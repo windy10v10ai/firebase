@@ -13,7 +13,7 @@ interface Event {
   params: {
     [key: string]: number | string | boolean;
     session_id: number | string;
-    session_number: number | string;
+    // session_number: number | string;
     engagement_time_msec: number | string;
     debug_mode?: boolean;
   };
@@ -101,7 +101,7 @@ export class AnalyticsService {
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
-        session_number: sessionNumber,
+        // session_number: sessionNumber,
         engagement_time_msec:
           (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
