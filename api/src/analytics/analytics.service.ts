@@ -1,19 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v1';
-import { BaseFirestoreRepository } from 'fireorm';
-import { InjectRepository } from 'nestjs-fireorm';
 
 import { GameEndDto } from '../game/dto/game-end.request.body';
 import { SECRET, SecretService } from '../util/secret/secret.service';
-
-import { Analytics } from './entities/analytics.entity';
 
 interface Event {
   name: string;
   params: {
     [key: string]: number | string | boolean;
     session_id: number | string;
-    // session_number: number | string;
     engagement_time_msec: number | string;
     debug_mode?: boolean;
   };
@@ -31,25 +26,15 @@ export class AnalyticsService {
     'https://www.google-analytics.com/mp/collect';
   private readonly measurementId = process.env.GA_MEASUREMENT_ID;
 
-  constructor(
-    private readonly secretService: SecretService,
-    @InjectRepository(Analytics)
-    private readonly analyticsRepository: BaseFirestoreRepository<Analytics>,
-  ) {}
+  constructor(private readonly secretService: SecretService) {}
 
   async gameStart(steamIds: number[], matchId: number) {
     for (const steamId of steamIds) {
-      const event = await this.buildEvent(
-        'game_start',
-        steamId,
-        matchId,
-        {
-          method: 'steam',
-          steam_id: steamId,
-          match_id: matchId,
-        },
-        true,
-      );
+      const event = await this.buildEvent('game_start', steamId, matchId, {
+        method: 'steam',
+        steam_id: steamId,
+        match_id: matchId,
+      });
 
       await this.sendEvent(steamId.toString(), event);
     }
@@ -91,17 +76,12 @@ export class AnalyticsService {
     steamId: number,
     matchId: number,
     eventParams: { [key: string]: number | string | boolean },
-    isNewSession: boolean = false,
   ) {
-    const sessionNumber = isNewSession
-      ? await this.updateSessionNumber(steamId)
-      : await this.getSessionNumber(steamId);
     const event: Event = {
       name: eventName,
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
-        // session_number: sessionNumber,
         engagement_time_msec:
           (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
@@ -109,33 +89,6 @@ export class AnalyticsService {
     };
 
     return event;
-  }
-
-  async getSessionNumber(steamId: number): Promise<number> {
-    const analytics = await this.analyticsRepository.findById(
-      steamId.toString(),
-    );
-    if (!analytics) {
-      return this.updateSessionNumber(steamId);
-    }
-    return analytics.sessionNumber;
-  }
-
-  async updateSessionNumber(steamId: number): Promise<number> {
-    const analytics = await this.analyticsRepository.findById(
-      steamId.toString(),
-    );
-    if (!analytics) {
-      const newAnalytics = new Analytics();
-      newAnalytics.id = steamId.toString();
-      newAnalytics.sessionNumber = 1;
-      await this.analyticsRepository.create(newAnalytics);
-      return 1;
-    } else {
-      analytics.sessionNumber++;
-      await this.analyticsRepository.update(analytics);
-      return analytics.sessionNumber;
-    }
   }
 
   async sendEvent(
