@@ -40,6 +40,7 @@ jobs:
           draft: true
 
       - name: Ready Pull Request
+        if: steps.check_pr.outputs.pr_exists == ''
         run: gh pr ready ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.WINDY_PR_PAT }}
