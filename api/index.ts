@@ -5,9 +5,9 @@ import * as functions from 'firebase-functions';
 import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
 
-import { AppModule } from './app.module';
-import { SECRET } from './util/secret/secret.service';
-import { AppGlobalSettings } from './util/settings';
+import { AppModule } from './src/app.module';
+import { SECRET } from './src/util/secret/secret.service';
+import { AppGlobalSettings } from './src/util/settings';
 
 // NestJS app
 const server = express();
@@ -66,7 +66,7 @@ async function callServerWithRegex(
     server(...args);
   } else {
     functions.logger.warn(
-      `Abnormal requeston API Cloud Function! Path: ${path}`,
+      `Abnormal request on API Cloud Function! Path: ${path}`,
     );
     args[1].status(403).send('Invalid path');
   }
