@@ -7,8 +7,11 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "start": "firebase emulators:start --only functions,hosting,firestore",
-    "start:with-data": "firebase emulators:start --only functions,hosting,firestore --import ./firestore-backup",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "(cd api && npm run build)",
+    "build:web": "(cd web && npm run build)",
+    "start": "npm run build && firebase emulators:start --only functions,hosting,firestore",
+    "start:with-data": "npm run build && firebase emulators:start --only functions,hosting,firestore --import ./firestore-backup",
     "postinstall": "(cd api && npm install) && (cd web && npm install)"
   },
   "repository": {
