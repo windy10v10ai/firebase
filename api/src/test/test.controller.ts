@@ -13,7 +13,7 @@ export class TestController {
   ) {}
 
   @Get('/init')
-  async initTestData() {
+  async initTestData(): Promise<void> {
     await this.playerService.initialLevel();
     await this.playerPropertyService.initialProperty();
     await this.membersService.initTestData();
