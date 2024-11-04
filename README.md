@@ -1,6 +1,6 @@
 # windy10v10ai-cloud
 
-Backend for [Windy 10v10ai](https://github.com/windybirth/windy10v10ai) with Firebase
+Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
 
 - [Built With](#built-with)
 - [Get Start](#get-start)
