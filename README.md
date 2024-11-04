@@ -94,11 +94,15 @@ npm run start:with-data
 (cd api && npm run test:e2e)
 ```
 
-
 **_Tips: If debug or e2e test not working with address already used error, kill nodejs process by `pkill -f node`, or try to restart winnat_**
 ```
 net stop winnat
 net start winnat
+```
+
+### Run Web
+```bash
+(cd web && npm run dev)
 ```
 
 ## Local end points
@@ -107,6 +111,7 @@ net start winnat
  - Function (Not used): http://localhost:5001/windy10v10ai/asia-northeast1/client/api/
  - Firebase Emulator: http://localhost:4000/
  - OpenAPI Document (Swagger): http://localhost:3000/api-doc
+ - Nextjs Web: http://localhost:3000/
 
 # Maintenance
 
