@@ -26,19 +26,18 @@ jobs:
           npm install
           npm run build
 
-      - name: Deploy functions
+      - name: Enable Web Frameworks
         uses: w9jds/firebase-action@v13.20.2
         with:
-          args: deploy --only functions
+          args: experiments:enable webframeworks
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
           PROJECT_ID: windy10v10ai
 
-      - name: Deploy hostings
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@v13.20.2
         with:
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}'
-          projectId: windy10v10ai
-          channelId: live
+          args: deploy --only functions,hosting
         env:
-          FIREBASE_CLI_EXPERIMENTS: webframeworks
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
+          PROJECT_ID: windy10v10ai
