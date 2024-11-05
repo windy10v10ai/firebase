@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import express from 'express';
 import * as functions from 'firebase-functions';
 import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
@@ -85,3 +85,24 @@ export const admin = onRequest(
     server(req, res);
   },
 );
+
+// nextjs app
+// const dev = process.env.NODE_ENV !== 'production';
+// const nextjsServer = next({
+//   dev,
+//   dir: '../web',
+//   conf: { distDir: '.next' },
+// });
+// const nextjsHandle = nextjsServer.getRequestHandler();
+
+// exports.nextjs = onRequest(
+//   {
+//     region: 'asia-northeast1',
+//     minInstances: 0,
+//     maxInstances: 1,
+//     timeoutSeconds: 10,
+//   },
+//   async (req, res) => {
+//     return nextjsServer.prepare().then(() => nextjsHandle(req, res));
+//   },
+// );
