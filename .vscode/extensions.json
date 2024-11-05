@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "zainchen.json",
         "dbaeumer.vscode-eslint",
         "github.vscode-pull-request-github",
         "eamodio.gitlens",

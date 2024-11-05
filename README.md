@@ -1,6 +1,6 @@
 # windy10v10ai-cloud
 
-Backend for [Windy 10v10ai](https://github.com/windybirth/windy10v10ai) with Firebase
+Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
 
 - [Built With](#built-with)
 - [Get Start](#get-start)
@@ -16,18 +16,20 @@ Backend for [Windy 10v10ai](https://github.com/windybirth/windy10v10ai) with Fir
   - [CLI](#cli)
   - [Postman](#postman)
 
-
 # Built With
+
 - Firebase
   - Hosting
   - Functions
-  - Realtime Database
+  - Firestore Database
 - NextJS
 
 # Get Start
 
 ## Installation
+
 ### Need
+
 - Java
 - Node v20
   - Recommend install node use [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
@@ -36,6 +38,7 @@ Backend for [Windy 10v10ai](https://github.com/windybirth/windy10v10ai) with Fir
 # firebase setting
 npm install -g firebase-tools
 firebase login
+firebase use windy10v10ai
 
 # setup package
 npm install
@@ -56,7 +59,9 @@ gcloud auth login
 ## Running the app
 
 ### Start Firebase Emulator
+
 ```bash
+npm run build
 npm run start
 ```
 
@@ -77,12 +82,8 @@ mkdir firestore-backup
 npm run start:with-data
 ```
 
-
-
-gsutil install && 运行 gcloud init login ad
-https://cloud.google.com/storage/docs/gsutil_install?hl=zh-cn#deb
-
 ### Run API
+
 ```bash
 # debug (need start firebase emulator)
 (cd api && npm run start:debug)
@@ -97,19 +98,27 @@ https://cloud.google.com/storage/docs/gsutil_install?hl=zh-cn#deb
 (cd api && npm run test:e2e)
 ```
 
-
 **_Tips: If debug or e2e test not working with address already used error, kill nodejs process by `pkill -f node`, or try to restart winnat_**
+
 ```
 net stop winnat
 net start winnat
 ```
 
+### Run Web
+
+```bash
+(cd web && npm run dev)
+```
+
 ## Local end points
- - Firebase Hosting: http://localhost:5000/api/
- - Debug end points: http://localhost:3000/api/
- - Function (Not used): http://localhost:5001/windy10v10ai/asia-northeast1/client/api/
- - Firebase Emulator: http://localhost:4000/
- - OpenAPI Document (Swagger): http://localhost:3000/api-doc
+
+- Firebase Hosting: http://localhost:5000/api/
+- Debug end points: http://localhost:3000/api/
+- Function (Not used): http://localhost:5001/windy10v10ai/asia-northeast1/client/api/
+- Firebase Emulator: http://localhost:4000/
+- OpenAPI Document (Swagger): http://localhost:3000/api-doc
+- Nextjs Web: http://localhost:3000/
 
 # Maintenance
 
@@ -122,12 +131,15 @@ Github Action will deploy automatically when push to main branch.
 - main: Deploy Firebase Functions and Hosting
 
 ### Deploy Manually
+
 - Deploy all
+
 ```
 firebase deploy
 ```
 
 - Deploy part
+
 ```bash
 # Deploy api function only
 firebase deploy --only functions:client
@@ -143,7 +155,7 @@ firebase deploy --only hosting
 firebase deploy --only functions,hosting
 ```
 
-## Set secret environment variables 
+## Set secret environment variables
 
 1. Create env in [secret manager](https://console.cloud.google.com/security/secret-manager?project=windy10v10ai)
 2. Set function run with secrets in [index.ts](api/src/index.ts)
@@ -158,7 +170,9 @@ https://cloud.google.com/functions/docs/securing/managing-access-iam#allowing_un
 https://console.cloud.google.com/firestore/databases/-default-/import-export?project=windy10v10ai
 
 ## Update dependencies
+
 - Update package.json
+
 ```bash
 # install tool
 `npm install -g npm-check-updates`
@@ -174,19 +188,22 @@ npm update
 ## Use Admin API
 
 ## Need
+
 - gcloud cli
 
 ## CLI
+
 ```
 curl -H "Authorization: bearer $(gcloud auth print-identity-token)" https://asia-northeast1-windy10v10ai.cloudfunctions.net/admin/api
 ```
 
 ## Postman
 
-``` bash
+```bash
 ## Get token
 echo $(gcloud auth print-identity-token)
 ```
+
 Import `api/swagger-spec.yaml` to postman with variable `baseUrl` : `https://asia-northeast1-windy10v10ai.cloudfunctions.net/admin`
 
 # Extension
@@ -200,6 +217,7 @@ firebase ext:install firebase/firestore-bigquery-export
 ```
 
 or Edit [firebase.json](/firebase.json) and create `extensions/firestore-bigquery-export-xxx.env`
+
 ```json
   "extensions": {
     "firestore-bigquery-export-xxx": "firebase/firestore-bigquery-export@0.1.54"
@@ -217,15 +235,16 @@ firebase deploy --only extensions
 [Guides](https://github.com/firebase/extensions/blob/master/firestore-bigquery-export/guides/IMPORT_EXISTING_DOCUMENTS.md)
 
 Setup gcloud default auth
+
 ```bash
 gcloud auth application-default login
 ```
 
 Run import command
+
 ```bash
 sh ./extensions/import-firestore-to-bigquery.sh
 ```
-
 
 ### Generate schema views
 

@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import express from 'express';
 import * as functions from 'firebase-functions';
 import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
 
-import { AppModule } from './app.module';
-import { SECRET } from './util/secret/secret.service';
-import { AppGlobalSettings } from './util/settings';
+import { AppModule } from './src/app.module';
+import { SECRET } from './src/util/secret/secret.service';
+import { AppGlobalSettings } from './src/util/settings';
 
 // NestJS app
 const server = express();
@@ -66,7 +66,7 @@ async function callServerWithRegex(
     server(...args);
   } else {
     functions.logger.warn(
-      `Abnormal requeston API Cloud Function! Path: ${path}`,
+      `Abnormal request on API Cloud Function! Path: ${path}`,
     );
     args[1].status(403).send('Invalid path');
   }
@@ -85,3 +85,24 @@ export const admin = onRequest(
     server(req, res);
   },
 );
+
+// nextjs app
+// const dev = process.env.NODE_ENV !== 'production';
+// const nextjsServer = next({
+//   dev,
+//   dir: '../web',
+//   conf: { distDir: '.next' },
+// });
+// const nextjsHandle = nextjsServer.getRequestHandler();
+
+// exports.nextjs = onRequest(
+//   {
+//     region: 'asia-northeast1',
+//     minInstances: 0,
+//     maxInstances: 1,
+//     timeoutSeconds: 10,
+//   },
+//   async (req, res) => {
+//     return nextjsServer.prepare().then(() => nextjsHandle(req, res));
+//   },
+// );
