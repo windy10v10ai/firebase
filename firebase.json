@@ -13,7 +13,7 @@
   },
   "hosting": {
     "site": "windy10v10ai",
-    "public": "public",
+    "source": "web",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
