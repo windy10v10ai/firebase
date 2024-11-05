@@ -21,15 +21,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.10.0
-      - name: Install Dependencies
-        run: (cd api && npm install)
       - name: Build
-        run: (cd api && npm run build)
+        run: |
+          npm install
+          npm build
 
-      - name: Deploy to Firebase
+      - name: Deploy functions
         uses: w9jds/firebase-action@v13.20.2
         with:
-          args: deploy --only functions,hosting
+          args: deploy --only functions
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
           PROJECT_ID: windy10v10ai
+
+      - name: Deploy hostings
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}'
+          projectId: windy10v10ai
+          channelId: live
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
