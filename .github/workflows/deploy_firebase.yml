@@ -31,6 +31,7 @@ jobs:
         with:
           args: experiments:enable webframeworks
         env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
           PROJECT_ID: windy10v10ai
 
       - name: Deploy to Firebase
