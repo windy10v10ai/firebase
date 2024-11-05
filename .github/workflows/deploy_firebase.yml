@@ -26,15 +26,14 @@ jobs:
           npm install
           npm run build
 
-      - name: Deploy functions
+      - name: Enable Web Frameworks
         uses: w9jds/firebase-action@v13.20.2
         with:
           args: experiments:enable webframeworks
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
           PROJECT_ID: windy10v10ai
 
-      - name: Deploy functions
+      - name: Deploy to Firebase
         uses: w9jds/firebase-action@v13.20.2
         with:
           args: deploy --only functions,hosting
