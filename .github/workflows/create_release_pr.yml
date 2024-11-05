@@ -46,6 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.WINDY_PR_PAT }}
 
       - name: Enable Pull Request Automerge
+        if: steps.check_pr.outputs.pr_exists == ''
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ secrets.WINDY_PR_PAT }}
