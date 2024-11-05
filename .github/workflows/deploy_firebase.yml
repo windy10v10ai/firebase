@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: |
           npm install
-          npm build
+          npm run build
 
       - name: Deploy functions
         uses: w9jds/firebase-action@v13.20.2
