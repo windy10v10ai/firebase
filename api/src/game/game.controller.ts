@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
@@ -29,7 +30,10 @@ import { GameStart } from './dto/game-start.response';
 import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
+import { Public } from '../util/auth/public.decorator';
+import { AuthGuard } from '../util/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @ApiTags('Game(Open)')
 @Controller('game')
 export class GameController {
@@ -44,7 +48,8 @@ export class GameController {
     private readonly analyticsService: AnalyticsService,
   ) {}
 
-  @Get(['start'])
+  @Public()
+  @Get('start')
   async start(
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
@@ -117,7 +122,6 @@ export class GameController {
       player.steamId = parseInt(player.steamId as any);
     });
     logger.debug(`[Game End] ${JSON.stringify(gameEnd)}`);
-    this.gameService.validateApiKey(apiKey, 'Game End');
 
     const players = gameEnd.players;
     for (const player of players) {
@@ -145,8 +149,6 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
   ): Promise<PlayerDto> {
-    this.gameService.validateApiKey(apiKey, 'Add Player Property');
-
     await this.playerPropertyService.update(updatePlayerPropertyDto);
 
     return await this.gameService.findPlayerDtoBySteamId(
@@ -159,8 +161,6 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Body() gameResetPlayerProperty: GameResetPlayerProperty,
   ) {
-    this.gameService.validateApiKey(apiKey, 'Reset Player Property');
-
     logger.debug(
       `[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`,
     );
@@ -177,8 +177,6 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Param('steamId') steamId: number,
   ): Promise<PlayerDto> {
-    this.gameService.validateApiKey(apiKey, 'Get Player Info');
-
     logger.debug(`[Get Player Info] ${steamId}`);
 
     return await this.gameService.findPlayerDtoBySteamId(steamId);
