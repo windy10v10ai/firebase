@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
@@ -29,7 +30,10 @@ import { GameStart } from './dto/game-start.response';
 import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
+import { Public } from '../util/auth/public.decorator';
+import { AuthGuard } from '../util/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @ApiTags('Game(Open)')
 @Controller('game')
 export class GameController {
@@ -44,7 +48,8 @@ export class GameController {
     private readonly analyticsService: AnalyticsService,
   ) {}
 
-  @Get(['start'])
+  @Public()
+  @Get('start')
   async start(
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
