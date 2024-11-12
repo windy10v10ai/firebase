@@ -122,7 +122,6 @@ export class GameController {
       player.steamId = parseInt(player.steamId as any);
     });
     logger.debug(`[Game End] ${JSON.stringify(gameEnd)}`);
-    this.gameService.validateApiKey(apiKey, 'Game End');
 
     const players = gameEnd.players;
     for (const player of players) {
@@ -150,8 +149,6 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
   ): Promise<PlayerDto> {
-    this.gameService.validateApiKey(apiKey, 'Add Player Property');
-
     await this.playerPropertyService.update(updatePlayerPropertyDto);
 
     return await this.gameService.findPlayerDtoBySteamId(
@@ -164,8 +161,6 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Body() gameResetPlayerProperty: GameResetPlayerProperty,
   ) {
-    this.gameService.validateApiKey(apiKey, 'Reset Player Property');
-
     logger.debug(
       `[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`,
     );
@@ -182,8 +177,6 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Param('steamId') steamId: number,
   ): Promise<PlayerDto> {
-    this.gameService.validateApiKey(apiKey, 'Get Player Info');
-
     logger.debug(`[Get Player Info] ${steamId}`);
 
     return await this.gameService.findPlayerDtoBySteamId(steamId);

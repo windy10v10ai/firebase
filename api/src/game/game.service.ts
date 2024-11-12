@@ -32,23 +32,6 @@ export class GameService {
     return 'OK';
   }
 
-  validateApiKey(apiKey: string, apiName: string): void {
-    if (this.isProductionServer(apiKey) || this.isTestServer(apiKey)) {
-      return;
-    }
-
-    logger.warn(`[${apiName}] apiKey permission error with ${apiKey}.`);
-    throw new UnauthorizedException();
-  }
-
-  isProductionServer(apiKey: string): boolean {
-    return apiKey === process.env.SERVER_APIKEY;
-  }
-
-  isTestServer(apiKey: string): boolean {
-    return apiKey === process.env.SERVER_APIKEY_TEST;
-  }
-
   validateSteamIds(steamIds: number[]): number[] {
     steamIds = steamIds.filter((id) => id > 0);
     if (steamIds.length > 10) {
