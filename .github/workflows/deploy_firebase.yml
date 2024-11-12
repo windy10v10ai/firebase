@@ -21,13 +21,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.10.0
-      - name: Install Dependencies
-        run: (cd api && npm install)
       - name: Build
-        run: (cd api && npm run build)
+        run: |
+          npm install
+          npm run build
+
+      - name: Enable Web Frameworks
+        uses: w9jds/firebase-action@v13.24.0
+        with:
+          args: experiments:enable webframeworks
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
+          PROJECT_ID: windy10v10ai
 
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@v13.20.2
+        uses: w9jds/firebase-action@v13.24.0
         with:
           args: deploy --only functions,hosting
         env:
