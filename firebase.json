@@ -15,6 +15,9 @@
     "site": "windy10v10ai",
     "source": "web",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "frameworksBackend": {
+      "region": "asia-northeast1"
+    },
     "rewrites": [
       {
         "regex": "^/api/(game|afdian).*",

@@ -1,12 +1,14 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
+  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { SECRET, SecretService } from '../secret/secret.service';
 import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
+
+import { SECRET, SecretService } from '../secret/secret.service';
+
 import { IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()
