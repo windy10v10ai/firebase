@@ -35,6 +35,12 @@ Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
   - Recommend install node use [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 
 ```bash
+# set/update node version
+nvm install
+nvm alias default
+```
+
+```bash
 # firebase setting
 npm install -g firebase-tools
 firebase login
