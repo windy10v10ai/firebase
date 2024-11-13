@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
