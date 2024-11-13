@@ -23,6 +23,8 @@ import { PlayerService } from '../player/player.service';
 import { PlayerCountService } from '../player-count/player-count.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
+import { AuthGuard } from '../util/auth/auth.guard';
+import { Public } from '../util/auth/public.decorator';
 
 import { GameEndDto } from './dto/game-end.request.body';
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
@@ -30,8 +32,6 @@ import { GameStart } from './dto/game-start.response';
 import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
-import { Public } from '../util/auth/public.decorator';
-import { AuthGuard } from '../util/auth/auth.guard';
 
 @UseGuards(AuthGuard)
 @ApiTags('Game(Open)')
