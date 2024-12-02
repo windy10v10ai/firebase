@@ -22,7 +22,7 @@ export class EventRewardsService {
 
     return steamIds.map((steamId) => ({
       steamId,
-      result: eventRewards.find((r) => r.steamId === steamId)?.point20240927 ?? false,
+      result: eventRewards.find((r) => r.steamId === steamId)?.fourthAnniversary ?? false,
     }));
   }
 
@@ -34,11 +34,11 @@ export class EventRewardsService {
       await this.eventRewardsRepository.create({
         id,
         steamId,
-        point20240927: true,
+        fourthAnniversary: true,
       });
     } else {
       // update
-      eventReward.point20240927 = true;
+      eventReward.fourthAnniversary = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
