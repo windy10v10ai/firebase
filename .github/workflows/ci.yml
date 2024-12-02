@@ -28,4 +28,4 @@ jobs:
       - name: Unit Test
         run: (cd api && npm run test)
       - name: E2E Test
-        run: (cd api && npm run test:e2e --project windy10v10ai)
+        run: (cd api && npm run test:e2e)
