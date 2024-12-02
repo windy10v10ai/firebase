@@ -94,9 +94,9 @@ export class GameService {
   // 活动赠送赛季积分
   async giveThridAnniversaryEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2024-09-27T00:00:00.000Z');
-    const endTime = new Date('2024-10-09T00:00:00.000Z');
-    const rewardSeasonPoint = 5000;
+    const startTime = new Date('2024-12-02T00:00:00.000Z');
+    const endTime = new Date('2024-12-10T00:00:00.000Z');
+    const rewardSeasonPoint = 4444;
 
     const now = new Date();
     if (now < startTime || now > endTime) {
@@ -107,11 +107,11 @@ export class GameService {
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
     for (const rewardResult of rewardResults) {
       if (rewardResult.result === false) {
-        // 奖励一周会员
-        // await this.membersService.addMember({
-        //   steamId: rewardResult.steamId,
-        //   month: 0.25,
-        // });
+        // 奖励两周会员
+        await this.membersService.addMember({
+          steamId: rewardResult.steamId,
+          month: 0.5,
+        });
         // 奖励赛季积分
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: rewardSeasonPoint,
