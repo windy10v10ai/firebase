@@ -12,13 +12,12 @@ import { AppGlobalSettings } from './src/util/settings';
 // NestJS app
 const server = express();
 
-const promiseApplicationReady = NestFactory.create(
-  AppModule,
-  new ExpressAdapter(server),
-).then((app) => {
-  AppGlobalSettings(app);
-  return app.init();
-});
+const promiseApplicationReady = NestFactory.create(AppModule, new ExpressAdapter(server)).then(
+  (app) => {
+    AppGlobalSettings(app);
+    return app.init();
+  },
+);
 
 // Cloud Functions
 const clientSecrets = [
@@ -65,9 +64,7 @@ async function callServerWithRegex(
     await promiseApplicationReady;
     server(...args);
   } else {
-    functions.logger.warn(
-      `Abnormal request on API Cloud Function! Path: ${path}`,
-    );
+    functions.logger.warn(`Abnormal request on API Cloud Function! Path: ${path}`);
     args[1].status(403).send('Invalid path');
   }
 }
