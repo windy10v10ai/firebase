@@ -66,15 +66,13 @@ export class GameController {
       await this.gameService.upsertPlayerInfo(steamId);
     }
 
-    const eventRewardInfo =
-      await this.gameService.giveThridAnniversaryEventReward(steamIds);
+    const eventRewardInfo = await this.gameService.giveThridAnniversaryEventReward(steamIds);
     pointInfo.push(...eventRewardInfo);
 
     // 获取会员 添加每日会员积分
     const members = await this.membersService.findBySteamIds(steamIds);
     // 添加每日会员积分
-    const memberDailyPointInfo =
-      await this.gameService.addDailyMemberPoints(members);
+    const memberDailyPointInfo = await this.gameService.addDailyMemberPoints(members);
     pointInfo.push(...memberDailyPointInfo);
 
     // ----------------- 以下为统计数据 -----------------
@@ -113,10 +111,7 @@ export class GameController {
 
   @ApiBody({ type: GameEndDto })
   @Post('end')
-  async end(
-    @Headers('x-api-key') apiKey: string,
-    @Body() gameEnd: GameEndDto,
-  ): Promise<string> {
+  async end(@Headers('x-api-key') apiKey: string, @Body() gameEnd: GameEndDto): Promise<string> {
     // FIXME 从游戏中传递过来的steamId是string类型，需要转换为number
     gameEnd.players.forEach((player) => {
       player.steamId = parseInt(player.steamId as any);
@@ -151,9 +146,7 @@ export class GameController {
   ): Promise<PlayerDto> {
     await this.playerPropertyService.update(updatePlayerPropertyDto);
 
-    return await this.gameService.findPlayerDtoBySteamId(
-      updatePlayerPropertyDto.steamId,
-    );
+    return await this.gameService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
   @Post('resetPlayerProperty')
@@ -161,15 +154,11 @@ export class GameController {
     @Headers('x-api-key') apiKey: string,
     @Body() gameResetPlayerProperty: GameResetPlayerProperty,
   ) {
-    logger.debug(
-      `[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`,
-    );
+    logger.debug(`[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`);
 
     await this.gameService.resetPlayerProperty(gameResetPlayerProperty);
 
-    return await this.gameService.findPlayerDtoBySteamId(
-      gameResetPlayerProperty.steamId,
-    );
+    return await this.gameService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
   }
 
   @Get('player/steamId/:steamId')
