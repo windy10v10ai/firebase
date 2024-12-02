@@ -80,8 +80,8 @@ Need Authenticate with gcloud
 rm -rf firestore-backup
 mkdir firestore-backup
 (cd firestore-backup && gsutil -m cp -r \
-  "gs://windy10v10ai.appspot.com/firestore-backup/20240529/20240529.overall_export_metadata" \
-  "gs://windy10v10ai.appspot.com/firestore-backup/20240529/all_namespaces" \
+  "gs://windy10v10ai.appspot.com/firestore-backup/20241130/20241130.overall_export_metadata" \
+  "gs://windy10v10ai.appspot.com/firestore-backup/20241130/all_namespaces" \
   .)
 
 # start emulator with data
