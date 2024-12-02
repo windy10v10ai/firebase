@@ -23,10 +23,9 @@ jobs:
       - name: Set firebase
         run: |
           npm install -g firebase-tools
-          firebase use windy10v10ai
           firebase experiments:enable webframeworks
 
       - name: Unit Test
         run: (cd api && npm run test)
       - name: E2E Test
-        run: (cd api && npm run test:e2e)
+        run: (cd api && npm run test:e2e --project windy10v10ai)
