@@ -18,14 +18,11 @@ export class EventRewardsService {
     }[]
   > {
     const ids = steamIds.map((id) => id.toString());
-    const eventRewards = await this.eventRewardsRepository
-      .whereIn('id', ids)
-      .find();
+    const eventRewards = await this.eventRewardsRepository.whereIn('id', ids).find();
 
     return steamIds.map((steamId) => ({
       steamId,
-      result:
-        eventRewards.find((r) => r.steamId === steamId)?.point20240927 ?? false,
+      result: eventRewards.find((r) => r.steamId === steamId)?.point20240927 ?? false,
     }));
   }
 
