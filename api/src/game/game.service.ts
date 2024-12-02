@@ -122,7 +122,7 @@ export class GameService {
           steamId: rewardResult.steamId,
           title: {
             cn: '庆祝4周年\n赠送2周会员和赛季积分',
-            en: 'Celebrate 4th Anniversary\nGive 2 Weeks Member and Season Points',
+            en: 'Celebrate 4th Anniversary\n Give 2 Weeks Membership\n and Season Points',
           },
           seasonPoint: rewardSeasonPoint,
         });
