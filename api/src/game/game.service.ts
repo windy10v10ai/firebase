@@ -121,8 +121,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '祝大家欢度国庆!',
-            en: 'Get 5000 battle points!',
+            cn: '庆祝4周年\n赠送2周会员和赛季积分',
+            en: 'Celebrate 4th Anniversary\nGive 2 Weeks Member and Season Points',
           },
           seasonPoint: rewardSeasonPoint,
         });
