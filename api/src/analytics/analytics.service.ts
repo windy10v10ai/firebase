@@ -4,6 +4,8 @@ import { logger } from 'firebase-functions/v1';
 import { GameEndDto } from '../game/dto/game-end.request.body';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
+import { PickDto } from './dto/pick-ability-dto';
+
 interface Event {
   name: string;
   params: {
@@ -63,6 +65,20 @@ export class AnalyticsService {
 
       await this.sendEvent(player.steamId.toString(), event);
     }
+  }
+
+  async pickAbilityStart(pickDto: PickDto) {
+    const event = await this.buildEvent('pick_ability', pickDto.steamAccountId, pickDto.matchId, {
+      method: 'steam',
+      steam_id: pickDto.steamAccountId,
+      match_id: pickDto.matchId,
+      ability_name: pickDto.name,
+      rate: pickDto.rate,
+      difficulty: pickDto.difficulty,
+      version: pickDto.version,
+    });
+
+    await this.sendEvent(pickDto.steamAccountId.toString(), event);
   }
 
   async buildEvent(
