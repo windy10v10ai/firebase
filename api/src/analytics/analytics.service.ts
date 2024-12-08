@@ -72,16 +72,40 @@ export class AnalyticsService {
     }
   }
 
-  async pickAbility(pickDto: PickDto) {
-    const event = await this.buildPlayerEvent('pick_ability', pickDto.steamId, pickDto.matchId, {
-      method: 'steam',
-      steam_id: pickDto.steamId,
-      match_id: pickDto.matchId,
-      ability_name: pickDto.name,
-      level: pickDto.level,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-    });
+  async lotteryPickAbility(pickDto: PickDto) {
+    const event = await this.buildPlayerEvent(
+      'lottery_pick_ability',
+      pickDto.steamId,
+      pickDto.matchId,
+      {
+        method: 'steam',
+        steam_id: pickDto.steamId,
+        match_id: pickDto.matchId,
+        ability_name: pickDto.name,
+        level: pickDto.level,
+        difficulty: pickDto.difficulty,
+        version: pickDto.version,
+      },
+    );
+
+    await this.sendEvent(pickDto.steamId.toString(), event);
+  }
+
+  async lotteryPickItem(pickDto: PickDto) {
+    const event = await this.buildPlayerEvent(
+      'lottery_pick_item',
+      pickDto.steamId,
+      pickDto.matchId,
+      {
+        method: 'steam',
+        steam_id: pickDto.steamId,
+        match_id: pickDto.matchId,
+        item_name: pickDto.name,
+        level: pickDto.level,
+        difficulty: pickDto.difficulty,
+        version: pickDto.version,
+      },
+    );
 
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
