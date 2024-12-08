@@ -31,6 +31,7 @@ export class GameEndDto {
   players: PlayerGameEnd[];
   @ApiProperty()
   winnerTeamId: number;
+  // FIXME: matchId is bigint, transform to string
   @ApiProperty()
   matchId: number;
   @ApiProperty()
