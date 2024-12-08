@@ -9,8 +9,8 @@ import { PickDto } from './dto/pick-ability-dto';
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  @Post('/pick/ability/start')
-  async pickAbilityStart(@Body() body: PickDto) {
-    await this.analyticsService.pickAbilityStart(body);
+  @Post('/pick/ability')
+  async pickAbility(@Body() body: PickDto) {
+    await this.analyticsService.pickAbility(body);
   }
 }

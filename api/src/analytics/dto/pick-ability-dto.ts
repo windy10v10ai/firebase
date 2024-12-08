@@ -6,7 +6,7 @@ export class PickDto extends EventBaseDto {
   @ApiProperty({ default: 'name' })
   name: string;
   @ApiProperty()
-  rate: number;
+  level: number;
   @ApiProperty()
   difficulty: number;
   @ApiProperty({ default: 'v4.00' })
