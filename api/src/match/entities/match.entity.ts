@@ -1,9 +1,6 @@
 import { Collection } from 'fireorm';
 
-import {
-  GameOption,
-  PlayerGameEnd,
-} from '../../game/dto/game-end.request.body';
+import { GameOption, PlayerGameEnd } from '../../game/dto/game-end.request.body';
 
 @Collection()
 export class Match {

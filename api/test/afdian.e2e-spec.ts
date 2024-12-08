@@ -69,9 +69,7 @@ describe('MemberController (e2e)', () => {
       const memberId = 200000103;
       const month = 12;
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(
-        new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month,
-      );
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
       const expectBodyJson = {
         steamId: memberId,
         expireDateString: dateNextMonth.toISOString().split('T')[0],
@@ -108,9 +106,7 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
       // 检查会员期限
-      const responseAfter = await request(app.getHttpServer()).get(
-        `/api/members/${memberId}`,
-      );
+      const responseAfter = await request(app.getHttpServer()).get(`/api/members/${memberId}`);
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
@@ -125,9 +121,7 @@ describe('MemberController (e2e)', () => {
       const memberId = 200000104;
       const month = 12;
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(
-        new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month,
-      );
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
       const expectBodyJson = {
         steamId: memberId,
         expireDateString: dateNextMonth.toISOString().split('T')[0],
@@ -195,9 +189,7 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
       // 检查会员期限
-      const responseAfter = await request(app.getHttpServer()).get(
-        `/api/members/${memberId}`,
-      );
+      const responseAfter = await request(app.getHttpServer()).get(`/api/members/${memberId}`);
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
@@ -212,9 +204,7 @@ describe('MemberController (e2e)', () => {
       const memberId = 200000110;
       const month = 12;
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(
-        new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month,
-      );
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
       const responseCreate = await request(app.getHttpServer())
         .post(`${prefixPath}/webhook`)
         .send({
@@ -248,9 +238,7 @@ describe('MemberController (e2e)', () => {
         em: '[Error] 未能正确获取Dota2 ID',
       });
 
-      const responseAfter = await request(app.getHttpServer()).get(
-        `/api/members/${memberId}`,
-      );
+      const responseAfter = await request(app.getHttpServer()).get(`/api/members/${memberId}`);
       expect(responseAfter.status).toEqual(404);
     });
 
@@ -258,9 +246,7 @@ describe('MemberController (e2e)', () => {
       const memberId = 200000201;
       const month = 12;
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(
-        new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month,
-      );
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
       const responseCreate = await request(app.getHttpServer())
         .post(`${prefixPath}/webhook`)
         .send({
@@ -308,9 +294,7 @@ describe('MemberController (e2e)', () => {
       const memberId = 200000202;
       const month = 12;
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(
-        new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month,
-      );
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
       const responseCreate = await request(app.getHttpServer())
         .post(`${prefixPath}/webhook`)
         .send({
@@ -358,9 +342,7 @@ describe('MemberController (e2e)', () => {
       const memberId = 200000203;
       const month = 12;
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(
-        new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month,
-      );
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
       const responseCreate = await request(app.getHttpServer())
         .post(`${prefixPath}/webhook`)
         .send({
