@@ -68,15 +68,20 @@ export class AnalyticsService {
   }
 
   async pickAbilityStart(pickDto: PickDto) {
-    const event = await this.buildEvent('pick_ability', pickDto.steamAccountId, pickDto.matchId, {
-      method: 'steam',
-      steam_id: pickDto.steamAccountId,
-      match_id: pickDto.matchId,
-      ability_name: pickDto.name,
-      rate: pickDto.rate,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-    });
+    const event = await this.buildEvent(
+      'pick_ability_start',
+      pickDto.steamAccountId,
+      pickDto.matchId,
+      {
+        method: 'steam',
+        steam_id: pickDto.steamAccountId,
+        match_id: pickDto.matchId,
+        ability_name: pickDto.name,
+        rate: pickDto.rate,
+        difficulty: pickDto.difficulty,
+        version: pickDto.version,
+      },
+    );
 
     await this.sendEvent(pickDto.steamAccountId.toString(), event);
   }
