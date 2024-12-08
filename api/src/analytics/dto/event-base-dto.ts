@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class EventBaseDto {
   @ApiProperty()
-  steamAccountId: number;
+  steamId: number;
   @ApiProperty()
-  matchId: number;
+  matchId: string;
 }
