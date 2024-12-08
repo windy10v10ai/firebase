@@ -4,6 +4,8 @@ import { logger } from 'firebase-functions/v1';
 import { GameEndDto } from '../game/dto/game-end.request.body';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
+import { PickDto } from './dto/pick-ability-dto';
+
 interface Event {
   name: string;
   params: {
@@ -22,15 +24,14 @@ interface UserProperties {
 
 @Injectable()
 export class AnalyticsService {
-  private readonly measurementProtocolUrl =
-    'https://www.google-analytics.com/mp/collect';
+  private readonly measurementProtocolUrl = 'https://www.google-analytics.com/mp/collect';
   private readonly measurementId = process.env.GA_MEASUREMENT_ID;
 
   constructor(private readonly secretService: SecretService) {}
 
   async gameStart(steamIds: number[], matchId: number) {
     for (const steamId of steamIds) {
-      const event = await this.buildEvent('game_start', steamId, matchId, {
+      const event = await this.buildPlayerEvent('game_start', steamId, matchId.toString(), {
         method: 'steam',
         steam_id: steamId,
         match_id: matchId,
@@ -48,10 +49,10 @@ export class AnalyticsService {
         continue;
       }
       logger.debug('send game_end event for player', player);
-      const event = await this.buildEvent(
+      const event = await this.buildPlayerEvent(
         'game_end',
         player.steamId,
-        gameEnd.matchId,
+        gameEnd.matchId.toString(),
         {
           method: 'steam',
           steam_id: player.steamId,
@@ -71,10 +72,24 @@ export class AnalyticsService {
     }
   }
 
-  async buildEvent(
+  async pickAbility(pickDto: PickDto) {
+    const event = await this.buildPlayerEvent('pick_ability', pickDto.steamId, pickDto.matchId, {
+      method: 'steam',
+      steam_id: pickDto.steamId,
+      match_id: pickDto.matchId,
+      ability_name: pickDto.name,
+      level: pickDto.level,
+      difficulty: pickDto.difficulty,
+      version: pickDto.version,
+    });
+
+    await this.sendEvent(pickDto.steamId.toString(), event);
+  }
+
+  async buildPlayerEvent(
     eventName: string,
     steamId: number,
-    matchId: number,
+    matchId: string,
     eventParams: { [key: string]: number | string | boolean },
   ) {
     const event: Event = {
@@ -82,8 +97,7 @@ export class AnalyticsService {
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
-        engagement_time_msec:
-          (eventParams.engagement_time_msec as number | string) || 1000,
+        engagement_time_msec: (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
       },
     };
@@ -91,11 +105,7 @@ export class AnalyticsService {
     return event;
   }
 
-  async sendEvent(
-    userId: string,
-    event: Event,
-    userProperties?: UserProperties,
-  ) {
+  async sendEvent(userId: string, event: Event, userProperties?: UserProperties) {
     const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
 
     const payload = {

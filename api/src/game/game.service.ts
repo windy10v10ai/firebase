@@ -31,9 +31,7 @@ export class GameService {
   validateSteamIds(steamIds: number[]): number[] {
     steamIds = steamIds.filter((id) => id > 0);
     if (steamIds.length > 10) {
-      logger.warn(
-        `[Game Start] steamIds has length more than 10, ${steamIds}.`,
-      );
+      logger.warn(`[Game Start] steamIds has length more than 10, ${steamIds}.`);
       throw new BadRequestException();
     }
     return steamIds;
@@ -88,20 +86,17 @@ export class GameService {
     if (playerRank) {
       return playerRank;
     } else {
-      const rankSteamIds =
-        await this.playerService.findTop100SeasonPointSteamIds();
+      const rankSteamIds = await this.playerService.findTop100SeasonPointSteamIds();
       return await this.playerCountService.updatePlayerRankToday(rankSteamIds);
     }
   }
 
   // 活动赠送赛季积分
-  async giveThridAnniversaryEventReward(
-    steamIds: number[],
-  ): Promise<PointInfoDto[]> {
+  async giveThridAnniversaryEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2024-09-27T00:00:00.000Z');
-    const endTime = new Date('2024-10-09T00:00:00.000Z');
-    const rewardSeasonPoint = 5000;
+    const startTime = new Date('2024-12-02T00:00:00.000Z');
+    const endTime = new Date('2024-12-10T00:00:00.000Z');
+    const rewardSeasonPoint = 4444;
 
     const now = new Date();
     if (now < startTime || now > endTime) {
@@ -109,15 +104,14 @@ export class GameService {
     }
 
     // FIXME 每次需要更新
-    const rewardResults =
-      await this.eventRewardsService.getRewardResults(steamIds);
+    const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
     for (const rewardResult of rewardResults) {
       if (rewardResult.result === false) {
-        // 奖励一周会员
-        // await this.membersService.addMember({
-        //   steamId: rewardResult.steamId,
-        //   month: 0.25,
-        // });
+        // 奖励两周会员
+        await this.membersService.addMember({
+          steamId: rewardResult.steamId,
+          month: 0.5,
+        });
         // 奖励赛季积分
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: rewardSeasonPoint,
@@ -127,8 +121,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '祝大家欢度国庆!',
-            en: 'Get 5000 battle points!',
+            cn: '庆祝4周年\n赠送2周会员和赛季积分',
+            en: 'Celebrate 4th Anniversary\n Give 2 Weeks Membership\n and Season Points',
           },
           seasonPoint: rewardSeasonPoint,
         });
@@ -138,14 +132,10 @@ export class GameService {
   }
 
   // 重置玩家属性
-  async resetPlayerProperty(
-    gameResetPlayerProperty: GameResetPlayerProperty,
-  ): Promise<void> {
+  async resetPlayerProperty(gameResetPlayerProperty: GameResetPlayerProperty): Promise<void> {
     const { steamId, useMemberPoint } = gameResetPlayerProperty;
 
-    const player = (
-      await this.findPlayerDtoBySteamIds([steamId.toString()])
-    )[0];
+    const player = (await this.findPlayerDtoBySteamIds([steamId.toString()]))[0];
 
     if (!player) {
       throw new BadRequestException();
@@ -153,8 +143,7 @@ export class GameService {
 
     // 消耗积分
     if (useMemberPoint) {
-      const resetPlayerPropertyMemberPoint =
-        this.resetPlayerPropertyMemberPoint;
+      const resetPlayerPropertyMemberPoint = this.resetPlayerPropertyMemberPoint;
       if (player.memberPointTotal < resetPlayerPropertyMemberPoint) {
         throw new BadRequestException();
       }
@@ -183,9 +172,7 @@ export class GameService {
   async findPlayerDtoBySteamIds(ids: string[]): Promise<PlayerDto[]> {
     const players = (await this.playerService.findByIds(ids)) as PlayerDto[];
     for (const player of players) {
-      const properties = await this.playerPropertyService.findBySteamId(
-        +player.id,
-      );
+      const properties = await this.playerPropertyService.findBySteamId(+player.id);
       if (properties) {
         player.properties = properties;
       } else {
@@ -193,28 +180,21 @@ export class GameService {
       }
 
       const seasonPoint = player.seasonPointTotal;
-      const seasonLevel =
-        this.playerService.getSeasonLevelBuyPoint(seasonPoint);
+      const seasonLevel = this.playerService.getSeasonLevelBuyPoint(seasonPoint);
       player.seasonLevel = seasonLevel;
       player.seasonCurrrentLevelPoint =
         seasonPoint - this.playerService.getSeasonTotalPoint(seasonLevel);
-      player.seasonNextLevelPoint =
-        this.playerService.getSeasonNextLevelPoint(seasonLevel);
+      player.seasonNextLevelPoint = this.playerService.getSeasonNextLevelPoint(seasonLevel);
 
       const memberPoint = player.memberPointTotal;
-      const memberLevel =
-        this.playerService.getMemberLevelBuyPoint(memberPoint);
+      const memberLevel = this.playerService.getMemberLevelBuyPoint(memberPoint);
       player.memberLevel = memberLevel;
       player.memberCurrentLevelPoint =
         memberPoint - this.playerService.getMemberTotalPoint(memberLevel);
-      player.memberNextLevelPoint =
-        this.playerService.getMemberNextLevelPoint(memberLevel);
+      player.memberNextLevelPoint = this.playerService.getMemberNextLevelPoint(memberLevel);
       player.totalLevel = seasonLevel + memberLevel;
 
-      const usedLevel = player.properties.reduce(
-        (prev, curr) => prev + curr.level,
-        0,
-      );
+      const usedLevel = player.properties.reduce((prev, curr) => prev + curr.level, 0);
       player.useableLevel = player.totalLevel - usedLevel;
     }
     return players;
