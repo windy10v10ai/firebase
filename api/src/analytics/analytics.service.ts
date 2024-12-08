@@ -31,7 +31,7 @@ export class AnalyticsService {
 
   async gameStart(steamIds: number[], matchId: number) {
     for (const steamId of steamIds) {
-      const event = await this.buildEvent('game_start', steamId, matchId, {
+      const event = await this.buildPlayerEvent('game_start', steamId, matchId.toString(), {
         method: 'steam',
         steam_id: steamId,
         match_id: matchId,
@@ -49,28 +49,33 @@ export class AnalyticsService {
         continue;
       }
       logger.debug('send game_end event for player', player);
-      const event = await this.buildEvent('game_end', player.steamId, gameEnd.matchId, {
-        method: 'steam',
-        steam_id: player.steamId,
-        matchId: gameEnd.matchId,
-        engagement_time_msec: gameEnd.gameTimeMsec,
-        difficulty: gameEnd.gameOption.gameDifficulty,
-        version: gameEnd.version,
-        is_winner: gameEnd.winnerTeamId === player.teamId,
-        team_id: player.teamId,
-        hero_name: player.heroName,
-        points: player.points,
-        is_disconnect: player.isDisconnect,
-      });
+      const event = await this.buildPlayerEvent(
+        'game_end',
+        player.steamId,
+        gameEnd.matchId.toString(),
+        {
+          method: 'steam',
+          steam_id: player.steamId,
+          matchId: gameEnd.matchId,
+          engagement_time_msec: gameEnd.gameTimeMsec,
+          difficulty: gameEnd.gameOption.gameDifficulty,
+          version: gameEnd.version,
+          is_winner: gameEnd.winnerTeamId === player.teamId,
+          team_id: player.teamId,
+          hero_name: player.heroName,
+          points: player.points,
+          is_disconnect: player.isDisconnect,
+        },
+      );
 
       await this.sendEvent(player.steamId.toString(), event);
     }
   }
 
   async pickAbility(pickDto: PickDto) {
-    const event = await this.buildEvent('pick_ability', pickDto.steamAccountId, pickDto.matchId, {
+    const event = await this.buildPlayerEvent('pick_ability', pickDto.steamId, pickDto.matchId, {
       method: 'steam',
-      steam_id: pickDto.steamAccountId,
+      steam_id: pickDto.steamId,
       match_id: pickDto.matchId,
       ability_name: pickDto.name,
       level: pickDto.level,
@@ -78,13 +83,13 @@ export class AnalyticsService {
       version: pickDto.version,
     });
 
-    await this.sendEvent(pickDto.steamAccountId.toString(), event);
+    await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
-  async buildEvent(
+  async buildPlayerEvent(
     eventName: string,
     steamId: number,
-    matchId: number,
+    matchId: string,
     eventParams: { [key: string]: number | string | boolean },
   ) {
     const event: Event = {
