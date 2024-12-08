@@ -10,4 +10,5 @@ export class EventReward {
   mayDay2024?: boolean;
   member20240716?: boolean;
   point20240927?: boolean;
+  fourthAnniversary?: boolean;
 }
