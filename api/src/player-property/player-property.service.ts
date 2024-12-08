@@ -46,27 +46,16 @@ export class PlayerPropertyService {
 
   async create(createPlayerPropertyDto: CreatePlayerPropertyDto) {
     this.validatePropertyName(createPlayerPropertyDto.name);
-    await this.cheakPlayerLevel(
-      createPlayerPropertyDto.steamId,
-      createPlayerPropertyDto.level,
-    );
+    await this.cheakPlayerLevel(createPlayerPropertyDto.steamId, createPlayerPropertyDto.level);
     return this.playerPropertyRepository.create({
-      id: this.buildId(
-        createPlayerPropertyDto.steamId,
-        createPlayerPropertyDto.name,
-      ),
+      id: this.buildId(createPlayerPropertyDto.steamId, createPlayerPropertyDto.name),
       ...createPlayerPropertyDto,
     });
   }
-  async update(
-    updatePlayerPropertyDto: UpdatePlayerPropertyDto,
-  ): Promise<PlayerProperty> {
+  async update(updatePlayerPropertyDto: UpdatePlayerPropertyDto): Promise<PlayerProperty> {
     this.validatePropertyName(updatePlayerPropertyDto.name);
     const existPlayerProperty = await this.playerPropertyRepository.findById(
-      this.buildId(
-        updatePlayerPropertyDto.steamId,
-        updatePlayerPropertyDto.name,
-      ),
+      this.buildId(updatePlayerPropertyDto.steamId, updatePlayerPropertyDto.name),
     );
 
     if (existPlayerProperty) {
@@ -84,9 +73,7 @@ export class PlayerPropertyService {
   async csv() {
     let returnString = '';
     for (const name of PlayerPropertyService.PROPERTY_NAME_LIST) {
-      const playerPropertys = await this.playerPropertyRepository
-        .whereEqualTo('name', name)
-        .find();
+      const playerPropertys = await this.playerPropertyRepository.whereEqualTo('name', name).find();
       // seasonPointTotal, matchCount
       // create csv
       const totalLevel = playerPropertys.reduce(
@@ -124,9 +111,7 @@ export class PlayerPropertyService {
     }
   }
   async findBySteamId(steamId: number) {
-    return this.playerPropertyRepository
-      .whereEqualTo('steamId', steamId)
-      .find();
+    return this.playerPropertyRepository.whereEqualTo('steamId', steamId).find();
   }
 
   async deleteBySteamId(steamId: number) {
@@ -166,9 +151,7 @@ export class PlayerPropertyService {
   }
   private validatePropertyName(name: string) {
     if (!PlayerPropertyService.PROPERTY_NAME_LIST.includes(name)) {
-      logger.error(
-        `[Player Property] validatePropertyName error, name ${name}`,
-      );
+      logger.error(`[Player Property] validatePropertyName error, name ${name}`);
       throw new BadRequestException();
     }
   }

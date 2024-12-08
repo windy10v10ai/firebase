@@ -2,22 +2,14 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
-import {
-  addPlayerProperty,
-  createPlayer,
-  getPlayer,
-  getPlayerProperty,
-} from './util/util-player';
+import { addPlayerProperty, createPlayer, getPlayer, getPlayerProperty } from './util/util-player';
 
 const gameStartUrl = '/api/game/start/';
 const playerGetUrl = '/api/player/steamId/';
 const memberPostUrl = '/api/members/';
 const resetPlayerPropertyUrl = '/api/game/resetPlayerProperty';
 
-function callGameStart(
-  app: INestApplication,
-  steamIds: number[],
-): request.Test {
+function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = 'Invalid_NotOnDedicatedServer';
   const countryCode = 'CN';
   const headers = {
@@ -123,38 +115,35 @@ describe('PlayerController (e2e)', () => {
           '2023-11-02T01:00:00.000Z',
           100,
         ],
-      ])(
-        '%s',
-        async (title, dateMember, steamId, date1, point1, date2, point2) => {
-          mockDate(dateMember);
-          await post(app, memberPostUrl, {
-            steamId: steamId,
-            month: 1,
-          });
+      ])('%s', async (title, dateMember, steamId, date1, point1, date2, point2) => {
+        mockDate(dateMember);
+        await post(app, memberPostUrl, {
+          steamId: steamId,
+          month: 1,
+        });
 
-          mockDate(date1);
-          const result = await get(app, gameStartUrl, {
-            steamIds: [steamId],
-            matchId,
-          });
-          expect(result.status).toEqual(200);
-          // assert player
-          const playerResult = await get(app, `${playerGetUrl}${steamId}`);
-          expect(playerResult.body.memberPointTotal).toEqual(point1);
-          expect(playerResult.body.seasonPointTotal).toEqual(0);
+        mockDate(date1);
+        const result = await get(app, gameStartUrl, {
+          steamIds: [steamId],
+          matchId,
+        });
+        expect(result.status).toEqual(200);
+        // assert player
+        const playerResult = await get(app, `${playerGetUrl}${steamId}`);
+        expect(playerResult.body.memberPointTotal).toEqual(point1);
+        expect(playerResult.body.seasonPointTotal).toEqual(0);
 
-          mockDate(date2);
-          const result2 = await get(app, gameStartUrl, {
-            steamIds: [steamId],
-            matchId,
-          });
-          expect(result2.status).toEqual(200);
-          // assert player
-          const playerResult2 = await get(app, `${playerGetUrl}${steamId}`);
-          expect(playerResult2.body.memberPointTotal).toEqual(point2);
-          expect(playerResult2.body.seasonPointTotal).toEqual(0);
-        },
-      );
+        mockDate(date2);
+        const result2 = await get(app, gameStartUrl, {
+          steamIds: [steamId],
+          matchId,
+        });
+        expect(result2.status).toEqual(200);
+        // assert player
+        const playerResult2 = await get(app, `${playerGetUrl}${steamId}`);
+        expect(playerResult2.body.memberPointTotal).toEqual(point2);
+        expect(playerResult2.body.seasonPointTotal).toEqual(0);
+      });
     });
 
     describe('多人开始', () => {
@@ -265,12 +254,7 @@ describe('PlayerController (e2e)', () => {
           memberPointTotal: before.memberPointTotal,
         });
 
-        await addPlayerProperty(
-          app,
-          body.steamId,
-          'property_cooldown_percentage',
-          1,
-        );
+        await addPlayerProperty(app, body.steamId, 'property_cooldown_percentage', 1);
 
         // 重置玩家属性
         const result = await post(app, resetPlayerPropertyUrl, body);
@@ -357,12 +341,7 @@ describe('PlayerController (e2e)', () => {
           memberPointTotal: before.memberPointTotal,
         });
 
-        await addPlayerProperty(
-          app,
-          body.steamId,
-          'property_cooldown_percentage',
-          1,
-        );
+        await addPlayerProperty(app, body.steamId, 'property_cooldown_percentage', 1);
 
         // 重置玩家属性
         const result = await post(app, resetPlayerPropertyUrl, body);

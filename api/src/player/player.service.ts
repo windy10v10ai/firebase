@@ -14,9 +14,7 @@ export class PlayerService {
 
   // 创建新玩家
   async findSteamIdAndNewPlayer(steamId: number) {
-    const existPlayer = await this.playerRepository.findById(
-      steamId.toString(),
-    );
+    const existPlayer = await this.playerRepository.findById(steamId.toString());
     const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
     if (!existPlayer) {
       await this.playerRepository.create(player);
@@ -46,9 +44,7 @@ export class PlayerService {
     if (isNaN(seasonPoint)) {
       seasonPoint = 0;
     }
-    const existPlayer = await this.playerRepository.findById(
-      steamId.toString(),
-    );
+    const existPlayer = await this.playerRepository.findById(steamId.toString());
 
     const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
 
@@ -112,9 +108,7 @@ export class PlayerService {
   }
 
   async upsertAddPoint(steamId: number, updatePlayerDto: UpdatePlayerDto) {
-    const existPlayer = await this.playerRepository.findById(
-      steamId.toString(),
-    );
+    const existPlayer = await this.playerRepository.findById(steamId.toString());
 
     const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
     if (updatePlayerDto.memberPointTotal) {
@@ -131,9 +125,7 @@ export class PlayerService {
   }
 
   async countPlayerSeasonPointTotalMoreThan(points = 500) {
-    const players = await this.playerRepository
-      .whereGreaterThan('seasonPointTotal', points)
-      .find();
+    const players = await this.playerRepository.whereGreaterThan('seasonPointTotal', points).find();
     return players.length;
   }
 
@@ -155,12 +147,8 @@ export class PlayerService {
       console.info(`Reset user count: ${count}`);
 
       // FIXME 每个赛季需要修正
-      player.thirdSeasonLevel = this.getSeasonLevelBuyPoint(
-        player.seasonPointTotal,
-      );
-      player.seasonPointTotal = Math.floor(
-        player.seasonPointTotal * seasonPointPercent,
-      );
+      player.thirdSeasonLevel = this.getSeasonLevelBuyPoint(player.seasonPointTotal);
+      player.seasonPointTotal = Math.floor(player.seasonPointTotal * seasonPointPercent);
       await this.playerRepository.update(player);
     }
   }
@@ -184,9 +172,7 @@ export class PlayerService {
 
   async setMemberLevel(steamId: number, level: number) {
     const point = this.getMemberTotalPoint(level);
-    const existPlayer = await this.playerRepository.findById(
-      steamId.toString(),
-    );
+    const existPlayer = await this.playerRepository.findById(steamId.toString());
 
     const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
 

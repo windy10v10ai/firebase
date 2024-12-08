@@ -17,8 +17,7 @@ export class PlayerCountService {
   async update(countDto: UpdatePlayerCountDto) {
     const id = this.getDateString();
 
-    const gamePlayerCountExist =
-      await this.gamePlayerCountRepository.findById(id);
+    const gamePlayerCountExist = await this.gamePlayerCountRepository.findById(id);
     if (gamePlayerCountExist) {
       gamePlayerCountExist.addPlayerCount(countDto);
       await this.gamePlayerCountRepository.update(gamePlayerCountExist);

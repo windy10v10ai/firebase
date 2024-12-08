@@ -1,13 +1,6 @@
 import * as crypto from 'crypto';
 
-import {
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  Headers,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Headers, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
 

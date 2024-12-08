@@ -14,21 +14,14 @@ export async function createPlayer(
   app: INestApplication,
   params: createPlayerParams,
 ): Promise<void> {
-  const resultAddPoints = await patch(
-    app,
-    `/api/player/steamId/${params.steamId}`,
-    {
-      seasonPointTotal: params.seasonPointTotal,
-      memberPointTotal: params.memberPointTotal,
-    },
-  );
+  const resultAddPoints = await patch(app, `/api/player/steamId/${params.steamId}`, {
+    seasonPointTotal: params.seasonPointTotal,
+    memberPointTotal: params.memberPointTotal,
+  });
   expect(resultAddPoints.status).toEqual(200);
 }
 
-export async function getPlayer(
-  app: INestApplication,
-  steamId: number,
-): Promise<Player> {
+export async function getPlayer(app: INestApplication, steamId: number): Promise<Player> {
   const result = await get(app, `/api/player/steamId/${steamId}`);
   expect(result.status).toEqual(200);
   return result.body;
@@ -48,10 +41,7 @@ export async function addPlayerProperty(
   expect(result.status).toEqual(200);
 }
 
-export async function getPlayerProperty(
-  app: INestApplication,
-  steamId: number,
-): Promise<number> {
+export async function getPlayerProperty(app: INestApplication, steamId: number): Promise<number> {
   const result = await get(app, `/api/player-property/steamId/${steamId}`);
   expect(result.status).toEqual(200);
   return result.body;

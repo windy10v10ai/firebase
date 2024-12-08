@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { CreatePlayerPropertyDto } from './dto/create-player-property.dto';

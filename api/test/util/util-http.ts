@@ -15,11 +15,7 @@ export async function initTest(): Promise<INestApplication> {
   return await app.init();
 }
 
-export function get(
-  app: INestApplication,
-  url: string,
-  query: object = {},
-): request.Test {
+export function get(app: INestApplication, url: string, query: object = {}): request.Test {
   const headers = {
     'x-api-key': 'Invalid_NotOnDedicatedServer',
     'x-country-code': 'CN',
@@ -27,30 +23,18 @@ export function get(
   return request(app.getHttpServer()).get(url).query(query).set(headers);
 }
 
-export function post(
-  app: INestApplication,
-  url: string,
-  body: object,
-): request.Test {
+export function post(app: INestApplication, url: string, body: object): request.Test {
   const headers = {
     'x-api-key': 'Invalid_NotOnDedicatedServer',
   };
   return request(app.getHttpServer()).post(url).send(body).set(headers);
 }
 
-export function put(
-  app: INestApplication,
-  url: string,
-  body: object,
-): request.Test {
+export function put(app: INestApplication, url: string, body: object): request.Test {
   return request(app.getHttpServer()).put(url).send(body);
 }
 
-export function patch(
-  app: INestApplication,
-  url: string,
-  body: object,
-): request.Test {
+export function patch(app: INestApplication, url: string, body: object): request.Test {
   return request(app.getHttpServer()).patch(url).send(body);
 }
 

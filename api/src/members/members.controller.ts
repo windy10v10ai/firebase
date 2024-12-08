@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { CreateMemberDto } from './dto/create-member.dto';
