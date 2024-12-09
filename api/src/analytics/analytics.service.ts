@@ -31,7 +31,7 @@ export class AnalyticsService {
 
   async gameStart(steamIds: number[], matchId: number) {
     for (const steamId of steamIds) {
-      const event = await this.buildPlayerEvent('game_start', steamId, matchId.toString(), {
+      const event = await this.buildPlayerEvent('player_game_start', steamId, matchId.toString(), {
         method: 'steam',
         steam_id: steamId,
         match_id: matchId,
@@ -50,7 +50,7 @@ export class AnalyticsService {
       }
       logger.debug('send game_end event for player', player);
       const event = await this.buildPlayerEvent(
-        'game_end',
+        'player_game_end',
         player.steamId,
         gameEnd.matchId.toString(),
         {
@@ -110,7 +110,7 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
-  async buildPlayerEvent(
+  private async buildPlayerEvent(
     eventName: string,
     steamId: number,
     matchId: string,
@@ -121,6 +121,7 @@ export class AnalyticsService {
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
+        session_number: matchId,
         engagement_time_msec: (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
       },
@@ -129,7 +130,7 @@ export class AnalyticsService {
     return event;
   }
 
-  async sendEvent(userId: string, event: Event, userProperties?: UserProperties) {
+  private async sendEvent(userId: string, event: Event, userProperties?: UserProperties) {
     const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
 
     const payload = {
