@@ -31,7 +31,7 @@ export class AnalyticsService {
 
   async gameStart(steamIds: number[], matchId: number) {
     for (const steamId of steamIds) {
-      const event = await this.buildPlayerEvent('game_start', steamId, matchId.toString(), {
+      const event = await this.buildPlayerEvent('player_game_start', steamId, matchId.toString(), {
         method: 'steam',
         steam_id: steamId,
         match_id: matchId,
@@ -50,7 +50,7 @@ export class AnalyticsService {
       }
       logger.debug('send game_end event for player', player);
       const event = await this.buildPlayerEvent(
-        'game_end',
+        'player_game_end',
         player.steamId,
         gameEnd.matchId.toString(),
         {
@@ -72,16 +72,40 @@ export class AnalyticsService {
     }
   }
 
-  async pickAbility(pickDto: PickDto) {
-    const event = await this.buildPlayerEvent('pick_ability', pickDto.steamId, pickDto.matchId, {
-      method: 'steam',
-      steam_id: pickDto.steamId,
-      match_id: pickDto.matchId,
-      ability_name: pickDto.name,
-      level: pickDto.level,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-    });
+  async lotteryPickAbility(pickDto: PickDto) {
+    const event = await this.buildPlayerEvent(
+      'lottery_pick_ability',
+      pickDto.steamId,
+      pickDto.matchId,
+      {
+        method: 'steam',
+        steam_id: pickDto.steamId,
+        match_id: pickDto.matchId,
+        ability_name: pickDto.name,
+        level: pickDto.level,
+        difficulty: pickDto.difficulty,
+        version: pickDto.version,
+      },
+    );
+
+    await this.sendEvent(pickDto.steamId.toString(), event);
+  }
+
+  async lotteryPickItem(pickDto: PickDto) {
+    const event = await this.buildPlayerEvent(
+      'lottery_pick_item',
+      pickDto.steamId,
+      pickDto.matchId,
+      {
+        method: 'steam',
+        steam_id: pickDto.steamId,
+        match_id: pickDto.matchId,
+        item_name: pickDto.name,
+        level: pickDto.level,
+        difficulty: pickDto.difficulty,
+        version: pickDto.version,
+      },
+    );
 
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
@@ -97,6 +121,7 @@ export class AnalyticsService {
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
+        session_number: matchId,
         engagement_time_msec: (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
       },

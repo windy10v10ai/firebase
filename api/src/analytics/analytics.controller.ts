@@ -9,8 +9,19 @@ import { PickDto } from './dto/pick-ability-dto';
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
+  // TODO remove this
   @Post('/pick/ability')
   async pickAbility(@Body() body: PickDto) {
-    await this.analyticsService.pickAbility(body);
+    await this.analyticsService.lotteryPickAbility(body);
+  }
+
+  @Post('/lottery/pick/ability')
+  async lotteryPickAbility(@Body() body: PickDto) {
+    await this.analyticsService.lotteryPickAbility(body);
+  }
+
+  @Post('/lottery/pick/item')
+  async lotteryPickItem(@Body() body: PickDto) {
+    await this.analyticsService.lotteryPickItem(body);
   }
 }
