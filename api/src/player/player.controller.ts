@@ -15,10 +15,7 @@ export class PlayerController {
   }
 
   @Patch('/steamId/:steamId')
-  upsert(
-    @Param('steamId') steamId: number,
-    @Body() updatePlayerDto: UpdatePlayerDto,
-  ) {
+  upsert(@Param('steamId') steamId: number, @Body() updatePlayerDto: UpdatePlayerDto) {
     return this.playerService.upsertAddPoint(steamId, updatePlayerDto);
   }
 

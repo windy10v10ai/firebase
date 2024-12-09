@@ -27,16 +27,12 @@ export class MembersService {
     const steamId = createMemberDto.steamId;
     const existMember = await this.findOne(steamId);
     const expireDate = new Date();
-    if (
-      existMember?.expireDate &&
-      existMember.expireDate.getTime() > expireDate.getTime()
-    ) {
+    if (existMember?.expireDate && existMember.expireDate.getTime() > expireDate.getTime()) {
       expireDate.setTime(existMember.expireDate.getTime());
     }
     // steam id not exist
     expireDate.setUTCDate(
-      expireDate.getUTCDate() +
-        createMemberDto.month * +process.env.DAYS_PER_MONTH,
+      expireDate.getUTCDate() + createMemberDto.month * +process.env.DAYS_PER_MONTH,
     );
     expireDate.setUTCHours(0, 0, 0, 0);
 
