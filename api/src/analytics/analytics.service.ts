@@ -110,7 +110,7 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
-  private async buildPlayerEvent(
+  async buildPlayerEvent(
     eventName: string,
     steamId: number,
     matchId: string,
@@ -130,7 +130,7 @@ export class AnalyticsService {
     return event;
   }
 
-  private async sendEvent(userId: string, event: Event, userProperties?: UserProperties) {
+  async sendEvent(userId: string, event: Event, userProperties?: UserProperties) {
     const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
 
     const payload = {
