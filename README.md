@@ -64,10 +64,9 @@ gcloud auth login
 
 ## Running the app
 
-### Start Firebase Emulator
+### Start Firebase Emulator & API & Web
 
 ```bash
-npm run build
 npm run start
 ```
 
@@ -88,12 +87,9 @@ mkdir firestore-backup
 npm run firebase:with-data
 ```
 
-### Run API
+### API only
 
 ```bash
-# debug (need start firebase emulator)
-(cd api && npm run start:debug)
-
 # REPL
 (cd api && npm run start -- --entryFile repl)
 
@@ -109,12 +105,6 @@ npm run firebase:with-data
 ```
 net stop winnat
 net start winnat
-```
-
-### Run Web
-
-```bash
-(cd web && npm run dev)
 ```
 
 ## Local end points
