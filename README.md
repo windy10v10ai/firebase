@@ -85,7 +85,7 @@ mkdir firestore-backup
   .)
 
 # start emulator with data
-npm run start:with-data
+npm run firebase:with-data
 ```
 
 ### Run API
