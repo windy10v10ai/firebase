@@ -18,9 +18,4 @@ export class PlayerController {
   upsert(@Param('steamId') steamId: number, @Body() updatePlayerDto: UpdatePlayerDto) {
     return this.playerService.upsertAddPoint(steamId, updatePlayerDto);
   }
-
-  @Get('/all/csv')
-  scoreAll() {
-    return this.playerService.scoreAll();
-  }
 }
