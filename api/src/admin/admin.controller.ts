@@ -10,6 +10,7 @@ import { PlayerPropertyService } from '../player-property/player-property.servic
 import { AdminService } from './admin.service';
 import { CreateAfdianMemberDto } from './dto/create-afdian-member.dto';
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
+import { Public } from '../util/auth/public.decorator';
 
 @ApiTags('Admin')
 @Controller('admin')

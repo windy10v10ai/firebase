@@ -15,12 +15,17 @@ async function bootstrap() {
     const config = new DocumentBuilder()
       .setTitle('Windy10v10 Cloud API')
       .setVersion('1.0')
-      .addBearerAuth()
+      .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
+      .addSecurityRequirements('x-api-key')
       .build();
     const document = SwaggerModule.createDocument(app, config);
 
     fs.writeFileSync('./swagger-spec.yaml', dump(document, {}));
-    SwaggerModule.setup('api-doc', app, document);
+    SwaggerModule.setup('api-doc', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
   }
   await app.listen(3001);
 }

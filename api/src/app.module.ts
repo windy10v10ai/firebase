@@ -20,6 +20,8 @@ import { PlayerCountModule } from './player-count/player-count.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { TestModule } from './test/test.module';
 import { SecretModule } from './util/secret/secret.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './util/auth/auth.guard';
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
 
@@ -55,7 +57,7 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     SecretModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
 })
 export class AppModule {
   constructor() {
