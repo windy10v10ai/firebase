@@ -11,12 +11,14 @@ import { logger } from 'firebase-functions';
 
 import { AfdianService } from './afdian.service';
 import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
+import { Public } from '../util/auth/public.decorator';
 
 @ApiTags('Afdian(Open)')
 @Controller('afdian')
 export class AfdianController {
   constructor(private readonly afdianService: AfdianService) {}
 
+  @Public()
   @Post('/webhook')
   async processAfdianWebhook(
     @Body() afdianWebhookDto: AfdianWebhookDto,

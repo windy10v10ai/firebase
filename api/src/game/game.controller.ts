@@ -33,7 +33,6 @@ import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
 
-@UseGuards(AuthGuard)
 @ApiTags('Game(Open)')
 @Controller('game')
 export class GameController {
@@ -111,7 +110,7 @@ export class GameController {
 
   @ApiBody({ type: GameEndDto })
   @Post('end')
-  async end(@Headers('x-api-key') apiKey: string, @Body() gameEnd: GameEndDto): Promise<string> {
+  async end(@Body() gameEnd: GameEndDto): Promise<string> {
     // FIXME 从游戏中传递过来的steamId是string类型，需要转换为number
     gameEnd.players.forEach((player) => {
       player.steamId = parseInt(player.steamId as any);
@@ -141,7 +140,6 @@ export class GameController {
 
   @Put('addPlayerProperty')
   async addPlayerProperty(
-    @Headers('x-api-key') apiKey: string,
     @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
   ): Promise<PlayerDto> {
     await this.playerPropertyService.update(updatePlayerPropertyDto);
@@ -150,10 +148,7 @@ export class GameController {
   }
 
   @Post('resetPlayerProperty')
-  async resetPlayerProperty(
-    @Headers('x-api-key') apiKey: string,
-    @Body() gameResetPlayerProperty: GameResetPlayerProperty,
-  ) {
+  async resetPlayerProperty(@Body() gameResetPlayerProperty: GameResetPlayerProperty) {
     logger.debug(`[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`);
 
     await this.gameService.resetPlayerProperty(gameResetPlayerProperty);
@@ -162,10 +157,7 @@ export class GameController {
   }
 
   @Get('player/steamId/:steamId')
-  async getPlayerInfo(
-    @Headers('x-api-key') apiKey: string,
-    @Param('steamId') steamId: number,
-  ): Promise<PlayerDto> {
+  async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
     logger.debug(`[Get Player Info] ${steamId}`);
 
     return await this.gameService.findPlayerDtoBySteamId(steamId);

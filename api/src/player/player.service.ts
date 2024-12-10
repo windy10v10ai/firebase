@@ -184,18 +184,6 @@ export class PlayerService {
     }
   }
 
-  async scoreAll() {
-    const players = await this.playerRepository.find();
-    let returnString = '';
-    // seasonPointTotal, matchCount
-    // create csv
-    for (const player of players) {
-      returnString += `${player.id},${player.seasonPointTotal},${player.matchCount},${player.winCount},${player.disconnectCount}\n`;
-    }
-
-    return returnString;
-  }
-
   private genereNewPlayerEntity(steamId: number): Player {
     return {
       id: steamId.toString(),
