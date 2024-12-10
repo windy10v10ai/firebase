@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { initTest } from './util/util-http';
+import { get, initTest } from './util/util-http';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
@@ -106,13 +106,11 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
       // 检查会员期限
-      const responseAfter = await request(app.getHttpServer()).get(`/api/members/${memberId}`);
+      const responseAfter = await get(app, `/api/members/${memberId}`);
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
-      const responsePlayer = await request(app.getHttpServer()).get(
-        `/api/player/steamId/${memberId}`,
-      );
+      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
       expect(responsePlayer.status).toEqual(200);
       expect(responsePlayer.body.memberPointTotal).toEqual(300 * month);
     });
@@ -189,13 +187,11 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
       // 检查会员期限
-      const responseAfter = await request(app.getHttpServer()).get(`/api/members/${memberId}`);
+      const responseAfter = await get(app, `/api/members/${memberId}`);
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
-      const responsePlayer = await request(app.getHttpServer()).get(
-        `/api/player/steamId/${memberId}`,
-      );
+      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
       expect(responsePlayer.status).toEqual(200);
       expect(responsePlayer.body.memberPointTotal).toEqual(300 * month);
     });
@@ -238,7 +234,7 @@ describe('MemberController (e2e)', () => {
         em: '[Error] 未能正确获取Dota2 ID',
       });
 
-      const responseAfter = await request(app.getHttpServer()).get(`/api/members/${memberId}`);
+      const responseAfter = await get(app, `/api/members/${memberId}`);
       expect(responseAfter.status).toEqual(404);
     });
 
@@ -283,9 +279,7 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
-      const responsePlayer = await request(app.getHttpServer()).get(
-        `/api/player/steamId/${memberId}`,
-      );
+      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
       expect(responsePlayer.status).toEqual(200);
       expect(responsePlayer.body.memberPointTotal).toEqual(3200);
     });
@@ -331,9 +325,7 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
-      const responsePlayer = await request(app.getHttpServer()).get(
-        `/api/player/steamId/${memberId}`,
-      );
+      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
       expect(responsePlayer.status).toEqual(200);
       expect(responsePlayer.body.memberPointTotal).toEqual(52000);
     });
@@ -414,9 +406,7 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate2.status).toEqual(201);
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
-      const responsePlayer = await request(app.getHttpServer()).get(
-        `/api/player/steamId/${memberId}`,
-      );
+      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
       expect(responsePlayer.status).toEqual(200);
       expect(responsePlayer.body.memberPointTotal).toEqual(13200);
     });
