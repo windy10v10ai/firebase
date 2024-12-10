@@ -22,7 +22,7 @@ async function bootstrap() {
     fs.writeFileSync('./swagger-spec.yaml', dump(document, {}));
     SwaggerModule.setup('api-doc', app, document);
   }
-  await app.listen(3000);
+  await app.listen(3001);
 }
 
 bootstrap();

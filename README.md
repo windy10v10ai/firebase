@@ -120,10 +120,10 @@ net start winnat
 ## Local end points
 
 - Firebase Hosting: http://localhost:5000/api/
-- Debug end points: http://localhost:3000/api/
+- Debug end points: http://localhost:3001/api/
 - Function (Not used): http://localhost:5001/windy10v10ai/asia-northeast1/client/api/
 - Firebase Emulator: http://localhost:4000/
-- OpenAPI Document (Swagger): http://localhost:3000/api-doc
+- OpenAPI Document (Swagger): http://localhost:3001/api-doc
 - Nextjs Web: http://localhost:3000/
 
 # Maintenance
