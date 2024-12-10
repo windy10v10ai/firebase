@@ -7,11 +7,14 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "npm run build:api && npm run build:web",
+    "build": "run-p build:*",
     "build:api": "cd api && npm run build",
     "build:web": "cd web && npm run build",
-    "start": "firebase emulators:start --only functions,hosting,firestore",
-    "start:with-data": "firebase emulators:start --only functions,hosting,firestore --import ./firestore-backup",
+    "start": "run-p start:*",
+    "start:api": "cd api && npm run start:debug",
+    "start:web": "cd web && npm run dev",
+    "start:firebase": "firebase emulators:start --only functions,hosting,firestore",
+    "firebase:with-data": "firebase emulators:start --only functions,hosting,firestore --import ./firestore-backup",
     "postinstall": "(cd api && npm install) && (cd web && npm install)"
   },
   "repository": {
@@ -24,6 +27,7 @@
     "url": "https://github.com/windybirth/windy10v10ai-cloud/issues"
   },
   "homepage": "https://github.com/windybirth/windy10v10ai-cloud#readme",
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
 }

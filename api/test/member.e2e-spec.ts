@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { initTest } from './util/util-http';
+import { get, initTest, post } from './util/util-http';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
@@ -9,15 +9,16 @@ describe('MemberController (e2e)', () => {
   beforeAll(async () => {
     app = await initTest();
     // 初始化测试数据
-    await request(app.getHttpServer()).get('/api/test/init');
+    await get(app, '/api/test/init');
   });
 
   describe('members/ (GET)', () => {
-    it('获取不存在的会员 return 404', () => {
-      return request(app.getHttpServer()).get('/api/members/987654321').expect(404);
+    it('获取不存在的会员 return 404', async () => {
+      const response = await get(app, '/api/members/987654321');
+      expect(response.status).toEqual(404);
     });
     it('获取存在已过期的会员 return 200 and enable false', async () => {
-      const response = await request(app.getHttpServer()).get('/api/members/20200801');
+      const response = await get(app, '/api/members/20200801');
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         steamId: 20200801,
@@ -26,7 +27,7 @@ describe('MemberController (e2e)', () => {
       });
     });
     it('获取存在且有效的会员 return 200 and enable true', async () => {
-      const response = await request(app.getHttpServer()).get('/api/members/20300801');
+      const response = await get(app, '/api/members/20300801');
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         steamId: 20300801,
@@ -46,17 +47,17 @@ describe('MemberController (e2e)', () => {
         enable: true,
       };
 
-      const responseBefore = await request(app.getHttpServer()).get('/api/members/123456789');
+      const responseBefore = await get(app, '/api/members/123456789');
       expect(responseBefore.status).toEqual(404);
 
-      const responseCreate = await request(app.getHttpServer()).post('/api/members').send({
+      const responseCreate = await post(app, '/api/members', {
         steamId: 123456789,
         month: 1,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
 
-      const responseAfter = await request(app.getHttpServer()).get('/api/members/123456789');
+      const responseAfter = await get(app, '/api/members/123456789');
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
     });
@@ -70,17 +71,17 @@ describe('MemberController (e2e)', () => {
         enable: true,
       };
 
-      const responseBefore = await request(app.getHttpServer()).get('/api/members/20201231');
+      const responseBefore = await get(app, '/api/members/20201231');
       expect(responseBefore.status).toEqual(200);
 
-      const responseCreate = await request(app.getHttpServer()).post('/api/members').send({
+      const responseCreate = await post(app, '/api/members', {
         steamId: 20201231,
         month: 1,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
 
-      const responseAfter = await request(app.getHttpServer()).get('/api/members/20201231');
+      const responseAfter = await get(app, '/api/members/20201231');
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
     });
@@ -92,17 +93,17 @@ describe('MemberController (e2e)', () => {
         enable: true,
       };
 
-      const responseBefore = await request(app.getHttpServer()).get('/api/members/20301231');
+      const responseBefore = await get(app, '/api/members/20301231');
       expect(responseBefore.status).toEqual(200);
 
-      const responseCreate = await request(app.getHttpServer()).post('/api/members').send({
+      const responseCreate = await post(app, '/api/members', {
         steamId: 20301231,
         month: 1,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
 
-      const responseAfter = await request(app.getHttpServer()).get('/api/members/20301231');
+      const responseAfter = await get(app, '/api/members/20301231');
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
     });
@@ -115,7 +116,7 @@ describe('MemberController (e2e)', () => {
         enable: true,
       };
 
-      const responseCreate = await request(app.getHttpServer()).post('/api/members').send({
+      const responseCreate = await post(app, '/api/members', {
         steamId: 1234567890,
         month: 13,
       });
@@ -131,7 +132,7 @@ describe('MemberController (e2e)', () => {
         enable: true,
       };
 
-      const responseCreate = await request(app.getHttpServer()).post('/api/members').send({
+      const responseCreate = await post(app, '/api/members', {
         steamId: 20200801,
         month: 3,
       });
@@ -145,7 +146,7 @@ describe('MemberController (e2e)', () => {
         enable: true,
       };
 
-      const responseCreate = await request(app.getHttpServer()).post('/api/members').send({
+      const responseCreate = await post(app, '/api/members', {
         steamId: 20300801,
         month: 12,
       });

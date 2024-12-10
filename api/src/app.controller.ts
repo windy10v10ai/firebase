@@ -3,7 +3,9 @@ import { ApiTags } from '@nestjs/swagger';
 import * as functions from 'firebase-functions';
 
 import { AppService } from './app.service';
+import { Public } from './util/auth/public.decorator';
 
+@Public()
 @ApiTags('Hello World')
 @Controller()
 export class AppController {
@@ -16,7 +18,6 @@ export class AppController {
 
   @Get('env')
   getEnv(): string {
-    // 打印所有环境变量
     const test_env = functions.config().admin?.test_env;
     return `test_env: ${test_env}`;
   }

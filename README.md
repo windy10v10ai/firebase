@@ -64,10 +64,9 @@ gcloud auth login
 
 ## Running the app
 
-### Start Firebase Emulator
+### Start Firebase Emulator & API & Web
 
 ```bash
-npm run build
 npm run start
 ```
 
@@ -85,15 +84,12 @@ mkdir firestore-backup
   .)
 
 # start emulator with data
-npm run start:with-data
+npm run firebase:with-data
 ```
 
-### Run API
+### API only
 
 ```bash
-# debug (need start firebase emulator)
-(cd api && npm run start:debug)
-
 # REPL
 (cd api && npm run start -- --entryFile repl)
 
@@ -111,19 +107,13 @@ net stop winnat
 net start winnat
 ```
 
-### Run Web
-
-```bash
-(cd web && npm run dev)
-```
-
 ## Local end points
 
 - Firebase Hosting: http://localhost:5000/api/
-- Debug end points: http://localhost:3000/api/
+- Debug end points: http://localhost:3001/api/
 - Function (Not used): http://localhost:5001/windy10v10ai/asia-northeast1/client/api/
 - Firebase Emulator: http://localhost:4000/
-- OpenAPI Document (Swagger): http://localhost:3000/api-doc
+- OpenAPI Document (Swagger): http://localhost:3001/api-doc
 - Nextjs Web: http://localhost:3000/
 
 # Maintenance

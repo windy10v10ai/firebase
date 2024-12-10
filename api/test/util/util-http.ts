@@ -31,11 +31,17 @@ export function post(app: INestApplication, url: string, body: object): request.
 }
 
 export function put(app: INestApplication, url: string, body: object): request.Test {
-  return request(app.getHttpServer()).put(url).send(body);
+  const headers = {
+    'x-api-key': 'Invalid_NotOnDedicatedServer',
+  };
+  return request(app.getHttpServer()).put(url).send(body).set(headers);
 }
 
 export function patch(app: INestApplication, url: string, body: object): request.Test {
-  return request(app.getHttpServer()).patch(url).send(body);
+  const headers = {
+    'x-api-key': 'Invalid_NotOnDedicatedServer',
+  };
+  return request(app.getHttpServer()).patch(url).send(body).set(headers);
 }
 
 export function mockDate(date: string): void {
