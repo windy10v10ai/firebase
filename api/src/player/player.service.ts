@@ -124,52 +124,6 @@ export class PlayerService {
     }
   }
 
-  async countPlayerSeasonPointTotalMoreThan(points = 500) {
-    const players = await this.playerRepository.whereGreaterThan('seasonPointTotal', points).find();
-    return players.length;
-  }
-
-  async resetSeasonPoint(resetPercent: number, baseSeasonPoint = 500) {
-    // FIXME baseSeasonPoint以下的玩家无法记录上个赛季的积分
-    const playersAll = await this.playerRepository
-      .whereGreaterThan('seasonPointTotal', baseSeasonPoint)
-      .find();
-    const players = playersAll.filter(
-      // FIXME 每个赛季需要修正
-      (player) => player.thirdSeasonLevel === undefined,
-    );
-    const seasonPointPercent = resetPercent / 100;
-
-    console.info(`Reset user total: ${players.length}`);
-    let count = 0;
-    for (const player of players) {
-      count++;
-      console.info(`Reset user count: ${count}`);
-
-      // FIXME 每个赛季需要修正
-      player.thirdSeasonLevel = this.getSeasonLevelBuyPoint(player.seasonPointTotal);
-      player.seasonPointTotal = Math.floor(player.seasonPointTotal * seasonPointPercent);
-      await this.playerRepository.update(player);
-    }
-  }
-
-  async addAllSeasonPoint(point: number, startFrom: Date) {
-    const players = await this.playerRepository
-      .whereGreaterOrEqualThan('lastMatchTime', startFrom)
-      .find();
-    for (const player of players) {
-      player.seasonPointTotal += point;
-      await this.playerRepository.update(player);
-    }
-    return players.length;
-  }
-
-  async addSeasonPoint(steamId: number, point: number) {
-    const player = await this.playerRepository.findById(steamId.toString());
-    player.seasonPointTotal += point;
-    await this.playerRepository.update(player);
-  }
-
   async setMemberLevel(steamId: number, level: number) {
     const point = this.getMemberTotalPoint(level);
     const existPlayer = await this.playerRepository.findById(steamId.toString());
