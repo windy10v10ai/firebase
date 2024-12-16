@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from 'firebase-functions/v1';
+import { logger } from 'firebase-functions';
 
 import { GameEndDto } from '../game/dto/game-end.request.body';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
+import { getHeroId } from './data/hero-data';
+import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
 import { PickDto } from './dto/pick-ability-dto';
 
 interface Event {
@@ -11,7 +13,8 @@ interface Event {
   params: {
     [key: string]: number | string | boolean;
     session_id: number | string;
-    engagement_time_msec: number | string;
+    session_number?: number;
+    engagement_time_msec?: number | string;
     debug_mode?: boolean;
   };
 }
@@ -110,6 +113,70 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
+  async gameEndMatch(gameEnd: GameEndMatchDto) {
+    const gameOptions = gameEnd.gameOptions;
+    const gameOptionsObject = {
+      mr: gameOptions.multiplierRadiant,
+      md: gameOptions.multiplierDire,
+      pnr: gameOptions.playerNumberRadiant,
+      pnd: gameOptions.playerNumberDire,
+      tp: gameOptions.towerPowerPct,
+    };
+    const gameOptionsJson = JSON.stringify(gameOptionsObject);
+
+    this.buildPlayerJson(gameEnd.players[0]);
+
+    const eventParams: { [key: string]: number | string | boolean } = {
+      match_id: gameEnd.matchId,
+      version: gameEnd.version,
+      difficulty: gameEnd.difficulty,
+      game_options: gameOptionsJson,
+      winner_team_id: gameEnd.winnerTeamId,
+    };
+
+    gameEnd.players.forEach((player, i) => {
+      eventParams[`player_${i + 1}`] = this.buildPlayerJson(player);
+    });
+
+    const event = await this.buildMatchEvent('game_end_match', gameEnd.matchId, eventParams);
+    await this.sendEvent(gameEnd.matchId, event);
+  }
+
+  private buildPlayerJson(player: GameEndPlayerDto) {
+    const playerObject = {
+      hi: getHeroId(player.heroName),
+      si: player.steamId,
+      ti: player.teamId,
+      dc: player.isDisconnected ? 1 : 0,
+      l: player.level,
+      g: player.gold,
+      k: player.kills,
+      d: player.deaths,
+      a: player.assists,
+      p: player.points,
+    };
+    const playerJson = JSON.stringify(playerObject);
+    return playerJson;
+  }
+
+  // ---------------------------- common ----------------------------
+  async buildMatchEvent(
+    eventName: string,
+    matchId: string,
+    eventParams: { [key: string]: number | string | boolean },
+  ) {
+    const event: Event = {
+      name: eventName,
+      params: {
+        ...eventParams,
+        session_id: matchId,
+        debug_mode: process.env.ENVIRONMENT === 'local',
+      },
+    };
+
+    return event;
+  }
+
   async buildPlayerEvent(
     eventName: string,
     steamId: number,
@@ -121,7 +188,8 @@ export class AnalyticsService {
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
-        session_number: matchId,
+        // FIXME https://github.com/windy10v10ai/firebase/issues/323
+        // session_number: matchId,
         engagement_time_msec: (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
       },
