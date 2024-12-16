@@ -34,7 +34,7 @@ export class AnalyticsService {
 
   async gameStart(steamIds: number[], matchId: number) {
     for (const steamId of steamIds) {
-      const event = await this.buildPlayerEvent('player_game_start', steamId, matchId.toString(), {
+      const event = await this.buildEvent('player_game_start', steamId, matchId.toString(), {
         method: 'steam',
         steam_id: steamId,
         match_id: matchId,
@@ -52,7 +52,7 @@ export class AnalyticsService {
         continue;
       }
       logger.debug('send game_end event for player', player);
-      const event = await this.buildPlayerEvent(
+      const event = await this.buildEvent(
         'player_game_end',
         player.steamId,
         gameEnd.matchId.toString(),
@@ -76,39 +76,29 @@ export class AnalyticsService {
   }
 
   async lotteryPickAbility(pickDto: PickDto) {
-    const event = await this.buildPlayerEvent(
-      'lottery_pick_ability',
-      pickDto.steamId,
-      pickDto.matchId,
-      {
-        method: 'steam',
-        steam_id: pickDto.steamId,
-        match_id: pickDto.matchId,
-        ability_name: pickDto.name,
-        level: pickDto.level,
-        difficulty: pickDto.difficulty,
-        version: pickDto.version,
-      },
-    );
+    const event = await this.buildEvent('lottery_pick_ability', pickDto.steamId, pickDto.matchId, {
+      method: 'steam',
+      steam_id: pickDto.steamId,
+      match_id: pickDto.matchId,
+      ability_name: pickDto.name,
+      level: pickDto.level,
+      difficulty: pickDto.difficulty,
+      version: pickDto.version,
+    });
 
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
   async lotteryPickItem(pickDto: PickDto) {
-    const event = await this.buildPlayerEvent(
-      'lottery_pick_item',
-      pickDto.steamId,
-      pickDto.matchId,
-      {
-        method: 'steam',
-        steam_id: pickDto.steamId,
-        match_id: pickDto.matchId,
-        item_name: pickDto.name,
-        level: pickDto.level,
-        difficulty: pickDto.difficulty,
-        version: pickDto.version,
-      },
-    );
+    const event = await this.buildEvent('lottery_pick_item', pickDto.steamId, pickDto.matchId, {
+      method: 'steam',
+      steam_id: pickDto.steamId,
+      match_id: pickDto.matchId,
+      item_name: pickDto.name,
+      level: pickDto.level,
+      difficulty: pickDto.difficulty,
+      version: pickDto.version,
+    });
 
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
@@ -138,7 +128,7 @@ export class AnalyticsService {
       eventParams[`player_${i + 1}`] = this.buildPlayerJson(player);
     });
 
-    const event = await this.buildMatchEvent('game_end_match', gameEnd.matchId, eventParams);
+    const event = await this.buildEvent('game_end_match', 0, gameEnd.matchId, eventParams);
     await this.sendEvent(gameEnd.matchId, event);
   }
 
@@ -160,24 +150,7 @@ export class AnalyticsService {
   }
 
   // ---------------------------- common ----------------------------
-  async buildMatchEvent(
-    eventName: string,
-    matchId: string,
-    eventParams: { [key: string]: number | string | boolean },
-  ) {
-    const event: Event = {
-      name: eventName,
-      params: {
-        ...eventParams,
-        session_id: matchId,
-        debug_mode: process.env.ENVIRONMENT === 'local',
-      },
-    };
-
-    return event;
-  }
-
-  async buildPlayerEvent(
+  async buildEvent(
     eventName: string,
     steamId: number,
     matchId: string,
