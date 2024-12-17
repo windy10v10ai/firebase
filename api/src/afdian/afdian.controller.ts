@@ -9,9 +9,10 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
 
+import { Public } from '../util/auth/public.decorator';
+
 import { AfdianService } from './afdian.service';
 import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
-import { Public } from '../util/auth/public.decorator';
 
 @ApiTags('Afdian(Open)')
 @Controller('afdian')
