@@ -7,9 +7,6 @@ export class EventBaseDto {
   version: string;
   @ApiProperty({ default: 0 })
   difficulty: number;
-}
-
-export class PlayerEventBaseDto extends EventBaseDto {
   @ApiProperty()
   steamId: number;
 }

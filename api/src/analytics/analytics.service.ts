@@ -114,8 +114,6 @@ export class AnalyticsService {
     };
     const gameOptionsJson = JSON.stringify(gameOptionsObject);
 
-    this.buildPlayerJson(gameEnd.players[0]);
-
     const eventParams: { [key: string]: number | string | boolean } = {
       match_id: gameEnd.matchId,
       version: gameEnd.version,
@@ -128,7 +126,12 @@ export class AnalyticsService {
       eventParams[`player_${i + 1}`] = this.buildPlayerJson(player);
     });
 
-    const event = await this.buildEvent('game_end_match', 0, gameEnd.matchId, eventParams);
+    const event = await this.buildEvent(
+      'game_end_match',
+      gameEnd.steamId,
+      gameEnd.matchId,
+      eventParams,
+    );
     await this.sendEvent(gameEnd.matchId, event);
   }
 

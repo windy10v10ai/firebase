@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { PlayerEventBaseDto } from './event-base-dto';
+import { EventBaseDto } from './event-base-dto';
 
-export class PickDto extends PlayerEventBaseDto {
+export class PickDto extends EventBaseDto {
   @ApiProperty({ default: 'name' })
   name: string;
   @ApiProperty()
