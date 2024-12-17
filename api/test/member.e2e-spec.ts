@@ -1,5 +1,4 @@
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
 
 import { get, initTest, post } from './util/util-http';
 

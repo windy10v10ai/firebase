@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
@@ -23,7 +22,6 @@ import { PlayerService } from '../player/player.service';
 import { PlayerCountService } from '../player-count/player-count.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
-import { AuthGuard } from '../util/auth/auth.guard';
 import { Public } from '../util/auth/public.decorator';
 
 import { GameEndDto } from './dto/game-end.request.body';

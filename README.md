@@ -139,7 +139,6 @@ firebase deploy
 ```bash
 # Deploy api function only
 firebase deploy --only functions:client
-firebase deploy --only functions:afdian
 firebase deploy --only functions:patreon
 firebase deploy --only functions:admin
 # Deploy all function
