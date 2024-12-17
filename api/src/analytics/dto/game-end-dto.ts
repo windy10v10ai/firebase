@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
@@ -45,5 +46,6 @@ export class GameEndDto extends EventBaseDto {
   winnerTeamId: number;
 
   @ApiProperty({ type: [GameEndPlayerDto], maxLength: 20 })
+  @IsNotEmpty()
   players: GameEndPlayerDto[];
 }
