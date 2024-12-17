@@ -2,8 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import * as functions from 'firebase-functions';
+import { onRequest } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
-import { onRequest } from 'firebase-functions/v2/https';
 
 import { AppModule } from './src/app.module';
 import { SECRET } from './src/util/secret/secret.service';
@@ -57,7 +57,7 @@ export const patreon = onRequest(
 
 async function callServerWithRegex(
   regex: string,
-  ...args: [req: functions.https.Request, resp: functions.Response<any>]
+  ...args: [req: functions.https.Request, resp: express.Response]
 ) {
   const path = args[0].path;
   if (path.match(regex)) {
