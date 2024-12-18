@@ -7,22 +7,15 @@ import { GameEndDto } from '../game/dto/game-end.request.body';
 import { HeroWinrate } from './dto/hero-winrate.entity';
 import { CountDifficult } from './entities/count-difficult.entity';
 import { CountHero, HeroType } from './entities/count-hero.entity';
-import { CountMatch } from './entities/count-match.entity';
 
 @Injectable()
 export class CountService {
   constructor(
-    @InjectRepository(CountMatch)
-    private readonly countMatchRepository: BaseFirestoreRepository<CountMatch>,
     @InjectRepository(CountDifficult)
     private readonly countDifficultRepository: BaseFirestoreRepository<CountDifficult>,
     @InjectRepository(CountHero)
     private readonly countHeroRepository: BaseFirestoreRepository<CountHero>,
   ) {}
-
-  findAllMatch() {
-    return this.countMatchRepository.find();
-  }
 
   async findHeroRate(version: string, heroType: string, order?: string) {
     let totalCount = 0;
@@ -67,10 +60,6 @@ export class CountService {
       winrate: winrate.join(', '),
       pickrate: pickrate.join(', '),
     };
-  }
-
-  findHeroPickrate() {
-    return this.countMatchRepository.find();
   }
 
   async countGameDifficult(gameEnd: GameEndDto) {
