@@ -132,7 +132,7 @@ export class AnalyticsService {
       gameEnd.matchId,
       eventParams,
     );
-    await this.sendEvent(gameEnd.matchId, event);
+    await this.sendEvent('system', event);
   }
 
   private buildPlayerJson(player: GameEndPlayerDto) {
