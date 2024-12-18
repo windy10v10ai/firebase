@@ -73,8 +73,6 @@ export class GameController {
     pointInfo.push(...memberDailyPointInfo);
 
     // ----------------- 以下为统计数据 -----------------
-    // 统计每日开始游戏数据
-    await this.countService.countGameStart();
     // 统计会员游戏数据
     await this.playerCountService
       .update({
@@ -127,7 +125,6 @@ export class GameController {
       }
     }
 
-    await this.countService.countGameEnd(gameEnd);
     await this.countService.countGameDifficult(gameEnd);
     await this.countService.countHeroes(gameEnd);
     await this.matchService.recordMatch(gameEnd);

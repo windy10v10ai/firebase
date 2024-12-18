@@ -73,35 +73,6 @@ export class CountService {
     return this.countMatchRepository.find();
   }
 
-  async countGameStart() {
-    const id = this.getDateString();
-    const existMatchCount = await this.countMatchRepository.findById(id);
-    if (existMatchCount) {
-      existMatchCount.addMatchStart();
-      await this.countMatchRepository.update(existMatchCount);
-    } else {
-      const matchCount = new CountMatch();
-      matchCount.init(id);
-      matchCount.addMatchStart();
-      await this.countMatchRepository.create(matchCount);
-    }
-  }
-
-  async countGameEnd(gameEnd: GameEndDto) {
-    const isWinner = gameEnd.winnerTeamId == 2;
-    const id = this.getDateString();
-    const existMatchCount = await this.countMatchRepository.findById(id);
-    if (existMatchCount) {
-      existMatchCount.addMatchEnd(isWinner);
-      await this.countMatchRepository.update(existMatchCount);
-    } else {
-      const matchCount = new CountMatch();
-      matchCount.init(id);
-      matchCount.addMatchEnd(isWinner);
-      await this.countMatchRepository.create(matchCount);
-    }
-  }
-
   async countGameDifficult(gameEnd: GameEndDto) {
     const id = `${gameEnd.version}#${gameEnd.gameOption.gameDifficulty}`;
     const existMatchDifficult = await this.countDifficultRepository.findById(id);

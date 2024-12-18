@@ -44,7 +44,8 @@ export class GameEndDto extends EventBaseDto {
   gameOptions: GameEndGameOptionsDto;
   @ApiProperty({ default: 2 })
   winnerTeamId: number;
-
+  @ApiProperty()
+  gameTimeMsec: number;
   @ApiProperty({ type: [GameEndPlayerDto], maxLength: 20 })
   @IsNotEmpty()
   players: GameEndPlayerDto[];
