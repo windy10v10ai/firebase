@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { initializeApp } from 'firebase-admin/app';
 import { FireormModule } from 'nestjs-fireorm';
 
@@ -19,9 +20,8 @@ import { PlayerModule } from './player/player.module';
 import { PlayerCountModule } from './player-count/player-count.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { TestModule } from './test/test.module';
-import { SecretModule } from './util/secret/secret.module';
-import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './util/auth/auth.guard';
+import { SecretModule } from './util/secret/secret.module';
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
 

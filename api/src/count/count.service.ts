@@ -7,22 +7,15 @@ import { GameEndDto } from '../game/dto/game-end.request.body';
 import { HeroWinrate } from './dto/hero-winrate.entity';
 import { CountDifficult } from './entities/count-difficult.entity';
 import { CountHero, HeroType } from './entities/count-hero.entity';
-import { CountMatch } from './entities/count-match.entity';
 
 @Injectable()
 export class CountService {
   constructor(
-    @InjectRepository(CountMatch)
-    private readonly countMatchRepository: BaseFirestoreRepository<CountMatch>,
     @InjectRepository(CountDifficult)
     private readonly countDifficultRepository: BaseFirestoreRepository<CountDifficult>,
     @InjectRepository(CountHero)
     private readonly countHeroRepository: BaseFirestoreRepository<CountHero>,
   ) {}
-
-  findAllMatch() {
-    return this.countMatchRepository.find();
-  }
 
   async findHeroRate(version: string, heroType: string, order?: string) {
     let totalCount = 0;
@@ -67,39 +60,6 @@ export class CountService {
       winrate: winrate.join(', '),
       pickrate: pickrate.join(', '),
     };
-  }
-
-  findHeroPickrate() {
-    return this.countMatchRepository.find();
-  }
-
-  async countGameStart() {
-    const id = this.getDateString();
-    const existMatchCount = await this.countMatchRepository.findById(id);
-    if (existMatchCount) {
-      existMatchCount.addMatchStart();
-      await this.countMatchRepository.update(existMatchCount);
-    } else {
-      const matchCount = new CountMatch();
-      matchCount.init(id);
-      matchCount.addMatchStart();
-      await this.countMatchRepository.create(matchCount);
-    }
-  }
-
-  async countGameEnd(gameEnd: GameEndDto) {
-    const isWinner = gameEnd.winnerTeamId == 2;
-    const id = this.getDateString();
-    const existMatchCount = await this.countMatchRepository.findById(id);
-    if (existMatchCount) {
-      existMatchCount.addMatchEnd(isWinner);
-      await this.countMatchRepository.update(existMatchCount);
-    } else {
-      const matchCount = new CountMatch();
-      matchCount.init(id);
-      matchCount.addMatchEnd(isWinner);
-      await this.countMatchRepository.create(matchCount);
-    }
   }
 
   async countGameDifficult(gameEnd: GameEndDto) {

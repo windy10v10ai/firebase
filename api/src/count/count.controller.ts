@@ -8,11 +8,6 @@ import { CountService } from './count.service';
 export class CountController {
   constructor(private readonly countService: CountService) {}
 
-  @Get('match')
-  findAllMatch() {
-    return this.countService.findAllMatch();
-  }
-
   @Get('hero/:version/:heroType')
   findHeroRate(
     @Param('version') version: string,

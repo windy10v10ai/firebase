@@ -47,7 +47,6 @@
   },
   "extensions": {
     "firestore-bigquery-export-players": "firebase/firestore-bigquery-export@0.1.54",
-    "firestore-bigquery-export-members": "firebase/firestore-bigquery-export@0.1.54",
-    "firestore-bigquery-export-matches": "firebase/firestore-bigquery-export@0.1.54"
+    "firestore-bigquery-export-members": "firebase/firestore-bigquery-export@0.1.54"
   }
 }

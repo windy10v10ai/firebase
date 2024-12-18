@@ -5,10 +5,9 @@ import { CountController } from './count.controller';
 import { CountService } from './count.service';
 import { CountDifficult } from './entities/count-difficult.entity';
 import { CountHero } from './entities/count-hero.entity';
-import { CountMatch } from './entities/count-match.entity';
 
 @Module({
-  imports: [FireormModule.forFeature([CountMatch, CountDifficult, CountHero])],
+  imports: [FireormModule.forFeature([CountDifficult, CountHero])],
   controllers: [CountController],
   providers: [CountService],
   exports: [CountService],
