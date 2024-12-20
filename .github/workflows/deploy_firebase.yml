@@ -3,7 +3,6 @@
 
 name: Deploy Firebase
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
