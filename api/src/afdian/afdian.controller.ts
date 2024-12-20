@@ -14,12 +14,12 @@ import { Public } from '../util/auth/public.decorator';
 import { AfdianService } from './afdian.service';
 import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
 
-@ApiTags('Afdian(Open)')
+@Public()
+@ApiTags('Afdian(Public)')
 @Controller('afdian')
 export class AfdianController {
   constructor(private readonly afdianService: AfdianService) {}
 
-  @Public()
   @Post('/webhook')
   async processAfdianWebhook(
     @Body() afdianWebhookDto: AfdianWebhookDto,
