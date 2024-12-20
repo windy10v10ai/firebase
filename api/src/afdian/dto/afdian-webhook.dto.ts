@@ -1,7 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Equals } from 'class-validator';
 
 export class AfdianWebhookDto {
   @Equals(200)
+  @ApiProperty()
   ec: number;
   data: DataDto;
 }

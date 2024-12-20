@@ -7,7 +7,6 @@ import { Order } from '../orders/entities/order.entity';
 import { OrderType } from '../orders/enums/order-type.enum';
 import { Platfrom } from '../orders/enums/platfrom.enum';
 import { PlayerService } from '../player/player.service';
-import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { OrderDto } from './dto/afdian-webhook.dto';
 
@@ -37,7 +36,6 @@ export class AfdianService {
     private readonly orderRepository: BaseFirestoreRepository<Order>,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
-    private readonly playerPropertyService: PlayerPropertyService,
   ) {}
 
   async processAfdianOrder(orderDto: OrderDto) {
@@ -55,10 +53,17 @@ export class AfdianService {
     if (orderDto.status !== 2) {
       success = false;
     }
-    const steamId = this.extractSteamIdFromAfdianOrderDto(orderDto);
+    const steamId = this.getSteamIdFromAfdianOrderDto(orderDto);
     if (!steamId) {
       success = false;
     }
+
+    // 检测玩家是否存在
+    // TODO: fix E2E测试
+    // const player = await this.playerService.findBySteamId(steamId);
+    // if (!player) {
+    //   success = false;
+    // }
 
     switch (orderDto.product_type) {
       case ProductType.member:
@@ -109,9 +114,11 @@ export class AfdianService {
             memberPointTotal: addPoint,
           });
         }
-        if (orderType === OrderType.initialAttribute) {
-          await this.playerPropertyService.deleteBySteamId(steamId);
-        }
+        // 已废止
+        // 英雄属性初始化 Initialize Attribute
+        // if (orderType === OrderType.initialAttribute) {
+        //   await this.playerPropertyService.deleteBySteamId(steamId);
+        // }
 
         break;
 
@@ -132,27 +139,17 @@ export class AfdianService {
     return this.orderRepository.create(orderEntity);
   }
 
-  private extractSteamIdFromAfdianOrderDto(orderDto: OrderDto): number | null {
+  private getSteamIdFromAfdianOrderDto(orderDto: OrderDto): number | null {
     // 查找remark
-    const steamId_remark = this.extractSteamId(orderDto.remark);
-    if (steamId_remark) {
-      return steamId_remark;
-    }
-
-    return null;
-  }
-
-  // steamId要求，numberString 6~11位，混有其他字符的情况暂不考虑。
-  private extractSteamId(rawString: string): number | null {
+    const rawString = orderDto.remark;
     if (!rawString) {
       return null;
     }
-    if (rawString.length < 6 || rawString.length > 11) {
+    const steamId_remark = Number(rawString);
+    if (isNaN(steamId_remark)) {
       return null;
     }
-    if (isNaN(Number(rawString))) {
-      return null;
-    }
-    return Number(rawString);
+
+    return steamId_remark;
   }
 }
