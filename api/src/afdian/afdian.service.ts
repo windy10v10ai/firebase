@@ -47,16 +47,7 @@ export class AfdianService {
       return existOrder;
     }
 
-    let success = true;
-    let orderType = OrderType.others;
-    // status = 2（交易成功） and product_type = 0（常规方案）and month > 0（订阅1个月以上）
-    if (orderDto.status !== 2) {
-      success = false;
-    }
     const steamId = this.getSteamIdFromAfdianOrderDto(orderDto);
-    if (!steamId) {
-      success = false;
-    }
 
     // 检测玩家是否存在
     // TODO: fix E2E测试
@@ -64,69 +55,91 @@ export class AfdianService {
     // if (!player) {
     //   success = false;
     // }
+    const activeResult = await this.activeAfidianOrder(orderDto, steamId);
 
-    switch (orderDto.product_type) {
-      case ProductType.member:
-        orderType = OrderType.member;
+    return await this.saveAfdianOrder(
+      orderDto,
+      activeResult.orderType,
+      steamId,
+      activeResult.success,
+    );
+  }
 
-        const month = orderDto.month;
-        if (month <= 0) {
-          success = false;
-        }
-        if (success) {
-          await this.membersService.addMember({ steamId, month });
-          await this.playerService.upsertAddPoint(steamId, {
-            memberPointTotal: AfdianService.MEMBER_MONTHLY_POINT * month,
-          });
-        }
-        break;
-
-      case ProductType.goods:
-        let planPoint = 0;
-        switch (orderDto.plan_id) {
-          case PlanId.tire1:
-            orderType = OrderType.goods1;
-            planPoint = PlanPoint.tire1;
-            break;
-          case PlanId.tire2:
-            orderType = OrderType.goods2;
-            planPoint = PlanPoint.tire2;
-            break;
-          case PlanId.tire3:
-            orderType = OrderType.goods3;
-            planPoint = PlanPoint.tire3;
-            break;
-          case PlanId.initialAttribute:
-            orderType = OrderType.initialAttribute;
-            planPoint = 0;
-            break;
-          default:
-            success = false;
-            break;
-        }
-        const goodsCount = Number(orderDto.sku_detail[0]?.count);
-        if (isNaN(goodsCount) || goodsCount < 0) {
-          success = false;
-        }
-        if (success) {
-          const addPoint = planPoint * goodsCount;
-          await this.playerService.upsertAddPoint(steamId, {
-            memberPointTotal: addPoint,
-          });
-        }
-        // 已废止
-        // 英雄属性初始化 Initialize Attribute
-        // if (orderType === OrderType.initialAttribute) {
-        //   await this.playerPropertyService.deleteBySteamId(steamId);
-        // }
-
-        break;
-
-      default:
-        success = false;
-        break;
+  private async activeAfidianOrder(
+    orderDto: OrderDto,
+    steamId: number,
+  ): Promise<{
+    success: boolean;
+    orderType: OrderType;
+  }> {
+    if (!steamId) {
+      return { success: false, orderType: OrderType.others };
+    }
+    // status = 2（交易成功）
+    if (orderDto.status !== 2) {
+      return { success: false, orderType: OrderType.others };
     }
 
+    if (ProductType.member == orderDto.product_type) {
+      const month = orderDto.month;
+      if (month <= 0) {
+        return { success: false, orderType: OrderType.member };
+      }
+
+      // 更新会员
+      await this.membersService.addMember({ steamId, month });
+      await this.playerService.upsertAddPoint(steamId, {
+        memberPointTotal: AfdianService.MEMBER_MONTHLY_POINT * month,
+      });
+      return { success: true, orderType: OrderType.member };
+    }
+
+    if (ProductType.goods == orderDto.product_type) {
+      let orderType = OrderType.others;
+      let planPoint = 0;
+      switch (orderDto.plan_id) {
+        case PlanId.tire1:
+          orderType = OrderType.goods1;
+          planPoint = PlanPoint.tire1;
+          break;
+        case PlanId.tire2:
+          orderType = OrderType.goods2;
+          planPoint = PlanPoint.tire2;
+          break;
+        case PlanId.tire3:
+          orderType = OrderType.goods3;
+          planPoint = PlanPoint.tire3;
+          break;
+        default:
+          break;
+      }
+
+      if (orderType === OrderType.others) {
+        return { success: false, orderType };
+      }
+
+      const goodsCount = Number(orderDto.sku_detail[0]?.count);
+      if (isNaN(goodsCount) || goodsCount < 0) {
+        return { success: false, orderType };
+      }
+
+      // 更新玩家积分
+      const addPoint = planPoint * goodsCount;
+      await this.playerService.upsertAddPoint(steamId, {
+        memberPointTotal: addPoint,
+      });
+      return { success: true, orderType };
+    }
+
+    return { success: false, orderType: OrderType.others };
+  }
+
+  private async saveAfdianOrder(
+    orderDto: OrderDto,
+    orderType: OrderType,
+    steamId: number,
+    success: boolean,
+  ) {
     const orderEntity = {
       platform: Platfrom.afdian,
       orderType,
@@ -136,7 +149,7 @@ export class AfdianService {
       orderDto: orderDto,
       outTradeNo: orderDto.out_trade_no,
     };
-    return this.orderRepository.create(orderEntity);
+    return await this.orderRepository.create(orderEntity);
   }
 
   private getSteamIdFromAfdianOrderDto(orderDto: OrderDto): number | null {
@@ -149,7 +162,6 @@ export class AfdianService {
     if (isNaN(steamId_remark)) {
       return null;
     }
-
     return steamId_remark;
   }
 }

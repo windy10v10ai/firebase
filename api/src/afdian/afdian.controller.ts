@@ -29,7 +29,7 @@ export class AfdianController {
       logger.error(`Afdian token error with: ${token}`);
       throw new UnauthorizedException();
     }
-    logger.info('Afdian webhook called with:', afdianWebhookDto);
+    logger.debug('Afdian webhook called with:', afdianWebhookDto);
     const order = afdianWebhookDto?.data?.order;
     if (!order) {
       throw new BadRequestException();
