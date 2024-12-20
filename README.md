@@ -75,7 +75,7 @@ npm run start
 Need Authenticate with gcloud
 
 ```bash
-# download data from storage (run only once)
+# download data from storage
 rm -rf firestore-backup
 mkdir firestore-backup
 gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20241220order/*" firestore-backup
