@@ -1,10 +1,5 @@
-import { Equals } from 'class-validator';
-
-export class AfdianWebhookDto {
-  @Equals(200)
-  ec: number;
-  data: DataDto;
-}
+import { ApiProperty } from '@nestjs/swagger';
+import { Equals, IsNotEmpty } from 'class-validator';
 
 export class DataDto {
   @Equals('order')
@@ -12,10 +7,20 @@ export class DataDto {
   order: OrderDto;
 }
 
+export class AfdianWebhookDto {
+  @Equals(200)
+  @ApiProperty()
+  ec: number;
+  @ApiProperty({ type: DataDto })
+  data: DataDto;
+}
+
 export class OrderDto {
+  @IsNotEmpty()
   out_trade_no: string;
   // 方案ID，如自选，则为空
   plan_id: string;
+  @IsNotEmpty()
   user_id: string;
   month: number;
   // 真实付款金额，如有兑换码，则为0.00

@@ -1,8 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
-import { PlayerService } from '../player/player.service';
-import { PlayerPropertyService } from '../player-property/player-property.service';
+import { AfdianService } from '../afdian/afdian.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
@@ -15,8 +14,7 @@ import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly playerService: PlayerService,
-    private readonly playerPropertyService: PlayerPropertyService,
+    private readonly afdianService: AfdianService,
   ) {}
 
   @Post('/member/afdian')
@@ -27,5 +25,15 @@ export class AdminController {
   @Post('/member/patreon')
   createPatreonMember(@Body() createPatreonMemberDto: CreatePatreonMemberDto) {
     return this.adminService.createPatreonMember(createPatreonMemberDto);
+  }
+
+  @Get('/afdian/check')
+  testAfdian() {
+    return this.afdianService.check();
+  }
+
+  @Get('/afdian/order/fail')
+  findFailed() {
+    return this.afdianService.findFailed();
   }
 }

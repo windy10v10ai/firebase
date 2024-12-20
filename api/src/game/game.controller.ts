@@ -31,7 +31,7 @@ import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
 
-@ApiTags('Game(Open)')
+@ApiTags('Game')
 @Controller('game')
 export class GameController {
   constructor(

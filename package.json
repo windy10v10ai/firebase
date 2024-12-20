@@ -13,9 +13,8 @@
     "start": "run-p start:*",
     "start:api": "cd api && npm run start:debug",
     "start:web": "cd web && npm run dev",
-    "start:firebase": "firebase emulators:start --only functions,hosting,firestore",
-    "firebase:with-data": "firebase emulators:start --only functions,hosting,firestore --import ./firestore-backup",
-    "postinstall": "(cd api && npm install) && (cd web && npm install)"
+    "start:firebase": "firebase emulators:start --only functions,hosting,firestore --import ./firestore-backup",
+    "postinstall": "(cd api && npm install) && (cd web && npm install) && mkdir firestore-backup"
   },
   "repository": {
     "type": "git",

@@ -14,7 +14,6 @@ import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
 import { MatchModule } from './match/match.module';
 import { MembersModule } from './members/members.module';
-import { OrdersModule } from './orders/orders.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
 import { PlayerCountModule } from './player-count/player-count.module';
@@ -42,7 +41,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
       },
     }),
     GameModule,
-    OrdersModule,
     AfdianModule,
     PatreonModule,
     PlayerCountModule,
