@@ -9,8 +9,8 @@ export class Order {
   platform: string;
   orderType: OrderType;
   success: boolean;
+  steamId: number;
   createdAt: Date;
   orderDto: OrderDto;
   outTradeNo: string;
-  steamId: number;
 }

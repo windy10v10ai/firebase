@@ -78,13 +78,7 @@ Need Authenticate with gcloud
 # download data from storage (run only once)
 rm -rf firestore-backup
 mkdir firestore-backup
-(cd firestore-backup && gsutil -m cp -r \
-  "gs://windy10v10ai.appspot.com/firestore-backup/20240529/20240529.overall_export_metadata" \
-  "gs://windy10v10ai.appspot.com/firestore-backup/20240529/all_namespaces" \
-  .)
-
-# start emulator with data
-npm run firebase:with-data
+gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20241220order/*" firestore-backup
 ```
 
 ### API only
