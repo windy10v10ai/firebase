@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -38,7 +39,7 @@ export class AfdianService {
     private readonly playerService: PlayerService,
   ) {}
 
-  async processAfdianOrder(orderDto: OrderDto) {
+  async processWebhookOrder(orderDto: OrderDto) {
     // 检测重复订单
     const existOrder = await this.orderRepository
       .whereEqualTo('outTradeNo', orderDto.out_trade_no)
@@ -158,10 +159,44 @@ export class AfdianService {
     if (!rawString) {
       return null;
     }
+    // FIXME: 临时处理 改成检测玩家是否存在
+    if (rawString.length > 12) {
+      return null;
+    }
     const steamId_remark = Number(rawString);
     if (isNaN(steamId_remark)) {
       return null;
     }
     return steamId_remark;
+  }
+
+  async check() {
+    const orders = await this.orderRepository.find();
+    const ordersNoOutTradeNo = orders.filter((order) => !order.outTradeNo);
+    const ordersNoOutTradeNoCount = ordersNoOutTradeNo.length;
+    const ordersNoSteamId = orders.filter((order) => !order.steamId);
+    const ordersNoSteamIdCount = ordersNoSteamId.length;
+    const ordersNotSuccess = orders.filter((order) => !order.success);
+
+    return {
+      ordersCount: orders.length,
+      ordersNoOutTradeNoCount,
+      ordersNoSteamIdCount,
+      ordersNotSuccessCount: ordersNotSuccess.length,
+    };
+  }
+
+  async setOutTradeNo() {
+    const orders = await this.orderRepository.find();
+    const ordersNoOutTradeNo = orders.filter((order) => !order.outTradeNo);
+
+    let count = ordersNoOutTradeNo.length;
+    logger.info(`ordersNoOutTradeNo Count: ${count}`);
+    for (const order of ordersNoOutTradeNo) {
+      order.outTradeNo = order.orderDto.out_trade_no;
+      await this.orderRepository.update(order);
+      count--;
+      logger.info(`ordersNoOutTradeNo Count: ${count}`);
+    }
   }
 }

@@ -11,5 +11,6 @@ import { AfdianService } from './afdian.service';
   imports: [MembersModule, OrdersModule, PlayerModule],
   controllers: [AfdianController],
   providers: [AfdianService],
+  exports: [AfdianService],
 })
 export class AfdianModule {}
