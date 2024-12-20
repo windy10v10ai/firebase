@@ -32,11 +32,6 @@ export class AdminController {
     return this.afdianService.check();
   }
 
-  @Post('/afdian/migration')
-  setOutTradeNo() {
-    return this.afdianService.migrationAfdianOrderUserId();
-  }
-
   @Get('/afdian/order/fail')
   findFailed() {
     return this.afdianService.findFailed();

@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { MembersService } from '../members/members.service';
-import { Order } from '../orders/entities/order.entity';
-import { OrderType } from '../orders/enums/order-type.enum';
 import { PlayerService } from '../player/player.service';
 
 import { OrderDto } from './dto/afdian-webhook.dto';
 import { AfdianOrder } from './entities/afdian-order.entity';
 import { AfdianUser } from './entities/afdian-user.entity';
+import { OrderType } from './enums/order-type.enum';
 
 enum ProductType {
   member = 0,
@@ -34,8 +32,6 @@ enum PlanPoint {
 export class AfdianService {
   private static MEMBER_MONTHLY_POINT = 300;
   constructor(
-    @InjectRepository(Order)
-    private readonly orderRepository: BaseFirestoreRepository<Order>,
     @InjectRepository(AfdianOrder)
     private readonly afdianOrderRepository: BaseFirestoreRepository<AfdianOrder>,
     @InjectRepository(AfdianUser)
@@ -197,34 +193,14 @@ export class AfdianService {
   }
 
   async check() {
-    const orders = await this.orderRepository.find();
-    const ordersNoUserId = orders.filter((order) => !order.userId);
-    const ordersNoUserIdCount = ordersNoUserId.length;
-
     const afdianOrders = await this.afdianOrderRepository.find();
     const afdianOrdersNoUserId = afdianOrders.filter((order) => !order.userId);
     const afdianOrdersNoUserIdCount = afdianOrdersNoUserId.length;
 
     return {
-      ordersCount: orders.length,
-      ordersNoUserIdCount,
       afdianOrdersCount: afdianOrders.length,
       afdianOrdersNoUserIdCount,
     };
-  }
-
-  async migrationAfdianOrderUserId() {
-    const orders = await this.orderRepository.find();
-
-    let count = orders.length;
-    logger.info(`ordersNoOutTradeNo Count: ${count}`);
-
-    for (const order of orders) {
-      order.userId = order.orderDto.user_id;
-      await this.afdianOrderRepository.create(order);
-      count--;
-      logger.info(`ordersNoOutTradeNo Count: ${count}`);
-    }
   }
 
   findFailed() {
