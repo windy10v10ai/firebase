@@ -32,9 +32,9 @@ export class AdminController {
     return this.afdianService.check();
   }
 
-  @Post('/afdian/set-outtradeno')
+  @Post('/afdian/migration')
   setOutTradeNo() {
-    return this.afdianService.setOutTradeNo();
+    return this.afdianService.migrationAfdianOrderUserId();
   }
 
   @Get('/afdian/order/fail')

@@ -6,10 +6,10 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { MembersService } from '../members/members.service';
 import { Order } from '../orders/entities/order.entity';
 import { OrderType } from '../orders/enums/order-type.enum';
-import { Platfrom } from '../orders/enums/platfrom.enum';
 import { PlayerService } from '../player/player.service';
 
 import { OrderDto } from './dto/afdian-webhook.dto';
+import { AfdianOrder } from './entities/afdian-order.entity';
 import { AfdianUser } from './entities/afdian-user.entity';
 
 enum ProductType {
@@ -36,6 +36,8 @@ export class AfdianService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: BaseFirestoreRepository<Order>,
+    @InjectRepository(AfdianOrder)
+    private readonly afdianOrderRepository: BaseFirestoreRepository<AfdianOrder>,
     @InjectRepository(AfdianUser)
     private readonly afdianUserRepository: BaseFirestoreRepository<AfdianUser>,
     private readonly membersService: MembersService,
@@ -44,7 +46,7 @@ export class AfdianService {
 
   async processWebhookOrder(orderDto: OrderDto) {
     // 检测重复订单
-    const existOrder = await this.orderRepository
+    const existOrder = await this.afdianOrderRepository
       .whereEqualTo('outTradeNo', orderDto.out_trade_no)
       .findOne();
     if (existOrder) {
@@ -62,7 +64,7 @@ export class AfdianService {
     const activeResult = await this.activeAfidianOrder(orderDto, steamId);
 
     // 保存订单记录（包括失败订单）
-    await this.saveOrder(orderDto, activeResult.orderType, steamId, activeResult.success);
+    await this.saveAfdianOrder(orderDto, activeResult.orderType, steamId, activeResult.success);
 
     if (activeResult.success) {
       // 保存玩家记录
@@ -141,14 +143,13 @@ export class AfdianService {
     return { success: false, orderType: OrderType.others };
   }
 
-  private async saveOrder(
+  private async saveAfdianOrder(
     orderDto: OrderDto,
     orderType: OrderType,
     steamId: number,
     success: boolean,
   ) {
     const orderEntity = {
-      platform: Platfrom.afdian,
       orderType,
       success,
       userId: orderDto.user_id,
@@ -157,7 +158,7 @@ export class AfdianService {
       orderDto: orderDto,
       outTradeNo: orderDto.out_trade_no,
     };
-    return await this.orderRepository.create(orderEntity);
+    return await this.afdianOrderRepository.create(orderEntity);
   }
 
   private async saveAfdianUser(userId: string, steamId: number) {
@@ -197,38 +198,36 @@ export class AfdianService {
 
   async check() {
     const orders = await this.orderRepository.find();
-    const ordersNoOutTradeNo = orders.filter((order) => !order.outTradeNo);
-    const ordersNoOutTradeNoCount = ordersNoOutTradeNo.length;
-    const ordersNoSteamId = orders.filter((order) => !order.steamId);
-    const ordersNoSteamIdCount = ordersNoSteamId.length;
-    const ordersNotSuccess = orders.filter((order) => !order.success);
+    const ordersNoUserId = orders.filter((order) => !order.userId);
+    const ordersNoUserIdCount = ordersNoUserId.length;
+
+    const afdianOrders = await this.afdianOrderRepository.find();
+    const afdianOrdersNoUserId = afdianOrders.filter((order) => !order.userId);
+    const afdianOrdersNoUserIdCount = afdianOrdersNoUserId.length;
 
     return {
       ordersCount: orders.length,
-      ordersNoOutTradeNoCount,
-      ordersNoSteamIdCount,
-      ordersNotSuccessCount: ordersNotSuccess.length,
+      ordersNoUserIdCount,
+      afdianOrdersCount: afdianOrders.length,
+      afdianOrdersNoUserIdCount,
     };
   }
 
-  async setOutTradeNo() {
+  async migrationAfdianOrderUserId() {
     const orders = await this.orderRepository.find();
-    const ordersNoOutTradeNo = orders.filter((order) => !order.outTradeNo);
 
-    let count = ordersNoOutTradeNo.length;
+    let count = orders.length;
     logger.info(`ordersNoOutTradeNo Count: ${count}`);
-    for (const order of ordersNoOutTradeNo) {
-      order.outTradeNo = order.orderDto.out_trade_no;
-      await this.orderRepository.update(order);
+
+    for (const order of orders) {
+      order.userId = order.orderDto.user_id;
+      await this.afdianOrderRepository.create(order);
       count--;
       logger.info(`ordersNoOutTradeNo Count: ${count}`);
     }
   }
 
   findFailed() {
-    return this.orderRepository
-      .whereEqualTo('success', false)
-      .orderByDescending('createdAt')
-      .find();
+    return this.afdianOrderRepository.whereEqualTo('success', false).find();
   }
 }
