@@ -10,19 +10,4 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly orderRepository: BaseFirestoreRepository<Order>,
   ) {}
-
-  findAll() {
-    return this.orderRepository.orderByDescending('createdAt').find();
-  }
-
-  findFailed() {
-    return this.orderRepository
-      .whereEqualTo('success', false)
-      .orderByDescending('createdAt')
-      .find();
-  }
-
-  create(order: Order) {
-    return this.orderRepository.create(order);
-  }
 }

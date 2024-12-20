@@ -9,6 +9,7 @@ export class Order {
   platform: string;
   orderType: OrderType;
   success: boolean;
+  userId: string;
   steamId: number;
   createdAt: Date;
   orderDto: OrderDto;

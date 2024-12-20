@@ -10,6 +10,7 @@ import { Platfrom } from '../orders/enums/platfrom.enum';
 import { PlayerService } from '../player/player.service';
 
 import { OrderDto } from './dto/afdian-webhook.dto';
+import { AfdianUser } from './entities/afdian-user.entity';
 
 enum ProductType {
   member = 0,
@@ -35,6 +36,8 @@ export class AfdianService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: BaseFirestoreRepository<Order>,
+    @InjectRepository(AfdianUser)
+    private readonly afdianUserRepository: BaseFirestoreRepository<AfdianUser>,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
   ) {}
@@ -58,12 +61,15 @@ export class AfdianService {
     // }
     const activeResult = await this.activeAfidianOrder(orderDto, steamId);
 
-    return await this.saveAfdianOrder(
-      orderDto,
-      activeResult.orderType,
-      steamId,
-      activeResult.success,
-    );
+    // 保存订单记录（包括失败订单）
+    await this.saveOrder(orderDto, activeResult.orderType, steamId, activeResult.success);
+
+    if (activeResult.success) {
+      // 保存玩家记录
+      await this.saveAfdianUser(orderDto.user_id, steamId);
+    }
+
+    return activeResult;
   }
 
   private async activeAfidianOrder(
@@ -135,7 +141,7 @@ export class AfdianService {
     return { success: false, orderType: OrderType.others };
   }
 
-  private async saveAfdianOrder(
+  private async saveOrder(
     orderDto: OrderDto,
     orderType: OrderType,
     steamId: number,
@@ -145,12 +151,31 @@ export class AfdianService {
       platform: Platfrom.afdian,
       orderType,
       success,
+      userId: orderDto.user_id,
       steamId,
       createdAt: new Date(),
       orderDto: orderDto,
       outTradeNo: orderDto.out_trade_no,
     };
     return await this.orderRepository.create(orderEntity);
+  }
+
+  private async saveAfdianUser(userId: string, steamId: number) {
+    const existAfdianUser = await this.afdianUserRepository.findById(`${userId}`);
+    if (existAfdianUser) {
+      if (existAfdianUser.steamId !== steamId) {
+        existAfdianUser.steamId = steamId;
+        await this.afdianUserRepository.update(existAfdianUser);
+      }
+      return existAfdianUser;
+    }
+
+    const afdianUser = {
+      id: `${userId}`,
+      userId,
+      steamId,
+    };
+    return await this.afdianUserRepository.create(afdianUser);
   }
 
   private getSteamIdFromAfdianOrderDto(orderDto: OrderDto): number | null {
@@ -198,5 +223,12 @@ export class AfdianService {
       count--;
       logger.info(`ordersNoOutTradeNo Count: ${count}`);
     }
+  }
+
+  findFailed() {
+    return this.orderRepository
+      .whereEqualTo('success', false)
+      .orderByDescending('createdAt')
+      .find();
   }
 }

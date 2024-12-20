@@ -20,6 +20,7 @@ export class OrderDto {
   out_trade_no: string;
   // 方案ID，如自选，则为空
   plan_id: string;
+  @IsNotEmpty()
   user_id: string;
   month: number;
   // 真实付款金额，如有兑换码，则为0.00

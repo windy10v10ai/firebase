@@ -36,4 +36,9 @@ export class AdminController {
   setOutTradeNo() {
     return this.afdianService.setOutTradeNo();
   }
+
+  @Get('/afdian/order/fail')
+  findFailed() {
+    return this.afdianService.findFailed();
+  }
 }
