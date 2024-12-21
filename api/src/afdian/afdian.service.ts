@@ -272,10 +272,12 @@ export class AfdianService {
     }
   }
 
-  findFailed() {
-    return this.afdianOrderRepository
-      .whereEqualTo('success', false)
-      .orderByAscending('createdAt')
-      .find();
+  async findFailed() {
+    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
+    // order by createdAt desc
+    orders.sort((a, b) => {
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+    return orders;
   }
 }
