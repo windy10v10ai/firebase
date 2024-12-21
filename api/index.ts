@@ -4,6 +4,7 @@ import express from 'express';
 import * as functions from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
+import { onSchedule } from 'firebase-functions/scheduler';
 
 import { AppModule } from './src/app.module';
 import { SECRET } from './src/util/secret/secret.service';
@@ -24,6 +25,7 @@ const clientSecrets = [
   defineSecret(SECRET.SERVER_APIKEY),
   defineSecret(SECRET.SERVER_APIKEY_TEST),
   defineSecret(SECRET.AFDIAN_TOKEN),
+  defineSecret(SECRET.AFDIAN_API_TOKEN),
   defineSecret(SECRET.GA4_API_SECRET),
 ];
 
@@ -76,10 +78,28 @@ export const admin = onRequest(
     minInstances: 0,
     maxInstances: 1,
     timeoutSeconds: 1800,
+    secrets: [defineSecret(SECRET.AFDIAN_API_TOKEN)],
   },
   async (req, res) => {
     await promiseApplicationReady;
     server(req, res);
+  },
+);
+
+export const scheduledFunction = onSchedule(
+  {
+    schedule: '0 * * * *',
+    region: 'asia-northeast1',
+  },
+  async () => {
+    try {
+      const response = await fetch(
+        'https://asia-northeast1-windy10v10ai.cloudfunctions.net/admin/api/admin/test',
+      );
+      functions.logger.info('Scheduled function called successfully', response);
+    } catch (error) {
+      functions.logger.error('Error calling scheduled function', error);
+    }
   },
 );
 

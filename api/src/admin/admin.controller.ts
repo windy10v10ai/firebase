@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { logger } from 'firebase-functions/v2';
 
+import { AfdianApiService } from '../afdian/afdian.api.service';
 import { AfdianService } from '../afdian/afdian.service';
 import { Public } from '../util/auth/public.decorator';
 
@@ -15,6 +17,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly afdianService: AfdianService,
+    private readonly afdianApiService: AfdianApiService,
   ) {}
 
   @Post('/member/afdian')
@@ -40,5 +43,15 @@ export class AdminController {
   @Get('/afdian/order/fail')
   findFailed() {
     return this.afdianService.findFailed();
+  }
+
+  @Get('/afdian/order/fetch/all')
+  afdianOrderFetch() {
+    return this.afdianApiService.fetchAllAfdianOrder();
+  }
+
+  @Get('/test')
+  test() {
+    logger.info('test called');
   }
 }
