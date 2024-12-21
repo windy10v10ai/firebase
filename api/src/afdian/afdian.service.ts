@@ -67,7 +67,7 @@ export class AfdianService {
       // 保存玩家记录
       await this.saveAfdianUser(orderDto.user_id, steamId);
       // 发送事件
-      await this.analyticsPurchaseService.purchase(steamId, afdianOrder);
+      await this.analyticsPurchaseService.purchase(afdianOrder);
     }
 
     return activeResult;
