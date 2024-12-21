@@ -197,15 +197,8 @@ export class AfdianService {
     if (!rawString) {
       return null;
     }
-
-    // 检测玩家是否存在
-    // TODO: fix E2E测试
-    // const player = await this.playerService.findBySteamId(steamId);
-    // if (!player) {
-    //   success = false;
-    // }
-    // FIXME: 临时处理 改成检测玩家是否存在
-    if (rawString.length > 12) {
+    // steamID通常应该在10位以内
+    if (rawString.length > 10) {
       return null;
     }
     const steamId_remark = Number(rawString);
