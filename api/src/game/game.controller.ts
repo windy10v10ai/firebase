@@ -144,9 +144,8 @@ export class GameController {
 
   @Post('resetPlayerProperty')
   async resetPlayerProperty(@Body() gameResetPlayerProperty: GameResetPlayerProperty) {
-    logger.debug(`[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`);
-
     await this.gameService.resetPlayerProperty(gameResetPlayerProperty);
+    await this.analyticsService.playerResetProperty(gameResetPlayerProperty);
 
     return await this.gameService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
   }
