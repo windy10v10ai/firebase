@@ -3,17 +3,29 @@ import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
+import { OrderDto } from './dto/afdian-webhook.dto';
+
+interface AfdianQueryOrderResponse {
+  ec: number;
+  em: string;
+  data: {
+    list: OrderDto[];
+    total_count: number;
+    total_page: number;
+  };
+}
+
 @Injectable()
 export class AfdianApiService {
   constructor() {}
 
-  async fetchAfdianOrderOutTradeNo(outTradeNo: string) {
+  async fetchAfdianOrderByOutTradeNo(outTradeNo: string) {
     const params = { out_trade_no: outTradeNo };
     const response = await this.callAfdianOrderAPI(params);
-    return response;
+    return response.data.list[0];
   }
 
-  private async callAfdianOrderAPI(params: object) {
+  private async callAfdianOrderAPI(params: object): Promise<AfdianQueryOrderResponse> {
     const token = process.env.AFDIAN_API_TOKEN;
     const userId = process.env.AFDIAN_USER_ID;
     const paramsString = JSON.stringify(params);

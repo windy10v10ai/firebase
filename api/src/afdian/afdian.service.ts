@@ -72,8 +72,7 @@ export class AfdianService {
       return isActiveSuccess;
     }
 
-    // TODO 本地测试
-    const orderDto = await this.afdianApiService.fetchAfdianOrderOutTradeNo(outTradeNo);
+    const orderDto = await this.afdianApiService.fetchAfdianOrderByOutTradeNo(outTradeNo);
     if (!orderDto) {
       return false;
     }
