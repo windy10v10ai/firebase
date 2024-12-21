@@ -197,9 +197,12 @@ export class AfdianService {
     const afdianOrdersNoUserId = afdianOrders.filter((order) => !order.userId);
     const afdianOrdersNoUserIdCount = afdianOrdersNoUserId.length;
 
+    const afdianUsers = await this.afdianUserRepository.find();
+
     return {
       afdianOrdersCount: afdianOrders.length,
       afdianOrdersNoUserIdCount,
+      afdianUsersCount: afdianUsers.length,
     };
   }
 
