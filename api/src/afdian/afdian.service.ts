@@ -246,10 +246,12 @@ export class AfdianService {
   async check() {
     const afdianOrders = await this.afdianOrderRepository.find();
     const afdianUsers = await this.afdianUserRepository.find();
+    const failedOrders = await this.findFailed();
 
     return {
       afdianOrdersCount: afdianOrders.length,
       afdianUsersCount: afdianUsers.length,
+      failedOrdersCount: failedOrders.length,
     };
   }
 
@@ -271,6 +273,9 @@ export class AfdianService {
   }
 
   findFailed() {
-    return this.afdianOrderRepository.whereEqualTo('success', false).find();
+    return this.afdianOrderRepository
+      .whereEqualTo('success', false)
+      .orderByAscending('createdAt')
+      .find();
   }
 }
