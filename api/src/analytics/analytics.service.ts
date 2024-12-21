@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from 'firebase-functions';
 
 import { GameEndDto } from '../game/dto/game-end.request.body';
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
@@ -49,10 +48,8 @@ export class AnalyticsService {
     for (const player of gameEnd.players) {
       if (player.steamId === 0) {
         // 暂且不统计电脑数据
-        logger.debug('skip computer player', player);
         continue;
       }
-      logger.debug('send game_end event for player', player);
       const event = await this.buildEvent(
         'player_game_end',
         player.steamId,

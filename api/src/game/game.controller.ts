@@ -152,8 +152,6 @@ export class GameController {
 
   @Get('player/steamId/:steamId')
   async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
-    logger.debug(`[Get Player Info] ${steamId}`);
-
     return await this.gameService.findPlayerDtoBySteamId(steamId);
   }
 }
