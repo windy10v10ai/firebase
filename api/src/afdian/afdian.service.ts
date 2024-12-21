@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
@@ -38,6 +39,7 @@ export class AfdianService {
     private readonly afdianUserRepository: BaseFirestoreRepository<AfdianUser>,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
+    private readonly analyticsPurchaseService: AnalyticsPurchaseService,
   ) {}
 
   async processWebhookOrder(orderDto: OrderDto) {
@@ -54,11 +56,18 @@ export class AfdianService {
     const activeResult = await this.activeAfidianOrder(orderDto, steamId);
 
     // 保存订单记录（包括失败订单）
-    await this.saveAfdianOrder(orderDto, activeResult.orderType, steamId, activeResult.success);
+    const afdianOrder = await this.saveAfdianOrder(
+      orderDto,
+      activeResult.orderType,
+      steamId,
+      activeResult.success,
+    );
 
     if (activeResult.success) {
       // 保存玩家记录
       await this.saveAfdianUser(orderDto.user_id, steamId);
+      // 发送事件
+      await this.analyticsPurchaseService.purchase(steamId, afdianOrder);
     }
 
     return activeResult;
