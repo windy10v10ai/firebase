@@ -59,16 +59,6 @@ export class MembersService {
     }
   }
 
-  async remove(steamId: number): Promise<string> {
-    const member = await this.findOne(steamId);
-    if (member) {
-      await this.membersRepository.delete(member.id);
-      return 'success';
-    } else {
-      throw new NotFoundException();
-    }
-  }
-
   // TODO move to test module
   async initTestData() {
     const members: MemberOld[] = [];

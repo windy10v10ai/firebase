@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
@@ -38,6 +39,7 @@ export class AfdianService {
     private readonly afdianUserRepository: BaseFirestoreRepository<AfdianUser>,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
+    private readonly analyticsPurchaseService: AnalyticsPurchaseService,
   ) {}
 
   async processWebhookOrder(orderDto: OrderDto) {
@@ -49,22 +51,23 @@ export class AfdianService {
       return existOrder;
     }
 
-    const steamId = this.getSteamIdFromAfdianOrderDto(orderDto);
+    const steamId = await this.getSteamId(orderDto);
 
-    // 检测玩家是否存在
-    // TODO: fix E2E测试
-    // const player = await this.playerService.findBySteamId(steamId);
-    // if (!player) {
-    //   success = false;
-    // }
     const activeResult = await this.activeAfidianOrder(orderDto, steamId);
 
     // 保存订单记录（包括失败订单）
-    await this.saveAfdianOrder(orderDto, activeResult.orderType, steamId, activeResult.success);
+    const afdianOrder = await this.saveAfdianOrder(
+      orderDto,
+      activeResult.orderType,
+      steamId,
+      activeResult.success,
+    );
 
     if (activeResult.success) {
       // 保存玩家记录
       await this.saveAfdianUser(orderDto.user_id, steamId);
+      // 发送事件
+      await this.analyticsPurchaseService.purchase(afdianOrder);
     }
 
     return activeResult;
@@ -158,7 +161,7 @@ export class AfdianService {
   }
 
   private async saveAfdianUser(userId: string, steamId: number) {
-    const existAfdianUser = await this.afdianUserRepository.findById(`${userId}`);
+    const existAfdianUser = await this.afdianUserRepository.findById(userId);
     if (existAfdianUser) {
       if (existAfdianUser.steamId !== steamId) {
         existAfdianUser.steamId = steamId;
@@ -168,11 +171,24 @@ export class AfdianService {
     }
 
     const afdianUser = {
-      id: `${userId}`,
+      id: userId,
       userId,
       steamId,
     };
     return await this.afdianUserRepository.create(afdianUser);
+  }
+
+  private async getSteamId(orderDto: OrderDto): Promise<number> {
+    const steamId = this.getSteamIdFromAfdianOrderDto(orderDto);
+
+    if (!steamId) {
+      const afdianUser = await this.afdianUserRepository.findById(orderDto.user_id);
+      if (afdianUser) {
+        return afdianUser.steamId;
+      }
+    }
+
+    return steamId;
   }
 
   private getSteamIdFromAfdianOrderDto(orderDto: OrderDto): number | null {
@@ -181,6 +197,13 @@ export class AfdianService {
     if (!rawString) {
       return null;
     }
+
+    // 检测玩家是否存在
+    // TODO: fix E2E测试
+    // const player = await this.playerService.findBySteamId(steamId);
+    // if (!player) {
+    //   success = false;
+    // }
     // FIXME: 临时处理 改成检测玩家是否存在
     if (rawString.length > 12) {
       return null;
@@ -194,13 +217,29 @@ export class AfdianService {
 
   async check() {
     const afdianOrders = await this.afdianOrderRepository.find();
-    const afdianOrdersNoUserId = afdianOrders.filter((order) => !order.userId);
-    const afdianOrdersNoUserIdCount = afdianOrdersNoUserId.length;
+    const afdianUsers = await this.afdianUserRepository.find();
 
     return {
       afdianOrdersCount: afdianOrders.length,
-      afdianOrdersNoUserIdCount,
+      afdianUsersCount: afdianUsers.length,
     };
+  }
+
+  async migration() {
+    const afdianOrders = await this.afdianOrderRepository.orderByAscending('createdAt').find();
+    // map userId to steamId
+    const userIdToSteamId = new Map<string, number>();
+    for (const order of afdianOrders) {
+      const userId = order.userId;
+      const steamId = order.steamId;
+      if (userId && steamId) {
+        userIdToSteamId.set(userId, steamId);
+      }
+    }
+
+    for (const [userId, steamId] of userIdToSteamId) {
+      await this.saveAfdianUser(userId, steamId);
+    }
   }
 
   findFailed() {

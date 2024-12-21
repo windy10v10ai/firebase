@@ -28,8 +28,13 @@ export class AdminController {
   }
 
   @Get('/afdian/check')
-  testAfdian() {
+  afdianCheck() {
     return this.afdianService.check();
+  }
+
+  @Post('/afdian/migration')
+  afdianMigration() {
+    return this.afdianService.migration();
   }
 
   @Get('/afdian/order/fail')
