@@ -144,17 +144,14 @@ export class GameController {
 
   @Post('resetPlayerProperty')
   async resetPlayerProperty(@Body() gameResetPlayerProperty: GameResetPlayerProperty) {
-    logger.debug(`[Reset Player Property] ${JSON.stringify(gameResetPlayerProperty)}`);
-
     await this.gameService.resetPlayerProperty(gameResetPlayerProperty);
+    await this.analyticsService.playerResetProperty(gameResetPlayerProperty);
 
     return await this.gameService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
   }
 
   @Get('player/steamId/:steamId')
   async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
-    logger.debug(`[Get Player Info] ${steamId}`);
-
     return await this.gameService.findPlayerDtoBySteamId(steamId);
   }
 }

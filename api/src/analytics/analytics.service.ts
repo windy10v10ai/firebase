@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from 'firebase-functions';
 
 import { GameEndDto } from '../game/dto/game-end.request.body';
+import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { getHeroId } from './data/hero-data';
@@ -12,7 +12,7 @@ interface Event {
   name: string;
   params: {
     [key: string]: number | string | boolean;
-    session_id: number | string;
+    session_id?: number | string;
     session_number?: number;
     engagement_time_msec?: number | string;
     debug_mode?: boolean;
@@ -48,10 +48,8 @@ export class AnalyticsService {
     for (const player of gameEnd.players) {
       if (player.steamId === 0) {
         // 暂且不统计电脑数据
-        logger.debug('skip computer player', player);
         continue;
       }
-      logger.debug('send game_end event for player', player);
       const event = await this.buildEvent(
         'player_game_end',
         player.steamId,
@@ -73,6 +71,16 @@ export class AnalyticsService {
 
       await this.sendEvent(player.steamId.toString(), event);
     }
+  }
+
+  async playerResetProperty(dto: GameResetPlayerProperty): Promise<void> {
+    await this.sendEvent(dto.steamId.toString(), {
+      name: 'player_reset_property',
+      params: {
+        steam_id: dto.steamId,
+        use_member_point: dto.useMemberPoint,
+      },
+    });
   }
 
   async lotteryPickAbility(pickDto: PickDto) {
