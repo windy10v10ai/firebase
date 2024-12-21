@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { CreateMemberDto } from './dto/create-member.dto';
@@ -22,13 +22,5 @@ export class MembersController {
     steamId: number,
   ) {
     return this.membersService.find(steamId);
-  }
-
-  @Delete(':id')
-  remove(
-    @Param('id', new ParseIntPipe())
-    steamId: number,
-  ) {
-    return this.membersService.remove(steamId);
   }
 }

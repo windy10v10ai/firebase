@@ -4,11 +4,12 @@ import { GameEndDto } from '../game/dto/game-end.request.body';
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
+import { PurchaseEvent } from './analytics.purchase.service';
 import { getHeroId } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
 import { PickDto } from './dto/pick-ability-dto';
 
-interface Event {
+export interface Event {
   name: string;
   params: {
     [key: string]: number | string | boolean;
@@ -182,7 +183,7 @@ export class AnalyticsService {
     return event;
   }
 
-  async sendEvent(userId: string, event: Event, userProperties?: UserProperties) {
+  async sendEvent(userId: string, event: Event | PurchaseEvent, userProperties?: UserProperties) {
     const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
 
     const payload = {
