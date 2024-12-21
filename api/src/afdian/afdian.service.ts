@@ -203,6 +203,23 @@ export class AfdianService {
     };
   }
 
+  async migration() {
+    const afdianOrders = await this.afdianOrderRepository.orderByAscending('createdAt').find();
+    // map userId to steamId
+    const userIdToSteamId = new Map<string, number>();
+    for (const order of afdianOrders) {
+      const userId = order.userId;
+      const steamId = order.steamId;
+      if (userId && steamId) {
+        userIdToSteamId.set(userId, steamId);
+      }
+    }
+
+    for (const [userId, steamId] of userIdToSteamId) {
+      await this.saveAfdianUser(userId, steamId);
+    }
+  }
+
   findFailed() {
     return this.afdianOrderRepository.whereEqualTo('success', false).find();
   }

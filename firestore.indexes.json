@@ -1,19 +1,4 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "Orders",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "success",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": []
 }
