@@ -35,19 +35,19 @@ export class AdminController {
     return this.afdianService.check();
   }
 
-  @Post('/afdian/migration')
-  afdianMigration() {
-    return this.afdianService.migration();
-  }
-
   @Get('/afdian/order/fail')
   findFailed() {
     return this.afdianService.findFailed();
   }
 
-  @Get('/afdian/order/fetch/all')
-  afdianOrderFetch() {
-    return this.afdianApiService.fetchAllAfdianOrder();
+  @Post('/afdian/order/ative')
+  activeOrder(@Body('outTradeNo') outTradeNo: string, @Body('steamId') steamId: string) {
+    return this.afdianService.activeOrderManual(outTradeNo, +steamId);
+  }
+
+  @Post('/afdian/order/set-success')
+  setOrderSuccess(@Body('outTradeNo') outTradeNo: string, @Body('steamId') steamId: string) {
+    return this.afdianService.setOrderSuccess(outTradeNo, +steamId);
   }
 
   @Get('/test')

@@ -3,44 +3,14 @@ import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
-import { AfdianService } from './afdian.service';
-import { OrderDto } from './dto/afdian-webhook.dto';
-
 @Injectable()
 export class AfdianApiService {
-  constructor(private readonly afdianService: AfdianService) {}
+  constructor() {}
 
-  async fetchAllAfdianOrder() {
-    let page = 1;
-    let totalPage = 1;
-    while (page <= totalPage) {
-      totalPage = await this.fetchAfdianOrder(page);
-      page++;
-    }
-  }
-
-  async fetchAfdianOrder(page: number) {
-    const params = { page, per_page: 100 };
+  async fetchAfdianOrderOutTradeNo(outTradeNo: string) {
+    const params = { out_trade_no: outTradeNo };
     const response = await this.callAfdianOrderAPI(params);
-
-    const data = response.data;
-    const list = data.list as OrderDto[];
-    const totalCount = data.total_count;
-    const totalPage = data.total_page;
-
-    logger.info(
-      `Afdian order fetch: page=${page}, total=${totalCount}, totalPage=${totalPage}, list=${list.length}`,
-    );
-
-    // record order if not exist
-    for (const order of list) {
-      const result = await this.afdianService.recordAfdianOrderIfNotExist(order);
-      if (result) {
-        logger.info(`Afdian order recorded: ${order.out_trade_no}`);
-      }
-    }
-
-    return totalPage;
+    return response;
   }
 
   private async callAfdianOrderAPI(params: object) {

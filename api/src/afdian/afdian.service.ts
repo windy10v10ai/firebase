@@ -6,6 +6,7 @@ import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.servic
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
+import { AfdianApiService } from './afdian.api.service';
 import { OrderDto } from './dto/afdian-webhook.dto';
 import { AfdianOrder } from './entities/afdian-order.entity';
 import { AfdianUser } from './entities/afdian-user.entity';
@@ -31,8 +32,10 @@ enum PlanPoint {
 
 @Injectable()
 export class AfdianService {
-  private static MEMBER_MONTHLY_POINT = 300;
+  private readonly MEMBER_MONTHLY_POINT = 300;
+  private readonly OUT_TRADE_NO_BASE = '202410010000000000000000000';
   constructor(
+    private readonly afdianApiService: AfdianApiService,
     @InjectRepository(AfdianOrder)
     private readonly afdianOrderRepository: BaseFirestoreRepository<AfdianOrder>,
     @InjectRepository(AfdianUser)
@@ -42,23 +45,39 @@ export class AfdianService {
     private readonly analyticsPurchaseService: AnalyticsPurchaseService,
   ) {}
 
-  async recordAfdianOrderIfNotExist(orderDto: OrderDto) {
+  // 手动激活订单 通过订单号
+  async activeOrderManual(outTradeNo: string, steamId: number) {
     const existOrder = await this.afdianOrderRepository
-      .whereEqualTo('outTradeNo', orderDto.out_trade_no)
+      .whereEqualTo('outTradeNo', outTradeNo)
       .findOne();
     if (existOrder) {
-      return false;
+      if (existOrder.success) {
+        return true;
+      }
+      const orderDto = existOrder.orderDto;
+      const orderType = this.getOrderType(orderDto);
+      const isActiveSuccess = await this.activeAfidianOrder(orderDto, orderType, steamId);
+
+      existOrder.success = isActiveSuccess;
+      existOrder.steamId = steamId;
+      await this.afdianOrderRepository.update(existOrder);
+
+      if (isActiveSuccess) {
+        // 保存玩家记录
+        await this.saveAfdianUser(orderDto.user_id, steamId);
+        // 发送事件
+        await this.analyticsPurchaseService.purchase(existOrder);
+      }
+
+      return isActiveSuccess;
     }
 
-    const steamId = await this.getSteamId(orderDto);
-    const orderType = this.getOrderType(orderDto);
-
-    // const isActiveSuccess = await this.activeAfidianOrder(orderDto, orderType, steamId);
-
-    // 保存订单记录（包括失败订单）
-    const afdianOrder = await this.saveAfdianOrder(orderDto, orderType, steamId, false);
-
-    return true;
+    // TODO 本地测试
+    const orderDto = await this.afdianApiService.fetchAfdianOrderOutTradeNo(outTradeNo);
+    if (!orderDto) {
+      return false;
+    }
+    return this.activeOrder(orderDto, steamId);
   }
 
   async setOrderSuccess(outTradeNo: string, steamId?: number) {
@@ -75,7 +94,7 @@ export class AfdianService {
     return true;
   }
 
-  async processWebhookOrder(orderDto: OrderDto) {
+  async activeOrderWebhook(orderDto: OrderDto) {
     // 检测重复订单
     const existOrder = await this.afdianOrderRepository
       .whereEqualTo('outTradeNo', orderDto.out_trade_no)
@@ -85,6 +104,11 @@ export class AfdianService {
     }
 
     const steamId = await this.getSteamId(orderDto);
+
+    return await this.activeOrder(orderDto, steamId);
+  }
+
+  async activeOrder(orderDto: OrderDto, steamId: number) {
     const orderType = this.getOrderType(orderDto);
 
     const isActiveSuccess = await this.activeAfidianOrder(orderDto, orderType, steamId);
@@ -147,7 +171,7 @@ export class AfdianService {
       }
       await this.membersService.addMember({ steamId, month });
       await this.playerService.upsertAddPoint(steamId, {
-        memberPointTotal: AfdianService.MEMBER_MONTHLY_POINT * month,
+        memberPointTotal: this.MEMBER_MONTHLY_POINT * month,
       });
       return true;
     }
@@ -255,29 +279,14 @@ export class AfdianService {
     };
   }
 
-  async migration() {
-    const afdianOrders = await this.afdianOrderRepository.orderByAscending('createdAt').find();
-    // map userId to steamId
-    const userIdToSteamId = new Map<string, number>();
-    for (const order of afdianOrders) {
-      const userId = order.userId;
-      const steamId = order.steamId;
-      if (userId && steamId) {
-        userIdToSteamId.set(userId, steamId);
-      }
-    }
-
-    for (const [userId, steamId] of userIdToSteamId) {
-      await this.saveAfdianUser(userId, steamId);
-    }
-  }
-
   async findFailed() {
     const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
-    // order by createdAt desc
+    // order by outTradeNo desc
     orders.sort((a, b) => {
-      return b.createdAt.getTime() - a.createdAt.getTime();
+      return b.outTradeNo.localeCompare(a.outTradeNo);
     });
-    return orders;
+    return orders.filter((order) => {
+      return order.outTradeNo > this.OUT_TRADE_NO_BASE;
+    });
   }
 }
