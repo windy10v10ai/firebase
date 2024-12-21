@@ -246,7 +246,7 @@ export class AfdianService {
   async check() {
     const afdianOrders = await this.afdianOrderRepository.find();
     const afdianUsers = await this.afdianUserRepository.find();
-    const failedOrders = await this.findFailed();
+    const failedOrders = afdianOrders.filter((order) => !order.success);
 
     return {
       afdianOrdersCount: afdianOrders.length,
