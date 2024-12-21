@@ -2,11 +2,11 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions/v2';
 
-import { AfdianApiService } from '../afdian/afdian.api.service';
 import { AfdianService } from '../afdian/afdian.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
+import { ActiveAfdianOrderDto } from './dto/active-afdian-order.dto';
 import { CreateAfdianMemberDto } from './dto/create-afdian-member.dto';
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
@@ -17,7 +17,6 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly afdianService: AfdianService,
-    private readonly afdianApiService: AfdianApiService,
   ) {}
 
   @Post('/member/afdian')
@@ -41,13 +40,13 @@ export class AdminController {
   }
 
   @Post('/afdian/order/ative')
-  activeOrder(@Body('outTradeNo') outTradeNo: string, @Body('steamId') steamId: string) {
-    return this.afdianService.activeOrderManual(outTradeNo, +steamId);
+  activeOrder(@Body() dto: ActiveAfdianOrderDto) {
+    return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
   }
 
   @Post('/afdian/order/set-success')
-  setOrderSuccess(@Body('outTradeNo') outTradeNo: string, @Body('steamId') steamId: string) {
-    return this.afdianService.setOrderSuccess(outTradeNo, +steamId);
+  setOrderSuccess(@Body() dto: ActiveAfdianOrderDto) {
+    return this.afdianService.setOrderSuccess(dto.outTradeNo, dto.steamId);
   }
 
   @Get('/test')
