@@ -32,7 +32,7 @@ export class AdminController {
     return this.afdianService.check();
   }
 
-  @Get('/afdian/migration')
+  @Post('/afdian/migration')
   afdianMigration() {
     return this.afdianService.migration();
   }
