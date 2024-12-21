@@ -92,14 +92,8 @@ export const scheduledFunction = onSchedule(
     region: 'asia-northeast1',
   },
   async () => {
-    try {
-      const response = await fetch(
-        'https://asia-northeast1-windy10v10ai.cloudfunctions.net/admin/api/admin/test',
-      );
-      functions.logger.info('Scheduled function called successfully', response);
-    } catch (error) {
-      functions.logger.error('Error calling scheduled function', error);
-    }
+    await promiseApplicationReady;
+    server({ path: '/api/admin/test' } as any, { status: () => {} } as any);
   },
 );
 
