@@ -35,8 +35,14 @@ export class GameEndPlayerDto {
   deaths: number;
   @ApiProperty()
   assists: number;
+  // FIXME 用score替代 删除
   @ApiProperty()
   points: number;
+
+  @ApiProperty()
+  score: number;
+  @ApiProperty()
+  battlePoints: number;
 }
 
 export class GameEndDto extends EventBaseDto {

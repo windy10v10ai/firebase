@@ -20,6 +20,7 @@ export class AnalyticsController {
     await this.analyticsService.lotteryPickItem(body);
   }
 
+  // TODO remove after v4.05
   @Post('/game/end')
   async gameEnd(@Body() body: GameEndDto) {
     await this.analyticsService.gameEndMatch(body);
