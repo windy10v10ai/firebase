@@ -5,6 +5,7 @@ import { AfdianService } from '../afdian/afdian.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
+import { ActiveAfdianOrderDto } from './dto/active-afdian-order.dto';
 import { CreateAfdianMemberDto } from './dto/create-afdian-member.dto';
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
@@ -32,13 +33,18 @@ export class AdminController {
     return this.afdianService.check();
   }
 
-  @Post('/afdian/migration')
-  afdianMigration() {
-    return this.afdianService.migration();
-  }
-
   @Get('/afdian/order/fail')
   findFailed() {
     return this.afdianService.findFailed();
+  }
+
+  @Post('/afdian/order/ative')
+  activeOrder(@Body() dto: ActiveAfdianOrderDto) {
+    return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
+  }
+
+  @Post('/afdian/order/set-success')
+  setOrderSuccess(@Body() dto: ActiveAfdianOrderDto) {
+    return this.afdianService.setOrderSuccess(dto.outTradeNo, dto.steamId);
   }
 }

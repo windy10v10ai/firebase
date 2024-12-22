@@ -34,8 +34,8 @@ export class AfdianController {
     if (!order) {
       throw new BadRequestException();
     }
-    const result = await this.afdianService.processWebhookOrder(order);
-    if (result.success) {
+    const result = await this.afdianService.activeOrderWebhook(order);
+    if (result) {
       return { ec: 200, em: 'ok' };
     } else {
       return { ec: 200, em: '[Error] 未能正确获取Dota2 ID' };
