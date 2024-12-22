@@ -4,7 +4,6 @@ import express from 'express';
 import * as functions from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
-import { onSchedule } from 'firebase-functions/scheduler';
 
 import { AppModule } from './src/app.module';
 import { SECRET } from './src/util/secret/secret.service';
@@ -83,17 +82,6 @@ export const admin = onRequest(
   async (req, res) => {
     await promiseApplicationReady;
     server(req, res);
-  },
-);
-
-export const scheduledFunction = onSchedule(
-  {
-    schedule: '0 * * * *',
-    region: 'asia-northeast1',
-  },
-  async () => {
-    await promiseApplicationReady;
-    server({ path: '/api/admin/test' } as any, { status: () => {} } as any);
   },
 );
 

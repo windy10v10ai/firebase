@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { logger } from 'firebase-functions/v2';
 
 import { AfdianService } from '../afdian/afdian.service';
 import { Public } from '../util/auth/public.decorator';
@@ -47,10 +46,5 @@ export class AdminController {
   @Post('/afdian/order/set-success')
   setOrderSuccess(@Body() dto: ActiveAfdianOrderDto) {
     return this.afdianService.setOrderSuccess(dto.outTradeNo, dto.steamId);
-  }
-
-  @Get('/test')
-  test() {
-    logger.info('test called');
   }
 }
