@@ -155,7 +155,7 @@ export class AnalyticsService {
       k: player.kills,
       d: player.deaths,
       a: player.assists,
-      p: player.points,
+      p: player.score,
     };
     const playerJson = JSON.stringify(playerObject);
     return playerJson;
