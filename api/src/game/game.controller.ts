@@ -105,7 +105,8 @@ export class GameController {
     };
   }
 
-  // FIXME: 该接口已废弃，使用endV2接口
+  // TODO remove after v4.05
+  // 该接口已废弃，使用endV2接口
   @ApiBody({ type: GameEndDtoOld })
   @Post('end')
   async end(@Body() gameEnd: GameEndDtoOld): Promise<string> {
@@ -153,6 +154,7 @@ export class GameController {
     }
 
     await this.analyticsService.gameEndMatch(gameEnd);
+    await this.analyticsService.gameEndPlayerBot(gameEnd);
     return this.gameService.getOK();
   }
 
