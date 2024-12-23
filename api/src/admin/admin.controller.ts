@@ -38,13 +38,13 @@ export class AdminController {
     return this.afdianService.findFailed();
   }
 
+  @Post('/afdian/order/migration')
+  activeOrderMigration() {
+    return this.afdianService.migrationPassedOrder();
+  }
+
   @Post('/afdian/order/ative')
   activeOrder(@Body() dto: ActiveAfdianOrderDto) {
     return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
-  }
-
-  @Post('/afdian/order/set-success')
-  setOrderSuccess(@Body() dto: ActiveAfdianOrderDto) {
-    return this.afdianService.setOrderSuccess(dto.outTradeNo, dto.steamId);
   }
 }

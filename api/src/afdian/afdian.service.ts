@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -78,19 +79,27 @@ export class AfdianService {
     }
     return this.activeOrder(orderDto, steamId);
   }
+  // FIXME migration结束后删除
+  async migrationPassedOrder() {
+    // find order after OUT_TRADE_NO_BASE
+    const orders = await this.afdianOrderRepository
+      .whereGreaterOrEqualThan('outTradeNo', this.OUT_TRADE_NO_BASE)
+      .find();
+    // order by outTradeNo desc
+    const notRecordOrders = orders.filter((order) => {
+      return order.outTradeNo <= '202412212043089954565713826';
+    });
 
-  async setOrderSuccess(outTradeNo: string, steamId?: number) {
-    const order = await this.afdianOrderRepository.whereEqualTo('outTradeNo', outTradeNo).findOne();
-    if (!order) {
-      return false;
+    let count = notRecordOrders.length;
+    for (const order of notRecordOrders) {
+      logger.debug(count);
+      count--;
+      if (!order.success || !order.steamId) {
+        logger.warn('order fail', order);
+        continue;
+      }
+      await this.analyticsPurchaseService.purchase(order);
     }
-
-    order.success = true;
-    if (steamId) {
-      order.steamId = steamId;
-    }
-    await this.afdianOrderRepository.update(order);
-    return true;
   }
 
   async activeOrderWebhook(orderDto: OrderDto) {
