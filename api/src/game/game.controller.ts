@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseArrayPipe,
   ParseIntPipe,
@@ -52,7 +51,7 @@ export class GameController {
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
-    @Headers('x-country-code') countryCode: string,
+    // @Headers('x-country-code') countryCode: string,
   ): Promise<GameStart> {
     logger.debug(`[Game Start] with steamIds ${JSON.stringify(steamIds)}`);
     steamIds = this.gameService.validateSteamIds(steamIds);
@@ -74,17 +73,6 @@ export class GameController {
     pointInfo.push(...memberDailyPointInfo);
 
     // ----------------- 以下为统计数据 -----------------
-    // 统计会员游戏数据
-    await this.playerCountService
-      .update({
-        countryCode: countryCode,
-        playerIds: steamIds,
-        memberIds: members.map((m) => m.steamId),
-      })
-      .catch((error) => {
-        logger.warn(`[Game Start] playerCount Failed, ${steamIds}`, error);
-      });
-
     // 统计数据发送至GA4
     await this.analyticsService.gameStart(steamIds, matchId);
 
