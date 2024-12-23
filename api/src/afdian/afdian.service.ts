@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -77,29 +76,7 @@ export class AfdianService {
     if (!orderDto) {
       return false;
     }
-    return this.activeOrder(orderDto, steamId);
-  }
-  // FIXME migration结束后删除
-  async migrationPassedOrder() {
-    // find order after OUT_TRADE_NO_BASE
-    const orders = await this.afdianOrderRepository
-      .whereGreaterOrEqualThan('outTradeNo', this.OUT_TRADE_NO_BASE)
-      .find();
-    // order by outTradeNo desc
-    const notRecordOrders = orders.filter((order) => {
-      return order.outTradeNo <= '202412212043089954565713826';
-    });
-
-    let count = notRecordOrders.length;
-    for (const order of notRecordOrders) {
-      logger.debug(count);
-      count--;
-      if (!order.success || !order.steamId) {
-        logger.warn('order fail', order);
-        continue;
-      }
-      await this.analyticsPurchaseService.purchase(order);
-    }
+    return this.activeNewOrder(orderDto, steamId);
   }
 
   async activeOrderWebhook(orderDto: OrderDto) {
@@ -113,10 +90,10 @@ export class AfdianService {
 
     const steamId = await this.getSteamId(orderDto);
 
-    return await this.activeOrder(orderDto, steamId);
+    return await this.activeNewOrder(orderDto, steamId);
   }
 
-  async activeOrder(orderDto: OrderDto, steamId: number) {
+  async activeNewOrder(orderDto: OrderDto, steamId: number) {
     const orderType = this.getOrderType(orderDto);
 
     const isActiveSuccess = await this.activeAfidianOrder(orderDto, orderType, steamId);
@@ -275,21 +252,12 @@ export class AfdianService {
     return steamId_remark;
   }
 
-  async check() {
-    const afdianOrders = await this.afdianOrderRepository.find();
-    const afdianUsers = await this.afdianUserRepository.find();
-    const failedOrders = afdianOrders.filter((order) => !order.success);
-
-    return {
-      afdianOrdersCount: afdianOrders.length,
-      afdianUsersCount: afdianUsers.length,
-      failedOrdersCount: failedOrders.length,
-    };
-  }
-
   async findFailed() {
-    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
-    // order by outTradeNo desc
+    const orders = await this.afdianOrderRepository
+      .whereEqualTo('success', false)
+      .whereGreaterOrEqualThan('outTradeNo', this.OUT_TRADE_NO_BASE)
+      .find();
+
     orders.sort((a, b) => {
       return b.outTradeNo.localeCompare(a.outTradeNo);
     });

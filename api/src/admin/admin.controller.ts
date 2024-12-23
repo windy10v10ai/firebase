@@ -18,6 +18,7 @@ export class AdminController {
     private readonly afdianService: AfdianService,
   ) {}
 
+  // FIXME 使用activeOrder替代，删除
   @Post('/member/afdian')
   createAfdianMember(@Body() createAfdianMemberDto: CreateAfdianMemberDto) {
     return this.adminService.createAfdianMember(createAfdianMemberDto);
@@ -28,19 +29,9 @@ export class AdminController {
     return this.adminService.createPatreonMember(createPatreonMemberDto);
   }
 
-  @Get('/afdian/check')
-  afdianCheck() {
-    return this.afdianService.check();
-  }
-
   @Get('/afdian/order/fail')
   findFailed() {
     return this.afdianService.findFailed();
-  }
-
-  @Post('/afdian/order/migration')
-  activeOrderMigration() {
-    return this.afdianService.migrationPassedOrder();
   }
 
   @Post('/afdian/order/ative')
