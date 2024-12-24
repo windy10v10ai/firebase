@@ -96,7 +96,7 @@ export class AnalyticsService {
         difficulty: gameEnd.difficulty,
         version: gameEnd.version,
         is_winner: gameEnd.winnerTeamId === player.teamId,
-        winner_index: gameEnd.winnerTeamId === player.teamId,
+        win_rate: gameEnd.winnerTeamId === player.teamId,
         team_id: player.teamId,
         hero_name: player.heroName,
         points: player.points,

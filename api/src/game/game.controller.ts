@@ -56,7 +56,8 @@ export class GameController {
       await this.gameService.upsertPlayerInfo(steamId);
     }
 
-    const eventRewardInfo = await this.gameService.giveThridAnniversaryEventReward(steamIds);
+    // 获取活动奖励
+    const eventRewardInfo = await this.gameService.giveEventReward(steamIds);
     pointInfo.push(...eventRewardInfo);
 
     // 获取会员 添加每日会员积分

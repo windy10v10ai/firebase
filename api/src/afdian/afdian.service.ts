@@ -257,10 +257,7 @@ export class AfdianService {
   }
 
   async findFailed() {
-    const orders = await this.afdianOrderRepository
-      .whereEqualTo('success', false)
-      .whereGreaterOrEqualThan('outTradeNo', this.OUT_TRADE_NO_BASE)
-      .find();
+    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
 
     orders.sort((a, b) => {
       return b.outTradeNo.localeCompare(a.outTradeNo);
