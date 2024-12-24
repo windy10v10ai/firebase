@@ -14,11 +14,9 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
-import { CountService } from '../count/count.service';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerCountService } from '../player-count/player-count.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { Public } from '../util/auth/public.decorator';
@@ -36,8 +34,6 @@ export class GameController {
   constructor(
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
-    private readonly playerCountService: PlayerCountService,
-    private readonly countService: CountService,
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
@@ -114,7 +110,6 @@ export class GameController {
       }
     }
 
-    await this.countService.countGameDifficult(gameEnd);
     await this.analyticsService.gameEnd(gameEnd);
 
     return this.gameService.getOK();
