@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseArrayPipe,
   ParseIntPipe,
@@ -15,12 +14,9 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
-import { CountService } from '../count/count.service';
-import { MatchService } from '../match/match.service';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerCountService } from '../player-count/player-count.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { Public } from '../util/auth/public.decorator';
@@ -38,11 +34,8 @@ export class GameController {
   constructor(
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
-    private readonly playerCountService: PlayerCountService,
-    private readonly countService: CountService,
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
-    private readonly matchService: MatchService,
     private readonly analyticsService: AnalyticsService,
   ) {}
 
@@ -52,7 +45,7 @@ export class GameController {
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
-    @Headers('x-country-code') countryCode: string,
+    // @Headers('x-country-code') countryCode: string,
   ): Promise<GameStart> {
     logger.debug(`[Game Start] with steamIds ${JSON.stringify(steamIds)}`);
     steamIds = this.gameService.validateSteamIds(steamIds);
@@ -74,17 +67,6 @@ export class GameController {
     pointInfo.push(...memberDailyPointInfo);
 
     // ----------------- 以下为统计数据 -----------------
-    // 统计会员游戏数据
-    await this.playerCountService
-      .update({
-        countryCode: countryCode,
-        playerIds: steamIds,
-        memberIds: members.map((m) => m.steamId),
-      })
-      .catch((error) => {
-        logger.warn(`[Game Start] playerCount Failed, ${steamIds}`, error);
-      });
-
     // 统计数据发送至GA4
     await this.analyticsService.gameStart(steamIds, matchId);
 
@@ -128,9 +110,6 @@ export class GameController {
       }
     }
 
-    await this.countService.countGameDifficult(gameEnd);
-    await this.countService.countHeroes(gameEnd);
-    await this.matchService.recordMatch(gameEnd);
     await this.analyticsService.gameEnd(gameEnd);
 
     return this.gameService.getOK();
@@ -144,6 +123,11 @@ export class GameController {
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {
+        const battlePoints = player.battlePoints;
+        if (battlePoints < 0 || battlePoints > 1000) {
+          // 异常数值，不更新
+          continue;
+        }
         await this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,

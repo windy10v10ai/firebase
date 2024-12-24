@@ -76,21 +76,7 @@ export class AfdianService {
     if (!orderDto) {
       return false;
     }
-    return this.activeOrder(orderDto, steamId);
-  }
-
-  async setOrderSuccess(outTradeNo: string, steamId?: number) {
-    const order = await this.afdianOrderRepository.whereEqualTo('outTradeNo', outTradeNo).findOne();
-    if (!order) {
-      return false;
-    }
-
-    order.success = true;
-    if (steamId) {
-      order.steamId = steamId;
-    }
-    await this.afdianOrderRepository.update(order);
-    return true;
+    return this.activeNewOrder(orderDto, steamId);
   }
 
   async activeOrderWebhook(orderDto: OrderDto) {
@@ -104,10 +90,10 @@ export class AfdianService {
 
     const steamId = await this.getSteamId(orderDto);
 
-    return await this.activeOrder(orderDto, steamId);
+    return await this.activeNewOrder(orderDto, steamId);
   }
 
-  async activeOrder(orderDto: OrderDto, steamId: number) {
+  async activeNewOrder(orderDto: OrderDto, steamId: number) {
     const orderType = this.getOrderType(orderDto);
 
     const isActiveSuccess = await this.activeAfidianOrder(orderDto, orderType, steamId);
@@ -266,21 +252,12 @@ export class AfdianService {
     return steamId_remark;
   }
 
-  async check() {
-    const afdianOrders = await this.afdianOrderRepository.find();
-    const afdianUsers = await this.afdianUserRepository.find();
-    const failedOrders = afdianOrders.filter((order) => !order.success);
-
-    return {
-      afdianOrdersCount: afdianOrders.length,
-      afdianUsersCount: afdianUsers.length,
-      failedOrdersCount: failedOrders.length,
-    };
-  }
-
   async findFailed() {
-    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
-    // order by outTradeNo desc
+    const orders = await this.afdianOrderRepository
+      .whereEqualTo('success', false)
+      .whereGreaterOrEqualThan('outTradeNo', this.OUT_TRADE_NO_BASE)
+      .find();
+
     orders.sort((a, b) => {
       return b.outTradeNo.localeCompare(a.outTradeNo);
     });

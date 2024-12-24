@@ -20,7 +20,7 @@ const promiseApplicationReady = NestFactory.create(AppModule, new ExpressAdapter
 );
 
 // Cloud Functions
-const clientSecrets = [
+const commonSecrets = [
   defineSecret(SECRET.SERVER_APIKEY),
   defineSecret(SECRET.SERVER_APIKEY_TEST),
   defineSecret(SECRET.AFDIAN_TOKEN),
@@ -34,7 +34,7 @@ export const client = onRequest(
     minInstances: 0,
     maxInstances: 10,
     timeoutSeconds: 10,
-    secrets: clientSecrets,
+    secrets: commonSecrets,
   },
   async (req, res) => {
     const regex = '^/api/(game|afdian|analytics).*';
@@ -77,7 +77,7 @@ export const admin = onRequest(
     minInstances: 0,
     maxInstances: 1,
     timeoutSeconds: 1800,
-    secrets: [defineSecret(SECRET.AFDIAN_API_TOKEN)],
+    secrets: commonSecrets,
   },
   async (req, res) => {
     await promiseApplicationReady;
