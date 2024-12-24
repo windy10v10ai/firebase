@@ -21,7 +21,6 @@ import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-pr
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { Public } from '../util/auth/public.decorator';
 
-import { GameEndDto as GameEndDtoOld } from './dto/game-end.request.body';
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { GameStart } from './dto/game-start.response';
 import { PlayerDto } from './dto/player.dto';
@@ -85,34 +84,6 @@ export class GameController {
       top100SteamIds,
       pointInfo,
     };
-  }
-
-  // TODO remove after v4.05
-  // 该接口已废弃，使用endV2接口
-  @ApiBody({ type: GameEndDtoOld })
-  @Post('end')
-  async end(@Body() gameEnd: GameEndDtoOld): Promise<string> {
-    // FIXME 从游戏中传递过来的steamId是string类型，需要转换为number
-    gameEnd.players.forEach((player) => {
-      player.steamId = parseInt(player.steamId as any);
-    });
-    logger.debug(`[Game End] ${JSON.stringify(gameEnd)}`);
-
-    const players = gameEnd.players;
-    for (const player of players) {
-      if (player.steamId > 0) {
-        await this.playerService.upsertGameEnd(
-          player.steamId,
-          player.teamId == gameEnd.winnerTeamId,
-          player.points,
-          player.isDisconnect,
-        );
-      }
-    }
-
-    await this.analyticsService.gameEnd(gameEnd);
-
-    return this.gameService.getOK();
   }
 
   @ApiBody({ type: GameEndDto })
