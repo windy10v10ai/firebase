@@ -115,7 +115,6 @@ export class GameController {
     }
 
     await this.countService.countGameDifficult(gameEnd);
-    await this.countService.countHeroes(gameEnd);
     await this.analyticsService.gameEnd(gameEnd);
 
     return this.gameService.getOK();

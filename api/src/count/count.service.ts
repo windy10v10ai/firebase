@@ -4,63 +4,14 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { GameEndDto } from '../game/dto/game-end.request.body';
 
-import { HeroWinrate } from './dto/hero-winrate.entity';
 import { CountDifficult } from './entities/count-difficult.entity';
-import { CountHero, HeroType } from './entities/count-hero.entity';
 
 @Injectable()
 export class CountService {
   constructor(
     @InjectRepository(CountDifficult)
     private readonly countDifficultRepository: BaseFirestoreRepository<CountDifficult>,
-    @InjectRepository(CountHero)
-    private readonly countHeroRepository: BaseFirestoreRepository<CountHero>,
   ) {}
-
-  async findHeroRate(version: string, heroType: string, order?: string) {
-    let totalCount = 0;
-    const heroWinrateMap: Map<string, HeroWinrate> = new Map();
-    for (const heroName of this.heroNameList) {
-      const heroWinrate = new HeroWinrate(heroName);
-      const countHeroList = await this.countHeroRepository
-        .whereEqualTo('version', version)
-        .whereEqualTo('isHuman', heroType == HeroType.human)
-        .whereEqualTo('heroName', heroName)
-        .find();
-      for (const countHero of countHeroList) {
-        totalCount += countHero.total;
-        heroWinrate.win += countHero.win;
-        heroWinrate.total += countHero.total;
-      }
-      heroWinrateMap.set(heroName, heroWinrate);
-    }
-    const heroRate = Array.from(heroWinrateMap.values()).map((heroWinrate) => {
-      heroWinrate.winrate = heroWinrate.win / heroWinrate.total || 0;
-      heroWinrate.pickrate = heroWinrate.total / totalCount || 0;
-      return heroWinrate;
-    });
-    return heroRate.sort((a, b) => {
-      if (order == 'winrate') {
-        return b.winrate - a.winrate;
-      } else if (order == 'pickrate') {
-        return b.pickrate - a.pickrate;
-      } else {
-        return b.total - a.total;
-      }
-    });
-  }
-
-  async findHeroRateChart(version: string, heroType: string, order?: string) {
-    const heroRate = await this.findHeroRate(version, heroType, order);
-    const label = heroRate.map((heroWinrate) => heroWinrate.heroName);
-    const winrate = heroRate.map((heroWinrate) => heroWinrate.winrate * 100);
-    const pickrate = heroRate.map((heroWinrate) => heroWinrate.pickrate * 100);
-    return {
-      label: `'${label.join("', '")}'`,
-      winrate: winrate.join(', '),
-      pickrate: pickrate.join(', '),
-    };
-  }
 
   async countGameDifficult(gameEnd: GameEndDto) {
     const id = `${gameEnd.version}#${gameEnd.gameOption.gameDifficulty}`;
@@ -73,32 +24,6 @@ export class CountService {
       matchCount.init(id);
       matchCount.add(gameEnd);
       await this.countDifficultRepository.create(matchCount);
-    }
-  }
-
-  async countHeroes(gameEnd: GameEndDto) {
-    for (const player of gameEnd.players) {
-      let heroType: HeroType;
-      if (player.steamId != 0) {
-        // 人类玩家
-        heroType = HeroType.human;
-      } else if (player.teamId == 3) {
-        // 夜魇bot
-        heroType = HeroType.bot;
-      } else {
-        // 天辉bot
-        continue;
-      }
-      const id = `${gameEnd.version}#${gameEnd.gameOption.gameDifficulty}#${heroType}#${player.heroName}`;
-      const exist = await this.countHeroRepository.findById(id);
-
-      const countHero = exist ?? new CountHero().init(id);
-      countHero.add(player, gameEnd.winnerTeamId);
-      if (exist) {
-        await this.countHeroRepository.update(countHero);
-      } else {
-        await this.countHeroRepository.create(countHero);
-      }
     }
   }
 
