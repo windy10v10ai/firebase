@@ -9,10 +9,8 @@ import { AfdianModule } from './afdian/afdian.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CountModule } from './count/count.module';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
-import { MatchModule } from './match/match.module';
 import { MembersModule } from './members/members.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
@@ -44,13 +42,11 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     AfdianModule,
     PatreonModule,
     PlayerCountModule,
-    CountModule,
     PlayerModule,
     PlayerPropertyModule,
     TestModule,
     AdminModule,
     EventRewardsModule,
-    MatchModule,
     AnalyticsModule,
     SecretModule,
   ],

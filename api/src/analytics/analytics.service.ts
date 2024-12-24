@@ -63,6 +63,7 @@ export class AnalyticsService {
           difficulty: gameEnd.gameOption.gameDifficulty,
           version: gameEnd.version,
           is_winner: gameEnd.winnerTeamId === player.teamId,
+          winner_index: gameEnd.winnerTeamId === player.teamId,
           team_id: player.teamId,
           hero_name: player.heroName,
           points: player.points,
@@ -112,6 +113,28 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
+  async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
+    for (const player of gameEnd.players) {
+      const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
+      const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
+        method: 'steam',
+        steam_id: player.steamId,
+        matchId: gameEnd.matchId,
+        engagement_time_msec: gameEnd.gameTimeMsec,
+        difficulty: gameEnd.difficulty,
+        version: gameEnd.version,
+        is_winner: gameEnd.winnerTeamId === player.teamId,
+        winner_index: gameEnd.winnerTeamId === player.teamId,
+        team_id: player.teamId,
+        hero_name: player.heroName,
+        points: player.points,
+        is_disconnect: player.isDisconnected,
+      });
+
+      await this.sendEvent(player.steamId.toString(), event);
+    }
+  }
+
   async gameEndMatch(gameEnd: GameEndMatchDto) {
     const gameOptions = gameEnd.gameOptions;
     const gameOptionsObject = {
@@ -155,7 +178,7 @@ export class AnalyticsService {
       k: player.kills,
       d: player.deaths,
       a: player.assists,
-      p: player.points,
+      p: player.score,
     };
     const playerJson = JSON.stringify(playerObject);
     return playerJson;
