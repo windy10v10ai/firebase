@@ -91,38 +91,37 @@ export class GameService {
     }
   }
 
-  // 活动赠送赛季积分
-  async giveThridAnniversaryEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
+  // 活动赠送赛季积分/会员
+  async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2024-12-02T00:00:00.000Z');
-    const endTime = new Date('2024-12-10T00:00:00.000Z');
-    const rewardSeasonPoint = 4444;
+    const startTime = new Date('2024-12-24T00:00:00.000Z');
+    const endTime = new Date('2025-01-04T00:00:00.000Z');
+    const rewardSeasonPoint = 2025;
 
     const now = new Date();
     if (now < startTime || now > endTime) {
       return pointInfoDtos;
     }
 
-    // FIXME 每次需要更新
+    // FIXME 活动每次需要更新
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
     for (const rewardResult of rewardResults) {
       if (rewardResult.result === false) {
         // 奖励两周会员
-        await this.membersService.addMember({
-          steamId: rewardResult.steamId,
-          month: 0.5,
-        });
+        // await this.membersService.addMember({
+        //   steamId: rewardResult.steamId,
+        //   month: 0.5,
+        // });
         // 奖励赛季积分
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: rewardSeasonPoint,
         });
-        // FIXME 每次需要更新
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '庆祝4周年\n赠送2周会员和赛季积分',
-            en: 'Celebrate 4th Anniversary\n Give 2 Weeks Membership\n and Season Points',
+            cn: '2025 双旦狂欢快乐',
+            en: 'Merry Christmas & Happy New Year',
           },
           seasonPoint: rewardSeasonPoint,
         });

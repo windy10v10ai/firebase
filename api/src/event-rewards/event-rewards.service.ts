@@ -22,7 +22,8 @@ export class EventRewardsService {
 
     return steamIds.map((steamId) => ({
       steamId,
-      result: eventRewards.find((r) => r.steamId === steamId)?.fourthAnniversary ?? false,
+      // FIXME 活动每次需要更新
+      result: eventRewards.find((r) => r.steamId === steamId)?.newYear2025 ?? false,
     }));
   }
 
@@ -34,11 +35,13 @@ export class EventRewardsService {
       await this.eventRewardsRepository.create({
         id,
         steamId,
-        fourthAnniversary: true,
+        // FIXME 活动每次需要更新
+        newYear2025: true,
       });
     } else {
       // update
-      eventReward.fourthAnniversary = true;
+      // FIXME 活动每次需要更新
+      eventReward.newYear2025 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
