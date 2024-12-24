@@ -15,7 +15,6 @@ import { logger } from 'firebase-functions';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { CountService } from '../count/count.service';
-import { MatchService } from '../match/match.service';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
@@ -41,7 +40,6 @@ export class GameController {
     private readonly countService: CountService,
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
-    private readonly matchService: MatchService,
     private readonly analyticsService: AnalyticsService,
   ) {}
 
@@ -118,7 +116,6 @@ export class GameController {
 
     await this.countService.countGameDifficult(gameEnd);
     await this.countService.countHeroes(gameEnd);
-    await this.matchService.recordMatch(gameEnd);
     await this.analyticsService.gameEnd(gameEnd);
 
     return this.gameService.getOK();
@@ -132,6 +129,11 @@ export class GameController {
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {
+        const battlePoints = player.battlePoints;
+        if (battlePoints < 0 || battlePoints > 1000) {
+          // 异常数值，不更新
+          continue;
+        }
         await this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,

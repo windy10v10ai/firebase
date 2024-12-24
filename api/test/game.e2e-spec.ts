@@ -5,6 +5,7 @@ import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { addPlayerProperty, createPlayer, getPlayer, getPlayerProperty } from './util/util-player';
 
 const gameStartUrl = '/api/game/start/';
+const gameEndUrl = '/api/game/end/v2';
 const playerGetUrl = '/api/player/steamId/';
 const memberPostUrl = '/api/members/';
 const resetPlayerPropertyUrl = '/api/game/resetPlayerProperty';
@@ -157,6 +158,199 @@ describe('PlayerController (e2e)', () => {
         const result = await callGameStart(app, steamIds);
         expect(result.status).toEqual(200);
       });
+    });
+  });
+  describe('/api/game/end/v2 (Post) 游戏结算', () => {
+    it.each([
+      ['单人结算 0分', 100000101, 0, 0],
+      ['单人结算 90分', 100000102, 90, 90],
+      ['单人结算 累加之前的积分', 100000102, 120, 210],
+      ['单人结算 1000分', 100000103, 1000, 1000],
+      ['单人结算 超过1000分不记录', 100000101, 1001, 0],
+      ['单人结算 低于分不记录', 100000101, -1, 0],
+    ])('%s', async (_title, steamId, inputPoints, expectedPoints) => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const result = await post(app, gameEndUrl, {
+        matchId: '8000000001',
+        version: 'v4.05',
+        winnerTeamId: 2,
+        players: [
+          {
+            isDisconnected: false,
+            score: 23,
+            damageTaken: 25000,
+            steamId,
+            damage: 280000,
+            teamId: 2,
+            level: 38,
+            kills: 51,
+            deaths: 2,
+            assists: 0,
+            healing: 0,
+            lastHits: 200,
+            towerKills: 10,
+            gold: 20000,
+            battlePoints: inputPoints,
+            heroName: 'npc_dota_hero_medusa',
+          },
+          {
+            isDisconnected: true,
+            score: 2,
+            damageTaken: 18949,
+            steamId: 0,
+            damage: 393,
+            teamId: 3,
+            level: 24,
+            kills: 0,
+            deaths: 3,
+            assists: 2,
+            healing: 0,
+            lastHits: 3,
+            towerKills: 0,
+            gold: 13273,
+            battlePoints: 0,
+            heroName: 'npc_dota_hero_chaos_knight',
+          },
+        ],
+        gameTimeMsec: 900000,
+        gameOptions: {
+          multiplierRadiant: 1.5,
+          multiplierDire: 8,
+          playerNumberRadiant: 1,
+          playerNumberDire: 10,
+          towerPowerPct: 300,
+        },
+        difficulty: 5,
+        steamId: 0,
+      });
+      expect(result.status).toEqual(201);
+      // assert player
+      const playerResult = await get(app, `${playerGetUrl}${steamId}`);
+      expect(playerResult.status).toEqual(200);
+      expect(playerResult.body.memberPointTotal).toEqual(0);
+      expect(playerResult.body.seasonPointTotal).toEqual(expectedPoints);
+
+      // bot not record
+      const botNoResult = await get(app, `${playerGetUrl}0`);
+      expect(botNoResult.body).toStrictEqual({});
+    });
+
+    it('多人结算', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId1 = 100000111;
+      const steamId2 = 100000112;
+      const steamId3 = 100000113;
+      const points1 = 0;
+      const points2 = -1;
+      const points3 = 1;
+      const result = await post(app, gameEndUrl, {
+        matchId: '8000000001',
+        version: 'v4.05',
+        winnerTeamId: 2,
+        players: [
+          {
+            isDisconnected: false,
+            score: 23,
+            damageTaken: 25000,
+            steamId: steamId1,
+            damage: 280000,
+            teamId: 2,
+            level: 38,
+            kills: 51,
+            deaths: 2,
+            assists: 0,
+            healing: 0,
+            lastHits: 200,
+            towerKills: 10,
+            gold: 20000,
+            battlePoints: points1,
+            heroName: 'npc_dota_hero_medusa',
+          },
+          {
+            isDisconnected: false,
+            score: 23,
+            damageTaken: 25000,
+            steamId: steamId2,
+            damage: 280000,
+            teamId: 2,
+            level: 38,
+            kills: 51,
+            deaths: 2,
+            assists: 0,
+            healing: 0,
+            lastHits: 200,
+            towerKills: 10,
+            gold: 20000,
+            battlePoints: points2,
+            heroName: 'npc_dota_hero_medusa',
+          },
+          {
+            isDisconnected: false,
+            score: 23,
+            damageTaken: 25000,
+            steamId: steamId3,
+            damage: 280000,
+            teamId: 2,
+            level: 38,
+            kills: 51,
+            deaths: 2,
+            assists: 0,
+            healing: 0,
+            lastHits: 200,
+            towerKills: 10,
+            gold: 20000,
+            battlePoints: points3,
+            heroName: 'npc_dota_hero_medusa',
+          },
+          {
+            isDisconnected: true,
+            score: 2,
+            damageTaken: 18949,
+            steamId: 0,
+            damage: 393,
+            teamId: 3,
+            level: 24,
+            kills: 0,
+            deaths: 3,
+            assists: 2,
+            healing: 0,
+            lastHits: 3,
+            towerKills: 0,
+            gold: 13273,
+            battlePoints: 0,
+            heroName: 'npc_dota_hero_chaos_knight',
+          },
+        ],
+        gameTimeMsec: 900000,
+        gameOptions: {
+          multiplierRadiant: 1.5,
+          multiplierDire: 8,
+          playerNumberRadiant: 1,
+          playerNumberDire: 10,
+          towerPowerPct: 300,
+        },
+        difficulty: 5,
+        steamId: 0,
+      });
+      expect(result.status).toEqual(201);
+      // assert player
+      const playerResult1 = await get(app, `${playerGetUrl}${steamId1}`);
+      expect(playerResult1.status).toEqual(200);
+      expect(playerResult1.body.memberPointTotal).toEqual(0);
+      expect(playerResult1.body.seasonPointTotal).toEqual(points1);
+      // 玩家2负分未记录
+      const playerResult2 = await get(app, `${playerGetUrl}${steamId2}`);
+      expect(playerResult2.status).toEqual(200);
+      expect(playerResult2.body).toStrictEqual({});
+
+      const playerResult3 = await get(app, `${playerGetUrl}${steamId3}`);
+      expect(playerResult3.status).toEqual(200);
+      expect(playerResult3.body.memberPointTotal).toEqual(0);
+      expect(playerResult3.body.seasonPointTotal).toEqual(points3);
+
+      // bot not record
+      const botNoResult = await get(app, `${playerGetUrl}0`);
+      expect(botNoResult.body).toStrictEqual({});
     });
   });
 
