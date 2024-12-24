@@ -85,11 +85,14 @@ export class AnalyticsService {
   async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
     for (const player of gameEnd.players) {
       const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
+      // 机器人不纳入互动时间统计
+      const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
+
       const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
         method: 'steam',
         steam_id: player.steamId,
         matchId: gameEnd.matchId,
-        engagement_time_msec: gameEnd.gameTimeMsec,
+        engagement_time_msec,
         difficulty: gameEnd.difficulty,
         version: gameEnd.version,
         is_winner: gameEnd.winnerTeamId === player.teamId,
