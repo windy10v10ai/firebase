@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { GameEndDto } from '../game/dto/game-end.request.body';
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
@@ -42,36 +41,6 @@ export class AnalyticsService {
       });
 
       await this.sendEvent(steamId.toString(), event);
-    }
-  }
-
-  async gameEnd(gameEnd: GameEndDto) {
-    for (const player of gameEnd.players) {
-      if (player.steamId === 0) {
-        // 暂且不统计电脑数据
-        continue;
-      }
-      const event = await this.buildEvent(
-        'player_game_end',
-        player.steamId,
-        gameEnd.matchId.toString(),
-        {
-          method: 'steam',
-          steam_id: player.steamId,
-          matchId: gameEnd.matchId,
-          engagement_time_msec: gameEnd.gameTimeMsec,
-          difficulty: gameEnd.gameOption.gameDifficulty,
-          version: gameEnd.version,
-          is_winner: gameEnd.winnerTeamId === player.teamId,
-          winner_index: gameEnd.winnerTeamId === player.teamId,
-          team_id: player.teamId,
-          hero_name: player.heroName,
-          points: player.points,
-          is_disconnect: player.isDisconnect,
-        },
-      );
-
-      await this.sendEvent(player.steamId.toString(), event);
     }
   }
 
