@@ -12,7 +12,6 @@ import { AppService } from './app.service';
 import { CountModule } from './count/count.module';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
-import { MatchModule } from './match/match.module';
 import { MembersModule } from './members/members.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
@@ -50,7 +49,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     TestModule,
     AdminModule,
     EventRewardsModule,
-    MatchModule,
     AnalyticsModule,
     SecretModule,
   ],
