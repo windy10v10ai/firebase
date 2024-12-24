@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { GameEndDto } from '../game/dto/game-end.request.body';
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
@@ -45,36 +44,6 @@ export class AnalyticsService {
     }
   }
 
-  async gameEnd(gameEnd: GameEndDto) {
-    for (const player of gameEnd.players) {
-      if (player.steamId === 0) {
-        // 暂且不统计电脑数据
-        continue;
-      }
-      const event = await this.buildEvent(
-        'player_game_end',
-        player.steamId,
-        gameEnd.matchId.toString(),
-        {
-          method: 'steam',
-          steam_id: player.steamId,
-          matchId: gameEnd.matchId,
-          engagement_time_msec: gameEnd.gameTimeMsec,
-          difficulty: gameEnd.gameOption.gameDifficulty,
-          version: gameEnd.version,
-          is_winner: gameEnd.winnerTeamId === player.teamId,
-          winner_index: gameEnd.winnerTeamId === player.teamId,
-          team_id: player.teamId,
-          hero_name: player.heroName,
-          points: player.points,
-          is_disconnect: player.isDisconnect,
-        },
-      );
-
-      await this.sendEvent(player.steamId.toString(), event);
-    }
-  }
-
   async playerResetProperty(dto: GameResetPlayerProperty): Promise<void> {
     await this.sendEvent(dto.steamId.toString(), {
       name: 'player_reset_property',
@@ -116,11 +85,14 @@ export class AnalyticsService {
   async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
     for (const player of gameEnd.players) {
       const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
+      // 机器人不纳入互动时间统计
+      const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
+
       const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
         method: 'steam',
         steam_id: player.steamId,
         matchId: gameEnd.matchId,
-        engagement_time_msec: gameEnd.gameTimeMsec,
+        engagement_time_msec,
         difficulty: gameEnd.difficulty,
         version: gameEnd.version,
         is_winner: gameEnd.winnerTeamId === player.teamId,

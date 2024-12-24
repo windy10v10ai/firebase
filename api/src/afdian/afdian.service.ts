@@ -47,6 +47,10 @@ export class AfdianService {
 
   // 手动激活订单 通过订单号
   async activeOrderManual(outTradeNo: string, steamId: number) {
+    if (outTradeNo < this.OUT_TRADE_NO_BASE) {
+      // 旧订单需人工处理
+      return false;
+    }
     const existOrder = await this.afdianOrderRepository
       .whereEqualTo('outTradeNo', outTradeNo)
       .findOne();
