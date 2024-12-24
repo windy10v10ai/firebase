@@ -120,7 +120,7 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '2025双旦狂欢快乐',
+            cn: '2025 双旦狂欢快乐',
             en: 'Merry Christmas & Happy New Year',
           },
           seasonPoint: rewardSeasonPoint,
