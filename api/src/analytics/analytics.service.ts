@@ -4,7 +4,7 @@ import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property'
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { PurchaseEvent } from './analytics.purchase.service';
-import { getHeroId } from './data/hero-data';
+import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
 import { PickDto } from './dto/pick-ability-dto';
 
@@ -99,7 +99,8 @@ export class AnalyticsService {
         win_rate: gameEnd.winnerTeamId === player.teamId,
         team_id: player.teamId,
         hero_name: player.heroName,
-        points: player.points,
+        hero_name_cn: GetHeroNameChinese(player.heroName),
+        points: player.battlePoints,
         is_disconnect: player.isDisconnected,
       });
 
@@ -141,7 +142,7 @@ export class AnalyticsService {
 
   private buildPlayerJson(player: GameEndPlayerDto) {
     const playerObject = {
-      hi: getHeroId(player.heroName),
+      hi: GetHeroId(player.heroName),
       si: player.steamId,
       ti: player.teamId,
       dc: player.isDisconnected ? 1 : 0,
