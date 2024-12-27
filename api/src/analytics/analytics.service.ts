@@ -99,7 +99,7 @@ export class AnalyticsService {
         win_rate: gameEnd.winnerTeamId === player.teamId,
         team_id: player.teamId,
         hero_name: player.heroName,
-        points: player.points,
+        points: player.battlePoints,
         is_disconnect: player.isDisconnected,
       });
 
