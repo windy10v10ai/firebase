@@ -19,20 +19,13 @@ const promiseApplicationReady = NestFactory.create(AppModule, new ExpressAdapter
   },
 );
 
-const isLocal = process.env.ENVIRONMENT === 'local';
-console.log('process.env.ENVIRONMENT:', process.env.ENVIRONMENT);
-console.log('isLocal:', isLocal);
-// Cloud Functions
-const commonSecrets = isLocal
-  ? []
-  : [
-      SECRET.SERVER_APIKEY,
-      SECRET.SERVER_APIKEY_TEST,
-      SECRET.AFDIAN_TOKEN,
-      SECRET.AFDIAN_API_TOKEN,
-      SECRET.GA4_API_SECRET,
-    ];
-console.log('commonSecrets:', commonSecrets);
+const commonSecrets = [
+  defineSecret(SECRET.SERVER_APIKEY),
+  defineSecret(SECRET.SERVER_APIKEY_TEST),
+  defineSecret(SECRET.AFDIAN_TOKEN),
+  defineSecret(SECRET.AFDIAN_API_TOKEN),
+  defineSecret(SECRET.GA4_API_SECRET),
+];
 
 export const client = onRequest(
   {
