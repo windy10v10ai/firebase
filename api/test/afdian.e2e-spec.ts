@@ -39,7 +39,7 @@ describe('MemberController (e2e)', () => {
               order: {},
             },
           })
-          .query({ token: 'afd' });
+          .query({ token: 'afdian-webhook' });
         expect(responseCreate.status).toEqual(400);
       });
 
@@ -50,7 +50,7 @@ describe('MemberController (e2e)', () => {
             ec: 200,
             em: 'ok',
           })
-          .query({ token: 'afd' });
+          .query({ token: 'afdian-webhook' });
         expect(responseCreate.status).toEqual(400);
       });
       it('order not exist', async () => {
@@ -60,7 +60,7 @@ describe('MemberController (e2e)', () => {
             ec: 200,
             em: 'ok',
           })
-          .query({ token: 'afd' });
+          .query({ token: 'afdian-webhook' });
         expect(responseCreate.status).toEqual(400);
       });
     });
@@ -101,7 +101,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
@@ -151,7 +151,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
@@ -182,7 +182,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate2.status).toEqual(201);
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
@@ -227,7 +227,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({
         ec: 200,
@@ -269,7 +269,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
@@ -299,7 +299,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate2.status).toEqual(201);
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
@@ -355,7 +355,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
@@ -401,7 +401,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
@@ -447,7 +447,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       const responseCreate2 = await request(app.getHttpServer())
@@ -482,7 +482,7 @@ describe('MemberController (e2e)', () => {
             },
           },
         })
-        .query({ token: 'afd' });
+        .query({ token: 'afdian-webhook' });
       expect(responseCreate2.status).toEqual(201);
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分

@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
 export enum SECRET {
-  AFDIAN_TOKEN = 'AFDIAN_TOKEN',
+  AFDIAN_WEBHOOK_TOKEN = 'AFDIAN_WEBHOOK_TOKEN',
   AFDIAN_API_TOKEN = 'AFDIAN_API_TOKEN',
   PATREON_SECRET = 'PATREON_SECRET',
   SERVER_APIKEY = 'SERVER_APIKEY',

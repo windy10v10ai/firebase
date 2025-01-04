@@ -10,6 +10,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
 
 import { Public } from '../util/auth/public.decorator';
+import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { AfdianService } from './afdian.service';
 import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
@@ -18,15 +19,18 @@ import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
 @ApiTags('Afdian(Public)')
 @Controller('afdian')
 export class AfdianController {
-  constructor(private readonly afdianService: AfdianService) {}
+  constructor(
+    private readonly afdianService: AfdianService,
+    private readonly secretService: SecretService,
+  ) {}
 
   @Post('/webhook')
   async processAfdianWebhook(
     @Body() afdianWebhookDto: AfdianWebhookDto,
     @Query('token') token: string,
   ) {
-    if (token !== process.env.AFDIAN_TOKEN) {
-      logger.error(`Afdian token error with: ${token}`);
+    if (token !== this.secretService.getSecretValue(SECRET.AFDIAN_WEBHOOK_TOKEN)) {
+      logger.error(`Afdian token error`);
       throw new UnauthorizedException();
     }
     logger.debug('Afdian webhook called with:', afdianWebhookDto);
