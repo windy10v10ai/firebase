@@ -76,7 +76,7 @@ export const admin = onRequest(
     minInstances: 0,
     maxInstances: 1,
     timeoutSeconds: 1800,
-    secrets: commonSecrets,
+    secrets: [defineSecret(SECRET.AFDIAN_API_TOKEN)],
   },
   async (req, res) => {
     await promiseApplicationReady;
