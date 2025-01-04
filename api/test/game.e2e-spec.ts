@@ -5,7 +5,7 @@ import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { addPlayerProperty, createPlayer, getPlayer, getPlayerProperty } from './util/util-player';
 
 const gameStartUrl = '/api/game/start/';
-const gameEndUrl = '/api/game/end/v2';
+const gameEndUrl = '/api/game/end';
 const playerGetUrl = '/api/player/steamId/';
 const memberPostUrl = '/api/members/';
 const resetPlayerPropertyUrl = '/api/game/resetPlayerProperty';
@@ -160,7 +160,7 @@ describe('PlayerController (e2e)', () => {
       });
     });
   });
-  describe('/api/game/end/v2 (Post) 游戏结算', () => {
+  describe('/api/game/end (Post) 游戏结算', () => {
     it.each([
       ['单人结算 0分', 100000101, 0, 0],
       ['单人结算 90分', 100000102, 90, 90],
