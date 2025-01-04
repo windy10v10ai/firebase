@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - fix-secrets-load
       - main
 
 jobs:
