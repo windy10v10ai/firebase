@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class EventBaseDto {
   @ApiProperty()
@@ -9,4 +9,6 @@ export class EventBaseDto {
   difficulty: number;
   @ApiProperty()
   steamId: number;
+  @ApiPropertyOptional()
+  isWin?: boolean;
 }

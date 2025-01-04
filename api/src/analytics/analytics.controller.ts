@@ -18,4 +18,14 @@ export class AnalyticsController {
   async lotteryPickItem(@Body() body: PickDto) {
     await this.analyticsService.lotteryPickItem(body);
   }
+
+  @Post('/game-end/pick/ability')
+  async gameEndLotteryPickAbility(@Body() body: PickDto) {
+    await this.analyticsService.lotteryPickAbility(body);
+  }
+
+  @Post('/game-end/pick/item')
+  async gameEndLotteryPickItem(@Body() body: PickDto) {
+    await this.analyticsService.lotteryPickItem(body);
+  }
 }
