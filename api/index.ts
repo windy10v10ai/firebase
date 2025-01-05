@@ -19,13 +19,17 @@ const promiseApplicationReady = NestFactory.create(AppModule, new ExpressAdapter
   },
 );
 
-const commonSecrets = [
-  defineSecret(SECRET.SERVER_APIKEY),
-  defineSecret(SECRET.SERVER_APIKEY_TEST),
-  defineSecret(SECRET.AFDIAN_WEBHOOK_TOKEN),
-  defineSecret(SECRET.AFDIAN_API_TOKEN),
-  defineSecret(SECRET.GA4_API_SECRET),
-];
+const isLocal = process.env.FUNCTIONS_EMULATOR === 'true';
+
+const commonSecrets = isLocal
+  ? [defineSecret(SECRET.AFDIAN_API_TOKEN)]
+  : [
+      defineSecret(SECRET.SERVER_APIKEY),
+      defineSecret(SECRET.SERVER_APIKEY_TEST),
+      defineSecret(SECRET.AFDIAN_WEBHOOK_TOKEN),
+      defineSecret(SECRET.AFDIAN_API_TOKEN),
+      defineSecret(SECRET.GA4_API_SECRET),
+    ];
 
 export const client = onRequest(
   {
@@ -76,31 +80,10 @@ export const admin = onRequest(
     minInstances: 0,
     maxInstances: 1,
     timeoutSeconds: 1800,
-    secrets: [defineSecret(SECRET.AFDIAN_API_TOKEN)],
+    secrets: commonSecrets,
   },
   async (req, res) => {
     await promiseApplicationReady;
     server(req, res);
   },
 );
-
-// nextjs app
-// const dev = process.env.NODE_ENV !== 'production';
-// const nextjsServer = next({
-//   dev,
-//   dir: '../web',
-//   conf: { distDir: '.next' },
-// });
-// const nextjsHandle = nextjsServer.getRequestHandler();
-
-// exports.nextjs = onRequest(
-//   {
-//     region: 'asia-northeast1',
-//     minInstances: 0,
-//     maxInstances: 1,
-//     timeoutSeconds: 10,
-//   },
-//   async (req, res) => {
-//     return nextjsServer.prepare().then(() => nextjsHandle(req, res));
-//   },
-// );
