@@ -113,7 +113,7 @@ export class AfdianService {
   }
 
   /** 激活最近的订单
-   * @returns 检测的订单号范围，激活的订单数量
+   * @returns 检测的订单号范围，激活的订单号
    *
    * @remarks
    * - 获取最近的订单
@@ -122,7 +122,7 @@ export class AfdianService {
    */
   async activeRecentOrder() {
     const orders = await this.afdianApiService.fetchAfdianOrders(1, 100);
-    let activeCount = 0;
+    const activeOrders = [];
 
     for (const orderDto of orders) {
       const existOrder = await this.afdianOrderRepository
@@ -135,13 +135,13 @@ export class AfdianService {
       const steamId = await this.getSteamId(orderDto);
       const isActiveSuccess = await this.activeNewOrder(orderDto, steamId);
       if (isActiveSuccess) {
-        activeCount++;
+        activeOrders.push(orderDto.out_trade_no);
       }
     }
 
     return {
-      range: orders[0].out_trade_no + ' ~ ' + orders[orders.length - 1].out_trade_no,
-      activeCount,
+      range: orders[orders.length - 1].out_trade_no + ' ~ ' + orders[0].out_trade_no,
+      activeOrders,
     };
   }
 

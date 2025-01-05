@@ -26,7 +26,7 @@ export class AfdianApiService {
    * @param perPage - 每页数量，默认20，支持1-100
    * @returns
    */
-  async fetchAfdianOrders(page: number, perPage: number): Promise<OrderDto[]> {
+  async fetchAfdianOrders(page: number = 1, perPage: number = 20): Promise<OrderDto[]> {
     const params = { page, per_page: perPage };
     const response = await this.callAfdianOrderAPI(params);
     return response.data.list;
