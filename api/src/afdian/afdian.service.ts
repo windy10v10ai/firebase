@@ -45,7 +45,18 @@ export class AfdianService {
     private readonly analyticsPurchaseService: AnalyticsPurchaseService,
   ) {}
 
-  // 手动激活订单 通过订单号
+  /** 手动激活订单
+   * @param outTradeNo - 订单号
+   * @param steamId - Steam ID
+   * @returns 成功: `true`，失败: `false`
+   *
+   * @remarks
+   * - 如果是2024年10月1日之前的订单号，需要人工处理。
+   * - 如果订单已存在且标记为成功，则函数返回true。
+   * - 如果订单存在但未成功，则尝试激活订单并更新存储库。
+   * - 如果订单成功激活，则保存用户记录并发送购买事件。
+   * - 如果订单不存在，则从Afdian API获取订单详情并尝试激活为新订单。
+   */
   async activeOrderManual(outTradeNo: string, steamId: number) {
     if (outTradeNo < this.OUT_TRADE_NO_BASE) {
       // 旧订单需人工处理
@@ -83,13 +94,17 @@ export class AfdianService {
     return this.activeNewOrder(orderDto, steamId);
   }
 
-  async activeOrderWebhook(orderDto: OrderDto) {
+  /** 通过Webhook激活订单
+   * @param orderDto - 订单详情
+   * @returns 成功: `true`，失败: `false`
+   */
+  async activeWebhookOrder(orderDto: OrderDto): Promise<boolean> {
     // 检测重复订单
     const existOrder = await this.afdianOrderRepository
       .whereEqualTo('outTradeNo', orderDto.out_trade_no)
       .findOne();
     if (existOrder) {
-      return existOrder;
+      return true;
     }
 
     const steamId = await this.getSteamId(orderDto);
@@ -97,7 +112,45 @@ export class AfdianService {
     return await this.activeNewOrder(orderDto, steamId);
   }
 
-  async activeNewOrder(orderDto: OrderDto, steamId: number) {
+  /** 激活最近的订单
+   * @returns 检测的订单号范围，激活的订单数量
+   *
+   * @remarks
+   * - 获取最近的订单
+   * - 检查重复订单
+   * - 激活订单
+   */
+  async activeRecentOrder() {
+    const orders = await this.afdianApiService.fetchAfdianOrders(1, 100);
+    let activeCount = 0;
+
+    for (const orderDto of orders) {
+      const existOrder = await this.afdianOrderRepository
+        .whereEqualTo('outTradeNo', orderDto.out_trade_no)
+        .findOne();
+      if (existOrder) {
+        continue;
+      }
+
+      const steamId = await this.getSteamId(orderDto);
+      const isActiveSuccess = await this.activeNewOrder(orderDto, steamId);
+      if (isActiveSuccess) {
+        activeCount++;
+      }
+    }
+
+    return {
+      range: orders[0].out_trade_no + ' ~ ' + orders[orders.length - 1].out_trade_no,
+      activeCount,
+    };
+  }
+
+  /**
+   * 激活新订单，基于提供的订单详情和Steam ID。
+   * - 调用前，需要确保订单号不重复。
+   * - 无论订单是否成功，都会保存订单记录。
+   */
+  async activeNewOrder(orderDto: OrderDto, steamId: number): Promise<boolean> {
     const orderType = this.getOrderType(orderDto);
 
     const isActiveSuccess = await this.activeAfidianOrder(orderDto, orderType, steamId);
@@ -106,16 +159,28 @@ export class AfdianService {
     const afdianOrder = await this.saveAfdianOrder(orderDto, orderType, steamId, isActiveSuccess);
 
     if (isActiveSuccess) {
-      // 保存玩家记录
+      // 保存爱发电用户记录
       await this.saveAfdianUser(orderDto.user_id, steamId);
-      // 发送事件
+      // 发送GA4事件
       await this.analyticsPurchaseService.purchase(afdianOrder);
     }
 
     return isActiveSuccess;
   }
 
-  getOrderType(orderDto: OrderDto): OrderType {
+  async findFailed() {
+    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
+
+    orders.sort((a, b) => {
+      return b.outTradeNo.localeCompare(a.outTradeNo);
+    });
+    return orders.filter((order) => {
+      return order.outTradeNo > this.OUT_TRADE_NO_BASE;
+    });
+  }
+
+  // --- private ---
+  private getOrderType(orderDto: OrderDto): OrderType {
     if (ProductType.member == orderDto.product_type) {
       return OrderType.member;
     }
@@ -254,16 +319,5 @@ export class AfdianService {
       return null;
     }
     return steamId_remark;
-  }
-
-  async findFailed() {
-    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
-
-    orders.sort((a, b) => {
-      return b.outTradeNo.localeCompare(a.outTradeNo);
-    });
-    return orders.filter((order) => {
-      return order.outTradeNo > this.OUT_TRADE_NO_BASE;
-    });
   }
 }

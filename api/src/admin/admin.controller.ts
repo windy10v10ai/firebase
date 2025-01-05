@@ -38,4 +38,9 @@ export class AdminController {
   activeOrder(@Body() dto: ActiveAfdianOrderDto) {
     return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
   }
+
+  @Post('/afdian/order/active-recent')
+  activeRecentOrder() {
+    return this.afdianService.activeRecentOrder();
+  }
 }
