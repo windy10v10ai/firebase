@@ -19,6 +19,19 @@ interface AfdianQueryOrderResponse {
 export class AfdianApiService {
   constructor() {}
 
+  /**
+   * 获取最近的爱发电订单
+   *
+   * @param page - 页码
+   * @param perPage - 每页数量，默认20，支持1-100
+   * @returns
+   */
+  async fetchAfdianOrders(page: number = 1, perPage: number = 20): Promise<OrderDto[]> {
+    const params = { page, per_page: perPage };
+    const response = await this.callAfdianOrderAPI(params);
+    return response.data.list;
+  }
+
   async fetchAfdianOrderByOutTradeNo(outTradeNo: string) {
     const params = { out_trade_no: outTradeNo };
     const response = await this.callAfdianOrderAPI(params);

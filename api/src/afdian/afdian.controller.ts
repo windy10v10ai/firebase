@@ -38,7 +38,7 @@ export class AfdianController {
     if (!order) {
       throw new BadRequestException();
     }
-    const result = await this.afdianService.activeOrderWebhook(order);
+    const result = await this.afdianService.activeWebhookOrder(order);
     if (result) {
       return { ec: 200, em: 'ok' };
     } else {
