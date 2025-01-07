@@ -2,10 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import * as functions from 'firebase-functions';
+import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
+import { onSchedule } from 'firebase-functions/scheduler';
 
 import { AppModule } from './src/app.module';
+import { TaskController } from './src/task/task.controller';
 import { SECRET } from './src/util/secret/secret.service';
 import { AppGlobalSettings } from './src/util/settings';
 
@@ -85,5 +88,25 @@ export const admin = onRequest(
   async (req, res) => {
     await promiseApplicationReady;
     server(req, res);
+  },
+);
+
+export const hourlyFunction = onSchedule(
+  {
+    // schedule: '0 * * * *',
+    // TODO revert test
+    schedule: '* * * * *',
+    region: 'asia-northeast1',
+    minInstances: 0,
+    maxInstances: 1,
+    timeoutSeconds: 60,
+    secrets: commonSecrets,
+  },
+  async () => {
+    logger.info('Hourly function triggered');
+    const app = await promiseApplicationReady;
+    const service = app.get(TaskController);
+    const result = await service.activeRecentOrder();
+    logger.info('Hourly function finished', result);
   },
 );

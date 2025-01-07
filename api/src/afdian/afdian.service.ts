@@ -113,6 +113,7 @@ export class AfdianService {
   }
 
   /** 激活最近的订单
+   * @param orderNumber 检测的最近订单件数
    * @returns 检测的订单号范围，激活的订单号
    *
    * @remarks
@@ -120,8 +121,8 @@ export class AfdianService {
    * - 检查重复订单
    * - 激活订单
    */
-  async activeRecentOrder() {
-    const orders = await this.afdianApiService.fetchAfdianOrders(1, 100);
+  async activeRecentOrder(orderNumber: number) {
+    const orders = await this.afdianApiService.fetchAfdianOrders(1, orderNumber);
     const activeOrders = [];
 
     for (const orderDto of orders) {
