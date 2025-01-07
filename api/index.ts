@@ -91,22 +91,23 @@ export const admin = onRequest(
   },
 );
 
-export const hourlyFunction = onSchedule(
+export const scheduledOrderCheck = onSchedule(
   {
-    // schedule: '0 * * * *',
-    // TODO revert test
-    schedule: '* * * * *',
+    schedule: 'every 30 minutes',
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
-    timeoutSeconds: 60,
+    timeoutSeconds: 1800,
     secrets: commonSecrets,
   },
   async () => {
-    logger.info('Hourly function triggered');
+    logger.info('Schedule Function triggered');
     const app = await promiseApplicationReady;
-    const service = app.get(TaskController);
-    const result = await service.activeRecentOrder();
-    logger.info('Hourly function finished', result);
+    const task = app.get(TaskController);
+    const result = await task.activeRecentOrder(10);
+    if (result.activeTradeNos) {
+      logger.warn(`Active trade nos: ${result.activeTradeNos}`);
+    }
+    logger.info('Schedule function finished', result);
   },
 );

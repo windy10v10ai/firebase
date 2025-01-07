@@ -6,7 +6,7 @@ import { AfdianService } from '../afdian/afdian.service';
 export class TaskController {
   constructor(private readonly afdianService: AfdianService) {}
 
-  activeRecentOrder() {
-    return this.afdianService.activeRecentOrder(20);
+  activeRecentOrder(orderNumber: number = 20) {
+    return this.afdianService.activeRecentOrder(orderNumber);
   }
 }

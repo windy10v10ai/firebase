@@ -123,7 +123,7 @@ export class AfdianService {
    */
   async activeRecentOrder(orderNumber: number) {
     const orders = await this.afdianApiService.fetchAfdianOrders(1, orderNumber);
-    const activeOrders = [];
+    const activeTradeNos: string[] = [];
 
     for (const orderDto of orders) {
       const existOrder = await this.afdianOrderRepository
@@ -136,13 +136,13 @@ export class AfdianService {
       const steamId = await this.getSteamId(orderDto);
       const isActiveSuccess = await this.activeNewOrder(orderDto, steamId);
       if (isActiveSuccess) {
-        activeOrders.push(orderDto.out_trade_no);
+        activeTradeNos.push(orderDto.out_trade_no);
       }
     }
 
     return {
-      range: orders[orders.length - 1].out_trade_no + ' ~ ' + orders[0].out_trade_no,
-      activeOrders,
+      checkTradeNos: orders.map((order) => order.out_trade_no),
+      activeTradeNos,
     };
   }
 
