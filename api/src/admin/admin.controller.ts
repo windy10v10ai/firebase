@@ -41,6 +41,6 @@ export class AdminController {
 
   @Post('/afdian/order/active-recent')
   activeRecentOrder() {
-    return this.afdianService.activeRecentOrder();
+    return this.afdianService.activeRecentOrder(100);
   }
 }
