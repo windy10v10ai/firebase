@@ -105,7 +105,7 @@ export const scheduledOrderCheck = onSchedule(
     const app = await promiseApplicationReady;
     const task = app.get(TaskController);
     const result = await task.activeRecentOrder(10);
-    if (result.activeTradeNos) {
+    if (result.activeTradeNos.length > 0) {
       logger.warn(`Active trade nos: ${result.activeTradeNos}`);
     }
     logger.info('Schedule function finished', result);
