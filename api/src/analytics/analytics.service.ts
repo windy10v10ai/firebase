@@ -112,6 +112,7 @@ export class AnalyticsService {
   }
 
   async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
+    const playerCount = gameEnd.players.filter((player) => player.steamId > 0).length;
     for (const player of gameEnd.players) {
       const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
       // 机器人不纳入互动时间统计
@@ -124,6 +125,7 @@ export class AnalyticsService {
         engagement_time_msec,
         difficulty: gameEnd.difficulty,
         version: gameEnd.version,
+        player_count: playerCount,
         is_winner: gameEnd.winnerTeamId === player.teamId,
         // TODO remove win_rate
         win_rate: gameEnd.winnerTeamId === player.teamId,
