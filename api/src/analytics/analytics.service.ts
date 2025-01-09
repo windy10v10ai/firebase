@@ -81,6 +81,35 @@ export class AnalyticsService {
 
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
+  async gameEndPickAbility(pickDto: PickDto) {
+    const event = await this.buildEvent('game_end_pick_ability', pickDto.steamId, pickDto.matchId, {
+      method: 'steam',
+      steam_id: pickDto.steamId,
+      match_id: pickDto.matchId,
+      ability_name: pickDto.name,
+      level: pickDto.level,
+      difficulty: pickDto.difficulty,
+      version: pickDto.version,
+      win_metrics: pickDto.isWin,
+    });
+
+    await this.sendEvent(pickDto.steamId.toString(), event);
+  }
+
+  async gameEndPickItem(pickDto: PickDto) {
+    const event = await this.buildEvent('game_end_pick_item', pickDto.steamId, pickDto.matchId, {
+      method: 'steam',
+      steam_id: pickDto.steamId,
+      match_id: pickDto.matchId,
+      item_name: pickDto.name,
+      level: pickDto.level,
+      difficulty: pickDto.difficulty,
+      version: pickDto.version,
+      win_metrics: pickDto.isWin,
+    });
+
+    await this.sendEvent(pickDto.steamId.toString(), event);
+  }
 
   async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
     for (const player of gameEnd.players) {
@@ -96,7 +125,9 @@ export class AnalyticsService {
         difficulty: gameEnd.difficulty,
         version: gameEnd.version,
         is_winner: gameEnd.winnerTeamId === player.teamId,
+        // TODO remove win_rate
         win_rate: gameEnd.winnerTeamId === player.teamId,
+        win_metrics: gameEnd.winnerTeamId === player.teamId,
         team_id: player.teamId,
         hero_name: player.heroName,
         hero_name_cn: GetHeroNameChinese(player.heroName),
