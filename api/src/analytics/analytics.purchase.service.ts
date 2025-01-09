@@ -13,6 +13,7 @@ export interface PurchaseEvent {
   params: {
     items: {
       item_id: string;
+      item_name: string;
       affiliation: AFFILIATION;
       price: number;
       currency: CURRENCY;
@@ -46,7 +47,8 @@ export class AnalyticsPurchaseService {
       params: {
         items: [
           {
-            item_id: afdianOrder.orderType,
+            item_id: afdianOrder.orderDto.plan_id,
+            item_name: `afdian-${afdianOrder.orderType}`,
             affiliation: 'afdian',
             price,
             currency: 'CNY',
