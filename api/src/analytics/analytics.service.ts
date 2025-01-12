@@ -127,8 +127,6 @@ export class AnalyticsService {
         version: gameEnd.version,
         player_count: playerCount,
         is_winner: gameEnd.winnerTeamId === player.teamId,
-        // TODO remove win_rate
-        win_rate: gameEnd.winnerTeamId === player.teamId,
         win_metrics: gameEnd.winnerTeamId === player.teamId,
         team_id: player.teamId,
         hero_name: player.heroName,
