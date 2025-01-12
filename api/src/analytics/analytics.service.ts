@@ -42,7 +42,13 @@ export class AnalyticsService {
         is_local: isLocal,
       });
 
-      await this.sendEvent(steamId.toString(), event);
+      const userProperties: UserProperties = {
+        country: {
+          value: lookup?.country,
+        },
+      };
+
+      await this.sendEvent(steamId.toString(), event, userProperties);
     }
   }
 
