@@ -73,7 +73,7 @@ export class GameController {
     // 统计数据发送至GA4
     const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
     const lookup = geoip.lookup(xForwardedFor);
-    await this.analyticsService.gameStart(steamIds, matchId, countryCode, isLocal);
+    await this.analyticsService.gameStart(steamIds, matchId, lookup, isLocal);
 
     // ----------------- 以下为返回数据 -----------------
     // 获取玩家信息
