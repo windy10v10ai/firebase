@@ -35,10 +35,10 @@ export class AnalyticsService {
 
   async gameStart(steamIds: number[], matchId: number, lookup: Lookup, isLocal: boolean) {
     for (const steamId of steamIds) {
-      const event = await this.buildEvent('player_game_start', steamId, matchId.toString(), {
+      const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
         steam_id: steamId,
         match_id: matchId,
-        country: lookup.country,
+        country: lookup?.country,
         is_local: isLocal,
       });
 
