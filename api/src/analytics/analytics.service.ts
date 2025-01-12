@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Lookup } from 'geoip-lite';
 
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
 import { SECRET, SecretService } from '../util/secret/secret.service';
@@ -32,12 +33,13 @@ export class AnalyticsService {
 
   constructor(private readonly secretService: SecretService) {}
 
-  async gameStart(steamIds: number[], matchId: number) {
+  async gameStart(steamIds: number[], matchId: number, lookup: Lookup, isLocal: boolean) {
     for (const steamId of steamIds) {
       const event = await this.buildEvent('player_game_start', steamId, matchId.toString(), {
-        method: 'steam',
         steam_id: steamId,
         match_id: matchId,
+        country: lookup.country,
+        is_local: isLocal,
       });
 
       await this.sendEvent(steamId.toString(), event);
@@ -56,7 +58,6 @@ export class AnalyticsService {
 
   async lotteryPickAbility(pickDto: PickDto) {
     const event = await this.buildEvent('lottery_pick_ability', pickDto.steamId, pickDto.matchId, {
-      method: 'steam',
       steam_id: pickDto.steamId,
       match_id: pickDto.matchId,
       ability_name: pickDto.name,
@@ -70,7 +71,6 @@ export class AnalyticsService {
 
   async lotteryPickItem(pickDto: PickDto) {
     const event = await this.buildEvent('lottery_pick_item', pickDto.steamId, pickDto.matchId, {
-      method: 'steam',
       steam_id: pickDto.steamId,
       match_id: pickDto.matchId,
       item_name: pickDto.name,
@@ -83,7 +83,6 @@ export class AnalyticsService {
   }
   async gameEndPickAbility(pickDto: PickDto) {
     const event = await this.buildEvent('game_end_pick_ability', pickDto.steamId, pickDto.matchId, {
-      method: 'steam',
       steam_id: pickDto.steamId,
       match_id: pickDto.matchId,
       ability_name: pickDto.name,
@@ -98,7 +97,6 @@ export class AnalyticsService {
 
   async gameEndPickItem(pickDto: PickDto) {
     const event = await this.buildEvent('game_end_pick_item', pickDto.steamId, pickDto.matchId, {
-      method: 'steam',
       steam_id: pickDto.steamId,
       match_id: pickDto.matchId,
       item_name: pickDto.name,
@@ -119,7 +117,6 @@ export class AnalyticsService {
       const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
 
       const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
-        method: 'steam',
         steam_id: player.steamId,
         matchId: gameEnd.matchId,
         engagement_time_msec,
