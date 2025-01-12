@@ -88,9 +88,8 @@ export class GameController {
   }
 
   @ApiBody({ type: GameEndDto })
-  // FIXME 移除 end/v2
-  @Post(['end', 'end/v2'])
-  async endV2(@Body() gameEnd: GameEndDto): Promise<string> {
+  @Post('end')
+  async end(@Body() gameEnd: GameEndDto): Promise<string> {
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {
