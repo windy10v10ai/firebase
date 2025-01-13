@@ -31,7 +31,7 @@ Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
 ### Need
 
 - Java
-- Node v20
+- Node v22
   - Recommend install node use [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 
 ```bash
