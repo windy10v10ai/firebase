@@ -32,7 +32,6 @@
     "csv-parse": "^5.5.3",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.2.0",
-    "geoip-lite": "^1.4.10",
     "nestjs-fireorm": "^1.1.1",
     "rimraf": "^6.0.1",
     "rxjs": "^7.8.1"
@@ -42,7 +41,6 @@
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.15",
     "@types/express": "^5.0.0",
-    "@types/geoip-lite": "^1.4.4",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.9",
     "@types/supertest": "^2.0.16",

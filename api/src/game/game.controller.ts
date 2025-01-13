@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions';
-import geoip from 'geoip-lite';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
@@ -46,7 +45,7 @@ export class GameController {
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
-    @Headers('x-forwarded-for') xForwardedFor: string,
+    @Headers('x-country-code') countryCode: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<GameStart> {
     logger.debug(`[Game Start] with steamIds ${JSON.stringify(steamIds)}`);
@@ -72,10 +71,7 @@ export class GameController {
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
     const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
-    const lookup = geoip.lookup(xForwardedFor);
-    // FIXME remove logger
-    logger.debug(`[Game Start] lookup: ${JSON.stringify(lookup)}`);
-    await this.analyticsService.gameStart(steamIds, matchId, lookup, isLocal);
+    await this.analyticsService.gameStart(steamIds, matchId, countryCode, isLocal);
 
     // ----------------- 以下为返回数据 -----------------
     // 获取玩家信息

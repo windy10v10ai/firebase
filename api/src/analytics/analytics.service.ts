@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Lookup } from 'geoip-lite';
 
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
 import { SECRET, SecretService } from '../util/secret/secret.service';
@@ -33,18 +32,18 @@ export class AnalyticsService {
 
   constructor(private readonly secretService: SecretService) {}
 
-  async gameStart(steamIds: number[], matchId: number, lookup: Lookup, isLocal: boolean) {
+  async gameStart(steamIds: number[], matchId: number, countryCode: string, isLocal: boolean) {
     for (const steamId of steamIds) {
       const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
         steam_id: steamId,
         match_id: matchId,
-        country: lookup?.country,
+        country: countryCode,
         is_local: isLocal,
       });
 
       const userProperties: UserProperties = {
         country: {
-          value: lookup?.country,
+          value: countryCode,
         },
       };
 
