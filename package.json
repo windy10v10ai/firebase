@@ -1,10 +1,10 @@
 {
   "name": "windy10v10ai-cloud",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "Save windy 10v10ai data in cloud.",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "run-p build:*",

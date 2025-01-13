@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   ParseArrayPipe,
   ParseIntPipe,
@@ -44,7 +45,8 @@ export class GameController {
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
-    // @Headers('x-country-code') countryCode: string,
+    @Headers('x-country-code') countryCode: string,
+    @Headers('x-api-key') apiKey: string,
   ): Promise<GameStart> {
     logger.debug(`[Game Start] with steamIds ${JSON.stringify(steamIds)}`);
     steamIds = this.gameService.validateSteamIds(steamIds);
@@ -68,7 +70,8 @@ export class GameController {
 
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
-    await this.analyticsService.gameStart(steamIds, matchId);
+    const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
+    await this.analyticsService.gameStart(steamIds, matchId, countryCode, isLocal);
 
     // ----------------- 以下为返回数据 -----------------
     // 获取玩家信息
@@ -88,9 +91,8 @@ export class GameController {
   }
 
   @ApiBody({ type: GameEndDto })
-  // FIXME 移除 end/v2
-  @Post(['end', 'end/v2'])
-  async endV2(@Body() gameEnd: GameEndDto): Promise<string> {
+  @Post('end')
+  async end(@Body() gameEnd: GameEndDto): Promise<string> {
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {
