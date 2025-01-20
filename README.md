@@ -1,6 +1,17 @@
 # windy10v10ai-cloud
 
-Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
+![Build Status](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml/badge.svg)
+![Deploy Firebase](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml/badge.svg)
+[![License: MIT](https://img.shields.io/github/license/windy10v10ai/firebase.svg)](LICENSE)
+[![CodeFactor](https://www.codefactor.io/repository/github/windy10v10ai/firebase/badge)](https://www.codefactor.io/repository/github/windy10v10ai/firebase)
+<br>
+[![GitHub issues](https://img.shields.io/github/issues/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/pulls)
+[![GitHub contributors](https://img.shields.io/github/contributors/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/graphs/contributors)
+[![GitHub stars](https://img.shields.io/github/stars/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/network)
+
+Backend for [Windy 10v10ai](https://github.com/windy10v10ai/firebase) with Firebase
 
 - [Built With](#built-with)
 - [Get Start](#get-start)
@@ -37,7 +48,7 @@ Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
 ```bash
 # set/update node version
 nvm install
-nvm alias default
+nvm alias default $(cat .nvmrc)
 ```
 
 ```bash
@@ -245,3 +256,7 @@ Create schema file `table_name_schema.json` and run command.
 ```bash
 sh ./extensions/generate-schema-views.sh
 ```
+
+<br>
+
+![](https://api.moedog.org/count/@windybirth.readme)
