@@ -37,7 +37,7 @@ Backend for [Windy 10v10ai](https://github.com/windy10v10ai/game) with Firebase
 ```bash
 # set/update node version
 nvm install
-nvm alias default
+nvm alias default $(cat .nvmrc)
 ```
 
 ```bash
