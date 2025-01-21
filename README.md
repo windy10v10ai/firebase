@@ -1,7 +1,7 @@
 # windy10v10ai-cloud
 
-![Build Status](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml/badge.svg)
-![Deploy Firebase](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml/badge.svg)
+[![Build Status](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml/badge.svg)](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml)
+[![Deploy Firebase](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml/badge.svg?branch=main)](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml)
 [![License: MIT](https://img.shields.io/github/license/windy10v10ai/firebase.svg)](LICENSE)
 [![CodeFactor](https://www.codefactor.io/repository/github/windy10v10ai/firebase/badge)](https://www.codefactor.io/repository/github/windy10v10ai/firebase)
 <br>
