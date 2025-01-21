@@ -3,6 +3,7 @@ import { IsNotEmpty } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
+// FIXME move to game module
 export class GameEndGameOptionsDto {
   @ApiProperty({ default: 1 })
   multiplierRadiant: number;
