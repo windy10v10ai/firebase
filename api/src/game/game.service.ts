@@ -94,9 +94,9 @@ export class GameService {
   // 活动赠送赛季积分/会员
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2024-12-24T00:00:00.000Z');
-    const endTime = new Date('2025-01-04T00:00:00.000Z');
-    const rewardSeasonPoint = 2025;
+    const startTime = new Date('2025-01-28T00:00:00.000Z');
+    const endTime = new Date('2025-02-10T00:00:00.000Z');
+    const rewardSeasonPoint = 5000;
 
     const now = new Date();
     if (now < startTime || now > endTime) {
