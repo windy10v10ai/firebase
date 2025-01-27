@@ -94,7 +94,7 @@ export class GameService {
   // 活动赠送赛季积分/会员
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2025-01-28T00:00:00.000Z');
+    const startTime = new Date('2025-01-27T00:00:00.000Z');
     const endTime = new Date('2025-02-10T00:00:00.000Z');
     const rewardSeasonPoint = 5000;
 
@@ -120,8 +120,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '2025 双旦狂欢快乐',
-            en: 'Merry Christmas & Happy New Year',
+            cn: '新年快乐！',
+            en: 'Happy Lunar New Year',
           },
           seasonPoint: rewardSeasonPoint,
         });
