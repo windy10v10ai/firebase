@@ -2,7 +2,6 @@ import { Collection } from 'fireorm';
 
 @Collection()
 export class EventReward {
-  // FIXME 活动每次需要更新
   id!: string;
   steamId!: number;
   thridAnniversary?: boolean;
@@ -13,4 +12,5 @@ export class EventReward {
   point20240927?: boolean;
   fourthAnniversary?: boolean;
   newYear2025?: boolean;
+  lunarNewYear2025?: boolean;
 }
