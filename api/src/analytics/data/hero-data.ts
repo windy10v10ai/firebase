@@ -266,7 +266,7 @@ const heroNameToChineseMap = new Map<string, string>([
   ['npc_dota_hero_vengefulspirit', '复仇之魂'],
   ['npc_dota_hero_venomancer', '剧毒术士'],
   ['npc_dota_hero_viper', '冥界亚龙'],
-  ['npc_dota_hero_visage', '维萨吉'],
+  ['npc_dota_hero_visage', '沉渊之剑'],
   ['npc_dota_hero_void_spirit', '虚无之灵'],
   ['npc_dota_hero_warlock', '术士'],
   ['npc_dota_hero_weaver', '编织者'],
