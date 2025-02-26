@@ -6,5 +6,7 @@ export class PickDto extends EventBaseDto {
   @ApiProperty({ default: 'name' })
   name: string;
   @ApiProperty()
+  type: string;
+  @ApiProperty()
   level: number;
 }
