@@ -90,7 +90,7 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
-  // TODO 移除物品pick统计
+  // FIXME 移除物品pick统计
   async lotteryPickItem(pickDto: PickDto) {
     const event = await this.buildEvent('lottery_pick_item', pickDto.steamId, pickDto.matchId, {
       steam_id: pickDto.steamId,
