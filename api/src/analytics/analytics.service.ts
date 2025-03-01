@@ -32,6 +32,14 @@ export class AnalyticsService {
 
   constructor(private readonly secretService: SecretService) {}
 
+  async playerCreate(steamId: number) {
+    const event = await this.buildEvent('new_player', steamId, '0', {
+      steam_id: steamId,
+    });
+
+    await this.sendEvent(steamId.toString(), event);
+  }
+
   async gameStart(steamIds: number[], matchId: number, countryCode: string, isLocal: boolean) {
     for (const steamId of steamIds) {
       const event = await this.buildEvent('game_load', steamId, matchId.toString(), {

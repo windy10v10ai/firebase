@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from 'nestjs-fireorm';
 
+import { AnalyticsService } from '../analytics/analytics.service';
+
 import { Player } from './entities/player.entity';
 import { PlayerService } from './player.service';
 
@@ -9,11 +11,14 @@ describe('CatsController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      //   imports: [FireormModule.forFeature([Player])],
       providers: [
         PlayerService,
         {
           provide: getRepositoryToken(Player),
+          useValue: {},
+        },
+        {
+          provide: AnalyticsService,
           useValue: {},
         },
       ],

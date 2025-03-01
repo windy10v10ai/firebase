@@ -69,15 +69,7 @@ export class GameService {
   }
 
   async upsertPlayerInfo(steamId: number): Promise<void> {
-    const player = await this.playerService.findSteamIdAndNewPlayer(steamId);
-
-    // 更新Player
-    await this.playerService.updatePlayerLastMatchTime(
-      player,
-      // seasonPointTobeAdd,
-      0,
-      0,
-    );
+    await this.playerService.updatePlayerLastMatchTime(steamId);
   }
 
   async getPlayerRank(): Promise<PlayerRank> {
