@@ -33,7 +33,7 @@ export class AnalyticsService {
   constructor(private readonly secretService: SecretService) {}
 
   async playerCreate(steamId: number) {
-    const event = await this.buildEvent('player_create', steamId, '0', {
+    const event = await this.buildEvent('new_player', steamId, '0', {
       steam_id: steamId,
     });
 
