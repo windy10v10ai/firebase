@@ -23,7 +23,7 @@ export class PlayerService {
    */
   async getOrNewPlayerBySteamId(steamId: number) {
     const existPlayer = await this.playerRepository.findById(steamId.toString());
-    const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
+    const player = existPlayer ?? this.generateNewPlayerEntity(steamId);
     if (!existPlayer) {
       await this.playerRepository.create(player);
       await this.analyticsService.playerCreate(steamId);
@@ -117,7 +117,7 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
-  private genereNewPlayerEntity(steamId: number): Player {
+  private generateNewPlayerEntity(steamId: number): Player {
     return {
       id: steamId.toString(),
       matchCount: 0,
