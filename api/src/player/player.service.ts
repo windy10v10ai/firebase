@@ -172,20 +172,4 @@ export class PlayerService {
   getMemberLevelBuyPoint(point: number) {
     return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
   }
-
-  // ------------------ test code ------------------
-  // FIXME 移动到test module
-  memberLevelList = [{ steamId: 136407523, level: 32 }];
-  async initialLevel() {
-    for (const memberLevel of this.memberLevelList) {
-      await this.setMemberLevel(memberLevel.steamId, memberLevel.level);
-    }
-  }
-
-  async setMemberLevel(steamId: number, level: number) {
-    const memberPointsNeed = this.getMemberTotalPoint(level);
-    await this.upsertAddPoint(steamId, {
-      memberPointTotal: memberPointsNeed,
-    });
-  }
 }

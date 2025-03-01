@@ -16,8 +16,19 @@ export class TestController {
 
   @Get('/init')
   async initTestData(): Promise<void> {
-    await this.playerService.initialLevel();
+    await this.initialLevel();
     await this.playerPropertyService.initialProperty();
     await this.membersService.initTestData();
+  }
+
+  private async initialLevel() {
+    const memberLevelList = [{ steamId: 136407523, level: 32 }];
+    for (const memberLevel of memberLevelList) {
+      const memberPointsNeed = this.playerService.getMemberTotalPoint(memberLevel.level);
+
+      await this.playerService.upsertAddPoint(memberLevel.steamId, {
+        memberPointTotal: memberPointsNeed,
+      });
+    }
   }
 }
