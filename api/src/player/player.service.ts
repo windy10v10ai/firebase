@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { AnalyticsService } from '../analytics/analytics.service';
+
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { Player } from './entities/player.entity';
 
@@ -10,27 +12,29 @@ export class PlayerService {
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
+    private analyticsService: AnalyticsService,
   ) {}
 
-  // 创建新玩家
-  async findSteamIdAndNewPlayer(steamId: number) {
+  /**
+   * 根据 Steam ID 获取或创建新玩家。
+   *
+   * @param steamId - 玩家 Steam ID
+   * @returns 返回玩家实体
+   */
+  async getOrNewPlayerBySteamId(steamId: number) {
     const existPlayer = await this.playerRepository.findById(steamId.toString());
-    const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
+    const player = existPlayer ?? this.generateNewPlayerEntity(steamId);
     if (!existPlayer) {
       await this.playerRepository.create(player);
+      await this.analyticsService.playerCreate(steamId);
     }
     return player;
   }
 
   // 更新积分和最后游戏时间
-  async updatePlayerLastMatchTime(
-    player: Player,
-    seasonPointTotal: number,
-    memberPointTotal: number,
-  ) {
+  async updatePlayerLastMatchTime(steamId: number) {
+    const player = await this.getOrNewPlayerBySteamId(steamId);
     player.lastMatchTime = new Date();
-    player.seasonPointTotal += seasonPointTotal;
-    player.memberPointTotal += memberPointTotal;
     await this.playerRepository.update(player);
     return player;
   }
@@ -44,9 +48,7 @@ export class PlayerService {
     if (isNaN(seasonPoint)) {
       seasonPoint = 0;
     }
-    const existPlayer = await this.playerRepository.findById(steamId.toString());
-
-    const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
+    const player = await this.getOrNewPlayerBySteamId(steamId);
 
     player.matchCount++;
     if (isWinner) {
@@ -66,11 +68,7 @@ export class PlayerService {
     player.conductPoint = Math.min(100, player.conductPoint);
     player.conductPoint = Math.max(0, player.conductPoint);
 
-    if (existPlayer) {
-      await this.playerRepository.update(player);
-    } else {
-      await this.playerRepository.create(player);
-    }
+    await this.playerRepository.update(player);
   }
 
   async getPlayerTotalLevel(steamId: number) {
@@ -108,37 +106,18 @@ export class PlayerService {
   }
 
   async upsertAddPoint(steamId: number, updatePlayerDto: UpdatePlayerDto) {
-    const existPlayer = await this.playerRepository.findById(steamId.toString());
+    const player = await this.getOrNewPlayerBySteamId(steamId);
 
-    const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
     if (updatePlayerDto.memberPointTotal) {
       player.memberPointTotal += updatePlayerDto.memberPointTotal;
     }
     if (updatePlayerDto.seasonPointTotal) {
       player.seasonPointTotal += updatePlayerDto.seasonPointTotal;
     }
-    if (existPlayer) {
-      return await this.playerRepository.update(player);
-    } else {
-      return await this.playerRepository.create(player);
-    }
+    return await this.playerRepository.update(player);
   }
 
-  async setMemberLevel(steamId: number, level: number) {
-    const point = this.getMemberTotalPoint(level);
-    const existPlayer = await this.playerRepository.findById(steamId.toString());
-
-    const player = existPlayer ?? this.genereNewPlayerEntity(steamId);
-
-    player.memberPointTotal += point;
-    if (existPlayer) {
-      await this.playerRepository.update(player);
-    } else {
-      await this.playerRepository.create(player);
-    }
-  }
-
-  private genereNewPlayerEntity(steamId: number): Player {
+  private generateNewPlayerEntity(steamId: number): Player {
     return {
       id: steamId.toString(),
       matchCount: 0,
@@ -192,13 +171,5 @@ export class PlayerService {
   // 根据积分获取当前等级
   getMemberLevelBuyPoint(point: number) {
     return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
-  }
-
-  // ------------------ test code ------------------
-  memberLevelList = [{ steamId: 136407523, level: 32 }];
-  async initialLevel() {
-    for (const memberLevel of this.memberLevelList) {
-      await this.setMemberLevel(memberLevel.steamId, memberLevel.level);
-    }
   }
 }
