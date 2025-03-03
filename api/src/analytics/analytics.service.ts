@@ -214,8 +214,7 @@ export class AnalyticsService {
       params: {
         ...eventParams,
         session_id: `${steamId}-${matchId}`,
-        // FIXME https://github.com/windy10v10ai/firebase/issues/323
-        // session_number: matchId,
+        session_number: Number(matchId),
         engagement_time_msec: (eventParams.engagement_time_msec as number | string) || 1000,
         debug_mode: process.env.ENVIRONMENT === 'local',
       },
