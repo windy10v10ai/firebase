@@ -18,15 +18,4 @@ export class AnalyticsController {
   async gameEndLotteryPickAbility(@Body() body: PickDto) {
     await this.analyticsService.gameEndPickAbility(body);
   }
-
-  // FIXME 移除物品pick统计
-  @Post('/lottery/pick/item')
-  async lotteryPickItem(@Body() body: PickDto) {
-    await this.analyticsService.lotteryPickItem(body);
-  }
-
-  @Post('/game-end/pick/item')
-  async gameEndLotteryPickItem(@Body() body: PickDto) {
-    await this.analyticsService.gameEndPickItem(body);
-  }
 }
