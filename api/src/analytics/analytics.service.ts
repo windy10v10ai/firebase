@@ -98,33 +98,6 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
-  // FIXME 移除物品pick统计
-  async lotteryPickItem(pickDto: PickDto) {
-    const event = await this.buildEvent('lottery_pick_item', pickDto.steamId, pickDto.matchId, {
-      steam_id: pickDto.steamId,
-      match_id: pickDto.matchId,
-      item_name: pickDto.name,
-      level: pickDto.level,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-    });
-
-    await this.sendEvent(pickDto.steamId.toString(), event);
-  }
-  async gameEndPickItem(pickDto: PickDto) {
-    const event = await this.buildEvent('game_end_pick_item', pickDto.steamId, pickDto.matchId, {
-      steam_id: pickDto.steamId,
-      match_id: pickDto.matchId,
-      item_name: pickDto.name,
-      level: pickDto.level,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-      win_metrics: pickDto.isWin,
-    });
-
-    await this.sendEvent(pickDto.steamId.toString(), event);
-  }
-
   // ------------------------ 通过game end API调用 ------------------------
   async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
     const playerCount = gameEnd.players.filter((player) => player.steamId > 0).length;
