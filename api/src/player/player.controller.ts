@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { PlayerService } from './player.service';
@@ -17,5 +17,11 @@ export class PlayerController {
   @Patch('/steamId/:steamId')
   upsert(@Param('steamId') steamId: number, @Body() updatePlayerDto: UpdatePlayerDto) {
     return this.playerService.upsertAddPoint(steamId, updatePlayerDto);
+  }
+
+  @Get('/rank')
+  @ApiOperation({ summary: 'Get player rankings' })
+  getPlayerRank() {
+    return this.playerService.getPlayerRank();
   }
 }

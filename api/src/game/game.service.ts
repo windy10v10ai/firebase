@@ -5,7 +5,6 @@ import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerRank } from '../player-count/entities/player-rank.entity';
 import { PlayerCountService } from '../player-count/player-count.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
@@ -70,17 +69,6 @@ export class GameService {
 
   async upsertPlayerInfo(steamId: number): Promise<void> {
     await this.playerService.updatePlayerLastMatchTime(steamId);
-  }
-
-  async getPlayerRank(): Promise<PlayerRank> {
-    const playerRank = await this.playerCountService.getPlayerRankToday();
-
-    if (playerRank) {
-      return playerRank;
-    } else {
-      const rankSteamIds = await this.playerService.findTop100SeasonPointSteamIds();
-      return await this.playerCountService.updatePlayerRankToday(rankSteamIds);
-    }
   }
 
   // 活动赠送赛季积分/会员

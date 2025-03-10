@@ -3,6 +3,8 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { PlayerRank } from '../player-count/entities/player-rank.entity';
+import { PlayerCountService } from '../player-count/player-count.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { Player } from './entities/player.entity';
@@ -12,7 +14,8 @@ export class PlayerService {
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
-    private analyticsService: AnalyticsService,
+    private readonly analyticsService: AnalyticsService,
+    private readonly playerCountService: PlayerCountService,
   ) {}
 
   /**
@@ -81,19 +84,6 @@ export class PlayerService {
     const memberPoint = player.memberPointTotal;
     const memberLevel = this.getMemberLevelBuyPoint(memberPoint);
     return seasonLevel + memberLevel;
-  }
-
-  async findTop100SeasonPointSteamIds(): Promise<string[]> {
-    const rankingCount = 200;
-    const excludeSteamIds = ['424859328', '869192295', '338807313'];
-    const players = await this.playerRepository
-      .orderByDescending('seasonPointTotal')
-      .limit(rankingCount + excludeSteamIds.length)
-      .find();
-
-    return players
-      .filter((player) => !excludeSteamIds.includes(player.id))
-      .map((player) => player.id);
   }
 
   async findBySteamId(steamId: number) {
@@ -171,5 +161,33 @@ export class PlayerService {
   // 根据积分获取当前等级
   getMemberLevelBuyPoint(point: number) {
     return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
+  }
+
+  /**
+   * 获取玩家排名信息
+   * 返回当前玩家排名，如果不存在则生成新的排名
+   */
+  async getPlayerRank(): Promise<PlayerRank> {
+    const playerRank = await this.playerCountService.getPlayerRankToday();
+
+    if (playerRank) {
+      return playerRank;
+    } else {
+      const rankSteamIds = await this.findTopSeasonPointSteamIds();
+      return await this.playerCountService.updatePlayerRankToday(rankSteamIds);
+    }
+  }
+
+  private async findTopSeasonPointSteamIds(): Promise<string[]> {
+    const rankingCount = 200;
+    const excludeSteamIds = ['424859328', '869192295', '338807313'];
+    const players = await this.playerRepository
+      .orderByDescending('seasonPointTotal')
+      .limit(rankingCount + excludeSteamIds.length)
+      .find();
+
+    return players
+      .filter((player) => !excludeSteamIds.includes(player.id))
+      .map((player) => player.id);
   }
 }
