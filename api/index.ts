@@ -17,14 +17,10 @@ const server = express();
 
 const adapter = new ExpressAdapter(server);
 const createApp = async () => {
-  const app = await NestFactory.create(
-    AppModule, 
-    adapter,
-    { 
-      bodyParser: false // 禁用内置的 body parser，避免 router 检测带来的兼容性问题
-    }
-  );
-  
+  const app = await NestFactory.create(AppModule, adapter, {
+    bodyParser: false, // 禁用内置的 body parser，避免 router 检测带来的兼容性问题
+  });
+
   AppGlobalSettings(app);
   await app.init();
   return app;
