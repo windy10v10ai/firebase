@@ -12,15 +12,25 @@ import { TaskController } from './src/task/task.controller';
 import { SECRET } from './src/util/secret/secret.service';
 import { AppGlobalSettings } from './src/util/settings';
 
-// NestJS app
+// Init NestJS app
 const server = express();
 
-const promiseApplicationReady = NestFactory.create(AppModule, new ExpressAdapter(server)).then(
-  (app) => {
-    AppGlobalSettings(app);
-    return app.init();
-  },
-);
+const adapter = new ExpressAdapter(server);
+const createApp = async () => {
+  const app = await NestFactory.create(
+    AppModule, 
+    adapter,
+    { 
+      bodyParser: false // 禁用内置的 body parser，避免 router 检测带来的兼容性问题
+    }
+  );
+  
+  AppGlobalSettings(app);
+  await app.init();
+  return app;
+};
+
+const promiseApplicationReady = createApp();
 
 const isLocal = process.env.FUNCTIONS_EMULATOR === 'true';
 
