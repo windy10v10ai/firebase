@@ -79,6 +79,7 @@ export class GameController {
     const players = await this.gameService.findPlayerDtoBySteamIds(steamIdsStr);
 
     // 排行榜
+    // TODO 移动到Player Controller中，移除这里的代码
     const playerRank = await this.playerService.getPlayerRank();
     const top100SteamIds = playerRank.rankSteamIds;
 

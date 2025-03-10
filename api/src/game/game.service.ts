@@ -5,7 +5,6 @@ import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerCountService } from '../player-count/player-count.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
@@ -18,7 +17,6 @@ export class GameService {
   constructor(
     private readonly playerService: PlayerService,
     private readonly membersService: MembersService,
-    private readonly playerCountService: PlayerCountService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly playerPropertyService: PlayerPropertyService,
   ) {}
