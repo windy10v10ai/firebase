@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { PlayerCountService } from '../player-count/player-count.service';
 
 import { Player } from './entities/player.entity';
 import { PlayerService } from './player.service';
@@ -19,6 +20,10 @@ describe('CatsController', () => {
         },
         {
           provide: AnalyticsService,
+          useValue: {},
+        },
+        {
+          provide: PlayerCountService,
           useValue: {},
         },
       ],
