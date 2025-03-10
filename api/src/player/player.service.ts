@@ -3,10 +3,9 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
-import { PlayerRank } from '../player-count/entities/player-rank.entity';
-import { PlayerCountService } from '../player-count/player-count.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
+import { PlayerRank } from './entities/player-rank.entity';
 import { Player } from './entities/player.entity';
 
 @Injectable()
@@ -14,8 +13,9 @@ export class PlayerService {
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
+    @InjectRepository(PlayerRank)
+    private readonly playerRankRepository: BaseFirestoreRepository<PlayerRank>,
     private readonly analyticsService: AnalyticsService,
-    private readonly playerCountService: PlayerCountService,
   ) {}
 
   /**
@@ -168,14 +168,31 @@ export class PlayerService {
    * 返回当前玩家排名，如果不存在则生成新的排名
    */
   async getPlayerRank(): Promise<PlayerRank> {
-    const playerRank = await this.playerCountService.getPlayerRankToday();
+    const playerRank = await this.getPlayerRankToday();
 
     if (playerRank) {
       return playerRank;
     } else {
       const rankSteamIds = await this.findTopSeasonPointSteamIds();
-      return await this.playerCountService.updatePlayerRankToday(rankSteamIds);
+      return await this.updatePlayerRankToday(rankSteamIds);
     }
+  }
+
+  async getPlayerRankToday(): Promise<PlayerRank> {
+    const id = this.getDateString();
+    return await this.playerRankRepository.findById(id);
+  }
+
+  async updatePlayerRankToday(steamIds: string[]): Promise<PlayerRank> {
+    const id = this.getDateString();
+    const playerRank = new PlayerRank();
+    playerRank.id = id;
+    playerRank.rankSteamIds = steamIds;
+    return await this.playerRankRepository.create(playerRank);
+  }
+
+  private getDateString() {
+    return new Date().toISOString().slice(0, 10).replace(/-/g, '');
   }
 
   private async findTopSeasonPointSteamIds(): Promise<string[]> {

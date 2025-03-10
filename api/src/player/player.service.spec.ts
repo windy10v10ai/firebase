@@ -2,12 +2,12 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
-import { PlayerCountService } from '../player-count/player-count.service';
 
+import { PlayerRank } from './entities/player-rank.entity';
 import { Player } from './entities/player.entity';
 import { PlayerService } from './player.service';
 
-describe('CatsController', () => {
+describe('PlayerService', () => {
   let playerService: PlayerService;
 
   beforeEach(async () => {
@@ -19,11 +19,11 @@ describe('CatsController', () => {
           useValue: {},
         },
         {
-          provide: AnalyticsService,
+          provide: getRepositoryToken(PlayerRank),
           useValue: {},
         },
         {
-          provide: PlayerCountService,
+          provide: AnalyticsService,
           useValue: {},
         },
       ],
@@ -31,15 +31,13 @@ describe('CatsController', () => {
 
     playerService = moduleRef.get<PlayerService>(PlayerService);
   });
+
   describe('赛季积分', () => {
     describe('升级所需积分', () => {
       let level = 1;
       let point = 100;
       it(`${level} -> ${point}`, async () => {
-        const level = 1;
-        const point = 100;
-        const result = playerService.getSeasonNextLevelPoint(level);
-        expect(result).toBe(point);
+        expect(playerService.getSeasonNextLevelPoint(level)).toBe(point);
       });
 
       level = 2;
