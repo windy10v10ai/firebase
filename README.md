@@ -89,7 +89,7 @@ Need Authenticate with gcloud
 # download data from storage
 rm -rf firestore-backup
 mkdir firestore-backup
-gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20241221/*" firestore-backup
+gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20250310/*" firestore-backup
 ```
 
 ### API only
