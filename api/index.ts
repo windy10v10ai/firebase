@@ -49,7 +49,7 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex = '^/api/(game|afdian|analytics).*';
+    const regex = '^/api/(game|afdian|analytics|player).*';
     callServerWithRegex(regex, req, res);
   },
 );

@@ -121,6 +121,11 @@ net start winnat
 - OpenAPI Document (Swagger): http://localhost:3001/api-doc
 - Nextjs Web: http://localhost:3000/
 
+
+## API Guide
+
+More usage details, including configuration, authentication, and example code, please refer to [API Guide](docs/API_GUIDE.md).
+
 # Maintenance
 
 ## Deploy

@@ -9,19 +9,9 @@ import { PlayerService } from './player.service';
 export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
 
-  @Get('/steamId/:steamId')
-  findOne(@Param('steamId') steamId: string) {
-    return this.playerService.findBySteamId(+steamId);
-  }
-
-  @Patch('/steamId/:steamId')
-  upsert(@Param('steamId') steamId: number, @Body() updatePlayerDto: UpdatePlayerDto) {
-    return this.playerService.upsertAddPoint(steamId, updatePlayerDto);
-  }
-
-  @Get('/rank')
+  @Get('/ranking')
   @ApiOperation({ summary: 'Get player rankings' })
-  getPlayerRank() {
-    return this.playerService.getPlayerRank();
+  getPlayerRanking() {
+    return this.playerService.getPlayerRanking();
   }
 }

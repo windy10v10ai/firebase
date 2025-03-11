@@ -163,11 +163,11 @@ export class PlayerService {
     return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
   }
 
-  /**
+  /** 
    * 获取玩家排名信息
    * 返回当前玩家排名，如果不存在则生成新的排名
    */
-  async getPlayerRank(): Promise<PlayerRank> {
+  async getPlayerRanking(): Promise<PlayerRank> {
     const playerRank = await this.getPlayerRankToday();
 
     if (playerRank) {
