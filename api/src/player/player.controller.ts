@@ -1,21 +1,21 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { UpdatePlayerDto } from './dto/update-player.dto';
+import { PlayerRanking } from './entities/player-ranking.entity';
+import { PlayerRankingService } from './player-ranking.service';
 import { PlayerService } from './player.service';
 
 @ApiTags('Player')
 @Controller('player')
 export class PlayerController {
-  constructor(private readonly playerService: PlayerService) {}
+  constructor(
+    private readonly playerService: PlayerService,
+    private readonly playerRankingService: PlayerRankingService,
+  ) {}
 
-  @Get('/steamId/:steamId')
-  findOne(@Param('steamId') steamId: string) {
-    return this.playerService.findBySteamId(+steamId);
-  }
-
-  @Patch('/steamId/:steamId')
-  upsert(@Param('steamId') steamId: number, @Body() updatePlayerDto: UpdatePlayerDto) {
-    return this.playerService.upsertAddPoint(steamId, updatePlayerDto);
+  @Get('/ranking')
+  @ApiOperation({ summary: 'Get player rankings' })
+  getRanking(): Promise<PlayerRanking> {
+    return this.playerRankingService.getRanking();
   }
 }

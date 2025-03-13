@@ -4,7 +4,6 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerCountService } from '../player-count/player-count.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { GameService } from './game.service';
@@ -27,10 +26,6 @@ describe('GameService', () => {
         },
         {
           provide: MembersService,
-          useValue: {},
-        },
-        {
-          provide: PlayerCountService,
           useValue: {},
         },
         {
