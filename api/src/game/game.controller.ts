@@ -79,7 +79,7 @@ export class GameController {
     const players = await this.gameService.findPlayerDtoBySteamIds(steamIdsStr);
 
     // 排行榜 移动到Player Service中
-    const playerRank = await this.playerService.getPlayerRanking();
+    const playerRank = await this.playerService.getPlayerRank();
     const top100SteamIds = playerRank.rankSteamIds;
 
     return {

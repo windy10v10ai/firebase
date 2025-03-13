@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { UpdatePlayerDto } from './dto/update-player.dto';
+import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerService } from './player.service';
 
 @ApiTags('Player')
@@ -11,7 +11,7 @@ export class PlayerController {
 
   @Get('/ranking')
   @ApiOperation({ summary: 'Get player rankings' })
-  getPlayerRanking() {
-    return this.playerService.getPlayerRanking();
+  getPlayerRanking(): Promise<PlayerRanking> {
+    return this.playerService.getRanking();
   }
 }
