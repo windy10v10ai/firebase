@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 import { get, initTest } from './util/util-http';
+import { getPlayer } from './util/util-player';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
@@ -110,9 +111,8 @@ describe('MemberController (e2e)', () => {
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
-      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
-      expect(responsePlayer.status).toEqual(200);
-      expect(responsePlayer.body.memberPointTotal).toEqual(300 * month);
+      const player = await getPlayer(app, memberId);
+      expect(player.memberPointTotal).toEqual(300 * month);
     });
 
     it('爱发电Webhook开通会员成功 webhook重复请求', async () => {
@@ -191,9 +191,8 @@ describe('MemberController (e2e)', () => {
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
-      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
-      expect(responsePlayer.status).toEqual(200);
-      expect(responsePlayer.body.memberPointTotal).toEqual(300 * month);
+      const player = await getPlayer(app, memberId);
+      expect(player.memberPointTotal).toEqual(300 * month);
     });
 
     it('爱发电Webhook开通会员失败 未留言ID', async () => {
@@ -313,9 +312,8 @@ describe('MemberController (e2e)', () => {
       expect(responseAfter.status).toEqual(200);
       expect(responseAfter.body).toEqual(expectBodyJson);
       // 检查玩家积分
-      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
-      expect(responsePlayer.status).toEqual(200);
-      expect(responsePlayer.body.memberPointTotal).toEqual(300 * month);
+      const player = await getPlayer(app, memberId);
+      expect(player.memberPointTotal).toEqual(300 * month);
     });
 
     it('爱发电Webhook购买会员积分 单次', async () => {
@@ -359,9 +357,8 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
-      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
-      expect(responsePlayer.status).toEqual(200);
-      expect(responsePlayer.body.memberPointTotal).toEqual(3200);
+      const player = await getPlayer(app, memberId);
+      expect(player.memberPointTotal).toEqual(3200);
     });
 
     it('爱发电Webhook购买会员积分 单次多个', async () => {
@@ -405,9 +402,8 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
-      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
-      expect(responsePlayer.status).toEqual(200);
-      expect(responsePlayer.body.memberPointTotal).toEqual(52000);
+      const player = await getPlayer(app, memberId);
+      expect(player.memberPointTotal).toEqual(52000);
     });
 
     it('爱发电Webhook购买会员积分 多次', async () => {
@@ -486,9 +482,8 @@ describe('MemberController (e2e)', () => {
       expect(responseCreate2.status).toEqual(201);
       expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
       // 检查玩家积分
-      const responsePlayer = await get(app, `/api/player/steamId/${memberId}`);
-      expect(responsePlayer.status).toEqual(200);
-      expect(responsePlayer.body.memberPointTotal).toEqual(13200);
+      const player = await getPlayer(app, memberId);
+      expect(player.memberPointTotal).toEqual(13200);
     });
   });
 

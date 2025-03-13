@@ -11,12 +11,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
+import { PlayerRankingService } from '../player/player-ranking.service';
 import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -35,6 +35,7 @@ export class GameController {
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
+    private readonly playerRankingService: PlayerRankingService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
   ) {}
@@ -48,7 +49,6 @@ export class GameController {
     @Headers('x-country-code') countryCode: string,
     @Headers('x-api-key') apiKey: string,
   ): Promise<GameStart> {
-    logger.debug(`[Game Start] with steamIds ${JSON.stringify(steamIds)}`);
     steamIds = this.gameService.validateSteamIds(steamIds);
 
     const pointInfo: PointInfoDto[] = [];
@@ -79,7 +79,7 @@ export class GameController {
     const players = await this.gameService.findPlayerDtoBySteamIds(steamIdsStr);
 
     // 排行榜 移动到Player Service中
-    const playerRank = await this.playerService.getPlayerRank();
+    const playerRank = await this.playerRankingService.getPlayerRank();
     const top100SteamIds = playerRank.rankSteamIds;
 
     return {

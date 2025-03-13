@@ -5,22 +5,13 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { AnalyticsService } from '../analytics/analytics.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
-import { PlayerRank } from './entities/player-rank.entity';
-import { PlayerRanking } from './entities/player-ranking.entity';
 import { Player } from './entities/player.entity';
 
 @Injectable()
 export class PlayerService {
-  // 排除的SteamId
-  private readonly excludeSteamIds = ['424859328', '869192295', '338807313'];
-
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
-    @InjectRepository(PlayerRank)
-    private readonly playerRankRepository: BaseFirestoreRepository<PlayerRank>,
-    @InjectRepository(PlayerRanking)
-    private readonly playerRankingRepository: BaseFirestoreRepository<PlayerRanking>,
     private readonly analyticsService: AnalyticsService,
   ) {}
 
@@ -92,7 +83,7 @@ export class PlayerService {
     return seasonLevel + memberLevel;
   }
 
-  async findBySteamId(steamId: number) {
+  async findBySteamId(steamId: number): Promise<Player> {
     return await this.playerRepository.findById(steamId.toString());
   }
 
@@ -167,116 +158,5 @@ export class PlayerService {
   // 根据积分获取当前等级
   getMemberLevelBuyPoint(point: number) {
     return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
-  }
-
-  /**
-   * 获取玩家排名信息
-   */
-  async getRanking(): Promise<PlayerRanking> {
-    const playerRanking = await this.getRankingToday();
-
-    if (playerRanking) {
-      return playerRanking;
-    } else {
-      return await this.calculateRanking();
-    }
-  }
-
-  async getRankingToday(): Promise<PlayerRanking> {
-    const id = this.getDateString();
-    return await this.playerRankingRepository.findById(id);
-  }
-
-  async calculateRanking(): Promise<PlayerRanking> {
-    const playerRanking = new PlayerRanking();
-    playerRanking.id = this.getDateString();
-
-    // 获取前1000名玩家详细排名
-    const topPlayers = await this.playerRepository
-      .orderByDescending('seasonPointTotal')
-      .limit(1000)
-      .find();
-    playerRanking.topSteamIds = topPlayers
-      .filter((player) => !this.excludeSteamIds.includes(player.id))
-      .map((player) => player.id);
-
-    // 获取第1000名玩家的分数
-    playerRanking.top1000Score = topPlayers[topPlayers.length - 1].seasonPointTotal;
-
-    // 获取第2000名玩家的分数
-    const top2000Players = await this.playerRepository
-      .whereLessThan('seasonPointTotal', playerRanking.top1000Score)
-      .orderByDescending('seasonPointTotal')
-      .limit(1000)
-      .find();
-    playerRanking.top2000Score = top2000Players[top2000Players.length - 1].seasonPointTotal;
-
-    // 获取第3000名玩家的分数
-    const top3000Players = await this.playerRepository
-      .whereLessThan('seasonPointTotal', playerRanking.top2000Score)
-      .orderByDescending('seasonPointTotal')
-      .limit(1000)
-      .find();
-    playerRanking.top3000Score = top3000Players[top3000Players.length - 1].seasonPointTotal;
-
-    // 获取第4000名玩家的分数
-    const top4000Players = await this.playerRepository
-      .whereLessThan('seasonPointTotal', playerRanking.top3000Score)
-      .orderByDescending('seasonPointTotal')
-      .limit(1000)
-      .find();
-    playerRanking.top4000Score = top4000Players[top4000Players.length - 1].seasonPointTotal;
-
-    // 获取第5000名玩家的分数
-    const top5000Players = await this.playerRepository
-      .whereLessThan('seasonPointTotal', playerRanking.top4000Score)
-      .orderByDescending('seasonPointTotal')
-      .limit(1000)
-      .find();
-    playerRanking.top5000Score = top5000Players[top5000Players.length - 1].seasonPointTotal;
-
-    return await this.playerRankingRepository.create(playerRanking);
-  }
-
-  // 旧版排行 GameController 使用 之后删除
-  async getPlayerRank(): Promise<PlayerRank> {
-    const playerRank = await this.getPlayerRankToday();
-
-    if (playerRank) {
-      return playerRank;
-    } else {
-      const rankSteamIds = await this.findTopSeasonPointSteamIds();
-      return await this.updatePlayerRankToday(rankSteamIds);
-    }
-  }
-
-  async getPlayerRankToday(): Promise<PlayerRank> {
-    const id = this.getDateString();
-    return await this.playerRankRepository.findById(id);
-  }
-
-  async updatePlayerRankToday(steamIds: string[]): Promise<PlayerRank> {
-    const id = this.getDateString();
-    const playerRank = new PlayerRank();
-    playerRank.id = id;
-    playerRank.rankSteamIds = steamIds;
-    return await this.playerRankRepository.create(playerRank);
-  }
-
-  private async findTopSeasonPointSteamIds(): Promise<string[]> {
-    const rankingCount = 200;
-    const players = await this.playerRepository
-      .orderByDescending('seasonPointTotal')
-      .limit(rankingCount + this.excludeSteamIds.length)
-      .find();
-
-    return players
-      .filter((player) => !this.excludeSteamIds.includes(player.id))
-      .map((player) => player.id);
-  }
-
-  // 获取当前日期字符串
-  private getDateString() {
-    return new Date().toISOString().slice(0, 10).replace(/-/g, '');
   }
 }
