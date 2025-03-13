@@ -41,6 +41,13 @@ export class PlayerRankingService {
   async calculateRanking(): Promise<PlayerRanking> {
     const playerRanking = new PlayerRanking();
     playerRanking.id = this.getDateString();
+    playerRanking.rankScores = {
+      top1000: 0,
+      top2000: 0,
+      top3000: 0,
+      top4000: 0,
+      top5000: 0,
+    };
 
     // 获取前1000名玩家详细排名
     const topPlayers = await this.playerRepository
@@ -51,14 +58,27 @@ export class PlayerRankingService {
       .filter((player) => !this.excludeSteamIds.includes(player.id))
       .map((player) => player.id);
 
+    // 如果没有玩家，返回空排名
+    if (topPlayers.length === 0) {
+      return await this.playerRankingRepository.create(playerRanking);
+    }
+
     // 获取第1000名玩家的分数
-    playerRanking.top1000Score = topPlayers[topPlayers.length - 1].seasonPointTotal;
+    playerRanking.rankScores.top1000 = topPlayers[topPlayers.length - 1].seasonPointTotal;
 
     // 获取其他分段的分数
-    playerRanking.top2000Score = await this.getNextRankScore(playerRanking.top1000Score);
-    playerRanking.top3000Score = await this.getNextRankScore(playerRanking.top2000Score);
-    playerRanking.top4000Score = await this.getNextRankScore(playerRanking.top3000Score);
-    playerRanking.top5000Score = await this.getNextRankScore(playerRanking.top4000Score);
+    playerRanking.rankScores.top2000 = await this.getNextRankScore(
+      playerRanking.rankScores.top1000,
+    );
+    playerRanking.rankScores.top3000 = await this.getNextRankScore(
+      playerRanking.rankScores.top2000,
+    );
+    playerRanking.rankScores.top4000 = await this.getNextRankScore(
+      playerRanking.rankScores.top3000,
+    );
+    playerRanking.rankScores.top5000 = await this.getNextRankScore(
+      playerRanking.rankScores.top4000,
+    );
 
     return await this.playerRankingRepository.create(playerRanking);
   }
