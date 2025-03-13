@@ -33,6 +33,11 @@ describe('PlayerController (e2e)', () => {
       expect(firstResponse.status).toEqual(200);
       expect(firstResponse.body.id).toBeDefined();
       expect(Array.isArray(firstResponse.body.topSteamIds)).toBeTruthy();
+      expect(firstResponse.body.top1000Score).toBeDefined();
+      expect(firstResponse.body.top2000Score).toBeDefined();
+      expect(firstResponse.body.top3000Score).toBeDefined();
+      expect(firstResponse.body.top4000Score).toBeDefined();
+      expect(firstResponse.body.top5000Score).toBeDefined();
 
       // 保存响应数据用于比较
       const initialRankData = firstResponse.body;
