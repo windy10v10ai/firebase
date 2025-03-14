@@ -33,7 +33,6 @@ export class AfdianController {
       logger.error(`Afdian webhook token error`);
       throw new UnauthorizedException();
     }
-    logger.debug('Afdian webhook called with:', afdianWebhookDto);
     const order = afdianWebhookDto?.data?.order;
     if (!order) {
       throw new BadRequestException();

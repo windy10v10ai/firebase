@@ -12,7 +12,7 @@ export class PlayerService {
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
-    private analyticsService: AnalyticsService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   /**
@@ -83,20 +83,7 @@ export class PlayerService {
     return seasonLevel + memberLevel;
   }
 
-  async findTop100SeasonPointSteamIds(): Promise<string[]> {
-    const rankingCount = 200;
-    const excludeSteamIds = ['424859328', '869192295', '338807313'];
-    const players = await this.playerRepository
-      .orderByDescending('seasonPointTotal')
-      .limit(rankingCount + excludeSteamIds.length)
-      .find();
-
-    return players
-      .filter((player) => !excludeSteamIds.includes(player.id))
-      .map((player) => player.id);
-  }
-
-  async findBySteamId(steamId: number) {
+  async findBySteamId(steamId: number): Promise<Player> {
     return await this.playerRepository.findById(steamId.toString());
   }
 

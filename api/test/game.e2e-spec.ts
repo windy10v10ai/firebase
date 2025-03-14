@@ -6,7 +6,6 @@ import { addPlayerProperty, createPlayer, getPlayer, getPlayerProperty } from '.
 
 const gameStartUrl = '/api/game/start/';
 const gameEndUrl = '/api/game/end';
-const playerGetUrl = '/api/player/steamId/';
 const memberPostUrl = '/api/members/';
 const resetPlayerPropertyUrl = '/api/game/resetPlayerProperty';
 
@@ -45,10 +44,9 @@ describe('PlayerController (e2e)', () => {
         const result = await get(app, gameStartUrl, { steamIds, matchId });
         expect(result.status).toEqual(200);
         // assert player
-        const playerResult = await get(app, `${playerGetUrl}100000001`);
-        expect(playerResult.status).toEqual(200);
-        expect(playerResult.body.memberPointTotal).toEqual(0);
-        expect(playerResult.body.seasonPointTotal).toEqual(0);
+        const player = await getPlayer(app, 100000001);
+        expect(player.memberPointTotal).toEqual(0);
+        expect(player.seasonPointTotal).toEqual(0);
       });
 
       it('普通玩家 老玩家 当日首次', async () => {
@@ -58,17 +56,17 @@ describe('PlayerController (e2e)', () => {
         const result = await get(app, gameStartUrl, { steamIds, matchId });
         expect(result.status).toEqual(200);
         // assert player
-        const playerResult = await get(app, `${playerGetUrl}100000002`);
-        expect(playerResult.body.memberPointTotal).toEqual(0);
-        expect(playerResult.body.seasonPointTotal).toEqual(0);
+        const player = await getPlayer(app, 100000002);
+        expect(player.memberPointTotal).toEqual(0);
+        expect(player.seasonPointTotal).toEqual(0);
 
         mockDate('2023-12-02T00:00:00.000Z');
         const result2 = await get(app, gameStartUrl, { steamIds, matchId });
         expect(result2.status).toEqual(200);
         // assert player
-        const playerResult2 = await get(app, `${playerGetUrl}100000002`);
-        expect(playerResult2.body.memberPointTotal).toEqual(0);
-        expect(playerResult2.body.seasonPointTotal).toEqual(0);
+        const player2 = await getPlayer(app, 100000002);
+        expect(player2.memberPointTotal).toEqual(0);
+        expect(player2.seasonPointTotal).toEqual(0);
       });
 
       it('有效会员 新玩家 当日首次', async () => {
@@ -83,9 +81,9 @@ describe('PlayerController (e2e)', () => {
         const result = await callGameStart(app, steamIds);
         expect(result.status).toEqual(200);
         // assert player
-        const playerResult = await get(app, `${playerGetUrl}100000011`);
-        expect(playerResult.body.memberPointTotal).toEqual(100);
-        expect(playerResult.body.seasonPointTotal).toEqual(0);
+        const player = await getPlayer(app, 100000011);
+        expect(player.memberPointTotal).toEqual(100);
+        expect(player.seasonPointTotal).toEqual(0);
       });
 
       it.each([
@@ -130,9 +128,9 @@ describe('PlayerController (e2e)', () => {
         });
         expect(result.status).toEqual(200);
         // assert player
-        const playerResult = await get(app, `${playerGetUrl}${steamId}`);
-        expect(playerResult.body.memberPointTotal).toEqual(point1);
-        expect(playerResult.body.seasonPointTotal).toEqual(0);
+        const player = await getPlayer(app, steamId);
+        expect(player.memberPointTotal).toEqual(point1);
+        expect(player.seasonPointTotal).toEqual(0);
 
         mockDate(date2);
         const result2 = await get(app, gameStartUrl, {
@@ -141,9 +139,9 @@ describe('PlayerController (e2e)', () => {
         });
         expect(result2.status).toEqual(200);
         // assert player
-        const playerResult2 = await get(app, `${playerGetUrl}${steamId}`);
-        expect(playerResult2.body.memberPointTotal).toEqual(point2);
-        expect(playerResult2.body.seasonPointTotal).toEqual(0);
+        const player2 = await getPlayer(app, steamId);
+        expect(player2.memberPointTotal).toEqual(point2);
+        expect(player2.seasonPointTotal).toEqual(0);
       });
     });
 
@@ -225,14 +223,16 @@ describe('PlayerController (e2e)', () => {
       });
       expect(result.status).toEqual(201);
       // assert player
-      const playerResult = await get(app, `${playerGetUrl}${steamId}`);
-      expect(playerResult.status).toEqual(200);
-      expect(playerResult.body.memberPointTotal).toEqual(0);
-      expect(playerResult.body.seasonPointTotal).toEqual(expectedPoints);
+      const player = await getPlayer(app, steamId);
+      expect(player.memberPointTotal).toEqual(0);
+      expect(player.seasonPointTotal).toEqual(expectedPoints);
 
       // bot not record
-      const botNoResult = await get(app, `${playerGetUrl}0`);
-      expect(botNoResult.body).toStrictEqual({});
+      try {
+        await getPlayer(app, 0);
+      } catch (error) {
+        expect(error.response.body).toStrictEqual({});
+      }
     });
 
     it('多人结算', async () => {
@@ -334,23 +334,28 @@ describe('PlayerController (e2e)', () => {
       });
       expect(result.status).toEqual(201);
       // assert player
-      const playerResult1 = await get(app, `${playerGetUrl}${steamId1}`);
-      expect(playerResult1.status).toEqual(200);
-      expect(playerResult1.body.memberPointTotal).toEqual(0);
-      expect(playerResult1.body.seasonPointTotal).toEqual(points1);
-      // 玩家2负分未记录
-      const playerResult2 = await get(app, `${playerGetUrl}${steamId2}`);
-      expect(playerResult2.status).toEqual(200);
-      expect(playerResult2.body).toStrictEqual({});
+      const player1 = await getPlayer(app, steamId1);
+      expect(player1.memberPointTotal).toEqual(0);
+      expect(player1.seasonPointTotal).toEqual(points1);
 
-      const playerResult3 = await get(app, `${playerGetUrl}${steamId3}`);
-      expect(playerResult3.status).toEqual(200);
-      expect(playerResult3.body.memberPointTotal).toEqual(0);
-      expect(playerResult3.body.seasonPointTotal).toEqual(points3);
+      // 玩家2负分未记录
+      try {
+        const player2 = await getPlayer(app, steamId2);
+        expect(player2).toStrictEqual({});
+      } catch (error) {
+        expect(error.response.body).toStrictEqual({});
+      }
+
+      const player3 = await getPlayer(app, steamId3);
+      expect(player3.memberPointTotal).toEqual(0);
+      expect(player3.seasonPointTotal).toEqual(points3);
 
       // bot not record
-      const botNoResult = await get(app, `${playerGetUrl}0`);
-      expect(botNoResult.body).toStrictEqual({});
+      try {
+        await getPlayer(app, 0);
+      } catch (error) {
+        expect(error.response.body).toStrictEqual({});
+      }
     });
   });
 

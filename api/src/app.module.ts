@@ -14,7 +14,6 @@ import { GameModule } from './game/game.module';
 import { MembersModule } from './members/members.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
-import { PlayerCountModule } from './player-count/player-count.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { TaskModule } from './task/task.module';
 import { TestModule } from './test/test.module';
@@ -42,7 +41,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     GameModule,
     AfdianModule,
     PatreonModule,
-    PlayerCountModule,
     PlayerModule,
     PlayerPropertyModule,
     TestModule,

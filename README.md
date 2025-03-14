@@ -89,7 +89,7 @@ Need Authenticate with gcloud
 # download data from storage
 rm -rf firestore-backup
 mkdir firestore-backup
-gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20241221/*" firestore-backup
+gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20250310/*" firestore-backup
 ```
 
 ### API only
@@ -120,6 +120,11 @@ net start winnat
 - Firebase Emulator: http://localhost:4000/
 - OpenAPI Document (Swagger): http://localhost:3001/api-doc
 - Nextjs Web: http://localhost:3000/
+
+
+## API Guide
+
+More usage details, including configuration, authentication, and example code, please refer to [API Guide](docs/API_GUIDE.md).
 
 # Maintenance
 
