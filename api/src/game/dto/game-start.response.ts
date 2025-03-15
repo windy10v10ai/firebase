@@ -11,7 +11,5 @@ export class GameStart {
   @ApiProperty()
   players: Player[];
   @ApiProperty()
-  top100SteamIds: string[];
-  @ApiProperty()
   pointInfo?: PointInfoDto[];
 }
