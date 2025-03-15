@@ -135,7 +135,7 @@ export class PlayerPropertyService {
     const totalLevel = await this.playerService.getPlayerTotalLevel(steamId);
     const usedLevel = await this.getPlayerUsedLevel(steamId);
     if (totalLevel < usedLevel + levelAdd) {
-      logger.warn('[Player Property] cheakPlayerLevel error', {
+      logger.warn('[Player Property] checkPlayerLevel error', {
         steamId,
         totalLevel,
         usedLevel,
