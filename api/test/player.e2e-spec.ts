@@ -16,7 +16,7 @@ describe('PlayerController (e2e)', () => {
     const testPlayerB = 300400002;
 
     beforeEach(async () => {
-      // 创建两个测试玩家并设置较高的赛季积分以确保他们出现在排行榜中
+      // 创建两个测试玩家并设置较高的勇士积分以确保他们出现在排行榜中
       await createPlayer(app, {
         steamId: testPlayerA,
         seasonPointTotal: 10000,

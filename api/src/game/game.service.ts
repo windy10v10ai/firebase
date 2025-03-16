@@ -69,12 +69,12 @@ export class GameService {
     await this.playerService.updatePlayerLastMatchTime(steamId);
   }
 
-  // 活动赠送赛季积分/会员
+  // 活动赠送勇士积分/会员
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2025-01-27T00:00:00.000Z');
-    const endTime = new Date('2025-02-10T00:00:00.000Z');
-    const rewardSeasonPoint = 5000;
+    const startTime = new Date('2025-03-16T00:00:00.000Z');
+    const endTime = new Date('2025-03-24T00:00:00.000Z');
+    const rewardSeasonPoint = 2000;
 
     const now = new Date();
     if (now < startTime || now > endTime) {
@@ -90,7 +90,7 @@ export class GameService {
         //   steamId: rewardResult.steamId,
         //   month: 0.5,
         // });
-        // 奖励赛季积分
+        // 奖励勇士积分
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: rewardSeasonPoint,
         });
@@ -98,8 +98,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '新年快乐！',
-            en: 'Happy Lunar New Year',
+            cn: '庆祝在线突破800人！\n获得2000勇士积分',
+            en: 'Online players reached 800!\n Get 2000 Battle Points',
           },
           seasonPoint: rewardSeasonPoint,
         });
