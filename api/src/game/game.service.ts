@@ -98,8 +98,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '庆在线突破800人！\n获得2000勇士积分',
-            en: 'Online player reach 800!\n Get 2000 Battle Points',
+            cn: '庆祝在线突破800人！\n获得2000勇士积分',
+            en: 'Online players reached 800!\n Get 2000 Battle Points',
           },
           seasonPoint: rewardSeasonPoint,
         });
