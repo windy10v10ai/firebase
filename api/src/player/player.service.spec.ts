@@ -27,7 +27,7 @@ describe('PlayerService', () => {
     playerService = moduleRef.get<PlayerService>(PlayerService);
   });
 
-  describe('赛季积分', () => {
+  describe('勇士积分', () => {
     describe('升级所需积分', () => {
       let level = 1;
       let point = 100;

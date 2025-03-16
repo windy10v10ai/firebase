@@ -118,7 +118,7 @@ export class PlayerService {
   }
 
   /**
-   * 赛季积分
+   * 勇士积分
    * @param level 当前等级
    * @returns 升级积分
    */
@@ -126,7 +126,7 @@ export class PlayerService {
     return 100 * level;
   }
   /**
-   * 赛季积分 指定等级所需累计积分
+   * 勇士积分 指定等级所需累计积分
    * @param level 指定等级
    * @returns 累计积分
    */
