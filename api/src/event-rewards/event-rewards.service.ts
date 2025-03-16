@@ -23,7 +23,7 @@ export class EventRewardsService {
     return steamIds.map((steamId) => ({
       steamId,
       // FIXME 活动每次需要更新
-      result: eventRewards.find((r) => r.steamId === steamId)?.lunarNewYear2025 ?? false,
+      result: eventRewards.find((r) => r.steamId === steamId)?.online800 ?? false,
     }));
   }
 
@@ -36,12 +36,12 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        lunarNewYear2025: true,
+        online800: true,
       });
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.lunarNewYear2025 = true;
+      eventReward.online800 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }

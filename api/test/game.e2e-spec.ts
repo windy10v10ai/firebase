@@ -363,7 +363,7 @@ describe('PlayerController (e2e)', () => {
     describe('可以重置', () => {
       it.each([
         [
-          '使用赛季积分重置 level2',
+          '使用勇士积分重置 level2',
           {
             body: {
               steamId: 100000402,
@@ -384,7 +384,7 @@ describe('PlayerController (e2e)', () => {
           },
         ],
         [
-          '使用赛季积分重置 level3',
+          '使用勇士积分重置 level3',
           {
             body: {
               steamId: 100000403,
@@ -492,7 +492,7 @@ describe('PlayerController (e2e)', () => {
       // 积分不足
       it.each([
         [
-          '使用赛季积分，积分不足',
+          '使用勇士积分，积分不足',
           {
             body: {
               steamId: 100000401,
