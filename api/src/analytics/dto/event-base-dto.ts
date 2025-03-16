@@ -8,12 +8,12 @@ export class EventBaseDto {
   @ApiProperty({ default: 'v4.00' })
   @IsNotEmpty()
   version: string;
-
   @ApiProperty({ default: 0 })
   @IsNotEmpty()
-  difficulty?: number;
-  @ApiPropertyOptional()
-  steamId?: number;
+  difficulty: number;
+  @ApiProperty()
+  @IsNotEmpty()
+  steamId: number;
   @ApiPropertyOptional()
   isWin?: boolean;
 }
