@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { AnalyticsService } from './analytics.service';
 import { PickDto } from './dto/pick-ability-dto';
+import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 @ApiTags('Analytics(GA4)')
 @Controller('analytics')
@@ -17,5 +18,10 @@ export class AnalyticsController {
   @Post('/game-end/pick/ability')
   async gameEndLotteryPickAbility(@Body() body: PickDto) {
     await this.analyticsService.gameEndPickAbility(body);
+  }
+
+  @Post('/player/language')
+  async trackPlayerLanguage(@Body() body: PlayerLanguageListDto) {
+    await this.analyticsService.trackPlayerLanguage(body);
   }
 }
