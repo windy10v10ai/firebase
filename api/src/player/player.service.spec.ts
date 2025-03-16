@@ -3,7 +3,6 @@ import { getRepositoryToken } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 
-import { PlayerRank } from './entities/player-rank.entity';
 import { Player } from './entities/player.entity';
 import { PlayerService } from './player.service';
 
@@ -16,10 +15,6 @@ describe('PlayerService', () => {
         PlayerService,
         {
           provide: getRepositoryToken(Player),
-          useValue: {},
-        },
-        {
-          provide: getRepositoryToken(PlayerRank),
           useValue: {},
         },
         {

@@ -16,7 +16,6 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
-import { PlayerRankingService } from '../player/player-ranking.service';
 import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -35,7 +34,6 @@ export class GameController {
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
-    private readonly playerRankingService: PlayerRankingService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
   ) {}
@@ -78,14 +76,9 @@ export class GameController {
     const steamIdsStr = steamIds.map((id) => id.toString());
     const players = await this.gameService.findPlayerDtoBySteamIds(steamIdsStr);
 
-    // 排行榜 移动到PlayerRankingService中
-    const playerRank = await this.playerRankingService.getPlayerRank();
-    const top100SteamIds = playerRank.rankSteamIds;
-
     return {
       members: members.map((m) => new MemberDto(m)),
       players,
-      top100SteamIds,
       pointInfo,
     };
   }

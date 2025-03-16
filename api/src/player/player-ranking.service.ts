@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { PlayerRank } from './entities/player-rank.entity';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { Player } from './entities/player.entity';
 
@@ -14,8 +13,6 @@ export class PlayerRankingService {
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
-    @InjectRepository(PlayerRank)
-    private readonly playerRankRepository: BaseFirestoreRepository<PlayerRank>,
     @InjectRepository(PlayerRanking)
     private readonly playerRankingRepository: BaseFirestoreRepository<PlayerRanking>,
   ) {}
@@ -96,43 +93,6 @@ export class PlayerRankingService {
       .find();
 
     return players.length > 0 ? players[players.length - 1].seasonPointTotal : 0;
-  }
-
-  // 旧版排行 GameController 使用 之后删除
-  async getPlayerRank(): Promise<PlayerRank> {
-    const playerRank = await this.getPlayerRankToday();
-
-    if (playerRank) {
-      return playerRank;
-    } else {
-      const rankSteamIds = await this.findTopSeasonPointSteamIds();
-      return await this.updatePlayerRankToday(rankSteamIds);
-    }
-  }
-
-  async getPlayerRankToday(): Promise<PlayerRank> {
-    const id = this.getDateString();
-    return await this.playerRankRepository.findById(id);
-  }
-
-  async updatePlayerRankToday(steamIds: string[]): Promise<PlayerRank> {
-    const id = this.getDateString();
-    const playerRank = new PlayerRank();
-    playerRank.id = id;
-    playerRank.rankSteamIds = steamIds;
-    return await this.playerRankRepository.create(playerRank);
-  }
-
-  private async findTopSeasonPointSteamIds(): Promise<string[]> {
-    const rankingCount = 200;
-    const players = await this.playerRepository
-      .orderByDescending('seasonPointTotal')
-      .limit(rankingCount + this.excludeSteamIds.length)
-      .find();
-
-    return players
-      .filter((player) => !this.excludeSteamIds.includes(player.id))
-      .map((player) => player.id);
   }
 
   // 获取当前日期字符串
