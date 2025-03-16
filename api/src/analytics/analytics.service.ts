@@ -102,6 +102,24 @@ export class AnalyticsService {
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
+  async trackPlayerLanguage(dto: PlayerLanguageListDto) {
+    for (const player of dto.players) {
+      const event = await this.buildEvent('player_language', player.steamId, dto.matchId, {
+        steam_id: player.steamId,
+        language: player.language,
+        version: dto.version,
+      });
+
+      const userProperties = {
+        language: {
+          value: player.language,
+        },
+      };
+
+      await this.sendEvent(player.steamId.toString(), event, userProperties);
+    }
+  }
+
   // ------------------------ 通过game end API调用 ------------------------
   async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
     const playerCount = gameEnd.players.filter((player) => player.steamId > 0).length;
@@ -223,22 +241,5 @@ export class AnalyticsService {
     );
 
     return response.status === 204;
-  }
-
-  async trackPlayerLanguage(dto: PlayerLanguageListDto) {
-    for (const player of dto.players) {
-      const event = await this.buildEvent('player_language', player.steamId, '0', {
-        steam_id: player.steamId,
-        language: player.language,
-      });
-
-      const userProperties = {
-        language: {
-          value: player.language,
-        },
-      };
-
-      await this.sendEvent(player.steamId.toString(), event, userProperties);
-    }
   }
 }

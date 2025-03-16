@@ -1,6 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+
+import { EventBaseDto } from './event-base-dto';
 
 export class PlayerLanguageDto {
   @ApiProperty()
@@ -13,7 +15,7 @@ export class PlayerLanguageDto {
   language: string;
 }
 
-export class PlayerLanguageListDto {
+export class PlayerLanguageListDto extends PickType(EventBaseDto, ['matchId', 'version']) {
   @ApiProperty({ type: [PlayerLanguageDto] })
   @IsArray()
   @ValidateNested({ each: true })
