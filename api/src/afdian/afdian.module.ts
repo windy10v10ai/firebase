@@ -3,6 +3,7 @@ import { FireormModule } from 'nestjs-fireorm';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { PlayerModule } from '../player/player.module';
+import { PlayerPropertyModule } from '../player-property/player-property.module';
 
 import { MembersModule } from './../members/members.module';
 import { AfdianApiService } from './afdian.api.service';
@@ -17,6 +18,7 @@ import { AfdianUser } from './entities/afdian-user.entity';
     MembersModule,
     PlayerModule,
     AnalyticsModule,
+    PlayerPropertyModule,
   ],
   controllers: [AfdianController],
   providers: [AfdianService, AfdianApiService],

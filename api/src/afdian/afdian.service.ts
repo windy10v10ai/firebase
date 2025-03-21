@@ -5,6 +5,7 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
+import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { AfdianApiService } from './afdian.api.service';
 import { OrderDto } from './dto/afdian-webhook.dto';
@@ -43,6 +44,8 @@ export class AfdianService {
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
     private readonly analyticsPurchaseService: AnalyticsPurchaseService,
+
+    private readonly playerPropertyService: PlayerPropertyService,
   ) {}
 
   /** 手动激活订单
@@ -194,6 +197,8 @@ export class AfdianService {
           return OrderType.goods2;
         case PlanId.tire3:
           return OrderType.goods3;
+        case PlanId.initialAttribute:
+          return OrderType.initialAttribute;
         default:
           return OrderType.others;
       }
@@ -239,6 +244,10 @@ export class AfdianService {
       planPoint = PlanPoint.tire2;
     } else if (orderType === OrderType.goods3) {
       planPoint = PlanPoint.tire3;
+    } else if (orderType === OrderType.initialAttribute) {
+      // 初始属性
+      await this.playerPropertyService.deleteBySteamId(steamId);
+      return true;
     } else {
       return false;
     }
