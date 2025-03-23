@@ -81,7 +81,7 @@ export class GameService {
       return pointInfoDtos;
     }
 
-    // [注意] 活动每次需要更新
+    // NOTE 活动每次需要更新
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
     for (const rewardResult of rewardResults) {
       if (rewardResult.result === false) {
