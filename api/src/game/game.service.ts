@@ -72,8 +72,8 @@ export class GameService {
   // 活动赠送勇士积分/会员
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
-    const startTime = new Date('2025-03-16T00:00:00.000Z');
-    const endTime = new Date('2025-03-24T00:00:00.000Z');
+    const startTime = new Date('2025-03-23T00:00:00.000Z');
+    const endTime = new Date('2025-03-31T00:00:00.000Z');
     const rewardSeasonPoint = 2000;
 
     const now = new Date();
@@ -81,7 +81,7 @@ export class GameService {
       return pointInfoDtos;
     }
 
-    // [注意] 活动每次需要更新
+    // NOTE 活动每次需要更新
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
     for (const rewardResult of rewardResults) {
       if (rewardResult.result === false) {
@@ -98,8 +98,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '庆祝在线突破800人！\n获得2000勇士积分',
-            en: 'Online players reached 800!\n Get 2000 Battle Points',
+            cn: '庆祝在线突破900人！\n获得2000勇士积分',
+            en: 'Online players reached 900!\n Get 2000 Battle Points',
           },
           seasonPoint: rewardSeasonPoint,
         });

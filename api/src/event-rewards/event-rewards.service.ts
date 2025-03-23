@@ -22,8 +22,8 @@ export class EventRewardsService {
 
     return steamIds.map((steamId) => ({
       steamId,
-      // FIXME 活动每次需要更新
-      result: eventRewards.find((r) => r.steamId === steamId)?.online800 ?? false,
+      // NOTE 活动每次需要更新
+      result: eventRewards.find((r) => r.steamId === steamId)?.online900 ?? false,
     }));
   }
 
@@ -35,13 +35,13 @@ export class EventRewardsService {
       await this.eventRewardsRepository.create({
         id,
         steamId,
-        // FIXME 活动每次需要更新
-        online800: true,
+        // NOTE 活动每次需要更新
+        online900: true,
       });
     } else {
       // update
-      // FIXME 活动每次需要更新
-      eventReward.online800 = true;
+      // NOTE 活动每次需要更新
+      eventReward.online900 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
