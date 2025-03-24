@@ -14,7 +14,7 @@ export class EventRewardsService {
   async getRewardResults(steamIds: number[]): Promise<
     {
       steamId: number;
-      result: boolean;
+      result: EventReward | undefined;
     }[]
   > {
     const ids = steamIds.map((id) => id.toString());
@@ -22,12 +22,11 @@ export class EventRewardsService {
 
     return steamIds.map((steamId) => ({
       steamId,
-      // NOTE 活动每次需要更新
-      result: eventRewards.find((r) => r.steamId === steamId)?.online900 ?? false,
+      result: eventRewards.find((r) => r.steamId === steamId),
     }));
   }
 
-  async setReward(steamId: number): Promise<void> {
+  async setReward(steamId: number, rewardType: 'online900' | 'online1000'): Promise<void> {
     const id = steamId.toString();
     const eventReward = await this.eventRewardsRepository.findById(id);
     if (!eventReward) {
@@ -35,13 +34,11 @@ export class EventRewardsService {
       await this.eventRewardsRepository.create({
         id,
         steamId,
-        // NOTE 活动每次需要更新
-        online900: true,
+        [rewardType]: true,
       });
     } else {
       // update
-      // NOTE 活动每次需要更新
-      eventReward.online900 = true;
+      eventReward[rewardType] = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }

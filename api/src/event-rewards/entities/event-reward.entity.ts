@@ -15,4 +15,5 @@ export class EventReward {
   lunarNewYear2025?: boolean;
   online800?: boolean;
   online900?: boolean;
+  online1000?: boolean;
 }
