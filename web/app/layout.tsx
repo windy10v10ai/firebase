@@ -40,7 +40,7 @@ export default function RootLayout({
                   <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2307479570" target="_blank" rel="noopener noreferrer" className="text-gray-200 hover:text-blue-400 transition-colors">Steam Workshop</a>
                   <a href="https://github.com/windy10v10ai/game" target="_blank" rel="noopener noreferrer" className="text-gray-200 hover:text-blue-400 transition-colors">GitHub</a>
                 </div>
-                <p className="text-center text-gray-300">© 2024 Windy10v10ai. All rights reserved.</p>
+                <p className="text-center text-gray-300">© 2025 Windy10v10ai. All rights reserved.</p>
               </div>
             </div>
           </footer>
