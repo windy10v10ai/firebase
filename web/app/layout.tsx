@@ -24,7 +24,7 @@ export default function RootLayout({
               <div className="flex justify-between items-center">
                 <a href="/" className="text-xl font-bold text-white link-hover">Windy10v10ai</a>
                 <div className="space-x-4">
-                  <a href="/products" className="text-content link-hover">商品列表</a>
+                  {/* <a href="/products" className="text-content link-hover">商品列表</a> */}
                   <a href="/legal/disclosure" className="text-content link-hover">商业披露</a>
                 </div>
               </div>
