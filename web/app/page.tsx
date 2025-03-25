@@ -20,7 +20,7 @@ export default function Home() {
             className="block p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-gray-800 hover:border-blue-500 transition-all transform hover:-translate-y-1"
           >
             <h2 className="text-2xl font-bold mb-2 text-blue-400">Steam Workshop</h2>
-            <p className="text-gray-300">在Steam Workshop上体验我们的地图，您的支持是我们持续更新的动力</p>
+            <p className="text-gray-300">在Steam Workshop订阅我们的地图，您的支持是我们持续更新的动力</p>
           </a>
 
           <a 
@@ -30,7 +30,7 @@ export default function Home() {
             className="block p-6 bg-black/50 backdrop-blur-sm rounded-lg border border-gray-800 hover:border-blue-500 transition-all transform hover:-translate-y-1"
           >
             <h2 className="text-2xl font-bold mb-2 text-blue-400">GitHub</h2>
-            <p className="text-gray-300">查看项目源代码和更新日志</p>
+            <p className="text-gray-300">查看项目源代码和更新日志，并参与贡献</p>
           </a>
         </div>
       </section>
