@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@layer components {
+  .title-primary {
+    @apply text-3xl font-bold text-white;
+  }
+  
+  .title-secondary {
+    @apply text-2xl font-bold text-blue-400;
+  }
+  
+  .text-content {
+    @apply text-gray-200;
+  }
+  
+  .card-container {
+    @apply bg-gray-800/70 backdrop-blur-sm rounded-lg border border-gray-700;
+  }
+  
+  .card-hover {
+    @apply hover:border-blue-500 transition-all transform hover:-translate-y-1;
+  }
+  
+  .link-hover {
+    @apply hover:text-blue-400 transition-colors;
+  }
+} 
