@@ -16,11 +16,6 @@ export default function ProductsPage() {
             <option value="ebook">电子书</option>
             <option value="course">课程</option>
           </select>
-          <select className="border rounded px-3 py-2">
-            <option value="">价格排序</option>
-            <option value="asc">从低到高</option>
-            <option value="desc">从高到低</option>
-          </select>
         </div>
         <div className="relative">
           <input
