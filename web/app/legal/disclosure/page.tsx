@@ -16,17 +16,15 @@ export default function DisclosurePage() {
         <h2>商品说明</h2>
         <p>我们提供的所有数字商品包括：</p>
         <ul>
-          <li>软件许可证</li>
-          <li>电子书</li>
-          <li>在线课程</li>
-          <li>其他数字内容</li>
+          <li>Dota2 10v10 AI 自定义地图内的会员资格</li>
+          <li>Dota2 10v10 AI 自定义地图内的会员积分</li>
         </ul>
       </section>
 
       {/* 价格和支付 */}
       <section>
         <h2>价格和支付</h2>
-        <p>所有价格均以日元（JPY）显示，包含适用的税费。</p>
+        <p>所有价格按照当地货币显示，包含适用的税费。</p>
         <p>我们使用Stripe作为支付处理商，确保交易安全。</p>
       </section>
 
@@ -35,8 +33,8 @@ export default function DisclosurePage() {
         <h2>退款政策</h2>
         <p>由于数字商品的特殊性，我们的退款政策如下：</p>
         <ul>
-          <li>未使用的数字商品可在购买后7天内申请退款</li>
-          <li>已使用或下载的商品不予退款</li>
+          <li>会员资格一经购买，不支持退款</li>
+          <li>会员积分一经购买，不支持退款</li>
           <li>特殊情况将根据具体情况进行处理</li>
         </ul>
       </section>
@@ -46,9 +44,7 @@ export default function DisclosurePage() {
         <h2>交付方式</h2>
         <p>所有数字商品将通过以下方式交付：</p>
         <ul>
-          <li>电子邮件发送下载链接</li>
-          <li>在线访问权限</li>
-          <li>即时下载</li>
+          <li>会员资格和会员积分，将在新一局的Dota2 10v10 AI 自定义地图内自动生效。</li>
         </ul>
       </section>
 
