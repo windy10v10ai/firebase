@@ -1,4 +1,4 @@
-import Section from '../../components/Section';
+import DataTable from '../../components/DataTable';
 
 interface DisclosureItem {
   title: string;
@@ -71,26 +71,7 @@ export default function DisclosurePage() {
         根据《特定商业交易法》要求，我们在此披露以下商业信息。
       </p>
       
-      <div className="w-full border border-gray-700 rounded-lg overflow-hidden bg-gray-900">
-        <table className="w-full">
-          <tbody>
-            {disclosureItems.map((item, index) => (
-              <tr key={index} className={index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900'}>
-                <td className="py-4 px-6 border-b border-gray-700 w-1/3">
-                  <div className="font-medium text-gray-200">{item.title}</div>
-                </td>
-                <td className="py-4 px-6 border-b border-gray-700 w-2/3">
-                  <div className="space-y-2">
-                    {item.content.map((text, i) => (
-                      <p key={i} className="text-gray-300">{text}</p>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable items={disclosureItems} />
 
       <p className="text-content text-sm mt-8">
         最后更新日期：2025年3月26日
