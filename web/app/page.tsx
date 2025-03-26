@@ -4,6 +4,7 @@ import React from 'react';
 import {useTranslations} from 'next-intl';
 import Card from './components/Card';
 import Section from './components/Section';
+import ProductDisplay from './components/ProductDisplay';
 
 export default function Home() {
   const t = useTranslations();
@@ -16,30 +17,14 @@ export default function Home() {
       </section>
 
       {/* 会员订阅 */}
-      <Section title={t('home.membership.title')}>
-        <div className="max-w-2xl mx-auto space-y-6">
-          <p className="text-content text-center whitespace-pre-line">
-            {t('home.membership.description')}
-          </p>
-          
-          <ul className="list-disc list-inside space-y-2 text-content">
-            {t.raw('home.membership.benefits').map((benefit: string, index: number) => (
-              <li key={index}>{benefit}</li>
-            ))}
-          </ul>
-
-          <div className="text-center pt-4">
-            <a 
-              href={t('home.membership.subscribeLink')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary"
-            >
-              {t('home.membership.subscribe')}
-            </a>
-          </div>
-        </div>
-      </Section>
+      <ProductDisplay
+        title={t('home.membership.title')}
+        description={t('home.membership.description')}
+        benefits={t.raw('home.membership.benefits')}
+        subscribeText={t('home.membership.subscribe')}
+        subscribeLink={t('home.membership.subscribeLink')}
+        imagePath="/images/membership.png"
+      />
 
       {/* 链接区域 */}
       <section className="max-w-2xl mx-auto">
