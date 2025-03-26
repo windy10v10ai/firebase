@@ -7,18 +7,80 @@
     "title": "DOTA2 10v10 AI Custom Map",
     "steamWorkshop": {
       "title": "Steam Workshop",
-      "description": "Subscribe to our map on Steam Workshop, your support drives our continuous updates"
+      "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates."
     },
     "github": {
       "title": "GitHub",
-      "description": "View project source code and changelog, and contribute"
+      "description": "View project source code, changelog, and contribute to the project"
     },
     "about": {
       "title": "About Project",
-      "description": "This is a DOTA2 custom map project, bringing you a new 10v10 AI battle experience.\nYou can subscribe to membership to unlock more features and enjoy a better gaming experience.\nWe will continue to optimize and update, your support is our motivation for continuous improvement."
+      "description": "This is a DOTA2 custom map project that brings you a new 10v10 AI battle experience.\nYou can subscribe to membership to unlock more features and enjoy better gaming experience.\nWe will continue to optimize and update, your support is our motivation to keep improving."
     }
   },
   "footer": {
     "copyright": "© 2025 Windy10v10ai. All rights reserved."
+  },
+  "disclosure": {
+    "title": "Business Disclosure",
+    "description": "According to the requirements of the Specified Commercial Transactions Act, we hereby disclose the following business information.",
+    "lastUpdate": "Last updated: March 26, 2025",
+    "items": {
+      "legalName": {
+        "title": "Legal Name",
+        "content": ["Windy (Individual)"]
+      },
+      "address": {
+        "title": "Address",
+        "content": ["Will be disclosed upon request"]
+      },
+      "phone": {
+        "title": "Phone Number",
+        "content": ["Will be disclosed upon request"]
+      },
+      "email": {
+        "title": "Email Address",
+        "content": ["windy10v10ai@gmail.com"]
+      },
+      "operator": {
+        "title": "Head of Operator",
+        "content": ["Windy"]
+      },
+      "otherFees": {
+        "title": "Additional Fees",
+        "content": ["Payment processing fee: Fees will be charged according to the payment method"]
+      },
+      "refundPolicy": {
+        "title": "Exchanges and returns policy",
+        "content": [
+          "Membership Service Cancellation:",
+          "You can cancel your membership subscription at any time in your account settings",
+          "After cancellation, you can continue to use the service until the end of your current subscription period",
+          "Used membership services are non-refundable",
+          "Special Circumstances:",
+          "We will handle special circumstances on a case-by-case basis"
+        ]
+      },
+      "serviceTime": {
+        "title": "Delivery times",
+        "content": ["Membership service is available immediately after successful subscription payment"]
+      },
+      "paymentMethods": {
+        "title": "Accepted Payment Methods",
+        "content": [
+          "Alipay",
+          "WeChat Pay",
+          "Credit Card"
+        ]
+      },
+      "paymentCycle": {
+        "title": "Payment period",
+        "content": ["Alipay, WeChat Pay, and credit card payments are instant, membership service will be activated immediately after successful payment"]
+      },
+      "price": {
+        "title": "Price",
+        "content": ["10v10AI Membership Subscription: ¥30/month"]
+      }
+    }
   }
 } 

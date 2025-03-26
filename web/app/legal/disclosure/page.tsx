@@ -1,4 +1,5 @@
 import DataTable from '../../components/DataTable';
+import { useTranslations } from 'next-intl';
 
 interface DisclosureItem {
   title: string;
@@ -6,75 +7,66 @@ interface DisclosureItem {
 }
 
 export default function DisclosurePage() {
+  const t = useTranslations('disclosure');
+  
   const disclosureItems: DisclosureItem[] = [
     {
-      title: "法定名称",
-      content: ["Windy（个人）"]
+      title: t('items.legalName.title'),
+      content: t.raw('items.legalName.content')
     },
     {
-      title: "地址",
-      content: ["如有需要，我们会立即披露"]
+      title: t('items.address.title'),
+      content: t.raw('items.address.content')
     },
     {
-      title: "电话号码",
-      content: ["如有需要，我们会立即披露"]
+      title: t('items.phone.title'),
+      content: t.raw('items.phone.content')
     },
     {
-      title: "邮箱地址",
-      content: ["windy10v10ai@gmail.com"]
+      title: t('items.email.title'),
+      content: t.raw('items.email.content')
     },
     {
-      title: "运营主管",
-      content: ["Windy"]
+      title: t('items.operator.title'),
+      content: t.raw('items.operator.content')
     },
     {
-      title: "其他费用",
-      content: ["支付手续费：根据支付方式收取相应费用"]
+      title: t('items.otherFees.title'),
+      content: t.raw('items.otherFees.content')
     },
     {
-      title: "退换货政策",
-      content: [
-        "会员服务退订：",
-        "您可以随时在账户设置中取消会员订阅",
-        "取消后，您可以继续使用到当前订阅期结束",
-        "已使用的会员服务不予退款",
-        "特殊情况：",
-        "如遇特殊情况，我们将根据具体情况进行处理"
-      ]
+      title: t('items.refundPolicy.title'),
+      content: t.raw('items.refundPolicy.content')
     },
     {
-      title: "服务提供时间",
-      content: ["订阅支付成功后即可立即使用会员服务"]
+      title: t('items.serviceTime.title'),
+      content: t.raw('items.serviceTime.content')
     },
     {
-      title: "接受的支付方式",
-      content: [
-        "支付宝",
-        "微信支付",
-        "信用卡支付"
-      ]
+      title: t('items.paymentMethods.title'),
+      content: t.raw('items.paymentMethods.content')
     },
     {
-      title: "付款周期",
-      content: ["支付宝，微信和信用卡支付均为即时到账，会员服务将在支付成功后立即生效"]
+      title: t('items.paymentCycle.title'),
+      content: t.raw('items.paymentCycle.content')
     },
     {
-      title: "价格",
-      content: ["10v10AI 会员订阅：¥30/月"]
+      title: t('items.price.title'),
+      content: t.raw('items.price.content')
     }
   ];
 
   return (
     <div className="space-y-8">
-      <h1 className="title-primary mb-6">商业披露</h1>
+      <h1 className="title-primary mb-6">{t('title')}</h1>
       <p className="text-content mb-8">
-        根据《特定商业交易法》要求，我们在此披露以下商业信息。
+        {t('description')}
       </p>
       
       <DataTable items={disclosureItems} />
 
       <p className="text-content text-sm mt-8">
-        最后更新日期：2025年3月26日
+        {t('lastUpdate')}
       </p>
     </div>
   )
