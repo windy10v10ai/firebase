@@ -29,10 +29,10 @@ export default async function RootLayout({
             <header className="card-container shadow-lg border-b border-gray-700">
               <nav className="container mx-auto px-4 py-4">
                 <div className="flex justify-between items-center">
-                  <a href="/" className="text-xl font-bold text-white link-hover">Windy10v10ai</a>
+                  <a href="/" className="text-xl font-bold text-white link-hover">{messages.navigation.home}</a>
                   <div className="flex items-center space-x-4">
+                    <a href="/legal/disclosure" className="text-content link-hover">{messages.navigation.disclosure}</a>
                     <LanguageSwitcher />
-                    <a href="/legal/disclosure" className="text-content link-hover">商业披露</a>
                   </div>
                 </div>
               </nav>

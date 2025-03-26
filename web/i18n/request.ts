@@ -2,7 +2,7 @@ import {getRequestConfig} from 'next-intl/server';
 import {cookies} from 'next/headers';
 
 export const locales = ['en', 'zh'];
-export const defaultLocale = 'zh';
+export const defaultLocale = 'en';
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
