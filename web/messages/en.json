@@ -1,0 +1,24 @@
+{
+  "navigation": {
+    "home": "Windy10v10ai",
+    "disclosure": "Business Disclosure"
+  },
+  "home": {
+    "title": "DOTA2 10v10 AI Custom Map",
+    "steamWorkshop": {
+      "title": "Steam Workshop",
+      "description": "Subscribe to our map on Steam Workshop, your support drives our continuous updates"
+    },
+    "github": {
+      "title": "GitHub",
+      "description": "View project source code and changelog, and contribute"
+    },
+    "about": {
+      "title": "About Project",
+      "description": "This is a DOTA2 custom map project, bringing you a new 10v10 AI battle experience.\nYou can subscribe to membership to unlock more features and enjoy a better gaming experience.\nWe will continue to optimize and update, your support is our motivation for continuous improvement."
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Windy10v10ai. All rights reserved."
+  }
+} 
