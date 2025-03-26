@@ -4,16 +4,28 @@ import React from 'react';
 import {useTranslations} from 'next-intl';
 import Card from './components/Card';
 import Section from './components/Section';
+import ProductDisplay from './components/ProductDisplay';
 
 export default function Home() {
   const t = useTranslations();
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* 欢迎区域 */}
-      <section className="text-center py-12">
-        <h1 className="title-primary mb-4">{t('home.title')}</h1>
+      <section className="text-center py-6">
+        <h1 className="title-primary">{t('home.title')}</h1>
       </section>
+
+      {/* 会员订阅 */}
+      <ProductDisplay
+        title={t('home.membership.title')}
+        description={t('home.membership.description')}
+        benefits={t.raw('home.membership.benefits')}
+        subscribeText={t('home.membership.subscribe')}
+        subscribeLink={t('home.membership.subscribeLink')}
+        imagePath="/images/membership.png"
+        note={t('home.membership.note')}
+      />
 
       {/* 链接区域 */}
       <section className="max-w-2xl mx-auto">
