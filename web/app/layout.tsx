@@ -8,8 +8,8 @@ import LanguageSwitcher from './components/LanguageSwitcher'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'DOTA2 10v10 AI',
-  description: 'DOTA2 10v10 AI custom map',
+  title: 'Windy10v10AI',
+  description: 'DOTA2 10v10 AI custom by windy',
   icons: {
     icon: '/favicon.webp'
   }
