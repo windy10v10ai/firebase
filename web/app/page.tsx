@@ -10,10 +10,10 @@ export default function Home() {
   const t = useTranslations();
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* 欢迎区域 */}
-      <section className="text-center py-12">
-        <h1 className="title-primary mb-4">{t('home.title')}</h1>
+      <section className="text-center py-6">
+        <h1 className="title-primary">{t('home.title')}</h1>
       </section>
 
       {/* 会员订阅 */}
