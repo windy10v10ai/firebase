@@ -1,42 +1,55 @@
 "use client";
 
 import React from 'react';
+import {useTranslations} from 'next-intl';
 import Card from './components/Card';
 import Section from './components/Section';
+import ProductDisplay from './components/ProductDisplay';
 
 export default function Home() {
+  const t = useTranslations();
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* 欢迎区域 */}
-      <section className="text-center py-12">
-        <h1 className="title-primary mb-4">DOTA2 10v10 AI 自定义地图</h1>
+      <section className="text-center py-6">
+        <h1 className="title-primary">{t('home.title')}</h1>
       </section>
+
+      {/* 会员订阅 */}
+      <ProductDisplay
+        title={t('home.membership.title')}
+        description={t('home.membership.description')}
+        benefits={t.raw('home.membership.benefits')}
+        subscribeText={t('home.membership.subscribe')}
+        subscribeLink={t('home.membership.subscribeLink')}
+        imagePath="/images/membership.png"
+        note={t('home.membership.note')}
+      />
 
       {/* 链接区域 */}
       <section className="max-w-2xl mx-auto">
         <div className="space-y-6">
           <Card 
             href="https://steamcommunity.com/sharedfiles/filedetails/?id=2307479570"
-            title="Steam Workshop"
-            description="在Steam Workshop订阅我们的地图，您的支持是我们持续更新的动力"
+            title={t('home.steamWorkshop.title')}
+            description={t('home.steamWorkshop.description')}
           />
 
           <Card 
             href="https://github.com/windy10v10ai/game"
-            title="GitHub"
-            description="查看项目源代码和更新日志，并参与贡献"
+            title={t('home.github.title')}
+            description={t('home.github.description')}
           />
         </div>
       </section>
 
       {/* 项目介绍 */}
-      <Section title="关于项目">
-        <p className="text-content text-center">
-          这是一个DOTA2自定义地图项目，为您带来全新的10v10AI对战体验。<br/>
-          您可以订阅会员，解锁更多功能，享受更好的游戏体验。<br/>
-          我们会持续优化和更新，您的支持是我们不断进步的动力。
+      <Section title={t('home.about.title')}>
+        <p className="text-content text-center whitespace-pre-line">
+          {t('home.about.description')}
         </p>
       </Section>
     </div>
-  )
+  );
 }
