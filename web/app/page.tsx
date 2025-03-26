@@ -15,6 +15,32 @@ export default function Home() {
         <h1 className="title-primary mb-4">{t('home.title')}</h1>
       </section>
 
+      {/* 会员订阅 */}
+      <Section title={t('home.membership.title')}>
+        <div className="max-w-2xl mx-auto space-y-6">
+          <p className="text-content text-center whitespace-pre-line">
+            {t('home.membership.description')}
+          </p>
+          
+          <ul className="list-disc list-inside space-y-2 text-content">
+            {t.raw('home.membership.benefits').map((benefit: string, index: number) => (
+              <li key={index}>{benefit}</li>
+            ))}
+          </ul>
+
+          <div className="text-center pt-4">
+            <a 
+              href={t('home.membership.subscribeLink')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+            >
+              {t('home.membership.subscribe')}
+            </a>
+          </div>
+        </div>
+      </Section>
+
       {/* 链接区域 */}
       <section className="max-w-2xl mx-auto">
         <div className="space-y-6">
