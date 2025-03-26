@@ -9,7 +9,7 @@ export default function DisclosurePage() {
   const disclosureItems: DisclosureItem[] = [
     {
       title: "法定名称",
-      content: ["Windy10v10ai（个人）"]
+      content: ["Windy（个人）"]
     },
     {
       title: "地址",
