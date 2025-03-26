@@ -3,6 +3,7 @@ import {getLocale} from 'next-intl/server';
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import LanguageSwitcher from './components/LanguageSwitcher'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,19 +18,20 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const locale = await getLocale();
+  const messages = (await import(`../messages/${locale}.json`)).default;
 
   return (
     <html lang={locale}>
       <body className={`${inter.className} min-h-screen bg-gray-900`}>
-        <NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages} locale={locale}>
           <div className="fixed inset-0 bg-[url('/images/dota-bg.jpg')] bg-cover bg-center opacity-50 z-0"></div>
           <div className="relative z-10">
             <header className="card-container shadow-lg border-b border-gray-700">
               <nav className="container mx-auto px-4 py-4">
                 <div className="flex justify-between items-center">
                   <a href="/" className="text-xl font-bold text-white link-hover">Windy10v10ai</a>
-                  <div className="space-x-4">
-                    {/* <a href="/products" className="text-content link-hover">商品列表</a> */}
+                  <div className="flex items-center space-x-4">
+                    <LanguageSwitcher />
                     <a href="/legal/disclosure" className="text-content link-hover">商业披露</a>
                   </div>
                 </div>
