@@ -8,6 +8,7 @@ interface ProductDisplayProps {
   subscribeText: string;
   subscribeLink: string;
   imagePath: string;
+  note?: string;
 }
 
 export default function ProductDisplay({
@@ -16,41 +17,44 @@ export default function ProductDisplay({
   benefits,
   subscribeText,
   subscribeLink,
-  imagePath
+  imagePath,
+  note
 }: ProductDisplayProps) {
   return (
-    <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+    <div className="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="lg:grid lg:grid-cols-5 lg:gap-8 items-center">
           {/* 左侧：图片 */}
-          <div className="relative h-[280px] w-[280px] mx-auto mb-8 lg:mb-0">
-            <Image
-              src={imagePath}
-              alt={title}
-              fill
-              className="object-contain rounded-lg"
-              priority
-            />
+          <div className="lg:col-span-2">
+            <div className="relative h-[200px] w-[200px] mx-auto mb-8 lg:mb-0">
+              <Image
+                src={imagePath}
+                alt={title}
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
 
           {/* 右侧：内容 */}
-          <div className="space-y-8">
-            <h2 className="text-3xl font-bold text-blue-400 mb-4">{title}</h2>
+          <div className="lg:col-span-3 space-y-6">
+            <h2 className="text-2xl font-bold text-blue-400">{title}</h2>
             
-            <p className="text-gray-300 text-lg whitespace-pre-line">
+            <p className="text-gray-200 text-lg">
               {description}
             </p>
             
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start text-gray-300">
+                <li key={index} className="flex items-start text-gray-200">
                   <span className="text-blue-400 mr-2">•</span>
                   <span>{benefit}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="pt-6">
+            <div className="pt-4 flex flex-col items-start space-y-3">
               <a
                 href={subscribeLink}
                 target="_blank"
@@ -59,6 +63,11 @@ export default function ProductDisplay({
               >
                 {subscribeText}
               </a>
+              {note && (
+                <p className="text-gray-400 text-sm">
+                  {note}
+                </p>
+              )}
             </div>
           </div>
         </div>

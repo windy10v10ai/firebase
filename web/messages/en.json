@@ -11,13 +11,14 @@
     },
     "membership": {
       "title": "Membership Subscription",
-      "description": "⭐Membership grants the following benefits:❗Remember to leave your Dota2 friend ID in the message to automatically activate your membership.",
+      "description": "⭐Membership grants the following benefits:",
+      "note": "❗Remember to leave your Dota2 friend ID in the message to automatically activate your membership.",
       "benefits": [
         "Receive 1000 membership points for each monthly subscription",
         "Gain 100 membership points for playing every day",
         "Get one extra reroll in Ability Draft",
-        "Enjoy a special Membership BUFF in-game",
-        "Respawn time reduced to 5 seconds, and buyback cooldown reduced to 2 minutes"
+        "Respawn time reduced to 5 seconds, and buyback cooldown reduced to 2 minutes",
+        "Enjoy a special Membership BUFF in-game"
       ],
       "subscribe": "Subscribe Now",
       "subscribeLink": "https://afdian.com/a/windy10v10ai"

@@ -24,6 +24,7 @@ export default function Home() {
         subscribeText={t('home.membership.subscribe')}
         subscribeLink={t('home.membership.subscribeLink')}
         imagePath="/images/membership.png"
+        note={t('home.membership.note')}
       />
 
       {/* 链接区域 */}
