@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'DOTA2 10v10 AI',
   description: 'DOTA2 10v10 AI custom map',
+  icons: {
+    icon: '/favicon.webp'
+  }
 }
 
 export default async function RootLayout({
