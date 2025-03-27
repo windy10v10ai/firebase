@@ -9,7 +9,7 @@ describe('MemberController (e2e)', () => {
   const prefixPath = '/api/afdian';
 
   // 创建基础的 webhook 请求数据
-  const createWebhookRequest = (order: any) => ({
+  const createWebhookRequest = (order: Record<string, unknown>) => ({
     ec: 200,
     em: 'ok',
     data: {
