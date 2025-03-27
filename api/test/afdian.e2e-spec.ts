@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 import { get, initTest } from './util/util-http';
-import { getPlayer } from './util/util-player';
+import { getPlayer, createPlayer } from './util/util-player';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
@@ -32,6 +32,13 @@ describe('MemberController (e2e)', () => {
 
   beforeAll(async () => {
     app = await initTest();
+    // 创建测试所需的玩家
+    await createPlayer(app, { steamId: 200000103 });
+    await createPlayer(app, { steamId: 200000104 });
+    await createPlayer(app, { steamId: 200000201 });
+    await createPlayer(app, { steamId: 200000202 });
+    await createPlayer(app, { steamId: 200000203 });
+    await createPlayer(app, { steamId: 200000111 });
   });
 
   afterAll(async () => {
@@ -234,6 +241,92 @@ describe('MemberController (e2e)', () => {
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
+      });
+
+      it('爱发电Webhook开通会员失败 玩家不存在', async () => {
+        const memberId = 200000112; // 未创建的玩家ID
+        const month = 12;
+        const responseCreate = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .send(
+            createWebhookRequest({
+              out_trade_no: '202106232138371083454010627',
+              user_id: 'adf397fe8374811eaacee525200000112',
+              plan_id: 'a45353328af911eb973052540025c377',
+              month: month,
+              remark: `${memberId}`,
+            }),
+          )
+          .query({ token: 'afdian-webhook' });
+        expect(responseCreate.status).toEqual(201);
+        expect(responseCreate.body).toEqual({
+          ec: 200,
+          em: '[Error] 未能正确获取Dota2 ID',
+        });
+
+        const responseAfter = await get(app, `/api/members/${memberId}`);
+        expect(responseAfter.status).toEqual(404);
+      });
+
+      it('爱发电Webhook开通会员失败 玩家不存在 用相同爱发电ID之前留存的steamID激活', async () => {
+        const memberId = 200000113; // 未创建的玩家ID
+        const memberIdNotExist = 200000199; // 不存在的玩家ID
+        const month = 1;
+
+        // 创建玩家
+        await createPlayer(app, { steamId: memberId });
+        // 第一次请求，记录爱发电ID和steamID
+        const responseCreate = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .send(
+            createWebhookRequest({
+              out_trade_no: '202106232138371083454010628',
+              user_id: 'adf397fe8374811eaacee525200000113',
+              plan_id: 'a45353328af911eb973052540025c377',
+              month: month,
+              remark: `${memberId}`,
+            }),
+          )
+          .query({ token: 'afdian-webhook' });
+        expect(responseCreate.status).toEqual(201);
+        expect(responseCreate.body).toEqual({
+          ec: 200,
+          em: 'ok',
+        });
+
+        // 第二次请求，使用相同的爱发电ID，但玩家已存在
+        const responseCreate2 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .send(
+            createWebhookRequest({
+              out_trade_no: '202106232138371083454010629',
+              user_id: 'adf397fe8374811eaacee525200000113',
+              plan_id: 'a45353328af911eb973052540025c377',
+              month: month,
+              remark: `${memberIdNotExist}`,
+            }),
+          )
+          .query({ token: 'afdian-webhook' });
+        expect(responseCreate2.status).toEqual(201);
+        expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
+
+        // 检查会员期限
+        const monthTwice = 2;
+        const dateNextMonth = new Date();
+        dateNextMonth.setUTCDate(
+          new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * monthTwice,
+        );
+        const expectBodyJson = {
+          steamId: memberId,
+          expireDateString: dateNextMonth.toISOString().split('T')[0],
+          enable: true,
+        };
+        const responseAfter = await get(app, `/api/members/${memberId}`);
+        expect(responseAfter.status).toEqual(200);
+        expect(responseAfter.body).toEqual(expectBodyJson);
+        // 检查玩家积分
+        const player = await getPlayer(app, memberId);
+        expect(player.memberPointTotal).toEqual(300 * monthTwice);
       });
     });
 

@@ -302,7 +302,7 @@ export class AfdianService {
   }
 
   private async getSteamId(orderDto: OrderDto): Promise<number> {
-    const steamId = this.getSteamIdFromAfdianOrderDto(orderDto);
+    const steamId = await this.getSteamIdFromAfdianOrderDto(orderDto);
 
     if (!steamId) {
       const afdianUser = await this.afdianUserRepository.findById(orderDto.user_id);
@@ -314,20 +314,23 @@ export class AfdianService {
     return steamId;
   }
 
-  private getSteamIdFromAfdianOrderDto(orderDto: OrderDto): number | null {
+  private async getSteamIdFromAfdianOrderDto(orderDto: OrderDto): Promise<number | null> {
     // 查找remark
     const rawString = orderDto.remark;
     if (!rawString) {
-      return null;
-    }
-    // steamID通常应该在10位以内
-    if (rawString.length > 10) {
       return null;
     }
     const steamId_remark = Number(rawString);
     if (isNaN(steamId_remark)) {
       return null;
     }
+
+    // 检查玩家是否存在
+    const player = await this.playerService.findBySteamId(steamId_remark);
+    if (!player) {
+      return null;
+    }
+
     return steamId_remark;
   }
 }
