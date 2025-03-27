@@ -27,7 +27,6 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className={`${inter.className} min-h-screen bg-gray-900`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <div className="fixed inset-0 bg-[url('/images/dota-bg.jpg')] bg-cover bg-center opacity-50 z-0"></div>
           <div className="relative z-10">
             <header className="card-container shadow-lg border-b border-gray-700">
               <nav className="container mx-auto px-4 py-4">

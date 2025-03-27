@@ -1,3 +1,43 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 * text eol=lf
+
+# 图片文件
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg binary
+
+# 字体文件
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
+# 其他二进制文件
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+
+# 确保脚本文件使用 LF 换行符
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 源代码文件
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.css text
+*.html text
+*.json text
+*.md text
+*.yml text
+*.yaml text
