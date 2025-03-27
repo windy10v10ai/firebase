@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 import { get, initTest } from './util/util-http';
-import { getPlayer, createPlayer } from './util/util-player';
+import { createPlayer, getPlayer } from './util/util-player';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
