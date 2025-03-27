@@ -16,7 +16,7 @@ describe('MemberController (e2e)', () => {
       type: 'order',
       order: {
         total_amount: '5.00',
-      show_amount: '5.00',
+        show_amount: '5.00',
         status: 2,
         redeem_id: '',
         product_type: 0,
