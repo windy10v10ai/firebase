@@ -25,6 +25,8 @@ jobs:
           npm install -g firebase-tools
           firebase experiments:enable webframeworks
 
+      - name: Lint Check
+        run: (cd api && npm run lint:check)
       - name: Unit Test
         run: (cd api && npm run test)
       - name: E2E Test
