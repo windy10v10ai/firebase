@@ -36,8 +36,11 @@ describe('MemberController (e2e)', () => {
   beforeAll(async () => {
     app = await initTest();
     // 创建测试所需的玩家
+    await createPlayer(app, { steamId: 200000101 });
+    await createPlayer(app, { steamId: 200000102 });
     await createPlayer(app, { steamId: 200000103 });
     await createPlayer(app, { steamId: 200000104 });
+    await createPlayer(app, { steamId: 200000105 });
     await createPlayer(app, { steamId: 200000201 });
     await createPlayer(app, { steamId: 200000202 });
     await createPlayer(app, { steamId: 200000203 });
@@ -86,42 +89,48 @@ describe('MemberController (e2e)', () => {
     });
 
     describe('爱发电Webhook开通会员', () => {
-      it('爱发电Webhook开通会员成功', async () => {
-        const memberId = 200000103;
-        const month = 12;
-        const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
-        const responseCreate = await request(app.getHttpServer())
-          .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              out_trade_no: '202106232138371083454010621',
-              user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: '6e27c8103bd011ed887852540025c377',
-              month: month,
-              remark: `${memberId}`,
-            }),
-          )
-          .query({ token: 'afdian-webhook' });
-        expect(responseCreate.status).toEqual(201);
-        expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
+      it.each([
+        [MemberLevel.NORMAL, 1, 200000101, '6e27c8103bd011ed887852540025c377', 300],
+        [MemberLevel.NORMAL, 12, 200000102, '6e27c8103bd011ed887852540025c377', 3600],
+        [MemberLevel.PREMIUM, 1, 200000103, '6c206f360d4c11f0a2cb52540025c377', 1000],
+        [MemberLevel.PREMIUM, 12, 200000104, '6c206f360d4c11f0a2cb52540025c377', 12000],
+      ])(
+        '爱发电Webhook开通%s会员成功 %s个月',
+        async (level, month, memberId, planId, memberPoint) => {
+          const dateNextMonth = new Date();
+          dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
+          const responseCreate = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .send(
+              createWebhookRequest({
+                out_trade_no: `202106232138371083${memberId}`,
+                user_id: `adf397fe8374811eaacee525${memberId}`,
+                plan_id: planId,
+                month: month,
+                remark: `${memberId}`,
+              }),
+            )
+            .query({ token: 'afdian-webhook' });
+          expect(responseCreate.status).toEqual(201);
+          expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
-        // 检查会员期限
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.NORMAL,
-        });
-        // 检查玩家积分
-        const player = await getPlayer(app, memberId);
-        expect(player.memberPointTotal).toEqual(300 * month);
-      });
+          // 检查会员期限
+          const responseAfter = await get(app, `/api/members/${memberId}`);
+          expect(responseAfter.status).toEqual(200);
+          expect(responseAfter.body).toEqual({
+            steamId: memberId,
+            expireDateString: dateNextMonth.toISOString().split('T')[0],
+            enable: true,
+            level,
+          });
+          // 检查玩家积分
+          const player = await getPlayer(app, memberId);
+          expect(player.memberPointTotal).toEqual(memberPoint);
+        },
+      );
 
       it('爱发电Webhook开通会员成功 webhook重复请求', async () => {
-        const memberId = 200000104;
+        const memberId = 200000105;
         const month = 12;
         const dateNextMonth = new Date();
         dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
