@@ -27,7 +27,7 @@ export class MembersService {
     private readonly playerService: PlayerService,
   ) {}
 
-  // FIXME 数据迁移后删除
+  // NOTE 数据迁移后删除
   async setMemberLevelAll() {
     const members = await this.membersRepository.find();
     logger.info(`[MembersService] setMemberLevelAll start, members count: ${members.length}`);

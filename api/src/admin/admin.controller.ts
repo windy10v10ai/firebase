@@ -30,7 +30,7 @@ export class AdminController {
     return this.adminService.createPatreonMember(createPatreonMemberDto);
   }
 
-  // FIXME 数据迁移后删除
+  // NOTE 数据迁移后删除
   @Post('/member/set-level-all')
   setMemberLevelAll() {
     return this.membersService.setMemberLevelAll();
