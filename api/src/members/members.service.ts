@@ -93,7 +93,7 @@ export class MembersService {
 
     // 会员有效，普通会员：剩余普通会员时长将按 0.6倍 折算为高级会员时长 + 增加高级会员时长
     if (existMember.level === MemberLevel.NORMAL) {
-      const convertedDays = this.convertToPremiumDays(existMember.expireDate, today);
+      const convertedDays = this.convertToPremiumDays(today, existMember.expireDate);
       return this.updateMemberExpireDate(
         steamId,
         today,
