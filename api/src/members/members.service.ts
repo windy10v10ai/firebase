@@ -62,23 +62,6 @@ export class MembersService {
   // TODO move to test module
   async initTestData() {
     const members: MemberOld[] = [];
-    // 开发贡献者
-    members.push(new MemberOld(136407523));
-    members.push(new MemberOld(1194383041));
-    members.push(new MemberOld(143575444));
-    members.push(new MemberOld(314757913));
-    members.push(new MemberOld(385130282));
-    members.push(new MemberOld(967052298));
-    members.push(new MemberOld(1159610111));
-    // 永久会员
-    members.push(new MemberOld(136668998));
-    members.push(new MemberOld(128984820));
-    members.push(new MemberOld(133043280));
-    members.push(new MemberOld(124111398));
-    members.push(new MemberOld(120921523));
-    members.push(new MemberOld(146837505));
-    members.push(new MemberOld(136385488));
-    members.push(new MemberOld(907056028));
     // 到期
     members.push(new MemberOld(20200801, new Date('2020-08-01T00:00:00Z')));
     members.push(new MemberOld(20201231, new Date('2020-12-31T00:00:00Z')));
