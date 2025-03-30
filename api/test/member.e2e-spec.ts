@@ -8,7 +8,7 @@ import { get, initTest, post } from './util/util-http';
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
   let membersRepository: BaseFirestoreRepository<Member>;
-
+  const daysPerMonth = 31;
   beforeAll(async () => {
     app = await initTest();
     membersRepository = app.get('MemberRepository');
@@ -104,7 +104,7 @@ describe('MemberController (e2e)', () => {
   describe('members/ (POST)', () => {
     it('开通一个月会员 新建 检测会员数据储存是否一致', async () => {
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH);
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth);
       const expectBodyJson = {
         steamId: 123456789,
         expireDateString: dateNextMonth.toISOString().split('T')[0],
@@ -137,7 +137,7 @@ describe('MemberController (e2e)', () => {
       });
 
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH);
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth);
       const expectBodyJson = {
         steamId: 20201231,
         expireDateString: dateNextMonth.toISOString().split('T')[0],
@@ -193,7 +193,7 @@ describe('MemberController (e2e)', () => {
 
     it('开通复数月会员 新建', async () => {
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * 13);
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * 13);
       const expectBodyJson = {
         steamId: 1234567890,
         expireDateString: dateNextMonth.toISOString().split('T')[0],
@@ -219,7 +219,7 @@ describe('MemberController (e2e)', () => {
       });
 
       const dateNextMonth = new Date();
-      dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * 3);
+      dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * 3);
 
       const responseCreate = await post(app, '/api/members', {
         steamId: 20200901,

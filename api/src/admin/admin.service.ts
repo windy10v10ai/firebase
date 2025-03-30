@@ -22,7 +22,14 @@ export class AdminService {
     const player = await this.playerService.upsertAddPoint(createMemberDto.steamId, {
       memberPointTotal: memberPointPerMonth * createMemberDto.month,
     });
-    const member = await this.membersService.addMember(createMemberDto);
+
+    const member =
+      createMemberDto.level == MemberLevel.NORMAL
+        ? await this.membersService.addNormalMember(createMemberDto.steamId, createMemberDto.month)
+        : await this.membersService.addPremiumMember(
+            createMemberDto.steamId,
+            createMemberDto.month,
+          );
     return {
       player,
       member,
@@ -42,11 +49,7 @@ export class AdminService {
       const player = await this.playerService.upsertAddPoint(steamId, {
         memberPointTotal: PREMIUM_MEMBER_MONTHLY_POINT,
       });
-      const member = await this.membersService.updateMemberExpireDate(
-        steamId,
-        expireAt,
-        MemberLevel.PREMIUM,
-      );
+      const member = await this.membersService.addPremiumMember(steamId, 1);
       result.push({
         player,
         member,

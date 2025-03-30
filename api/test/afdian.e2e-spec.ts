@@ -9,6 +9,7 @@ import { createPlayer, getPlayer } from './util/util-player';
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
   const prefixPath = '/api/afdian';
+  const daysPerMonth = 31;
 
   // 创建基础的 webhook 请求数据
   const createWebhookRequest = (order: Record<string, unknown>) => ({
@@ -89,7 +90,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000103;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -123,7 +124,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000104;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -173,7 +174,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000110;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -200,7 +201,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000111;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -315,9 +316,7 @@ describe('MemberController (e2e)', () => {
         // 检查会员期限
         const monthTwice = 2;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(
-          new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * monthTwice,
-        );
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * monthTwice);
         const responseAfter = await get(app, `/api/members/${memberId}`);
         expect(responseAfter.status).toEqual(200);
         expect(responseAfter.body).toEqual({
@@ -337,7 +336,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000201;
         const month = 1;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -369,7 +368,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000202;
         const month = 1;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -401,7 +400,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000203;
         const month = 1;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(

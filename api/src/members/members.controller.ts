@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { CreateMemberDto } from './dto/create-member.dto';
+import { MemberLevel } from './entities/members.entity';
 import { MembersService } from './members.service';
 
 @ApiTags('Members')
@@ -13,7 +14,11 @@ export class MembersController {
   @ApiBody({ type: CreateMemberDto })
   @Post()
   create(@Body() createMemberDto: CreateMemberDto) {
-    return this.membersService.addMember(createMemberDto);
+    if (createMemberDto.level == MemberLevel.NORMAL) {
+      return this.membersService.addNormalMember(createMemberDto.steamId, createMemberDto.month);
+    } else {
+      return this.membersService.addPremiumMember(createMemberDto.steamId, createMemberDto.month);
+    }
   }
 
   @Get(':id')

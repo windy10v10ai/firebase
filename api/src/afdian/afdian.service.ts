@@ -3,7 +3,6 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
-import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -230,7 +229,7 @@ export class AfdianService {
       if (month <= 0) {
         return false;
       }
-      await this.membersService.addMember({ steamId, month, level: MemberLevel.NORMAL });
+      await this.membersService.addNormalMember(steamId, month);
       await this.playerService.upsertAddPoint(steamId, {
         memberPointTotal: this.MEMBER_MONTHLY_POINT * month,
       });
