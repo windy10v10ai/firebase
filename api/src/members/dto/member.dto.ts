@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { MemberOld } from '../entities/memberOld.entity';
 import { Member } from '../entities/members.entity';
 import { MembersService } from '../members.service';
 
@@ -12,7 +11,7 @@ export class MemberDto {
   @ApiProperty()
   expireDateString!: string;
 
-  constructor(member: MemberOld | Member) {
+  constructor(member: Member) {
     this.steamId = member.steamId;
     // 有效期次日UTC 00:00后 过期
     this.enable = MembersService.IsMemberEnable(member);

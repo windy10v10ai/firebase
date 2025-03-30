@@ -4,7 +4,6 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { CreateMemberDto } from './dto/create-member.dto';
 import { MemberDto } from './dto/member.dto';
-import { MemberOld } from './entities/memberOld.entity';
 import { Member } from './entities/members.entity';
 
 @Injectable()
@@ -59,24 +58,6 @@ export class MembersService {
     }
   }
 
-  // TODO move to test module
-  async initTestData() {
-    const members: MemberOld[] = [];
-    // 到期
-    members.push(new MemberOld(20200801, new Date('2020-08-01T00:00:00Z')));
-    members.push(new MemberOld(20201231, new Date('2020-12-31T00:00:00Z')));
-    // 未来
-    members.push(new MemberOld(20300801, new Date('2030-08-01T00:00:00Z')));
-    members.push(new MemberOld(20301231, new Date('2030-12-31T00:00:00Z')));
-    for (const member of members) {
-      await this.membersRepository.create({
-        id: member.steamId.toString(),
-        ...member,
-      });
-    }
-    return `This action create test members with init data`;
-  }
-
   getDailyMemberPoint(member: Member) {
     let memberDailyPoint = 0;
     const todayZero = new Date();
@@ -94,7 +75,7 @@ export class MembersService {
     return memberDailyPoint;
   }
 
-  static IsMemberEnable(member: Member | MemberOld): boolean {
+  static IsMemberEnable(member: Member): boolean {
     const oneDataAgo: Date = new Date();
     oneDataAgo.setDate(oneDataAgo.getDate() - 1);
     return member.expireDate > oneDataAgo;

@@ -1,14 +1,29 @@
 import { INestApplication } from '@nestjs/common';
+import { BaseFirestoreRepository } from 'fireorm';
+
+import { Member } from '../src/members/entities/members.entity';
 
 import { get, initTest, post } from './util/util-http';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
+  let membersRepository: BaseFirestoreRepository<Member>;
 
   beforeAll(async () => {
     app = await initTest();
+    membersRepository = app.get('MemberRepository');
+
     // 初始化测试数据
-    await get(app, '/api/test/init');
+    const testMembers = [
+      { id: '20200801', steamId: 20200801, expireDate: new Date('2020-08-01T00:00:00Z') },
+      { id: '20201231', steamId: 20201231, expireDate: new Date('2020-12-31T00:00:00Z') },
+      { id: '20300801', steamId: 20300801, expireDate: new Date('2030-08-01T00:00:00Z') },
+      { id: '20301231', steamId: 20301231, expireDate: new Date('2030-12-31T00:00:00Z') },
+    ];
+
+    for (const member of testMembers) {
+      await membersRepository.create(member);
+    }
   });
 
   describe('members/ (GET)', () => {
