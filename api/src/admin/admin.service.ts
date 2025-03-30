@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
+import { CreateMemberDto } from '../members/dto/create-member.dto';
+import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { AFDIAN_MEMBER_MONTHLY_POINT, PATREON_MEMBER_MONTHLY_POINT } from '../util/const';
+import { NORMAL_MEMBER_MONTHLY_POINT, PREMIUM_MEMBER_MONTHLY_POINT } from '../util/const';
 
-import { CreateAfdianMemberDto } from './dto/create-afdian-member.dto';
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
 @Injectable()
@@ -13,11 +14,15 @@ export class AdminService {
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
   ) {}
-  async createAfdianMember(createAfdianMemberDto: CreateAfdianMemberDto) {
-    const player = await this.playerService.upsertAddPoint(createAfdianMemberDto.steamId, {
-      memberPointTotal: AFDIAN_MEMBER_MONTHLY_POINT * createAfdianMemberDto.month,
+  async createMember(createMemberDto: CreateMemberDto) {
+    const memberPointPerMonth =
+      createMemberDto.level == MemberLevel.NORMAL
+        ? NORMAL_MEMBER_MONTHLY_POINT
+        : PREMIUM_MEMBER_MONTHLY_POINT;
+    const player = await this.playerService.upsertAddPoint(createMemberDto.steamId, {
+      memberPointTotal: memberPointPerMonth * createMemberDto.month,
     });
-    const member = await this.membersService.addMember(createAfdianMemberDto);
+    const member = await this.membersService.addMember(createMemberDto);
     return {
       player,
       member,
@@ -35,9 +40,13 @@ export class AdminService {
       }
 
       const player = await this.playerService.upsertAddPoint(steamId, {
-        memberPointTotal: PATREON_MEMBER_MONTHLY_POINT,
+        memberPointTotal: PREMIUM_MEMBER_MONTHLY_POINT,
       });
-      const member = await this.membersService.updateMemberExpireDate(steamId, expireAt);
+      const member = await this.membersService.updateMemberExpireDate(
+        steamId,
+        expireAt,
+        MemberLevel.PREMIUM,
+      );
       result.push({
         player,
         member,

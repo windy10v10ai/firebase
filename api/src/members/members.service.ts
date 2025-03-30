@@ -4,7 +4,7 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { CreateMemberDto } from './dto/create-member.dto';
 import { MemberDto } from './dto/member.dto';
-import { Member } from './entities/members.entity';
+import { Member, MemberLevel } from './entities/members.entity';
 
 @Injectable()
 export class MembersService {
@@ -35,13 +35,79 @@ export class MembersService {
     );
     expireDate.setUTCHours(0, 0, 0, 0);
 
-    return this.updateMemberExpireDate(steamId, expireDate);
+    return this.updateMemberExpireDate(steamId, expireDate, createMemberDto.level);
   }
 
-  async updateMemberExpireDate(steamId: number, expireDate: Date) {
+  async addPremiumMember(steamId: number, month: number) {
     const existMember = await this.findOne(steamId);
-    const member = { id: steamId.toString(), steamId, expireDate };
+    const now = new Date();
+    now.setUTCHours(0, 0, 0, 0);
+
+    let expireDate = new Date();
+    expireDate.setUTCHours(0, 0, 0, 0);
+
     if (existMember) {
+      // 如果已经是高级会员，直接增加时长
+      if (existMember.level === MemberLevel.PREMIUM) {
+        expireDate = new Date(existMember.expireDate);
+        if (expireDate.getTime() < now.getTime()) {
+          expireDate = now;
+        }
+      } else {
+        // 如果是普通会员，将剩余时长按0.6倍折算为高级会员时长
+        expireDate = now;
+        if (existMember.expireDate.getTime() > now.getTime()) {
+          const remainingDays = Math.ceil(
+            (existMember.expireDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+          );
+          expireDate.setUTCDate(expireDate.getUTCDate() + Math.floor(remainingDays * 0.6));
+        }
+      }
+    }
+
+    // 添加新的高级会员时长
+    expireDate.setUTCDate(expireDate.getUTCDate() + month * +process.env.DAYS_PER_MONTH);
+
+    const member = {
+      id: steamId.toString(),
+      steamId,
+      expireDate,
+      level: MemberLevel.PREMIUM,
+    };
+
+    if (existMember) {
+      await this.membersRepository.update(member);
+    } else {
+      await this.membersRepository.create(member);
+    }
+
+    return this.find(steamId);
+  }
+
+  async updateMemberExpireDate(steamId: number, expireDate: Date, level: MemberLevel) {
+    const existMember = await this.findOne(steamId);
+    const member: Member = {
+      id: steamId.toString(),
+      steamId,
+      expireDate,
+      level,
+    };
+
+    if (existMember) {
+      // TODO 考虑其他几种情况
+      // 如果是高级会员，购买普通会员时按0.6倍折算为高级会员时长
+      if (existMember.level === MemberLevel.PREMIUM) {
+        const now = new Date();
+        now.setUTCHours(0, 0, 0, 0);
+        const remainingDays = Math.ceil(
+          (expireDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        const premiumExpireDate = new Date(existMember.expireDate);
+        premiumExpireDate.setUTCDate(
+          premiumExpireDate.getUTCDate() + Math.floor(remainingDays * 0.6),
+        );
+        member.expireDate = premiumExpireDate;
+      }
       await this.membersRepository.update(member);
     } else {
       await this.membersRepository.create(member);
