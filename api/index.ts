@@ -88,6 +88,7 @@ export const admin = onRequest(
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
+    memory: '512MiB',
     timeoutSeconds: 1800,
     secrets: commonSecrets,
   },

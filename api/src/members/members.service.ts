@@ -29,9 +29,15 @@ export class MembersService {
 
   // FIXME 数据迁移后删除
   async setMemberLevelAll() {
+    // find where level is null
     const members = await this.membersRepository.find();
     logger.info(`[MembersService] setMemberLevelAll start, members count: ${members.length}`);
+    let count = 0;
     for (const member of members) {
+      count++;
+      if (member.level) {
+        continue;
+      }
       member.level = MemberLevel.NORMAL;
       await this.membersRepository.update(member);
       // if member expireDate not exist, error
@@ -41,6 +47,7 @@ export class MembersService {
         );
         continue;
       }
+      logger.debug(`[MembersService] setMemberLevelAll member: ${count}`);
     }
     logger.info(`[MembersService] setMemberLevelAll end, members count: ${members.length}`);
   }
