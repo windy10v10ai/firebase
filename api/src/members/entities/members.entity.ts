@@ -13,5 +13,5 @@ export class Member {
   // 最近一次签到时间
   lastDailyDate?: Date;
   // 会员等级
-  level: MemberLevel = MemberLevel.NORMAL;
+  level: MemberLevel;
 }
