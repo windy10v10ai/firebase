@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { CreateMemberDto } from './dto/create-member.dto';
+import { MemberLevel } from './entities/members.entity';
 import { MembersService } from './members.service';
 
 @ApiTags('Members')
@@ -9,11 +10,16 @@ import { MembersService } from './members.service';
 export class MembersController {
   constructor(private readonly membersService: MembersService) {}
 
-  // 开通会员 指定月份
+  // 追加会员月份
   @ApiBody({ type: CreateMemberDto })
   @Post()
   create(@Body() createMemberDto: CreateMemberDto) {
-    return this.membersService.addMember(createMemberDto);
+    // FIXME 改用createMember同时修正e2e测试
+    if (createMemberDto.level == MemberLevel.NORMAL) {
+      return this.membersService.addNormalMember(createMemberDto.steamId, createMemberDto.month);
+    } else {
+      return this.membersService.addPremiumMember(createMemberDto.steamId, createMemberDto.month);
+    }
   }
 
   @Get(':id')

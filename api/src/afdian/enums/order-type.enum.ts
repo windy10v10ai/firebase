@@ -1,5 +1,6 @@
 export enum OrderType {
-  member = 'member',
+  memberNormal = 'member',
+  memberPremium = 'memberPremium',
   goods1 = 'pointTire1',
   goods2 = 'pointTire2',
   goods3 = 'pointTire3',

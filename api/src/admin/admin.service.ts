@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { AFDIAN_MEMBER_MONTHLY_POINT, PATREON_MEMBER_MONTHLY_POINT } from '../util/const';
 
-import { CreateAfdianMemberDto } from './dto/create-afdian-member.dto';
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
 @Injectable()
@@ -13,17 +11,6 @@ export class AdminService {
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
   ) {}
-  async createAfdianMember(createAfdianMemberDto: CreateAfdianMemberDto) {
-    const player = await this.playerService.upsertAddPoint(createAfdianMemberDto.steamId, {
-      memberPointTotal: AFDIAN_MEMBER_MONTHLY_POINT * createAfdianMemberDto.month,
-    });
-    const member = await this.membersService.addMember(createAfdianMemberDto);
-    return {
-      player,
-      member,
-    };
-  }
-
   async createPatreonMember(createPatreonMemberDto: CreatePatreonMemberDto) {
     const expireAt = this.getEndOfNextMonth();
     const result = [];
@@ -35,9 +22,9 @@ export class AdminService {
       }
 
       const player = await this.playerService.upsertAddPoint(steamId, {
-        memberPointTotal: PATREON_MEMBER_MONTHLY_POINT,
+        memberPointTotal: 600,
       });
-      const member = await this.membersService.updateMemberExpireDate(steamId, expireAt);
+      const member = await this.membersService.addPremiumMember(steamId, 1);
       result.push({
         player,
         member,

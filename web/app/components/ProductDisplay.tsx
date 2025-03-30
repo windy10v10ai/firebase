@@ -31,6 +31,7 @@ export default function ProductDisplay({
                 src={imagePath}
                 alt={title}
                 fill
+                sizes="(max-width: 768px) 200px, 200px"
                 className="object-contain"
                 priority
               />
