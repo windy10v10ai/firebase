@@ -71,58 +71,92 @@ describe('PlayerController (e2e)', () => {
         expect(player2.seasonPointTotal).toEqual(0);
       });
 
-      it('有效会员 新玩家 当日首次', async () => {
-        const steamIds = [100000011];
-
+      it.each([
+        ['普通会员 新玩家 当日首次', 100000011, MemberLevel.NORMAL],
+        ['高级会员 新玩家 当日首次', 100000012, MemberLevel.PREMIUM],
+      ])('%s', async (title, steamId, level) => {
         mockDate('2023-12-01T00:00:00.000Z');
         await post(app, memberPostUrl, {
-          steamId: 100000011,
+          steamId,
           month: 1,
-          level: MemberLevel.NORMAL,
+          level,
         });
 
-        const result = await callGameStart(app, steamIds);
+        const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
         // assert player
-        const player = await getPlayer(app, 100000011);
+        const player = await getPlayer(app, steamId);
         expect(player.memberPointTotal).toEqual(100);
         expect(player.seasonPointTotal).toEqual(0);
       });
 
       it.each([
         [
-          '有效会员 二日首次登录 赋予积分',
+          '普通会员 二日首次登录 赋予积分',
           '2023-12-01T00:00:00.000Z',
-          100000012,
+          100000021,
           '2023-12-01T00:00:00.000Z',
           100,
           '2023-12-02T00:00:00.000Z',
           200,
+          MemberLevel.NORMAL,
         ],
         [
-          '有效会员 当日第二次 不赋予积分',
+          '普通会员 当日第二次 不赋予积分',
           '2023-12-01T00:00:00.000Z',
-          100000013,
+          100000022,
           '2023-12-01T00:00:00.000Z',
           100,
           '2023-12-01T01:00:00.000Z',
           100,
+          MemberLevel.NORMAL,
         ],
         [
-          '会员过期后 不赋予积分',
+          '普通过期后 不赋予积分',
           '2023-10-01T00:00:00.000Z',
-          100000014,
+          100000023,
           '2023-11-01T00:00:00.000Z',
           100,
           '2023-11-02T01:00:00.000Z',
           100,
+          MemberLevel.NORMAL,
         ],
-      ])('%s', async (title, dateMember, steamId, date1, point1, date2, point2) => {
+        [
+          '高级会员 二日首次登录 赋予积分',
+          '2023-12-01T00:00:00.000Z',
+          100000024,
+          '2023-12-01T00:00:00.000Z',
+          100,
+          '2023-12-02T00:00:00.000Z',
+          200,
+          MemberLevel.PREMIUM,
+        ],
+        [
+          '高级会员 当日第二次 不赋予积分',
+          '2023-12-01T00:00:00.000Z',
+          100000025,
+          '2023-12-01T00:00:00.000Z',
+          100,
+          '2023-12-01T01:00:00.000Z',
+          100,
+          MemberLevel.PREMIUM,
+        ],
+        [
+          '高级会员 过期后 不赋予积分',
+          '2023-10-01T00:00:00.000Z',
+          100000026,
+          '2023-11-01T00:00:00.000Z',
+          100,
+          '2023-11-02T01:00:00.000Z',
+          100,
+          MemberLevel.PREMIUM,
+        ],
+      ])('%s', async (title, dateMember, steamId, date1, point1, date2, point2, level) => {
         mockDate(dateMember);
         await post(app, memberPostUrl, {
-          steamId: steamId,
+          steamId,
           month: 1,
-          level: MemberLevel.NORMAL,
+          level,
         });
 
         mockDate(date1);
@@ -150,16 +184,34 @@ describe('PlayerController (e2e)', () => {
     });
 
     describe('多人开始', () => {
-      it('普通玩家 会员', async () => {
+      it('普通玩家 会员 混合', async () => {
         await post(app, memberPostUrl, {
           steamId: 100000032,
           month: 1,
           level: MemberLevel.NORMAL,
         });
-        const steamIds = [100000030, 100000031, 100000032];
+        await post(app, memberPostUrl, {
+          steamId: 100000033,
+          month: 1,
+          level: MemberLevel.PREMIUM,
+        });
+
+        const steamIds = [100000030, 100000031, 100000032, 100000033];
 
         const result = await callGameStart(app, steamIds);
         expect(result.status).toEqual(200);
+        // assert player
+        const player1 = await getPlayer(app, 100000030);
+        expect(player1.memberPointTotal).toEqual(0);
+
+        const player2 = await getPlayer(app, 100000031);
+        expect(player2.memberPointTotal).toEqual(0);
+
+        const player3 = await getPlayer(app, 100000032);
+        expect(player3.memberPointTotal).toEqual(100);
+
+        const player4 = await getPlayer(app, 100000033);
+        expect(player4.memberPointTotal).toEqual(100);
       });
     });
   });
