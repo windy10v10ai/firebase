@@ -97,7 +97,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010621',
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -131,7 +131,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010620',
               user_id: 'adf397fe8374811eaacee525200000104',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -147,7 +147,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010620', // 重复订单号
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -181,7 +181,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010622',
               user_id: 'adf397fe8374811eaacee525200000110',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: 'xxxx message',
             }),
@@ -208,7 +208,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371082000001111',
               user_id: 'adf397fe8374811eaacee525200000111',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month / 2,
               remark: '200000111',
             }),
@@ -223,7 +223,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371082000001112',
               user_id: 'adf397fe8374811eaacee525200000111',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month / 2,
               remark: '', // 未留言
             }),
@@ -255,7 +255,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010627',
               user_id: 'adf397fe8374811eaacee525200000112',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -285,7 +285,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010628',
               user_id: 'adf397fe8374811eaacee525200000113',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -304,7 +304,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010629',
               user_id: 'adf397fe8374811eaacee525200000113',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberIdNotExist}`,
             }),
