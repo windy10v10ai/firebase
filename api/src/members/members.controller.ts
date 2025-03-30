@@ -10,10 +10,11 @@ import { MembersService } from './members.service';
 export class MembersController {
   constructor(private readonly membersService: MembersService) {}
 
-  // 开通会员 指定月份
+  // 追加会员月份
   @ApiBody({ type: CreateMemberDto })
   @Post()
   create(@Body() createMemberDto: CreateMemberDto) {
+    // FIXME 改用createMember同时修正e2e测试
     if (createMemberDto.level == MemberLevel.NORMAL) {
       return this.membersService.addNormalMember(createMemberDto.steamId, createMemberDto.month);
     } else {

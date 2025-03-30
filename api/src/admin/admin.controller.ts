@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { AfdianService } from '../afdian/afdian.service';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
+import { MembersService } from '../members/members.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
@@ -16,11 +17,12 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly afdianService: AfdianService,
+    private readonly membersService: MembersService,
   ) {}
 
   @Post('/member')
   createMember(@Body() createMemberDto: CreateMemberDto) {
-    return this.adminService.createMember(createMemberDto);
+    return this.membersService.createMember(createMemberDto);
   }
 
   @Post('/member/patreon')

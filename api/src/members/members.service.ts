@@ -1,7 +1,15 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { PlayerService } from '../player/player.service';
+
+import { CreateMemberDto } from './dto/create-member.dto';
 import { MemberDto } from './dto/member.dto';
 import { Member, MemberLevel } from './entities/members.entity';
 
@@ -9,19 +17,35 @@ import { Member, MemberLevel } from './entities/members.entity';
 export class MembersService {
   private readonly CONVERSION_RATE = 0.6;
   private readonly DAYS_PER_MONTH = 31;
+  private readonly NORMAL_MEMBER_MONTHLY_POINT = 300;
+  private readonly PREMIUM_MEMBER_MONTHLY_POINT = 1000;
 
   constructor(
     @InjectRepository(Member)
     private readonly membersRepository: BaseFirestoreRepository<Member>,
+    private readonly playerService: PlayerService,
   ) {}
 
-  findOne(steamId: number): Promise<Member> {
-    return this.membersRepository.findById(steamId.toString());
-  }
+  async createMember(createMemberDto: CreateMemberDto) {
+    if (createMemberDto.month <= 0) {
+      throw new BadRequestException('Month must be greater than 0');
+    }
+    const memberPointPerMonth =
+      createMemberDto.level == MemberLevel.NORMAL
+        ? this.NORMAL_MEMBER_MONTHLY_POINT
+        : this.PREMIUM_MEMBER_MONTHLY_POINT;
+    const player = await this.playerService.upsertAddPoint(createMemberDto.steamId, {
+      memberPointTotal: memberPointPerMonth * createMemberDto.month,
+    });
 
-  // steamIds maxlength 10
-  async findBySteamIds(steamIds: number[]): Promise<Member[]> {
-    return await this.membersRepository.whereIn('steamId', steamIds).find();
+    const member =
+      createMemberDto.level == MemberLevel.NORMAL
+        ? await this.addNormalMember(createMemberDto.steamId, createMemberDto.month)
+        : await this.addPremiumMember(createMemberDto.steamId, createMemberDto.month);
+    return {
+      player,
+      member,
+    };
   }
 
   private getTodayDate(): Date {
@@ -141,7 +165,15 @@ export class MembersService {
     return this.find(steamId);
   }
 
-  // 获取会员信息
+  // ---- 获取会员信息 ----
+  findOne(steamId: number): Promise<Member> {
+    return this.membersRepository.findById(steamId.toString());
+  }
+
+  async findBySteamIds(steamIds: number[]): Promise<Member[]> {
+    return await this.membersRepository.whereIn('steamId', steamIds).find();
+  }
+
   async find(steamId: number): Promise<MemberDto> {
     const member = await this.findOne(steamId);
     if (member) {

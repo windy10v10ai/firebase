@@ -3,6 +3,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
+import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -35,8 +36,6 @@ enum PlanPoint {
 
 @Injectable()
 export class AfdianService {
-  // TODO move
-  private readonly MEMBER_MONTHLY_POINT = 300;
   private readonly OUT_TRADE_NO_BASE = '202410010000000000000000000';
   constructor(
     private readonly afdianApiService: AfdianApiService,
@@ -233,15 +232,30 @@ export class AfdianService {
       return false;
     }
 
-    // 订阅会员
+    // 订阅普通会员
     if (orderType === OrderType.memberNormal) {
       const month = orderDto.month;
       if (month <= 0) {
         return false;
       }
-      await this.membersService.addNormalMember(steamId, month);
-      await this.playerService.upsertAddPoint(steamId, {
-        memberPointTotal: this.MEMBER_MONTHLY_POINT * month,
+      await this.membersService.createMember({
+        steamId,
+        month,
+        level: MemberLevel.NORMAL,
+      });
+      return true;
+    }
+
+    // 订阅高级会员
+    if (orderType === OrderType.memberPremium) {
+      const month = orderDto.month;
+      if (month <= 0) {
+        return false;
+      }
+      await this.membersService.createMember({
+        steamId,
+        month,
+        level: MemberLevel.PREMIUM,
       });
       return true;
     }
