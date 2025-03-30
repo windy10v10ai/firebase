@@ -69,7 +69,7 @@ export class MembersService {
 
     // 会员有效，高级会员：增加高级会员时长
     if (existMember.level === MemberLevel.PREMIUM) {
-      const convertedDays = Math.floor(additionalDays * this.CONVERSION_RATE);
+      const convertedDays = Math.ceil(additionalDays * this.CONVERSION_RATE);
       return this.updateMemberExpireDate(
         steamId,
         existMember.expireDate,
