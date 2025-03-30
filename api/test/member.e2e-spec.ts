@@ -118,6 +118,7 @@ describe('MemberController (e2e)', () => {
       const responseCreate = await post(app, '/api/members', {
         steamId: 123456789,
         month: 1,
+        level: MemberLevel.NORMAL,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
@@ -151,6 +152,7 @@ describe('MemberController (e2e)', () => {
       const responseCreate = await post(app, '/api/members', {
         steamId: 20201231,
         month: 1,
+        level: MemberLevel.NORMAL,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
@@ -182,6 +184,7 @@ describe('MemberController (e2e)', () => {
       const responseCreate = await post(app, '/api/members', {
         steamId: 20301231,
         month: 1,
+        level: MemberLevel.NORMAL,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
@@ -204,6 +207,7 @@ describe('MemberController (e2e)', () => {
       const responseCreate = await post(app, '/api/members', {
         steamId: 1234567890,
         month: 13,
+        level: MemberLevel.NORMAL,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual(expectBodyJson);
@@ -224,6 +228,7 @@ describe('MemberController (e2e)', () => {
       const responseCreate = await post(app, '/api/members', {
         steamId: 20200901,
         month: 3,
+        level: MemberLevel.NORMAL,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({
@@ -246,6 +251,7 @@ describe('MemberController (e2e)', () => {
       const responseCreate = await post(app, '/api/members', {
         steamId: 20301001,
         month: 12,
+        level: MemberLevel.NORMAL,
       });
       expect(responseCreate.status).toEqual(201);
       expect(responseCreate.body).toEqual({

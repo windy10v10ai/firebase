@@ -1,6 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
+import { MemberLevel } from '../src/members/entities/members.entity';
+
 import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { addPlayerProperty, createPlayer, getPlayer, getPlayerProperty } from './util/util-player';
 
@@ -76,6 +78,7 @@ describe('PlayerController (e2e)', () => {
         await post(app, memberPostUrl, {
           steamId: 100000011,
           month: 1,
+          level: MemberLevel.NORMAL,
         });
 
         const result = await callGameStart(app, steamIds);
@@ -119,6 +122,7 @@ describe('PlayerController (e2e)', () => {
         await post(app, memberPostUrl, {
           steamId: steamId,
           month: 1,
+          level: MemberLevel.NORMAL,
         });
 
         mockDate(date1);
@@ -150,6 +154,7 @@ describe('PlayerController (e2e)', () => {
         await post(app, memberPostUrl, {
           steamId: 100000032,
           month: 1,
+          level: MemberLevel.NORMAL,
         });
         const steamIds = [100000030, 100000031, 100000032];
 
