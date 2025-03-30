@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -25,6 +26,24 @@ export class MembersService {
     private readonly membersRepository: BaseFirestoreRepository<Member>,
     private readonly playerService: PlayerService,
   ) {}
+
+  // FIXME 数据迁移后删除
+  async setMemberLevelAll() {
+    const members = await this.membersRepository.find();
+    logger.info(`[MembersService] setMemberLevelAll start, members count: ${members.length}`);
+    for (const member of members) {
+      member.level = MemberLevel.NORMAL;
+      await this.membersRepository.update(member);
+      // if member expireDate not exist, error
+      if (!member.expireDate) {
+        logger.error(
+          `[MembersService] setMemberLevelAll member expireDate not exist: ${member.id}`,
+        );
+        continue;
+      }
+    }
+    logger.info(`[MembersService] setMemberLevelAll end, members count: ${members.length}`);
+  }
 
   async createMember(createMemberDto: CreateMemberDto) {
     if (createMemberDto.month <= 0) {
