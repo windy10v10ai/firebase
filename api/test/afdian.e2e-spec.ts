@@ -1,6 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
+import { MemberLevel } from '../src/members/entities/members.entity';
+
 import { get, initTest } from './util/util-http';
 import { createPlayer, getPlayer } from './util/util-player';
 
@@ -88,11 +90,6 @@ describe('MemberController (e2e)', () => {
         const month = 12;
         const dateNextMonth = new Date();
         dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
-        const expectBodyJson = {
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-        };
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -111,7 +108,12 @@ describe('MemberController (e2e)', () => {
         // 检查会员期限
         const responseAfter = await get(app, `/api/members/${memberId}`);
         expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(responseAfter.body).toEqual({
+          steamId: memberId,
+          expireDateString: dateNextMonth.toISOString().split('T')[0],
+          enable: true,
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -122,11 +124,6 @@ describe('MemberController (e2e)', () => {
         const month = 12;
         const dateNextMonth = new Date();
         dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
-        const expectBodyJson = {
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-        };
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -161,7 +158,12 @@ describe('MemberController (e2e)', () => {
         // 检查会员期限
         const responseAfter = await get(app, `/api/members/${memberId}`);
         expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(responseAfter.body).toEqual({
+          steamId: memberId,
+          expireDateString: dateNextMonth.toISOString().split('T')[0],
+          enable: true,
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -230,14 +232,14 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
         // 检查会员期限
-        const expectBodyJson = {
+        const responseAfter = await get(app, `/api/members/${memberId}`);
+        expect(responseAfter.status).toEqual(200);
+        expect(responseAfter.body).toEqual({
           steamId: memberId,
           expireDateString: dateNextMonth.toISOString().split('T')[0],
           enable: true,
-        };
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -316,14 +318,14 @@ describe('MemberController (e2e)', () => {
         dateNextMonth.setUTCDate(
           new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * monthTwice,
         );
-        const expectBodyJson = {
+        const responseAfter = await get(app, `/api/members/${memberId}`);
+        expect(responseAfter.status).toEqual(200);
+        expect(responseAfter.body).toEqual({
           steamId: memberId,
           expireDateString: dateNextMonth.toISOString().split('T')[0],
           enable: true,
-        };
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * monthTwice);
