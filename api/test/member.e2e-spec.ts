@@ -20,41 +20,83 @@ describe('MemberController (e2e)', () => {
       expect(response.status).toEqual(404);
     });
 
-    it('获取存在已过期的会员 return 200 and enable false', async () => {
-      // 初始化测试数据
-      await membersRepository.create({
-        id: '20200801',
-        steamId: 20200801,
-        expireDate: new Date('2020-08-01T00:00:00Z'),
-        level: MemberLevel.NORMAL,
+    describe('获取存在已过期的会员', () => {
+      it('已过期的普通会员', async () => {
+        // 初始化测试数据
+        await membersRepository.create({
+          id: '20200801',
+          steamId: 20200801,
+          expireDate: new Date('2020-08-01T00:00:00Z'),
+          level: MemberLevel.NORMAL,
+        });
+
+        const response = await get(app, '/api/members/20200801');
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          steamId: 20200801,
+          expireDateString: '2020-08-01',
+          enable: false,
+          level: MemberLevel.NORMAL,
+        });
       });
 
-      const response = await get(app, '/api/members/20200801');
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual({
-        steamId: 20200801,
-        expireDateString: '2020-08-01',
-        enable: false,
-        level: MemberLevel.NORMAL,
+      it('已过期的高级会员', async () => {
+        // 初始化测试数据
+        await membersRepository.create({
+          id: '20200802',
+          steamId: 20200802,
+          expireDate: new Date('2020-08-02T00:00:00Z'),
+          level: MemberLevel.NORMAL,
+        });
+
+        const response = await get(app, '/api/members/20200802');
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          steamId: 20200802,
+          expireDateString: '2020-08-02',
+          enable: false,
+          level: MemberLevel.NORMAL,
+        });
       });
     });
 
-    it('获取存在且有效的会员 return 200 and enable true', async () => {
-      // 初始化测试数据
-      await membersRepository.create({
-        id: '20300801',
-        steamId: 20300801,
-        expireDate: new Date('2030-08-01T00:00:00Z'),
-        level: MemberLevel.PREMIUM,
+    describe('获取存在且有效的会员', () => {
+      it('有效的普通会员', async () => {
+        // 初始化测试数据
+        await membersRepository.create({
+          id: '20300801',
+          steamId: 20300801,
+          expireDate: new Date('2030-08-01T00:00:00Z'),
+          level: MemberLevel.NORMAL,
+        });
+
+        const response = await get(app, '/api/members/20300801');
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          steamId: 20300801,
+          expireDateString: '2030-08-01',
+          enable: true,
+          level: MemberLevel.NORMAL,
+        });
       });
 
-      const response = await get(app, '/api/members/20300801');
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual({
-        steamId: 20300801,
-        expireDateString: '2030-08-01',
-        enable: true,
-        level: MemberLevel.PREMIUM,
+      it('有效的高级会员', async () => {
+        // 初始化测试数据
+        await membersRepository.create({
+          id: '20300802',
+          steamId: 20300802,
+          expireDate: new Date('2030-08-02T00:00:00Z'),
+          level: MemberLevel.PREMIUM,
+        });
+
+        const response = await get(app, '/api/members/20300802');
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual({
+          steamId: 20300802,
+          expireDateString: '2030-08-02',
+          enable: true,
+          level: MemberLevel.PREMIUM,
+        });
       });
     });
   });
@@ -124,14 +166,14 @@ describe('MemberController (e2e)', () => {
         id: '20301231',
         steamId: 20301231,
         expireDate: new Date('2030-12-31T00:00:00Z'),
-        level: MemberLevel.PREMIUM,
+        level: MemberLevel.NORMAL,
       });
 
       const expectBodyJson = {
         steamId: 20301231,
         expireDateString: '2031-01-31',
         enable: true,
-        level: MemberLevel.PREMIUM,
+        level: MemberLevel.NORMAL,
       };
 
       const responseBefore = await get(app, '/api/members/20301231');
@@ -170,51 +212,48 @@ describe('MemberController (e2e)', () => {
     it('开通复数月会员 有效期在过去', async () => {
       // 初始化测试数据
       await membersRepository.create({
-        id: '20200801',
-        steamId: 20200801,
-        expireDate: new Date('2020-08-01T00:00:00Z'),
+        id: '20200901',
+        steamId: 20200901,
+        expireDate: new Date('2020-09-01T00:00:00Z'),
         level: MemberLevel.NORMAL,
       });
 
       const dateNextMonth = new Date();
       dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * 3);
-      const expectBodyJson = {
-        steamId: 20200801,
-        expireDateString: dateNextMonth.toISOString().split('T')[0],
-        enable: true,
-        level: MemberLevel.NORMAL,
-      };
 
       const responseCreate = await post(app, '/api/members', {
-        steamId: 20200801,
+        steamId: 20200901,
         month: 3,
       });
       expect(responseCreate.status).toEqual(201);
-      expect(responseCreate.body).toEqual(expectBodyJson);
+      expect(responseCreate.body).toEqual({
+        steamId: 20200901,
+        expireDateString: dateNextMonth.toISOString().split('T')[0],
+        enable: true,
+        level: MemberLevel.NORMAL,
+      });
     });
 
     it('开通复数月会员 有效期在未来', async () => {
       // 初始化测试数据
       await membersRepository.create({
-        id: '20300801',
-        steamId: 20300801,
-        expireDate: new Date('2030-08-01T00:00:00Z'),
-        level: MemberLevel.PREMIUM,
+        id: '20301001',
+        steamId: 20301001,
+        expireDate: new Date('2030-10-01T00:00:00Z'),
+        level: MemberLevel.NORMAL,
       });
 
-      const expectBodyJson = {
-        steamId: 20300801,
-        expireDateString: '2031-08-08',
-        enable: true,
-        level: MemberLevel.PREMIUM,
-      };
-
       const responseCreate = await post(app, '/api/members', {
-        steamId: 20300801,
+        steamId: 20301001,
         month: 12,
       });
       expect(responseCreate.status).toEqual(201);
-      expect(responseCreate.body).toEqual(expectBodyJson);
+      expect(responseCreate.body).toEqual({
+        steamId: 20301001,
+        expireDateString: '2031-10-08',
+        enable: true,
+        level: MemberLevel.NORMAL,
+      });
     });
   });
 
