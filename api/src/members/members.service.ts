@@ -1,53 +1,203 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { PlayerService } from '../player/player.service';
+
 import { CreateMemberDto } from './dto/create-member.dto';
 import { MemberDto } from './dto/member.dto';
-import { MemberOld } from './entities/memberOld.entity';
-import { Member } from './entities/members.entity';
+import { Member, MemberLevel } from './entities/members.entity';
 
 @Injectable()
 export class MembersService {
+  private readonly CONVERSION_RATE = 0.6;
+  private readonly DAYS_PER_MONTH = 31;
+  private readonly NORMAL_MEMBER_MONTHLY_POINT = 300;
+  private readonly PREMIUM_MEMBER_MONTHLY_POINT = 1000;
+
   constructor(
     @InjectRepository(Member)
     private readonly membersRepository: BaseFirestoreRepository<Member>,
+    private readonly playerService: PlayerService,
   ) {}
 
-  findOne(steamId: number): Promise<Member> {
-    return this.membersRepository.findById(steamId.toString());
-  }
-
-  // steamIds maxlength 10
-  async findBySteamIds(steamIds: number[]): Promise<Member[]> {
-    return await this.membersRepository.whereIn('steamId', steamIds).find();
-  }
-
-  async addMember(createMemberDto: CreateMemberDto) {
-    const steamId = createMemberDto.steamId;
-    const existMember = await this.findOne(steamId);
-    const expireDate = new Date();
-    if (existMember?.expireDate && existMember.expireDate.getTime() > expireDate.getTime()) {
-      expireDate.setTime(existMember.expireDate.getTime());
+  // NOTE 数据迁移后删除
+  async setMemberLevelAll() {
+    // find where level is null
+    const members = await this.membersRepository.find();
+    logger.info(`[MembersService] setMemberLevelAll start, members count: ${members.length}`);
+    let count = 0;
+    for (const member of members) {
+      count++;
+      if (member.level) {
+        continue;
+      }
+      member.level = MemberLevel.NORMAL;
+      await this.membersRepository.update(member);
+      // if member expireDate not exist, error
+      if (!member.expireDate) {
+        logger.error(
+          `[MembersService] setMemberLevelAll member expireDate not exist: ${member.id}`,
+        );
+        continue;
+      }
+      logger.debug(`[MembersService] setMemberLevelAll member: ${count}`);
     }
-    // steam id not exist
-    expireDate.setUTCDate(
-      expireDate.getUTCDate() + createMemberDto.month * +process.env.DAYS_PER_MONTH,
-    );
+    logger.info(`[MembersService] setMemberLevelAll end, members count: ${members.length}`);
+  }
+
+  async createMember(createMemberDto: CreateMemberDto) {
+    if (createMemberDto.month <= 0) {
+      throw new BadRequestException('Month must be greater than 0');
+    }
+    const memberPointPerMonth =
+      createMemberDto.level == MemberLevel.NORMAL
+        ? this.NORMAL_MEMBER_MONTHLY_POINT
+        : this.PREMIUM_MEMBER_MONTHLY_POINT;
+    const player = await this.playerService.upsertAddPoint(createMemberDto.steamId, {
+      memberPointTotal: memberPointPerMonth * createMemberDto.month,
+    });
+
+    const member =
+      createMemberDto.level == MemberLevel.NORMAL
+        ? await this.addNormalMember(createMemberDto.steamId, createMemberDto.month)
+        : await this.addPremiumMember(createMemberDto.steamId, createMemberDto.month);
+    return {
+      player,
+      member,
+    };
+  }
+
+  private getTodayDate(): Date {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    return today;
+  }
+
+  private isMemberValid(member: Member): boolean {
+    if (!member) {
+      return false;
+    }
+    const today = this.getTodayDate();
+    // 日期相同时，或者有效期在未来，会员有效
+    return today.getTime() <= member.expireDate.getTime();
+  }
+
+  private convertToPremiumDays(fromDate: Date, toDate: Date): number {
+    const remainingDays = (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24);
+    if (remainingDays < 0) {
+      return 0;
+    }
+    return Math.ceil(remainingDays * this.CONVERSION_RATE);
+  }
+
+  async addNormalMember(steamId: number, month: number): Promise<MemberDto> {
+    const existMember = await this.findOne(steamId);
+    const today = this.getTodayDate();
+    const additionalDays = month * this.DAYS_PER_MONTH;
+
+    // 非会员或会员已过期：增加普通会员时长
+    if (!this.isMemberValid(existMember)) {
+      return this.updateMemberExpireDate(steamId, today, additionalDays, MemberLevel.NORMAL);
+    }
+
+    // 会员有效，普通会员：增加普通会员时长
+    if (existMember.level === MemberLevel.NORMAL) {
+      return this.updateMemberExpireDate(
+        steamId,
+        existMember.expireDate,
+        additionalDays,
+        MemberLevel.NORMAL,
+      );
+    }
+
+    // 会员有效，高级会员：增加高级会员时长
+    if (existMember.level === MemberLevel.PREMIUM) {
+      const convertedDays = Math.ceil(additionalDays * this.CONVERSION_RATE);
+      return this.updateMemberExpireDate(
+        steamId,
+        existMember.expireDate,
+        convertedDays,
+        MemberLevel.PREMIUM,
+      );
+    }
+
+    throw new InternalServerErrorException('Invalid member level');
+  }
+
+  async addPremiumMember(steamId: number, month: number): Promise<MemberDto> {
+    const existMember = await this.findOne(steamId);
+    const today = this.getTodayDate();
+    const additionalDays = month * this.DAYS_PER_MONTH;
+
+    // 非会员或会员已过期：增加高级会员时长
+    if (!this.isMemberValid(existMember)) {
+      return this.updateMemberExpireDate(steamId, today, additionalDays, MemberLevel.PREMIUM);
+    }
+
+    // 会员有效，普通会员：剩余普通会员时长将按 0.6倍 折算为高级会员时长 + 增加高级会员时长
+    if (existMember.level === MemberLevel.NORMAL) {
+      const convertedDays = this.convertToPremiumDays(today, existMember.expireDate);
+      return this.updateMemberExpireDate(
+        steamId,
+        today,
+        convertedDays + additionalDays,
+        MemberLevel.PREMIUM,
+      );
+    }
+
+    // 会员有效，高级会员：增加高级会员时长
+    if (existMember.level === MemberLevel.PREMIUM) {
+      return this.updateMemberExpireDate(
+        steamId,
+        existMember.expireDate,
+        additionalDays,
+        MemberLevel.PREMIUM,
+      );
+    }
+
+    throw new InternalServerErrorException('Invalid member level');
+  }
+
+  async updateMemberExpireDate(
+    steamId: number,
+    baseDate: Date,
+    additionalDays: number,
+    level: MemberLevel,
+  ): Promise<MemberDto> {
+    const expireDate = new Date(baseDate);
+    expireDate.setUTCDate(expireDate.getUTCDate() + additionalDays);
     expireDate.setUTCHours(0, 0, 0, 0);
 
-    return this.updateMemberExpireDate(steamId, expireDate);
-  }
+    const member: Member = {
+      id: steamId.toString(),
+      steamId,
+      expireDate,
+      level,
+    };
 
-  async updateMemberExpireDate(steamId: number, expireDate: Date) {
     const existMember = await this.findOne(steamId);
-    const member = { id: steamId.toString(), steamId, expireDate };
     if (existMember) {
       await this.membersRepository.update(member);
     } else {
       await this.membersRepository.create(member);
     }
     return this.find(steamId);
+  }
+
+  // ---- 获取会员信息 ----
+  findOne(steamId: number): Promise<Member> {
+    return this.membersRepository.findById(steamId.toString());
+  }
+
+  async findBySteamIds(steamIds: number[]): Promise<Member[]> {
+    return await this.membersRepository.whereIn('steamId', steamIds).find();
   }
 
   async find(steamId: number): Promise<MemberDto> {
@@ -57,41 +207,6 @@ export class MembersService {
     } else {
       throw new NotFoundException();
     }
-  }
-
-  // TODO move to test module
-  async initTestData() {
-    const members: MemberOld[] = [];
-    // 开发贡献者
-    members.push(new MemberOld(136407523));
-    members.push(new MemberOld(1194383041));
-    members.push(new MemberOld(143575444));
-    members.push(new MemberOld(314757913));
-    members.push(new MemberOld(385130282));
-    members.push(new MemberOld(967052298));
-    members.push(new MemberOld(1159610111));
-    // 永久会员
-    members.push(new MemberOld(136668998));
-    members.push(new MemberOld(128984820));
-    members.push(new MemberOld(133043280));
-    members.push(new MemberOld(124111398));
-    members.push(new MemberOld(120921523));
-    members.push(new MemberOld(146837505));
-    members.push(new MemberOld(136385488));
-    members.push(new MemberOld(907056028));
-    // 到期
-    members.push(new MemberOld(20200801, new Date('2020-08-01T00:00:00Z')));
-    members.push(new MemberOld(20201231, new Date('2020-12-31T00:00:00Z')));
-    // 未来
-    members.push(new MemberOld(20300801, new Date('2030-08-01T00:00:00Z')));
-    members.push(new MemberOld(20301231, new Date('2030-12-31T00:00:00Z')));
-    for (const member of members) {
-      await this.membersRepository.create({
-        id: member.steamId.toString(),
-        ...member,
-      });
-    }
-    return `This action create test members with init data`;
   }
 
   getDailyMemberPoint(member: Member) {
@@ -111,7 +226,7 @@ export class MembersService {
     return memberDailyPoint;
   }
 
-  static IsMemberEnable(member: Member | MemberOld): boolean {
+  static IsMemberEnable(member: Member): boolean {
     const oneDataAgo: Date = new Date();
     oneDataAgo.setDate(oneDataAgo.getDate() - 1);
     return member.expireDate > oneDataAgo;

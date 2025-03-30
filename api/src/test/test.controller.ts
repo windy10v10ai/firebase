@@ -20,7 +20,6 @@ export class TestController {
   async initTestData(): Promise<void> {
     await this.initialLevel();
     await this.playerPropertyService.initialProperty();
-    await this.membersService.initTestData();
   }
 
   @Get('/player/steamId/:steamId')

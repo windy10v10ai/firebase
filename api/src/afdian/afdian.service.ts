@@ -3,6 +3,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
+import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -19,6 +20,8 @@ enum ProductType {
 }
 
 enum PlanId {
+  memberNormal = '6e27c8103bd011ed887852540025c377',
+  memberPremium = '6c206f360d4c11f0a2cb52540025c377',
   tire1 = '6f73a48e546011eda08052540025c377',
   tire2 = '29df1632688911ed9e7052540025c377',
   tire3 = '0783fa70688a11edacd452540025c377',
@@ -33,7 +36,6 @@ enum PlanPoint {
 
 @Injectable()
 export class AfdianService {
-  private readonly MEMBER_MONTHLY_POINT = 300;
   private readonly OUT_TRADE_NO_BASE = '202410010000000000000000000';
   constructor(
     private readonly afdianApiService: AfdianApiService,
@@ -186,7 +188,14 @@ export class AfdianService {
   // --- private ---
   private getOrderType(orderDto: OrderDto): OrderType {
     if (ProductType.member == orderDto.product_type) {
-      return OrderType.member;
+      switch (orderDto.plan_id) {
+        case PlanId.memberNormal:
+          return OrderType.memberNormal;
+        case PlanId.memberPremium:
+          return OrderType.memberPremium;
+        default:
+          return OrderType.others;
+      }
     }
 
     if (ProductType.goods == orderDto.product_type) {
@@ -223,15 +232,30 @@ export class AfdianService {
       return false;
     }
 
-    // 订阅会员
-    if (orderType === OrderType.member) {
+    // 订阅普通会员
+    if (orderType === OrderType.memberNormal) {
       const month = orderDto.month;
       if (month <= 0) {
         return false;
       }
-      await this.membersService.addMember({ steamId, month });
-      await this.playerService.upsertAddPoint(steamId, {
-        memberPointTotal: this.MEMBER_MONTHLY_POINT * month,
+      await this.membersService.createMember({
+        steamId,
+        month,
+        level: MemberLevel.NORMAL,
+      });
+      return true;
+    }
+
+    // 订阅高级会员
+    if (orderType === OrderType.memberPremium) {
+      const month = orderDto.month;
+      if (month <= 0) {
+        return false;
+      }
+      await this.membersService.createMember({
+        steamId,
+        month,
+        level: MemberLevel.PREMIUM,
       });
       return true;
     }

@@ -1,12 +1,15 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
+import { MemberLevel } from '../src/members/entities/members.entity';
+
 import { get, initTest } from './util/util-http';
 import { createPlayer, getPlayer } from './util/util-player';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
   const prefixPath = '/api/afdian';
+  const daysPerMonth = 31;
 
   // 创建基础的 webhook 请求数据
   const createWebhookRequest = (order: Record<string, unknown>) => ({
@@ -33,8 +36,11 @@ describe('MemberController (e2e)', () => {
   beforeAll(async () => {
     app = await initTest();
     // 创建测试所需的玩家
+    await createPlayer(app, { steamId: 200000101 });
+    await createPlayer(app, { steamId: 200000102 });
     await createPlayer(app, { steamId: 200000103 });
     await createPlayer(app, { steamId: 200000104 });
+    await createPlayer(app, { steamId: 200000105 });
     await createPlayer(app, { steamId: 200000201 });
     await createPlayer(app, { steamId: 200000202 });
     await createPlayer(app, { steamId: 200000203 });
@@ -83,57 +89,58 @@ describe('MemberController (e2e)', () => {
     });
 
     describe('爱发电Webhook开通会员', () => {
-      it('爱发电Webhook开通会员成功', async () => {
-        const memberId = 200000103;
-        const month = 12;
-        const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
-        const expectBodyJson = {
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-        };
-        const responseCreate = await request(app.getHttpServer())
-          .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              out_trade_no: '202106232138371083454010621',
-              user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: 'a45353328af911eb973052540025c377',
-              month: month,
-              remark: `${memberId}`,
-            }),
-          )
-          .query({ token: 'afdian-webhook' });
-        expect(responseCreate.status).toEqual(201);
-        expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
+      it.each([
+        [MemberLevel.NORMAL, 1, 200000101, '6e27c8103bd011ed887852540025c377', 300],
+        [MemberLevel.NORMAL, 12, 200000102, '6e27c8103bd011ed887852540025c377', 3600],
+        [MemberLevel.PREMIUM, 1, 200000103, '6c206f360d4c11f0a2cb52540025c377', 1000],
+        [MemberLevel.PREMIUM, 12, 200000104, '6c206f360d4c11f0a2cb52540025c377', 12000],
+      ])(
+        '爱发电Webhook开通%s会员成功 %s个月',
+        async (level, month, memberId, planId, memberPoint) => {
+          const dateNextMonth = new Date();
+          dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
+          const responseCreate = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .send(
+              createWebhookRequest({
+                out_trade_no: `202106232138371083${memberId}`,
+                user_id: `adf397fe8374811eaacee525${memberId}`,
+                plan_id: planId,
+                month: month,
+                remark: `${memberId}`,
+              }),
+            )
+            .query({ token: 'afdian-webhook' });
+          expect(responseCreate.status).toEqual(201);
+          expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
-        // 检查会员期限
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
-        // 检查玩家积分
-        const player = await getPlayer(app, memberId);
-        expect(player.memberPointTotal).toEqual(300 * month);
-      });
+          // 检查会员期限
+          const responseAfter = await get(app, `/api/members/${memberId}`);
+          expect(responseAfter.status).toEqual(200);
+          expect(responseAfter.body).toEqual({
+            steamId: memberId,
+            expireDateString: dateNextMonth.toISOString().split('T')[0],
+            enable: true,
+            level,
+          });
+          // 检查玩家积分
+          const player = await getPlayer(app, memberId);
+          expect(player.memberPointTotal).toEqual(memberPoint);
+        },
+      );
 
       it('爱发电Webhook开通会员成功 webhook重复请求', async () => {
-        const memberId = 200000104;
+        const memberId = 200000105;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
-        const expectBodyJson = {
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-        };
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
             createWebhookRequest({
               out_trade_no: '202106232138371083454010620',
               user_id: 'adf397fe8374811eaacee525200000104',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -149,7 +156,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010620', // 重复订单号
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -161,7 +168,12 @@ describe('MemberController (e2e)', () => {
         // 检查会员期限
         const responseAfter = await get(app, `/api/members/${memberId}`);
         expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(responseAfter.body).toEqual({
+          steamId: memberId,
+          expireDateString: dateNextMonth.toISOString().split('T')[0],
+          enable: true,
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -171,14 +183,14 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000110;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
             createWebhookRequest({
               out_trade_no: '202106232138371083454010622',
               user_id: 'adf397fe8374811eaacee525200000110',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: 'xxxx message',
             }),
@@ -198,14 +210,14 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000111;
         const month = 12;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
             createWebhookRequest({
               out_trade_no: '202106232138371082000001111',
               user_id: 'adf397fe8374811eaacee525200000111',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month / 2,
               remark: '200000111',
             }),
@@ -220,7 +232,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371082000001112',
               user_id: 'adf397fe8374811eaacee525200000111',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month / 2,
               remark: '', // 未留言
             }),
@@ -230,14 +242,14 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
         // 检查会员期限
-        const expectBodyJson = {
+        const responseAfter = await get(app, `/api/members/${memberId}`);
+        expect(responseAfter.status).toEqual(200);
+        expect(responseAfter.body).toEqual({
           steamId: memberId,
           expireDateString: dateNextMonth.toISOString().split('T')[0],
           enable: true,
-        };
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -252,7 +264,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010627',
               user_id: 'adf397fe8374811eaacee525200000112',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -282,7 +294,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010628',
               user_id: 'adf397fe8374811eaacee525200000113',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberId}`,
             }),
@@ -301,7 +313,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010629',
               user_id: 'adf397fe8374811eaacee525200000113',
-              plan_id: 'a45353328af911eb973052540025c377',
+              plan_id: '6e27c8103bd011ed887852540025c377',
               month: month,
               remark: `${memberIdNotExist}`,
             }),
@@ -313,17 +325,15 @@ describe('MemberController (e2e)', () => {
         // 检查会员期限
         const monthTwice = 2;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(
-          new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * monthTwice,
-        );
-        const expectBodyJson = {
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * monthTwice);
+        const responseAfter = await get(app, `/api/members/${memberId}`);
+        expect(responseAfter.status).toEqual(200);
+        expect(responseAfter.body).toEqual({
           steamId: memberId,
           expireDateString: dateNextMonth.toISOString().split('T')[0],
           enable: true,
-        };
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+          level: MemberLevel.NORMAL,
+        });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * monthTwice);
@@ -335,7 +345,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000201;
         const month = 1;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -367,7 +377,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000202;
         const month = 1;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
@@ -399,7 +409,7 @@ describe('MemberController (e2e)', () => {
         const memberId = 200000203;
         const month = 1;
         const dateNextMonth = new Date();
-        dateNextMonth.setUTCDate(new Date().getUTCDate() + +process.env.DAYS_PER_MONTH * month);
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * month);
         const responseCreate = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
           .send(
