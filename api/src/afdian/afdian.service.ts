@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -50,6 +51,28 @@ export class AfdianService {
     private readonly playerPropertyService: PlayerPropertyService,
   ) {}
 
+  async updateSuccess() {
+    const orders = await this.afdianOrderRepository.whereEqualTo('success', false).find();
+    logger.info(`[AfdianService] test orders not success count: ${orders.length}`);
+    // count steam Id null, not null
+    let steamIdNullCount = 0;
+    let steamIdNotNullCount = 0;
+    for (const order of orders) {
+      if (order.steamId && order.steamId > 100000000) {
+        steamIdNotNullCount++;
+        // update success to true
+        order.success = true;
+        await this.afdianOrderRepository.update(order);
+        logger.info(
+          `[AfdianService] update success to true order: ${order.outTradeNo}, steamId: ${order.steamId}`,
+        );
+      } else {
+        steamIdNullCount++;
+      }
+    }
+    logger.info(`[AfdianService] test steamIdNullCount: ${steamIdNullCount}`);
+    logger.info(`[AfdianService] test steamIdNotNullCount: ${steamIdNotNullCount}`);
+  }
   /** 手动激活订单
    * @param outTradeNo - 订单号
    * @param steamId - Steam ID

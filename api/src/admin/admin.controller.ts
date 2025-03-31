@@ -20,6 +20,11 @@ export class AdminController {
     private readonly membersService: MembersService,
   ) {}
 
+  @Post('/afdian/order/update-success')
+  updateSuccess() {
+    return this.afdianService.updateSuccess();
+  }
+
   @Post('/member')
   createMember(@Body() createMemberDto: CreateMemberDto) {
     return this.membersService.createMember(createMemberDto);
@@ -28,12 +33,6 @@ export class AdminController {
   @Post('/member/patreon')
   createPatreonMember(@Body() createPatreonMemberDto: CreatePatreonMemberDto) {
     return this.adminService.createPatreonMember(createPatreonMemberDto);
-  }
-
-  // NOTE 数据迁移后删除
-  @Post('/member/set-level-all')
-  setMemberLevelAll() {
-    return this.membersService.setMemberLevelAll();
   }
 
   @Get('/afdian/order/fail')
