@@ -30,12 +30,6 @@ export class AdminController {
     return this.adminService.createPatreonMember(createPatreonMemberDto);
   }
 
-  // NOTE 数据迁移后删除
-  @Post('/member/set-level-all')
-  setMemberLevelAll() {
-    return this.membersService.setMemberLevelAll();
-  }
-
   @Get('/afdian/order/fail')
   findFailed() {
     return this.afdianService.findFailed();
