@@ -1,8 +1,8 @@
 import { Collection } from 'fireorm';
 
 export enum MemberLevel {
-  NORMAL = 'normal',
-  PREMIUM = 'premium',
+  NORMAL = 1,
+  PREMIUM = 2,
 }
 
 @Collection()

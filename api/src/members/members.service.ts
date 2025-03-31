@@ -35,18 +35,8 @@ export class MembersService {
     let count = 0;
     for (const member of members) {
       count++;
-      if (member.level) {
-        continue;
-      }
       member.level = MemberLevel.NORMAL;
       await this.membersRepository.update(member);
-      // if member expireDate not exist, error
-      if (!member.expireDate) {
-        logger.error(
-          `[MembersService] setMemberLevelAll member expireDate not exist: ${member.id}`,
-        );
-        continue;
-      }
       logger.debug(`[MembersService] setMemberLevelAll member: ${count}`);
     }
     logger.info(`[MembersService] setMemberLevelAll end, members count: ${members.length}`);
