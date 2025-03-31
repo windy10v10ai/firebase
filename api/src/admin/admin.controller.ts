@@ -20,11 +20,6 @@ export class AdminController {
     private readonly membersService: MembersService,
   ) {}
 
-  @Post('/afdian/order/update-success')
-  updateSuccess() {
-    return this.afdianService.updateSuccess();
-  }
-
   @Post('/member')
   createMember(@Body() createMemberDto: CreateMemberDto) {
     return this.membersService.createMember(createMemberDto);
