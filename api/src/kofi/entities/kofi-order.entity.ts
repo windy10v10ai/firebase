@@ -4,7 +4,7 @@ import { KofiType } from '../enums/kofi-type.enum';
 import { KofiShipping, KofiShopItem } from '../types/kofi.types';
 
 @Collection()
-export class Kofi {
+export class KofiOrder {
   id: string;
   messageId: string;
   timestamp: Date;

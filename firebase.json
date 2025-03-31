@@ -20,7 +20,7 @@
     },
     "rewrites": [
       {
-        "regex": "^/api/(game|afdian|analytics|player).*",
+        "regex": "^/api/(game|afdian|analytics|player|kofi).*",
         "function": "client",
         "region": "asia-northeast1"
       }
