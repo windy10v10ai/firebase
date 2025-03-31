@@ -86,7 +86,7 @@ export class AfdianService {
         // 保存玩家记录
         await this.saveAfdianUser(orderDto.user_id, steamId);
         // 发送事件
-        await this.analyticsPurchaseService.purchase(existOrder);
+        await this.analyticsPurchaseService.afdianPurchase(existOrder);
       }
 
       return isActiveSuccess;
@@ -168,7 +168,7 @@ export class AfdianService {
       // 保存爱发电用户记录
       await this.saveAfdianUser(orderDto.user_id, steamId);
       // 发送GA4事件
-      await this.analyticsPurchaseService.purchase(afdianOrder);
+      await this.analyticsPurchaseService.afdianPurchase(afdianOrder);
     }
 
     return isActiveSuccess;

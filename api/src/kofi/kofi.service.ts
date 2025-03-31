@@ -11,6 +11,7 @@ import { KofiOrder } from './entities/kofi-order.entity';
 import { KofiUser } from './entities/kofi-user.entity';
 import { KofiType } from './enums/kofi-type.enum';
 import { logger } from 'firebase-functions/v2';
+import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
 
 @Injectable()
 export class KofiService {
@@ -21,6 +22,7 @@ export class KofiService {
     private readonly kofiUserRepository: BaseFirestoreRepository<KofiUser>,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
+    private readonly analyticsPurchaseService: AnalyticsPurchaseService,
   ) {}
 
   async handleWebhook(data: KofiWebhookDto) {
@@ -75,6 +77,8 @@ export class KofiService {
     if (kofi.success) {
       // 记录KofiUser
       await this.saveKofiUser(data.email, steamId);
+      // 发送GA4事件
+      await this.analyticsPurchaseService.kofiPurchase(kofi);
     }
     await this.kofiRepository.create(kofi);
     return { status: kofi.success ? 'success' : 'failed' };
