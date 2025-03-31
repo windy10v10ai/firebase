@@ -38,6 +38,7 @@ const commonSecrets = isLocal
       defineSecret(SECRET.AFDIAN_WEBHOOK_TOKEN),
       defineSecret(SECRET.AFDIAN_API_TOKEN),
       defineSecret(SECRET.GA4_API_SECRET),
+      defineSecret(SECRET.KOFI_VERIFICATION_TOKEN),
     ];
 
 export const client = onRequest(

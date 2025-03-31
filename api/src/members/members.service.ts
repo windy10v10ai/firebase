@@ -19,6 +19,7 @@ export class MembersService {
   private readonly DAYS_PER_MONTH = 31;
   private readonly NORMAL_MEMBER_MONTHLY_POINT = 300;
   private readonly PREMIUM_MEMBER_MONTHLY_POINT = 1000;
+  private readonly MEMBER_DAILY_POINT = 100;
 
   constructor(
     @InjectRepository(Member)
@@ -183,21 +184,17 @@ export class MembersService {
     }
   }
 
-  getDailyMemberPoint(member: Member) {
-    let memberDailyPoint = 0;
+  getDailyMemberPoint(member: Member): number {
     const todayZero = new Date();
     todayZero.setHours(0, 0, 0, 0);
 
     if (MembersService.IsMemberEnable(member)) {
       // 判断是否为当日首次登陆
       if (!member?.lastDailyDate || member.lastDailyDate < todayZero) {
-        memberDailyPoint = +process.env.MEMBER_DAILY_POINT;
-      }
-      if (isNaN(memberDailyPoint)) {
-        memberDailyPoint = 0;
+        return this.MEMBER_DAILY_POINT;
       }
     }
-    return memberDailyPoint;
+    return 0;
   }
 
   static IsMemberEnable(member: Member): boolean {
