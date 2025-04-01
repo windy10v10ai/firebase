@@ -2,21 +2,18 @@ import { INestApplication } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 
 import { Member, MemberLevel } from '../src/members/entities/members.entity';
-import { Player } from '../src/player/entities/player.entity';
 
 import { get, initTest, mockDate, post } from './util/util-http';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
   let membersRepository: BaseFirestoreRepository<Member>;
-  let playerRepository: BaseFirestoreRepository<Player>;
 
   const daysPerMonth = 31;
 
   beforeAll(async () => {
     app = await initTest();
     membersRepository = app.get('MemberRepository');
-    playerRepository = app.get('PlayerRepository');
   });
 
   describe('members/ (GET)', () => {
