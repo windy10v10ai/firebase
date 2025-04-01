@@ -25,7 +25,7 @@ export class KofiWebhookDto {
   @ApiProperty({ example: 'Good luck with the integration!' })
   message: string;
 
-  @ApiProperty({ example: '3.00' })
+  @ApiProperty({ example: '4.00' })
   amount: string;
 
   @ApiProperty({

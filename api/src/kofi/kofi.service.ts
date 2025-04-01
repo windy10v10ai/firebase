@@ -85,13 +85,12 @@ export class KofiService {
   }
 
   private async handleMemberSubscription(data: KofiWebhookDto, steamId: number): Promise<boolean> {
-    let month = 1;
-    if (data.currency === 'USD') {
-      month = Math.floor(parseFloat(data.amount) / 4); // 4 USD per month
-    } else {
+    if (data.currency !== 'USD') {
       logger.error(`[Kofi] Unsupported currency: ${data.currency}`);
       return false;
     }
+
+    const month = Math.floor(parseFloat(data.amount) / 4); // 4 USD per month
     if (month <= 0) {
       logger.error(`[Kofi] Invalid month: ${month}`);
       return false;
