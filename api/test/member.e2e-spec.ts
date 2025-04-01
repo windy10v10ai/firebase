@@ -8,7 +8,9 @@ import { get, initTest, mockDate, post } from './util/util-http';
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
   let membersRepository: BaseFirestoreRepository<Member>;
+
   const daysPerMonth = 31;
+
   beforeAll(async () => {
     app = await initTest();
     membersRepository = app.get('MemberRepository');
