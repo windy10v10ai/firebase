@@ -1,11 +1,11 @@
 import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
+import { Public } from '../util/auth/public.decorator';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { KofiWebhookDto } from './dto/kofi-webhook.dto';
 import { KofiService } from './kofi.service';
-import { Public } from '../util/auth/public.decorator';
-import { ApiTags } from '@nestjs/swagger';
 @Public()
 @ApiTags('Kofi(Public)')
 @Controller('kofi')

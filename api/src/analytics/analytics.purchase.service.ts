@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from 'firebase-functions/v2';
 
 import { AfdianOrder } from '../afdian/entities/afdian-order.entity';
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
