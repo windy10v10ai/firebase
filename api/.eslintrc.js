@@ -18,8 +18,8 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': 'warn',
-    'unused-imports/no-unused-imports': 'warn',
+    '@typescript-eslint/no-unused-vars': 'error',
+    'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
       'warn',
       { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
@@ -27,7 +27,7 @@ module.exports = {
     'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
     // 'autofix/no-unused-vars': 'error',
     'sort-imports': [
-      'warn',
+      'error',
       {
         ignoreCase: false,
         ignoreDeclarationSort: true,
@@ -37,7 +37,7 @@ module.exports = {
       },
     ],
     'import/order': [
-      'warn',
+      'error',
       {
         groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
         'newlines-between': 'always',
