@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions/v2';
 
@@ -19,7 +19,22 @@ export class KofiController {
 
   @Post('webhook')
   async handleWebhook(@Body('data') data: string) {
-    const webhookData: KofiWebhookDto = JSON.parse(data);
+    if (!data) {
+      throw new BadRequestException('Missing data field');
+    }
+
+    let webhookData: KofiWebhookDto;
+    try {
+      webhookData = JSON.parse(data);
+    } catch {
+      throw new BadRequestException('Invalid JSON format');
+    }
+
+    // 验证必要字段
+    if (!webhookData.message_id) {
+      throw new BadRequestException('Missing required field: message_id');
+    }
+
     const verificationToken = this.secretService.getSecretValue(SECRET.KOFI_VERIFICATION_TOKEN);
 
     if (webhookData.verification_token !== verificationToken) {

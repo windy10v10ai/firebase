@@ -70,12 +70,15 @@ describe('KofiController (e2e)', () => {
       it('认证失败', async () => {
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              verification_token: 'wrong-token',
-              email: 'auth-failed@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                verification_token: 'wrong-token',
+                email: 'auth-failed@example.com',
+              }),
+            ),
+          });
 
         expect(response.status).toEqual(401);
       });
@@ -89,7 +92,10 @@ describe('KofiController (e2e)', () => {
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(requestWithoutMessageId);
+          .type('form')
+          .send({
+            data: JSON.stringify(requestWithoutMessageId),
+          });
 
         expect(response.status).toEqual(400);
       });
@@ -98,37 +104,49 @@ describe('KofiController (e2e)', () => {
         // 测试非JSON格式请求
         const response1 = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .set('Content-Type', 'text/plain')
-          .send('This is not a valid JSON request');
+          .type('form')
+          .send({
+            data: 'This is not a valid JSON request',
+          });
 
         expect(response1.status).toEqual(400);
 
         // 测试空请求体
-        const response2 = await request(app.getHttpServer()).post(`${prefixPath}/webhook`).send();
+        const response2 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form')
+          .send({});
 
         expect(response2.status).toEqual(400);
 
         // 测试格式错误的JSON
         const response3 = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .set('Content-Type', 'application/json')
-          .send('{invalid json}');
+          .type('form')
+          .send({
+            data: '{invalid json}',
+          });
 
         expect(response3.status).toEqual(400);
 
         // 测试与预期完全不同的数据结构
-        const response4 = await request(app.getHttpServer()).post(`${prefixPath}/webhook`).send({
-          some_random_field: 'random_value',
-          another_field: 123,
-          email: 'abnormal-request@example.com',
-        });
+        const response4 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form')
+          .send({
+            data: JSON.stringify({
+              some_random_field: 'random_value',
+              another_field: 123,
+              email: 'abnormal-request@example.com',
+            }),
+          });
 
         expect(response4.status).toEqual(400);
       });
     });
 
     describe('Ko-fi Webhook Content-Type测试', () => {
-      it('处理application/x-www-form-urlencoded格式请求', async () => {
+      it('处理form-data格式请求', async () => {
         const memberId = 200010020;
         const dateNextMonth = new Date();
         dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth);
@@ -136,25 +154,27 @@ describe('KofiController (e2e)', () => {
         // 创建表单数据
         const formData = {
           verification_token: 'kofi-verification-token',
-          message_id: `form-urlencoded-${memberId}`,
+          message_id: `form-data-${memberId}`,
           timestamp: new Date().toISOString(),
           type: KofiType.DONATION,
-          is_public: 'true',
+          is_public: true,
           from_name: 'Form Test User',
           message: `${memberId}`,
           amount: '4.00',
           url: 'https://ko-fi.com/form-test',
-          email: 'form-urlencoded@example.com',
+          email: 'form-data@example.com',
           currency: 'USD',
-          is_subscription_payment: 'false',
-          is_first_subscription_payment: 'false',
+          is_subscription_payment: false,
+          is_first_subscription_payment: false,
           kofi_transaction_id: 'form-transaction-id',
         };
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .type('form') // 设置Content-Type为application/x-www-form-urlencoded
-          .send(formData);
+          .type('form')
+          .send({
+            data: JSON.stringify(formData),
+          });
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'success');
@@ -168,27 +188,6 @@ describe('KofiController (e2e)', () => {
           enable: true,
           level: MemberLevel.PREMIUM,
         });
-      });
-
-      it('同时支持JSON和表单格式', async () => {
-        // 已经测试过JSON格式，这里只需确认两种格式都能正常工作
-        const memberId = 200010020;
-
-        // 使用JSON格式的另一个请求
-        const jsonResponse = await request(app.getHttpServer())
-          .post(`${prefixPath}/webhook`)
-          .set('Content-Type', 'application/json')
-          .send(
-            createWebhookRequest({
-              message_id: `json-format-${memberId}`,
-              message: `${memberId}`,
-              email: 'json-format@example.com',
-            }),
-          );
-
-        expect(jsonResponse.status).toEqual(201);
-        // 因为message_id不同，所以不会被识别为重复请求
-        expect(jsonResponse.body).toHaveProperty('status', 'success');
       });
     });
 
@@ -206,16 +205,19 @@ describe('KofiController (e2e)', () => {
 
           const response = await request(app.getHttpServer())
             .post(`${prefixPath}/webhook`)
-            .send(
-              createWebhookRequest({
-                message_id: `donation-month-${month}-${memberId}`,
-                message: `${memberId}`,
-                amount: amount.toFixed(2), // 不同金额对应不同月份
-                currency: 'USD',
-                type: KofiType.DONATION,
-                email,
-              }),
-            );
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `donation-month-${month}-${memberId}`,
+                  message: `${memberId}`,
+                  amount: amount.toFixed(2), // 不同金额对应不同月份
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                  email,
+                }),
+              ),
+            });
 
           expect(response.status).toEqual(201);
           expect(response.body).toHaveProperty('status', 'success');
@@ -243,16 +245,19 @@ describe('KofiController (e2e)', () => {
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `donation-${memberId}`,
-              message: `${memberId}`,
-              amount: '4.00', // 单月高级会员（4美元/月）
-              currency: 'USD',
-              type: KofiType.DONATION,
-              email: 'donation-single@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `donation-${memberId}`,
+                message: `${memberId}`,
+                amount: '4.00', // 单月高级会员（4美元/月）
+                currency: 'USD',
+                type: KofiType.DONATION,
+                email: 'single-donation@example.com',
+              }),
+            ),
+          });
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'success');
@@ -278,18 +283,21 @@ describe('KofiController (e2e)', () => {
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `subscription-${memberId}`,
-              message: `${memberId}`,
-              amount: '4.00',
-              currency: 'USD',
-              type: KofiType.SUBSCRIPTION,
-              is_subscription_payment: true,
-              is_first_subscription_payment: true,
-              email: 'first-subscription@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `subscription-${memberId}`,
+                message: `${memberId}`,
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.SUBSCRIPTION,
+                is_subscription_payment: true,
+                is_first_subscription_payment: true,
+                email: 'first-subscription@example.com',
+              }),
+            ),
+          });
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'success');
@@ -317,18 +325,21 @@ describe('KofiController (e2e)', () => {
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `subscription-multi-${memberId}`,
-              message: `${memberId}`,
-              amount: `${4.0 * months}`, // 多个月份的高级会员（4美元/月）
-              currency: 'USD',
-              type: KofiType.SUBSCRIPTION,
-              is_subscription_payment: true,
-              is_first_subscription_payment: true,
-              email: 'multi-month@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `subscription-multi-${memberId}`,
+                message: `${memberId}`,
+                amount: `${4.0 * months}`, // 多个月份的高级会员（4美元/月）
+                currency: 'USD',
+                type: KofiType.SUBSCRIPTION,
+                is_subscription_payment: true,
+                is_first_subscription_payment: true,
+                email: 'multi-month@example.com',
+              }),
+            ),
+          });
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'success');
@@ -356,16 +367,19 @@ describe('KofiController (e2e)', () => {
         // 第一次请求
         const response1 = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `duplicate-${memberId}`,
-              message: `${memberId}`,
-              amount: '4.00',
-              currency: 'USD',
-              type: KofiType.DONATION,
-              email: 'duplicate-request@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `duplicate-${memberId}`,
+                message: `${memberId}`,
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.DONATION,
+                email: 'duplicate-request@example.com',
+              }),
+            ),
+          });
 
         expect(response1.status).toEqual(201);
         expect(response1.body).toHaveProperty('status', 'success');
@@ -373,16 +387,19 @@ describe('KofiController (e2e)', () => {
         // 重复相同的请求
         const response2 = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `duplicate-${memberId}`, // 相同的message_id
-              message: `${memberId}`,
-              amount: '4.00',
-              currency: 'USD',
-              type: KofiType.DONATION,
-              email: 'duplicate-request@example.com', // 相同email
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `duplicate-${memberId}`, // 相同的message_id
+                message: `${memberId}`,
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.DONATION,
+                email: 'duplicate-request@example.com', // 相同email
+              }),
+            ),
+          });
 
         expect(response2.status).toEqual(201);
         expect(response2.body).toHaveProperty('status', 'already_processed');
@@ -403,16 +420,19 @@ describe('KofiController (e2e)', () => {
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `invalid-steam-${nonExistingId}`,
-              message: `${nonExistingId}`, // 不存在的玩家ID
-              amount: '4.00',
-              currency: 'USD',
-              type: KofiType.DONATION,
-              email: 'invalid-steam@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `invalid-steam-${nonExistingId}`,
+                message: `${nonExistingId}`, // 不存在的玩家ID
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.DONATION,
+                email: 'invalid-steam@example.com',
+              }),
+            ),
+          });
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'invalid_steam_id');
@@ -429,16 +449,19 @@ describe('KofiController (e2e)', () => {
         // 第一次请求，记录email和steamId的关联
         const response1 = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `email-assoc-1-${memberId}`,
-              message: `${memberId}`, // 提供steamId
-              email: sharedEmail,
-              amount: '4.00',
-              currency: 'USD',
-              type: KofiType.DONATION,
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `email-assoc-1-${memberId}`,
+                message: `${memberId}`, // 提供steamId
+                email: sharedEmail,
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.DONATION,
+              }),
+            ),
+          });
 
         expect(response1.status).toEqual(201);
         expect(response1.body).toHaveProperty('status', 'success');
@@ -446,16 +469,19 @@ describe('KofiController (e2e)', () => {
         // 第二次请求，不提供steamId，但使用相同email
         const response2 = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `email-assoc-2-${memberId}`,
-              message: '', // 不提供steamId
-              email: sharedEmail, // 相同email
-              amount: '4.00',
-              currency: 'USD',
-              type: KofiType.DONATION,
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `email-assoc-2-${memberId}`,
+                message: '', // 不提供steamId
+                email: sharedEmail, // 相同email
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.DONATION,
+              }),
+            ),
+          });
 
         expect(response2.status).toEqual(201);
         expect(response2.body).toHaveProperty('status', 'success');
@@ -480,16 +506,19 @@ describe('KofiController (e2e)', () => {
 
         const response = await request(app.getHttpServer())
           .post(`${prefixPath}/webhook`)
-          .send(
-            createWebhookRequest({
-              message_id: `unsupported-currency-${memberId}`,
-              message: `${memberId}`,
-              amount: '400.00',
-              currency: 'JPY', // 不支持的货币
-              type: KofiType.DONATION,
-              email: 'unsupported-currency@example.com',
-            }),
-          );
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `unsupported-currency-${memberId}`,
+                message: `${memberId}`,
+                amount: '400.00',
+                currency: 'JPY', // 不支持的货币
+                type: KofiType.DONATION,
+                email: 'unsupported-currency@example.com',
+              }),
+            ),
+          });
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'failed');
