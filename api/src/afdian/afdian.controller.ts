@@ -30,7 +30,7 @@ export class AfdianController {
     @Query('token') token: string,
   ) {
     if (token !== this.secretService.getSecretValue(SECRET.AFDIAN_WEBHOOK_TOKEN)) {
-      logger.error(`Afdian webhook token error`);
+      logger.warn(`Afdian webhook invalid token`);
       throw new UnauthorizedException();
     }
     const order = afdianWebhookDto?.data?.order;

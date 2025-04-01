@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 import { KofiType } from '../enums/kofi-type.enum';
 import { KofiShipping, KofiShopItem } from '../types/kofi.types';
@@ -8,6 +9,7 @@ export class KofiWebhookDto {
   verification_token: string;
 
   @ApiProperty({ example: 'd619baf6-c4ef-4862-bb0e-43922096868b' })
+  @IsNotEmpty()
   message_id: string;
 
   @ApiProperty({ example: '2025-03-31T16:55:10Z' })
