@@ -22,7 +22,7 @@ describe('KofiController (e2e)', () => {
     type: KofiType.DONATION,
     is_public: true,
     from_name: 'Test User',
-    message: '200010001',
+    message: '200010000',
     amount: '4.00',
     url: 'https://ko-fi.com/test',
     email: 'default@example.com',
@@ -53,6 +53,9 @@ describe('KofiController (e2e)', () => {
     await createPlayer(app, { steamId: 200010012 });
     await createPlayer(app, { steamId: 200010013 });
     await createPlayer(app, { steamId: 200010014 });
+
+    // 为表单格式测试创建额外的玩家
+    await createPlayer(app, { steamId: 200010020 });
   });
 
   afterAll(async () => {
@@ -89,6 +92,102 @@ describe('KofiController (e2e)', () => {
           .send(requestWithoutMessageId);
 
         expect(response.status).toEqual(400);
+      });
+
+      it('异常请求格式', async () => {
+        // 测试非JSON格式请求
+        const response1 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .set('Content-Type', 'text/plain')
+          .send('This is not a valid JSON request');
+
+        expect(response1.status).toEqual(400);
+
+        // 测试空请求体
+        const response2 = await request(app.getHttpServer()).post(`${prefixPath}/webhook`).send();
+
+        expect(response2.status).toEqual(400);
+
+        // 测试格式错误的JSON
+        const response3 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .set('Content-Type', 'application/json')
+          .send('{invalid json}');
+
+        expect(response3.status).toEqual(400);
+
+        // 测试与预期完全不同的数据结构
+        const response4 = await request(app.getHttpServer()).post(`${prefixPath}/webhook`).send({
+          some_random_field: 'random_value',
+          another_field: 123,
+          email: 'abnormal-request@example.com',
+        });
+
+        expect(response4.status).toEqual(400);
+      });
+    });
+
+    describe('Ko-fi Webhook Content-Type测试', () => {
+      it('处理application/x-www-form-urlencoded格式请求', async () => {
+        const memberId = 200010020;
+        const dateNextMonth = new Date();
+        dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth);
+
+        // 创建表单数据
+        const formData = {
+          verification_token: 'kofi-verification-token',
+          message_id: `form-urlencoded-${memberId}`,
+          timestamp: new Date().toISOString(),
+          type: KofiType.DONATION,
+          is_public: 'true',
+          from_name: 'Form Test User',
+          message: `${memberId}`,
+          amount: '4.00',
+          url: 'https://ko-fi.com/form-test',
+          email: 'form-urlencoded@example.com',
+          currency: 'USD',
+          is_subscription_payment: 'false',
+          is_first_subscription_payment: 'false',
+          kofi_transaction_id: 'form-transaction-id',
+        };
+
+        const response = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form') // 设置Content-Type为application/x-www-form-urlencoded
+          .send(formData);
+
+        expect(response.status).toEqual(201);
+        expect(response.body).toHaveProperty('status', 'success');
+
+        // 检查会员期限
+        const memberResponse = await get(app, `/api/members/${memberId}`);
+        expect(memberResponse.status).toEqual(200);
+        expect(memberResponse.body).toEqual({
+          steamId: memberId,
+          expireDateString: dateNextMonth.toISOString().split('T')[0],
+          enable: true,
+          level: MemberLevel.PREMIUM,
+        });
+      });
+
+      it('同时支持JSON和表单格式', async () => {
+        // 已经测试过JSON格式，这里只需确认两种格式都能正常工作
+        const memberId = 200010021;
+
+        // 使用JSON格式的另一个请求
+        const jsonResponse = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .set('Content-Type', 'application/json')
+          .send(
+            createWebhookRequest({
+              message_id: `${memberId}`,
+              email: 'json-format@example.com',
+            }),
+          );
+
+        expect(jsonResponse.status).toEqual(201);
+        // 因为message_id不同，所以不会被识别为重复请求
+        expect(jsonResponse.body).toHaveProperty('status', 'success');
       });
     });
 

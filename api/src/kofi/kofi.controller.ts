@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions/v2';
 
 import { Public } from '../util/auth/public.decorator';
@@ -17,14 +17,20 @@ export class KofiController {
   ) {}
 
   @Post('webhook')
+  @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
   async handleWebhook(@Body() webhookData: KofiWebhookDto) {
-    const verificationToken = this.secretService.getSecretValue(SECRET.KOFI_VERIFICATION_TOKEN);
+    try {
+      const verificationToken = this.secretService.getSecretValue(SECRET.KOFI_VERIFICATION_TOKEN);
 
-    if (webhookData.verification_token !== verificationToken) {
-      logger.warn('Kofi webhook invalid verification token');
-      throw new UnauthorizedException('Invalid verification token');
+      if (webhookData.verification_token !== verificationToken) {
+        logger.warn('Kofi webhook invalid verification token');
+        throw new UnauthorizedException('Invalid verification token');
+      }
+
+      return this.kofiService.handleWebhook(webhookData);
+    } catch (error) {
+      logger.error('Error processing Kofi webhook:', error);
+      throw error;
     }
-
-    return this.kofiService.handleWebhook(webhookData);
   }
 }
