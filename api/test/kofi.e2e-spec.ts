@@ -172,7 +172,7 @@ describe('KofiController (e2e)', () => {
 
       it('同时支持JSON和表单格式', async () => {
         // 已经测试过JSON格式，这里只需确认两种格式都能正常工作
-        const memberId = 200010021;
+        const memberId = 200010020;
 
         // 使用JSON格式的另一个请求
         const jsonResponse = await request(app.getHttpServer())
@@ -180,7 +180,8 @@ describe('KofiController (e2e)', () => {
           .set('Content-Type', 'application/json')
           .send(
             createWebhookRequest({
-              message_id: `${memberId}`,
+              message_id: `json-format-${memberId}`,
+              message: `${memberId}`,
               email: 'json-format@example.com',
             }),
           );
