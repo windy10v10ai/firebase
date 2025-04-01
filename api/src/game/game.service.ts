@@ -35,19 +35,13 @@ export class GameService {
   }
 
   async addDailyMemberPoints(members: Member[]): Promise<PointInfoDto[]> {
-    const memberDailyPoint = +process.env.MEMBER_DAILY_POINT;
-    if (isNaN(memberDailyPoint)) {
-      logger.error(`[Game Start] MEMBER_DAILY_POINT is NaN.`);
-      return [];
-    }
-
     const pointInfoDtos: PointInfoDto[] = [];
     for (const member of members) {
       const daliyMemberPoint = this.membersService.getDailyMemberPoint(member);
       // 判断是否为会员
       if (daliyMemberPoint > 0) {
         await this.playerService.upsertAddPoint(member.steamId, {
-          memberPointTotal: memberDailyPoint,
+          memberPointTotal: daliyMemberPoint,
         });
         await this.membersService.updateMemberLastDailyDate(member);
         // 返回会员积分信息
@@ -57,7 +51,7 @@ export class GameService {
             cn: '获得会员积分',
             en: 'Get Member Daily Points',
           },
-          memberPoint: memberDailyPoint,
+          memberPoint: daliyMemberPoint,
         });
       }
     }

@@ -11,6 +11,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
+import { KofiModule } from './kofi/kofi.module';
 import { MembersModule } from './members/members.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
@@ -40,6 +41,7 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     }),
     GameModule,
     AfdianModule,
+    KofiModule,
     PatreonModule,
     PlayerModule,
     PlayerPropertyModule,

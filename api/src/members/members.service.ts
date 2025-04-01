@@ -4,7 +4,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -20,27 +19,13 @@ export class MembersService {
   private readonly DAYS_PER_MONTH = 31;
   private readonly NORMAL_MEMBER_MONTHLY_POINT = 300;
   private readonly PREMIUM_MEMBER_MONTHLY_POINT = 1000;
+  private readonly MEMBER_DAILY_POINT = 100;
 
   constructor(
     @InjectRepository(Member)
     private readonly membersRepository: BaseFirestoreRepository<Member>,
     private readonly playerService: PlayerService,
   ) {}
-
-  // NOTE 数据迁移后删除
-  async setMemberLevelAll() {
-    // find where level is null
-    const members = await this.membersRepository.find();
-    logger.info(`[MembersService] setMemberLevelAll start, members count: ${members.length}`);
-    let count = 0;
-    for (const member of members) {
-      count++;
-      member.level = MemberLevel.NORMAL;
-      await this.membersRepository.update(member);
-      logger.debug(`[MembersService] setMemberLevelAll member: ${count}`);
-    }
-    logger.info(`[MembersService] setMemberLevelAll end, members count: ${members.length}`);
-  }
 
   async createMember(createMemberDto: CreateMemberDto) {
     if (createMemberDto.month <= 0) {
@@ -199,21 +184,17 @@ export class MembersService {
     }
   }
 
-  getDailyMemberPoint(member: Member) {
-    let memberDailyPoint = 0;
+  getDailyMemberPoint(member: Member): number {
     const todayZero = new Date();
     todayZero.setHours(0, 0, 0, 0);
 
     if (MembersService.IsMemberEnable(member)) {
       // 判断是否为当日首次登陆
       if (!member?.lastDailyDate || member.lastDailyDate < todayZero) {
-        memberDailyPoint = +process.env.MEMBER_DAILY_POINT;
-      }
-      if (isNaN(memberDailyPoint)) {
-        memberDailyPoint = 0;
+        return this.MEMBER_DAILY_POINT;
       }
     }
-    return memberDailyPoint;
+    return 0;
   }
 
   static IsMemberEnable(member: Member): boolean {
