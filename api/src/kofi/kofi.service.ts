@@ -90,7 +90,8 @@ export class KofiService {
       return false;
     }
 
-    const month = Math.floor(parseFloat(data.amount) / 4); // 4 USD per month
+    const amount = parseFloat(data.amount);
+    const month = Number((amount / 4).toFixed(1)); // 4 USD per month, 1 decimal place
     if (month <= 0) {
       logger.error(`[Kofi] Invalid month: ${month}`);
       return false;
