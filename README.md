@@ -64,14 +64,9 @@ npm install
 firebase experiments:enable webframeworks
 ```
 
-### Set GCP (Optional)
+### Set GCP
 
 Install gCloud SDK: https://cloud.google.com/sdk/docs/install
-
-```bash
-# Authenticate with gcloud
-gcloud auth login
-```
 
 ## Running the app
 
@@ -82,8 +77,6 @@ npm run start
 ```
 
 ### Start Firebase Emulator with data
-
-Need Authenticate with gcloud
 
 ```bash
 # download data from storage
@@ -115,9 +108,9 @@ net start winnat
 ## Local end points
 
 - Firebase Hosting: http://localhost:5000/api/
-- Debug end points: http://localhost:3001/api/
 - Function (Not used): http://localhost:5001/windy10v10ai/asia-northeast1/client/api/
 - Firebase Emulator: http://localhost:4000/
+- Debug end points: http://localhost:3001/api/
 - OpenAPI Document (Swagger): http://localhost:3001/api-doc
 - Nextjs Web: http://localhost:3000/
 
