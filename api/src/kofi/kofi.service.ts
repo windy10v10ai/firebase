@@ -13,6 +13,26 @@ import { KofiOrder } from './entities/kofi-order.entity';
 import { KofiUser } from './entities/kofi-user.entity';
 import { KofiType } from './enums/kofi-type.enum';
 
+interface ShopItem {
+  code: string;
+  points: number;
+}
+
+const SHOP_ITEMS: Record<string, ShopItem> = {
+  TIER1: {
+    code: '74a1b5be84',
+    points: 3500,
+  },
+  TIER2: {
+    code: '0e9591aa5d',
+    points: 11000,
+  },
+  TIER3: {
+    code: '3d4304d9a7',
+    points: 28000,
+  },
+};
+
 @Injectable()
 export class KofiService {
   constructor(
@@ -74,6 +94,8 @@ export class KofiService {
   private async handleKofiOrder(kofi: KofiOrder) {
     if (kofi.type === KofiType.DONATION || kofi.type === KofiType.SUBSCRIPTION) {
       kofi.success = await this.handleMemberSubscription(kofi);
+    } else if (kofi.type === KofiType.SHOP_ORDER) {
+      kofi.success = await this.handleShopOrder(kofi);
     }
 
     if (kofi.success) {
@@ -111,6 +133,41 @@ export class KofiService {
       steamId: kofi.steamId,
       month,
       level: MemberLevel.PREMIUM,
+    });
+
+    return true;
+  }
+
+  private async handleShopOrder(kofi: KofiOrder): Promise<boolean> {
+    if (!kofi.shopItems || kofi.shopItems.length === 0) {
+      logger.error('[Kofi] No shop items found in order');
+      return false;
+    }
+
+    let totalPoints = 0;
+
+    for (const item of kofi.shopItems) {
+      const quantity = item.quantity || 1;
+      const shopItem = Object.values(SHOP_ITEMS).find(
+        (shopItem) => shopItem.code === item.direct_link_code,
+      );
+
+      if (!shopItem) {
+        logger.error(`[Kofi] Unknown shop item code: ${item.direct_link_code}`);
+        return false;
+      }
+
+      totalPoints += shopItem.points * quantity;
+    }
+
+    if (totalPoints <= 0) {
+      logger.error('[Kofi] Invalid total points');
+      return false;
+    }
+
+    // 更新玩家积分
+    await this.playerService.upsertAddPoint(kofi.steamId, {
+      memberPointTotal: totalPoints,
     });
 
     return true;
