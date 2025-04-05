@@ -147,7 +147,7 @@ export class KofiService {
     let totalPoints = 0;
 
     for (const item of kofi.shopItems) {
-      const quantity = item.quantity || 1;
+      const quantity = item.quantity || 0;
       const shopItem = Object.values(SHOP_ITEMS).find(
         (shopItem) => shopItem.code === item.direct_link_code,
       );
