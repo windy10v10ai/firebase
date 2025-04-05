@@ -4,7 +4,7 @@ import request from 'supertest';
 import { MemberLevel } from '../src/members/entities/members.entity';
 
 import { get, initTest } from './util/util-http';
-import { createPlayer, getPlayer } from './util/util-player';
+import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
 
 describe('MemberController (e2e)', () => {
   let app: INestApplication;
@@ -115,14 +115,11 @@ describe('MemberController (e2e)', () => {
           expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
 
           // 检查会员期限
-          const responseAfter = await get(app, `/api/members/${memberId}`);
-          expect(responseAfter.status).toEqual(200);
-          expect(responseAfter.body).toEqual({
-            steamId: memberId,
-            expireDateString: dateNextMonth.toISOString().split('T')[0],
-            enable: true,
-            level,
-          });
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(level);
+
           // 检查玩家积分
           const player = await getPlayer(app, memberId);
           expect(player.memberPointTotal).toEqual(memberPoint);
@@ -166,14 +163,10 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
         // 检查会员期限
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.NORMAL,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.NORMAL);
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -242,14 +235,10 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
 
         // 检查会员期限
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.NORMAL,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.NORMAL);
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * month);
@@ -326,14 +315,10 @@ describe('MemberController (e2e)', () => {
         const monthTwice = 2;
         const dateNextMonth = new Date();
         dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth * monthTwice);
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.NORMAL,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.NORMAL);
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(300 * monthTwice);

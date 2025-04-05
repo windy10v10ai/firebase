@@ -6,8 +6,8 @@ import { KofiType } from '../src/kofi/enums/kofi-type.enum';
 import { MemberLevel } from '../src/members/entities/members.entity';
 import { SECRET } from '../src/util/secret/secret.service';
 
-import { get, initTest } from './util/util-http';
-import { createPlayer, getPlayer } from './util/util-player';
+import { initTest } from './util/util-http';
+import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
 
 describe('KofiController (e2e)', () => {
   let app: INestApplication;
@@ -182,14 +182,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
       });
     });
 
@@ -225,14 +221,10 @@ describe('KofiController (e2e)', () => {
           expect(response.body).toHaveProperty('status', 'success');
 
           // 检查会员期限
-          const memberResponse = await get(app, `/api/members/${memberId}`);
-          expect(memberResponse.status).toEqual(200);
-          expect(memberResponse.body).toEqual({
-            steamId: memberId,
-            expireDateString: dateExpire.toISOString().split('T')[0],
-            enable: true,
-            level: MemberLevel.PREMIUM,
-          });
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateExpire.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
           // 检查玩家积分（首次订阅额外获得1000积分）
           const player = await getPlayer(app, memberId);
@@ -265,14 +257,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
         // 检查玩家积分（首次订阅额外获得1000积分）
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(1000);
@@ -305,14 +293,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
         // 检查玩家积分（首次订阅额外获得1000积分）
         const player = await getPlayer(app, memberId);
@@ -347,14 +331,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonths.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonths.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
@@ -407,14 +387,10 @@ describe('KofiController (e2e)', () => {
         expect(response2.body).toHaveProperty('status', 'already_processed');
 
         // 检查会员期限（确保没有重复添加）
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
       });
 
       it('Ko-fi Webhook不支持的货币', async () => {
@@ -481,14 +457,10 @@ describe('KofiController (e2e)', () => {
           expect(response.body).toHaveProperty('status', 'success');
 
           // 检查会员期限
-          const memberResponse = await get(app, `/api/members/${memberId}`);
-          expect(memberResponse.status).toEqual(200);
-          expect(memberResponse.body).toEqual({
-            steamId: memberId,
-            expireDateString: dateNextMonth.toISOString().split('T')[0],
-            enable: true,
-            level: MemberLevel.PREMIUM,
-          });
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
           // 检查玩家积分
           const player = await getPlayer(app, memberId);
@@ -544,14 +516,10 @@ describe('KofiController (e2e)', () => {
           const dateTwoMonths = new Date();
           dateTwoMonths.setUTCDate(new Date().getUTCDate() + daysPerMonth * twoMonths);
 
-          const memberResponse = await get(app, `/api/members/${memberId}`);
-          expect(memberResponse.status).toEqual(200);
-          expect(memberResponse.body).toEqual({
-            steamId: memberId,
-            expireDateString: dateTwoMonths.toISOString().split('T')[0],
-            enable: true,
-            level: MemberLevel.PREMIUM,
-          });
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateTwoMonths.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
         });
 
         it('Ko-fi Webhook无效steamId', async () => {
@@ -577,8 +545,12 @@ describe('KofiController (e2e)', () => {
           expect(response.body).toHaveProperty('status', 'invalid_steam_id');
 
           // 确认会员未创建
-          const memberResponse = await get(app, `/api/members/${nonExistingId}`);
-          expect(memberResponse.status).toEqual(404);
+          try {
+            await getMemberDto(app, nonExistingId);
+            fail('Member should not exist');
+          } catch (error) {
+            expect(error.status).toEqual(404);
+          }
         });
       });
     });
