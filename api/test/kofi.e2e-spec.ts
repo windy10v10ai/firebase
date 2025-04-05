@@ -37,9 +37,6 @@ describe('KofiController (e2e)', () => {
   });
 
   beforeAll(async () => {
-    // 设置环境变量用于测试
-    process.env[SECRET.KOFI_VERIFICATION_TOKEN] = 'kofi-verification-token';
-
     app = await initTest();
     // 创建测试所需的玩家
     await createPlayer(app, { steamId: 200010001 });
@@ -57,7 +54,7 @@ describe('KofiController (e2e)', () => {
     await createPlayer(app, { steamId: 200010014 });
 
     // 为表单格式测试创建额外的玩家
-    await createPlayer(app, { steamId: 200010020 });
+    await createPlayer(app, { steamId: 200010999 });
   });
 
   afterAll(async () => {
@@ -149,7 +146,7 @@ describe('KofiController (e2e)', () => {
 
     describe('Ko-fi Webhook Content-Type测试', () => {
       it('处理form-data格式请求', async () => {
-        const memberId = 200010020;
+        const memberId = 200010999;
         const dateNextMonth = new Date();
         dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth);
 
@@ -552,6 +549,203 @@ describe('KofiController (e2e)', () => {
             expect(error.status).toEqual(404);
           }
         });
+      });
+    });
+
+    describe('Ko-fi Webhook购买商品', () => {
+      it.each([
+        [
+          '单个商品 Tier1 3500积分',
+          200010101,
+          'single-item-t1@example.com',
+          [
+            {
+              direct_link_code: '74a1b5be84',
+              quantity: 1,
+              variation_name: null,
+            },
+          ],
+          3500,
+        ],
+        [
+          '单个商品 Tier2 11000积分',
+          200010102,
+          'single-item-t2@example.com',
+          [
+            {
+              direct_link_code: '0e9591aa5d',
+              quantity: 1,
+              variation_name: null,
+            },
+          ],
+          11000,
+        ],
+        [
+          '单个商品 Tier3 28000积分',
+          200010103,
+          'single-item-t3@example.com',
+          [
+            {
+              direct_link_code: '3d4304d9a7',
+              quantity: 1,
+              variation_name: null,
+            },
+          ],
+          28000,
+        ],
+        [
+          '一个商品多件',
+          200010104,
+          'multiple-same@example.com',
+          [
+            {
+              direct_link_code: '0e9591aa5d',
+              quantity: 2,
+              variation_name: null,
+            },
+          ],
+          22000,
+        ],
+        [
+          '多种商品多件',
+          200010105,
+          'multiple-different@example.com',
+          [
+            {
+              direct_link_code: '74a1b5be84', // Tier1
+              quantity: 2,
+              variation_name: null,
+            },
+            {
+              direct_link_code: '3d4304d9a7', // Tier3
+              quantity: 1,
+              variation_name: null,
+            },
+          ],
+          35000,
+        ],
+      ])('%s', async (_, memberId, email, shopItems, expectedPoints) => {
+        // 创建玩家
+        await createPlayer(app, { steamId: memberId });
+
+        // 第一次请求，开通单词会员 获得1000积分，并记录email和steamId的关联
+        const response1 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `shop-1-${memberId}`,
+                message: `${memberId}`,
+                email,
+                amount: '4.00',
+                currency: 'USD',
+                type: KofiType.DONATION,
+              }),
+            ),
+          });
+
+        expect(response1.status).toEqual(201);
+        expect(response1.body).toHaveProperty('status', 'success');
+
+        // 检查玩家积分
+        const player = await getPlayer(app, memberId);
+        expect(player.memberPointTotal).toEqual(1000);
+
+        // 第二次请求，不提供steamId，但使用相同email
+        const response2 = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `shop-2-${memberId}`,
+                message: '', // 不提供steamId
+                email, // 相同email
+                amount: '0.00',
+                currency: 'USD',
+                type: KofiType.SHOP_ORDER,
+                shop_items: shopItems,
+              }),
+            ),
+          });
+
+        expect(response2.status).toEqual(201);
+        expect(response2.body).toHaveProperty('status', 'success');
+
+        // 检查玩家积分（确认积分已累加）
+        const player2 = await getPlayer(app, memberId);
+        expect(player2.memberPointTotal).toEqual(expectedPoints + 1000);
+      });
+
+      it('商品数量为0', async () => {
+        const memberId = 200010191;
+        await createPlayer(app, { steamId: memberId });
+
+        const response = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `shop-zero-${memberId}`,
+                message: `${memberId}`,
+                email: 'zero-quantity@example.com',
+                amount: '0.00',
+                currency: 'USD',
+                type: KofiType.SHOP_ORDER,
+                shop_items: [
+                  {
+                    direct_link_code: '74a1b5be84',
+                    quantity: 0,
+                    variation_name: null,
+                  },
+                ],
+              }),
+            ),
+          });
+
+        expect(response.status).toEqual(201);
+        expect(response.body).toHaveProperty('status', 'failed');
+
+        // 检查玩家积分（确认没有增加）
+        const player = await getPlayer(app, memberId);
+        expect(player.memberPointTotal).toEqual(0);
+      });
+
+      it('KofiUser不存在的情况', async () => {
+        const memberId = 200010192;
+        await createPlayer(app, { steamId: memberId });
+
+        const response = await request(app.getHttpServer())
+          .post(`${prefixPath}/webhook`)
+          .type('form')
+          .send({
+            data: JSON.stringify(
+              createWebhookRequest({
+                message_id: `shop-no-user-${memberId}`,
+                message: '', // 不提供steamId
+                email: 'no-kofi-user@example.com', // 未关联的email
+                amount: '0.00',
+                currency: 'USD',
+                type: KofiType.SHOP_ORDER,
+                shop_items: [
+                  {
+                    direct_link_code: '74a1b5be84',
+                    quantity: 1,
+                    variation_name: null,
+                  },
+                ],
+              }),
+            ),
+          });
+
+        expect(response.status).toEqual(201);
+        expect(response.body).toHaveProperty('status', 'invalid_steam_id');
+
+        // 检查玩家积分（确认没有增加）
+        const player = await getPlayer(app, memberId);
+        expect(player.memberPointTotal).toEqual(0);
       });
     });
   });
