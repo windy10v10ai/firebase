@@ -68,14 +68,17 @@ export class KofiService {
       return { status: 'invalid_steam_id' };
     }
 
-    // 处理会员订阅
-    if (data.type === KofiType.DONATION || data.type === KofiType.SUBSCRIPTION) {
-      kofi.success = await this.handleMemberSubscription(data, steamId);
+    return this.handleKofiOrder(kofi);
+  }
+
+  private async handleKofiOrder(kofi: KofiOrder) {
+    if (kofi.type === KofiType.DONATION || kofi.type === KofiType.SUBSCRIPTION) {
+      kofi.success = await this.handleMemberSubscription(kofi);
     }
 
     if (kofi.success) {
       // 记录KofiUser
-      await this.saveKofiUser(data.email, steamId);
+      await this.saveKofiUser(kofi.email, kofi.steamId);
       // 发送GA4事件
       await this.analyticsPurchaseService.kofiPurchase(kofi);
       await this.kofiRepository.update(kofi);
@@ -83,30 +86,29 @@ export class KofiService {
     return { status: kofi.success ? 'success' : 'failed' };
   }
 
-  private async handleMemberSubscription(data: KofiWebhookDto, steamId: number): Promise<boolean> {
-    if (data.currency !== 'USD') {
-      logger.error(`[Kofi] Unsupported currency: ${data.currency}`);
+  private async handleMemberSubscription(kofi: KofiOrder): Promise<boolean> {
+    if (kofi.currency !== 'USD') {
+      logger.error(`[Kofi] Unsupported currency: ${kofi.currency}`);
       return false;
     }
 
-    const amount = parseFloat(data.amount);
-    const month = Number((amount / 4).toFixed(1)); // 4 USD per month, 1 decimal place
+    const month = Number((kofi.amount / 4).toFixed(1)); // 4 USD per month, 1 decimal place
     if (month <= 0) {
       logger.error(`[Kofi] Invalid month: ${month}`);
       return false;
     }
 
     // 检查是否是首次订阅,如果是则额外获得1000积分
-    const isFirstSubscription = data.is_first_subscription_payment;
+    const isFirstSubscription = kofi.isFirstSubscriptionPayment;
     if (isFirstSubscription) {
-      await this.playerService.upsertAddPoint(steamId, {
+      await this.playerService.upsertAddPoint(kofi.steamId, {
         memberPointTotal: 1000,
       });
     }
 
     // 创建会员
     await this.membersService.createMember({
-      steamId,
+      steamId: kofi.steamId,
       month,
       level: MemberLevel.PREMIUM,
     });
