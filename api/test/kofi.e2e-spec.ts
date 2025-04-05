@@ -37,9 +37,6 @@ describe('KofiController (e2e)', () => {
   });
 
   beforeAll(async () => {
-    // 设置环境变量用于测试
-    process.env[SECRET.KOFI_VERIFICATION_TOKEN] = 'kofi-verification-token';
-
     app = await initTest();
     // 创建测试所需的玩家
     await createPlayer(app, { steamId: 200010001 });
