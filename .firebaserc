@@ -1,0 +1,16 @@
+{
+  "projects": {},
+  "targets": {
+    "windy10v10ai": {
+      "hosting": {
+        "web": [
+          "web-windy10v10ai"
+        ],
+        "api": [
+          "windy10v10ai"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
