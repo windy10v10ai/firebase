@@ -36,7 +36,7 @@ export class KofiService {
     }
 
     // 从message中提取steamId，如果失败则尝试从KofiUser中获取
-    const steamId = await this.getSteamId(data.email, data.message);
+    const steamId = await this.getSteamId(data.email, data.message, data.from_name);
 
     // 创建Kofi记录
     const kofi = new KofiOrder();
@@ -115,16 +115,22 @@ export class KofiService {
     return true;
   }
 
-  private async getSteamId(email: string, message: string): Promise<number> {
-    let steamId = await this.getSteamIdFromMessage(message);
+  private async getSteamId(email: string, message: string, fromName: string): Promise<number> {
+    // 尝试从message中获取steamId
+    let steamId = await this.parseSteamId(message);
     if (!steamId) {
+      // 如果message中没有，尝试从name中获取
+      steamId = await this.parseSteamId(fromName);
+    }
+    if (!steamId) {
+      // 如果name中也没有，尝试从KofiUser中获取
       steamId = await this.getSteamIdFromKofiUser(email);
     }
     return steamId;
   }
 
-  private async getSteamIdFromMessage(message: string): Promise<number> {
-    const steamId = parseInt(message);
+  private async parseSteamId(input: string): Promise<number> {
+    const steamId = parseInt(input);
     if (isNaN(steamId)) {
       return null;
     }

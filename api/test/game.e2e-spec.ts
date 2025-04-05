@@ -396,12 +396,8 @@ describe('PlayerController (e2e)', () => {
       expect(player1.seasonPointTotal).toEqual(points1);
 
       // 玩家2负分未记录
-      try {
-        const player2 = await getPlayer(app, steamId2);
-        expect(player2).toStrictEqual({});
-      } catch (error) {
-        expect(error.response.body).toStrictEqual({});
-      }
+      const player2 = await getPlayer(app, steamId2);
+      expect(player2).toBeNull();
 
       const player3 = await getPlayer(app, steamId3);
       expect(player3.memberPointTotal).toEqual(0);

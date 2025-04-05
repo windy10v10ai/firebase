@@ -1,8 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 
+import { MemberDto } from '../../src/members/dto/member.dto';
+import { MembersService } from '../../src/members/members.service';
 import { Player } from '../../src/player/entities/player.entity';
+import { PlayerService } from '../../src/player/player.service';
 
-import { get, patch, put } from './util-http';
+import { get, put } from './util-http';
 
 interface createPlayerParams {
   steamId: number;
@@ -14,17 +17,23 @@ export async function createPlayer(
   app: INestApplication,
   params: createPlayerParams,
 ): Promise<void> {
-  const resultAddPoints = await patch(app, `/api/test/player/steamId/${params.steamId}`, {
+  const playerService = app.get(PlayerService);
+  await playerService.upsertAddPoint(params.steamId, {
     seasonPointTotal: params.seasonPointTotal,
     memberPointTotal: params.memberPointTotal,
   });
-  expect(resultAddPoints.status).toEqual(200);
 }
 
 export async function getPlayer(app: INestApplication, steamId: number): Promise<Player> {
-  const result = await get(app, `/api/test/player/steamId/${steamId}`);
-  expect(result.status).toEqual(200);
-  return result.body;
+  const playerService = app.get(PlayerService);
+  const player = await playerService.findBySteamId(steamId);
+  return player;
+}
+
+export async function getMemberDto(app: INestApplication, steamId: number): Promise<MemberDto> {
+  const memberService = app.get(MembersService);
+  const memberDto = await memberService.findBySteamId(steamId);
+  return memberDto;
 }
 
 export async function addPlayerProperty(

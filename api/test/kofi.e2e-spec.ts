@@ -6,8 +6,8 @@ import { KofiType } from '../src/kofi/enums/kofi-type.enum';
 import { MemberLevel } from '../src/members/entities/members.entity';
 import { SECRET } from '../src/util/secret/secret.service';
 
-import { get, initTest } from './util/util-http';
-import { createPlayer, getPlayer } from './util/util-player';
+import { initTest } from './util/util-http';
+import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
 
 describe('KofiController (e2e)', () => {
   let app: INestApplication;
@@ -47,6 +47,8 @@ describe('KofiController (e2e)', () => {
     await createPlayer(app, { steamId: 200010003 });
     await createPlayer(app, { steamId: 200010004 });
     await createPlayer(app, { steamId: 200010005 });
+    await createPlayer(app, { steamId: 200010006 });
+    await createPlayer(app, { steamId: 200010007 });
 
     // 为不同月份测试创建额外的玩家
     await createPlayer(app, { steamId: 200010011 });
@@ -180,14 +182,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
       });
     });
 
@@ -223,14 +221,10 @@ describe('KofiController (e2e)', () => {
           expect(response.body).toHaveProperty('status', 'success');
 
           // 检查会员期限
-          const memberResponse = await get(app, `/api/members/${memberId}`);
-          expect(memberResponse.status).toEqual(200);
-          expect(memberResponse.body).toEqual({
-            steamId: memberId,
-            expireDateString: dateExpire.toISOString().split('T')[0],
-            enable: true,
-            level: MemberLevel.PREMIUM,
-          });
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateExpire.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
           // 检查玩家积分（首次订阅额外获得1000积分）
           const player = await getPlayer(app, memberId);
@@ -263,14 +257,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
         // 检查玩家积分（首次订阅额外获得1000积分）
         const player = await getPlayer(app, memberId);
         expect(player.memberPointTotal).toEqual(1000);
@@ -303,14 +293,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
         // 检查玩家积分（首次订阅额外获得1000积分）
         const player = await getPlayer(app, memberId);
@@ -345,14 +331,10 @@ describe('KofiController (e2e)', () => {
         expect(response.body).toHaveProperty('status', 'success');
 
         // 检查会员期限
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonths.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonths.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
 
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
@@ -405,100 +387,10 @@ describe('KofiController (e2e)', () => {
         expect(response2.body).toHaveProperty('status', 'already_processed');
 
         // 检查会员期限（确保没有重复添加）
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateNextMonth.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
-      });
-
-      it('Ko-fi Webhook无效steamId', async () => {
-        const nonExistingId = 200019999; // 不存在的ID
-
-        const response = await request(app.getHttpServer())
-          .post(`${prefixPath}/webhook`)
-          .type('form')
-          .send({
-            data: JSON.stringify(
-              createWebhookRequest({
-                message_id: `invalid-steam-${nonExistingId}`,
-                message: `${nonExistingId}`, // 不存在的玩家ID
-                amount: '4.00',
-                currency: 'USD',
-                type: KofiType.DONATION,
-                email: 'invalid-steam@example.com',
-              }),
-            ),
-          });
-
-        expect(response.status).toEqual(201);
-        expect(response.body).toHaveProperty('status', 'invalid_steam_id');
-
-        // 确认会员未创建
-        const memberResponse = await get(app, `/api/members/${nonExistingId}`);
-        expect(memberResponse.status).toEqual(404);
-      });
-
-      it('Ko-fi Webhook记住之前的用户', async () => {
-        const memberId = 200010005;
-        const sharedEmail = 'repeat-user@example.com';
-
-        // 第一次请求，记录email和steamId的关联
-        const response1 = await request(app.getHttpServer())
-          .post(`${prefixPath}/webhook`)
-          .type('form')
-          .send({
-            data: JSON.stringify(
-              createWebhookRequest({
-                message_id: `email-assoc-1-${memberId}`,
-                message: `${memberId}`, // 提供steamId
-                email: sharedEmail,
-                amount: '4.00',
-                currency: 'USD',
-                type: KofiType.DONATION,
-              }),
-            ),
-          });
-
-        expect(response1.status).toEqual(201);
-        expect(response1.body).toHaveProperty('status', 'success');
-
-        // 第二次请求，不提供steamId，但使用相同email
-        const response2 = await request(app.getHttpServer())
-          .post(`${prefixPath}/webhook`)
-          .type('form')
-          .send({
-            data: JSON.stringify(
-              createWebhookRequest({
-                message_id: `email-assoc-2-${memberId}`,
-                message: '', // 不提供steamId
-                email: sharedEmail, // 相同email
-                amount: '4.00',
-                currency: 'USD',
-                type: KofiType.DONATION,
-              }),
-            ),
-          });
-
-        expect(response2.status).toEqual(201);
-        expect(response2.body).toHaveProperty('status', 'success');
-
-        // 检查会员期限（确认两个月都已添加）
-        const twoMonths = 2;
-        const dateTwoMonths = new Date();
-        dateTwoMonths.setUTCDate(new Date().getUTCDate() + daysPerMonth * twoMonths);
-
-        const memberResponse = await get(app, `/api/members/${memberId}`);
-        expect(memberResponse.status).toEqual(200);
-        expect(memberResponse.body).toEqual({
-          steamId: memberId,
-          expireDateString: dateTwoMonths.toISOString().split('T')[0],
-          enable: true,
-          level: MemberLevel.PREMIUM,
-        });
+        const memberDto = await getMemberDto(app, memberId);
+        expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+        expect(memberDto.enable).toEqual(true);
+        expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
       });
 
       it('Ko-fi Webhook不支持的货币', async () => {
@@ -522,6 +414,144 @@ describe('KofiController (e2e)', () => {
 
         expect(response.status).toEqual(201);
         expect(response.body).toHaveProperty('status', 'failed');
+      });
+
+      describe('Ko-fi Webhook SteamID获取测试', () => {
+        it.each([
+          [
+            '从message中获取steamID',
+            200010005,
+            `${200010005}`, // message
+            'Test User', // name
+            'message-steam@example.com',
+          ],
+          [
+            '从name中获取steamID',
+            200010006,
+            '', // message
+            `${200010006}`, // name
+            'name-steam@example.com',
+          ],
+        ])('%s', async (_, memberId, message, fromName, email) => {
+          const dateNextMonth = new Date();
+          dateNextMonth.setUTCDate(new Date().getUTCDate() + daysPerMonth);
+
+          const response = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `steam-test-${memberId}`,
+                  message,
+                  from_name: fromName,
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                  email,
+                }),
+              ),
+            });
+
+          expect(response.status).toEqual(201);
+          expect(response.body).toHaveProperty('status', 'success');
+
+          // 检查会员期限
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateNextMonth.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
+
+          // 检查玩家积分
+          const player = await getPlayer(app, memberId);
+          expect(player.memberPointTotal).toEqual(1000);
+        });
+
+        it('Ko-fi 订阅过的用户 从KofiUser中获取steamID', async () => {
+          const memberId = 200010007;
+          const sharedEmail = 'repeat-user@example.com';
+
+          // 第一次请求，记录email和steamId的关联
+          const response1 = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `email-assoc-1-${memberId}`,
+                  message: `${memberId}`, // 提供steamId
+                  email: sharedEmail,
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(response1.status).toEqual(201);
+          expect(response1.body).toHaveProperty('status', 'success');
+
+          // 第二次请求，不提供steamId，但使用相同email
+          const response2 = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `email-assoc-2-${memberId}`,
+                  message: '', // 不提供steamId
+                  email: sharedEmail, // 相同email
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(response2.status).toEqual(201);
+          expect(response2.body).toHaveProperty('status', 'success');
+
+          // 检查会员期限（确认两个月都已添加）
+          const twoMonths = 2;
+          const dateTwoMonths = new Date();
+          dateTwoMonths.setUTCDate(new Date().getUTCDate() + daysPerMonth * twoMonths);
+
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateTwoMonths.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
+        });
+
+        it('Ko-fi Webhook无效steamId', async () => {
+          const nonExistingId = 200019999; // 不存在的ID
+
+          const response = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `invalid-steam-${nonExistingId}`,
+                  message: `${nonExistingId}`, // 不存在的玩家ID
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                  email: 'invalid-steam@example.com',
+                }),
+              ),
+            });
+
+          expect(response.status).toEqual(201);
+          expect(response.body).toHaveProperty('status', 'invalid_steam_id');
+
+          // 确认会员未创建
+          try {
+            await getMemberDto(app, nonExistingId);
+            fail('Member should not exist');
+          } catch (error) {
+            expect(error.status).toEqual(404);
+          }
+        });
       });
     });
   });

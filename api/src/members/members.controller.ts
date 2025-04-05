@@ -27,6 +27,6 @@ export class MembersController {
     @Param('id', new ParseIntPipe())
     steamId: number,
   ) {
-    return this.membersService.find(steamId);
+    return this.membersService.findBySteamId(steamId);
   }
 }
