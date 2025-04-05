@@ -62,16 +62,15 @@ export class KofiService {
     kofi.createdAt = new Date();
     kofi.updatedAt = new Date();
 
+    await this.kofiRepository.create(kofi);
+
     if (!steamId) {
-      await this.kofiRepository.create(kofi);
       return { status: 'invalid_steam_id' };
     }
 
     // 处理会员订阅
     if (data.type === KofiType.DONATION || data.type === KofiType.SUBSCRIPTION) {
       kofi.success = await this.handleMemberSubscription(data, steamId);
-    } else {
-      kofi.success = false;
     }
 
     if (kofi.success) {
@@ -79,8 +78,8 @@ export class KofiService {
       await this.saveKofiUser(data.email, steamId);
       // 发送GA4事件
       await this.analyticsPurchaseService.kofiPurchase(kofi);
+      await this.kofiRepository.update(kofi);
     }
-    await this.kofiRepository.create(kofi);
     return { status: kofi.success ? 'success' : 'failed' };
   }
 
