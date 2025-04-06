@@ -141,6 +141,7 @@ export class AnalyticsService {
         hero_name: player.heroName,
         hero_name_cn: GetHeroNameChinese(player.heroName),
         points: player.battlePoints,
+        facet_id: player.facetId,
         is_disconnect: player.isDisconnected,
       });
 

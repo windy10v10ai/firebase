@@ -39,6 +39,8 @@ export class GameEndPlayerDto {
   score: number;
   @ApiProperty()
   battlePoints: number;
+  @ApiProperty()
+  facetId: number;
 }
 
 export class GameEndDto extends EventBaseDto {
