@@ -30,9 +30,6 @@ export default getRequestConfig(async () => {
   const cookieSession = cookieStore.get('__session')?.value;
   const cookieLocale = cookieSession ? cookieSession.split('=')[1] : undefined;
 
-  console.log('cookieSession:', cookieSession);
-  console.log('cookieLocale:', cookieLocale);
-
   // 优先使用 cookie 中的语言设置，如果没有则使用浏览器语言
   const locale = cookieLocale || (await getBrowserLocale());
 
