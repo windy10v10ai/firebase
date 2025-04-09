@@ -10,9 +10,9 @@ export default function LanguageSwitcher() {
   const t = useTranslations();
 
   const switchLocale = (newLocale: string) => {
-    // 设置 cookie
-    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
-    // 刷新页面以应用新的语言设置
+    // 使用 __session cookie
+    document.cookie = `__session=NEXT_LOCALE=${newLocale}; path=/; secure; sameSite=strict`;
+
     router.refresh();
   };
 
@@ -21,9 +21,7 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => switchLocale('en')}
         className={`px-2 py-1 rounded ${
-          locale === 'en'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          locale === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
         }`}
       >
         English
@@ -31,13 +29,11 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => switchLocale('zh')}
         className={`px-2 py-1 rounded ${
-          locale === 'zh'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          locale === 'zh' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
         }`}
       >
         中文
       </button>
     </div>
   );
-} 
+}
