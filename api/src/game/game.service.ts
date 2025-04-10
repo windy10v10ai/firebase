@@ -4,13 +4,13 @@ import { logger } from 'firebase-functions';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
+import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
-
 @Injectable()
 export class GameService {
   private readonly resetPlayerPropertyMemberPoint = 1000;
@@ -19,6 +19,7 @@ export class GameService {
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly playerPropertyService: PlayerPropertyService,
+    private readonly playerSettingService: PlayerSettingService,
   ) {}
 
   getOK(): string {
@@ -156,6 +157,7 @@ export class GameService {
     return players[0];
   }
 
+  // TODO 移动到playerModule
   async findPlayerDtoBySteamIds(ids: string[]): Promise<PlayerDto[]> {
     const players = (await this.playerService.findByIds(ids)) as PlayerDto[];
     for (const player of players) {
@@ -165,6 +167,8 @@ export class GameService {
       } else {
         player.properties = [];
       }
+      const setting = await this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id);
+      player.playerSetting = setting;
 
       const seasonPoint = player.seasonPointTotal;
       const seasonLevel = this.playerService.getSeasonLevelBuyPoint(seasonPoint);
