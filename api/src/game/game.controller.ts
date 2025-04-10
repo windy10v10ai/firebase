@@ -17,7 +17,6 @@ import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerDto } from '../player/dto/player.dto';
-import { PlayerDtoService } from '../player/player-dto.service';
 import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -37,7 +36,6 @@ export class GameController {
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
-    private readonly playerDtoService: PlayerDtoService,
   ) {}
 
   @Public()
@@ -76,7 +74,7 @@ export class GameController {
     // ----------------- 以下为返回数据 -----------------
     // 获取玩家信息
     const steamIdsStr = steamIds.map((id) => id.toString());
-    const players = await this.playerDtoService.findPlayerDtoBySteamIds(steamIdsStr);
+    const players = await this.gameService.findPlayerDtoBySteamIds(steamIdsStr);
 
     return {
       members: members.map((m) => new MemberDto(m)),
@@ -116,7 +114,7 @@ export class GameController {
   ): Promise<PlayerDto> {
     await this.playerPropertyService.update(updatePlayerPropertyDto);
 
-    return await this.playerDtoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
+    return await this.gameService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
   @Post('resetPlayerProperty')
@@ -124,12 +122,12 @@ export class GameController {
     await this.gameService.resetPlayerProperty(gameResetPlayerProperty);
     await this.analyticsService.playerResetProperty(gameResetPlayerProperty);
 
-    return await this.playerDtoService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
+    return await this.gameService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
   }
 
   // FIXME 移动到player模块，需要修改Dota2中的调用
   @Get('player/steamId/:steamId')
   async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
-    return await this.playerDtoService.findPlayerDtoBySteamId(steamId);
+    return await this.gameService.findPlayerDtoBySteamId(steamId);
   }
 }

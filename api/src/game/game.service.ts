@@ -4,7 +4,8 @@ import { logger } from 'firebase-functions';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
-import { PlayerDtoService } from '../player/player-dto.service';
+import { PlayerDto } from '../player/dto/player.dto';
+import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
@@ -18,7 +19,7 @@ export class GameService {
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly playerPropertyService: PlayerPropertyService,
-    private readonly playerDtoService: PlayerDtoService,
+    private readonly playerSettingService: PlayerSettingService,
   ) {}
 
   getOK(): string {
@@ -123,7 +124,7 @@ export class GameService {
     const { steamId, useMemberPoint } = gameResetPlayerProperty;
 
     // FIXME 不使用playerDto，直接使用playerService获取player
-    const player = await this.playerDtoService.findPlayerDtoBySteamId(steamId);
+    const player = await this.findPlayerDtoBySteamId(steamId);
 
     if (!player) {
       throw new BadRequestException();
@@ -151,5 +152,43 @@ export class GameService {
 
     // 重置玩家属性
     await this.playerPropertyService.deleteBySteamId(steamId);
+  }
+
+  async findPlayerDtoBySteamId(steamId: number): Promise<PlayerDto> {
+    const players = await this.findPlayerDtoBySteamIds([steamId.toString()]);
+    return players[0];
+  }
+
+  async findPlayerDtoBySteamIds(ids: string[]): Promise<PlayerDto[]> {
+    const players = (await this.playerService.findByIds(ids)) as PlayerDto[];
+    for (const player of players) {
+      const properties = await this.playerPropertyService.findBySteamId(+player.id);
+      if (properties) {
+        player.properties = properties;
+      } else {
+        player.properties = [];
+      }
+      const setting = await this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id);
+      player.playerSetting = setting;
+
+      const seasonPoint = player.seasonPointTotal;
+      const seasonLevel = this.playerService.getSeasonLevelBuyPoint(seasonPoint);
+      player.seasonLevel = seasonLevel;
+      player.seasonCurrrentLevelPoint =
+        seasonPoint - this.playerService.getSeasonTotalPoint(seasonLevel);
+      player.seasonNextLevelPoint = this.playerService.getSeasonNextLevelPoint(seasonLevel);
+
+      const memberPoint = player.memberPointTotal;
+      const memberLevel = this.playerService.getMemberLevelBuyPoint(memberPoint);
+      player.memberLevel = memberLevel;
+      player.memberCurrentLevelPoint =
+        memberPoint - this.playerService.getMemberTotalPoint(memberLevel);
+      player.memberNextLevelPoint = this.playerService.getMemberNextLevelPoint(memberLevel);
+      player.totalLevel = seasonLevel + memberLevel;
+
+      const usedLevel = player.properties.reduce((prev, curr) => prev + curr.level, 0);
+      player.useableLevel = player.totalLevel - usedLevel;
+    }
+    return players;
   }
 }

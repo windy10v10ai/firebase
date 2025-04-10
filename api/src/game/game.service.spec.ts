@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { MembersService } from '../members/members.service';
-import { PlayerDtoService } from '../player/player-dto.service';
+import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
@@ -42,7 +42,7 @@ describe('GameService', () => {
           useValue: {},
         },
         {
-          provide: PlayerDtoService,
+          provide: PlayerSettingService,
           useValue: {},
         },
       ],
