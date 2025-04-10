@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { PlayerSetting } from '../../player/entities/player-setting.entity';
-import { Player } from '../../player/entities/player.entity';
 import { PlayerProperty } from '../../player-property/entities/player-property.entity';
+import { PlayerSetting } from '../entities/player-setting.entity';
+import { Player } from '../entities/player.entity';
 
 export class PlayerDto extends Player {
   @ApiProperty()
