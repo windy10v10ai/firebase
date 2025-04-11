@@ -4,7 +4,7 @@ import { Collection } from 'fireorm';
 
 @Collection()
 export class PlayerSetting {
-  @Exclude()
+  @ApiProperty()
   id: string;
 
   // 不记忆快捷键
