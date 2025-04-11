@@ -7,11 +7,19 @@ export class PlayerSetting {
   @Exclude()
   id: string;
 
+  // 不记忆快捷键
+  @ApiProperty()
+  noRememberAbilityKey: boolean;
   // 快捷键设置
   @ApiProperty()
-  activeSkillKey: string;
+  activeAbilityKey: string;
   @ApiProperty()
-  passiveSkillKey: string;
+  passiveAbilityKey: string;
+  // 快捷施法
+  @ApiProperty()
+  activeAbilityQuickCast: boolean;
+  @ApiProperty()
+  passiveAbilityQuickCast: boolean;
 
   // 为未来其他设置预留
 
