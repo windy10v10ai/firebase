@@ -9,7 +9,7 @@ export class PlayerSetting {
 
   // 不记忆快捷键
   @ApiProperty()
-  noRememberAbilityKey: boolean;
+  isRememberAbilityKey: boolean;
   // 快捷键设置
   @ApiProperty()
   activeAbilityKey: string;

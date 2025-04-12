@@ -25,7 +25,7 @@ describe('PlayerSettingController (e2e)', () => {
       const playerSetting = await getPlayerSetting(app, testPlayer.toString());
       expect(playerSetting).toEqual({
         id: testPlayer.toString(),
-        noRememberAbilityKey: false,
+        isRememberAbilityKey: true,
         activeAbilityKey: '',
         passiveAbilityKey: '',
         activeAbilityQuickCast: false,
@@ -48,7 +48,7 @@ describe('PlayerSettingController (e2e)', () => {
       expect(response.body).toEqual(
         expect.objectContaining({
           id: testPlayer.toString(),
-          noRememberAbilityKey: false,
+          isRememberAbilityKey: true,
           ...updateData,
         }),
       );
@@ -56,7 +56,7 @@ describe('PlayerSettingController (e2e)', () => {
       // 验证更新后的设置
       const playerSetting = await getPlayerSetting(app, testPlayer.toString());
       expect(playerSetting.id).toEqual(testPlayer.toString());
-      expect(playerSetting.noRememberAbilityKey).toEqual(false);
+      expect(playerSetting.isRememberAbilityKey).toEqual(true);
       expect(playerSetting.activeAbilityKey).toEqual('Q');
       expect(playerSetting.passiveAbilityKey).toEqual('E');
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
@@ -74,7 +74,7 @@ describe('PlayerSettingController (e2e)', () => {
 
       // 设置不记住快捷键
       const updateData = {
-        noRememberAbilityKey: true,
+        isRememberAbilityKey: false,
       };
 
       const response = await put(app, `${playerUrl}/${testPlayer}/settings`, updateData);
@@ -82,7 +82,7 @@ describe('PlayerSettingController (e2e)', () => {
       expect(response.body).toEqual(
         expect.objectContaining({
           id: testPlayer.toString(),
-          noRememberAbilityKey: true,
+          isRememberAbilityKey: false,
           activeAbilityKey: '',
           passiveAbilityKey: '',
           activeAbilityQuickCast: true,
@@ -93,7 +93,7 @@ describe('PlayerSettingController (e2e)', () => {
       // 验证更新后的设置
       const playerSetting = await getPlayerSetting(app, testPlayer.toString());
       expect(playerSetting.id).toEqual(testPlayer.toString());
-      expect(playerSetting.noRememberAbilityKey).toEqual(true);
+      expect(playerSetting.isRememberAbilityKey).toEqual(false);
       expect(playerSetting.activeAbilityKey).toEqual('');
       expect(playerSetting.passiveAbilityKey).toEqual('');
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);

@@ -18,8 +18,8 @@ export class PlayerSettingService {
   ): Promise<PlayerSetting> {
     const setting = await this.getPlayerSettingOrGenerateDefault(playerId);
 
-    if (updatePlayerSettingDto.noRememberAbilityKey !== undefined) {
-      setting.noRememberAbilityKey = updatePlayerSettingDto.noRememberAbilityKey;
+    if (updatePlayerSettingDto.isRememberAbilityKey !== undefined) {
+      setting.isRememberAbilityKey = updatePlayerSettingDto.isRememberAbilityKey;
     }
     if (updatePlayerSettingDto.activeAbilityQuickCast !== undefined) {
       setting.activeAbilityQuickCast = updatePlayerSettingDto.activeAbilityQuickCast;
@@ -27,16 +27,16 @@ export class PlayerSettingService {
     if (updatePlayerSettingDto.passiveAbilityQuickCast !== undefined) {
       setting.passiveAbilityQuickCast = updatePlayerSettingDto.passiveAbilityQuickCast;
     }
-    if (setting.noRememberAbilityKey) {
-      setting.activeAbilityKey = '';
-      setting.passiveAbilityKey = '';
-    } else {
+    if (setting.isRememberAbilityKey) {
       if (updatePlayerSettingDto.activeAbilityKey !== undefined) {
         setting.activeAbilityKey = updatePlayerSettingDto.activeAbilityKey;
       }
       if (updatePlayerSettingDto.passiveAbilityKey !== undefined) {
         setting.passiveAbilityKey = updatePlayerSettingDto.passiveAbilityKey;
       }
+    } else {
+      setting.activeAbilityKey = '';
+      setting.passiveAbilityKey = '';
     }
     setting.updatedAt = new Date();
     return this.playerSettingRepository.update(setting);
@@ -54,7 +54,7 @@ export class PlayerSettingService {
   private async createDefaultSettings(playerId: string): Promise<PlayerSetting> {
     const defaultSetting: PlayerSetting = {
       id: playerId,
-      noRememberAbilityKey: false,
+      isRememberAbilityKey: true,
       activeAbilityKey: '',
       passiveAbilityKey: '',
       activeAbilityQuickCast: false,
