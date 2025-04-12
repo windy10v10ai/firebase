@@ -26,7 +26,7 @@ export class PlayerController {
     return this.playerRankingService.getRanking();
   }
 
-  @Put(':id/settings')
+  @Put(':id/setting')
   async updatePlayerSetting(
     @Param('id') id: string,
     @Body() updatePlayerSettingDto: UpdatePlayerSettingDto,
