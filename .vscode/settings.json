@@ -6,5 +6,6 @@
   "git.autofetch": true,
   "debug.javascript.autoAttachFilter": "smart",
   "typescript.preferences.importModuleSpecifier": "relative",
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "githubPullRequests.ignoredPullRequestBranches": ["develop"]
 }
