@@ -16,6 +16,7 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
+import { PlayerDto } from '../player/dto/player.dto';
 import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -23,7 +24,6 @@ import { Public } from '../util/auth/public.decorator';
 
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { GameStart } from './dto/game-start.response';
-import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
 
@@ -125,6 +125,7 @@ export class GameController {
     return await this.gameService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
   }
 
+  // FIXME 移动到player模块，需要修改Dota2中的调用
   @Get('player/steamId/:steamId')
   async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
     return await this.gameService.findPlayerDtoBySteamId(steamId);
