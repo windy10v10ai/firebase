@@ -11,7 +11,7 @@ describe('PlayerSettingController (e2e)', () => {
     app = await initTest();
   });
 
-  describe(`${playerUrl}/:id/settings (Put)`, () => {
+  describe(`${playerUrl}/:id/setting (Put)`, () => {
     const testPlayer = 300400001;
 
     beforeEach(async () => {
@@ -43,7 +43,7 @@ describe('PlayerSettingController (e2e)', () => {
         passiveAbilityQuickCast: true,
       };
 
-      const response = await put(app, `${playerUrl}/${testPlayer}/settings`, updateData);
+      const response = await put(app, `${playerUrl}/${testPlayer}/setting`, updateData);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(
         expect.objectContaining({
@@ -65,7 +65,7 @@ describe('PlayerSettingController (e2e)', () => {
 
     it('更新玩家设置 - 不记住快捷键但保留快速施法', async () => {
       // 先设置快捷键和快速施法
-      await put(app, `${playerUrl}/${testPlayer}/settings`, {
+      await put(app, `${playerUrl}/${testPlayer}/setting`, {
         activeAbilityKey: 'Q',
         passiveAbilityKey: 'E',
         activeAbilityQuickCast: true,
@@ -77,7 +77,7 @@ describe('PlayerSettingController (e2e)', () => {
         isRememberAbilityKey: false,
       };
 
-      const response = await put(app, `${playerUrl}/${testPlayer}/settings`, updateData);
+      const response = await put(app, `${playerUrl}/${testPlayer}/setting`, updateData);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(
         expect.objectContaining({
