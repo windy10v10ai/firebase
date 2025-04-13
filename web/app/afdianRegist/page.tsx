@@ -1,7 +1,7 @@
 'use client';
 import { useTranslations } from 'next-intl';
 import { IdcardOutlined, AccountBookOutlined } from '@ant-design/icons';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, Spin } from 'antd';
 import React, { useState } from 'react';
 import { submmitBtnDisableStyle, afdianContentStyle } from '../style/CSSProperties';
 import { afdianRegistUrl } from '../../config/constant';
@@ -51,6 +51,7 @@ const afdianRegistPage: React.FC = () => {
   const [regisCommited, setRegisCommited] = useState<boolean>(false);
   const [registStatus, setRegistStatus] = useState<boolean>(false);
   const [registErrcode, setRegistErrcode] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [form] = Form.useForm();
   const values = Form.useWatch([], form);
@@ -87,9 +88,13 @@ const afdianRegistPage: React.FC = () => {
         setRegistErrcode(e.error.message);
         setRegistResult(false);
       });
+    // 模拟延迟
+    // await new Promise((resolve) => setTimeout(resolve, 5000));
+    setIsLoading(false);
   };
 
   const onFinish = () => {
+    setIsLoading(true);
     registAfdian();
   };
 
@@ -102,80 +107,83 @@ const afdianRegistPage: React.FC = () => {
   }, [form, values]);
 
   return (
-    <div className="space-y-8" style={afdianContentStyle}>
-      {!regisCommited ? (
-        <>
-          <h1 className="title-primary mb-6">{t('title')}</h1>
-          <p className="text-content mb-8">{t('description')}</p>
+    <>
+      {isLoading ? <Spin fullscreen size="large" /> : null}
+      <div className="space-y-8" style={afdianContentStyle}>
+        {!regisCommited ? (
+          <>
+            <h1 className="title-primary mb-6">{t('title')}</h1>
+            <p className="text-content mb-8">{t('description')}</p>
 
-          <Form form={form} {...formItemLayout} style={{ maxWidth: 600 }} onFinish={onFinish}>
-            <Form.Item
-              label={<label style={{ color: 'white' }}>{t('input.steamId.title')}</label>}
-              name={'steamId'}
-              hasFeedback
-              rules={[
-                {
-                  required: true,
-                  message: t('input.steamId.help'),
-                  type: 'string',
-                  max: 10,
-                  pattern: /^[0-9]+$/,
-                },
-              ]}
-            >
-              <Input
-                value={steamId}
-                onChange={(e) => setSteamId(e.target.value)}
-                placeholder={t('input.steamId.placeholder')}
-                prefix={<IdcardOutlined />}
-                id="inputSteamId"
-                allowClear
-                showCount
-              />
-            </Form.Item>
-
-            <Form.Item
-              label={<label style={{ color: 'white' }}>{t('input.afdianOrderId.title')}</label>}
-              name={'afdianOrderId'}
-              hasFeedback
-              rules={[
-                {
-                  required: true,
-                  message: t('input.afdianOrderId.help'),
-                  type: 'string',
-                  min: 26,
-                  max: 26,
-                  pattern: /^[0-9]+$/,
-                },
-              ]}
-            >
-              <Input
-                value={sorderId}
-                onChange={(e) => setOrderId(e.target.value)}
-                placeholder={t('input.afdianOrderId.placeholder')}
-                prefix={<AccountBookOutlined />}
-                id="inputAfdianOrderId"
-                allowClear
-                showCount
-              />
-            </Form.Item>
-
-            <Form.Item label={null}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                disabled={!submitButtonEnable}
-                style={{ ...(!submitButtonEnable ? submmitBtnDisableStyle : {}) }}
+            <Form form={form} {...formItemLayout} style={{ maxWidth: 600 }} onFinish={onFinish}>
+              <Form.Item
+                label={<label style={{ color: 'white' }}>{t('input.steamId.title')}</label>}
+                name={'steamId'}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: t('input.steamId.help'),
+                    type: 'string',
+                    max: 10,
+                    pattern: /^[0-9]+$/,
+                  },
+                ]}
               >
-                {t('submitButton.buttonText')}
-              </Button>
-            </Form.Item>
-          </Form>
-        </>
-      ) : (
-        <RegistResult result={registStatus} errorCode={registErrcode} />
-      )}
-    </div>
+                <Input
+                  value={steamId}
+                  onChange={(e) => setSteamId(e.target.value)}
+                  placeholder={t('input.steamId.placeholder')}
+                  prefix={<IdcardOutlined />}
+                  id="inputSteamId"
+                  allowClear
+                  showCount
+                />
+              </Form.Item>
+
+              <Form.Item
+                label={<label style={{ color: 'white' }}>{t('input.afdianOrderId.title')}</label>}
+                name={'afdianOrderId'}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: t('input.afdianOrderId.help'),
+                    type: 'string',
+                    min: 26,
+                    max: 26,
+                    pattern: /^[0-9]+$/,
+                  },
+                ]}
+              >
+                <Input
+                  value={sorderId}
+                  onChange={(e) => setOrderId(e.target.value)}
+                  placeholder={t('input.afdianOrderId.placeholder')}
+                  prefix={<AccountBookOutlined />}
+                  id="inputAfdianOrderId"
+                  allowClear
+                  showCount
+                />
+              </Form.Item>
+
+              <Form.Item label={null}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  disabled={!submitButtonEnable}
+                  style={{ ...(!submitButtonEnable ? submmitBtnDisableStyle : {}) }}
+                >
+                  {t('submitButton.buttonText')}
+                </Button>
+              </Form.Item>
+            </Form>
+          </>
+        ) : (
+          <RegistResult result={registStatus} errorCode={registErrcode} />
+        )}
+      </div>
+    </>
   );
 };
 
