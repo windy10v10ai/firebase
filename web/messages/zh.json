@@ -81,11 +81,7 @@
       },
       "paymentMethods": {
         "title": "接受的支付方式",
-        "content": [
-          "支付宝",
-          "微信支付",
-          "信用卡支付"
-        ]
+        "content": ["支付宝", "微信支付", "信用卡支付"]
       },
       "paymentCycle": {
         "title": "付款周期",
@@ -96,5 +92,24 @@
         "content": ["10v10AI 会员订阅：¥30/月"]
       }
     }
+  },
+  "afdianRegist": {
+    "title": "爱发电会员激活",
+    "description": "已购买但未留言Dota2ID的用户，可在本页面中输入steamID和爱发电的订单号进行激活。",
+    "input": {
+      "steamId": {
+        "title": "Steam ID",
+        "placeholder": "请输入您的Steam ID",
+        "help": "请输入正确的Steam ID，格式为10位以下纯数字"
+      },
+      "afdianOrderId": {
+        "title": "爱发电订单号",
+        "placeholder": "请输入您的爱发电订单号",
+        "help": "请输入正确的爱发电订单号，格式为26位纯数字"
+      }
+    },
+    "submitButton": {
+      "buttonText": "激活会员"
+    }
   }
-} 
+}
