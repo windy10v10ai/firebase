@@ -54,7 +54,7 @@ export class PlayerSettingService {
   private async createDefaultSettings(playerId: string): Promise<PlayerSetting> {
     const defaultSetting: PlayerSetting = {
       id: playerId,
-      isRememberAbilityKey: true,
+      isRememberAbilityKey: false,
       activeAbilityKey: '',
       passiveAbilityKey: '',
       activeAbilityQuickCast: false,
