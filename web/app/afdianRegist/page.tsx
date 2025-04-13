@@ -8,6 +8,30 @@ import { afdianRegistUrl } from '../../config/constant';
 import axios from 'axios';
 import RegistResult from './registResult';
 
+const successResponse = {
+  data: {
+    steamId: 1234567890,
+    outTradeNo: '12345678901234567890123456',
+    result: true,
+    error_code: '',
+  },
+};
+
+const failResponse = {
+  data: {
+    steamId: 1234567890,
+    outTradeNo: '12345678901234567890123456',
+    result: false,
+    error_code: 'A01',
+  },
+};
+
+function fetchData() {
+  // 直接返回 mock 数据（替换真实的 axios 调用）
+  return Promise.resolve(successResponse);
+  // return Promise.resolve(failResponse);
+}
+
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -25,34 +49,44 @@ const afdianRegistPage: React.FC = () => {
   const [sorderId, setOrderId] = useState('');
   const [submitButtonEnable, setSubmitButtonEnable] = useState<boolean>(false);
   const [regisCommited, setRegisCommited] = useState<boolean>(false);
+  const [registStatus, setRegistStatus] = useState<boolean>(false);
+  const [registErrcode, setRegistErrcode] = useState<string>('');
 
   const [form] = Form.useForm();
   const values = Form.useWatch([], form);
 
+  const setRegistResult = (success: boolean) => {
+    setRegistStatus(success);
+    setRegisCommited(true);
+  };
+
   const registAfdian = async () => {
-    const registResponse = await axios
-      .post(afdianRegistUrl, {
-        steamId: Number(steamId),
-        outTradeNo: sorderId,
-      })
+    await fetchData()
+      // const registResponse = await axios
+      //   .post(afdianRegistUrl, {
+      //     steamId: Number(steamId),
+      //     outTradeNo: sorderId,
+      // })
       .then((response) => {
-        // console.log('registResponse', response);
+        console.log('registResponse:', response);
+        console.log('registResponse:', response);
         if (response.data.steamId === Number(steamId) && response.data.outTradeNo === sorderId) {
           if (response.data.result) {
-            // alert(t('success'));
+            setRegistResult(true);
           } else {
-            // alert(t('fail'));
+            setRegistErrcode(response.data.error_code);
+            setRegistResult(false);
           }
         } else {
-          //
+          // API返回的steamId和outTradeNo与输入不一致
+          setRegistResult(false);
         }
       })
-      .catch((error) => {
-        // console.error('registResponse error', error);
-        // alert(t('error'));
+      .catch((e) => {
+        // API调用失败
+        setRegistErrcode(e.error.message);
+        setRegistResult(false);
       });
-    console.log('registResponse', registResponse);
-    // return registResponse;
   };
 
   const onFinish = () => {
@@ -139,7 +173,7 @@ const afdianRegistPage: React.FC = () => {
           </Form>
         </>
       ) : (
-        <RegistResult />
+        <RegistResult result={registStatus} errorCode={registErrcode} />
       )}
     </div>
   );

@@ -113,11 +113,11 @@
     },
     "registResult": {
       "success": {
-        "description": "您的会员已成功激活，感谢您的支持！",
+        "message": "您的会员已成功激活，感谢您的支持！",
         "btnText": "完成"
       },
       "error": {
-        "description": "请检查您的Steam ID和爱发电订单号是否正确，或稍后再试。",
+        "message": "请检查您的Steam ID和爱发电订单号是否正确，或稍后再试。",
         "btnText": "返回"
       }
     }
