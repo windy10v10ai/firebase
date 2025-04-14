@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -13,7 +14,6 @@ import { OrderDto } from './dto/afdian-webhook.dto';
 import { AfdianOrder } from './entities/afdian-order.entity';
 import { AfdianUser } from './entities/afdian-user.entity';
 import { OrderType } from './enums/order-type.enum';
-import { logger } from 'firebase-functions/v2';
 
 enum ProductType {
   member = 0,
