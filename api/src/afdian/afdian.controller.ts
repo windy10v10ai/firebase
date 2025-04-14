@@ -31,7 +31,7 @@ export class AfdianController {
     @Query('token') token: string,
   ) {
     if (token !== this.secretService.getSecretValue(SECRET.AFDIAN_WEBHOOK_TOKEN)) {
-      logger.warn(`Afdian webhook invalid token`);
+      logger.error(`接收到不可用的爱发电Token`);
       throw new UnauthorizedException();
     }
     const order = afdianWebhookDto?.data?.order;
