@@ -93,9 +93,9 @@
       }
     }
   },
-  "afdianRegist": {
-    "title": "爱发电会员激活",
-    "description": "已购买但未留言Dota2ID的用户，可在本页面中输入steamID和爱发电的订单号进行激活。",
+  "manualActive": {
+    "afdianTitle": "爱发电会员激活",
+    "afdianDescription": "已购买但未留言steamID的用户，可在本页面中输入steamID和爱发电的订单号进行激活。",
     "input": {
       "steamId": {
         "title": "Steam ID",
@@ -105,19 +105,19 @@
       "afdianOrderId": {
         "title": "爱发电订单号",
         "placeholder": "请输入您的爱发电订单号",
-        "help": "请输入正确的爱发电订单号，格式为26位纯数字"
+        "help": "请输入正确的爱发电订单号，格式为26-30位纯数字"
       }
     },
     "submitButton": {
       "buttonText": "激活会员"
     },
-    "registResult": {
+    "avticeResult": {
       "success": {
         "message": "您的会员已成功激活，感谢您的支持！",
         "btnText": "完成"
       },
       "error": {
-        "message": "请检查您的Steam ID和爱发电订单号是否正确，或稍后再试。",
+        "afdianMessage": "请检查您的Steam ID和爱发电订单号是否正确，或稍后再试。",
         "btnText": "返回"
       }
     }

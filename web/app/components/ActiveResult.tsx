@@ -4,32 +4,32 @@ import { SmileOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Result } from 'antd';
 import { redirect } from 'next/navigation';
 
-interface RegistResultProps {
+interface ActiveResultProps {
+  activeType: string;
   result: boolean;
-  errorCode?: string;
+  errorMsg?: string;
 }
 
-const RegistResult: React.FC<RegistResultProps> = (props) => {
-  const t = useTranslations('afdianRegist');
+const ActiveResult: React.FC<ActiveResultProps> = (props) => {
+  const t = useTranslations('manualActive');
   const [message, setMessage] = React.useState<string>('');
   const [btnText, setBtnText] = React.useState<string>('');
 
   const getResultMessage = () => {
     if (props.result) {
-      setMessage(t('registResult.success.message'));
-      setBtnText(t('registResult.success.btnText'));
+      setMessage(t('avticeResult.success.message'));
+      setBtnText(t('avticeResult.success.btnText'));
     } else {
-      if (props.result === false && props.errorCode) {
-        setMessage('根据错误码进行处理（TODO）');
+      if (props.result === false && props.errorMsg) {
+        setMessage(props.errorMsg);
       } else {
-        setMessage(t('registResult.error.message'));
+        setMessage(props.activeType === 'afdian' ? t('avticeResult.error.afdianMessage') : '');
       }
-      setBtnText(t('registResult.error.btnText'));
+      setBtnText(t('avticeResult.error.btnText'));
     }
   };
 
   const handleClidk = () => {
-    console.log('handleClidk:', props.result);
     if (props.result) {
       redirect('/');
     } else {
@@ -55,4 +55,4 @@ const RegistResult: React.FC<RegistResultProps> = (props) => {
   );
 };
 
-export default RegistResult;
+export default ActiveResult;
