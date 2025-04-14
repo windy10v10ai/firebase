@@ -31,7 +31,7 @@ export class AfdianController {
     @Query('token') token: string,
   ) {
     if (token !== this.secretService.getSecretValue(SECRET.AFDIAN_WEBHOOK_TOKEN)) {
-      logger.error(`接收到不可用的爱发电Token`);
+      logger.warn(`接收到不可用的爱发电Token`);
       throw new UnauthorizedException();
     }
     const order = afdianWebhookDto?.data?.order;
@@ -51,7 +51,7 @@ export class AfdianController {
     const result = await this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
     if (!result) {
       // 失败时，输出错误日志
-      logger.error(`爱发电手动激活订单失败: ${dto.outTradeNo} ${dto.steamId}`);
+      logger.warn(`爱发电手动激活订单失败: ${dto.outTradeNo} ${dto.steamId}`);
     }
     return { result };
   }

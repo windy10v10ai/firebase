@@ -13,6 +13,7 @@ import { OrderDto } from './dto/afdian-webhook.dto';
 import { AfdianOrder } from './entities/afdian-order.entity';
 import { AfdianUser } from './entities/afdian-user.entity';
 import { OrderType } from './enums/order-type.enum';
+import { logger } from 'firebase-functions/v2';
 
 enum ProductType {
   member = 0,
@@ -65,6 +66,13 @@ export class AfdianService {
   async activeOrderManual(outTradeNo: string, steamId: number) {
     if (outTradeNo < this.OUT_TRADE_NO_BASE) {
       // 旧订单需人工处理
+      logger.warn('旧订单需人工处理', { outTradeNo, steamId });
+      return false;
+    }
+    // 检查steamId是否存在
+    const player = await this.playerService.findBySteamId(steamId);
+    if (!player) {
+      logger.warn(`steamId ${steamId} 不存在`);
       return false;
     }
     const existOrder = await this.afdianOrderRepository
