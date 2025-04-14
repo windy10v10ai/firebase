@@ -33,6 +33,9 @@ export class AfdianApiService {
   }
 
   async fetchAfdianOrderByOutTradeNo(outTradeNo: string) {
+    if (process.env.ENVIRONMENT === 'local') {
+      return undefined;
+    }
     const params = { out_trade_no: outTradeNo };
     const response = await this.callAfdianOrderAPI(params);
     return response.data.list[0];
