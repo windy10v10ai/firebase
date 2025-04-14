@@ -51,7 +51,7 @@ export class AfdianController {
     const result = await this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
     if (!result) {
       // 失败时，输出错误日志
-      logger.warn(`爱发电手动激活订单失败: ${dto.outTradeNo} ${dto.steamId}`);
+      logger.warn(`爱发电手动激活订单失败 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
     }
     return { result };
   }
