@@ -13,6 +13,7 @@ import { Public } from '../util/auth/public.decorator';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { AfdianService } from './afdian.service';
+import { ActiveAfdianOrderDto } from './dto/active-afdian-order.dto';
 import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
 
 @Public()
@@ -43,5 +44,10 @@ export class AfdianController {
     } else {
       return { ec: 200, em: '[Error] 未能正确获取Dota2 ID' };
     }
+  }
+
+  @Post('/order/active')
+  async activeOrder(@Body() dto: ActiveAfdianOrderDto) {
+    return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
   }
 }
