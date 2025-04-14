@@ -48,6 +48,11 @@ export class AfdianController {
 
   @Post('/order/active')
   async activeOrder(@Body() dto: ActiveAfdianOrderDto) {
-    return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
+    const result = await this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
+    if (!result) {
+      // 失败时，输出错误日志
+      logger.error(`爱发电手动激活订单失败: ${dto.outTradeNo} ${dto.steamId}`);
+    }
+    return { result };
   }
 }
