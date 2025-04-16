@@ -1,7 +1,4 @@
-import * as fs from 'fs';
-
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { parse } from 'csv-parse/sync';
 import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
@@ -85,31 +82,6 @@ export class PlayerPropertyService {
     return returnString;
   }
 
-  async initialProperty() {
-    const propertyData = fs.readFileSync('src/player-property/property.csv');
-    const propertyList = parse(propertyData, {
-      // key for each property
-      columns: true,
-      // skip the first line
-      skip_empty_lines: true,
-    });
-    for (const property of propertyList) {
-      // property get keys
-      const propertyKeys = Object.keys(property);
-      for (const propertyKey of propertyKeys) {
-        // if property key is not steamId
-        if (propertyKey !== 'steamId') {
-          if (property[propertyKey] !== '') {
-            await this.update({
-              steamId: Number(property.steamId),
-              name: propertyKey,
-              level: Number(property[propertyKey]),
-            });
-          }
-        }
-      }
-    }
-  }
   async findBySteamId(steamId: number) {
     return this.playerPropertyRepository.whereEqualTo('steamId', steamId).find();
   }

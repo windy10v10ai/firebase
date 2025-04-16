@@ -16,12 +16,6 @@ export class TestController {
     private readonly membersService: MembersService,
   ) {}
 
-  @Get('/init')
-  async initTestData(): Promise<void> {
-    await this.initialLevel();
-    await this.playerPropertyService.initialProperty();
-  }
-
   @Get('/player/steamId/:steamId')
   findOne(@Param('steamId') steamId: string): Promise<Player> {
     return this.playerService.findBySteamId(+steamId);
@@ -30,16 +24,5 @@ export class TestController {
   @Patch('/player/steamId/:steamId')
   upsert(@Param('steamId') steamId: number, @Body() updatePlayerDto: UpdatePlayerDto) {
     return this.playerService.upsertAddPoint(steamId, updatePlayerDto);
-  }
-
-  private async initialLevel() {
-    const memberLevelList = [{ steamId: 136407523, level: 32 }];
-    for (const memberLevel of memberLevelList) {
-      const memberPointsNeed = this.playerService.getMemberTotalPoint(memberLevel.level);
-
-      await this.playerService.upsertAddPoint(memberLevel.steamId, {
-        memberPointTotal: memberPointsNeed,
-      });
-    }
   }
 }
