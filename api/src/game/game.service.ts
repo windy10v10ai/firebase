@@ -4,13 +4,13 @@ import { logger } from 'firebase-functions';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
+import { PlayerDto } from '../player/dto/player.dto';
+import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
-import { PlayerDto } from './dto/player.dto';
 import { PointInfoDto } from './dto/point-info.dto';
-
 @Injectable()
 export class GameService {
   private readonly resetPlayerPropertyMemberPoint = 1000;
@@ -19,6 +19,7 @@ export class GameService {
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly playerPropertyService: PlayerPropertyService,
+    private readonly playerSettingService: PlayerSettingService,
   ) {}
 
   getOK(): string {
@@ -122,7 +123,8 @@ export class GameService {
   async resetPlayerProperty(gameResetPlayerProperty: GameResetPlayerProperty): Promise<void> {
     const { steamId, useMemberPoint } = gameResetPlayerProperty;
 
-    const player = (await this.findPlayerDtoBySteamIds([steamId.toString()]))[0];
+    // FIXME 不使用playerDto，直接使用playerService获取player
+    const player = await this.findPlayerDtoBySteamId(steamId);
 
     if (!player) {
       throw new BadRequestException();
@@ -138,6 +140,7 @@ export class GameService {
         memberPointTotal: -resetPlayerPropertyMemberPoint,
       });
     } else {
+      // FIXME 不使用playerDto，直接使用playerService中的方法计算。计算考虑做成helper
       const resetPlayerPropertySeasonPoint = player.seasonNextLevelPoint;
       if (player.seasonPointTotal < resetPlayerPropertySeasonPoint) {
         throw new BadRequestException();
@@ -165,6 +168,8 @@ export class GameService {
       } else {
         player.properties = [];
       }
+      const setting = await this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id);
+      player.playerSetting = setting;
 
       const seasonPoint = player.seasonPointTotal;
       const seasonLevel = this.playerService.getSeasonLevelBuyPoint(seasonPoint);

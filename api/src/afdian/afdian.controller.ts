@@ -13,6 +13,7 @@ import { Public } from '../util/auth/public.decorator';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { AfdianService } from './afdian.service';
+import { ActiveAfdianOrderDto } from './dto/active-afdian-order.dto';
 import { AfdianWebhookDto } from './dto/afdian-webhook.dto';
 
 @Public()
@@ -30,7 +31,7 @@ export class AfdianController {
     @Query('token') token: string,
   ) {
     if (token !== this.secretService.getSecretValue(SECRET.AFDIAN_WEBHOOK_TOKEN)) {
-      logger.warn(`Afdian webhook invalid token`);
+      logger.warn(`接收到不可用的爱发电Token`);
       throw new UnauthorizedException();
     }
     const order = afdianWebhookDto?.data?.order;
@@ -43,5 +44,17 @@ export class AfdianController {
     } else {
       return { ec: 200, em: '[Error] 未能正确获取Dota2 ID' };
     }
+  }
+
+  @Post('/order/active')
+  async activeOrder(@Body() dto: ActiveAfdianOrderDto) {
+    const result = await this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
+    if (!result) {
+      // 失败时，输出错误日志
+      logger.warn(`爱发电手动激活订单失败 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
+    } else {
+      logger.info(`爱发电手动激活订单成功 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
+    }
+    return { result };
   }
 }

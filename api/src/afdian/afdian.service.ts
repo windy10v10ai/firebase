@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -65,6 +66,13 @@ export class AfdianService {
   async activeOrderManual(outTradeNo: string, steamId: number) {
     if (outTradeNo < this.OUT_TRADE_NO_BASE) {
       // 旧订单需人工处理
+      logger.warn('旧订单需人工处理', { outTradeNo, steamId });
+      return false;
+    }
+    // 检查steamId是否存在
+    const player = await this.playerService.findBySteamId(steamId);
+    if (!player) {
+      logger.warn(`steamId ${steamId} 不存在`);
       return false;
     }
     const existOrder = await this.afdianOrderRepository

@@ -163,7 +163,7 @@ export class MembersService {
     } else {
       await this.membersRepository.create(member);
     }
-    return this.find(steamId);
+    return this.findBySteamId(steamId);
   }
 
   // ---- 获取会员信息 ----
@@ -175,7 +175,7 @@ export class MembersService {
     return await this.membersRepository.whereIn('steamId', steamIds).find();
   }
 
-  async find(steamId: number): Promise<MemberDto> {
+  async findBySteamId(steamId: number): Promise<MemberDto> {
     const member = await this.findOne(steamId);
     if (member) {
       return new MemberDto(member);

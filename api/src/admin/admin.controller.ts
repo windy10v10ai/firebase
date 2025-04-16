@@ -2,12 +2,12 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { AfdianService } from '../afdian/afdian.service';
+import { ActiveAfdianOrderDto } from '../afdian/dto/active-afdian-order.dto';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
 import { MembersService } from '../members/members.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
-import { ActiveAfdianOrderDto } from './dto/active-afdian-order.dto';
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
 @Public()
