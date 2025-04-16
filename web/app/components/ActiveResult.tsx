@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { SmileOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Result } from 'antd';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface ActiveResultProps {
   activeType: string;
@@ -12,6 +12,7 @@ interface ActiveResultProps {
 
 const ActiveResult: React.FC<ActiveResultProps> = (props) => {
   const t = useTranslations('manualActive');
+  const router = useRouter();
   const [message, setMessage] = React.useState<string>('');
   const [btnText, setBtnText] = React.useState<string>('');
 
@@ -29,11 +30,11 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
     }
   };
 
-  const handleClidk = () => {
+  const handleClick = () => {
     if (props.result) {
-      redirect('/');
+      router.push('/');
     } else {
-      window.location.reload();
+      router.refresh();
     }
   };
 
@@ -47,7 +48,7 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
       icon={props.result ? <SmileOutlined /> : <InfoCircleOutlined />}
       title={<div style={{ color: 'white' }}>{message}</div>}
       extra={
-        <Button type="primary" onClick={handleClidk}>
+        <Button type="primary" onClick={handleClick}>
           {btnText}
         </Button>
       }

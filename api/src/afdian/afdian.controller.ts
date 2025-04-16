@@ -52,6 +52,8 @@ export class AfdianController {
     if (!result) {
       // 失败时，输出错误日志
       logger.warn(`爱发电手动激活订单失败 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
+    } else {
+      logger.info(`爱发电手动激活订单成功 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
     }
     return { result };
   }
