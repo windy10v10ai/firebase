@@ -18,19 +18,11 @@
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
-          "regex": "^/api/(game|afdian|analytics|player|kofi).*",
+          "regex": "^/api/.*",
           "function": "client",
           "region": "asia-northeast1"
         }
       ]
-    },
-    {
-      "target": "web",
-      "source": "web",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "frameworksBackend": {
-        "region": "asia-northeast1"
-      }
     }
   ],
   "emulators": {
