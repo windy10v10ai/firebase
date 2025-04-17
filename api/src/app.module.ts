@@ -17,7 +17,6 @@ import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { TaskModule } from './task/task.module';
-import { TestModule } from './test/test.module';
 import { AuthGuard } from './util/auth/auth.guard';
 import { SecretModule } from './util/secret/secret.module';
 
@@ -45,7 +44,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     PatreonModule,
     PlayerModule,
     PlayerPropertyModule,
-    TestModule,
     AdminModule,
     EventRewardsModule,
     AnalyticsModule,

@@ -8,6 +8,7 @@ interface ActiveResultProps {
   activeType: string;
   result: boolean;
   errorMsg?: string;
+  setRequestCommited: (commited: boolean) => void;
 }
 
 const ActiveResult: React.FC<ActiveResultProps> = (props) => {
@@ -32,9 +33,11 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
 
   const handleClick = () => {
     if (props.result) {
+      // 成功时返回首页
       router.push('/');
     } else {
-      router.refresh();
+      // 失败时返回输入页面
+      props.setRequestCommited(false);
     }
   };
 
