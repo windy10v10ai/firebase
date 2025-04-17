@@ -11,22 +11,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   AppGlobalSettings(app);
 
-  // 允许来自web画面的跨域名访问
-  // 根据环境设置 CORS origin
-  const isLocal = process.env.ENVIRONMENT === 'local';
-  const allowedOrigins = isLocal
-    ? true // 本地环境允许所有来源
-    : ['https://www.windy10v10ai.com']; // 生产环境只允许特定域名
-
-  app.enableCors({
-    origin: allowedOrigins,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'x-api-key'],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  });
-
   if (process.env.ENVIRONMENT == 'local') {
     const config = new DocumentBuilder()
       .setTitle('Windy10v10 Cloud API')
