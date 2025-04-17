@@ -193,6 +193,7 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
             activeType={props.activeType}
             result={activeStatus}
             errorMsg={activeErrmsg}
+            setRequestCommited={setRequestCommited}
           />
         )}
       </div>
