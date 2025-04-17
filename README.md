@@ -149,7 +149,6 @@ firebase deploy --only functions
 
 # Deploy hosting only
 firebase deploy --only hosting
-firebase deploy --only hosting:web
 # Deploy function and hosting
 firebase deploy --only functions,hosting
 ```
