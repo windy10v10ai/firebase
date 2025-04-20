@@ -8,7 +8,7 @@ import { Player } from './entities/player.entity';
 @Injectable()
 export class PlayerRankingService {
   // 排除的SteamId
-  private readonly excludeSteamIds = ['424859328', '869192295', '338807313'];
+  private readonly excludeSteamIds = ['424859328', '869192295', '338807313', '120461913'];
 
   constructor(
     @InjectRepository(Player)
