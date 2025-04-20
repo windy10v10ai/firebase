@@ -6,9 +6,10 @@ import React, { useState, useEffect } from 'react';
 import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
 import axios from 'axios';
 import ActiveResult from './ActiveResult';
+import { PlatformType } from '../../types/platform';
 
 interface ManualActiveProps {
-  activeType: string;
+  activeType: PlatformType;
 }
 
 // const successResponse = {
