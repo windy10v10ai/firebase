@@ -57,6 +57,7 @@ export class AfdianApiService {
       sign,
     };
 
+    logger.info('调用爱发电API', { params, userId });
     const response = await fetch('https://afdian.com/api/open/query-order', {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -64,9 +65,10 @@ export class AfdianApiService {
     });
     const responseJson = await response.json();
     if (responseJson.ec !== 200) {
-      logger.error('Afdian API error', responseJson);
+      logger.error('爱发电API调用失败', { response: responseJson, params });
       throw new Error(`Afdian API error: ${responseJson.em}`);
     }
+    logger.info('爱发电API调用成功', { params, response: responseJson });
     return responseJson;
   }
 }
