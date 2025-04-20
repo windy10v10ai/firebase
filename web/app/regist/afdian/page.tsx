@@ -1,8 +1,7 @@
 'use client';
 import React from 'react';
-import ManualActive from '../regist/components/ManualActive';
+import ManualActive from '../components/ManualActive';
 
-// TODO 废弃该路径，删除
 const ActiveAfdianPage: React.FC = () => {
   return <ManualActive activeType="afdian" />;
 };

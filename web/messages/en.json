@@ -77,24 +77,55 @@
       },
       "serviceTime": {
         "title": "Delivery times",
-        "content": ["Membership service is available immediately after successful subscription payment"]
+        "content": [
+          "Membership service is available immediately after successful subscription payment"
+        ]
       },
       "paymentMethods": {
         "title": "Accepted Payment Methods",
-        "content": [
-          "Alipay",
-          "WeChat Pay",
-          "Credit Card"
-        ]
+        "content": ["Alipay", "WeChat Pay", "Credit Card"]
       },
       "paymentCycle": {
         "title": "Payment period",
-        "content": ["Alipay, WeChat Pay, and credit card payments are instant, membership service will be activated immediately after successful payment"]
+        "content": [
+          "Alipay, WeChat Pay, and credit card payments are instant, membership service will be activated immediately after successful payment"
+        ]
       },
       "price": {
         "title": "Price",
         "content": ["10v10AI Membership Subscription: ¥30/month"]
       }
     }
+  },
+  "manualActive": {
+    "afdianTitle": "Afdian Membership Activation",
+    "afdianDescription": "For users who have purchased but failed to activate membership automatically, you can manually activate it by entering your Dota2 friend ID and Afdian Order No on this page.",
+    "input": {
+      "steamId": {
+        "title": "Dota2 Friend ID",
+        "placeholder": "Please enter your Dota2 friend ID",
+        "help": "Please enter a valid Dota2 friend ID, format: numbers only, up to 10 digits",
+        "helpLink": "How to find your Dota2 friend ID?"
+      },
+      "afdianOrderId": {
+        "title": "Afdian Order No",
+        "placeholder": "Please enter your Afdian Order No",
+        "help": "Please enter a valid Afdian Order No, format: numbers only, 26-30 digits",
+        "helpLink": "How to find your Afdian Order No?"
+      }
+    },
+    "submitButton": {
+      "buttonText": "Activate Membership"
+    },
+    "avticeResult": {
+      "success": {
+        "message": "Your membership has been successfully activated. Thank you for your support! The membership will take effect in the next game.",
+        "btnText": "Return to Home"
+      },
+      "error": {
+        "afdianMessage": "Please check if your Dota2 friend ID and Afdian Order No are correct. If the problem persists, please try again later.",
+        "btnText": "Try Again"
+      }
+    }
   }
-} 
+}
