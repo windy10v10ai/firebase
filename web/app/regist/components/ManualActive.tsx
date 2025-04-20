@@ -2,13 +2,14 @@
 import { useTranslations } from 'next-intl';
 import { IdcardOutlined, AccountBookOutlined } from '@ant-design/icons';
 import { Form, Input, Button, Spin } from 'antd';
-import React, { useState } from 'react';
-import { submmitBtnDisableStyle, manualActiveContentStyle } from '../style/CSSProperties';
+import React, { useState, useEffect } from 'react';
+import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
 import axios from 'axios';
 import ActiveResult from './ActiveResult';
+import { PlatformType } from '../../types/platform';
 
 interface ManualActiveProps {
-  activeType: string;
+  activeType: PlatformType;
 }
 
 // const successResponse = {
@@ -55,9 +56,23 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
   const [activeStatus, setActiveStatus] = useState<boolean>(false);
   const [activeErrmsg, setActiveErrmsg] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [mounted, setMounted] = useState(false);
 
   const [form] = Form.useForm();
   const values = Form.useWatch([], form);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      form
+        .validateFields({ validateOnly: true })
+        .then(() => setSubmitButtonEnable(true))
+        .catch(() => setSubmitButtonEnable(false));
+    }
+  }, [form, values, mounted]);
 
   const setActiveResult = (success: boolean) => {
     setActiveStatus(success);
@@ -98,12 +113,9 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
     requestActive();
   };
 
-  React.useEffect(() => {
-    form
-      .validateFields({ validateOnly: true })
-      .then(() => setSubmitButtonEnable(true))
-      .catch(() => setSubmitButtonEnable(false));
-  }, [form, values]);
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>
@@ -132,6 +144,19 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
                     pattern: /^[0-9]+$/,
                   },
                 ]}
+                extra={
+                  <div className="text-sm text-gray-400 mt-2">
+                    <a
+                      href="https://afdian.com/p/bfba558c5d9311ed836152540025c377"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      {t('input.steamId.helpLink')}
+                    </a>
+                  </div>
+                }
+                className="mb-8"
               >
                 <Input
                   value={steamId}
@@ -162,6 +187,21 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
                     pattern: /^[0-9]+$/,
                   },
                 ]}
+                extra={
+                  props.activeType === 'afdian' ? (
+                    <div className="text-sm text-gray-400 mt-2">
+                      <a
+                        href="https://afdian.com/dashboard/order"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        {t('input.afdianOrderId.helpLink')}
+                      </a>
+                    </div>
+                  ) : null
+                }
+                className="mb-8"
               >
                 <Input
                   value={sorderId}

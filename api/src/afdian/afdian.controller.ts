@@ -48,12 +48,12 @@ export class AfdianController {
 
   @Post('/order/active')
   async activeOrder(@Body() dto: ActiveAfdianOrderDto) {
+    logger.info('开始处理爱发电手动激活订单', { outTradeNo: dto.outTradeNo, steamId: dto.steamId });
     const result = await this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
     if (!result) {
-      // 失败时，输出错误日志
-      logger.warn(`爱发电手动激活订单失败 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
+      logger.warn('爱发电手动激活订单失败', { outTradeNo: dto.outTradeNo, steamId: dto.steamId });
     } else {
-      logger.info(`爱发电手动激活订单成功 outTradeNo: ${dto.outTradeNo} steamId: ${dto.steamId}`);
+      logger.info('爱发电手动激活订单成功', { outTradeNo: dto.outTradeNo, steamId: dto.steamId });
     }
     return { result };
   }

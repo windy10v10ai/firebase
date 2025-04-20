@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { steamId, outTradeNo } = body;
 
+    console.log('开始处理爱发电订单激活请求', { steamId, outTradeNo });
+
     // 调用后端API
     const response = await fetch(afdianActiveUrl, {
       method: 'POST',
@@ -19,9 +21,19 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await response.json();
+    console.log('爱发电订单激活请求完成', {
+      steamId,
+      outTradeNo,
+      status: response.status,
+      data,
+    });
+
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in afdian order active:', error);
+    console.error('爱发电订单激活请求失败', {
+      error: error instanceof Error ? error.message : '未知错误',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
