@@ -10,9 +10,9 @@ export default function LanguageSwitcher() {
   const t = useTranslations();
 
   const switchLocale = (newLocale: string) => {
-    // 使用 __session cookie
-    document.cookie = `__session=NEXT_LOCALE=${newLocale}; path=/; secure; sameSite=strict`;
-
+    // 设置 cookie
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+    // 刷新页面以应用新的语言设置
     router.refresh();
   };
 

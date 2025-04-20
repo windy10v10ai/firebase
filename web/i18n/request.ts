@@ -13,7 +13,6 @@ async function getBrowserLocale(): Promise<string> {
     .split(',')
     .map((lang) => lang.split(';')[0].trim())
     .filter((lang) => lang.length > 0);
-
   // 检查是否支持中文
   const hasChinese = languages.some(
     (lang) =>
@@ -27,25 +26,13 @@ async function getBrowserLocale(): Promise<string> {
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
-  const cookieSession = cookieStore.get('__session')?.value;
-  const cookieLocale = cookieSession ? cookieSession.split('=')[1] : undefined;
+  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
 
   // 优先使用 cookie 中的语言设置，如果没有则使用浏览器语言
   const locale = cookieLocale || (await getBrowserLocale());
 
-  // 加载语言包
-  let messages;
-  try {
-    messages = (await import(`../messages/${locale}.json`)).default;
-  } catch (error) {
-    console.error(`Failed to load messages for locale ${locale}:`, error);
-    messages = (await import(`../messages/${defaultLocale}.json`)).default;
-  }
-
   return {
     locale,
-    messages,
-    timeZone: 'UTC',
-    now: new Date(),
+    messages: (await import(`../messages/${locale}.json`)).default,
   };
 });
