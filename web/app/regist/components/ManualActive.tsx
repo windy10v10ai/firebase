@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import { IdcardOutlined, AccountBookOutlined } from '@ant-design/icons';
 import { Form, Input, Button, Spin } from 'antd';
 import React, { useState } from 'react';
-import { submmitBtnDisableStyle, manualActiveContentStyle } from '../style/CSSProperties';
+import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
 import axios from 'axios';
 import ActiveResult from './ActiveResult';
 
