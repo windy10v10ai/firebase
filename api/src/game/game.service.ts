@@ -79,12 +79,12 @@ export class GameService {
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
 
     for (const rewardResult of rewardResults) {
-      // 第一个活动奖励
-      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.online900) {
+      // FIXME 活动每次需要更新
+      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.mayDay2025) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: firstRewardPoint,
         });
-        await this.eventRewardsService.setReward(rewardResult.steamId, 'online900');
+        await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
