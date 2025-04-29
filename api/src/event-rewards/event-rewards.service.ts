@@ -26,7 +26,7 @@ export class EventRewardsService {
     }));
   }
 
-  async setReward(steamId: number, rewardType: 'online900' | 'online1000'): Promise<void> {
+  async setReward(steamId: number): Promise<void> {
     const id = steamId.toString();
     const eventReward = await this.eventRewardsRepository.findById(id);
     if (!eventReward) {
@@ -34,11 +34,13 @@ export class EventRewardsService {
       await this.eventRewardsRepository.create({
         id,
         steamId,
-        [rewardType]: true,
+        // FIXME 活动每次需要更新
+        mayDay2025: true,
       });
     } else {
       // update
-      eventReward[rewardType] = true;
+      // FIXME 活动每次需要更新
+      eventReward.mayDay2025 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
