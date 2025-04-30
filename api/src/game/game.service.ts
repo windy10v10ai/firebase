@@ -68,15 +68,10 @@ export class GameService {
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    // 第一个活动：3/23-3/31 900人在线奖励
-    const firstStartTime = new Date('2025-03-23T00:00:00.000Z');
-    const firstEndTime = new Date('2025-03-31T23:59:59.999Z');
-    const firstRewardPoint = 2000;
-
-    // 第二个活动：3/24-4/24 1000人在线奖励
-    const secondStartTime = new Date('2025-03-24T00:00:00.000Z');
-    const secondEndTime = new Date('2025-04-24T00:00:00.000Z');
-    const secondRewardPoint = 10000;
+    // 4/30-5/05 五一活动
+    const firstStartTime = new Date('2025-04-30T00:00:00.000Z');
+    const firstEndTime = new Date('2025-05-05T23:59:59.999Z');
+    const firstRewardPoint = 2051;
 
     const now = new Date();
 
@@ -84,35 +79,19 @@ export class GameService {
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
 
     for (const rewardResult of rewardResults) {
-      // 第一个活动奖励
-      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.online900) {
+      // FIXME 活动每次需要更新
+      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.mayDay2025) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: firstRewardPoint,
         });
-        await this.eventRewardsService.setReward(rewardResult.steamId, 'online900');
+        await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '庆祝在线突破900人！\n获得2000勇士积分',
-            en: 'Online players reached 900!\n Get 2000 Battle Points',
+            cn: '五一快乐！',
+            en: 'Happy Workers Day!',
           },
           seasonPoint: firstRewardPoint,
-        });
-      }
-
-      // 第二个活动奖励
-      if (now >= secondStartTime && now <= secondEndTime && !rewardResult.result?.online1000) {
-        await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          seasonPointTotal: secondRewardPoint,
-        });
-        await this.eventRewardsService.setReward(rewardResult.steamId, 'online1000');
-        pointInfoDtos.push({
-          steamId: rewardResult.steamId,
-          title: {
-            cn: '庆祝在线突破1000人！\n获得10000勇士积分',
-            en: 'Online players reached 1000!\n Get 10000 Battle Points',
-          },
-          seasonPoint: secondRewardPoint,
         });
       }
     }
