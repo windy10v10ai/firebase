@@ -110,7 +110,7 @@
       "afdianOrderId": {
         "title": "Afdian Order No",
         "placeholder": "Please enter your Afdian Order No",
-        "help": "Please enter a valid Afdian Order No, format: numbers only, 26-30 digits",
+        "help": "Please enter a valid Afdian Order No, format: numbers only, 24-30 digits",
         "helpLink": "How to find your Afdian Order No?"
       }
     },
