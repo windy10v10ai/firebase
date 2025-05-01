@@ -182,7 +182,7 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
                     required: true,
                     message: props.activeType === 'afdian' ? t('input.afdianOrderId.help') : '',
                     type: 'string',
-                    min: 26,
+                    min: 24,
                     max: 30,
                     pattern: /^[0-9]+$/,
                   },
