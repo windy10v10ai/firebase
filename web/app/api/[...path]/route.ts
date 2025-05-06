@@ -46,7 +46,13 @@ async function handleRequest(request: NextRequest, method: string) {
       body,
     });
 
-    return response;
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      return NextResponse.json(await response.json(), {
+        status: response.status,
+      });
+    }
+    return new NextResponse(await response.text(), { status: response.status });
   } catch (error) {
     console.error('Proxy request failed:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
