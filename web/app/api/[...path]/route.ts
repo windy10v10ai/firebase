@@ -46,15 +46,26 @@ async function handleRequest(request: NextRequest, method: string) {
       body,
     });
 
-    // 获取响应数据
-    const data = await response.json();
+    // 获取响应内容类型
+    const contentType = response.headers.get('content-type');
 
-    // 返回响应
-    return NextResponse.json(data, {
+    // 如果是 JSON 响应，则解析 JSON
+    if (contentType?.includes('application/json')) {
+      const data = await response.json();
+      return NextResponse.json(data, {
+        status: response.status,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // 非 JSON 响应，直接返回原始响应
+    const text = await response.text();
+    return new NextResponse(text, {
       status: response.status,
       headers: {
-        'Content-Type': 'application/json',
-        // 可以添加其他需要的响应头
+        'Content-Type': contentType || 'text/plain',
       },
     });
   } catch (error) {
