@@ -46,28 +46,7 @@ async function handleRequest(request: NextRequest, method: string) {
       body,
     });
 
-    // 获取响应内容类型
-    const contentType = response.headers.get('content-type');
-
-    // 如果是 JSON 响应，则解析 JSON
-    if (contentType?.includes('application/json')) {
-      const data = await response.json();
-      return NextResponse.json(data, {
-        status: response.status,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    }
-
-    // 非 JSON 响应，直接返回原始响应
-    const text = await response.text();
-    return new NextResponse(text, {
-      status: response.status,
-      headers: {
-        'Content-Type': contentType || 'text/plain',
-      },
-    });
+    return response;
   } catch (error) {
     console.error('Proxy request failed:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
