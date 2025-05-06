@@ -25,8 +25,8 @@ export async function PATCH(request: NextRequest) {
 
 async function handleRequest(request: NextRequest, method: string) {
   try {
-    // 构建目标 URL
-    const targetUrl = `${API_DOMAIN}${request.nextUrl.pathname}`;
+    // 构建目标 URL，包含查询参数
+    const targetUrl = `${API_DOMAIN}${request.nextUrl.pathname}${request.nextUrl.search}`;
 
     // 获取请求头
     const headers = new Headers(request.headers);
