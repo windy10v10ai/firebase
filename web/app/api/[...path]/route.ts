@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions/v2';
 import { NextRequest, NextResponse } from 'next/server';
 
 // 内部服务器的基础 URL
@@ -31,13 +32,18 @@ async function handleRequest(request: NextRequest, method: string) {
     // 获取请求头
     const headers = new Headers(request.headers);
 
+    // 设置必要的请求头
+    headers.set('Accept', 'application/json');
+    headers.set('Accept-Encoding', 'gzip, deflate, br');
+    headers.set('Connection', 'keep-alive');
+
     // 获取请求体
     let body;
     if (method !== 'GET' && method !== 'HEAD') {
       body = await request.text();
     }
 
-    console.log(`Proxying ${method} request to: ${targetUrl}`);
+    logger.info(`Proxying ${method} request to: ${targetUrl}`);
 
     // 发送请求到内部服务器
     const response = await fetch(targetUrl, {
@@ -54,7 +60,7 @@ async function handleRequest(request: NextRequest, method: string) {
     }
     return new NextResponse(await response.text(), { status: response.status });
   } catch (error) {
-    console.error('Proxy request failed:', error);
+    logger.error('Proxy request failed:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
