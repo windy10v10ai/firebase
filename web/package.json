@@ -12,6 +12,7 @@
     "antd": "^5.24.6",
     "axios": "^1.8.4",
     "eslint-config-next": "15.0.2",
+    "firebase-functions": "^6.3.2",
     "next": "15.1.2",
     "next-intl": "^4.0.2",
     "react": "18.3.1",
