@@ -31,6 +31,11 @@ async function handleRequest(request: NextRequest, method: string) {
     // 获取请求头
     const headers = new Headers(request.headers);
 
+    // 设置必要的请求头
+    headers.set('Accept', 'application/json');
+    headers.set('Accept-Encoding', 'gzip, deflate, br');
+    headers.set('Connection', 'keep-alive');
+
     // 获取请求体
     let body;
     if (method !== 'GET' && method !== 'HEAD') {
