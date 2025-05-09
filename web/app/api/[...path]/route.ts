@@ -36,6 +36,9 @@ async function handleRequest(request: NextRequest, method: string) {
     headers.set('Accept-Encoding', 'gzip, deflate, br');
     headers.set('Connection', 'keep-alive');
 
+    // 记录请求信息
+    console.log('Request headers:', Object.fromEntries(headers.entries()));
+
     // 获取请求体
     let body;
     if (method !== 'GET' && method !== 'HEAD') {
@@ -51,15 +54,44 @@ async function handleRequest(request: NextRequest, method: string) {
       body,
     });
 
+    // 记录响应信息
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
     const contentType = response.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
-      return NextResponse.json(await response.json(), {
+    console.log('Response content-type:', contentType);
+
+    try {
+      if (contentType?.includes('application/json')) {
+        const jsonData = await response.json();
+        console.log('Response JSON data:', jsonData);
+        return NextResponse.json(jsonData, {
+          status: response.status,
+        });
+      }
+      // 如果不是 JSON 格式，直接返回文本
+      const textData = await response.text();
+      console.log('Response text data:', textData);
+      return new NextResponse(textData, {
         status: response.status,
+        headers: {
+          'content-type': contentType || 'text/plain',
+        },
       });
+    } catch (error) {
+      console.error('Error processing response:', error);
+      console.error('Error stack:', error.stack);
+      return NextResponse.json(
+        {
+          error: 'Error processing response',
+          details: error.message,
+        },
+        { status: 500 },
+      );
     }
-    return new NextResponse(await response.text(), { status: response.status });
   } catch (error) {
     console.error('Proxy request failed:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
