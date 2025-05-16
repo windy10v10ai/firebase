@@ -53,6 +53,6 @@ export class KofiController {
     if (!result) {
       logger.warn('Kofi order active failed', { dto });
     }
-    return { result: true };
+    return { result };
   }
 }

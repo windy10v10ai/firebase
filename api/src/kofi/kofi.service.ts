@@ -12,6 +12,7 @@ import { KofiWebhookDto } from './dto/kofi-webhook.dto';
 import { KofiOrder } from './entities/kofi-order.entity';
 import { KofiUser } from './entities/kofi-user.entity';
 import { KofiType } from './enums/kofi-type.enum';
+import { ActiveKofiOrderDto } from './dto/active-kofi-order.dto';
 
 interface ShopItem {
   code: string;
@@ -89,6 +90,30 @@ export class KofiService {
     }
 
     return this.handleKofiOrder(kofi);
+  }
+
+  async activeOrderManual(dto: ActiveKofiOrderDto) {
+    const steamId = await this.parseSteamId(dto.steamId.toString());
+    if (!steamId) {
+      logger.warn('[Kofi] Steam ID not found', { dto });
+      return false;
+    }
+
+    const kofiOrders = await this.kofiRepository
+      .whereEqualTo('email', dto.email)
+      .whereEqualTo('success', false)
+      .find();
+    if (!kofiOrders) {
+      logger.warn('[Kofi] Kofi order not found', { dto });
+      return false;
+    }
+
+    for (const kofiOrder of kofiOrders) {
+      kofiOrder.steamId = steamId;
+      await this.handleKofiOrder(kofiOrder);
+    }
+
+    return true;
   }
 
   private async handleKofiOrder(kofi: KofiOrder) {
