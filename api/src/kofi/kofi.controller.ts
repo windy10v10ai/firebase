@@ -48,6 +48,11 @@ export class KofiController {
 
   @Post('/order/active')
   async activeOrder(@Body() dto: ActiveKofiOrderDto) {
-    return this.kofiService.activeOrder(dto);
+    logger.info('Kofi order active', { dto });
+    const result = await this.kofiService.activeOrderManual(dto);
+    if (!result) {
+      logger.warn('Kofi order active failed', { dto });
+    }
+    return { result: true };
   }
 }
