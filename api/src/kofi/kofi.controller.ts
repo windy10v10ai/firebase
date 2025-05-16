@@ -5,6 +5,7 @@ import { logger } from 'firebase-functions/v2';
 import { Public } from '../util/auth/public.decorator';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
+import { ActiveKofiOrderDto } from './dto/active-kofi-order.dto';
 import { KofiWebhookDto } from './dto/kofi-webhook.dto';
 import { KofiService } from './kofi.service';
 
@@ -43,5 +44,15 @@ export class KofiController {
     }
 
     return this.kofiService.handleWebhook(webhookData);
+  }
+
+  @Post('/order/active')
+  async activeOrder(@Body() dto: ActiveKofiOrderDto) {
+    logger.info('Kofi order active', { dto });
+    const result = await this.kofiService.activeOrderManual(dto);
+    if (!result) {
+      logger.warn('Kofi order active failed', { dto });
+    }
+    return { result };
   }
 }
