@@ -1,6 +1,6 @@
 'use client';
 import { useTranslations } from 'next-intl';
-import { IdcardOutlined, AccountBookOutlined } from '@ant-design/icons';
+import { IdcardOutlined, AccountBookOutlined, MailOutlined } from '@ant-design/icons';
 import { Form, Input, Button, Spin } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
@@ -11,30 +11,6 @@ import { PlatformType } from '../../types/platform';
 interface ManualActiveProps {
   activeType: PlatformType;
 }
-
-// const successResponse = {
-//   data: {
-//     steamId: 1234567890,
-//     outTradeNo: '12345678901234567890123456',
-//     result: true,
-//     error_code: '',
-//   },
-// };
-
-// const failResponse = {
-//   data: {
-//     steamId: 1234567890,
-//     outTradeNo: '12345678901234567890123456',
-//     result: false,
-//     error_code: 'A01',
-//   },
-// };
-
-// function fetchData() {
-//   // 直接返回 mock 数据（替换真实的 axios 调用）
-//   return Promise.resolve(successResponse);
-//   // return Promise.resolve(failResponse);
-// }
 
 const formItemLayout = {
   labelCol: {
@@ -50,7 +26,8 @@ const formItemLayout = {
 const ManualActive: React.FC<ManualActiveProps> = (props) => {
   const t = useTranslations('manualActive');
   const [steamId, setSteamId] = useState('');
-  const [sorderId, setOrderId] = useState('');
+  // Afdian: 订单号 ko-fi: 邮箱
+  const [platformOrderKey, setPlatformOrderKey] = useState('');
   const [submitButtonEnable, setSubmitButtonEnable] = useState<boolean>(false);
   const [requestCommited, setRequestCommited] = useState<boolean>(false);
   const [activeStatus, setActiveStatus] = useState<boolean>(false);
@@ -83,12 +60,16 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
     var requestUrl = '';
     if (props.activeType === 'afdian') {
       requestUrl = '/api/afdian';
+    } else if (props.activeType === 'kofi') {
+      requestUrl = '/api/kofi';
     }
 
     await axios
       .post(requestUrl, {
         steamId: Number(steamId),
-        outTradeNo: sorderId,
+        ...(props.activeType === 'afdian'
+          ? { outTradeNo: platformOrderKey }
+          : { mailAddress: platformOrderKey }),
       })
       .then((response) => {
         if (response.data.result) {
@@ -124,10 +105,10 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
         {!requestCommited ? (
           <>
             <h1 className="title-primary mb-6">
-              {props.activeType === 'afdian' ? t('afdianTitle') : ''}
+              {props.activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
             </h1>
             <p className="text-content mb-8">
-              {props.activeType === 'afdian' ? t('afdianDescription') : ''}
+              {props.activeType === 'afdian' ? t('afdianDescription') : t('kofiDescription')}
             </p>
 
             <Form form={form} {...formItemLayout} style={{ maxWidth: 600 }} onFinish={onFinish}>
@@ -147,7 +128,11 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
                 extra={
                   <div className="text-sm text-gray-400 mt-2">
                     <a
-                      href="https://afdian.com/p/bfba558c5d9311ed836152540025c377"
+                      href={
+                        props.activeType === 'afdian'
+                          ? 'https://afdian.com/p/bfba558c5d9311ed836152540025c377'
+                          : 'https://ko-fi.com/post/Membership-Z8Z01CDJLU'
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-400 hover:text-blue-300"
@@ -169,26 +154,22 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
                 />
               </Form.Item>
 
-              <Form.Item
-                label={
-                  <label style={{ color: 'white' }}>
-                    {props.activeType === 'afdian' ? t('input.afdianOrderId.title') : ''}
-                  </label>
-                }
-                name={props.activeType === 'afdian' ? 'afdianOrderId' : ''}
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                    message: props.activeType === 'afdian' ? t('input.afdianOrderId.help') : '',
-                    type: 'string',
-                    min: 24,
-                    max: 30,
-                    pattern: /^[0-9]+$/,
-                  },
-                ]}
-                extra={
-                  props.activeType === 'afdian' ? (
+              {props.activeType === 'afdian' ? (
+                <Form.Item
+                  label={<label style={{ color: 'white' }}>{t('input.afdianOrderId.title')}</label>}
+                  name="afdianOrderId"
+                  hasFeedback
+                  rules={[
+                    {
+                      required: true,
+                      message: t('input.afdianOrderId.help'),
+                      type: 'string',
+                      min: 24,
+                      max: 30,
+                      pattern: /^[0-9]+$/,
+                    },
+                  ]}
+                  extra={
                     <div className="text-sm text-gray-400 mt-2">
                       <a
                         href="https://afdian.com/dashboard/order"
@@ -199,22 +180,49 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
                         {t('input.afdianOrderId.helpLink')}
                       </a>
                     </div>
-                  ) : null
-                }
-                className="mb-8"
-              >
-                <Input
-                  value={sorderId}
-                  onChange={(e) => setOrderId(e.target.value)}
-                  placeholder={
-                    props.activeType === 'afdian' ? t('input.afdianOrderId.placeholder') : ''
                   }
-                  prefix={<AccountBookOutlined />}
-                  id={props.activeType === 'afdian' ? 'inputAfdianOrderId' : ''}
-                  allowClear
-                  showCount
-                />
-              </Form.Item>
+                  className="mb-8"
+                >
+                  <Input
+                    value={platformOrderKey}
+                    onChange={(e) => setPlatformOrderKey(e.target.value)}
+                    placeholder={t('input.afdianOrderId.placeholder')}
+                    prefix={<AccountBookOutlined />}
+                    id={'inputAfdianOrderId'}
+                    allowClear
+                    showCount
+                  />
+                </Form.Item>
+              ) : (
+                <Form.Item
+                  label={
+                    <label style={{ color: 'white' }}>{t('input.kofiMailAddress.title')}</label>
+                  }
+                  name="kofiMailAddress"
+                  hasFeedback
+                  rules={[
+                    {
+                      required: true,
+                      message: t('input.kofiMailAddress.help'),
+                      type: 'string',
+                      min: 6,
+                      max: 64,
+                      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    },
+                  ]}
+                  className="mb-8"
+                >
+                  <Input
+                    value={platformOrderKey}
+                    onChange={(e) => setPlatformOrderKey(e.target.value)}
+                    placeholder={t('input.kofiMailAddress.placeholder')}
+                    prefix={<MailOutlined />}
+                    id={'inputKofiMailAddress'}
+                    allowClear
+                    showCount
+                  />
+                </Form.Item>
+              )}
 
               <Form.Item label={null}>
                 <Button

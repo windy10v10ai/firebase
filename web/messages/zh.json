@@ -95,7 +95,9 @@
   },
   "manualActive": {
     "afdianTitle": "爱发电会员激活",
+    "kofiTitle": "ko-fi会员激活",
     "afdianDescription": "已购买但未能自动激活会员的用户，可在本页面中输入 Dota2好友ID 和 爱发电订单号 进行手动激活。",
+    "kofiDescription": "已购买但未能自动激活会员的用户，可在本页面中输入 Dota2好友ID 和 ko-fi订单号 进行手动激活。",
     "input": {
       "steamId": {
         "title": "Dota2好友ID",
@@ -108,6 +110,11 @@
         "placeholder": "请输入您的爱发电订单号",
         "help": "请输入正确的爱发电订单号，格式为24-30位纯数字",
         "helpLink": "如何找到您的爱发电订单号？"
+      },
+      "kofiMailAddress": {
+        "title": "ko-fi邮箱地址",
+        "placeholder": "请输入您的ko-fi邮箱地址",
+        "help": "请输入正确的ko-fi邮箱地址，如：user@example.com"
       }
     },
     "submitButton": {
@@ -120,6 +127,7 @@
       },
       "error": {
         "afdianMessage": "请检查您的Dota2好友ID和爱发电订单号是否正确，如果仍有问题，请稍后再试。",
+        "kofiMessage": "请检查您的Dota2好友ID和ko-fi邮箱地址是否正确，如果仍有问题，请稍后再试。",
         "btnText": "重新输入"
       }
     }
