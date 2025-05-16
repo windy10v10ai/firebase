@@ -25,7 +25,11 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
       if (props.result === false && props.errorMsg) {
         setMessage(props.errorMsg);
       } else {
-        setMessage(props.activeType === 'afdian' ? t('avticeResult.error.afdianMessage') : '');
+        setMessage(
+          props.activeType === 'afdian'
+            ? t('avticeResult.error.afdianMessage')
+            : t('avticeResult.error.kofiMessage'),
+        );
       }
       setBtnText(t('avticeResult.error.btnText'));
     }
