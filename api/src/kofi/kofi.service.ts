@@ -103,7 +103,7 @@ export class KofiService {
       .whereEqualTo('email', dto.email)
       .whereEqualTo('success', false)
       .find();
-    if (!kofiOrders) {
+    if (!kofiOrders || kofiOrders.length === 0) {
       logger.warn('[Kofi] Kofi order not found', { dto });
       return false;
     }

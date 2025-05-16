@@ -99,7 +99,9 @@
   },
   "manualActive": {
     "afdianTitle": "Afdian Membership Activation",
+    "kofiTitle": "Ko-fi Membership Activation",
     "afdianDescription": "For users who have purchased but failed to activate membership automatically, you can manually activate it by entering your Dota2 friend ID and Afdian Order No on this page.",
+    "kofiDescription": "For users who have purchased but failed to activate membership automatically, you can manually activate it by entering your Dota2 friend ID and Ko-fi Email Address on this page.",
     "input": {
       "steamId": {
         "title": "Dota2 Friend ID",
@@ -112,6 +114,11 @@
         "placeholder": "Please enter your Afdian Order No",
         "help": "Please enter a valid Afdian Order No, format: numbers only, 24-30 digits",
         "helpLink": "How to find your Afdian Order No?"
+      },
+      "kofiMailAddress": {
+        "title": "Ko-fi Email Address",
+        "placeholder": "Please enter your Ko-fi Email Address",
+        "help": "Please enter a valid Ko-fi Email Address, format: user@example.com"
       }
     },
     "submitButton": {
@@ -124,6 +131,7 @@
       },
       "error": {
         "afdianMessage": "Please check if your Dota2 friend ID and Afdian Order No are correct. If the problem persists, please try again later.",
+        "kofiMessage": "Please check if your Dota2 friend ID and Ko-fi Email Address are correct. If the problem persists, please try again later.",
         "btnText": "Try Again"
       }
     }
