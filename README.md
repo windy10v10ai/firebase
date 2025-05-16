@@ -82,7 +82,7 @@ npm run start
 # download data from storage
 rm -rf firestore-backup
 mkdir firestore-backup
-gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20250421/*" firestore-backup
+gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20250516/*" firestore-backup
 ```
 
 ### API only

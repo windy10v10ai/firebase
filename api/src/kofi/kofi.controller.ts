@@ -6,6 +6,7 @@ import { Public } from '../util/auth/public.decorator';
 import { SECRET, SecretService } from '../util/secret/secret.service';
 
 import { KofiWebhookDto } from './dto/kofi-webhook.dto';
+import { ActiveKofiOrderDto } from './dto/active-kofi-order.dto';
 import { KofiService } from './kofi.service';
 
 @Public()
@@ -43,5 +44,10 @@ export class KofiController {
     }
 
     return this.kofiService.handleWebhook(webhookData);
+  }
+
+  @Post('/order/active')
+  async activeOrder(@Body() dto: ActiveKofiOrderDto) {
+    return this.kofiService.activeOrder(dto);
   }
 }

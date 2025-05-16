@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
-export class ActiveAfdianOrderDto {
+
+export class ActiveKofiOrderDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  outTradeNo!: string;
+  email!: string;
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
