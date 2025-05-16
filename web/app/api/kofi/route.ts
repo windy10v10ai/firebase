@@ -5,9 +5,9 @@ import { logger } from 'firebase-functions/v2';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { steamId, mailAddress } = body;
+    const { steamId, email } = body;
 
-    logger.log('开始处理ko-fi订单激活请求', { steamId, mailAddress });
+    logger.log('开始处理ko-fi订单激活请求', { steamId, email });
 
     // 调用后端API
     const response = await fetch(kofiActiveUrl, {
@@ -17,14 +17,14 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         steamId: Number(steamId),
-        mailAddress,
+        email,
       }),
     });
 
     const data = await response.json();
     logger.log('ko-fi订单激活请求完成', {
       steamId,
-      mailAddress,
+      email,
       status: response.status,
       data,
     });

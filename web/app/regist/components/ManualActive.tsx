@@ -69,7 +69,7 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
         steamId: Number(steamId),
         ...(props.activeType === 'afdian'
           ? { outTradeNo: platformOrderKey }
-          : { mailAddress: platformOrderKey }),
+          : { email: platformOrderKey }),
       })
       .then((response) => {
         if (response.data.result) {
