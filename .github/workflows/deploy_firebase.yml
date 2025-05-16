@@ -26,7 +26,7 @@ jobs:
           npm run build
 
       - name: Enable Web Frameworks
-        uses: w9jds/firebase-action@v14.0.1
+        uses: w9jds/firebase-action@v14.2.2
         with:
           args: experiments:enable webframeworks
         env:
@@ -34,7 +34,7 @@ jobs:
           PROJECT_ID: windy10v10ai
 
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@v14.0.1
+        uses: w9jds/firebase-action@v14.2.2
         with:
           args: deploy --only functions,hosting
         env:
