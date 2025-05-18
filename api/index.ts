@@ -55,20 +55,6 @@ export const client = onRequest(
   },
 );
 
-export const patreon = onRequest(
-  {
-    region: 'asia-northeast1',
-    minInstances: 0,
-    maxInstances: 1,
-    timeoutSeconds: 60,
-    secrets: [defineSecret(SECRET.PATREON_SECRET)],
-  },
-  async (req, res) => {
-    const regex = '^/api/patreon.*';
-    callServerWithRegex(regex, req, res);
-  },
-);
-
 async function callServerWithRegex(
   regex: string,
   ...args: [req: functions.https.Request, resp: express.Response]
