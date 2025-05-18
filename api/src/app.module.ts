@@ -13,7 +13,6 @@ import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
 import { KofiModule } from './kofi/kofi.module';
 import { MembersModule } from './members/members.module';
-import { PatreonModule } from './patreon/patreon.module';
 import { PlayerModule } from './player/player.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { TaskModule } from './task/task.module';
@@ -41,7 +40,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     GameModule,
     AfdianModule,
     KofiModule,
-    PatreonModule,
     PlayerModule,
     PlayerPropertyModule,
     AdminModule,

@@ -141,7 +141,6 @@ firebase deploy
 ```bash
 # Deploy specific function
 firebase deploy --only functions:client
-firebase deploy --only functions:patreon
 firebase deploy --only functions:admin
 firebase deploy --only functions:scheduledOrderCheck
 # Deploy all function
