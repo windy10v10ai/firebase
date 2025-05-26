@@ -68,10 +68,9 @@ export class GameService {
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    // 4/30-5/05 五一活动
-    const firstStartTime = new Date('2025-04-30T00:00:00.000Z');
-    const firstEndTime = new Date('2025-05-05T23:59:59.999Z');
-    const firstRewardPoint = 2051;
+    const firstStartTime = new Date('2025-05-26T00:00:00.000Z');
+    const firstEndTime = new Date('2025-06-01T23:59:59.999Z');
+    const firstRewardPoint = 2000;
 
     const now = new Date();
 
@@ -80,7 +79,7 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.mayDay2025) {
+      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.online1200) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: firstRewardPoint,
         });
@@ -88,8 +87,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '五一快乐！',
-            en: 'Happy Workers Day!',
+            cn: '庆祝在线突破1200人！\n获得2000勇士积分',
+            en: 'Online players reached 1200!\n Get 2000 Battle Points',
           },
           seasonPoint: firstRewardPoint,
         });
