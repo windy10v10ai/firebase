@@ -88,7 +88,7 @@ export class GameService {
           steamId: rewardResult.steamId,
           title: {
             cn: '庆祝订阅突破10万！\n获得10000勇士积分',
-            en: 'Subscription reached 100k!\n Get 10000 Battle Points',
+            en: 'Subscription reached 100k!\n Get 10,000 Battle Points',
           },
           seasonPoint: firstRewardPoint,
         });
