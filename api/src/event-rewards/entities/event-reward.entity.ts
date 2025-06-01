@@ -18,4 +18,5 @@ export class EventReward {
   online1000?: boolean;
   mayDay2025?: boolean;
   online1200?: boolean;
+  subscription100k?: boolean;
 }
