@@ -35,12 +35,12 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        subscription100k: true,
+        point20250928: true,
       });
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.subscription100k = true;
+      eventReward.point20250928 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
