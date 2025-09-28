@@ -87,7 +87,7 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '祝大家欢度国庆!',
+            cn: '祝大家国庆快乐!',
             en: 'Get 5000 battle points!',
           },
           seasonPoint: firstRewardPoint,
