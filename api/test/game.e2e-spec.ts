@@ -609,6 +609,28 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
+  describe('Tenvten API Key', () => {
+    it('游戏结算 使用 Tenvten API Key 应该返回 201', async () => {
+      const headers = {
+        'x-api-key': 'tenvten-apikey',
+      };
+      const result = await request(app.getHttpServer())
+        .post(gameEndUrl)
+        .send({
+          matchId: '8000000001',
+          version: 'v4.05',
+          winnerTeamId: 2,
+          players: [],
+          gameTimeMsec: 900000,
+          gameOptions: {},
+          difficulty: 5,
+          steamId: 0,
+        })
+        .set(headers);
+      expect(result.status).toEqual(201);
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
