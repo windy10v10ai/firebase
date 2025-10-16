@@ -27,8 +27,9 @@ export class AuthGuard implements CanActivate {
 
     const serverApiKey = this.sercretService.getSecretValue(SECRET.SERVER_APIKEY);
     const testServerApiKey = this.sercretService.getSecretValue(SECRET.SERVER_APIKEY_TEST);
+    const tenvtenServerApiKey = this.sercretService.getSecretValue(SECRET.SERVER_APIKEY_TENVTEN);
 
-    if (apiKey === serverApiKey || apiKey === testServerApiKey) {
+    if (apiKey === serverApiKey || apiKey === testServerApiKey || apiKey === tenvtenServerApiKey) {
       return true;
     }
 
