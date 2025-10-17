@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
-import { SECRET, SecretService } from '../util/secret/secret.service';
+import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
@@ -44,13 +44,20 @@ export class AnalyticsService {
     await this.sendEvent(steamId.toString(), event);
   }
 
-  async gameStart(steamIds: number[], matchId: number, countryCode: string, isLocal: boolean) {
+  async gameStart(
+    steamIds: number[],
+    matchId: number,
+    countryCode: string,
+    isLocal: boolean,
+    serverType: SERVER_TYPE,
+  ) {
     for (const steamId of steamIds) {
       const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
         steam_id: steamId,
         match_id: matchId,
         country: countryCode,
         is_local: isLocal,
+        server_type: serverType,
       });
 
       const userProperties: UserProperties = {
@@ -121,7 +128,7 @@ export class AnalyticsService {
   }
 
   // ------------------------ 通过game end API调用 ------------------------
-  async gameEndPlayerBot(gameEnd: GameEndMatchDto) {
+  async gameEndPlayerBot(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
     const playerCount = gameEnd.players.filter((player) => player.steamId > 0).length;
     for (const player of gameEnd.players) {
       const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
@@ -143,13 +150,14 @@ export class AnalyticsService {
         points: player.battlePoints,
         facet_id: player.facetId,
         is_disconnect: player.isDisconnected,
+        server_type: serverType,
       });
 
       await this.sendEvent(player.steamId.toString(), event);
     }
   }
 
-  async gameEndMatch(gameEnd: GameEndMatchDto) {
+  async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
     const gameOptions = gameEnd.gameOptions;
     const gameOptionsObject = {
       mr: gameOptions.multiplierRadiant,
@@ -166,6 +174,7 @@ export class AnalyticsService {
       difficulty: gameEnd.difficulty,
       game_options: gameOptionsJson,
       winner_team_id: gameEnd.winnerTeamId,
+      server_type: serverType,
     };
 
     gameEnd.players.forEach((player, i) => {
