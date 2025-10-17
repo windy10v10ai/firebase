@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
 export enum SERVER_TYPE {
-  PRODUCTION = 'PRODUCTION',
+  WINDY = 'WINDY',
   TEST = 'TEST',
   TENVTEN = 'TENVTEN',
   LOCAL = 'LOCAL',
@@ -35,9 +35,9 @@ export class SecretService {
       return SERVER_TYPE.LOCAL;
     }
 
-    const productionKey = this.getSecretValue(SECRET.SERVER_APIKEY);
-    if (apiKey === productionKey) {
-      return SERVER_TYPE.PRODUCTION;
+    const windyKey = this.getSecretValue(SECRET.SERVER_APIKEY);
+    if (apiKey === windyKey) {
+      return SERVER_TYPE.WINDY;
     }
     const testKey = this.getSecretValue(SECRET.SERVER_APIKEY_TEST);
     if (apiKey === testKey) {

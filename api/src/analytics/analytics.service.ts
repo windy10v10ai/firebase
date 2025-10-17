@@ -80,21 +80,21 @@ export class AnalyticsService {
     });
   }
 
-  async lotteryPickAbility(pickDto: PickDto) {
-    const event = await this.buildEvent('lottery_pick_ability', pickDto.steamId, pickDto.matchId, {
-      steam_id: pickDto.steamId,
-      match_id: pickDto.matchId,
-      ability_name: pickDto.name,
-      type: pickDto.type,
-      level: pickDto.level,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-    });
+  // async lotteryPickAbility(pickDto: PickDto) {
+  //   const event = await this.buildEvent('lottery_pick_ability', pickDto.steamId, pickDto.matchId, {
+  //     steam_id: pickDto.steamId,
+  //     match_id: pickDto.matchId,
+  //     ability_name: pickDto.name,
+  //     type: pickDto.type,
+  //     level: pickDto.level,
+  //     difficulty: pickDto.difficulty,
+  //     version: pickDto.version,
+  //   });
 
-    await this.sendEvent(pickDto.steamId.toString(), event);
-  }
+  //   await this.sendEvent(pickDto.steamId.toString(), event);
+  // }
 
-  async gameEndPickAbility(pickDto: PickDto) {
+  async gameEndPickAbility(pickDto: PickDto, serverType: SERVER_TYPE) {
     const event = await this.buildEvent('game_end_pick_ability', pickDto.steamId, pickDto.matchId, {
       steam_id: pickDto.steamId,
       match_id: pickDto.matchId,
@@ -104,17 +104,19 @@ export class AnalyticsService {
       difficulty: pickDto.difficulty,
       version: pickDto.version,
       win_metrics: pickDto.isWin,
+      server_type: serverType,
     });
 
     await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
-  async trackPlayerLanguage(dto: PlayerLanguageListDto) {
+  async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
     for (const player of dto.players) {
       const event = await this.buildEvent('player_language', player.steamId, dto.matchId, {
         steam_id: player.steamId,
         language: player.language,
         version: dto.version,
+        server_type: serverType,
       });
 
       const userProperties = {
