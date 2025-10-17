@@ -21,6 +21,7 @@ import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { Public } from '../util/auth/public.decorator';
+import { SecretService } from '../util/secret/secret.service';
 
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { GameStart } from './dto/game-start.response';
@@ -36,6 +37,7 @@ export class GameController {
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
+    private readonly secretService: SecretService,
   ) {}
 
   @Public()
@@ -69,7 +71,8 @@ export class GameController {
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
     const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
-    await this.analyticsService.gameStart(steamIds, matchId, countryCode, isLocal);
+    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
+    await this.analyticsService.gameStart(steamIds, matchId, countryCode, isLocal, serverType);
 
     // ----------------- 以下为返回数据 -----------------
     // 获取玩家信息
@@ -85,7 +88,7 @@ export class GameController {
 
   @ApiBody({ type: GameEndDto })
   @Post('end')
-  async end(@Body() gameEnd: GameEndDto): Promise<string> {
+  async end(@Body() gameEnd: GameEndDto, @Headers('x-api-key') apiKey: string): Promise<string> {
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {
@@ -103,8 +106,9 @@ export class GameController {
       }
     }
 
-    await this.analyticsService.gameEndMatch(gameEnd);
-    await this.analyticsService.gameEndPlayerBot(gameEnd);
+    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
+    await this.analyticsService.gameEndMatch(gameEnd, serverType);
+    await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
     return this.gameService.getOK();
   }
 
