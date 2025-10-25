@@ -26,7 +26,14 @@ export class PlayerController {
     return this.playerRankingService.getRanking();
   }
 
+  @Get(':id/setting')
+  @ApiOperation({ summary: 'Get player setting' })
+  async getPlayerSetting(@Param('id') id: string): Promise<PlayerSetting> {
+    return await this.playerSettingService.getPlayerSettingOrGenerateDefault(id);
+  }
+
   @Put(':id/setting')
+  @ApiOperation({ summary: 'Update player setting' })
   async updatePlayerSetting(
     @Param('id') id: string,
     @Body() updatePlayerSettingDto: UpdatePlayerSettingDto,
