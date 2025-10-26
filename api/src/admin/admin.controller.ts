@@ -44,4 +44,9 @@ export class AdminController {
   activeRecentOrder() {
     return this.afdianService.activeRecentOrder(100);
   }
+
+  @Post('/migration/player-setting-passive-ability-key2')
+  async migratePlayerSettingPassiveAbilityKey2() {
+    return await this.adminService.migratePlayerSettingPassiveAbilityKey2();
+  }
 }

@@ -15,11 +15,15 @@ export class PlayerSetting {
   activeAbilityKey: string;
   @ApiProperty()
   passiveAbilityKey: string;
+  @ApiProperty()
+  passiveAbilityKey2: string;
   // 快捷施法
   @ApiProperty()
   activeAbilityQuickCast: boolean;
   @ApiProperty()
   passiveAbilityQuickCast: boolean;
+  @ApiProperty()
+  passiveAbilityQuickCast2: boolean;
 
   // 为未来其他设置预留
 
