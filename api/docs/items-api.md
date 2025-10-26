@@ -76,8 +76,8 @@ POST /analytics/game-end/item-builds
 发送到Google Analytics时，物品类型会根据槽位自动映射：
 
 - `slot1-slot6` → `type: "normal"`
-- `neutralActiveSlot` → `type: "NEUTRAL_ACTIVE"`
-- `neutralPassiveSlot` → `type: "NEUTRAL_PASSIVE"`
+- `neutralActiveSlot` → `type: "neutral_active"`
+- `neutralPassiveSlot` → `type: "neutral_passive"`
 
 ## 数据处理
 

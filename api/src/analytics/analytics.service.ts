@@ -129,8 +129,8 @@ export class AnalyticsService {
         { name: playerItems.slot4, type: 'normal' },
         { name: playerItems.slot5, type: 'normal' },
         { name: playerItems.slot6, type: 'normal' },
-        { name: playerItems.neutralActiveSlot, type: 'NEUTRAL_ACTIVE' },
-        { name: playerItems.neutralPassiveSlot, type: 'NEUTRAL_PASSIVE' },
+        { name: playerItems.neutralActiveSlot, type: 'neutral_active' },
+        { name: playerItems.neutralPassiveSlot, type: 'neutral_passive' },
       ];
 
       // 逐个发送物品事件到GA
