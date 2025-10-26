@@ -1,11 +1,11 @@
 {
-    "recommendations": [
-        "dbaeumer.vscode-eslint",
-        "github.vscode-pull-request-github",
-        "eamodio.gitlens",
-        "orta.vscode-jest",
-        "github.vscode-github-actions",
-        "gruntfuggly.todo-tree",
-        "esbenp.prettier-vscode"
-    ]
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "github.vscode-pull-request-github",
+    "eamodio.gitlens",
+    "orta.vscode-jest",
+    "github.vscode-github-actions",
+    "gruntfuggly.todo-tree",
+    "esbenp.prettier-vscode"
+  ]
 }
