@@ -18,10 +18,10 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
-import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
-import { PlayerPropertyService } from '../player-property/player-property.service';
 import { PlayerDto } from '../player/dto/player.dto';
 import { PlayerService } from '../player/player.service';
+import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
+import { PlayerPropertyService } from '../player-property/player-property.service';
 import { Public } from '../util/auth/public.decorator';
 import { SecretService } from '../util/secret/secret.service';
 

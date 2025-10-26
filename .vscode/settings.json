@@ -9,19 +9,5 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "githubPullRequests.ignoredPullRequestBranches": ["develop"],
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-  "eslint.workingDirectories": ["api", "web"],
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
-    }
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
-    }
-  }
+  "eslint.workingDirectories": ["api", "web"]
 }
