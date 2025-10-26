@@ -84,7 +84,7 @@ POST /analytics/game-end/item-builds
 1. API接收包含多个物品槽位的请求
 2. 系统会遍历所有非空的物品槽位
 3. 每个物品会单独发送一个事件到Google Analytics
-4. 事件名称: `game_end_pick_item`
+4. 事件名称: `game_end_item_build`
 
 ## 响应
 

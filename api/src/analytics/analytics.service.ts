@@ -138,7 +138,7 @@ export class AnalyticsService {
         if (slot.name) {
           // 只发送非空的物品槽位
           const event = await this.buildEvent(
-            'game_end_pick_item',
+            'game_end_item_build',
             playerItems.steamId,
             dto.matchId,
             {
