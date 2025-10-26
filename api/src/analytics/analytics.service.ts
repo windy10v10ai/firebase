@@ -80,20 +80,6 @@ export class AnalyticsService {
     });
   }
 
-  // async lotteryPickAbility(pickDto: PickDto) {
-  //   const event = await this.buildEvent('lottery_pick_ability', pickDto.steamId, pickDto.matchId, {
-  //     steam_id: pickDto.steamId,
-  //     match_id: pickDto.matchId,
-  //     ability_name: pickDto.name,
-  //     type: pickDto.type,
-  //     level: pickDto.level,
-  //     difficulty: pickDto.difficulty,
-  //     version: pickDto.version,
-  //   });
-
-  //   await this.sendEvent(pickDto.steamId.toString(), event);
-  // }
-
   async gameEndPickAbility(pickDto: PickDto, serverType: SERVER_TYPE) {
     const event = await this.buildEvent('game_end_pick_ability', pickDto.steamId, pickDto.matchId, {
       steam_id: pickDto.steamId,

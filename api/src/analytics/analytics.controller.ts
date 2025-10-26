@@ -15,12 +15,6 @@ export class AnalyticsController {
     private readonly secretService: SecretService,
   ) {}
 
-  // FIXME 确认统计没有问题后移除此接口
-  // @Post('/lottery/pick/ability')
-  // async lotteryPickAbility(@Body() body: PickDto) {
-  //   await this.analyticsService.lotteryPickAbility(body);
-  // }
-
   @Post('/game-end/pick/ability')
   async gameEndLotteryPickAbility(
     @Body() body: PickDto,
