@@ -27,6 +27,9 @@ export class PlayerSettingService {
     if (updatePlayerSettingDto.passiveAbilityQuickCast !== undefined) {
       setting.passiveAbilityQuickCast = updatePlayerSettingDto.passiveAbilityQuickCast;
     }
+    if (updatePlayerSettingDto.passiveAbilityQuickCast2 !== undefined) {
+      setting.passiveAbilityQuickCast2 = updatePlayerSettingDto.passiveAbilityQuickCast2;
+    }
     if (setting.isRememberAbilityKey) {
       if (updatePlayerSettingDto.activeAbilityKey !== undefined) {
         setting.activeAbilityKey = updatePlayerSettingDto.activeAbilityKey;
@@ -34,9 +37,13 @@ export class PlayerSettingService {
       if (updatePlayerSettingDto.passiveAbilityKey !== undefined) {
         setting.passiveAbilityKey = updatePlayerSettingDto.passiveAbilityKey;
       }
+      if (updatePlayerSettingDto.passiveAbilityKey2 !== undefined) {
+        setting.passiveAbilityKey2 = updatePlayerSettingDto.passiveAbilityKey2;
+      }
     } else {
       setting.activeAbilityKey = '';
       setting.passiveAbilityKey = '';
+      setting.passiveAbilityKey2 = '';
     }
     setting.updatedAt = new Date();
     return this.playerSettingRepository.update(setting);
@@ -57,8 +64,10 @@ export class PlayerSettingService {
       isRememberAbilityKey: false,
       activeAbilityKey: '',
       passiveAbilityKey: '',
+      passiveAbilityKey2: '',
       activeAbilityQuickCast: false,
       passiveAbilityQuickCast: false,
+      passiveAbilityQuickCast2: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

@@ -20,8 +20,10 @@ describe('PlayerSettingController (e2e)', () => {
         isRememberAbilityKey: false,
         activeAbilityKey: '',
         passiveAbilityKey: '',
+        passiveAbilityKey2: '',
         activeAbilityQuickCast: false,
         passiveAbilityQuickCast: false,
+        passiveAbilityQuickCast2: false,
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
       });
@@ -33,8 +35,10 @@ describe('PlayerSettingController (e2e)', () => {
         isRememberAbilityKey: true,
         activeAbilityKey: 'Q',
         passiveAbilityKey: 'E',
+        passiveAbilityKey2: 'R',
         activeAbilityQuickCast: true,
         passiveAbilityQuickCast: true,
+        passiveAbilityQuickCast2: false,
       };
 
       const response = await put(app, `${playerUrl}/${testPlayer}/setting`, updateData);
@@ -52,8 +56,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.isRememberAbilityKey).toEqual(true);
       expect(playerSetting.activeAbilityKey).toEqual('Q');
       expect(playerSetting.passiveAbilityKey).toEqual('E');
+      expect(playerSetting.passiveAbilityKey2).toEqual('R');
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast).toEqual(true);
+      expect(playerSetting.passiveAbilityQuickCast2).toEqual(false);
     });
 
     it('更新玩家设置 - 默认不记住快捷键但保留快速施法', async () => {
@@ -62,8 +68,10 @@ describe('PlayerSettingController (e2e)', () => {
       const response = await put(app, `${playerUrl}/${testPlayer}/setting`, {
         activeAbilityKey: 'Q',
         passiveAbilityKey: 'E',
+        passiveAbilityKey2: 'R',
         activeAbilityQuickCast: true,
         passiveAbilityQuickCast: false,
+        passiveAbilityQuickCast2: true,
       });
 
       expect(response.status).toEqual(200);
@@ -73,8 +81,10 @@ describe('PlayerSettingController (e2e)', () => {
           isRememberAbilityKey: false,
           activeAbilityKey: '',
           passiveAbilityKey: '',
+          passiveAbilityKey2: '',
           activeAbilityQuickCast: true,
           passiveAbilityQuickCast: false,
+          passiveAbilityQuickCast2: true,
         }),
       );
 
@@ -84,8 +94,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.isRememberAbilityKey).toEqual(false);
       expect(playerSetting.activeAbilityKey).toEqual('');
       expect(playerSetting.passiveAbilityKey).toEqual('');
+      expect(playerSetting.passiveAbilityKey2).toEqual('');
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast).toEqual(false);
+      expect(playerSetting.passiveAbilityQuickCast2).toEqual(true);
     });
 
     it('更新玩家设置 - 记忆快捷键后，再取消记忆快捷键但保留快速施法', async () => {
@@ -95,8 +107,10 @@ describe('PlayerSettingController (e2e)', () => {
         isRememberAbilityKey: true,
         activeAbilityKey: 'Q',
         passiveAbilityKey: 'E',
+        passiveAbilityKey2: 'R',
         activeAbilityQuickCast: true,
         passiveAbilityQuickCast: false,
+        passiveAbilityQuickCast2: true,
       });
 
       // 设置不记住快捷键
@@ -112,8 +126,10 @@ describe('PlayerSettingController (e2e)', () => {
           isRememberAbilityKey: false,
           activeAbilityKey: '',
           passiveAbilityKey: '',
+          passiveAbilityKey2: '',
           activeAbilityQuickCast: true,
           passiveAbilityQuickCast: false,
+          passiveAbilityQuickCast2: true,
         }),
       );
 
@@ -123,8 +139,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.isRememberAbilityKey).toEqual(false);
       expect(playerSetting.activeAbilityKey).toEqual('');
       expect(playerSetting.passiveAbilityKey).toEqual('');
+      expect(playerSetting.passiveAbilityKey2).toEqual('');
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast).toEqual(false);
+      expect(playerSetting.passiveAbilityQuickCast2).toEqual(true);
     });
   });
 
