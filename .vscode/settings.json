@@ -1,11 +1,13 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always"
+    "source.fixAll.eslint": "explicit"
   },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "git.autofetch": true,
   "debug.javascript.autoAttachFilter": "smart",
   "typescript.preferences.importModuleSpecifier": "relative",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "githubPullRequests.ignoredPullRequestBranches": ["develop"]
+  "githubPullRequests.ignoredPullRequestBranches": ["develop"],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.workingDirectories": ["api", "web"]
 }

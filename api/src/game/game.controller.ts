@@ -9,8 +9,10 @@ import {
   Post,
   Put,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
@@ -47,8 +49,9 @@ export class GameController {
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
     @Headers('x-country-code') countryCode: string,
-    @Headers('x-api-key') apiKey: string,
+    @Req() req: Request,
   ): Promise<GameStart> {
+    const apiKey = req.headers['x-api-key'] as string;
     steamIds = this.gameService.validateSteamIds(steamIds);
 
     const pointInfo: PointInfoDto[] = [];
@@ -88,7 +91,8 @@ export class GameController {
 
   @ApiBody({ type: GameEndDto })
   @Post('end')
-  async end(@Body() gameEnd: GameEndDto, @Headers('x-api-key') apiKey: string): Promise<string> {
+  async end(@Body() gameEnd: GameEndDto, @Req() req: Request): Promise<string> {
+    const apiKey = req.headers['x-api-key'] as string;
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {

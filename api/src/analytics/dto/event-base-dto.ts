@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class EventBaseDto {
   @ApiProperty()
@@ -11,9 +11,10 @@ export class EventBaseDto {
   @ApiProperty({ default: 0 })
   @IsNotEmpty()
   difficulty: number;
-  @ApiProperty()
-  @IsNotEmpty()
-  steamId: number;
   @ApiPropertyOptional()
+  @IsOptional()
+  steamId?: number;
+  @ApiPropertyOptional()
+  @IsOptional()
   isWin?: boolean;
 }
