@@ -8,10 +8,10 @@ import { PlayerDto } from '../player/dto/player.dto';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
-import { SECRET, SecretService, SERVER_TYPE } from '../util/secret/secret.service';
+import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
-import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { GA4ConfigDto } from './dto/ga4-config.dto';
+import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { PointInfoDto } from './dto/point-info.dto';
 @Injectable()
 export class GameService {
@@ -180,10 +180,14 @@ export class GameService {
    */
   getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
     // WINDY、TEST、TENVTEN服务器返回GA4配置信息
-    if (serverType === SERVER_TYPE.WINDY || serverType === SERVER_TYPE.TEST || serverType === SERVER_TYPE.TENVTEN) {
+    if (
+      serverType === SERVER_TYPE.WINDY ||
+      serverType === SERVER_TYPE.TEST ||
+      serverType === SERVER_TYPE.TENVTEN
+    ) {
       const measurementId = process.env.GA_MEASUREMENT_ID;
       const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
-      
+
       if (measurementId && apiSecret) {
         return {
           measurementId,
@@ -191,7 +195,7 @@ export class GameService {
         };
       }
     }
-    
+
     return undefined;
   }
 }
