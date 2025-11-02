@@ -8,7 +8,9 @@ import { PlayerDto } from '../player/dto/player.dto';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
+import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
+import { GA4ConfigDto } from './dto/ga4-config.dto';
 import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { PointInfoDto } from './dto/point-info.dto';
 @Injectable()
@@ -20,6 +22,7 @@ export class GameService {
     private readonly eventRewardsService: EventRewardsService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly playerSettingService: PlayerSettingService,
+    private readonly secretService: SecretService,
   ) {}
 
   getOK(): string {
@@ -168,5 +171,31 @@ export class GameService {
       player.useableLevel = player.totalLevel - usedLevel;
     }
     return players;
+  }
+
+  /**
+   * 获取GA4配置信息
+   * @param serverType 服务器类型
+   * @returns GA4配置信息，如果不符合条件则返回undefined
+   */
+  getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
+    // WINDY、TEST、TENVTEN服务器返回GA4配置信息
+    if (
+      serverType === SERVER_TYPE.WINDY ||
+      serverType === SERVER_TYPE.TEST ||
+      serverType === SERVER_TYPE.TENVTEN
+    ) {
+      const measurementId = process.env.GA_MEASUREMENT_ID;
+      const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
+
+      if (measurementId && apiSecret) {
+        return {
+          measurementId,
+          apiSecret,
+        };
+      }
+    }
+
+    return undefined;
   }
 }
