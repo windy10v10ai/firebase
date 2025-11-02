@@ -82,11 +82,20 @@ export class GameController {
     const steamIdsStr = steamIds.map((id) => id.toString());
     const players = await this.gameService.findPlayerDtoBySteamIds(steamIdsStr);
 
-    return {
+    // 构建响应对象
+    const response: GameStart = {
       members: members.map((m) => new MemberDto(m)),
       players,
       pointInfo,
     };
+
+    // 获取GA4配置信息
+    const ga4Config = this.gameService.getGA4Config(serverType);
+    if (ga4Config) {
+      response.ga4Config = ga4Config;
+    }
+
+    return response;
   }
 
   @ApiBody({ type: GameEndDto })
