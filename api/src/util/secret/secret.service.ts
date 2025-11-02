@@ -31,21 +31,21 @@ export class SecretService {
   }
 
   getServerTypeByApiKey(apiKey: string): SERVER_TYPE {
-    if (apiKey === 'Invalid_NotOnDedicatedServer') {
-      return SERVER_TYPE.LOCAL;
-    }
-
     const windyKey = this.getSecretValue(SECRET.SERVER_APIKEY);
     if (apiKey === windyKey) {
       return SERVER_TYPE.WINDY;
+    }
+    const tenvtenKey = this.getSecretValue(SECRET.SERVER_APIKEY_TENVTEN);
+    if (apiKey === tenvtenKey) {
+      return SERVER_TYPE.TENVTEN;
     }
     const testKey = this.getSecretValue(SECRET.SERVER_APIKEY_TEST);
     if (apiKey === testKey) {
       return SERVER_TYPE.TEST;
     }
-    const tenvtenKey = this.getSecretValue(SECRET.SERVER_APIKEY_TENVTEN);
-    if (apiKey === tenvtenKey) {
-      return SERVER_TYPE.TENVTEN;
+
+    if (apiKey === 'Invalid_NotOnDedicatedServer') {
+      return SERVER_TYPE.LOCAL;
     }
 
     return SERVER_TYPE.UNKNOWN;
