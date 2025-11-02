@@ -88,6 +88,7 @@ describe('GameService', () => {
       expect(result).toEqual({
         measurementId: mockMeasurementId,
         apiSecret: mockApiSecret,
+        serverType: SERVER_TYPE.WINDY,
       });
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
@@ -98,6 +99,7 @@ describe('GameService', () => {
       expect(result).toEqual({
         measurementId: mockMeasurementId,
         apiSecret: mockApiSecret,
+        serverType: SERVER_TYPE.TEST,
       });
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
@@ -108,6 +110,7 @@ describe('GameService', () => {
       expect(result).toEqual({
         measurementId: mockMeasurementId,
         apiSecret: mockApiSecret,
+        serverType: SERVER_TYPE.TENVTEN,
       });
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
