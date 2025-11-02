@@ -192,6 +192,7 @@ export class GameService {
         return {
           measurementId,
           apiSecret,
+          serverType,
         };
       }
     }
