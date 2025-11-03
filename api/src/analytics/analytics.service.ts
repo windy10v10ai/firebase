@@ -174,7 +174,7 @@ export class AnalyticsService {
 
       const userProperties: UserProperties = {};
 
-      if (player.steamId > 0) {
+      if (player.steamId > 0 && gameEnd.countryCode) {
         userProperties.country = {
           value: gameEnd.countryCode,
         };

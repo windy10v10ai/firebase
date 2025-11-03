@@ -54,5 +54,5 @@ export class GameEndDto extends EventBaseDto {
   @IsNotEmpty()
   players: GameEndPlayerDto[];
   @ApiProperty()
-  countryCode: string;
+  countryCode?: string;
 }
