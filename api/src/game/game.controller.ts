@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseArrayPipe,
   ParseIntPipe,
@@ -48,7 +47,6 @@ export class GameController {
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
-    @Headers('x-country-code') countryCode: string,
     @Req() req: Request,
   ): Promise<GameStart> {
     const apiKey = req.headers['x-api-key'] as string;
@@ -75,7 +73,7 @@ export class GameController {
     // 统计数据发送至GA4
     const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    await this.analyticsService.gameStart(steamIds, matchId, countryCode, isLocal, serverType);
+    await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType);
 
     // ----------------- 以下为返回数据 -----------------
     // 获取玩家信息

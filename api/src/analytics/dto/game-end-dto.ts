@@ -53,4 +53,6 @@ export class GameEndDto extends EventBaseDto {
   @ApiProperty({ type: [GameEndPlayerDto], maxLength: 20 })
   @IsNotEmpty()
   players: GameEndPlayerDto[];
+  @ApiProperty()
+  countryCode?: string;
 }
