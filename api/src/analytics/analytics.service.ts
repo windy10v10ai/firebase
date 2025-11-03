@@ -6,7 +6,7 @@ import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.servic
 import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
-import { PickDto, PickListDto } from './dto/pick-ability-dto';
+import { PickListDto } from './dto/pick-ability-dto';
 import { ItemListDto } from './dto/pick-item-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
@@ -45,29 +45,16 @@ export class AnalyticsService {
     await this.sendEvent(steamId.toString(), event);
   }
 
-  async gameStart(
-    steamIds: number[],
-    matchId: number,
-    countryCode: string,
-    isLocal: boolean,
-    serverType: SERVER_TYPE,
-  ) {
+  async gameStart(steamIds: number[], matchId: number, isLocal: boolean, serverType: SERVER_TYPE) {
     for (const steamId of steamIds) {
       const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
         steam_id: steamId,
         match_id: matchId,
-        country: countryCode,
         is_local: isLocal,
         server_type: serverType,
       });
 
-      const userProperties: UserProperties = {
-        country: {
-          value: countryCode,
-        },
-      };
-
-      await this.sendEvent(steamId.toString(), event, userProperties);
+      await this.sendEvent(steamId.toString(), event);
     }
   }
 
@@ -79,26 +66,6 @@ export class AnalyticsService {
         use_member_point: dto.useMemberPoint,
       },
     });
-  }
-
-  // FIXME 客户端更新后移除此接口，使用gameEndPickAbilities代替
-  async gameEndPickAbility(
-    pickDto: PickDto & { matchId: string; version: string; difficulty: number; isWin?: boolean },
-    serverType: SERVER_TYPE,
-  ) {
-    const event = await this.buildEvent('game_end_pick_ability', pickDto.steamId, pickDto.matchId, {
-      steam_id: pickDto.steamId,
-      match_id: pickDto.matchId,
-      ability_name: pickDto.name,
-      type: pickDto.type,
-      level: pickDto.level,
-      difficulty: pickDto.difficulty,
-      version: pickDto.version,
-      win_metrics: pickDto.isWin,
-      server_type: serverType,
-    });
-
-    await this.sendEvent(pickDto.steamId.toString(), event);
   }
 
   async gameEndPickAbilities(dto: PickListDto, serverType: SERVER_TYPE) {
@@ -202,9 +169,18 @@ export class AnalyticsService {
         facet_id: player.facetId,
         is_disconnect: player.isDisconnected,
         server_type: serverType,
+        country: gameEnd.countryCode,
       });
 
-      await this.sendEvent(player.steamId.toString(), event);
+      const userProperties: UserProperties = {};
+
+      if (player.steamId > 0) {
+        userProperties.country = {
+          value: gameEnd.countryCode,
+        };
+      }
+
+      await this.sendEvent(player.steamId.toString(), event, userProperties);
     }
   }
 

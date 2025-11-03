@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { SecretService } from '../util/secret/secret.service';
 
 import { AnalyticsService } from './analytics.service';
-import { PickDto, PickListDto } from './dto/pick-ability-dto';
+import { PickListDto } from './dto/pick-ability-dto';
 import { ItemListDto } from './dto/pick-item-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
@@ -16,18 +16,6 @@ export class AnalyticsController {
     private readonly analyticsService: AnalyticsService,
     private readonly secretService: SecretService,
   ) {}
-
-  // FIXME 客户端更新后移除此接口，使用gameEndPickAbilities代替
-  @Post('/game-end/pick/ability')
-  async gameEndLotteryPickAbility(
-    @Body()
-    body: PickDto & { matchId: string; version: string; difficulty: number; isWin?: boolean },
-    @Req() req: Request,
-  ): Promise<void> {
-    const apiKey = req.headers['x-api-key'] as string;
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    await this.analyticsService.gameEndPickAbility(body, serverType);
-  }
 
   @Post('/game-end/pick/abilities')
   async gameEndLotteryPickAbilities(@Body() body: PickListDto, @Req() req: Request): Promise<void> {
