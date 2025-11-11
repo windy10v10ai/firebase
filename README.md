@@ -66,23 +66,27 @@ firebase experiments:enable webframeworks
 
 ### Set GCP
 
-Install gCloud SDK: https://cloud.google.com/sdk/docs/install
+```bash
+# Setup gcloud authentication (need to do first time)
+gcloud auth login
+gcloud config set project windy10v10ai
+```
 
 ## Running the app
 
-### Start Firebase Emulator & API & Web
-
-```bash
-npm run start
-```
-
-### Start Firebase Emulator with data
+### Download DB data
 
 ```bash
 # download data from storage
 rm -rf firestore-backup
 mkdir firestore-backup
 gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20250928/*" firestore-backup
+```
+
+### Start Firebase Emulator & API & Web
+
+```bash
+npm run start
 ```
 
 ### API only
