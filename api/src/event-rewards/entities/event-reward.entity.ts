@@ -20,4 +20,5 @@ export class EventReward {
   online1200?: boolean;
   subscription100k?: boolean;
   point20250928?: boolean;
+  point20251118?: boolean; // 网络故障补偿积分
 }
