@@ -33,6 +33,7 @@ export class PlayerPropertyService {
     'property_mana_regen_total_percentage',
     'property_ignore_movespeed_limit',
     'property_cannot_miss',
+    'property_flying',
   ];
 
   constructor(
@@ -65,21 +66,6 @@ export class PlayerPropertyService {
     } else {
       return this.create({ ...updatePlayerPropertyDto });
     }
-  }
-
-  async csv() {
-    let returnString = '';
-    for (const name of PlayerPropertyService.PROPERTY_NAME_LIST) {
-      const playerPropertys = await this.playerPropertyRepository.whereEqualTo('name', name).find();
-      // seasonPointTotal, matchCount
-      // create csv
-      const totalLevel = playerPropertys.reduce(
-        (total, playerProperty) => total + playerProperty.level,
-        0,
-      );
-      returnString += `${name}	${playerPropertys.length}	${totalLevel}\n`;
-    }
-    return returnString;
   }
 
   async findBySteamId(steamId: number) {
