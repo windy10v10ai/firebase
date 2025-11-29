@@ -71,9 +71,9 @@ export class GameService {
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    const firstStartTime = new Date('2025-11-18T12:00:00.000Z');
-    const firstEndTime = new Date('2025-11-19T23:59:59.999Z');
-    const firstRewardPoint = 1000;
+    const firstStartTime = new Date('2025-11-29T00:00:00.000Z');
+    const firstEndTime = new Date('2025-12-08T23:59:59.999Z');
+    const firstRewardPoint = 5000;
 
     const now = new Date();
 
@@ -82,7 +82,11 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.point20251118) {
+      if (
+        now >= firstStartTime &&
+        now <= firstEndTime &&
+        !rewardResult.result?.fiveYearAnniversary
+      ) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: firstRewardPoint,
         });
@@ -90,8 +94,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '网络故障补偿积分',
-            en: 'Network Issue <br> Compensation Points',
+            cn: '5周年庆典<br>获得5000赛季积分',
+            en: 'Celebrate 5th Anniversary <br> Get 5000 Season Points',
           },
           seasonPoint: firstRewardPoint,
         });
