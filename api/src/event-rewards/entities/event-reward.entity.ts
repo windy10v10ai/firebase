@@ -21,4 +21,5 @@ export class EventReward {
   subscription100k?: boolean;
   point20250928?: boolean;
   point20251118?: boolean; // 网络故障补偿积分
+  fiveYearAnniversary?: boolean; // 5周年庆典
 }
