@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: main
       - name: Setup Node
@@ -29,7 +29,7 @@ jobs:
           npm run build
 
       - name: Enable Web Frameworks
-        uses: w9jds/firebase-action@v14.23.0
+        uses: w9jds/firebase-action@v14.26.0
         with:
           args: experiments:enable webframeworks
         env:
@@ -37,7 +37,7 @@ jobs:
           PROJECT_ID: windy10v10ai
 
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@v14.23.0
+        uses: w9jds/firebase-action@v14.26.0
         with:
           args: deploy --only functions,hosting
         env:
