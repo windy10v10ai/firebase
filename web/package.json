@@ -13,7 +13,7 @@
     "axios": "^1.8.4",
     "eslint-config-next": "15.0.2",
     "firebase-functions": "^6.4.0",
-    "next": "15.1.2",
+    "next": "15.5.7",
     "next-intl": "^4.0.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
