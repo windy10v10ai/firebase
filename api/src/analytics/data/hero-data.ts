@@ -153,6 +153,7 @@ const heroNameToIdMap = new Map<string, number>([
   ['npc_dota_hero_muerta', 124],
   ['npc_dota_hero_ringmaster', 125],
   ['npc_dota_hero_kez', 126],
+  ['npc_dota_hero_largo', 127],
 ]);
 
 const heroNameToChineseMap = new Map<string, string>([
@@ -282,4 +283,5 @@ const heroNameToChineseMap = new Map<string, string>([
   ['npc_dota_hero_muerta', '琼英碧灵'],
   ['npc_dota_hero_ringmaster', '百戏大王'],
   ['npc_dota_hero_kez', '凯'],
+  ['npc_dota_hero_largo', '朗戈'],
 ]);
