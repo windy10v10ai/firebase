@@ -35,12 +35,12 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        fiveYearAnniversary: true,
+        newYear2026: true,
       });
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.fiveYearAnniversary = true;
+      eventReward.newYear2026 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }

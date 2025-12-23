@@ -71,9 +71,9 @@ export class GameService {
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    const firstStartTime = new Date('2025-11-29T00:00:00.000Z');
-    const firstEndTime = new Date('2025-12-08T23:59:59.999Z');
-    const firstRewardPoint = 5000;
+    const firstStartTime = new Date('2025-12-23T00:00:00.000Z');
+    const firstEndTime = new Date('2026-01-04T23:59:59.999Z');
+    const firstRewardPoint = 2026;
 
     const now = new Date();
 
@@ -82,11 +82,7 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (
-        now >= firstStartTime &&
-        now <= firstEndTime &&
-        !rewardResult.result?.fiveYearAnniversary
-      ) {
+      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.newYear2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: firstRewardPoint,
         });
@@ -94,8 +90,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '5周年庆典<br>获得5000勇士积分',
-            en: 'Celebrate 5th Anniversary <br> Get 5000 Battle Points',
+            cn: '2026圣诞元旦快乐',
+            en: 'Merry Christmas & Happy New Year',
           },
           seasonPoint: firstRewardPoint,
         });
