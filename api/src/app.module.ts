@@ -34,7 +34,7 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
         ignoreUndefinedProperties: true,
       },
       fireormSettings: {
-        validateModels: true,
+        validateModels: false,
       },
     }),
     GameModule,
