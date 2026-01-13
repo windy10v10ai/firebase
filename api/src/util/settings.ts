@@ -2,7 +2,12 @@ import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@n
 import { Reflector } from '@nestjs/core';
 
 export function AppGlobalSettings(app: INestApplication) {
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      forbidUnknownValues: false,
+    }),
+  );
   app.setGlobalPrefix('api');
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 }
