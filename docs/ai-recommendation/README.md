@@ -8,8 +8,10 @@
 
 | 文档 | 描述 | 状态 |
 |------|------|------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | 系统架构设计文档 | ✅ v0.1 |
-| [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | 分步实施计划 | ✅ v0.1 |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | 系统架构设计文档 | ✅ v1.0 |
+| [IMPLEMENTATION_PLAN_V2.md](./IMPLEMENTATION_PLAN_V2.md) | 分阶段实施计划（推荐） | ✅ v2.0 |
+| [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | 原始实施计划（参考） | 📦 v0.1 |
+| [GITHUB_ISSUES.md](./GITHUB_ISSUES.md) | GitHub Issues模板 | 📝 待更新 |
 
 ### 🎯 项目目标
 
@@ -23,14 +25,29 @@
 - **推理服务**: Python + FastAPI
 - **部署平台**: Google Cloud Run
 
-### 📊 实施进度
+### ✅ 游戏规则（已确认）
 
-- [ ] **阶段1**: 数据收集基础设施（Issues #1-#4）
-- [ ] **阶段2**: 训练环境搭建（Issues #5-#8）
-- [ ] **阶段3**: 模型训练与评估（Issues #9-#11）
-- [ ] **阶段4**: 推理服务部署（Issues #12-#15）
-- [ ] **阶段5**: 集成与上线（Issues #16-#18）
-- [ ] **阶段6**: 监控与迭代（Issues #19-#20）
+- **Radiant（玩家方）**：1-10个玩家，人数可变，可以重复选择英雄
+- **Dire（Bot方）**：固定10个英雄，不可重复
+- **选择顺序**：Radiant先选完，Dire再选
+- **数据来源**：已有大量历史对局数据在GA4 BigQuery中
+
+### 📊 实施策略
+
+#### Phase 1: 快速实验验证（2-3周）
+利用现有GA4数据快速训练模型并验证方案可行性
+
+- [ ] **Week 1**: 环境准备（Issues #P1-1 ~ #P1-3）
+- [ ] **Week 2**: 模型训练（Issues #P1-4, #P1-5）
+- [ ] **Week 3**: 推理服务部署（Issues #P1-6, #P1-7, #P1-8）
+- [ ] **Week 4**: 灰度测试（Issue #P1-9）
+
+#### Phase 2: 持续优化（并行启动，长期）
+建立专用数据流水线和自动化重训练机制
+
+- [ ] **数据基础设施**（Issues #P2-1 ~ #P2-4）- 可在Week 2并行启动
+- [ ] **模型优化**（Issues #P2-5, #P2-6）
+- [ ] **自动化**（Issues #P2-7, #P2-8）
 
 ### 🚀 快速开始
 
@@ -39,24 +56,18 @@
 cat docs/ai-recommendation/ARCHITECTURE.md
 ```
 
-#### 2. 查看实施计划
+#### 2. 查看分阶段实施计划（推荐）
 ```bash
-cat docs/ai-recommendation/IMPLEMENTATION_PLAN.md
+cat docs/ai-recommendation/IMPLEMENTATION_PLAN_V2.md
 ```
 
-#### 3. 查看GitHub Issues
-访问 [Issues页面](https://github.com/windy10v10ai/firebase/issues?q=is%3Aissue+label%3Aai-recommendation)
+#### 3. 准备环境
+- [ ] 确认GA4 Property ID
+- [ ] 配置GCP权限（BigQuery + Cloud Run）
+- [ ] 安装Python 3.11+
 
-### ⚠️ 待确认问题
-
-在开始实施前，需要确认以下游戏规则细节：
-
-1. **Radiant方人数**：是否固定10人？还是1-10人可变？
-2. **英雄重复规则**：是否只有Radiant可以重复，Dire不能重复？
-3. **推荐时机**：Dire是否在Radiant全部选完后一次性选10个？
-4. **现有数据**：是否已有历史对局数据可以导入？
-
-**请在开始Issue #1之前确认这些问题。**
+#### 4. 开始Phase 1
+从Issue #P1-1开始：创建Python训练项目结构
 
 ### 📈 预期成果
 

@@ -2,19 +2,31 @@
 
 ## 文档状态
 
-⚠️ **待确认**：本文档基于初始需求编写，部分细节需要根据实际游戏规则确认后更新。
+✅ **已确认**：游戏规则已确认，分Phase 1（快速实验）和Phase 2（持续优化）实施。
 
 ## 项目概述
 
 为Dota2自定义游戏的Bot方（Dire）提供基于机器学习的英雄选择推荐。
 
-### 游戏规则
+### 游戏规则（已确认）
 
-- **Radiant（人类方）**：最多10个英雄，可以重复选择
+- **Radiant（人类方）**：1-10个玩家（人数可变），可以重复选择英雄
 - **Dire（Bot方）**：固定10个英雄，不可重复
 - **选择顺序**：Radiant先选完，Dire再选
 - **当前Dire胜率**：约20%
-- **目标**：根据Radiant阵容，为Dire推荐最优英雄选择，提升胜率
+- **目标**：根据Radiant阵容，为Dire推荐最优英雄选择，提升胜率至25%+
+
+### 实施策略
+
+**Phase 1: 快速实验（2-3周）**
+- 利用现有GA4事件数据（已在BigQuery中存储大量历史对局）
+- 快速训练并部署初版模型
+- 验证方案可行性和效果
+
+**Phase 2: 持续优化（并行启动，长期运行）**
+- 实现专用的BigQuery数据采集流程（从NestJS直接写入）
+- 建立每周自动重训练机制
+- 持续监控和优化模型效果
 
 ---
 
@@ -108,7 +120,120 @@ async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
 }
 ```
 
-### 2. BigQuery表结构
+### 2. 训练数据来源
+
+#### Phase 1: 使用现有GA4数据（快速启动）
+
+✅ **优势**：已有大量历史对局数据，可立即开始训练
+
+现有GA4事件`game_end_match`包含完整的对局信息，存储在BigQuery的`analytics_<property_id>.events_*`表中。
+
+**从GA4提取对局数据的SQL**：
+
+```sql
+-- ml/training/load_ga4_data.sql
+-- 从GA4事件表提取对局数据
+
+WITH parsed_matches AS (
+  SELECT
+    event_timestamp,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'match_id') as match_id,
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'winner_team_id') as winner,
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'difficulty') as difficulty,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'version') as version,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'server_type') as server_type,
+    -- 提取所有玩家数据（player_1到player_20）
+    [
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_1'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_2'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_3'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_4'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_5'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_6'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_7'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_8'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_9'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_10'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_11'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_12'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_13'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_14'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_15'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_16'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_17'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_18'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_19'),
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_20')
+    ] as players_json
+  FROM `windy10v10ai.analytics_<property_id>.events_*`
+  WHERE event_name = 'game_end_match'
+    AND _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY))
+                          AND FORMAT_DATE('%Y%m%d', CURRENT_DATE())
+)
+
+SELECT
+  match_id,
+  TIMESTAMP_MICROS(event_timestamp) as timestamp,
+  winner,
+  difficulty,
+  version,
+  server_type,
+  -- 解析每个玩家的JSON数据提取英雄ID和队伍ID
+  ARRAY(
+    SELECT CAST(JSON_EXTRACT_SCALAR(player_json, '$.hi') AS INT64)
+    FROM UNNEST(players_json) as player_json
+    WHERE player_json IS NOT NULL
+      AND JSON_EXTRACT_SCALAR(player_json, '$.ti') = '2'  -- teamId = 2 (Radiant)
+  ) as radiant_heroes,
+  ARRAY(
+    SELECT CAST(JSON_EXTRACT_SCALAR(player_json, '$.hi') AS INT64)
+    FROM UNNEST(players_json) as player_json
+    WHERE player_json IS NOT NULL
+      AND JSON_EXTRACT_SCALAR(player_json, '$.ti') = '3'  -- teamId = 3 (Dire)
+  ) as dire_heroes
+FROM parsed_matches
+WHERE match_id IS NOT NULL
+  AND winner IN (2, 3)
+ORDER BY timestamp DESC;
+```
+
+**Python数据加载器（Phase 1）**：
+
+```python
+# ml/training/data_loader_ga4.py
+from google.cloud import bigquery
+import pandas as pd
+
+class GA4MatchDataLoader:
+    def __init__(self, project_id='windy10v10ai', property_id='<your_property_id>'):
+        self.client = bigquery.Client(project=project_id)
+        self.property_id = property_id
+
+    def load_recent_matches(self, days=90):
+        """从GA4事件表加载对局数据"""
+        query = """
+        -- 使用上面的SQL查询
+        """
+        df = self.client.query(query).to_dataframe()
+
+        # 数据验证
+        df = df[
+            (df['radiant_heroes'].apply(len) >= 1) &
+            (df['radiant_heroes'].apply(len) <= 10) &
+            (df['dire_heroes'].apply(len) == 10)
+        ]
+
+        print(f"加载 {len(df)} 场对局")
+        print(f"Dire胜率: {(df['winner'] == 3).mean():.2%}")
+
+        return df
+```
+
+#### Phase 2: 专用数据表（持续优化）
+
+在Phase 1验证方案可行后，建立专用数据表以提高效率。
+
+**新表结构**：
 
 ```sql
 CREATE TABLE `windy10v10ai.dota2.matches` (
@@ -121,24 +246,38 @@ CREATE TABLE `windy10v10ai.dota2.matches` (
   game_version STRING,
   difficulty INT64,
   server_type STRING,
-  -- 统计字段
   radiant_player_count INT64,
   dire_player_count INT64
 )
 PARTITION BY DATE(timestamp)
 OPTIONS(
-  description = "Dota2 10v10 match records for hero recommendation training"
+  description = "Dota2 10v10 match records for hero recommendation training (Phase 2)"
 );
 ```
 
-### 3. 训练数据查询
+**Phase 2数据写入**（在analytics.service.ts中添加）：
+
+```typescript
+// api/src/analytics/analytics.service.ts
+async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
+  // 现有：发送到GA4
+  await this.sendToGA4(gameEnd);
+
+  // Phase 2新增：直接写入专用表
+  if (process.env.ENABLE_BIGQUERY_DIRECT_EXPORT === 'true') {
+    await this.bigQueryService.saveMatch(gameEnd);
+  }
+}
+```
+
+### 3. 训练数据查询（Phase 2）
 
 ```python
 # ml/training/data_loader.py
 from google.cloud import bigquery
 
 def load_training_data(days=60):
-    """加载最近N天的对局数据"""
+    """从专用表加载对局数据"""
     client = bigquery.Client()
 
     query = f"""
@@ -150,7 +289,8 @@ def load_training_data(days=60):
       duration_msec
     FROM `windy10v10ai.dota2.matches`
     WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
-      AND array_length(radiant_heroes) > 0
+      AND array_length(radiant_heroes) >= 1
+      AND array_length(radiant_heroes) <= 10
       AND array_length(dire_heroes) = 10
     ORDER BY timestamp DESC
     """
