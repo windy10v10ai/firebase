@@ -8,8 +8,9 @@
 
 | 文档 | 描述 | 状态 |
 |------|------|------|
+| [BIGQUERY_SETUP.md](./BIGQUERY_SETUP.md) | BigQuery建表与数据导入（必读） | ✅ v1.0 |
+| [IMPLEMENTATION_PLAN_V2.md](./IMPLEMENTATION_PLAN_V2.md) | 分阶段实施计划（推荐） | ✅ v2.1 |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | 系统架构设计文档 | ✅ v1.0 |
-| [IMPLEMENTATION_PLAN_V2.md](./IMPLEMENTATION_PLAN_V2.md) | 分阶段实施计划（推荐） | ✅ v2.0 |
 | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | 原始实施计划（参考） | 📦 v0.1 |
 | [GITHUB_ISSUES.md](./GITHUB_ISSUES.md) | GitHub Issues模板 | 📝 待更新 |
 
@@ -34,39 +35,48 @@
 
 ### 📊 实施策略
 
-#### Phase 1: 快速实验验证（2-3周）
-利用现有GA4数据快速训练模型并验证方案可行性
+#### Phase 1: 快速实验验证（约3周）
+建立专有数据表，导入历史数据，快速训练并验证方案
 
+- [x] **准备**: BigQuery建表+数据导入（Issue #P1-0，2-3小时）← **先做这个！**
 - [ ] **Week 1**: 环境准备（Issues #P1-1 ~ #P1-3）
 - [ ] **Week 2**: 模型训练（Issues #P1-4, #P1-5）
 - [ ] **Week 3**: 推理服务部署（Issues #P1-6, #P1-7, #P1-8）
 - [ ] **Week 4**: 灰度测试（Issue #P1-9）
 
-#### Phase 2: 持续优化（并行启动，长期）
-建立专用数据流水线和自动化重训练机制
+#### Phase 2: 持续优化（Phase 1后，长期）
+模型优化和自动化重训练
 
-- [ ] **数据基础设施**（Issues #P2-1 ~ #P2-4）- 可在Week 2并行启动
-- [ ] **模型优化**（Issues #P2-5, #P2-6）
-- [ ] **自动化**（Issues #P2-7, #P2-8）
+- [ ] **模型优化**（Issue #P2-1）
+- [ ] **自动化重训练**（Issue #P2-2）
+- [ ] **监控Dashboard**（Issue #P2-3）
 
 ### 🚀 快速开始
 
-#### 1. 阅读架构文档
+#### 步骤0：⚡ 建表并导入数据（必须先做！）
 ```bash
-cat docs/ai-recommendation/ARCHITECTURE.md
+# 1. 阅读BigQuery设置指南
+cat docs/ai-recommendation/BIGQUERY_SETUP.md
+
+# 2. 在BigQuery控制台创建表并导入GA4历史数据
+# 详见 BIGQUERY_SETUP.md 中的完整步骤
 ```
 
-#### 2. 查看分阶段实施计划（推荐）
+✅ **完成后你将拥有**：包含50k+历史对局的专有数据表
+
+---
+
+#### 步骤1：阅读实施计划
 ```bash
 cat docs/ai-recommendation/IMPLEMENTATION_PLAN_V2.md
 ```
 
-#### 3. 准备环境
-- [ ] 确认GA4 Property ID
-- [ ] 配置GCP权限（BigQuery + Cloud Run）
+#### 步骤2：准备开发环境
 - [ ] 安装Python 3.11+
+- [ ] 配置GCP认证
+- [ ] 验证可以查询BigQuery数据表
 
-#### 4. 开始Phase 1
+#### 步骤3：开始训练
 从Issue #P1-1开始：创建Python训练项目结构
 
 ### 📈 预期成果

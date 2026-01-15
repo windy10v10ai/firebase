@@ -12,9 +12,62 @@ Phase 2的数据采集可以与Phase 1并行启动。
 
 ## Phase 1: 快速实验验证（2-3周）
 
-**目标**：利用现有GA4数据快速训练模型并验证方案可行性
+**目标**：建立专有数据表，导入历史数据，快速训练模型并验证方案可行性
 
-### Phase 1.1: 环境准备（第1周，10小时）
+### Phase 1.0: 数据基础设施（先决条件，2-3小时）
+
+#### Issue #P1-0: 创建BigQuery专有表并导入历史数据
+**优先级**：P0（阻塞所有后续任务）
+**预计工时**：2-3小时
+
+**任务描述**：
+- [ ] 创建`dota2.matches`专有表
+- [ ] 编写从GA4导入历史数据的SQL
+- [ ] 执行数据导入（最近6个月数据）
+- [ ] 验证数据质量和数量
+- [ ] 配置持续数据写入（新对局自动写入）
+
+**详细步骤**：见 [BIGQUERY_SETUP.md](./BIGQUERY_SETUP.md)
+
+**关键SQL**：
+```sql
+-- 1. 建表
+CREATE TABLE `windy10v10ai.dota2.matches` (
+  match_id STRING NOT NULL,
+  timestamp TIMESTAMP NOT NULL,
+  winner INT64 NOT NULL,
+  radiant_heroes ARRAY<INT64> NOT NULL,
+  dire_heroes ARRAY<INT64> NOT NULL,
+  duration_msec INT64,
+  game_version STRING,
+  difficulty INT64,
+  server_type STRING,
+  radiant_player_count INT64,
+  dire_player_count INT64
+)
+PARTITION BY DATE(timestamp)
+CLUSTER BY winner, difficulty;
+
+-- 2. 导入数据（见BIGQUERY_SETUP.md中的完整SQL）
+INSERT INTO `windy10v10ai.dota2.matches` ...
+```
+
+**验收标准**：
+- [ ] 专有表创建成功
+- [ ] 至少导入50,000场历史对局数据
+- [ ] Dire胜率约20%
+- [ ] Radiant平均人数在1-10范围内
+- [ ] Dire固定10个英雄
+- [ ] 持续写入已配置（通过环境变量控制）
+
+**为什么先做这一步？**
+✅ 统一数据源，后续所有训练都用同一张表
+✅ 利用现有GA4历史数据，无需等待新数据收集
+✅ 数据导入一次性完成，训练时直接查询
+
+---
+
+### Phase 1.1: 环境准备（第1周，7小时）
 
 #### Issue #P1-1: 创建Python训练项目结构
 **优先级**：P0
@@ -64,82 +117,90 @@ pyyaml==6.0.1
 
 ---
 
-#### Issue #P1-2: 实现GA4数据加载器
+#### Issue #P1-2: 实现专有表数据加载器
 **优先级**：P0
-**预计工时**：6小时
-**依赖**：#P1-1
+**预计工时**：2小时
+**依赖**：#P1-0, #P1-1
 
 **任务描述**：
-- [ ] 编写`load_ga4_data.sql`提取GA4事件数据
-- [ ] 实现`data_loader_ga4.py`
+- [ ] 实现`data_loader.py`从专有表加载数据
 - [ ] 支持按时间范围查询
-- [ ] 添加数据验证和统计
+- [ ] 添加数据统计功能
 - [ ] 本地测试（需要GCP认证）
 
 **关键代码**：
 
 ```python
-# ml/training/data_loader_ga4.py
+# ml/training/data_loader.py
 from google.cloud import bigquery
 import pandas as pd
-import json
+from collections import Counter
 
-class GA4MatchDataLoader:
-    def __init__(self, project_id='windy10v10ai', property_id='<your_property_id>'):
+class MatchDataLoader:
+    def __init__(self, project_id='windy10v10ai'):
         self.client = bigquery.Client(project=project_id)
-        self.property_id = property_id
 
     def load_recent_matches(self, days=90):
-        """从GA4事件表加载对局数据"""
-        # 读取SQL文件
-        with open('load_ga4_data.sql', 'r') as f:
-            query_template = f.read()
+        """从专有表加载对局数据"""
+        query = f"""
+        SELECT
+          match_id,
+          timestamp,
+          winner,
+          radiant_heroes,
+          dire_heroes,
+          duration_msec,
+          game_version,
+          difficulty,
+          server_type,
+          radiant_player_count,
+          dire_player_count
+        FROM `windy10v10ai.dota2.matches`
+        WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
+          AND radiant_player_count >= 1
+          AND radiant_player_count <= 10
+          AND dire_player_count = 10
+        ORDER BY timestamp DESC
+        """
 
-        # 替换参数
-        query = query_template.replace('<property_id>', self.property_id)
-        query = query.replace('<days>', str(days))
-
-        # 执行查询
         df = self.client.query(query).to_dataframe()
-
-        # 数据验证
-        print(f"原始数据: {len(df)} 场对局")
-
-        # 过滤异常数据
-        df = df[
-            (df['match_id'].notna()) &
-            (df['winner'].isin([2, 3])) &
-            (df['radiant_heroes'].apply(lambda x: len(x) >= 1 and len(x) <= 10)) &
-            (df['dire_heroes'].apply(lambda x: len(x) == 10))
-        ]
-
-        print(f"过滤后: {len(df)} 场对局")
-        print(f"Dire胜率: {(df['winner'] == 3).mean():.2%}")
-        print(f"Radiant平均人数: {df['radiant_heroes'].apply(len).mean():.1f}")
-
         return df
 
-    def get_hero_distribution(self, df):
-        """统计英雄选择分布"""
-        from collections import Counter
+    def get_data_stats(self, df):
+        """打印数据统计"""
+        print(f"📊 数据统计:")
+        print(f"   总对局数: {len(df):,}")
+        print(f"   时间范围: {df['timestamp'].min()} ~ {df['timestamp'].max()}")
+        print(f"   Dire胜率: {(df['winner'] == 3).mean():.2%}")
+        print(f"   Radiant平均人数: {df['radiant_player_count'].mean():.1f}")
 
-        radiant_counter = Counter()
-        dire_counter = Counter()
+        # 英雄选择频率
+        all_radiant = [h for heroes in df['radiant_heroes'] for h in heroes]
+        all_dire = [h for heroes in df['dire_heroes'] for h in heroes]
 
-        for heroes in df['radiant_heroes']:
-            radiant_counter.update(heroes)
+        print(f"\n🎯 最常选英雄:")
+        print(f"   Radiant: {Counter(all_radiant).most_common(5)}")
+        print(f"   Dire: {Counter(all_dire).most_common(5)}")
 
-        for heroes in df['dire_heroes']:
-            dire_counter.update(heroes)
+        return {
+            'total': len(df),
+            'dire_win_rate': (df['winner'] == 3).mean(),
+            'avg_radiant_players': df['radiant_player_count'].mean()
+        }
 
-        return radiant_counter, dire_counter
+# 测试
+if __name__ == '__main__':
+    loader = MatchDataLoader()
+    df = loader.load_recent_matches(days=90)
+    stats = loader.get_data_stats(df)
 ```
 
 **验收标准**：
-- [ ] 可以成功从BigQuery加载GA4数据
-- [ ] DataFrame包含必需字段（match_id, winner, radiant_heroes, dire_heroes）
-- [ ] 数据量 > 1000场对局
-- [ ] 有数据质量统计输出
+- [ ] 可以成功从专有表加载数据
+- [ ] DataFrame包含所有必需字段
+- [ ] 数据量 > 50,000场对局（取决于导入的历史数据）
+- [ ] 有详细的数据质量统计输出
+- [ ] 查询速度 < 5秒
 
 ---
 
@@ -640,127 +701,15 @@ WHERE server_type = 'ai_recommendation';
 
 ---
 
-## Phase 2: 持续优化（并行启动，长期运行）
+## Phase 2: 持续优化（Phase 1完成后，长期运行）
 
-**目标**：建立专用数据流水线和自动化重训练机制
+**目标**：模型优化和自动化重训练机制
 
-Phase 2可以在Phase 1的Issue #P1-4之后并行启动。
+⚠️ **注意**：数据基础设施已在Phase 1.0中完成（Issue #P1-0），Phase 2专注于模型和流程优化。
 
-### Phase 2.1: 数据基础设施（与Phase 1并行，10小时）
+### Phase 2.1: 模型优化（持续，10小时）
 
-#### Issue #P2-1: 创建BigQuery专用表
-**优先级**：P1
-**预计工时**：2小时
-**可并行启动**：Phase 1完成#P1-3后即可开始
-
-**任务描述**：
-- [ ] 在GCP控制台创建`dota2` dataset
-- [ ] 创建`matches`表
-- [ ] 配置分区策略（按日期）
-- [ ] 验证表创建成功
-
-**SQL**：
-```sql
-CREATE TABLE `windy10v10ai.dota2.matches` (
-  match_id STRING NOT NULL,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-  winner INT64,
-  radiant_heroes ARRAY<INT64>,
-  dire_heroes ARRAY<INT64>,
-  duration_msec INT64,
-  game_version STRING,
-  difficulty INT64,
-  server_type STRING,
-  radiant_player_count INT64,
-  dire_player_count INT64
-)
-PARTITION BY DATE(timestamp)
-OPTIONS(
-  description = "Dota2 10v10 match records for hero recommendation training (Phase 2)"
-);
-```
-
-**验收标准**：
-- [ ] 表创建成功
-- [ ] 可以手动插入测试数据
-
----
-
-#### Issue #P2-2: 实现BigQueryService
-**优先级**：P1
-**预计工时**：4小时
-**依赖**：#P2-1
-
-**任务描述**：
-- [ ] 安装`@google-cloud/bigquery`依赖
-- [ ] 创建`api/src/bigquery/bigquery.module.ts`
-- [ ] 实现`api/src/bigquery/bigquery.service.ts`
-- [ ] 实现`saveMatch()`方法
-- [ ] 添加单元测试
-- [ ] 添加错误处理
-
-**验收标准**：
-- [ ] 单元测试通过
-- [ ] 可以成功写入数据
-- [ ] 有适当的错误日志
-
----
-
-#### Issue #P2-3: 在Analytics服务中集成BigQuery写入
-**优先级**：P1
-**预计工时**：2小时
-**依赖**：#P2-2
-
-**任务描述**：
-- [ ] 在`analytics.service.ts`中注入`BigQueryService`
-- [ ] 在`gameEndMatch()`中调用写入
-- [ ] 添加feature flag控制
-- [ ] 更新e2e测试
-
-**验收标准**：
-- [ ] e2e测试通过
-- [ ] 可以通过环境变量控制开关
-- [ ] 错误不影响GA4流程
-
----
-
-#### Issue #P2-4: 部署并验证数据写入
-**优先级**：P1
-**预计工时**：2小时
-**依赖**：#P2-3
-
-**任务描述**：
-- [ ] 设置环境变量启用BigQuery写入
-- [ ] 部署到Firebase Functions
-- [ ] 运行测试对局
-- [ ] 验证数据写入正确
-
-**验收标准**：
-- [ ] 至少有10条数据写入
-- [ ] 数据格式正确
-- [ ] 有查询示例文档
-
----
-
-### Phase 2.2: 模型优化（持续，12小时）
-
-#### Issue #P2-5: 实现专用表数据加载器
-**优先级**：P2
-**预计工时**：2小时
-**依赖**：#P2-4
-
-**任务描述**：
-- [ ] 更新`data_loader.py`支持专用表
-- [ ] 在`config.yaml`中添加数据源切换
-- [ ] 测试从专用表加载数据
-
-**验收标准**：
-- [ ] 可以从两种数据源加载（GA4或专用表）
-- [ ] 配置文件可以切换数据源
-
----
-
-#### Issue #P2-6: 模型调参优化
+#### Issue #P2-1: 模型调参优化
 **优先级**：P2
 **预计工时**：10小时
 **依赖**：#P1-5
@@ -778,12 +727,12 @@ OPTIONS(
 
 ---
 
-### Phase 2.3: 自动化（长期，10小时）
+### Phase 2.2: 自动化（长期，10小时）
 
-#### Issue #P2-7: 设置每周自动重训练
+#### Issue #P2-2: 设置每周自动重训练
 **优先级**：P2
 **预计工时**：6小时
-**依赖**：#P2-5
+**依赖**：#P1-5
 
 **任务描述**：
 - [ ] 创建Cloud Functions触发训练
@@ -798,10 +747,10 @@ OPTIONS(
 
 ---
 
-#### Issue #P2-8: 创建监控Dashboard
+#### Issue #P2-3: 创建监控Dashboard
 **优先级**：P2
 **预计工时**：4小时
-**依赖**：#P2-4
+**依赖**：#P1-0
 
 **任务描述**：
 - [ ] 创建BigQuery视图
@@ -823,35 +772,42 @@ OPTIONS(
 
 ## 实施时间线
 
-### 并行执行策略
+### 执行策略
 
 ```
-周 | Phase 1                        | Phase 2
----+--------------------------------+-------------------------
-1  | #P1-1, #P1-2, #P1-3           | -
-2  | #P1-4, #P1-5                  | #P2-1, #P2-2, #P2-3, #P2-4 (并行启动)
-3  | #P1-6, #P1-7, #P1-8           | #P2-5, #P2-6 (开始调参)
-4  | #P1-9 (灰度测试)              | #P2-7 (自动化训练)
-5+ | -                             | #P2-8 (监控)，持续优化
+周 | Phase 1                                  | Phase 2
+---+------------------------------------------+-------------------------
+准备 | #P1-0 (BigQuery建表+数据导入, 2-3h)      | -
+1  | #P1-1, #P1-2, #P1-3 (环境+数据加载, 7h)  | -
+2  | #P1-4, #P1-5 (训练+评估, 12h)            | -
+3  | #P1-6, #P1-7, #P1-8 (推理服务, 16h)      | #P2-1 (开始调参)
+4  | #P1-9 (灰度测试, 4h)                     | #P2-2, #P2-3 (自动化+监控)
+5+ | 全量上线                                  | 持续优化
 ```
 
 ### 关键里程碑
 
-- **Week 1**: Phase 1环境就绪
-- **Week 2**: 首个模型训练完成 + Phase 2数据采集上线
+- **准备阶段**: 建表并导入历史数据（2-3小时）← 关键！
+- **Week 1**: Python环境就绪，可以加载数据
+- **Week 2**: 首个模型训练完成
 - **Week 3**: 推理服务上线
-- **Week 4**: 灰度测试 + 自动化重训练
+- **Week 4**: 灰度测试并决策
 - **Week 5+**: 全量上线 + 持续监控优化
 
 ---
 
 ## 总预计工时
 
-- **Phase 1**: 52小时
-- **Phase 2**: 32小时
-- **总计**: 84小时
+- **Phase 1（核心）**: 41-42小时
+  - P1-0: 2-3小时（建表+导入数据）
+  - P1-1 to P1-9: 39小时
+- **Phase 2（优化）**: 20小时
+  - P2-1: 10小时（调参）
+  - P2-2: 6小时（自动化）
+  - P2-3: 4小时（监控）
+- **总计**: 61-62小时
 
-由于Phase 2大部分任务可以并行执行，实际日历时间约**3-4周**即可完成Phase 1和Phase 2的核心功能。
+**实际日历时间**：约**3周**完成Phase 1核心功能，Phase 2可以持续迭代。
 
 ---
 
@@ -859,7 +815,8 @@ OPTIONS(
 
 | 风险 | 影响 | 缓解措施 |
 |------|------|----------|
-| GA4数据质量问题 | Phase 1延迟 | 提前验证数据，编写清洗脚本 |
+| 历史数据量不足 | 模型效果差 | 确认至少有50k对局后再开始训练 |
+| 数据导入失败 | 阻塞所有后续工作 | 先dry-run验证，分批导入 |
 | 首次训练效果差 | 方案可行性受质疑 | 设定合理预期（Top-1 > 2%即可），强调迭代优化 |
 | Cloud Run冷启动慢 | 用户体验差 | 配置min_instances=1 |
 | 模型过拟合 | 泛化能力差 | 交叉验证、正则化 |
@@ -868,10 +825,35 @@ OPTIONS(
 
 ## 下一步
 
-1. **立即开始**：创建Issue #P1-1（Python项目结构）
-2. **确认GA4 Property ID**：需要知道具体的property_id以提取数据
-3. **准备GCP权限**：确保有BigQuery和Cloud Run的访问权限
-4. **沟通游戏Bot集成**：了解Bot侧的技术栈和HTTP调用方式
+### 立即执行（Issue #P1-0）
+
+1. **确认GA4 Property ID**
+   ```bash
+   # 在BigQuery控制台查找analytics_开头的数据集
+   # 格式：analytics_<property_id>
+   ```
+
+2. **创建BigQuery专有表**
+   - 复制 `BIGQUERY_SETUP.md` 中的建表SQL
+   - 在BigQuery控制台执行
+
+3. **导入历史数据**
+   - 选择方式A（SQL直接导入）或方式B（Python脚本）
+   - 先dry-run验证数据量
+   - 确认 ≥ 50,000场对局
+
+4. **配置持续写入**
+   - 实现`BigQueryService`
+   - 集成到`analytics.service.ts`
+   - 设置`ENABLE_BIGQUERY_EXPORT=true`并部署
+
+**预计时间**：2-3小时（完成后可以开始训练！）
+
+### 后续步骤
+
+- Issue #P1-1: 创建Python训练项目结构
+- Issue #P1-2: 实现数据加载器
+- ...
 
 ---
 
