@@ -3,10 +3,10 @@
 ## 概览
 
 本文档将实施工作分为两个阶段：
-- **Phase 1**: 快速实验验证（使用现有GA4数据）
-- **Phase 2**: 持续优化（建立专用数据流水线）
+- **Phase 1**: 快速实验验证（建立专有表，导入历史数据，训练并部署模型）
+- **Phase 2**: 持续优化（模型调参、自动重训练、监控）
 
-Phase 2的数据采集可以与Phase 1并行启动。
+**关键策略**：先建专有BigQuery表并导入GA4历史数据，之后所有训练都用这一张表。
 
 ---
 
@@ -83,20 +83,19 @@ INSERT INTO `windy10v10ai.dota2.matches` ...
 ```
 ml/
 ├── training/
-│   ├── README.md
-│   ├── requirements.txt
-│   ├── load_ga4_data.sql          # GA4数据提取SQL
-│   ├── data_loader_ga4.py         # Phase 1: GA4数据加载器
-│   ├── data_loader.py             # Phase 2: 专用表数据加载器
+│   ├── README.md                  # 环境设置指南
+│   ├── requirements.txt           # Python依赖
+│   ├── data_loader.py             # 专有表数据加载器
 │   ├── feature_engineering.py     # 特征工程
 │   ├── train.py                   # 训练脚本
 │   ├── evaluate.py                # 评估脚本
 │   └── config.yaml                # 训练配置
 └── inference/
-    ├── main.py
-    ├── feature_engineering.py
+    ├── main.py                    # FastAPI应用
+    ├── feature_engineering.py     # 特征编码（复用）
     ├── requirements.txt
     ├── Dockerfile
+    ├── model.json                 # 训练好的模型
     └── README.md
 ```
 
@@ -337,10 +336,8 @@ def prepare_dataset(df):
 **config.yaml**：
 ```yaml
 data:
-  source: ga4  # ga4 或 dedicated_table
-  property_id: "<your_property_id>"
-  days: 90
-  train_ratio: 0.8
+  days: 90                # 使用最近N天的数据
+  train_ratio: 0.8        # 训练集比例
 
 model:
   max_depth: 8
@@ -348,7 +345,7 @@ model:
   n_estimators: 200
   subsample: 0.8
   colsample_bytree: 0.8
-  scale_pos_weight: 4  # 处理20%胜率不平衡
+  scale_pos_weight: 4     # 处理20%胜率不平衡
 
 training:
   early_stopping_rounds: 20
@@ -369,16 +366,13 @@ import yaml
 import argparse
 from datetime import datetime
 
-from data_loader_ga4 import GA4MatchDataLoader
+from data_loader import MatchDataLoader
 from feature_engineering import prepare_dataset
 
 def train_model(config):
     # 加载数据
     print("加载数据...")
-    loader = GA4MatchDataLoader(
-        project_id='windy10v10ai',
-        property_id=config['data']['property_id']
-    )
+    loader = MatchDataLoader(project_id='windy10v10ai')
     df = loader.load_recent_matches(days=config['data']['days'])
 
     # 特征工程

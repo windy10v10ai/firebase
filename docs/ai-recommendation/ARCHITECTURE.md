@@ -18,15 +18,18 @@
 
 ### 实施策略
 
-**Phase 1: 快速实验（2-3周）**
-- 利用现有GA4事件数据（已在BigQuery中存储大量历史对局）
-- 快速训练并部署初版模型
-- 验证方案可行性和效果
+**Phase 1: 快速实验验证（约3周）**
+1. 建立专有BigQuery表
+2. 从GA4导入历史数据（一次性）
+3. 快速训练并部署初版模型
+4. 灰度测试并验证效果
 
-**Phase 2: 持续优化（并行启动，长期运行）**
-- 实现专用的BigQuery数据采集流程（从NestJS直接写入）
-- 建立每周自动重训练机制
-- 持续监控和优化模型效果
+**Phase 2: 持续优化（长期运行）**
+1. 模型调参优化
+2. 建立每周自动重训练
+3. 持续监控胜率和模型效果
+
+**关键优势**：统一数据源，历史数据和新数据都在同一张表中。
 
 ---
 
@@ -120,128 +123,24 @@ async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
 }
 ```
 
-### 2. 训练数据来源
+### 2. 专有BigQuery数据表
 
-#### Phase 1: 使用现有GA4数据（快速启动）
+**设计思路**：统一数据源，历史数据和新数据都存储在同一张专有表中。
 
-✅ **优势**：已有大量历史对局数据，可立即开始训练
-
-现有GA4事件`game_end_match`包含完整的对局信息，存储在BigQuery的`analytics_<property_id>.events_*`表中。
-
-**从GA4提取对局数据的SQL**：
-
-```sql
--- ml/training/load_ga4_data.sql
--- 从GA4事件表提取对局数据
-
-WITH parsed_matches AS (
-  SELECT
-    event_timestamp,
-    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'match_id') as match_id,
-    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'winner_team_id') as winner,
-    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'difficulty') as difficulty,
-    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'version') as version,
-    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'server_type') as server_type,
-    -- 提取所有玩家数据（player_1到player_20）
-    [
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_1'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_2'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_3'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_4'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_5'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_6'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_7'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_8'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_9'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_10'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_11'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_12'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_13'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_14'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_15'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_16'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_17'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_18'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_19'),
-      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'player_20')
-    ] as players_json
-  FROM `windy10v10ai.analytics_<property_id>.events_*`
-  WHERE event_name = 'game_end_match'
-    AND _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY))
-                          AND FORMAT_DATE('%Y%m%d', CURRENT_DATE())
-)
-
-SELECT
-  match_id,
-  TIMESTAMP_MICROS(event_timestamp) as timestamp,
-  winner,
-  difficulty,
-  version,
-  server_type,
-  -- 解析每个玩家的JSON数据提取英雄ID和队伍ID
-  ARRAY(
-    SELECT CAST(JSON_EXTRACT_SCALAR(player_json, '$.hi') AS INT64)
-    FROM UNNEST(players_json) as player_json
-    WHERE player_json IS NOT NULL
-      AND JSON_EXTRACT_SCALAR(player_json, '$.ti') = '2'  -- teamId = 2 (Radiant)
-  ) as radiant_heroes,
-  ARRAY(
-    SELECT CAST(JSON_EXTRACT_SCALAR(player_json, '$.hi') AS INT64)
-    FROM UNNEST(players_json) as player_json
-    WHERE player_json IS NOT NULL
-      AND JSON_EXTRACT_SCALAR(player_json, '$.ti') = '3'  -- teamId = 3 (Dire)
-  ) as dire_heroes
-FROM parsed_matches
-WHERE match_id IS NOT NULL
-  AND winner IN (2, 3)
-ORDER BY timestamp DESC;
-```
-
-**Python数据加载器（Phase 1）**：
-
-```python
-# ml/training/data_loader_ga4.py
-from google.cloud import bigquery
-import pandas as pd
-
-class GA4MatchDataLoader:
-    def __init__(self, project_id='windy10v10ai', property_id='<your_property_id>'):
-        self.client = bigquery.Client(project=project_id)
-        self.property_id = property_id
-
-    def load_recent_matches(self, days=90):
-        """从GA4事件表加载对局数据"""
-        query = """
-        -- 使用上面的SQL查询
-        """
-        df = self.client.query(query).to_dataframe()
-
-        # 数据验证
-        df = df[
-            (df['radiant_heroes'].apply(len) >= 1) &
-            (df['radiant_heroes'].apply(len) <= 10) &
-            (df['dire_heroes'].apply(len) == 10)
-        ]
-
-        print(f"加载 {len(df)} 场对局")
-        print(f"Dire胜率: {(df['winner'] == 3).mean():.2%}")
-
-        return df
-```
-
-#### Phase 2: 专用数据表（持续优化）
-
-在Phase 1验证方案可行后，建立专用数据表以提高效率。
-
-**新表结构**：
+#### 表结构
 
 ```sql
 CREATE TABLE `windy10v10ai.dota2.matches` (
+  -- 核心字段
   match_id STRING NOT NULL,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
-  winner INT64,                     -- 2=radiant, 3=dire
-  radiant_heroes ARRAY<INT64>,      -- 英雄ID数组（可重复，长度1-10）
-  dire_heroes ARRAY<INT64>,         -- 英雄ID数组（不重复，长度10）
+  timestamp TIMESTAMP NOT NULL,
+  winner INT64 NOT NULL,              -- 2=Radiant, 3=Dire
+
+  -- 英雄阵容（ML核心特征）
+  radiant_heroes ARRAY<INT64> NOT NULL,  -- 1-10个，可重复
+  dire_heroes ARRAY<INT64> NOT NULL,     -- 固定10个，不重复
+
+  -- 对局元数据
   duration_msec INT64,
   game_version STRING,
   difficulty INT64,
@@ -250,53 +149,121 @@ CREATE TABLE `windy10v10ai.dota2.matches` (
   dire_player_count INT64
 )
 PARTITION BY DATE(timestamp)
+CLUSTER BY winner, difficulty
 OPTIONS(
-  description = "Dota2 10v10 match records for hero recommendation training (Phase 2)"
+  description = "Dota2 10v10 match records for AI hero recommendation"
 );
 ```
 
-**Phase 2数据写入**（在analytics.service.ts中添加）：
+**优化特性**：
+- ✅ **分区**：按日期分区，查询最近N天数据时只扫描相关分区
+- ✅ **聚簇**：按winner和difficulty聚簇，加速胜率分析
+- ✅ **数组类型**：直接存储英雄ID数组，无需JOIN
+
+#### 数据导入（一次性）
+
+从GA4历史数据导入到专有表：
+
+```sql
+-- 详见 BIGQUERY_SETUP.md 中的完整导入SQL
+INSERT INTO `windy10v10ai.dota2.matches`
+SELECT ... FROM `analytics_<property_id>.events_*`
+WHERE event_name = 'game_end_match' ...
+```
+
+**导入方式**：
+- 方式A：直接执行SQL（BigQuery控制台）
+- 方式B：Python脚本（更灵活，支持dry-run）
+
+**详细步骤**：见 [BIGQUERY_SETUP.md](./BIGQUERY_SETUP.md)
+
+#### 持续数据写入
+
+新对局自动写入专有表：
 
 ```typescript
+// api/src/bigquery/bigquery.service.ts
+@Injectable()
+export class BigQueryService {
+  private bigquery = new BigQuery();
+  private table = this.bigquery.dataset('dota2').table('matches');
+
+  async saveMatch(gameEnd: GameEndMatchDto): Promise<void> {
+    const row = {
+      match_id: gameEnd.matchId,
+      timestamp: new Date().toISOString(),
+      winner: gameEnd.winnerTeamId,
+      radiant_heroes: gameEnd.players
+        .filter(p => p.teamId === 2)
+        .map(p => GetHeroId(p.heroName)),
+      dire_heroes: gameEnd.players
+        .filter(p => p.teamId === 3)
+        .map(p => GetHeroId(p.heroName)),
+      duration_msec: gameEnd.gameTimeMsec,
+      game_version: gameEnd.version,
+      difficulty: gameEnd.difficulty,
+      server_type: 'production',
+      radiant_player_count: radiantHeroes.length,
+      dire_player_count: direHeroes.length
+    };
+
+    await this.table.insert([row]);
+  }
+}
+
 // api/src/analytics/analytics.service.ts
 async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
   // 现有：发送到GA4
   await this.sendToGA4(gameEnd);
 
-  // Phase 2新增：直接写入专用表
-  if (process.env.ENABLE_BIGQUERY_DIRECT_EXPORT === 'true') {
+  // 新增：写入专有表
+  if (process.env.ENABLE_BIGQUERY_EXPORT === 'true') {
     await this.bigQueryService.saveMatch(gameEnd);
   }
 }
 ```
 
-### 3. 训练数据查询（Phase 2）
+### 3. 训练数据加载
+
+Python数据加载器（统一接口，适用于所有训练）：
 
 ```python
 # ml/training/data_loader.py
 from google.cloud import bigquery
+import pandas as pd
 
-def load_training_data(days=60):
-    """从专用表加载对局数据"""
-    client = bigquery.Client()
+class MatchDataLoader:
+    def __init__(self, project_id='windy10v10ai'):
+        self.client = bigquery.Client(project=project_id)
 
-    query = f"""
-    SELECT
-      match_id,
-      winner,
-      radiant_heroes,
-      dire_heroes,
-      duration_msec
-    FROM `windy10v10ai.dota2.matches`
-    WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
-      AND array_length(radiant_heroes) >= 1
-      AND array_length(radiant_heroes) <= 10
-      AND array_length(dire_heroes) = 10
-    ORDER BY timestamp DESC
-    """
+    def load_recent_matches(self, days=90):
+        """从专有表加载对局数据"""
+        query = f"""
+        SELECT
+          match_id,
+          timestamp,
+          winner,
+          radiant_heroes,
+          dire_heroes,
+          duration_msec,
+          game_version,
+          difficulty,
+          server_type,
+          radiant_player_count,
+          dire_player_count
+        FROM `windy10v10ai.dota2.matches`
+        WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL {days} DAY)
+          AND radiant_player_count >= 1
+          AND radiant_player_count <= 10
+          AND dire_player_count = 10
+        ORDER BY timestamp DESC
+        """
 
-    df = client.query(query).to_dataframe()
-    return df
+        df = self.client.query(query).to_dataframe()
+        print(f"加载 {len(df):,} 场对局")
+        print(f"Dire胜率: {(df['winner'] == 3).mean():.2%}")
+
+        return df
 ```
 
 ### 4. 推理API
@@ -662,53 +629,20 @@ Cloud Run免费额度：180,000 vCPU秒/月
 
 ---
 
-## 实施步骤
+## 实施概览
 
-### 阶段1：数据收集（1周）
+详细的分步实施计划请参考 [IMPLEMENTATION_PLAN_V2.md](./IMPLEMENTATION_PLAN_V2.md)
 
-- [ ] 创建BigQuery dataset和matches表
-- [ ] 实现BigQueryService
-- [ ] 在analytics.service.ts中集成BigQuery写入
-- [ ] 部署并验证数据写入
-- [ ] 收集至少1周的真实对局数据
+**快速摘要**：
 
-### 阶段2：训练环境搭建（1周）
+1. **准备阶段**（2-3小时）：创建BigQuery表并导入历史数据
+2. **Week 1**（7小时）：搭建Python训练环境
+3. **Week 2**（12小时）：模型训练与评估
+4. **Week 3**（16小时）：推理服务部署
+5. **Week 4**（4小时）：灰度测试与上线
+6. **持续迭代**：模型优化和自动重训练
 
-- [ ] 搭建本地Python环境或配置Colab
-- [ ] 安装依赖：pandas, numpy, xgboost, google-cloud-bigquery
-- [ ] 编写数据加载脚本
-- [ ] 实现特征工程代码
-- [ ] 验证样本生成逻辑
-
-### 阶段3：模型训练（1-2周）
-
-- [ ] 从BigQuery导出训练数据
-- [ ] 训练初版XGBoost模型
-- [ ] 离线评估：准确率、胜率提升
-- [ ] 调参优化
-- [ ] 生成模型文件
-
-### 阶段4：推理服务部署（1周）
-
-- [ ] 实现FastAPI推理服务
-- [ ] 本地测试推理逻辑
-- [ ] 编写Dockerfile
-- [ ] 部署到Cloud Run
-- [ ] 性能测试（延迟、并发）
-
-### 阶段5：集成与上线（1周）
-
-- [ ] 游戏Bot集成推荐API
-- [ ] 灰度测试（部分对局使用推荐）
-- [ ] 监控推荐效果与胜率
-- [ ] 全量上线
-
-### 阶段6：监控与迭代（持续）
-
-- [ ] 设置胜率监控Dashboard
-- [ ] 配置每周自动重训练
-- [ ] 根据效果优化特征/模型
-- [ ] A/B测试不同模型版本
+**总工时**：约41-42小时（Phase 1核心功能）
 
 ---
 
@@ -765,13 +699,4 @@ Cloud Run免费额度：180,000 vCPU秒/月
 
 | 日期 | 版本 | 变更内容 |
 |------|------|----------|
-| 2026-01-14 | v0.1 | 初始版本，待确认游戏规则细节 |
-
----
-
-## 待确认问题
-
-1. ⚠️ **Radiant方人数**：是否固定10人？还是1-10人可变？
-2. ⚠️ **英雄重复规则**：是否只有Radiant可以重复，Dire不能重复？
-3. ⚠️ **推荐时机**：Dire是否在Radiant全部选完后一次性选10个？还是交替选？
-4. ⚠️ **现有数据**：是否已有历史对局数据可以导入？
+| 2026-01-14 | v1.0 | 游戏规则已确认，统一为专有表数据方案 |
