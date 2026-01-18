@@ -1,7 +1,7 @@
 import { InfoCircleOutlined, SmileOutlined } from '@ant-design/icons';
 import { Button, Result } from 'antd';
-import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import React, { useCallback, useEffect } from 'react';
 
 interface ActiveResultProps {
