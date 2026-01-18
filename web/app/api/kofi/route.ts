@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { kofiActiveUrl } from '@/config/constant';
 import { logger } from 'firebase-functions/v2';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { kofiActiveUrl } from '@/config/constant';
 
 export async function POST(request: NextRequest) {
   try {

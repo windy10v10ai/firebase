@@ -1,5 +1,6 @@
-import DataTable from '../../components/DataTable';
 import { useTranslations } from 'next-intl';
+
+import DataTable from '../../components/DataTable';
 
 interface DisclosureItem {
   title: string;
