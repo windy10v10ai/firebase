@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { afdianActiveUrl } from '@/config/constant';
 import { logger } from 'firebase-functions/v2';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { afdianActiveUrl } from '@/config/constant';
 
 export async function POST(request: NextRequest) {
   try {

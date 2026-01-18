@@ -1,12 +1,14 @@
 'use client';
-import { useTranslations } from 'next-intl';
 import { IdcardOutlined, AccountBookOutlined, MailOutlined } from '@ant-design/icons';
 import { Form, Input, Button, Spin } from 'antd';
-import React, { useState, useEffect } from 'react';
-import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
 import axios from 'axios';
-import ActiveResult from './ActiveResult';
+import { useTranslations } from 'next-intl';
+import React, { useState, useEffect } from 'react';
+
+import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
 import { PlatformType } from '../../types/platform';
+
+import ActiveResult from './ActiveResult';
 
 interface ManualActiveProps {
   activeType: PlatformType;
