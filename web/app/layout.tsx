@@ -1,10 +1,14 @@
+import { Inter } from 'next/font/google';
+import Link from 'next/link';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
+
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { bodyDivStyle, bodyMainStyle } from './style/CSSProperties';
+
+import './globals.css';
+
+import type { Metadata } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,13 +32,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <header className="card-container shadow-lg border-b border-gray-700">
               <nav className="container mx-auto px-4 py-4">
                 <div className="flex justify-between items-center">
-                  <a href="/" className="text-xl font-bold text-white link-hover">
+                  <Link href="/" className="text-xl font-bold text-white link-hover">
                     {messages.navigation.home}
-                  </a>
+                  </Link>
                   <div className="flex items-center space-x-4">
-                    <a href="/legal/disclosure" className="text-content link-hover">
+                    <Link href="/legal/disclosure" className="text-content link-hover">
                       {messages.navigation.disclosure}
-                    </a>
+                    </Link>
                     <LanguageSwitcher />
                   </div>
                 </div>

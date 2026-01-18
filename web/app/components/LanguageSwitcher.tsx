@@ -1,13 +1,11 @@
 'use client';
 
-import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
-  const t = useTranslations();
 
   const switchLocale = (newLocale: string) => {
     // 设置 cookie

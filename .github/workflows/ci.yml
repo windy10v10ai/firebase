@@ -3,9 +3,6 @@ name: CI
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches:
-      - develop
-      - main
 
 permissions:
   contents: read
@@ -35,7 +32,9 @@ jobs:
           firebase experiments:enable webframeworks
 
       - name: Lint Check
-        run: (cd api && npm run lint:check)
+        run: (cd api && npm run lint)
+      - name: Lint Check (Web)
+        run: (cd web && npm run lint)
       - name: Unit Test
         run: (cd api && npm run test)
       - name: E2E Test

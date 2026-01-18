@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { SmileOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, SmileOutlined } from '@ant-design/icons';
 import { Button, Result } from 'antd';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import React, { useCallback, useEffect } from 'react';
 
 interface ActiveResultProps {
   activeType: string;
@@ -17,7 +17,7 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
   const [message, setMessage] = React.useState<string>('');
   const [btnText, setBtnText] = React.useState<string>('');
 
-  const getResultMessage = () => {
+  const getResultMessage = useCallback(() => {
     if (props.result) {
       setMessage(t('avticeResult.success.message'));
       setBtnText(t('avticeResult.success.btnText'));
@@ -33,7 +33,7 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
       }
       setBtnText(t('avticeResult.error.btnText'));
     }
-  };
+  }, [props.activeType, props.errorMsg, props.result, t]);
 
   const handleClick = () => {
     if (props.result) {
@@ -47,7 +47,7 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
 
   useEffect(() => {
     getResultMessage();
-  }, [props.result]);
+  }, [getResultMessage]);
 
   return (
     <Result

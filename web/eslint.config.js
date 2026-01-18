@@ -1,0 +1,31 @@
+const { FlatCompat } = require('@eslint/eslintrc');
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  resolvePluginsRelativeTo: __dirname,
+});
+
+module.exports = [
+  ...compat.config({
+    extends: ['next/core-web-vitals'],
+    plugins: ['import', 'unused-imports'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'warn',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
+      ],
+      'import/order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+          'newlines-between': 'always',
+          pathGroupsExcludedImportTypes: ['builtin', 'external', 'object'],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          pathGroups: [{ pattern: '~/**', group: 'external', position: 'before' }],
+        },
+      ],
+    },
+  }),
+];
