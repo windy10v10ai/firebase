@@ -36,6 +36,8 @@ jobs:
 
       - name: Lint Check
         run: (cd api && npm run lint:check)
+      - name: Lint Check (Web)
+        run: (cd web && npm run lint:check)
       - name: Unit Test
         run: (cd api && npm run test)
       - name: E2E Test
