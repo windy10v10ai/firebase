@@ -24,6 +24,9 @@ CREATE TABLE `windy10v10ai.dota2.matches` (
   difficulty INT64,
   server_type STRING,
 
+  -- AI推荐相关（用于AB测试和效果评估）
+  recommendation_strategy STRING,  -- 'baseline', 'xgboost_v1', 'xgboost_v2', 'random' 等
+
   -- 统计字段
   radiant_player_count INT64,
   dire_player_count INT64
@@ -65,6 +68,7 @@ INSERT INTO `windy10v10ai.dota2.matches`
   game_version,
   difficulty,
   server_type,
+  recommendation_strategy,
   radiant_player_count,
   dire_player_count
 )
@@ -151,6 +155,7 @@ SELECT
   game_version,
   difficulty,
   server_type,
+  NULL as recommendation_strategy,  -- 历史数据无此字段，设为NULL
   ARRAY_LENGTH(radiant_heroes) as radiant_player_count,
   ARRAY_LENGTH(dire_heroes) as dire_player_count
 FROM extracted_heroes
@@ -345,6 +350,7 @@ export class BigQueryService {
         game_version: gameEnd.version,
         difficulty: gameEnd.difficulty,
         server_type: 'production',
+        recommendation_strategy: gameEnd.recommendationStrategy || null,  // 'baseline', 'xgboost_v1', etc.
         radiant_player_count: radiantHeroes.length,
         dire_player_count: direHeroes.length,
       };

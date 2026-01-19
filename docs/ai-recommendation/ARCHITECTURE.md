@@ -589,6 +589,7 @@ export class BigQueryService {
       game_version: gameEnd.version,
       difficulty: gameEnd.difficulty,
       server_type: 'production',
+      recommendation_strategy: gameEnd.recommendationStrategy || null,  // 'baseline', 'xgboost_v1', etc.
       radiant_player_count: radiantHeroes.length,
       dire_player_count: direHeroes.length,
     };
