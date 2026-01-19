@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
 import {useTranslations} from 'next-intl';
+import React from 'react';
+
 import Card from './components/Card';
-import Section from './components/Section';
 import ProductDisplay from './components/ProductDisplay';
+import Section from './components/Section';
 
 export default function Home() {
   const t = useTranslations();
