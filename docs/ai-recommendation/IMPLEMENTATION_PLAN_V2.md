@@ -657,6 +657,7 @@ gcloud run deploy ${SERVICE_NAME} \
 **SQL监控查询**：
 ```sql
 -- 统计AI推荐的胜率
+-- 注意：需要在game_end_match事件中添加use_ai_recommendation参数
 SELECT
   COUNT(*) as total_matches,
   SUM(CASE WHEN winner = 3 THEN 1 ELSE 0 END) as dire_wins,
@@ -665,13 +666,13 @@ FROM (
   SELECT
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'match_id') as match_id,
     (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'winner_team_id') as winner,
-    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'server_type') as server_type
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'use_ai_recommendation') as use_ai
   FROM `windy10v10ai.analytics_<property_id>.events_*`
   WHERE event_name = 'game_end_match'
     AND _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY))
                           AND FORMAT_DATE('%Y%m%d', CURRENT_DATE())
 )
-WHERE server_type = 'ai_recommendation';
+WHERE use_ai = 'true';
 ```
 
 **验收标准**：

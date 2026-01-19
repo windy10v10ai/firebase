@@ -48,7 +48,7 @@
 │  ├── /api/analytics/game-end                     │
 │  │   └── 接收对局数据                            │
 │  ├── /api/hero-recommendation (新增)             │
-│  │   └── 转发推荐请求到Python服务                │
+│  │   └── 直接请求Python服务                      │
 │  └── BigQueryService (新增)                      │
 │      └── 直接写入对局数据到BigQuery              │
 └─────────────────────────────────────────────────┘

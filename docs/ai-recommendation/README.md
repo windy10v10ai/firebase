@@ -11,7 +11,6 @@
 | [BIGQUERY_SETUP.md](./BIGQUERY_SETUP.md) | BigQuery建表与数据导入（必读） | ✅ v1.0 |
 | [IMPLEMENTATION_PLAN_V2.md](./IMPLEMENTATION_PLAN_V2.md) | 分阶段实施计划（推荐） | ✅ v2.1 |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | 系统架构设计文档 | ✅ v1.0 |
-| [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | 原始实施计划（参考） | 📦 v0.1 |
 | [GITHUB_ISSUES.md](./GITHUB_ISSUES.md) | GitHub Issues模板 | 📝 待更新 |
 
 ### 🎯 项目目标
