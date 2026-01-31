@@ -27,6 +27,67 @@ function callGameStart(app: INestApplication, steamIds: number[]): request.Test 
     .set(headers);
 }
 
+// 验证 PlayerDto 包含所有计算字段
+function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
+  expect(playerDto.seasonLevel).toBeDefined();
+  expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
+  expect(playerDto.seasonNextLevelPoint).toBeDefined();
+  expect(playerDto.memberLevel).toBeDefined();
+  expect(playerDto.memberCurrentLevelPoint).toBeDefined();
+  expect(playerDto.memberNextLevelPoint).toBeDefined();
+  expect(playerDto.totalLevel).toBeDefined();
+  expect(playerDto.useableLevel).toBeDefined();
+  expect(playerDto.properties).toBeDefined();
+  expect(playerDto.playerSetting).toBeDefined();
+}
+
+// 创建 GameEnd 请求体的默认玩家数据
+interface GameEndPlayerOptions {
+  steamId: number;
+  battlePoints?: number;
+  teamId?: number;
+  isDisconnected?: boolean;
+}
+
+function createGameEndPlayer(options: GameEndPlayerOptions) {
+  return {
+    isDisconnected: options.isDisconnected ?? false,
+    score: 10,
+    damageTaken: 1000,
+    steamId: options.steamId,
+    damage: 5000,
+    teamId: options.teamId ?? 2,
+    level: 20,
+    kills: 5,
+    deaths: 3,
+    assists: 2,
+    healing: 0,
+    lastHits: 50,
+    towerKills: 1,
+    gold: 10000,
+    battlePoints: options.battlePoints ?? 100,
+    heroName: 'npc_dota_hero_medusa',
+  };
+}
+
+interface GameEndPayloadOptions {
+  players?: GameEndPlayerOptions[];
+  winnerTeamId?: number;
+}
+
+function createGameEndPayload(options: GameEndPayloadOptions = {}) {
+  return {
+    matchId: '8000000001',
+    version: 'v4.05',
+    winnerTeamId: options.winnerTeamId ?? 2,
+    players: (options.players ?? []).map(createGameEndPlayer),
+    gameTimeMsec: 900000,
+    gameOptions: {},
+    difficulty: 5,
+    steamId: 0,
+  };
+}
+
 describe('PlayerController (e2e)', () => {
   let app: INestApplication;
 
@@ -658,20 +719,11 @@ describe('PlayerController (e2e)', () => {
       expect(playerDto.seasonPointTotal).toEqual(500);
       expect(playerDto.memberPointTotal).toEqual(200);
       // 验证计算字段
-      expect(playerDto.seasonLevel).toBeDefined();
-      expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
-      expect(playerDto.seasonNextLevelPoint).toBeDefined();
-      expect(playerDto.memberLevel).toBeDefined();
-      expect(playerDto.memberCurrentLevelPoint).toBeDefined();
-      expect(playerDto.memberNextLevelPoint).toBeDefined();
-      expect(playerDto.totalLevel).toBeDefined();
-      expect(playerDto.useableLevel).toBeDefined();
+      expectPlayerDtoHasComputedFields(playerDto);
       // 验证属性
       expect(playerDto.properties).toHaveLength(1);
       expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
       expect(playerDto.properties[0].level).toEqual(2);
-      // 验证 playerSetting
-      expect(playerDto.playerSetting).toBeDefined();
     });
 
     it('添加多个不同属性', async () => {
@@ -777,20 +829,12 @@ describe('PlayerController (e2e)', () => {
       expect(playerDto.id).toEqual(steamId.toString());
       expect(playerDto.seasonPointTotal).toEqual(300);
       expect(playerDto.memberPointTotal).toEqual(100);
-      // 计算字段
       expect(playerDto.seasonLevel).toEqual(3);
-      expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
-      expect(playerDto.seasonNextLevelPoint).toBeDefined();
-      expect(playerDto.memberLevel).toBeDefined();
-      expect(playerDto.memberCurrentLevelPoint).toBeDefined();
-      expect(playerDto.memberNextLevelPoint).toBeDefined();
-      expect(playerDto.totalLevel).toBeDefined();
-      expect(playerDto.useableLevel).toBeDefined();
+      // 计算字段
+      expectPlayerDtoHasComputedFields(playerDto);
       // 属性
       expect(playerDto.properties).toHaveLength(1);
       expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
-      // playerSetting
-      expect(playerDto.playerSetting).toBeDefined();
     });
 
     it('获取不存在的玩家 返回空', async () => {
@@ -879,19 +923,8 @@ describe('PlayerController (e2e)', () => {
       expect(player).toBeDefined();
 
       // 验证计算字段存在
-      expect(player.seasonLevel).toBeDefined();
-      expect(player.seasonCurrrentLevelPoint).toBeDefined();
-      expect(player.seasonNextLevelPoint).toBeDefined();
-      expect(player.memberLevel).toBeDefined();
-      expect(player.memberCurrentLevelPoint).toBeDefined();
-      expect(player.memberNextLevelPoint).toBeDefined();
-      expect(player.totalLevel).toBeDefined();
-      expect(player.useableLevel).toBeDefined();
-
-      // 验证 properties 和 playerSetting
-      expect(player.properties).toBeDefined();
+      expectPlayerDtoHasComputedFields(player);
       expect(player.properties.length).toBeGreaterThanOrEqual(1);
-      expect(player.playerSetting).toBeDefined();
     });
 
     it('验证 pointInfo 包含正确的会员积分信息', async () => {
@@ -1047,16 +1080,7 @@ describe('PlayerController (e2e)', () => {
   describe('Game End 响应体验证', () => {
     it('验证响应返回OK字符串', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
-      const result = await post(app, gameEndUrl, {
-        matchId: '8000000001',
-        version: 'v4.05',
-        winnerTeamId: 2,
-        players: [],
-        gameTimeMsec: 900000,
-        gameOptions: {},
-        difficulty: 5,
-        steamId: 0,
-      });
+      const result = await post(app, gameEndUrl, createGameEndPayload());
 
       expect(result.status).toEqual(201);
       expect(result.text).toEqual('OK');
@@ -1070,35 +1094,13 @@ describe('PlayerController (e2e)', () => {
       await callGameStart(app, [steamId]);
 
       // 游戏结束，玩家断开连接
-      const result = await post(app, gameEndUrl, {
-        matchId: '8000000001',
-        version: 'v4.05',
-        winnerTeamId: 2,
-        players: [
-          {
-            isDisconnected: true,
-            score: 10,
-            damageTaken: 1000,
-            steamId,
-            damage: 5000,
-            teamId: 2,
-            level: 20,
-            kills: 5,
-            deaths: 3,
-            assists: 2,
-            healing: 0,
-            lastHits: 50,
-            towerKills: 1,
-            gold: 10000,
-            battlePoints: 50,
-            heroName: 'npc_dota_hero_medusa',
-          },
-        ],
-        gameTimeMsec: 900000,
-        gameOptions: {},
-        difficulty: 5,
-        steamId: 0,
-      });
+      const result = await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId, battlePoints: 50, isDisconnected: true }],
+        }),
+      );
 
       expect(result.status).toEqual(201);
 
@@ -1115,35 +1117,13 @@ describe('PlayerController (e2e)', () => {
       await callGameStart(app, [steamId]);
 
       // 游戏结束，玩家胜利 (teamId === winnerTeamId)
-      const result = await post(app, gameEndUrl, {
-        matchId: '8000000001',
-        version: 'v4.05',
-        winnerTeamId: 2,
-        players: [
-          {
-            isDisconnected: false,
-            score: 10,
-            damageTaken: 1000,
-            steamId,
-            damage: 5000,
-            teamId: 2, // 与 winnerTeamId 相同
-            level: 20,
-            kills: 5,
-            deaths: 3,
-            assists: 2,
-            healing: 0,
-            lastHits: 50,
-            towerKills: 1,
-            gold: 10000,
-            battlePoints: 100,
-            heroName: 'npc_dota_hero_medusa',
-          },
-        ],
-        gameTimeMsec: 900000,
-        gameOptions: {},
-        difficulty: 5,
-        steamId: 0,
-      });
+      const result = await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId, teamId: 2 }], // teamId === winnerTeamId
+        }),
+      );
 
       expect(result.status).toEqual(201);
 
@@ -1159,35 +1139,13 @@ describe('PlayerController (e2e)', () => {
       await callGameStart(app, [steamId]);
 
       // 游戏结束，玩家失败 (teamId !== winnerTeamId)
-      const result = await post(app, gameEndUrl, {
-        matchId: '8000000001',
-        version: 'v4.05',
-        winnerTeamId: 2,
-        players: [
-          {
-            isDisconnected: false,
-            score: 10,
-            damageTaken: 1000,
-            steamId,
-            damage: 5000,
-            teamId: 3, // 与 winnerTeamId 不同
-            level: 20,
-            kills: 5,
-            deaths: 3,
-            assists: 2,
-            healing: 0,
-            lastHits: 50,
-            towerKills: 1,
-            gold: 10000,
-            battlePoints: 100,
-            heroName: 'npc_dota_hero_medusa',
-          },
-        ],
-        gameTimeMsec: 900000,
-        gameOptions: {},
-        difficulty: 5,
-        steamId: 0,
-      });
+      const result = await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId, teamId: 3 }], // teamId !== winnerTeamId
+        }),
+      );
 
       expect(result.status).toEqual(201);
 
