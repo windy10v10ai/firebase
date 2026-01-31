@@ -7,7 +7,7 @@ import { Player } from '../../src/player/entities/player.entity';
 import { PlayerSettingService } from '../../src/player/player-setting.service';
 import { PlayerService } from '../../src/player/player.service';
 
-import { get, put } from './util-http';
+import { put } from './util-http';
 
 interface createPlayerParams {
   steamId: number;
@@ -53,16 +53,10 @@ export async function addPlayerProperty(
   property: string,
   value: number,
 ): Promise<void> {
-  const result = await put(app, `/api/player-property`, {
+  const result = await put(app, `/api/game/addPlayerProperty`, {
     steamId,
     name: property,
     level: value,
   });
   expect(result.status).toEqual(200);
-}
-
-export async function getPlayerProperty(app: INestApplication, steamId: number): Promise<number> {
-  const result = await get(app, `/api/player-property/steamId/${steamId}`);
-  expect(result.status).toEqual(200);
-  return result.body;
 }
