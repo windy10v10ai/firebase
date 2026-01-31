@@ -991,12 +991,12 @@ describe('PlayerController (e2e)', () => {
     });
 
     it('验证 useableLevel 正确计算', async () => {
-      const steamId = 100000504;
+      const steamId = 100000514;
       mockDate('2023-12-01T00:00:00.000Z');
-      // 创建玩家 200分 = level 2
+      // 创建玩家 100分 = level 1 (根据公式 getSeasonTotalPoint(2) = 100)
       await createPlayer(app, {
         steamId,
-        seasonPointTotal: 200,
+        seasonPointTotal: 100,
         memberPointTotal: 0,
       });
 
@@ -1009,9 +1009,9 @@ describe('PlayerController (e2e)', () => {
 
       expect(result.status).toEqual(200);
       const playerDto = result.body;
-      expect(playerDto.seasonLevel).toEqual(2);
-      expect(playerDto.totalLevel).toEqual(2);
-      expect(playerDto.useableLevel).toEqual(1); // 2 - 1 = 1
+      expect(playerDto.seasonLevel).toEqual(1);
+      expect(playerDto.totalLevel).toEqual(1);
+      expect(playerDto.useableLevel).toEqual(0); // 1 - 1 = 0
     });
   });
 
@@ -1044,20 +1044,20 @@ describe('PlayerController (e2e)', () => {
       expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
     });
 
-    it('获取不存在的玩家 返回空', async () => {
+    it('获取不存在的玩家 返回空对象', async () => {
       const steamId = 100000699;
 
       const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
 
       expect(result.status).toEqual(200);
-      // 不存在的玩家返回空
-      expect(result.body).toBeFalsy();
+      // 不存在的玩家返回空对象
+      expect(result.body).toEqual({});
     });
 
     it('验证PlayerDto计算字段正确性', async () => {
-      const steamId = 100000602;
+      const steamId = 100000612;
       mockDate('2023-12-01T00:00:00.000Z');
-      // 500分 = level 5, 下一级需要100分
+      // 500分 = level 3 (getSeasonTotalPoint(3)=300, getSeasonTotalPoint(4)=600)
       // 会员100分 = level 1
       await createPlayer(app, {
         steamId,
@@ -1069,12 +1069,12 @@ describe('PlayerController (e2e)', () => {
 
       expect(result.status).toEqual(200);
       const playerDto = result.body;
-      expect(playerDto.seasonLevel).toEqual(5);
-      expect(playerDto.seasonCurrrentLevelPoint).toEqual(0); // 500 - 500 = 0
-      expect(playerDto.seasonNextLevelPoint).toEqual(100);
+      expect(playerDto.seasonLevel).toEqual(3);
+      expect(playerDto.seasonCurrrentLevelPoint).toEqual(200); // 500 - 300 = 200
+      expect(playerDto.seasonNextLevelPoint).toEqual(300); // 100 * 3 = 300
       expect(playerDto.memberLevel).toEqual(1);
-      expect(playerDto.totalLevel).toEqual(6); // 5 + 1 = 6
-      expect(playerDto.useableLevel).toEqual(6); // 没有使用任何属性
+      expect(playerDto.totalLevel).toEqual(4); // 3 + 1 = 4
+      expect(playerDto.useableLevel).toEqual(4); // 没有使用任何属性
     });
   });
 
