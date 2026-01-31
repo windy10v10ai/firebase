@@ -17,6 +17,7 @@ export class PlayerInfoService {
 
   /**
    * 根据 Steam ID 查找单个 PlayerDto
+   * @deprecated 此方法将在未来版本中移除，请使用 findPlayerInfoBySteamId 替代
    * @param steamId Steam ID
    * @returns PlayerDto
    */
@@ -27,6 +28,7 @@ export class PlayerInfoService {
 
   /**
    * 根据 Steam ID 列表查找多个 PlayerDto
+   * @deprecated 此方法将在未来版本中移除，请使用 findPlayerInfoBySteamIds 替代
    * @param ids Steam ID 字符串数组
    * @returns PlayerDto 数组
    */
@@ -70,14 +72,6 @@ export class PlayerInfoService {
   }
 
   /**
-   * 根据 Steam ID 删除玩家属性
-   * @param steamId Steam ID
-   */
-  async deletePlayerPropertyBySteamId(steamId: number): Promise<void> {
-    await this.playerPropertyService.deleteBySteamId(steamId);
-  }
-
-  /**
    * 重置玩家属性
    * @param steamId Steam ID
    * @param useMemberPoint 是否使用会员积分
@@ -111,6 +105,6 @@ export class PlayerInfoService {
     }
 
     // 重置玩家属性
-    await this.deletePlayerPropertyBySteamId(steamId);
+    await this.playerPropertyService.deleteBySteamId(steamId);
   }
 }

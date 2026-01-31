@@ -8,6 +8,10 @@ import { PlayerService } from '../player/player.service';
 import { CreatePlayerPropertyDto } from './dto/create-player-property.dto';
 import { UpdatePlayerPropertyDto } from './dto/update-player-property.dto';
 import { PlayerProperty } from './entities/player-property.entity';
+
+/**
+ * @deprecated 此 Service 将在未来版本中移除，请使用 PlayerPropertyV2Service 替代
+ */
 @Injectable()
 export class PlayerPropertyService {
   static PROPERTY_NAME_LIST = [
@@ -42,6 +46,9 @@ export class PlayerPropertyService {
     private readonly playerService: PlayerService,
   ) {}
 
+  /**
+   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.create 替代
+   */
   async create(createPlayerPropertyDto: CreatePlayerPropertyDto) {
     this.validatePropertyName(createPlayerPropertyDto.name);
     await this.cheakPlayerLevel(createPlayerPropertyDto.steamId, createPlayerPropertyDto.level);
@@ -50,6 +57,9 @@ export class PlayerPropertyService {
       ...createPlayerPropertyDto,
     });
   }
+  /**
+   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.update 替代
+   */
   async update(updatePlayerPropertyDto: UpdatePlayerPropertyDto): Promise<PlayerProperty> {
     this.validatePropertyName(updatePlayerPropertyDto.name);
     const existPlayerProperty = await this.playerPropertyRepository.findById(
@@ -68,10 +78,16 @@ export class PlayerPropertyService {
     }
   }
 
+  /**
+   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.findBySteamId 替代
+   */
   async findBySteamId(steamId: number) {
     return this.playerPropertyRepository.whereEqualTo('steamId', steamId).find();
   }
 
+  /**
+   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.deleteBySteamId 替代
+   */
   async deleteBySteamId(steamId: number) {
     const playerPropertyList = await this.findBySteamId(steamId);
     for (const playerProperty of playerPropertyList) {
@@ -79,6 +95,9 @@ export class PlayerPropertyService {
     }
   }
 
+  /**
+   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.getPlayerUsedLevel 替代
+   */
   async getPlayerUsedLevel(steamId: number) {
     const playerProperties = await this.findBySteamId(steamId);
     let usedLevel = 0;

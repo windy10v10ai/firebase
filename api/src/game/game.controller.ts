@@ -10,7 +10,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 
 import { AnalyticsService } from '../analytics/analytics.service';
@@ -125,6 +125,11 @@ export class GameController {
     return this.gameService.getOK();
   }
 
+  @ApiOperation({
+    summary: 'Get player info (deprecated)',
+    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
+    deprecated: true,
+  })
   @Put('addPlayerProperty')
   async addPlayerProperty(
     @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
@@ -134,6 +139,11 @@ export class GameController {
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
+  @ApiOperation({
+    summary: 'Get player info (deprecated)',
+    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
+    deprecated: true,
+  })
   @Post('resetPlayerProperty')
   async resetPlayerProperty(@Body() gameResetPlayerProperty: GameResetPlayerProperty) {
     await this.playerInfoService.resetPlayerProperty(
@@ -145,7 +155,11 @@ export class GameController {
     return await this.playerInfoService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
   }
 
-  // FIXME 移动到player模块，需要修改Dota2中的调用
+  @ApiOperation({
+    summary: 'Get player info (deprecated)',
+    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
+    deprecated: true,
+  })
   @Get('player/steamId/:steamId')
   async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
     return await this.playerInfoService.findPlayerDtoBySteamId(steamId);
