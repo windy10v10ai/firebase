@@ -3,13 +3,15 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
+import { get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
 import { addPlayerProperty, createPlayer, getPlayer, getPlayerProperty } from './util/util-player';
 
 const gameStartUrl = '/api/game/start/';
 const gameEndUrl = '/api/game/end';
 const memberPostUrl = '/api/members/';
 const resetPlayerPropertyUrl = '/api/game/resetPlayerProperty';
+const addPlayerPropertyUrl = '/api/game/addPlayerProperty';
+const getPlayerInfoUrl = '/api/game/player/steamId';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = 'Invalid_NotOnDedicatedServer';
@@ -628,6 +630,570 @@ describe('PlayerController (e2e)', () => {
         })
         .set(headers);
       expect(result.status).toEqual(201);
+    });
+  });
+
+  describe(`${addPlayerPropertyUrl} (Put) 添加玩家属性`, () => {
+    it('添加玩家属性 返回更新后的PlayerDto', async () => {
+      const steamId = 100000501;
+      mockDate('2023-12-01T00:00:00.000Z');
+      // 先创建玩家
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 500,
+        memberPointTotal: 200,
+      });
+
+      // 添加属性
+      const result = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 2,
+      });
+
+      expect(result.status).toEqual(200);
+      // 验证返回的 PlayerDto 结构
+      const playerDto = result.body;
+      expect(playerDto.id).toEqual(steamId.toString());
+      expect(playerDto.seasonPointTotal).toEqual(500);
+      expect(playerDto.memberPointTotal).toEqual(200);
+      // 验证计算字段
+      expect(playerDto.seasonLevel).toBeDefined();
+      expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
+      expect(playerDto.seasonNextLevelPoint).toBeDefined();
+      expect(playerDto.memberLevel).toBeDefined();
+      expect(playerDto.memberCurrentLevelPoint).toBeDefined();
+      expect(playerDto.memberNextLevelPoint).toBeDefined();
+      expect(playerDto.totalLevel).toBeDefined();
+      expect(playerDto.useableLevel).toBeDefined();
+      // 验证属性
+      expect(playerDto.properties).toHaveLength(1);
+      expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
+      expect(playerDto.properties[0].level).toEqual(2);
+      // 验证 playerSetting
+      expect(playerDto.playerSetting).toBeDefined();
+    });
+
+    it('添加多个不同属性', async () => {
+      const steamId = 100000502;
+      mockDate('2023-12-01T00:00:00.000Z');
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 1000,
+        memberPointTotal: 500,
+      });
+
+      // 添加第一个属性
+      await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 1,
+      });
+
+      // 添加第二个属性
+      const result = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_attack_speed',
+        level: 2,
+      });
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.properties).toHaveLength(2);
+    });
+
+    it('更新已有属性 level累加', async () => {
+      const steamId = 100000503;
+      mockDate('2023-12-01T00:00:00.000Z');
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 1000,
+        memberPointTotal: 500,
+      });
+
+      // 第一次添加属性
+      await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 2,
+      });
+
+      // 第二次添加同一属性
+      const result = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 3,
+      });
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.properties).toHaveLength(1);
+      expect(playerDto.properties[0].level).toEqual(5); // 2 + 3 = 5
+    });
+
+    it('验证 useableLevel 正确计算', async () => {
+      const steamId = 100000504;
+      mockDate('2023-12-01T00:00:00.000Z');
+      // 创建玩家 200分 = level 2
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 200,
+        memberPointTotal: 0,
+      });
+
+      // 添加属性消耗 1 level
+      const result = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 1,
+      });
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.seasonLevel).toEqual(2);
+      expect(playerDto.totalLevel).toEqual(2);
+      expect(playerDto.useableLevel).toEqual(1); // 2 - 1 = 1
+    });
+  });
+
+  describe(`${getPlayerInfoUrl}/:steamId (Get) 获取玩家信息`, () => {
+    it('获取已存在玩家 返回完整PlayerDto', async () => {
+      const steamId = 100000601;
+      mockDate('2023-12-01T00:00:00.000Z');
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 300,
+        memberPointTotal: 100,
+      });
+
+      // 添加一些属性
+      await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
+
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      // 基础字段
+      expect(playerDto.id).toEqual(steamId.toString());
+      expect(playerDto.seasonPointTotal).toEqual(300);
+      expect(playerDto.memberPointTotal).toEqual(100);
+      // 计算字段
+      expect(playerDto.seasonLevel).toEqual(3);
+      expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
+      expect(playerDto.seasonNextLevelPoint).toBeDefined();
+      expect(playerDto.memberLevel).toBeDefined();
+      expect(playerDto.memberCurrentLevelPoint).toBeDefined();
+      expect(playerDto.memberNextLevelPoint).toBeDefined();
+      expect(playerDto.totalLevel).toBeDefined();
+      expect(playerDto.useableLevel).toBeDefined();
+      // 属性
+      expect(playerDto.properties).toHaveLength(1);
+      expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
+      // playerSetting
+      expect(playerDto.playerSetting).toBeDefined();
+    });
+
+    it('获取不存在的玩家 返回空', async () => {
+      const steamId = 100000699;
+
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
+
+      expect(result.status).toEqual(200);
+      // 不存在的玩家返回空
+      expect(result.body).toBeFalsy();
+    });
+
+    it('验证PlayerDto计算字段正确性', async () => {
+      const steamId = 100000602;
+      mockDate('2023-12-01T00:00:00.000Z');
+      // 500分 = level 5, 下一级需要100分
+      // 会员100分 = level 1
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 500,
+        memberPointTotal: 100,
+      });
+
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.seasonLevel).toEqual(5);
+      expect(playerDto.seasonCurrrentLevelPoint).toEqual(0); // 500 - 500 = 0
+      expect(playerDto.seasonNextLevelPoint).toEqual(100);
+      expect(playerDto.memberLevel).toEqual(1);
+      expect(playerDto.totalLevel).toEqual(6); // 5 + 1 = 6
+      expect(playerDto.useableLevel).toEqual(6); // 没有使用任何属性
+    });
+  });
+
+  describe('Game Start 响应体验证', () => {
+    it('验证响应体结构完整性 (members, players, pointInfo)', async () => {
+      const steamId = 100000701;
+      mockDate('2023-12-01T00:00:00.000Z');
+
+      // 创建会员
+      await post(app, memberPostUrl, {
+        steamId,
+        month: 1,
+        level: MemberLevel.NORMAL,
+      });
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      const response = result.body;
+      // 验证 members 数组
+      expect(response.members).toBeDefined();
+      expect(Array.isArray(response.members)).toBe(true);
+      expect(response.members.length).toBeGreaterThanOrEqual(1);
+
+      // 验证 players 数组
+      expect(response.players).toBeDefined();
+      expect(Array.isArray(response.players)).toBe(true);
+      expect(response.players.length).toEqual(1);
+
+      // 验证 pointInfo 数组
+      expect(response.pointInfo).toBeDefined();
+      expect(Array.isArray(response.pointInfo)).toBe(true);
+    });
+
+    it('验证 players 包含完整的计算字段', async () => {
+      const steamId = 100000702;
+      mockDate('2023-12-01T00:00:00.000Z');
+
+      // 先创建玩家并添加积分
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 300,
+        memberPointTotal: 200,
+      });
+
+      // 添加属性
+      await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
+      expect(player).toBeDefined();
+
+      // 验证计算字段存在
+      expect(player.seasonLevel).toBeDefined();
+      expect(player.seasonCurrrentLevelPoint).toBeDefined();
+      expect(player.seasonNextLevelPoint).toBeDefined();
+      expect(player.memberLevel).toBeDefined();
+      expect(player.memberCurrentLevelPoint).toBeDefined();
+      expect(player.memberNextLevelPoint).toBeDefined();
+      expect(player.totalLevel).toBeDefined();
+      expect(player.useableLevel).toBeDefined();
+
+      // 验证 properties 和 playerSetting
+      expect(player.properties).toBeDefined();
+      expect(player.properties.length).toBeGreaterThanOrEqual(1);
+      expect(player.playerSetting).toBeDefined();
+    });
+
+    it('验证 pointInfo 包含正确的会员积分信息', async () => {
+      const steamId = 100000703;
+      mockDate('2023-12-01T00:00:00.000Z');
+
+      // 创建会员
+      await post(app, memberPostUrl, {
+        steamId,
+        month: 1,
+        level: MemberLevel.NORMAL,
+      });
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      const pointInfo = result.body.pointInfo;
+      const memberPointInfo = pointInfo.find((p: { steamId: number }) => p.steamId === steamId);
+      expect(memberPointInfo).toBeDefined();
+      expect(memberPointInfo.title).toBeDefined();
+      expect(memberPointInfo.title.cn).toBeDefined();
+      expect(memberPointInfo.title.en).toBeDefined();
+      expect(memberPointInfo.memberPoint).toEqual(100);
+    });
+
+    it('验证 MemberDto 结构', async () => {
+      const steamId = 100000704;
+      mockDate('2023-12-01T00:00:00.000Z');
+
+      await post(app, memberPostUrl, {
+        steamId,
+        month: 1,
+        level: MemberLevel.PREMIUM,
+      });
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      const member = result.body.members.find((m: { steamId: number }) => m.steamId === steamId);
+      expect(member).toBeDefined();
+      expect(member.steamId).toEqual(steamId);
+      expect(member.level).toEqual(MemberLevel.PREMIUM);
+      expect(member.expireDate).toBeDefined();
+    });
+  });
+
+  describe('Game Start 边界条件', () => {
+    it('steamIds超过10个应返回400', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamIds = Array.from({ length: 11 }, (_, i) => 200000001 + i);
+
+      const result = await callGameStart(app, steamIds);
+      expect(result.status).toEqual(400);
+    });
+
+    it('steamIds包含无效值(0或负数)应被过滤', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamIds = [100000801, 0, -1, 100000802];
+
+      const result = await callGameStart(app, steamIds);
+      expect(result.status).toEqual(200);
+      // 只有2个有效玩家
+      expect(result.body.players).toHaveLength(2);
+    });
+
+    it('steamIds刚好10个应正常返回', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamIds = Array.from({ length: 10 }, (_, i) => 200000101 + i);
+
+      const result = await callGameStart(app, steamIds);
+      expect(result.status).toEqual(200);
+      expect(result.body.players).toHaveLength(10);
+    });
+
+    it('所有steamIds都是无效值应返回空players', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamIds = [0, -1, -100];
+
+      const result = await callGameStart(app, steamIds);
+      expect(result.status).toEqual(200);
+      expect(result.body.players).toHaveLength(0);
+    });
+  });
+
+  describe('Game Start 事件奖励', () => {
+    it('活动期间内首次登录 获得活动积分', async () => {
+      const steamId = 100000901;
+      // 活动期间: 2025-12-23 ~ 2026-01-04
+      mockDate('2025-12-25T00:00:00.000Z');
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      // 验证获得了活动积分
+      const pointInfo = result.body.pointInfo;
+      const eventReward = pointInfo.find(
+        (p: { steamId: number; seasonPoint?: number }) => p.steamId === steamId && p.seasonPoint,
+      );
+      expect(eventReward).toBeDefined();
+      expect(eventReward.seasonPoint).toEqual(2026);
+
+      // 验证玩家积分
+      const player = await getPlayer(app, steamId);
+      expect(player.seasonPointTotal).toEqual(2026);
+    });
+
+    it('活动期间内第二次登录 不重复获得积分', async () => {
+      const steamId = 100000902;
+      mockDate('2025-12-25T00:00:00.000Z');
+
+      // 第一次登录
+      await callGameStart(app, [steamId]);
+      const player1 = await getPlayer(app, steamId);
+      expect(player1.seasonPointTotal).toEqual(2026);
+
+      // 第二次登录
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      // 不应该再获得活动积分
+      const pointInfo = result.body.pointInfo;
+      const eventReward = pointInfo.find(
+        (p: { steamId: number; seasonPoint?: number }) => p.steamId === steamId && p.seasonPoint,
+      );
+      expect(eventReward).toBeUndefined();
+
+      // 积分不变
+      const player2 = await getPlayer(app, steamId);
+      expect(player2.seasonPointTotal).toEqual(2026);
+    });
+
+    it('活动期间外 不获得活动积分', async () => {
+      const steamId = 100000903;
+      // 活动期间外
+      mockDate('2023-12-01T00:00:00.000Z');
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      // 不应该获得活动积分
+      const pointInfo = result.body.pointInfo;
+      const eventReward = pointInfo.find(
+        (p: { steamId: number; seasonPoint?: number }) => p.steamId === steamId && p.seasonPoint,
+      );
+      expect(eventReward).toBeUndefined();
+
+      // 玩家积分为0
+      const player = await getPlayer(app, steamId);
+      expect(player.seasonPointTotal).toEqual(0);
+    });
+  });
+
+  describe('Game End 响应体验证', () => {
+    it('验证响应返回OK字符串', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const result = await post(app, gameEndUrl, {
+        matchId: '8000000001',
+        version: 'v4.05',
+        winnerTeamId: 2,
+        players: [],
+        gameTimeMsec: 900000,
+        gameOptions: {},
+        difficulty: 5,
+        steamId: 0,
+      });
+
+      expect(result.status).toEqual(201);
+      expect(result.text).toEqual('OK');
+    });
+
+    it('断开连接的玩家 正确记录disconnectCount', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100001001;
+
+      // 先让玩家正常开始游戏
+      await callGameStart(app, [steamId]);
+
+      // 游戏结束，玩家断开连接
+      const result = await post(app, gameEndUrl, {
+        matchId: '8000000001',
+        version: 'v4.05',
+        winnerTeamId: 2,
+        players: [
+          {
+            isDisconnected: true,
+            score: 10,
+            damageTaken: 1000,
+            steamId,
+            damage: 5000,
+            teamId: 2,
+            level: 20,
+            kills: 5,
+            deaths: 3,
+            assists: 2,
+            healing: 0,
+            lastHits: 50,
+            towerKills: 1,
+            gold: 10000,
+            battlePoints: 50,
+            heroName: 'npc_dota_hero_medusa',
+          },
+        ],
+        gameTimeMsec: 900000,
+        gameOptions: {},
+        difficulty: 5,
+        steamId: 0,
+      });
+
+      expect(result.status).toEqual(201);
+
+      // 验证玩家的 disconnectCount 增加
+      const player = await getPlayer(app, steamId);
+      expect(player.disconnectCount).toEqual(1);
+    });
+
+    it('胜利的玩家 正确记录winCount', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100001002;
+
+      // 先让玩家正常开始游戏
+      await callGameStart(app, [steamId]);
+
+      // 游戏结束，玩家胜利 (teamId === winnerTeamId)
+      const result = await post(app, gameEndUrl, {
+        matchId: '8000000001',
+        version: 'v4.05',
+        winnerTeamId: 2,
+        players: [
+          {
+            isDisconnected: false,
+            score: 10,
+            damageTaken: 1000,
+            steamId,
+            damage: 5000,
+            teamId: 2, // 与 winnerTeamId 相同
+            level: 20,
+            kills: 5,
+            deaths: 3,
+            assists: 2,
+            healing: 0,
+            lastHits: 50,
+            towerKills: 1,
+            gold: 10000,
+            battlePoints: 100,
+            heroName: 'npc_dota_hero_medusa',
+          },
+        ],
+        gameTimeMsec: 900000,
+        gameOptions: {},
+        difficulty: 5,
+        steamId: 0,
+      });
+
+      expect(result.status).toEqual(201);
+
+      const player = await getPlayer(app, steamId);
+      expect(player.winCount).toEqual(1);
+      expect(player.matchCount).toEqual(1);
+    });
+
+    it('失败的玩家 matchCount增加但winCount不增加', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100001003;
+
+      await callGameStart(app, [steamId]);
+
+      // 游戏结束，玩家失败 (teamId !== winnerTeamId)
+      const result = await post(app, gameEndUrl, {
+        matchId: '8000000001',
+        version: 'v4.05',
+        winnerTeamId: 2,
+        players: [
+          {
+            isDisconnected: false,
+            score: 10,
+            damageTaken: 1000,
+            steamId,
+            damage: 5000,
+            teamId: 3, // 与 winnerTeamId 不同
+            level: 20,
+            kills: 5,
+            deaths: 3,
+            assists: 2,
+            healing: 0,
+            lastHits: 50,
+            towerKills: 1,
+            gold: 10000,
+            battlePoints: 100,
+            heroName: 'npc_dota_hero_medusa',
+          },
+        ],
+        gameTimeMsec: 900000,
+        gameOptions: {},
+        difficulty: 5,
+        steamId: 0,
+      });
+
+      expect(result.status).toEqual(201);
+
+      const player = await getPlayer(app, steamId);
+      expect(player.winCount).toEqual(0);
+      expect(player.matchCount).toEqual(1);
     });
   });
 
