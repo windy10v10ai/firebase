@@ -25,7 +25,10 @@ export class GameService {
   validateSteamIds(steamIds: number[]): number[] {
     steamIds = steamIds.filter((id) => id > 0);
     if (steamIds.length > 10) {
-      logger.error(`[Game Start] steamIds has length more than 10, ${steamIds}.`);
+      logger.warn(`[Game Start] steamIds has length more than 10, ${steamIds}.`);
+      throw new BadRequestException();
+    } else if (steamIds.length === 0) {
+      logger.warn(`[Game Start] steamIds is empty, ${steamIds}.`);
       throw new BadRequestException();
     }
     return steamIds;
