@@ -406,13 +406,12 @@ describe('PlayerController (e2e)', () => {
         expect(result.body.players).toHaveLength(10);
       });
 
-      it('所有steamIds都是无效值应返回空players', async () => {
+      it('所有steamIds都是无效值应返回400', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
         const steamIds = [0, -1, -100];
 
         const result = await callGameStart(app, steamIds);
-        expect(result.status).toEqual(200);
-        expect(result.body.players).toHaveLength(0);
+        expect(result.status).toEqual(400);
       });
     });
 
