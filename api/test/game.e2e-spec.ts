@@ -99,7 +99,7 @@ describe('PlayerController (e2e)', () => {
     restoreDate();
   });
 
-  describe(`${gameStartUrl} (Get)`, () => {
+  describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
     describe('单人开始', () => {
       it('普通玩家 新玩家 首次', async () => {
@@ -901,7 +901,7 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe(`${addPlayerPropertyUrl} (Put) 添加玩家属性`, () => {
+  describe('/api/game/addPlayerProperty (Put) 添加玩家属性', () => {
     it('添加玩家属性 返回更新后的PlayerDto', async () => {
       const steamId = 100000501;
       mockDate('2023-12-01T00:00:00.000Z');
@@ -1015,7 +1015,7 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe(`${getPlayerInfoUrl}/:steamId (Get) 获取玩家信息`, () => {
+  describe('/api/game/player/steamId/:steamId (Get) 获取玩家信息', () => {
     it('获取已存在玩家 返回完整PlayerDto', async () => {
       const steamId = 100000601;
       mockDate('2023-12-01T00:00:00.000Z');
@@ -1078,7 +1078,7 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe('Game End 响应体验证', () => {
+  describe('/api/game/end (Post) 响应体验证', () => {
     it('验证响应返回OK字符串', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const result = await post(app, gameEndUrl, createGameEndPayload());
