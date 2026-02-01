@@ -1,8 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions';
 
 import { PlayerDto } from '../player/dto/player.dto';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerService } from '../player/player.service';
+import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
 @Injectable()
@@ -17,7 +19,6 @@ export class PlayerInfoService {
 
   /**
    * 根据 Steam ID 查找单个 PlayerDto
-   * @deprecated 此方法将在未来版本中移除，请使用 findPlayerInfoBySteamId 替代
    * @param steamId Steam ID
    * @returns PlayerDto
    */
@@ -106,5 +107,54 @@ export class PlayerInfoService {
 
     // 重置玩家属性
     await this.playerPropertyService.deleteBySteamId(steamId);
+  }
+
+  /**
+   * 升级玩家属性
+   * @param updatePlayerPropertyDto 更新玩家属性 DTO
+   * @returns 更新后的 PlayerDto
+   */
+  async upgradePlayerProperty(
+    updatePlayerPropertyDto: UpdatePlayerPropertyDto,
+  ): Promise<PlayerDto> {
+    // 验证属性名称
+    this.playerPropertyService.validatePropertyName(updatePlayerPropertyDto.name);
+
+    // 检查现有属性以计算等级差值
+    const existPlayerProperty = await this.playerPropertyService.findBySteamId(
+      updatePlayerPropertyDto.steamId,
+    );
+    const existingProperty = existPlayerProperty.find(
+      (p) => p.name === updatePlayerPropertyDto.name,
+    );
+
+    // 计算等级差值
+    const levelAdd = existingProperty
+      ? updatePlayerPropertyDto.level - existingProperty.level
+      : updatePlayerPropertyDto.level;
+
+    // 验证等级
+    await this.checkPlayerLevel(updatePlayerPropertyDto.steamId, levelAdd);
+
+    // 更新属性
+    await this.playerPropertyService.update(updatePlayerPropertyDto);
+
+    // 返回更新后的 PlayerDto
+    return await this.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
+  }
+
+  // ------------------ private ------------------
+  private async checkPlayerLevel(steamId: number, levelAdd: number) {
+    const totalLevel = await this.playerService.getPlayerTotalLevel(steamId);
+    const usedLevel = await this.playerPropertyService.getPlayerUsedLevel(steamId);
+    if (totalLevel < usedLevel + levelAdd) {
+      logger.warn('[Player Info] checkPlayerLevel error', {
+        steamId,
+        totalLevel,
+        usedLevel,
+        levelAdd,
+      });
+      throw new BadRequestException();
+    }
   }
 }
