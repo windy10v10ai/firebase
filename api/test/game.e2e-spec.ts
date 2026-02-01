@@ -1018,6 +1018,38 @@ describe('PlayerController (e2e)', () => {
       expect(playerDto.totalLevel).toEqual(3); // seasonLevel 2 + memberLevel 1 = 3
       expect(playerDto.useableLevel).toEqual(2); // 3 - 1 = 2
     });
+
+    it('点数用尽时添加属性应报错', async () => {
+      const steamId = 100000515;
+      mockDate('2023-12-01T00:00:00.000Z');
+      // 创建玩家 100分 = level 2, 0分 = memberLevel 1, totalLevel = 3
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 100,
+        memberPointTotal: 0,
+      });
+
+      // 添加属性消耗所有点数，使 useableLevel = 0
+      const firstResult = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 3,
+      });
+
+      expect(firstResult.status).toEqual(200);
+      const firstPlayerDto = firstResult.body;
+      expect(firstPlayerDto.totalLevel).toEqual(3);
+      expect(firstPlayerDto.useableLevel).toEqual(0); // 3 - 3 = 0，点数已用尽
+
+      // 尝试再次添加属性，应该返回 400 错误
+      const secondResult = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_attackspeed_bonus_constant',
+        level: 1,
+      });
+
+      expect(secondResult.status).toEqual(400);
+    });
   });
 
   describe('/api/game/player/steamId/:steamId (Get) 获取玩家信息', () => {
