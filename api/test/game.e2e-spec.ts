@@ -1050,6 +1050,26 @@ describe('PlayerController (e2e)', () => {
 
       expect(secondResult.status).toEqual(400);
     });
+
+    it('一开始就添加超过上限的属性应报错', async () => {
+      const steamId = 100000516;
+      mockDate('2023-12-01T00:00:00.000Z');
+      // 创建玩家 100分 = level 2, 0分 = memberLevel 1, totalLevel = 3
+      await createPlayer(app, {
+        steamId,
+        seasonPointTotal: 100,
+        memberPointTotal: 0,
+      });
+
+      // 一开始就尝试添加超过 totalLevel 的属性，应该返回 400 错误
+      const result = await put(app, addPlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level: 4, // totalLevel = 3，尝试添加 level 4 应该报错
+      });
+
+      expect(result.status).toEqual(400);
+    });
   });
 
   describe('/api/game/player/steamId/:steamId (Get) 获取玩家信息', () => {
