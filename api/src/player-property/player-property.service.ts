@@ -3,7 +3,7 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { PlayerService } from '../player/player.service';
+import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 
 import { CreatePlayerPropertyDto } from './dto/create-player-property.dto';
 import { UpdatePlayerPropertyDto } from './dto/update-player-property.dto';
@@ -43,15 +43,12 @@ export class PlayerPropertyService {
   constructor(
     @InjectRepository(PlayerProperty)
     private readonly playerPropertyRepository: BaseFirestoreRepository<PlayerProperty>,
-    private readonly playerService: PlayerService,
   ) {}
 
   /**
    * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.create 替代
    */
   async create(createPlayerPropertyDto: CreatePlayerPropertyDto) {
-    this.validatePropertyName(createPlayerPropertyDto.name);
-    await this.cheakPlayerLevel(createPlayerPropertyDto.steamId, createPlayerPropertyDto.level);
     return this.playerPropertyRepository.create({
       id: this.buildId(createPlayerPropertyDto.steamId, createPlayerPropertyDto.name),
       ...createPlayerPropertyDto,
@@ -61,16 +58,11 @@ export class PlayerPropertyService {
    * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.update 替代
    */
   async update(updatePlayerPropertyDto: UpdatePlayerPropertyDto): Promise<PlayerProperty> {
-    this.validatePropertyName(updatePlayerPropertyDto.name);
     const existPlayerProperty = await this.playerPropertyRepository.findById(
       this.buildId(updatePlayerPropertyDto.steamId, updatePlayerPropertyDto.name),
     );
 
     if (existPlayerProperty) {
-      await this.cheakPlayerLevel(
-        updatePlayerPropertyDto.steamId,
-        updatePlayerPropertyDto.level - existPlayerProperty.level,
-      );
       existPlayerProperty.level = updatePlayerPropertyDto.level;
       return this.playerPropertyRepository.update(existPlayerProperty);
     } else {
@@ -100,28 +92,11 @@ export class PlayerPropertyService {
    */
   async getPlayerUsedLevel(steamId: number) {
     const playerProperties = await this.findBySteamId(steamId);
-    let usedLevel = 0;
-    playerProperties.forEach((playerProperty) => {
-      usedLevel += playerProperty.level;
-    });
-    return usedLevel;
+    return PlayerLevelHelper.calculateUsedLevel(playerProperties);
   }
 
   // ------------------ private ------------------
-  private async cheakPlayerLevel(steamId: number, levelAdd: number) {
-    const totalLevel = await this.playerService.getPlayerTotalLevel(steamId);
-    const usedLevel = await this.getPlayerUsedLevel(steamId);
-    if (totalLevel < usedLevel + levelAdd) {
-      logger.warn('[Player Property] checkPlayerLevel error', {
-        steamId,
-        totalLevel,
-        usedLevel,
-        levelAdd,
-      });
-      throw new BadRequestException();
-    }
-  }
-  private validatePropertyName(name: string) {
+  public validatePropertyName(name: string) {
     if (!PlayerPropertyService.PROPERTY_NAME_LIST.includes(name)) {
       logger.error(`[Player Property] validatePropertyName error, name ${name}`);
       throw new BadRequestException();

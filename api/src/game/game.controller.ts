@@ -17,11 +17,10 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
-import { PlayerDto } from '../player/dto/player.dto';
 import { PlayerService } from '../player/player.service';
+import { PlayerDto } from '../player-info/dto/player.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
-import { PlayerPropertyService } from '../player-property/player-property.service';
 import { Public } from '../util/auth/public.decorator';
 import { SecretService } from '../util/secret/secret.service';
 
@@ -37,7 +36,6 @@ export class GameController {
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
-    private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
     private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
@@ -134,8 +132,7 @@ export class GameController {
   async addPlayerProperty(
     @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
   ): Promise<PlayerDto> {
-    await this.playerPropertyService.update(updatePlayerPropertyDto);
-
+    await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
