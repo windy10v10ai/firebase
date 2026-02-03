@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { GameResetPlayerProperty } from '../game/dto/game-reset-player-property';
+import { ResetPlayerPropertyDto } from '../player-info/dto/reset-player-property.dto';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { PurchaseEvent } from './analytics.purchase.service';
@@ -58,7 +58,7 @@ export class AnalyticsService {
     }
   }
 
-  async playerResetProperty(dto: GameResetPlayerProperty): Promise<void> {
+  async playerResetProperty(dto: ResetPlayerPropertyDto): Promise<void> {
     await this.sendEvent(dto.steamId.toString(), {
       name: 'player_reset_property',
       params: {

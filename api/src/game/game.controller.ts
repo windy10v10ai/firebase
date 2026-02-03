@@ -19,12 +19,12 @@ import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerDto } from '../player-info/dto/player.dto';
+import { ResetPlayerPropertyDto } from '../player-info/dto/reset-player-property.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { Public } from '../util/auth/public.decorator';
 import { SecretService } from '../util/secret/secret.service';
 
-import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
@@ -142,14 +142,14 @@ export class GameController {
     deprecated: true,
   })
   @Post('resetPlayerProperty')
-  async resetPlayerProperty(@Body() gameResetPlayerProperty: GameResetPlayerProperty) {
+  async resetPlayerProperty(@Body() resetPlayerPropertyDto: ResetPlayerPropertyDto) {
     await this.playerInfoService.resetPlayerProperty(
-      gameResetPlayerProperty.steamId,
-      gameResetPlayerProperty.useMemberPoint,
+      resetPlayerPropertyDto.steamId,
+      resetPlayerPropertyDto.useMemberPoint,
     );
-    await this.analyticsService.playerResetProperty(gameResetPlayerProperty);
+    await this.analyticsService.playerResetProperty(resetPlayerPropertyDto);
 
-    return await this.playerInfoService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
+    return await this.playerInfoService.findPlayerDtoBySteamId(resetPlayerPropertyDto.steamId);
   }
 
   @ApiOperation({
