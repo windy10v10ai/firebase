@@ -21,7 +21,7 @@ import { PlayerService } from '../player/player.service';
 import { PlayerDto } from '../player-info/dto/player.dto';
 import { ResetPlayerPropertyDto } from '../player-info/dto/reset-player-property.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
-import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
+import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
 import { Public } from '../util/auth/public.decorator';
 import { SecretService } from '../util/secret/secret.service';
 
@@ -130,7 +130,7 @@ export class GameController {
   })
   @Put('addPlayerProperty')
   async addPlayerProperty(
-    @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
+    @Body() updatePlayerPropertyDto: PlayerPropertyItemDto,
   ): Promise<PlayerDto> {
     await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);

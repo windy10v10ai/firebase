@@ -96,9 +96,12 @@ describe('PlayerInfoController (e2e)', () => {
   });
 
   describe('PUT /api/player/property 升级玩家属性', () => {
+    beforeEach(() => {
+      mockDate('2023-12-01T00:00:00.000Z');
+    });
+
     it('添加玩家属性 返回更新后的PlayerDto', async () => {
       const steamId = 200000501;
-      mockDate('2023-12-01T00:00:00.000Z');
       // 先创建玩家
       await createPlayer(app, {
         steamId,
@@ -129,7 +132,6 @@ describe('PlayerInfoController (e2e)', () => {
 
     it('添加多个不同属性', async () => {
       const steamId = 200000502;
-      mockDate('2023-12-01T00:00:00.000Z');
       await createPlayer(app, {
         steamId,
         seasonPointTotal: 1000,
@@ -157,7 +159,6 @@ describe('PlayerInfoController (e2e)', () => {
 
     it('更新已有属性 level升级', async () => {
       const steamId = 200000503;
-      mockDate('2023-12-01T00:00:00.000Z');
       await createPlayer(app, {
         steamId,
         seasonPointTotal: 1000,
@@ -184,35 +185,50 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.properties[0].level).toEqual(3); // 更新为新的 level 值
     });
 
-    it('验证 useableLevel 正确计算', async () => {
-      const steamId = 200000514;
-      mockDate('2023-12-01T00:00:00.000Z');
-      // 创建玩家 100分 = level 2 (根据公式 getSeasonLevelBuyPoint(100) = 2)
-      // memberPointTotal 0分 = memberLevel 1 (根据公式 getMemberLevelBuyPoint(0) = 1)
-      await createPlayer(app, {
+    it.each([
+      ['添加属性 level=1 剩余 useableLevel=2', 200000514, 1, 2, 1, 2, 1],
+      ['添加属性 level=3 刚好用尽属性点', 200000515, 3, 2, 1, 0, 3],
+    ])(
+      '%s',
+      async (
+        _,
         steamId,
-        seasonPointTotal: 100,
-        memberPointTotal: 0,
-      });
+        level,
+        expectedSeasonLevel,
+        expectedMemberLevel,
+        expectedUseableLevel,
+        expectedPropertyLevel,
+      ) => {
+        // 创建玩家 100分 = level 2 (根据公式 getSeasonLevelBuyPoint(100) = 2)
+        // memberPointTotal 0分 = memberLevel 1 (根据公式 getMemberLevelBuyPoint(0) = 1)
+        await createPlayer(app, {
+          steamId,
+          seasonPointTotal: 100,
+          memberPointTotal: 0,
+        });
 
-      // 添加属性消耗 1 level
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
-        name: 'property_cooldown_percentage',
-        level: 1,
-      });
+        const result = await put(app, upgradePlayerPropertyUrl, {
+          steamId,
+          name: 'property_cooldown_percentage',
+          level,
+        });
 
-      expect(result.status).toEqual(200);
-      const playerDto = result.body;
-      expect(playerDto.seasonLevel).toEqual(2); // 100分对应 level 2
-      expect(playerDto.memberLevel).toEqual(1); // 0分对应 memberLevel 1
-      expect(playerDto.totalLevel).toEqual(3); // seasonLevel 2 + memberLevel 1 = 3
-      expect(playerDto.useableLevel).toEqual(2); // 3 - 1 = 2
-    });
+        expect(result.status).toEqual(200);
+        const playerDto = result.body;
+        expect(playerDto.seasonLevel).toEqual(expectedSeasonLevel);
+        expect(playerDto.memberLevel).toEqual(expectedMemberLevel);
+        expect(playerDto.totalLevel).toEqual(3); // seasonLevel 2 + memberLevel 1 = 3
+        expect(playerDto.useableLevel).toEqual(expectedUseableLevel);
+        const property = playerDto.properties.find(
+          (p: { name: string }) => p.name === 'property_cooldown_percentage',
+        );
+        expect(property).toBeDefined();
+        expect(property.level).toEqual(expectedPropertyLevel);
+      },
+    );
 
-    it('点数用尽时添加属性应报错', async () => {
-      const steamId = 200000515;
-      mockDate('2023-12-01T00:00:00.000Z');
+    it('分两次添加同一属性刚好用尽属性点应该成功', async () => {
+      const steamId = 200000517;
       // 创建玩家 100分 = level 2, 0分 = memberLevel 1, totalLevel = 3
       await createPlayer(app, {
         steamId,
@@ -220,31 +236,52 @@ describe('PlayerInfoController (e2e)', () => {
         memberPointTotal: 0,
       });
 
-      // 添加属性消耗所有点数，使 useableLevel = 0
+      // 第一次添加属性 level = 1
       const firstResult = await put(app, upgradePlayerPropertyUrl, {
         steamId,
         name: 'property_cooldown_percentage',
-        level: 3,
+        level: 1,
       });
 
       expect(firstResult.status).toEqual(200);
       const firstPlayerDto = firstResult.body;
       expect(firstPlayerDto.totalLevel).toEqual(3);
-      expect(firstPlayerDto.useableLevel).toEqual(0); // 3 - 3 = 0，点数已用尽
+      expect(firstPlayerDto.useableLevel).toEqual(2); // 3 - 1 = 2
 
-      // 尝试再次添加属性，应该返回 400 错误
+      // 第二次添加同一属性到 level = 3，刚好用尽剩余点数
       const secondResult = await put(app, upgradePlayerPropertyUrl, {
         steamId,
-        name: 'property_attackspeed_bonus_constant',
-        level: 1,
+        name: 'property_cooldown_percentage',
+        level: 3, // 从 level 1 升级到 level 3，增加 2 点，刚好用尽
       });
 
-      expect(secondResult.status).toEqual(400);
+      expect(secondResult.status).toEqual(200);
+      const secondPlayerDto = secondResult.body;
+      expect(secondPlayerDto.totalLevel).toEqual(3);
+      expect(secondPlayerDto.useableLevel).toEqual(0); // 3 - 3 = 0，刚好用尽
+      const property = secondPlayerDto.properties.find(
+        (p: { name: string }) => p.name === 'property_cooldown_percentage',
+      );
+      expect(property).toBeDefined();
+      expect(property.level).toEqual(3);
     });
 
-    it('一开始就添加超过上限的属性应报错', async () => {
-      const steamId = 200000516;
-      mockDate('2023-12-01T00:00:00.000Z');
+    it.each([
+      [
+        '点数用尽时添加属性应报错',
+        200000515,
+        [
+          { name: 'property_cooldown_percentage', level: 3 }, // 先用尽
+        ],
+        { name: 'property_attackspeed_bonus_constant', level: 1 }, // 再添加应该报错
+      ],
+      [
+        '一开始就添加超过上限的属性应报错',
+        200000516,
+        [], // 没有前置操作
+        { name: 'property_cooldown_percentage', level: 4 }, // 直接添加超过上限
+      ],
+    ])('%s', async (_, steamId, setupProperties, errorProperty) => {
       // 创建玩家 100分 = level 2, 0分 = memberLevel 1, totalLevel = 3
       await createPlayer(app, {
         steamId,
@@ -252,11 +289,24 @@ describe('PlayerInfoController (e2e)', () => {
         memberPointTotal: 0,
       });
 
-      // 一开始就尝试添加超过 totalLevel 的属性，应该返回 400 错误
+      // 执行前置操作（如果有）
+      for (const prop of setupProperties) {
+        const firstResult = await put(app, upgradePlayerPropertyUrl, {
+          steamId,
+          name: prop.name,
+          level: prop.level,
+        });
+        expect(firstResult.status).toEqual(200);
+        const firstPlayerDto = firstResult.body;
+        expect(firstPlayerDto.totalLevel).toEqual(3);
+        expect(firstPlayerDto.useableLevel).toEqual(0); // 3 - 3 = 0，点数已用尽
+      }
+
+      // 尝试添加应该报错的属性
       const result = await put(app, upgradePlayerPropertyUrl, {
         steamId,
-        name: 'property_cooldown_percentage',
-        level: 4, // totalLevel = 3，尝试添加 level 4 应该报错
+        name: errorProperty.name,
+        level: errorProperty.level,
       });
 
       expect(result.status).toEqual(400);

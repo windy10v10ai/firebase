@@ -2,11 +2,10 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/c
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AnalyticsService } from '../analytics/analytics.service';
-import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
-
-import { ResetPlayerPropertyDto } from './dto/reset-player-property.dto';
+import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
 
 import { PlayerDto } from './dto/player.dto';
+import { ResetPlayerPropertyDto } from './dto/reset-player-property.dto';
 import { PlayerInfoService } from './player-info.service';
 
 @ApiTags('Player Info')
@@ -26,7 +25,7 @@ export class PlayerInfoController {
   @Put('property')
   @ApiOperation({ summary: 'Upgrade player property' })
   async upgradePlayerProperty(
-    @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
+    @Body() updatePlayerPropertyDto: PlayerPropertyItemDto,
   ): Promise<PlayerDto> {
     await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
