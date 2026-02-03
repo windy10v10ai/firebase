@@ -80,11 +80,8 @@ export class PlayerInfoService {
   /**
    * 升级玩家属性
    * @param updatePlayerPropertyDto 更新玩家属性 DTO
-   * @returns 更新后的 PlayerDto
    */
-  async upgradePlayerProperty(
-    updatePlayerPropertyDto: UpdatePlayerPropertyDto,
-  ): Promise<PlayerDto> {
+  async upgradePlayerProperty(updatePlayerPropertyDto: UpdatePlayerPropertyDto): Promise<void> {
     // 验证属性名称
     this.playerPropertyService.validatePropertyName(updatePlayerPropertyDto.name);
 
@@ -106,9 +103,6 @@ export class PlayerInfoService {
 
     // 更新属性
     await this.playerPropertyService.update(updatePlayerPropertyDto);
-
-    // 返回更新后的 PlayerDto
-    return await this.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
   // ------------------ private ------------------

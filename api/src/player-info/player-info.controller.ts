@@ -27,7 +27,8 @@ export class PlayerInfoController {
   async upgradePlayerProperty(
     @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
   ): Promise<PlayerDto> {
-    return await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
+    await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
+    return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
   @Post('property/reset')
