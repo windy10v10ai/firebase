@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions';
 
-import { PlayerDto } from '../player/dto/player.dto';
-import { PlayerSettingService } from '../player/player-setting.service';
+import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 import { PlayerService } from '../player/player.service';
+import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
+
+import { PlayerDtoAssembler } from './assemblers/player-dto.assembler';
+import { PlayerDto } from './dto/player.dto';
 
 @Injectable()
 export class PlayerInfoService {
@@ -12,12 +16,11 @@ export class PlayerInfoService {
   constructor(
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
-    private readonly playerSettingService: PlayerSettingService,
+    private readonly playerDtoAssembler: PlayerDtoAssembler,
   ) {}
 
   /**
    * 根据 Steam ID 查找单个 PlayerDto
-   * @deprecated 此方法将在未来版本中移除，请使用 findPlayerInfoBySteamId 替代
    * @param steamId Steam ID
    * @returns PlayerDto
    */
@@ -33,42 +36,8 @@ export class PlayerInfoService {
    * @returns PlayerDto 数组
    */
   async findPlayerDtoBySteamIds(ids: string[]): Promise<PlayerDto[]> {
-    const players = (await this.playerService.findByIds(ids)) as PlayerDto[];
-    for (const player of players) {
-      // 获取玩家属性
-      const properties = await this.playerPropertyService.findBySteamId(+player.id);
-      if (properties) {
-        player.properties = properties;
-      } else {
-        player.properties = [];
-      }
-
-      // 获取玩家设置
-      const setting = await this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id);
-      player.playerSetting = setting;
-
-      // 计算赛季等级相关数据
-      const seasonPoint = player.seasonPointTotal;
-      const seasonLevel = this.playerService.getSeasonLevelBuyPoint(seasonPoint);
-      player.seasonLevel = seasonLevel;
-      player.seasonCurrrentLevelPoint =
-        seasonPoint - this.playerService.getSeasonTotalPoint(seasonLevel);
-      player.seasonNextLevelPoint = this.playerService.getSeasonNextLevelPoint(seasonLevel);
-
-      // 计算会员等级相关数据
-      const memberPoint = player.memberPointTotal;
-      const memberLevel = this.playerService.getMemberLevelBuyPoint(memberPoint);
-      player.memberLevel = memberLevel;
-      player.memberCurrentLevelPoint =
-        memberPoint - this.playerService.getMemberTotalPoint(memberLevel);
-      player.memberNextLevelPoint = this.playerService.getMemberNextLevelPoint(memberLevel);
-
-      // 计算总等级和可用等级
-      player.totalLevel = seasonLevel + memberLevel;
-      const usedLevel = player.properties.reduce((prev, curr) => prev + curr.level, 0);
-      player.useableLevel = player.totalLevel - usedLevel;
-    }
-    return players;
+    const players = await this.playerService.findByIds(ids);
+    return Promise.all(players.map((player) => this.playerDtoAssembler.assemblePlayerDto(player)));
   }
 
   /**
@@ -106,5 +75,49 @@ export class PlayerInfoService {
 
     // 重置玩家属性
     await this.playerPropertyService.deleteBySteamId(steamId);
+  }
+
+  /**
+   * 升级玩家属性
+   * @param updatePlayerPropertyDto 更新玩家属性 DTO
+   */
+  async upgradePlayerProperty(updatePlayerPropertyDto: UpdatePlayerPropertyDto): Promise<void> {
+    // 验证属性名称
+    this.playerPropertyService.validatePropertyName(updatePlayerPropertyDto.name);
+
+    // 检查现有属性以计算等级差值
+    const existPlayerProperty = await this.playerPropertyService.findBySteamId(
+      updatePlayerPropertyDto.steamId,
+    );
+    const existingProperty = existPlayerProperty.find(
+      (p) => p.name === updatePlayerPropertyDto.name,
+    );
+
+    // 计算等级差值
+    const levelAdd = existingProperty
+      ? updatePlayerPropertyDto.level - existingProperty.level
+      : updatePlayerPropertyDto.level;
+
+    // 验证等级
+    await this.checkPlayerLevel(updatePlayerPropertyDto.steamId, levelAdd);
+
+    // 更新属性
+    await this.playerPropertyService.update(updatePlayerPropertyDto);
+  }
+
+  // ------------------ private ------------------
+  private async checkPlayerLevel(steamId: number, levelAdd: number) {
+    const player = await this.playerService.findBySteamId(steamId);
+    const totalLevel = PlayerLevelHelper.getPlayerTotalLevel(player);
+    const usedLevel = await this.playerPropertyService.getPlayerUsedLevel(steamId);
+    if (totalLevel < usedLevel + levelAdd) {
+      logger.warn('[Player Info] checkPlayerLevel error', {
+        steamId,
+        totalLevel,
+        usedLevel,
+        levelAdd,
+      });
+      throw new BadRequestException();
+    }
   }
 }
