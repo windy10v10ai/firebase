@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { MembersModule } from '../members/members.module';
 import { PlayerModule } from '../player/player.module';
 import { PlayerPropertyModule } from '../player-property/player-property.module';
 
 import { PlayerDtoAssembler } from './assemblers/player-dto.assembler';
+import { PlayerInfoController } from './player-info.controller';
 import { PlayerInfoService } from './player-info.service';
 
 @Module({
-  imports: [PlayerModule, MembersModule, PlayerPropertyModule],
-  controllers: [], // Phase 1: 无 Controller
+  imports: [PlayerModule, MembersModule, PlayerPropertyModule, AnalyticsModule],
+  controllers: [PlayerInfoController],
   providers: [PlayerInfoService, PlayerDtoAssembler],
   exports: [PlayerInfoService],
 })

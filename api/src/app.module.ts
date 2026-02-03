@@ -14,6 +14,7 @@ import { GameModule } from './game/game.module';
 import { KofiModule } from './kofi/kofi.module';
 import { MembersModule } from './members/members.module';
 import { PlayerModule } from './player/player.module';
+import { PlayerInfoModule } from './player-info/player-info.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { TaskModule } from './task/task.module';
 import { AuthGuard } from './util/auth/auth.guard';
@@ -41,6 +42,7 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     AfdianModule,
     KofiModule,
     PlayerModule,
+    PlayerInfoModule,
     PlayerPropertyModule,
     AdminModule,
     EventRewardsModule,

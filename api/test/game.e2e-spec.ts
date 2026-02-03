@@ -687,7 +687,7 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe('/api/game/resetPlayerProperty (Post) 重置玩家属性', () => {
+  describe('/api/game/resetPlayerProperty (Post) 重置玩家属性 [DEPRECATED]', () => {
     describe('可以重置', () => {
       it.each([
         [
@@ -904,7 +904,7 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe('/api/game/addPlayerProperty (Put) 添加玩家属性', () => {
+  describe('/api/game/addPlayerProperty (Put) 添加玩家属性 [DEPRECATED]', () => {
     it('添加玩家属性 返回更新后的PlayerDto', async () => {
       const steamId = 100000501;
       mockDate('2023-12-01T00:00:00.000Z');
@@ -1072,7 +1072,7 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe('/api/game/player/steamId/:steamId (Get) 获取玩家信息', () => {
+  describe('/api/game/player/steamId/:steamId (Get) 获取玩家信息 [DEPRECATED]', () => {
     it('获取已存在玩家 返回完整PlayerDto', async () => {
       const steamId = 100000601;
       mockDate('2023-12-01T00:00:00.000Z');
