@@ -10,7 +10,7 @@ describe('PlayerLevelHelper', () => {
     });
 
     it('should return 0 when player is undefined', () => {
-      expect(PlayerLevelHelper.getPlayerTotalLevel(undefined as any)).toBe(0);
+      expect(PlayerLevelHelper.getPlayerTotalLevel(undefined as Player)).toBe(0);
     });
 
     it('should calculate total level correctly', () => {
