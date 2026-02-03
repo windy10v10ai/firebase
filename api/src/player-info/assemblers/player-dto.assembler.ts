@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { PlayerDto } from '../../player/dto/player.dto';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerLevelHelper } from '../../player/helpers/player-level.helper';
 import { PlayerSettingService } from '../../player/player-setting.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
+import { PlayerDto } from '../dto/player.dto';
 
 /**
  * PlayerDtoAssembler - Assembler 模式

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
-import { PlayerDto } from '../player/dto/player.dto';
+import { PlayerDto } from './dto/player.dto';
 import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
