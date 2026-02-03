@@ -145,7 +145,8 @@ export class PlayerInfoService {
 
   // ------------------ private ------------------
   private async checkPlayerLevel(steamId: number, levelAdd: number) {
-    const totalLevel = await this.playerService.getPlayerTotalLevel(steamId);
+    const player = await this.playerService.findBySteamId(steamId);
+    const totalLevel = this.playerService.getPlayerTotalLevel(player);
     const usedLevel = await this.playerPropertyService.getPlayerUsedLevel(steamId);
     if (totalLevel < usedLevel + levelAdd) {
       logger.warn('[Player Info] checkPlayerLevel error', {

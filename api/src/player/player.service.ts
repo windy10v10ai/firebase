@@ -71,8 +71,7 @@ export class PlayerService {
     await this.playerRepository.update(player);
   }
 
-  async getPlayerTotalLevel(steamId: number) {
-    const player = await this.playerRepository.findById(steamId.toString());
+  getPlayerTotalLevel(player: Player | null): number {
     if (!player) {
       return 0;
     }
