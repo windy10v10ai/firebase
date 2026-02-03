@@ -71,17 +71,6 @@ export class PlayerService {
     await this.playerRepository.update(player);
   }
 
-  getPlayerTotalLevel(player: Player | null): number {
-    if (!player) {
-      return 0;
-    }
-    const seasonPoint = player.seasonPointTotal;
-    const seasonLevel = this.getSeasonLevelBuyPoint(seasonPoint);
-    const memberPoint = player.memberPointTotal;
-    const memberLevel = this.getMemberLevelBuyPoint(memberPoint);
-    return seasonLevel + memberLevel;
-  }
-
   async findBySteamId(steamId: number): Promise<Player> {
     return await this.playerRepository.findById(steamId.toString());
   }
@@ -114,48 +103,5 @@ export class PlayerService {
       lastMatchTime: null,
       conductPoint: 100,
     };
-  }
-
-  /**
-   * 勇士积分
-   * @param level 当前等级
-   * @returns 升级积分
-   */
-  getSeasonNextLevelPoint(level: number) {
-    return 100 * level;
-  }
-  /**
-   * 勇士积分 指定等级所需累计积分
-   * @param level 指定等级
-   * @returns 累计积分
-   */
-  getSeasonTotalPoint(level: number) {
-    return 50 * (level - 1) * level;
-  }
-  // 根据积分获取当前等级
-  getSeasonLevelBuyPoint(point: number) {
-    return Math.floor(Math.sqrt(point / 50 + 0.25) + 0.5);
-  }
-
-  /**
-   * 会员积分
-   * @param level 当前等级
-   * @returns 升级积分
-   */
-  getMemberNextLevelPoint(level: number) {
-    return 50 * (level + 19);
-  }
-  /**
-   * 会员积分
-   * @param level 指定等级
-   * @returns 累计积分
-   */
-  getMemberTotalPoint(level: number) {
-    level -= 1;
-    return 100 * ((level * level) / 4 + level * 9.75);
-  }
-  // 根据积分获取当前等级
-  getMemberLevelBuyPoint(point: number) {
-    return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
   }
 }

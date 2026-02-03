@@ -2,10 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
 import { PlayerDto } from '../player/dto/player.dto';
-import { PlayerSettingService } from '../player/player-setting.service';
+import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 import { PlayerService } from '../player/player.service';
 import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
+
+import { PlayerDtoAssembler } from './assemblers/player-dto.assembler';
 
 @Injectable()
 export class PlayerInfoService {
@@ -14,7 +16,7 @@ export class PlayerInfoService {
   constructor(
     private readonly playerService: PlayerService,
     private readonly playerPropertyService: PlayerPropertyService,
-    private readonly playerSettingService: PlayerSettingService,
+    private readonly playerDtoAssembler: PlayerDtoAssembler,
   ) {}
 
   /**
@@ -34,42 +36,8 @@ export class PlayerInfoService {
    * @returns PlayerDto 数组
    */
   async findPlayerDtoBySteamIds(ids: string[]): Promise<PlayerDto[]> {
-    const players = (await this.playerService.findByIds(ids)) as PlayerDto[];
-    for (const player of players) {
-      // 获取玩家属性
-      const properties = await this.playerPropertyService.findBySteamId(+player.id);
-      if (properties) {
-        player.properties = properties;
-      } else {
-        player.properties = [];
-      }
-
-      // 获取玩家设置
-      const setting = await this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id);
-      player.playerSetting = setting;
-
-      // 计算赛季等级相关数据
-      const seasonPoint = player.seasonPointTotal;
-      const seasonLevel = this.playerService.getSeasonLevelBuyPoint(seasonPoint);
-      player.seasonLevel = seasonLevel;
-      player.seasonCurrrentLevelPoint =
-        seasonPoint - this.playerService.getSeasonTotalPoint(seasonLevel);
-      player.seasonNextLevelPoint = this.playerService.getSeasonNextLevelPoint(seasonLevel);
-
-      // 计算会员等级相关数据
-      const memberPoint = player.memberPointTotal;
-      const memberLevel = this.playerService.getMemberLevelBuyPoint(memberPoint);
-      player.memberLevel = memberLevel;
-      player.memberCurrentLevelPoint =
-        memberPoint - this.playerService.getMemberTotalPoint(memberLevel);
-      player.memberNextLevelPoint = this.playerService.getMemberNextLevelPoint(memberLevel);
-
-      // 计算总等级和可用等级
-      player.totalLevel = seasonLevel + memberLevel;
-      const usedLevel = player.properties.reduce((prev, curr) => prev + curr.level, 0);
-      player.useableLevel = player.totalLevel - usedLevel;
-    }
-    return players;
+    const players = await this.playerService.findByIds(ids);
+    return Promise.all(players.map((player) => this.playerDtoAssembler.assemblePlayerDto(player)));
   }
 
   /**
@@ -146,7 +114,7 @@ export class PlayerInfoService {
   // ------------------ private ------------------
   private async checkPlayerLevel(steamId: number, levelAdd: number) {
     const player = await this.playerService.findBySteamId(steamId);
-    const totalLevel = this.playerService.getPlayerTotalLevel(player);
+    const totalLevel = PlayerLevelHelper.getPlayerTotalLevel(player);
     const usedLevel = await this.playerPropertyService.getPlayerUsedLevel(steamId);
     if (totalLevel < usedLevel + levelAdd) {
       logger.warn('[Player Info] checkPlayerLevel error', {
