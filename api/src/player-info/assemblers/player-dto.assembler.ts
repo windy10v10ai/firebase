@@ -70,7 +70,7 @@ export class PlayerDtoAssembler {
    * @returns 可用等级
    */
   private calculateUseableLevel(dto: PlayerDto): number {
-    const usedLevel = dto.properties.reduce((prev, curr) => prev + curr.level, 0);
+    const usedLevel = PlayerLevelHelper.calculateUsedLevel(dto.properties);
     return dto.totalLevel - usedLevel;
   }
 }

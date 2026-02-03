@@ -1,3 +1,4 @@
+import { PlayerProperty } from '../../player-property/entities/player-property.entity';
 import { Player } from '../entities/player.entity';
 
 import { PlayerLevelHelper } from './player-level.helper';
@@ -113,10 +114,6 @@ describe('PlayerLevelHelper', () => {
 
   describe('会员积分', () => {
     describe('升级所需积分', () => {
-      //   it('0 -> 0', () => {
-      //     expect(PlayerLevelHelper.getMemberNextLevelPoint(0)).toBe(0);
-      //   });
-
       it('1 -> 1000', () => {
         expect(PlayerLevelHelper.getMemberNextLevelPoint(1)).toBe(1000);
       });
@@ -188,6 +185,35 @@ describe('PlayerLevelHelper', () => {
       it('111250 -> 51', () => {
         expect(PlayerLevelHelper.getMemberLevelBuyPoint(111250)).toBe(51);
       });
+    });
+  });
+
+  describe('calculateUsedLevel', () => {
+    it('should return 0 for empty array', () => {
+      expect(PlayerLevelHelper.calculateUsedLevel([])).toBe(0);
+    });
+
+    it('should calculate used level correctly for single property', () => {
+      const properties: PlayerProperty[] = [{ level: 5 } as PlayerProperty];
+      expect(PlayerLevelHelper.calculateUsedLevel(properties)).toBe(5);
+    });
+
+    it('should calculate used level correctly for multiple properties', () => {
+      const properties: PlayerProperty[] = [
+        { level: 3 } as PlayerProperty,
+        { level: 5 } as PlayerProperty,
+        { level: 2 } as PlayerProperty,
+      ];
+      expect(PlayerLevelHelper.calculateUsedLevel(properties)).toBe(10);
+    });
+
+    it('should handle zero levels', () => {
+      const properties: PlayerProperty[] = [
+        { level: 0 } as PlayerProperty,
+        { level: 5 } as PlayerProperty,
+        { level: 0 } as PlayerProperty,
+      ];
+      expect(PlayerLevelHelper.calculateUsedLevel(properties)).toBe(5);
     });
   });
 });

@@ -3,6 +3,8 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
+
 import { CreatePlayerPropertyDto } from './dto/create-player-property.dto';
 import { UpdatePlayerPropertyDto } from './dto/update-player-property.dto';
 import { PlayerProperty } from './entities/player-property.entity';
@@ -90,11 +92,7 @@ export class PlayerPropertyService {
    */
   async getPlayerUsedLevel(steamId: number) {
     const playerProperties = await this.findBySteamId(steamId);
-    let usedLevel = 0;
-    playerProperties.forEach((playerProperty) => {
-      usedLevel += playerProperty.level;
-    });
-    return usedLevel;
+    return PlayerLevelHelper.calculateUsedLevel(playerProperties);
   }
 
   // ------------------ private ------------------

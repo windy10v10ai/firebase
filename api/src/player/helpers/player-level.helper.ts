@@ -1,3 +1,4 @@
+import { PlayerProperty } from '../../player-property/entities/player-property.entity';
 import { Player } from '../entities/player.entity';
 
 /**
@@ -74,5 +75,14 @@ export class PlayerLevelHelper {
    */
   static getMemberLevelBuyPoint(point: number): number {
     return Math.floor(Math.sqrt(point / 25 + 380.25) - 19.5) + 1;
+  }
+
+  /**
+   * 计算已使用的等级（从玩家属性中累加）
+   * @param properties 玩家属性数组
+   * @returns 已使用的等级总数
+   */
+  static calculateUsedLevel(properties: PlayerProperty[]): number {
+    return properties.reduce((prev, curr) => prev + curr.level, 0);
   }
 }
