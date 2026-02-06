@@ -1,4 +1,3 @@
-import { PlayerProperty } from '../../player-property/entities/player-property.entity';
 import { Player } from '../entities/player.entity';
 
 import { PlayerLevelHelper } from './player-level.helper';
@@ -194,24 +193,24 @@ describe('PlayerLevelHelper', () => {
     });
 
     it('should calculate used level correctly for single property', () => {
-      const properties: PlayerProperty[] = [{ level: 5 } as PlayerProperty];
+      const properties = [{ steamId: 123, name: 'property_cooldown_percentage', level: 5 }];
       expect(PlayerLevelHelper.calculateUsedLevel(properties)).toBe(5);
     });
 
     it('should calculate used level correctly for multiple properties', () => {
-      const properties: PlayerProperty[] = [
-        { level: 3 } as PlayerProperty,
-        { level: 5 } as PlayerProperty,
-        { level: 2 } as PlayerProperty,
+      const properties = [
+        { steamId: 123, name: 'property_cooldown_percentage', level: 3 },
+        { steamId: 123, name: 'property_movespeed_bonus_constant', level: 5 },
+        { steamId: 123, name: 'property_skill_points_bonus', level: 2 },
       ];
       expect(PlayerLevelHelper.calculateUsedLevel(properties)).toBe(10);
     });
 
     it('should handle zero levels', () => {
-      const properties: PlayerProperty[] = [
-        { level: 0 } as PlayerProperty,
-        { level: 5 } as PlayerProperty,
-        { level: 0 } as PlayerProperty,
+      const properties = [
+        { steamId: 123, name: 'property_cooldown_percentage', level: 0 },
+        { steamId: 123, name: 'property_movespeed_bonus_constant', level: 5 },
+        { steamId: 123, name: 'property_skill_points_bonus', level: 0 },
       ];
       expect(PlayerLevelHelper.calculateUsedLevel(properties)).toBe(5);
     });
