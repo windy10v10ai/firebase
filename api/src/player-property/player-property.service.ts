@@ -11,6 +11,7 @@ export class PlayerPropertyService {
   static PROPERTY_NAME_LIST = [
     'property_cooldown_percentage',
     'property_movespeed_bonus_constant',
+    'property_bonus_vision',
     'property_skill_points_bonus',
     'property_cast_range_bonus_stacking',
     'property_spell_amplify_percentage',
