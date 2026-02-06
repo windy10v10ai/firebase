@@ -18,7 +18,6 @@ import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerDto } from '../player-info/dto/player.dto';
-import { ResetPlayerPropertyDto } from '../player-info/dto/reset-player-property.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
 import { Public } from '../util/auth/public.decorator';
@@ -133,21 +132,5 @@ export class GameController {
   ): Promise<PlayerDto> {
     await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
-  }
-
-  @ApiOperation({
-    summary: 'Get player info (deprecated)',
-    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
-    deprecated: true,
-  })
-  @Post('resetPlayerProperty')
-  async resetPlayerProperty(@Body() resetPlayerPropertyDto: ResetPlayerPropertyDto) {
-    await this.playerInfoService.resetPlayerProperty(
-      resetPlayerPropertyDto.steamId,
-      resetPlayerPropertyDto.useMemberPoint,
-    );
-    await this.analyticsService.playerResetProperty(resetPlayerPropertyDto);
-
-    return await this.playerInfoService.findPlayerDtoBySteamId(resetPlayerPropertyDto.steamId);
   }
 }
