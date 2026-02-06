@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   ParseArrayPipe,
   ParseIntPipe,
   Post,
@@ -150,15 +149,5 @@ export class GameController {
     await this.analyticsService.playerResetProperty(resetPlayerPropertyDto);
 
     return await this.playerInfoService.findPlayerDtoBySteamId(resetPlayerPropertyDto.steamId);
-  }
-
-  @ApiOperation({
-    summary: 'Get player info (deprecated)',
-    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
-    deprecated: true,
-  })
-  @Get('player/steamId/:steamId')
-  async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
-    return await this.playerInfoService.findPlayerDtoBySteamId(steamId);
   }
 }

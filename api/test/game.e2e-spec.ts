@@ -11,7 +11,6 @@ const gameEndUrl = '/api/game/end';
 const memberPostUrl = '/api/members/';
 const resetPlayerPropertyUrl = '/api/game/resetPlayerProperty';
 const addPlayerPropertyUrl = '/api/game/addPlayerProperty';
-const getPlayerInfoUrl = '/api/game/player/steamId';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = 'Invalid_NotOnDedicatedServer';
@@ -1069,69 +1068,6 @@ describe('PlayerController (e2e)', () => {
       });
 
       expect(result.status).toEqual(400);
-    });
-  });
-
-  describe('/api/game/player/steamId/:steamId (Get) 获取玩家信息 [DEPRECATED]', () => {
-    it('获取已存在玩家 返回完整PlayerDto', async () => {
-      const steamId = 100000601;
-      mockDate('2023-12-01T00:00:00.000Z');
-      await createPlayer(app, {
-        steamId,
-        seasonPointTotal: 300,
-        memberPointTotal: 100,
-      });
-
-      // 添加一些属性
-      await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
-
-      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
-
-      expect(result.status).toEqual(200);
-      const playerDto = result.body;
-      // 基础字段
-      expect(playerDto.id).toEqual(steamId.toString());
-      expect(playerDto.seasonPointTotal).toEqual(300);
-      expect(playerDto.memberPointTotal).toEqual(100);
-      expect(playerDto.seasonLevel).toEqual(3);
-      // 计算字段
-      expectPlayerDtoHasComputedFields(playerDto);
-      // 属性
-      expect(playerDto.properties).toHaveLength(1);
-      expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
-    });
-
-    it('获取不存在的玩家 返回空对象', async () => {
-      const steamId = 100000699;
-
-      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
-
-      expect(result.status).toEqual(200);
-      // 不存在的玩家返回空对象
-      expect(result.body).toEqual({});
-    });
-
-    it('验证PlayerDto计算字段正确性', async () => {
-      const steamId = 100000612;
-      mockDate('2023-12-01T00:00:00.000Z');
-      // 500分 = level 3 (getSeasonTotalPoint(3)=300, getSeasonTotalPoint(4)=600)
-      // 会员100分 = level 1
-      await createPlayer(app, {
-        steamId,
-        seasonPointTotal: 500,
-        memberPointTotal: 100,
-      });
-
-      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
-
-      expect(result.status).toEqual(200);
-      const playerDto = result.body;
-      expect(playerDto.seasonLevel).toEqual(3);
-      expect(playerDto.seasonCurrrentLevelPoint).toEqual(200); // 500 - 300 = 200
-      expect(playerDto.seasonNextLevelPoint).toEqual(300); // 100 * 3 = 300
-      expect(playerDto.memberLevel).toEqual(1);
-      expect(playerDto.totalLevel).toEqual(4); // 3 + 1 = 4
-      expect(playerDto.useableLevel).toEqual(4); // 没有使用任何属性
     });
   });
 
