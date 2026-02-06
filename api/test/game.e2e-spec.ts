@@ -416,8 +416,8 @@ describe('PlayerController (e2e)', () => {
     describe('事件奖励', () => {
       it('活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000901;
-        // 活动期间: 2025-12-23 ~ 2026-01-04
-        mockDate('2025-12-25T00:00:00.000Z');
+        // 活动期间: 2026-02-06 ~ 2026-02-23
+        mockDate('2026-02-10T00:00:00.000Z');
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -428,21 +428,21 @@ describe('PlayerController (e2e)', () => {
           (p: { steamId: number; seasonPoint?: number }) => p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeDefined();
-        expect(eventReward.seasonPoint).toEqual(2026);
+        expect(eventReward.seasonPoint).toEqual(5000);
 
         // 验证玩家积分
         const player = await getPlayer(app, steamId);
-        expect(player.seasonPointTotal).toEqual(2026);
+        expect(player.seasonPointTotal).toEqual(5000);
       });
 
       it('活动期间内第二次登录 不重复获得积分', async () => {
         const steamId = 100000902;
-        mockDate('2025-12-25T00:00:00.000Z');
+        mockDate('2026-02-10T00:00:00.000Z');
 
         // 第一次登录
         await callGameStart(app, [steamId]);
         const player1 = await getPlayer(app, steamId);
-        expect(player1.seasonPointTotal).toEqual(2026);
+        expect(player1.seasonPointTotal).toEqual(5000);
 
         // 第二次登录
         const result = await callGameStart(app, [steamId]);
@@ -457,13 +457,13 @@ describe('PlayerController (e2e)', () => {
 
         // 积分不变
         const player2 = await getPlayer(app, steamId);
-        expect(player2.seasonPointTotal).toEqual(2026);
+        expect(player2.seasonPointTotal).toEqual(5000);
       });
 
       it('活动期间外 不获得活动积分', async () => {
         const steamId = 100000903;
         // 活动期间外
-        mockDate('2023-12-01T00:00:00.000Z');
+        mockDate('2026-02-24T00:00:00.000Z');
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
