@@ -23,4 +23,5 @@ export class EventReward {
   point20251118?: boolean; // 网络故障补偿积分
   fiveYearAnniversary?: boolean; // 5周年庆典
   newYear2026?: boolean;
+  lunarNewYear2026?: boolean;
 }

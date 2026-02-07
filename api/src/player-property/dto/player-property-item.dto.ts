@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GameResetPlayerProperty {
+export class PlayerPropertyItemDto {
   @ApiProperty()
   steamId: number;
   @ApiProperty()
-  useMemberPoint: boolean;
+  name: string;
+  @ApiProperty()
+  level: number;
 }

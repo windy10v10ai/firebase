@@ -1,4 +1,4 @@
-import { PlayerProperty } from '../../player-property/entities/player-property.entity';
+import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 import { Player } from '../entities/player.entity';
 
 /**
@@ -82,7 +82,7 @@ export class PlayerLevelHelper {
    * @param properties 玩家属性数组
    * @returns 已使用的等级总数
    */
-  static calculateUsedLevel(properties: PlayerProperty[]): number {
+  static calculateUsedLevel(properties: PlayerPropertyItemDto[]): number {
     return properties.reduce((prev, curr) => prev + curr.level, 0);
   }
 }

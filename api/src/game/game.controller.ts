@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   ParseArrayPipe,
   ParseIntPipe,
   Post,
@@ -20,11 +19,10 @@ import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerDto } from '../player-info/dto/player.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
-import { UpdatePlayerPropertyDto } from '../player-property/dto/update-player-property.dto';
+import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
 import { Public } from '../util/auth/public.decorator';
 import { SecretService } from '../util/secret/secret.service';
 
-import { GameResetPlayerProperty } from './dto/game-reset-player-property';
 import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
@@ -130,35 +128,9 @@ export class GameController {
   })
   @Put('addPlayerProperty')
   async addPlayerProperty(
-    @Body() updatePlayerPropertyDto: UpdatePlayerPropertyDto,
+    @Body() updatePlayerPropertyDto: PlayerPropertyItemDto,
   ): Promise<PlayerDto> {
     await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
-  }
-
-  @ApiOperation({
-    summary: 'Get player info (deprecated)',
-    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
-    deprecated: true,
-  })
-  @Post('resetPlayerProperty')
-  async resetPlayerProperty(@Body() gameResetPlayerProperty: GameResetPlayerProperty) {
-    await this.playerInfoService.resetPlayerProperty(
-      gameResetPlayerProperty.steamId,
-      gameResetPlayerProperty.useMemberPoint,
-    );
-    await this.analyticsService.playerResetProperty(gameResetPlayerProperty);
-
-    return await this.playerInfoService.findPlayerDtoBySteamId(gameResetPlayerProperty.steamId);
-  }
-
-  @ApiOperation({
-    summary: 'Get player info (deprecated)',
-    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
-    deprecated: true,
-  })
-  @Get('player/steamId/:steamId')
-  async getPlayerInfo(@Param('steamId') steamId: number): Promise<PlayerDto> {
-    return await this.playerInfoService.findPlayerDtoBySteamId(steamId);
   }
 }

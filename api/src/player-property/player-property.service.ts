@@ -3,20 +3,15 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
-
-import { CreatePlayerPropertyDto } from './dto/create-player-property.dto';
-import { UpdatePlayerPropertyDto } from './dto/update-player-property.dto';
+import { PlayerPropertyItemDto } from './dto/player-property-item.dto';
 import { PlayerProperty } from './entities/player-property.entity';
 
-/**
- * @deprecated 此 Service 将在未来版本中移除，请使用 PlayerPropertyV2Service 替代
- */
 @Injectable()
 export class PlayerPropertyService {
   static PROPERTY_NAME_LIST = [
     'property_cooldown_percentage',
     'property_movespeed_bonus_constant',
+    'property_bonus_vision',
     'property_skill_points_bonus',
     'property_cast_range_bonus_stacking',
     'property_spell_amplify_percentage',
@@ -45,54 +40,43 @@ export class PlayerPropertyService {
     private readonly playerPropertyRepository: BaseFirestoreRepository<PlayerProperty>,
   ) {}
 
-  /**
-   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.create 替代
-   */
-  async create(createPlayerPropertyDto: CreatePlayerPropertyDto) {
-    return this.playerPropertyRepository.create({
-      id: this.buildId(createPlayerPropertyDto.steamId, createPlayerPropertyDto.name),
-      ...createPlayerPropertyDto,
-    });
-  }
-  /**
-   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.update 替代
-   */
-  async update(updatePlayerPropertyDto: UpdatePlayerPropertyDto): Promise<PlayerProperty> {
-    const existPlayerProperty = await this.playerPropertyRepository.findById(
-      this.buildId(updatePlayerPropertyDto.steamId, updatePlayerPropertyDto.name),
-    );
+  async upsert(propertyDto: PlayerPropertyItemDto): Promise<PlayerProperty> {
+    const id = propertyDto.steamId.toString();
+    let playerProperty = await this.playerPropertyRepository.findById(id);
 
-    if (existPlayerProperty) {
-      existPlayerProperty.level = updatePlayerPropertyDto.level;
-      return this.playerPropertyRepository.update(existPlayerProperty);
-    } else {
-      return this.create({ ...updatePlayerPropertyDto });
+    if (!playerProperty) {
+      // 创建新文档，初始化 properties 为空数组
+      playerProperty = {
+        id,
+        steamId: propertyDto.steamId,
+        properties: [],
+      };
+      await this.playerPropertyRepository.create(playerProperty);
     }
+
+    this.setPropertyLevel(playerProperty, propertyDto.name, propertyDto.level);
+
+    return this.playerPropertyRepository.update(playerProperty);
   }
 
-  /**
-   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.findBySteamId 替代
-   */
-  async findBySteamId(steamId: number) {
-    return this.playerPropertyRepository.whereEqualTo('steamId', steamId).find();
-  }
-
-  /**
-   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.deleteBySteamId 替代
-   */
-  async deleteBySteamId(steamId: number) {
-    const playerPropertyList = await this.findBySteamId(steamId);
-    for (const playerProperty of playerPropertyList) {
-      await this.playerPropertyRepository.delete(playerProperty.id);
+  async findBySteamId(steamId: number): Promise<PlayerPropertyItemDto[]> {
+    const playerProperty = await this.playerPropertyRepository.findById(steamId.toString());
+    if (!playerProperty) {
+      return [];
     }
+
+    return playerProperty.properties
+      .filter((p) => p.level > 0)
+      .map((p) => ({
+        steamId: playerProperty.steamId,
+        name: p.name,
+        level: p.level,
+      }));
   }
 
-  /**
-   * @deprecated 此方法将在未来版本中移除，请使用 PlayerPropertyV2Service.getPlayerUsedLevel 替代
-   */
-  async getPlayerUsedLevel(steamId: number) {
-    const playerProperties = await this.findBySteamId(steamId);
-    return PlayerLevelHelper.calculateUsedLevel(playerProperties);
+  async deleteBySteamId(steamId: number): Promise<void> {
+    const id = steamId.toString();
+    await this.playerPropertyRepository.delete(id);
   }
 
   // ------------------ private ------------------
@@ -102,7 +86,23 @@ export class PlayerPropertyService {
       throw new BadRequestException();
     }
   }
-  private buildId(steamId: number, name: string) {
-    return steamId.toString() + '#' + name;
+
+  private setPropertyLevel(
+    playerProperty: PlayerProperty,
+    propertyName: string,
+    level: number,
+  ): void {
+    // 1. 运行时验证（防止无效属性名）
+    if (!PlayerPropertyService.PROPERTY_NAME_LIST.includes(propertyName)) {
+      throw new BadRequestException(`Invalid property name: ${propertyName}`);
+    }
+
+    // 2. 查找或添加属性
+    const property = playerProperty.properties.find((p) => p.name === propertyName);
+    if (property) {
+      property.level = level;
+    } else {
+      playerProperty.properties.push({ name: propertyName, level });
+    }
   }
 }

@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { PlayerSetting } from '../../player/entities/player-setting.entity';
 import { Player } from '../../player/entities/player.entity';
-import { PlayerProperty } from '../../player-property/entities/player-property.entity';
+import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 
 export class PlayerDto extends Player {
   @ApiProperty()
@@ -22,7 +22,7 @@ export class PlayerDto extends Player {
   @ApiProperty()
   useableLevel: number;
   @ApiPropertyOptional()
-  properties?: PlayerProperty[];
+  properties?: PlayerPropertyItemDto[];
   @ApiProperty()
   playerSetting: PlayerSetting;
 }
