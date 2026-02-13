@@ -1,6 +1,8 @@
-# BigQuery专有表设计与数据导入方案
+# BigQuery 专有表设计与数据导入方案
 
 ## 1. 创建专有表
+
+> **✅ SQL 文件已创建**：建表 SQL 已保存在 [`sql/create_tables.sql`](./sql/create_tables.sql)，可直接使用。
 
 ```sql
 -- 在BigQuery控制台执行
@@ -40,21 +42,24 @@ OPTIONS(
 ```
 
 **设计要点**：
+
 - ✅ **分区**：按日期分区，提高查询效率
-- ✅ **聚簇**：按winner和difficulty聚簇，加速训练数据筛选
-- ✅ **NOT NULL约束**：确保核心字段完整性
-- ✅ **数组类型**：直接存储英雄ID数组，无需JOIN
+- ✅ **聚簇**：按 winner 和 difficulty 聚簇，加速训练数据筛选
+- ✅ **NOT NULL 约束**：确保核心字段完整性
+- ✅ **数组类型**：直接存储英雄 ID 数组，无需 JOIN
 
 ---
 
-## 2. 从GA4导入历史数据
+## 2. 从 GA4 导入历史数据
 
-### 方式A：一次性导入（推荐）
+### 方式 A：一次性导入（推荐）
 
-创建SQL文件 `ml/data/import_ga4_to_dedicated_table.sql`：
+> **✅ SQL 文件已创建**：数据导入 SQL 已保存在 [`sql/import_data.sql`](./sql/import_data.sql)，可直接使用。
+
+**SQL 文件位置**：`docs/ai-recommendation/sql/import_data.sql`
 
 ```sql
--- ml/data/import_ga4_to_dedicated_table.sql
+-- docs/ai-recommendation/sql/import_data.sql
 -- 从GA4事件表导入历史对局数据到专有表
 
 INSERT INTO `windy10v10ai.dota2.matches`
@@ -184,7 +189,7 @@ bq query --use_legacy_sql=false < ml/data/import_temp.sql
 # 或在BigQuery控制台直接粘贴执行
 ```
 
-### 方式B：Python脚本导入（更灵活）
+### 方式 B：Python 脚本导入（更灵活）
 
 创建 `ml/data/import_ga4_data.py`：
 
@@ -296,7 +301,7 @@ python ml/data/import_ga4_data.py \
 
 在导入历史数据后，新对局自动写入专有表。
 
-### BigQueryService实现
+### BigQueryService 实现
 
 ```typescript
 // api/src/bigquery/bigquery.service.ts
@@ -316,25 +321,25 @@ export class BigQueryService {
     try {
       // 提取Radiant英雄
       const radiantHeroes = gameEnd.players
-        .filter(p => p.teamId === 2)
-        .map(p => GetHeroId(p.heroName));
+        .filter((p) => p.teamId === 2)
+        .map((p) => GetHeroId(p.heroName));
 
       // 提取Dire英雄
       const direHeroes = gameEnd.players
-        .filter(p => p.teamId === 3)
-        .map(p => GetHeroId(p.heroName));
+        .filter((p) => p.teamId === 3)
+        .map((p) => GetHeroId(p.heroName));
 
       // 数据验证
       if (direHeroes.length !== 10) {
         this.logger.warn(
-          `Invalid dire hero count: ${direHeroes.length}, match_id: ${gameEnd.matchId}`
+          `Invalid dire hero count: ${direHeroes.length}, match_id: ${gameEnd.matchId}`,
         );
         return;
       }
 
       if (radiantHeroes.length < 1 || radiantHeroes.length > 10) {
         this.logger.warn(
-          `Invalid radiant hero count: ${radiantHeroes.length}, match_id: ${gameEnd.matchId}`
+          `Invalid radiant hero count: ${radiantHeroes.length}, match_id: ${gameEnd.matchId}`,
         );
         return;
       }
@@ -350,7 +355,7 @@ export class BigQueryService {
         game_version: gameEnd.version,
         difficulty: gameEnd.difficulty,
         server_type: 'production',
-        recommendation_strategy: gameEnd.recommendationStrategy || null,  // 'baseline', 'xgboost_v1', etc.
+        recommendation_strategy: gameEnd.recommendationStrategy || null, // 'baseline', 'xgboost_v1', etc.
         radiant_player_count: radiantHeroes.length,
         dire_player_count: direHeroes.length,
       };
@@ -359,7 +364,7 @@ export class BigQueryService {
       await this.table.insert([row]);
 
       this.logger.log(
-        `Match saved to BigQuery: ${gameEnd.matchId}, winner: ${gameEnd.winnerTeamId}`
+        `Match saved to BigQuery: ${gameEnd.matchId}, winner: ${gameEnd.winnerTeamId}`,
       );
     } catch (error) {
       this.logger.error('Failed to save match to BigQuery', error);
@@ -369,7 +374,7 @@ export class BigQueryService {
 }
 ```
 
-### 集成到Analytics Service
+### 集成到 Analytics Service
 
 ```typescript
 // api/src/analytics/analytics.service.ts
@@ -378,8 +383,7 @@ import { BigQueryService } from '../bigquery/bigquery.service';
 @Injectable()
 export class AnalyticsService {
   constructor(
-    private readonly bigQueryService: BigQueryService,
-    // ... 其他依赖
+    private readonly bigQueryService: BigQueryService, // ... 其他依赖
   ) {}
 
   async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
@@ -396,7 +400,7 @@ export class AnalyticsService {
 
 ---
 
-## 4. 统一的数据加载器（ML训练）
+## 4. 统一的数据加载器（ML 训练）
 
 导入后，只需要一个简单的数据加载器：
 
@@ -462,26 +466,39 @@ if __name__ == '__main__':
 
 ## 5. 执行清单
 
-### 步骤1: 创建表（10分钟）
+### 步骤 1: 创建表（10 分钟）
+
 ```bash
-# 在BigQuery控制台执行建表SQL
-# 或使用bq命令行
-bq mk --table \
-  windy10v10ai:dota2.matches \
-  ml/data/schema.json
+# 方式A: 在BigQuery控制台执行
+# 打开 docs/ai-recommendation/sql/create_tables.sql，复制内容执行
+
+# 方式B: 使用bq命令行
+cd docs/ai-recommendation/sql
+bq query --use_legacy_sql=false < create_tables.sql
 ```
 
-### 步骤2: 导入历史数据（30分钟）
-```bash
-# 方式A: 直接执行SQL
-bq query --use_legacy_sql=false < ml/data/import_ga4_to_dedicated_table.sql
+### 步骤 2: 导入历史数据（30 分钟）
 
-# 方式B: Python脚本
+```bash
+# ⚠️ 重要：执行前需要替换 <PROPERTY_ID>
+
+# 方式A: 在BigQuery控制台执行
+# 1. 打开 docs/ai-recommendation/sql/import_data.sql
+# 2. 替换 <PROPERTY_ID> 为实际的 GA4 Property ID
+# 3. 复制到 BigQuery 控制台执行
+
+# 方式B: 使用 sed + bq 命令行
+cd docs/ai-recommendation/sql
+sed 's/<PROPERTY_ID>/YOUR_PROPERTY_ID/g' import_data.sql | \
+  bq query --use_legacy_sql=false
+
+# 方式C: Python脚本（如果已创建）
 python ml/data/import_ga4_data.py --property-id YOUR_ID --dry-run
 python ml/data/import_ga4_data.py --property-id YOUR_ID
 ```
 
-### 步骤3: 验证数据（5分钟）
+### 步骤 3: 验证数据（5 分钟）
+
 ```sql
 -- 在BigQuery控制台执行
 SELECT
@@ -492,7 +509,8 @@ SELECT
 FROM `windy10v10ai.dota2.matches`;
 ```
 
-### 步骤4: 配置持续写入（20分钟）
+### 步骤 4: 配置持续写入（20 分钟）
+
 ```bash
 # 1. 实现BigQueryService（已有代码）
 # 2. 设置环境变量
@@ -507,13 +525,15 @@ firebase deploy --only functions:client
 ## 6. 预期数据量
 
 假设：
-- 每月对局：100,000场
-- 历史数据：6个月
-- 总数据量：约600,000场对局
 
-**BigQuery成本估算**：
-- 存储：600k × 500字节 ≈ 300MB → $0.006/月
-- 查询（训练）：每次扫描300MB → 免费额度内（1TB/月免费）
+- 每月对局：100,000 场
+- 历史数据：6 个月
+- 总数据量：约 600,000 场对局
+
+**BigQuery 成本估算**：
+
+- 存储：600k × 500 字节 ≈ 300MB → $0.006/月
+- 查询（训练）：每次扫描 300MB → 免费额度内（1TB/月免费）
 
 ---
 
@@ -523,4 +543,4 @@ firebase deploy --only functions:client
 ✅ **高效查询**：分区+聚簇，查询速度快
 ✅ **数据质量**：导入时过滤，确保训练数据干净
 ✅ **可扩展性**：新字段（如玩家等级）可以轻松添加
-✅ **成本低**：完全在BigQuery免费额度内
+✅ **成本低**：完全在 BigQuery 免费额度内
