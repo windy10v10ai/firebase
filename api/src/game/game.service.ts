@@ -67,9 +67,10 @@ export class GameService {
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    const firstStartTime = new Date('2026-02-06T00:00:00.000Z');
-    const firstEndTime = new Date('2026-02-23T23:59:59.999Z');
-    const firstRewardPoint = 5000;
+    const startTime = new Date('2026-02-22T00:00:00.000Z');
+    const endTime = new Date('2026-03-01T23:59:59.999Z');
+    const memberRewardPoint = 1000;
+    const seasonRewardPoint = 5000;
 
     const now = new Date();
 
@@ -78,18 +79,20 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= firstStartTime && now <= firstEndTime && !rewardResult.result?.lunarNewYear2026) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.compensation20260301) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          seasonPointTotal: firstRewardPoint,
+          memberPointTotal: memberRewardPoint,
+          seasonPointTotal: seasonRewardPoint,
         });
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '新春快乐',
-            en: 'Happy Lunar New Year',
+            cn: '游戏崩溃补偿',
+            en: 'Game Crash Compensation',
           },
-          seasonPoint: firstRewardPoint,
+          memberPoint: memberRewardPoint,
+          seasonPoint: seasonRewardPoint,
         });
       }
     }
