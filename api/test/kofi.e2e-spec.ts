@@ -535,6 +535,7 @@ describe('KofiController (e2e)', () => {
                 createWebhookRequest({
                   message_id: `invalid-steam-${nonExistingId}`,
                   message: `${nonExistingId}`, // 不存在的玩家ID
+                  from_name: 'Invalid Steam User',
                   amount: '4.00',
                   currency: 'USD',
                   type: KofiType.DONATION,
@@ -917,6 +918,7 @@ describe('KofiController (e2e)', () => {
             data: JSON.stringify(
               createWebhookRequest({
                 message_id: `shop-no-user-${memberId}`,
+                from_name: 'No Kofi User',
                 message: '', // 不提供steamId
                 email: 'no-kofi-user@example.com', // 未关联的email
                 amount: '0.00',
