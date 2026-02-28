@@ -49,4 +49,14 @@ export class AdminController {
   async migratePlayerSettingPassiveAbilityKey2() {
     return await this.adminService.migratePlayerSettingPassiveAbilityKey2();
   }
+
+  @Post('/migration/kofi-user-from-name')
+  async migrateKofiUserFromName() {
+    return await this.adminService.migrateKofiUserFromName();
+  }
+
+  @Get('/kofi/order/null-email')
+  findKofiOrdersWithNullEmail() {
+    return this.adminService.findKofiOrdersWithNullEmail();
+  }
 }
