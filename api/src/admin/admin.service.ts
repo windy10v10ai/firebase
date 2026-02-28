@@ -106,32 +106,13 @@ export class AdminService {
         continue;
       }
 
-      // 从 KofiOrder 中查找对应的 fromName
-      // 优先查找成功的订单，按时间倒序
+      // 从 KofiOrder 中查找对应的 fromName，按时间倒序
       const orders = await this.kofiOrderRepository
         .whereEqualTo('email', kofiUser.email)
-        .whereEqualTo('success', true)
         .orderByDescending('timestamp')
         .find();
 
-      if (orders.length === 0) {
-        // 如果没有成功的订单，查找所有订单
-        const allOrders = await this.kofiOrderRepository
-          .whereEqualTo('email', kofiUser.email)
-          .orderByDescending('timestamp')
-          .find();
-
-        if (allOrders.length > 0 && allOrders[0].fromName) {
-          kofiUser.fromName = allOrders[0].fromName;
-          kofiUser.updatedAt = new Date();
-          await this.kofiUserRepository.update(kofiUser);
-          migratedCount.updated++;
-          logger.info(`[AdminService] Migrated KofiUser fromName for ${kofiUser.email}`);
-        } else {
-          migratedCount.notFound++;
-          logger.warn(`[AdminService] No fromName found for KofiUser ${kofiUser.email}`);
-        }
-      } else if (orders[0].fromName) {
+      if (orders.length > 0 && orders[0].fromName) {
         kofiUser.fromName = orders[0].fromName;
         kofiUser.updatedAt = new Date();
         await this.kofiUserRepository.update(kofiUser);
@@ -139,7 +120,7 @@ export class AdminService {
         logger.info(`[AdminService] Migrated KofiUser fromName for ${kofiUser.email}`);
       } else {
         migratedCount.notFound++;
-        logger.warn(`[AdminService] No fromName found in orders for KofiUser ${kofiUser.email}`);
+        logger.warn(`[AdminService] No fromName found for KofiUser ${kofiUser.email}`);
       }
     }
 
