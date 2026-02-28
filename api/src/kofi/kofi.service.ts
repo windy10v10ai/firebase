@@ -199,20 +199,16 @@ export class KofiService {
   }
 
   private async getSteamId(email: string, message: string, fromName: string): Promise<number> {
-    // 优先级：message > email > fromName
+    // 优先级：message > fromName（解析）> email（KofiUser）> fromName（KofiUser）
     // 尝试从message中获取steamId
     let steamId = await this.parseSteamId(message);
     if (!steamId) {
-      // 如果message中没有，尝试从KofiUser中通过email获取
-      if (email) {
-        steamId = await this.getSteamIdFromKofiUser(email, null);
-      }
+      // 如果message中没有，尝试从name中获取
+      steamId = await this.parseSteamId(fromName);
     }
     if (!steamId) {
-      // 如果email也没有找到，尝试从KofiUser中通过fromName获取
-      if (fromName) {
-        steamId = await this.getSteamIdFromKofiUser(null, fromName);
-      }
+      // 如果fromName中也没有，尝试从KofiUser中获取（优先email，其次fromName）
+      steamId = await this.getSteamIdFromKofiUser(email, fromName);
     }
     return steamId;
   }
