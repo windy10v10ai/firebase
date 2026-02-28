@@ -80,7 +80,7 @@ gcloud config set project windy10v10ai
 # download data from storage
 rm -rf firestore-backup
 mkdir firestore-backup
-gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20250928/*" firestore-backup
+gsutil -m cp -r "gs://windy10v10ai.appspot.com/firestore-backup/20260207/*" firestore-backup
 ```
 
 ### Start Firebase Emulator & API & Web
