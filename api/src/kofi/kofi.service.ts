@@ -236,7 +236,8 @@ export class KofiService {
         return kofiUser.steamId || null;
       }
     }
-    if (fromName) {
+    // 跳过默认值"Somebody"
+    if (fromName && fromName !== 'Somebody') {
       const kofiUser = await this.kofiUserRepository.whereEqualTo('fromName', fromName).findOne();
       if (kofiUser) {
         return kofiUser.steamId || null;

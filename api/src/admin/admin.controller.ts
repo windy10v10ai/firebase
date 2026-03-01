@@ -8,7 +8,6 @@ import { MembersService } from '../members/members.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
-import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
 @Public()
 @ApiTags('Admin')
@@ -23,11 +22,6 @@ export class AdminController {
   @Post('/member')
   createMember(@Body() createMemberDto: CreateMemberDto) {
     return this.membersService.createMember(createMemberDto);
-  }
-
-  @Post('/member/patreon')
-  createPatreonMember(@Body() createPatreonMemberDto: CreatePatreonMemberDto) {
-    return this.adminService.createPatreonMember(createPatreonMemberDto);
   }
 
   @Get('/afdian/order/fail')
