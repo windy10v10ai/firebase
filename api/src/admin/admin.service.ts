@@ -6,7 +6,6 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiUser } from '../kofi/entities/kofi-user.entity';
 import { MembersService } from '../members/members.service';
-import { PlayerSetting } from '../player/entities/player-setting.entity';
 import { PlayerService } from '../player/player.service';
 
 import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
@@ -16,8 +15,6 @@ export class AdminService {
   constructor(
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
-    @InjectRepository(PlayerSetting)
-    private readonly playerSettingRepository: BaseFirestoreRepository<PlayerSetting>,
     @InjectRepository(KofiUser)
     private readonly kofiUserRepository: BaseFirestoreRepository<KofiUser>,
     @InjectRepository(KofiOrder)
@@ -43,39 +40,6 @@ export class AdminService {
       });
     }
     return result;
-  }
-
-  async migratePlayerSettingPassiveAbilityKey2() {
-    const allSettings = await this.playerSettingRepository.find();
-    const migratedCount = { total: 0, updated: 0, skipped: 0 };
-
-    for (const setting of allSettings) {
-      migratedCount.total++;
-
-      // 检查是否已经有新字段，如果有则跳过
-      if (
-        setting.passiveAbilityKey2 !== undefined &&
-        setting.passiveAbilityQuickCast2 !== undefined
-      ) {
-        migratedCount.skipped++;
-        continue;
-      }
-
-      // 初始化新字段
-      setting.passiveAbilityKey2 = '';
-      setting.passiveAbilityQuickCast2 = false;
-      setting.updatedAt = new Date();
-
-      await this.playerSettingRepository.update(setting);
-      migratedCount.updated++;
-
-      logger.info(`[AdminService] Migrated player setting for ${setting.id}`);
-    }
-
-    return {
-      message: 'Player setting migration completed',
-      ...migratedCount,
-    };
   }
 
   getEndOfNextMonth() {
@@ -107,10 +71,14 @@ export class AdminService {
       }
 
       // 从 KofiOrder 中查找对应的 fromName，按时间倒序
-      const orders = await this.kofiOrderRepository
-        .whereEqualTo('email', kofiUser.email)
-        .orderByDescending('timestamp')
-        .find();
+      const orders = await this.kofiOrderRepository.whereEqualTo('email', kofiUser.email).find();
+
+      // 在内存中按时间倒序排序
+      orders.sort((a, b) => {
+        const timeA = a.timestamp?.getTime() || 0;
+        const timeB = b.timestamp?.getTime() || 0;
+        return timeB - timeA; // 降序
+      });
 
       if (orders.length > 0 && orders[0].fromName) {
         kofiUser.fromName = orders[0].fromName;
