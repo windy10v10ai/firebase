@@ -125,7 +125,7 @@ export class KofiService {
 
     if (kofi.success) {
       // 记录KofiUser
-      await this.saveKofiUser(kofi.email, kofi.steamId);
+      await this.saveKofiUser(kofi.email, kofi.fromName, kofi.steamId);
       // 发送GA4事件
       await this.analyticsPurchaseService.kofiPurchase(kofi);
       await this.kofiRepository.update(kofi);
@@ -199,6 +199,7 @@ export class KofiService {
   }
 
   private async getSteamId(email: string, message: string, fromName: string): Promise<number> {
+    // 优先级：message > fromName（解析）> email（KofiUser）> fromName（KofiUser）
     // 尝试从message中获取steamId
     let steamId = await this.parseSteamId(message);
     if (!steamId) {
@@ -206,8 +207,8 @@ export class KofiService {
       steamId = await this.parseSteamId(fromName);
     }
     if (!steamId) {
-      // 如果name中也没有，尝试从KofiUser中获取
-      steamId = await this.getSteamIdFromKofiUser(email);
+      // 如果fromName中也没有，尝试从KofiUser中获取（优先email，其次fromName）
+      steamId = await this.getSteamIdFromKofiUser(email, fromName);
     }
     return steamId;
   }
@@ -225,23 +226,57 @@ export class KofiService {
     return steamId;
   }
 
-  private async getSteamIdFromKofiUser(email: string): Promise<number> {
-    const kofiUser = await this.kofiUserRepository.whereEqualTo('email', email).findOne();
-
-    return kofiUser?.steamId || null;
+  private async getSteamIdFromKofiUser(
+    email: string | null,
+    fromName: string | null,
+  ): Promise<number> {
+    if (email) {
+      const kofiUser = await this.kofiUserRepository.whereEqualTo('email', email).findOne();
+      if (kofiUser) {
+        return kofiUser.steamId || null;
+      }
+    }
+    if (fromName) {
+      const kofiUser = await this.kofiUserRepository.whereEqualTo('fromName', fromName).findOne();
+      if (kofiUser) {
+        return kofiUser.steamId || null;
+      }
+    }
+    return null;
   }
 
-  private async saveKofiUser(email: string, steamId: number): Promise<void> {
+  private async saveKofiUser(
+    email: string | null,
+    fromName: string | null,
+    steamId: number,
+  ): Promise<void> {
+    // 只用 email 作为标识符，email 为 null 时跳过保存
+    if (!email) {
+      logger.warn('[Kofi] Cannot save KofiUser: email is null, skipping', {
+        email,
+        fromName,
+        steamId,
+      });
+      return;
+    }
+
+    // 只通过 email 查找现有用户
     const existingUser = await this.kofiUserRepository.whereEqualTo('email', email).findOne();
 
     if (existingUser) {
+      // 更新现有用户
       existingUser.steamId = steamId;
+      // fromName 作为辅助信息，如果存在则更新（可能重复，不作为唯一标识）
+      if (fromName) {
+        existingUser.fromName = fromName;
+      }
       existingUser.updatedAt = new Date();
       await this.kofiUserRepository.update(existingUser);
     } else {
       const kofiUser = new KofiUser();
       kofiUser.id = email;
       kofiUser.email = email;
+      kofiUser.fromName = fromName || null; // fromName 作为辅助信息保存
       kofiUser.steamId = steamId;
       kofiUser.createdAt = new Date();
       kofiUser.updatedAt = new Date();
