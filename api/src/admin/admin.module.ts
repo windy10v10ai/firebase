@@ -6,7 +6,6 @@ import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiUser } from '../kofi/entities/kofi-user.entity';
 import { KofiModule } from '../kofi/kofi.module';
 import { MembersModule } from '../members/members.module';
-import { PlayerSetting } from '../player/entities/player-setting.entity';
 import { PlayerModule } from '../player/player.module';
 import { PlayerPropertyModule } from '../player-property/player-property.module';
 
@@ -20,7 +19,7 @@ import { AdminService } from './admin.service';
     PlayerPropertyModule,
     AfdianModule,
     KofiModule,
-    FireormModule.forFeature([PlayerSetting, KofiUser, KofiOrder]),
+    FireormModule.forFeature([KofiUser, KofiOrder]),
   ],
   controllers: [AdminController],
   providers: [AdminService],
