@@ -4,6 +4,7 @@ import { Collection } from 'fireorm';
 export class KofiUser {
   id: string;
   email: string;
+  fromName: string;
   steamId: number;
   createdAt: Date;
   updatedAt: Date;

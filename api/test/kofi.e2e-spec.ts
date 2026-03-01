@@ -55,6 +55,11 @@ describe('KofiController (e2e)', () => {
 
     // 为表单格式测试创建额外的玩家
     await createPlayer(app, { steamId: 200010999 });
+
+    // 为 email null 测试创建额外的玩家
+    await createPlayer(app, { steamId: 200010020 });
+    await createPlayer(app, { steamId: 200010021 });
+    await createPlayer(app, { steamId: 200010022 });
   });
 
   afterAll(async () => {
@@ -530,6 +535,7 @@ describe('KofiController (e2e)', () => {
                 createWebhookRequest({
                   message_id: `invalid-steam-${nonExistingId}`,
                   message: `${nonExistingId}`, // 不存在的玩家ID
+                  from_name: 'Invalid Steam User',
                   amount: '4.00',
                   currency: 'USD',
                   type: KofiType.DONATION,
@@ -548,6 +554,194 @@ describe('KofiController (e2e)', () => {
           } catch (error) {
             expect(error.status).toEqual(404);
           }
+        });
+
+        it('Ko-fi 续费时email为null，通过fromName从KofiUser中获取steamID', async () => {
+          const memberId = 200010020;
+          const sharedEmail = 'renewal-user@example.com';
+          const sharedFromName = 'Renewal User';
+
+          // 第一次请求，记录email和steamId的关联，同时保存fromName
+          const response1 = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `renewal-1-${memberId}`,
+                  message: `${memberId}`, // 提供steamId
+                  email: sharedEmail,
+                  from_name: sharedFromName,
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.SUBSCRIPTION,
+                  is_subscription_payment: true,
+                  is_first_subscription_payment: true,
+                }),
+              ),
+            });
+
+          expect(response1.status).toEqual(201);
+          expect(response1.body).toHaveProperty('status', 'success');
+
+          // 第二次请求（续费），email为null，但使用相同的fromName
+          const response2 = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `renewal-2-${memberId}`,
+                  message: '', // 不提供steamId
+                  email: null, // email为null
+                  from_name: sharedFromName, // 相同的fromName
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.SUBSCRIPTION,
+                  is_subscription_payment: true,
+                  is_first_subscription_payment: false,
+                }),
+              ),
+            });
+
+          expect(response2.status).toEqual(201);
+          expect(response2.body).toHaveProperty('status', 'success');
+
+          // 检查会员期限（确认两个月都已添加）
+          const twoMonths = 2;
+          const dateTwoMonths = new Date();
+          dateTwoMonths.setUTCDate(new Date().getUTCDate() + daysPerMonth * twoMonths);
+
+          const memberDto = await getMemberDto(app, memberId);
+          expect(memberDto.expireDateString).toEqual(dateTwoMonths.toISOString().split('T')[0]);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
+        });
+
+        it('Ko-fi SteamID获取优先级：message > email > fromName', async () => {
+          const memberIdFromMessage = 200010021;
+          const memberIdFromEmail = 200010022;
+          const sharedEmail = 'priority-test@example.com';
+          const sharedFromName = 'Priority Test User';
+
+          // 先创建一个KofiUser，关联email和memberIdFromEmail
+          const setupResponse = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `priority-setup-${memberIdFromEmail}`,
+                  message: `${memberIdFromEmail}`,
+                  email: sharedEmail,
+                  from_name: sharedFromName,
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(setupResponse.status).toEqual(201);
+          expect(setupResponse.body).toHaveProperty('status', 'success');
+
+          // 测试优先级：message中的steamId应该优先于email中的steamId
+          const priorityResponse = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `priority-test-${memberIdFromMessage}`,
+                  message: `${memberIdFromMessage}`, // message中有steamId，应该优先
+                  email: sharedEmail, // email关联的是memberIdFromEmail
+                  from_name: sharedFromName,
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(priorityResponse.status).toEqual(201);
+          expect(priorityResponse.body).toHaveProperty('status', 'success');
+
+          // 验证激活的是message中的steamId，而不是email中的
+          const memberDto = await getMemberDto(app, memberIdFromMessage);
+          expect(memberDto.enable).toEqual(true);
+          expect(memberDto.level).toEqual(MemberLevel.PREMIUM);
+        });
+
+        it('Ko-fi 优先级：email优先于fromName', async () => {
+          const memberIdFromEmail = 200010022;
+          const memberIdFromFromName = 200010021;
+          const sharedEmail = 'email-priority@example.com';
+          const sharedFromName = 'Email Priority User';
+
+          // 创建两个KofiUser：一个通过email，一个通过fromName
+          const emailResponse = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `email-priority-email-${memberIdFromEmail}`,
+                  message: `${memberIdFromEmail}`,
+                  email: sharedEmail,
+                  from_name: sharedFromName,
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(emailResponse.status).toEqual(201);
+
+          // 创建另一个KofiUser，使用不同的email但相同的fromName
+          const fromNameResponse = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `email-priority-fromname-${memberIdFromFromName}`,
+                  message: `${memberIdFromFromName}`,
+                  email: 'different-email@example.com',
+                  from_name: sharedFromName, // 相同的fromName
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(fromNameResponse.status).toEqual(201);
+
+          // 测试：当同时有email和fromName时，优先使用email查找
+          const priorityResponse = await request(app.getHttpServer())
+            .post(`${prefixPath}/webhook`)
+            .type('form')
+            .send({
+              data: JSON.stringify(
+                createWebhookRequest({
+                  message_id: `email-priority-test-${memberIdFromEmail}`,
+                  message: '', // 不提供steamId
+                  email: sharedEmail, // 应该找到memberIdFromEmail
+                  from_name: sharedFromName, // fromName关联的是memberIdFromFromName
+                  amount: '4.00',
+                  currency: 'USD',
+                  type: KofiType.DONATION,
+                }),
+              ),
+            });
+
+          expect(priorityResponse.status).toEqual(201);
+          expect(priorityResponse.body).toHaveProperty('status', 'success');
+
+          // 验证激活的是email中的steamId，而不是fromName中的
+          const memberDto = await getMemberDto(app, memberIdFromEmail);
+          expect(memberDto.enable).toEqual(true);
         });
       });
     });
@@ -724,6 +918,7 @@ describe('KofiController (e2e)', () => {
             data: JSON.stringify(
               createWebhookRequest({
                 message_id: `shop-no-user-${memberId}`,
+                from_name: 'No Kofi User',
                 message: '', // 不提供steamId
                 email: 'no-kofi-user@example.com', // 未关联的email
                 amount: '0.00',
