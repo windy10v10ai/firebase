@@ -5,51 +5,15 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiUser } from '../kofi/entities/kofi-user.entity';
-import { MembersService } from '../members/members.service';
-import { PlayerService } from '../player/player.service';
-
-import { CreatePatreonMemberDto } from './dto/create-patreon-member.dto';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly membersService: MembersService,
-    private readonly playerService: PlayerService,
     @InjectRepository(KofiUser)
     private readonly kofiUserRepository: BaseFirestoreRepository<KofiUser>,
     @InjectRepository(KofiOrder)
     private readonly kofiOrderRepository: BaseFirestoreRepository<KofiOrder>,
   ) {}
-  async createPatreonMember(createPatreonMemberDto: CreatePatreonMemberDto) {
-    const expireAt = this.getEndOfNextMonth();
-    const result = [];
-    for (const steamId of createPatreonMemberDto.steamIds) {
-      // if member expiredDate > expireAt, then skip
-      const existMember = await this.membersService.findOne(steamId);
-      if (existMember && existMember.expireDate.getTime() >= expireAt.getTime()) {
-        continue;
-      }
-
-      const player = await this.playerService.upsertAddPoint(steamId, {
-        memberPointTotal: 600,
-      });
-      const member = await this.membersService.addPremiumMember(steamId, 1);
-      result.push({
-        player,
-        member,
-      });
-    }
-    return result;
-  }
-
-  getEndOfNextMonth() {
-    const date = new Date();
-    date.setMonth(date.getMonth() + 2);
-    date.setUTCDate(0);
-    // set start of day in utc
-    date.setUTCHours(0, 0, 0, 0);
-    return date;
-  }
 
   async migrateKofiUserFromName() {
     const allKofiUsers = await this.kofiUserRepository.find();
