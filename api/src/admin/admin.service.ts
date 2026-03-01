@@ -107,10 +107,14 @@ export class AdminService {
       }
 
       // 从 KofiOrder 中查找对应的 fromName，按时间倒序
-      const orders = await this.kofiOrderRepository
-        .whereEqualTo('email', kofiUser.email)
-        .orderByDescending('timestamp')
-        .find();
+      const orders = await this.kofiOrderRepository.whereEqualTo('email', kofiUser.email).find();
+
+      // 在内存中按时间倒序排序
+      orders.sort((a, b) => {
+        const timeA = a.timestamp?.getTime() || 0;
+        const timeB = b.timestamp?.getTime() || 0;
+        return timeB - timeA; // 降序
+      });
 
       if (orders.length > 0 && orders[0].fromName) {
         kofiUser.fromName = orders[0].fromName;
