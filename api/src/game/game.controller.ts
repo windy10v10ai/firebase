@@ -102,7 +102,7 @@ export class GameController {
     for (const player of players) {
       if (player.steamId > 0) {
         const battlePoints = player.battlePoints;
-        if (battlePoints < 0 || battlePoints > 1000) {
+        if (battlePoints < 0 || battlePoints > 500) {
           // 异常数值，不更新
           continue;
         }
