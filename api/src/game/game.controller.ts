@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
@@ -98,12 +99,17 @@ export class GameController {
   @Post('end')
   async end(@Body() gameEnd: GameEndDto, @Req() req: Request): Promise<string> {
     const apiKey = req.headers['x-api-key'] as string;
+    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     const players = gameEnd.players;
     for (const player of players) {
       if (player.steamId > 0) {
         const battlePoints = player.battlePoints;
-        if (battlePoints < 0 || battlePoints > 1000) {
-          // 异常数值，不更新
+        if (battlePoints < 0 || battlePoints > 500) {
+          logger.warn('game/end: invalid battlePoints, skip upsert', {
+            steamId: player.steamId,
+            serverType,
+            battlePoints,
+          });
           continue;
         }
         await this.playerService.upsertGameEnd(
@@ -115,7 +121,6 @@ export class GameController {
       }
     }
 
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     await this.analyticsService.gameEndMatch(gameEnd, serverType);
     await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
     return this.gameService.getOK();

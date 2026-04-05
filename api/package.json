@@ -22,7 +22,7 @@
     "test:e2e": "firebase emulators:exec --only firestore \"jest --config ./test/jest-e2e.json\" --project windy10v10ai"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.9",
+    "@nestjs/common": "^11.1.17",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.9",
     "@nestjs/mapped-types": "*",
@@ -53,7 +53,7 @@
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-unused-imports": "^4.3.0",
     "fireorm": "^0.23.3",
-    "jest": "^30.2.0",
+    "jest": "^30.3.0",
     "jest-util": "^30.2.0",
     "prettier": "^3.8.1",
     "source-map-support": "^0.5.21",
