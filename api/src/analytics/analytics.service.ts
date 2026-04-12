@@ -7,7 +7,6 @@ import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
 import { PickListDto } from './dto/pick-ability-dto';
-import { ItemListDto } from './dto/pick-item-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 export interface Event {
@@ -86,46 +85,6 @@ export class AnalyticsService {
     }
   }
 
-  async gameEndItemBuilds(dto: ItemListDto, serverType: SERVER_TYPE) {
-    // 遍历每个玩家的物品数据
-    for (const playerItems of dto.items) {
-      const itemSlots = [
-        { name: playerItems.slot1, type: 'normal' },
-        { name: playerItems.slot2, type: 'normal' },
-        { name: playerItems.slot3, type: 'normal' },
-        { name: playerItems.slot4, type: 'normal' },
-        { name: playerItems.slot5, type: 'normal' },
-        { name: playerItems.slot6, type: 'normal' },
-        { name: playerItems.neutralActiveSlot, type: 'neutral_active' },
-        { name: playerItems.neutralPassiveSlot, type: 'neutral_passive' },
-      ];
-
-      // 逐个发送物品事件到GA
-      for (const slot of itemSlots) {
-        if (slot.name) {
-          // 只发送非空的物品槽位
-          const event = await this.buildEvent(
-            'game_end_item_build',
-            playerItems.steamId,
-            dto.matchId,
-            {
-              steam_id: playerItems.steamId,
-              match_id: dto.matchId,
-              item_name: slot.name,
-              type: slot.type,
-              difficulty: dto.difficulty,
-              version: dto.version,
-              win_metrics: dto.isWin,
-              server_type: serverType,
-            },
-          );
-
-          await this.sendEvent(playerItems.steamId.toString(), event);
-        }
-      }
-    }
-  }
-
   async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
     for (const player of dto.players) {
       const event = await this.buildEvent('player_language', player.steamId, dto.matchId, {
@@ -166,7 +125,6 @@ export class AnalyticsService {
         hero_name: player.heroName,
         hero_name_cn: GetHeroNameChinese(player.heroName),
         points: player.battlePoints,
-        facet_id: player.facetId,
         is_disconnect: player.isDisconnected,
         server_type: serverType,
         country: gameEnd.countryCode,
