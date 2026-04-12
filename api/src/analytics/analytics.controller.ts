@@ -6,7 +6,6 @@ import { SecretService } from '../util/secret/secret.service';
 
 import { AnalyticsService } from './analytics.service';
 import { PickListDto } from './dto/pick-ability-dto';
-import { ItemListDto } from './dto/pick-item-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 @ApiTags('Analytics(GA4)')
@@ -22,13 +21,6 @@ export class AnalyticsController {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     await this.analyticsService.gameEndPickAbilities(body, serverType);
-  }
-
-  @Post('/game-end/item-builds')
-  async gameEndItemBuilds(@Body() body: ItemListDto, @Req() req: Request): Promise<void> {
-    const apiKey = req.headers['x-api-key'] as string;
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    await this.analyticsService.gameEndItemBuilds(body, serverType);
   }
 
   @Post('/player/language')
