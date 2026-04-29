@@ -69,7 +69,7 @@ export class GameService {
 
     const startTime = new Date('2026-04-29T00:00:00.000Z');
     const endTime = new Date('2026-05-10T23:59:59.999Z');
-    const memberRewardPoint = 5100;
+    const seasonRewardPoint = 5100;
 
     const now = new Date();
 
@@ -80,7 +80,7 @@ export class GameService {
       // FIXME 活动每次需要更新
       if (now >= startTime && now <= endTime && !rewardResult.result?.mayDay2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          memberPointTotal: memberRewardPoint,
+          seasonPointTotal: seasonRewardPoint,
         });
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
@@ -89,7 +89,7 @@ export class GameService {
             cn: '五一快乐！',
             en: 'Happy May Day!',
           },
-          memberPoint: memberRewardPoint,
+          seasonPoint: seasonRewardPoint,
         });
       }
     }
