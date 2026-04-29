@@ -67,10 +67,9 @@ export class GameService {
   async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    const startTime = new Date('2026-02-22T00:00:00.000Z');
-    const endTime = new Date('2026-03-01T23:59:59.999Z');
-    const memberRewardPoint = 1000;
-    const seasonRewardPoint = 5000;
+    const startTime = new Date('2026-04-29T00:00:00.000Z');
+    const endTime = new Date('2026-05-10T23:59:59.999Z');
+    const seasonRewardPoint = 5100;
 
     const now = new Date();
 
@@ -79,19 +78,17 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= startTime && now <= endTime && !rewardResult.result?.compensation20260301) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.mayDay2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          memberPointTotal: memberRewardPoint,
           seasonPointTotal: seasonRewardPoint,
         });
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '游戏崩溃补偿',
-            en: 'Game Crash Compensation',
+            cn: '五一快乐！',
+            en: 'Happy May Day!',
           },
-          memberPoint: memberRewardPoint,
           seasonPoint: seasonRewardPoint,
         });
       }
