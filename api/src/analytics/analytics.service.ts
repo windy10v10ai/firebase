@@ -6,7 +6,6 @@ import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.servic
 import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
-import { PickListDto } from './dto/pick-ability-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 export interface Event {
@@ -65,24 +64,6 @@ export class AnalyticsService {
         use_member_point: dto.useMemberPoint,
       },
     });
-  }
-
-  async gameEndPickAbilities(dto: PickListDto, serverType: SERVER_TYPE) {
-    for (const pick of dto.picks) {
-      const event = await this.buildEvent('game_end_pick_ability', pick.steamId, dto.matchId, {
-        steam_id: pick.steamId,
-        match_id: dto.matchId,
-        ability_name: pick.name,
-        type: pick.type,
-        level: pick.level,
-        difficulty: dto.difficulty,
-        version: dto.version,
-        win_metrics: dto.isWin,
-        server_type: serverType,
-      });
-
-      await this.sendEvent(pick.steamId.toString(), event);
-    }
   }
 
   async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
