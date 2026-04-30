@@ -5,7 +5,6 @@ import { Request } from 'express';
 import { SecretService } from '../util/secret/secret.service';
 
 import { AnalyticsService } from './analytics.service';
-import { PickListDto } from './dto/pick-ability-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 @ApiTags('Analytics(GA4)')
@@ -15,13 +14,6 @@ export class AnalyticsController {
     private readonly analyticsService: AnalyticsService,
     private readonly secretService: SecretService,
   ) {}
-
-  @Post('/game-end/pick/abilities')
-  async gameEndLotteryPickAbilities(@Body() body: PickListDto, @Req() req: Request): Promise<void> {
-    const apiKey = req.headers['x-api-key'] as string;
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    await this.analyticsService.gameEndPickAbilities(body, serverType);
-  }
 
   @Post('/player/language')
   async trackPlayerLanguage(
