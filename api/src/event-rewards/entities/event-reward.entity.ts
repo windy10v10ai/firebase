@@ -25,4 +25,5 @@ export class EventReward {
   newYear2026?: boolean;
   lunarNewYear2026?: boolean;
   compensation20260301?: boolean; // 补偿活动：1000会员积分+5000赛季积分
+  mayDay2026?: boolean; // 51活动：5100会员积分
 }
