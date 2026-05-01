@@ -131,7 +131,7 @@
       },
       "error": {
         "afdianMessage": "Please check if your Dota2 friend ID and Afdian Order No are correct. If the problem persists, please try again later.",
-        "kofiMessage": "Please check if your Dota2 friend ID and Ko-fi Email Address are correct. If the problem persists, please try again later.",
+        "kofiMessage": "No unactivated orders found. If you have successfully subscribed, your membership will take effect in the next game. If it still does not take effect after starting a new game, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
         "btnText": "Try Again"
       }
     }
