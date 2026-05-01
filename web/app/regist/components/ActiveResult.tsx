@@ -53,7 +53,7 @@ const ActiveResult: React.FC<ActiveResultProps> = (props) => {
     <Result
       status={props.result ? 'success' : 'warning'}
       icon={props.result ? <SmileOutlined /> : <InfoCircleOutlined />}
-      title={<div style={{ color: 'white' }}>{message}</div>}
+      title={<div style={{ color: 'white', whiteSpace: 'pre-line' }}>{message}</div>}
       extra={
         <Button type="primary" onClick={handleClick}>
           {btnText}
