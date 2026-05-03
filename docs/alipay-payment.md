@@ -347,19 +347,17 @@ curl -X POST http://localhost:5001/windy10v10ai/asia-northeast1/client/api/alipa
 **密钥生成（用 openssl，无需安装支付宝密钥工具）：**
 
 ```bash
-# 1. 生成 PKCS8 私钥
+# 1. 生成密钥对
 openssl genrsa -out private_key_pkcs1.pem 2048
-openssl pkcs8 -topk8 -nocrypt -in private_key_pkcs1.pem -out private_key.pem
 
-# 2. 提取公钥
-openssl rsa -in private_key_pkcs1.pem -pubout -out public_key.pem
+# 2. 应用公钥（上传到支付宝控制台）
+openssl rsa -in private_key_pkcs1.pem -pubout -outform DER | base64 | tr -d '\n'
 
-# 3. 应用公钥（上传到支付宝控制台）
-cat public_key.pem | grep -v "PUBLIC KEY" | tr -d '\n'
-
-# 4. 应用私钥（填入 ALIPAY_APP_PRIVATE_KEY）
-cat private_key.pem | grep -v "PRIVATE KEY" | tr -d '\n'
+# 3. 应用私钥（填入 ALIPAY_APP_PRIVATE_KEY）
+openssl pkcs8 -topk8 -nocrypt -in private_key_pkcs1.pem -outform DER | base64 | tr -d '\n'
 ```
+
+> 通过 DER → base64 输出，确保无多余字符且 `=` padding 正确，避免支付宝"密钥格式不正确"错误。
 
 **支付宝控制台操作：**
 1. 将第 3 步输出粘贴到控制台"上传应用公钥"
