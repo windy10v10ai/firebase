@@ -6,6 +6,7 @@ import { FireormModule } from 'nestjs-fireorm';
 
 import { AdminModule } from './admin/admin.module';
 import { AfdianModule } from './afdian/afdian.module';
+import { AlipayModule } from './alipay/alipay.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -40,6 +41,7 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     }),
     GameModule,
     AfdianModule,
+    AlipayModule,
     KofiModule,
     PlayerModule,
     PlayerInfoModule,

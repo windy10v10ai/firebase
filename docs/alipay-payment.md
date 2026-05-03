@@ -10,7 +10,9 @@
 - 游戏端轮询查询接口拿到 `SUCCESS` 状态，结束流程
 - 沙箱/生产通过环境变量切换 gateway
 
-复用 [afdian](api/src/afdian) / [kofi](api/src/kofi) 的目录结构、Secret 管理、Members/Player 奖励发放、定时回扫等约定，最大限度减少差异。
+复用 [afdian](api/src/afdian) / [kofi](api/src/kofi) 的目录结构、Secret 管理、Members/Player 奖励发放等约定，最大限度减少差异。
+
+> **与 afdian/kofi 的主要差异**：订单创建时 steamId 已由客户端明确传入，无需 User 表做 userId→steamId 反查；webhook 丢失时由用户手动触发补单，不做定时回扫。
 
 ---
 
@@ -37,12 +39,15 @@ game ──(每 2s 轮询 GET /api/alipay/order/query?outTradeNo=xxx)──▶ c
                                                                                   ├─ 幂等：outTradeNo 已 SUCCESS 直接回 "success"
                                                                                   ├─ 校验 trade_status === TRADE_SUCCESS && total_amount 匹配
                                                                                   ├─ 更新订单 SUCCESS、应用奖励（MembersService / PlayerService）
-                                                                                  ├─ 写 AlipayUser(buyerId → steamId)
                                                                                   ├─ 发 GA4 purchase 事件
                                                                                   └─ 返回 plain text "success"
 
-定时任务（every 30 min, 复用 scheduledOrderCheck）
-  └─ 扫描 WAITING 且 > 5min 的订单 → alipay.trade.query 兜底 → 必要时 alipay.trade.cancel
+webhook 丢失时（用户手动补单）
+game ──(POST /api/alipay/order/active  {steamId, outTradeNo})──▶ cloudfunction
+                                                                     ├─ 验证 order.steamId === 请求 steamId
+                                                                     ├─ 调 alipay.trade.query 确认支付宝侧已付款
+                                                                     ├─ 幂等：已 SUCCESS 直接返回成功
+                                                                     └─ 走同款激活逻辑
 ```
 
 ---
@@ -60,7 +65,6 @@ api/src/alipay/
   alipay.constants.ts             productCode → 价格/奖励 映射表
   entities/
     alipay-order.entity.ts        Firestore 订单实体（带 outTradeNo 索引）
-    alipay-user.entity.ts         buyerId ↔ steamId 映射
   dto/
     create-alipay-order.dto.ts    入参 {steamId, productCode, quantity?}
     create-alipay-order-response.dto.ts  出参 {outTradeNo, qrCode, totalAmount, expiresAt}
@@ -68,7 +72,7 @@ api/src/alipay/
     alipay-notify.dto.ts          支付宝异步通知字段
     active-alipay-order.dto.ts    手工补单 {outTradeNo, steamId}
   enums/
-    alipay-product-code.enum.ts   MEMBER_PREMIUM_1M / POINTS_TIER1..3
+    alipay-product-code.enum.ts   MEMBER_PREMIUM / POINTS_TIER1..3
     alipay-trade-status.enum.ts   WAITING / SUCCESS / CLOSED / FAILED
 ```
 
@@ -91,7 +95,7 @@ api/src/alipay/
   "outTradeNo": "ali-123456789-1714600000000-ab12",
   "qrCode": "https://qr.alipay.com/bax03206rqipznwqounm00a8",
   "totalAmount": "28.00",
-  "subject": "Premium 会员 1 个月",
+  "subject": "Premium 会员",
   "expiresAt": "2026-05-02T12:00:00Z"
 }
 ```
@@ -115,25 +119,30 @@ api/src/alipay/
 
 ```ts
 export enum AlipayProductCode {
-  MEMBER_PREMIUM_1M = 'MEMBER_PREMIUM_1M',
-  POINTS_TIER1 = 'POINTS_TIER1',
-  POINTS_TIER2 = 'POINTS_TIER2',
-  POINTS_TIER3 = 'POINTS_TIER3',
+  MEMBER_PREMIUM = 'MEMBER_PREMIUM',   // 会员，月数由 quantity 决定
+  POINTS_TIER1   = 'POINTS_TIER1',
+  POINTS_TIER2   = 'POINTS_TIER2',
+  POINTS_TIER3   = 'POINTS_TIER3',
 }
 
-// 价格用「分」内部计算，落库/precreate 转成 "xx.xx" CNY 字符串
-export const ALIPAY_PRODUCT_TABLE: Record<AlipayProductCode, ProductSpec> = {
-  MEMBER_PREMIUM_1M: { subject: 'Premium 会员 1 个月', priceCent: 2800, reward: { kind: 'member', level: PREMIUM, month: 1 } },
-  POINTS_TIER1:      { subject: '积分礼包 3500',       priceCent: 7800, reward: { kind: 'points', points: 3500 } },
-  POINTS_TIER2:      { subject: '积分礼包 11000',      priceCent: 23800, reward: { kind: 'points', points: 11000 } },
-  POINTS_TIER3:      { subject: '积分礼包 28000',      priceCent: 56800, reward: { kind: 'points', points: 28000 } },
+// priceCentPerUnit：单份价格（分）；quantity 传几份就乘几倍
+// reward 中不含 month，month = quantity，由 service 计算
+export const ALIPAY_PRODUCT_TABLE: Record<AlipayProductCode, AlipayProductSpec> = {
+  MEMBER_PREMIUM: { subjectUnit: 'Premium 会员', priceCentPerUnit: 2800, reward: { kind: 'member', level: PREMIUM } },
+  POINTS_TIER1:   { subjectUnit: '积分礼包 3500',  priceCentPerUnit: 7800,  reward: { kind: 'points', points: 3500 } },
+  POINTS_TIER2:   { subjectUnit: '积分礼包 11000', priceCentPerUnit: 23800, reward: { kind: 'points', points: 11000 } },
+  POINTS_TIER3:   { subjectUnit: '积分礼包 28000', priceCentPerUnit: 56800, reward: { kind: 'points', points: 28000 } },
 };
 ```
 
+**quantity 语义**：
+- 会员：quantity = 月数（`POST { productCode: "MEMBER_PREMIUM", quantity: 3 }` → 3 个月，¥84.00）
+- 积分：首期固定 quantity=1；后续扩展多份时直接传数量
+
 **未来扩展位（已留口）**：
-- `quantity` 入参 + 折扣阶梯表（3/12/36 月、积分多份）
+- 折扣阶梯表（3/12/36 月会员折扣、积分多份折扣）
 - `firstOrderDiscount` 标志：根据 `AlipayOrder` 是否存在该 steamId 的 SUCCESS 历史决定
-- 价格/折扣计算放在 `AlipayService.calculatePrice(productCode, quantity, isFirstOrder)`，奖励发放复用 `MembersService.createMember()` 和 `PlayerService.upsertAddPoint()`（已实现）
+- 价格/折扣计算收敛到 `AlipayService.calculatePrice(productCode, quantity, isFirstOrder)`，奖励发放复用 `MembersService.createMember()` 和 `PlayerService.upsertAddPoint()`（已实现）
 
 ---
 
@@ -251,15 +260,9 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 ---
 
-## 定时回扫（兜底 webhook 丢失）
+## webhook 丢失兜底
 
-复用 [scheduledOrderCheck](api/index.ts) 的 30 分钟节奏，新增 `TaskController.checkPendingAlipayOrders(limit)`：
-
-1. 查 `AlipayOrder` where `status == WAITING` and `createdAt < now - 5min`，取最旧 N 条
-2. 对每条调 `alipay.trade.query`：
-   - `TRADE_SUCCESS` → 走 webhook 同款激活逻辑
-   - `TRADE_CLOSED` 或超过 2h → 标记 CLOSED
-   - 其他 → 跳过下次再查
+不做定时回扫。用户在支付宝账单页可看到「商家订单号」，通过游戏界面手动触发 `POST /api/alipay/order/active` 补单。二维码 2 小时到期未付款的订单，支付宝自动关单，Firestore 侧保持 WAITING 即可（历史记录，无需主动清理）。
 
 ---
 
@@ -271,7 +274,7 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 - 没有游戏客户端时也能完整跑通：下单 → 扫码 → 支付 → 看到状态翻转 → 验证奖励到账
 
 ### B. 游戏端正式接入（后期）
-1. `POST {API_DOMAIN}/api/alipay/order/create` → `{ steamId, productCode: "MEMBER_PREMIUM_1M" }`
+1. `POST {API_DOMAIN}/api/alipay/order/create` → `{ steamId, productCode: "MEMBER_PREMIUM", quantity: 1 }`
 2. 拿到 `qrCode` 字符串后用本地 QR 库（如 Lua 的 `qrcode.lua`）生成图像贴在 UI 上
 3. 启动 2s 间隔轮询 `GET /api/alipay/order/query?outTradeNo=...`，`SUCCESS` 关弹窗刷新；`CLOSED` 提示重试
 4. 弹窗关闭时停止轮询；服务端不依赖客户端通知，webhook 才是真相
@@ -311,7 +314,7 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
   - SDK `checkNotifySign` 验签；`total_amount` 与订单匹配校验
   - 幂等：`status===SUCCESS` 直接回 `success`
   - 调 `applyRewards()` → `MembersService.createMember` 或 `PlayerService.upsertAddPoint`
-  - 写 `AlipayUser`、发 GA4 `alipayPurchase` 事件；回 `success` 纯文本
+  - 发 GA4 `alipayPurchase` 事件；回 `success` 纯文本
 - 单测：验签失败拒绝、金额不符拒绝、重复通知幂等、奖励正确分发
 - 验收：ngrok 暴露 emulator → 沙箱付款 → Firestore 订单变 SUCCESS → 会员/积分到账 → web 页自动跳"支付成功"
 
@@ -320,7 +323,7 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 **支付宝控制台操作：**
 1. 密钥工具生成 PKCS8 RSA2 密钥对 → 上传应用公钥 → 拿支付宝公钥
-2. 填写应用网关：`https://asia-northeast1-<project>.cloudfunctions.net/client/api/alipay/webhook`
+2. 填写应用网关（异步通知地址）：`https://asia-northeast1-<project>.cloudfunctions.net/client/api/alipay/webhook`
 
 **Firebase 操作：**
 ```bash
@@ -328,20 +331,25 @@ firebase functions:secrets:set ALIPAY_APP_ID
 firebase functions:secrets:set ALIPAY_APP_PRIVATE_KEY
 firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 ```
-- `.env.production` 设 `ALIPAY_ENV=prod`、`ALIPAY_NOTIFY_URL=<正式 webhook URL>`
-- 先放开 1 个 productCode（`MEMBER_PREMIUM_1M`）观察 1–2 周，确认 webhook 到账率
+- `.env.production` 设 `ALIPAY_ENV=prod`（notify URL 在支付宝控制台配置，无需环境变量）
+- 先放开 1 个 productCode（`MEMBER_PREMIUM`）观察 1–2 周，确认 webhook 到账率
 - 验收：真实支付宝付款 → 订单 SUCCESS → 会员到账
 
-### Step 6 — 用户自助补单接口（上线后补充）
+### Step 6 — 手动补单接口
 > 场景：webhook 延迟/失败，用户在支付宝账单页看到「商家订单号」，在游戏界面输入后自助补单。
 
-- `POST /api/alipay/order/active { outTradeNo }`（无需传 steamId，游戏客户端自动附带）
+- `POST /api/alipay/order/active { steamId, outTradeNo }`
 - 后端逻辑：
-  1. 查 Firestore：`order.steamId` 必须与请求的 steamId 一致（防止他人用你的订单号）
+  1. 验证 `order.steamId === 请求 steamId`（防止他人用你的订单号）
   2. 调 `alipay.trade.query` 确认支付宝侧已付款（防止伪造未付款订单）
   3. 幂等：已 SUCCESS 直接返回成功
-  4. 调 `applyRewards()` → 发放奖励
-- 验收：手动将一条订单设为 WAITING → 用游戏客户端输入 outTradeNo → 奖励到账
+  4. 调 `applyRewards()`
+- 验收：手动将一条订单设为 WAITING → 用游戏客户端输入 outTradeNo → 奖励到账；用非本人 steamId 调用 → 403
+
+### 未来可选项（所有 Step 完成后视需求实施）
+
+- **动态定价 / 折扣**：新增 `GET /api/alipay/order/price` 查询接口，返回原价与实际价；`AlipayService.calculatePrice(productCode, quantity, steamId)` 根据 SUCCESS 历史决定首次折扣；前端改为先查价格展示再下单
+- **定时回扫清理 WAITING 数据**：若 WAITING 订单量积累较多影响查询性能，可复用 `scheduledOrderCheck` 的 30 分钟节奏，扫描超过 2h 的 WAITING 订单调 `alipay.trade.query`，已关单则标记 CLOSED
 
 ---
 
@@ -354,8 +362,7 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 - `api/src/alipay/alipay.api.service.ts`
 - `api/src/alipay/alipay.constants.ts`
 - `api/src/alipay/entities/alipay-order.entity.ts`
-- `api/src/alipay/entities/alipay-user.entity.ts`
-- `api/src/alipay/dto/*.ts`（5 个 DTO）
+- `api/src/alipay/dto/*.ts`（create / create-response / query / notify / active 共 5 个）
 - `api/src/alipay/enums/*.ts`（2 个 enum）
 - `api/src/alipay/alipay.service.spec.ts`（单测：价格表、奖励分发、签名验证 mock）
 
@@ -365,7 +372,7 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 - [api/src/util/secret/secret.service.ts](api/src/util/secret/secret.service.ts)：`SECRET` 枚举加 3 项
 - [api/src/analytics](api/src/analytics)：新增 `alipayPurchase` 方法（类比现有 `kofiPurchase`/`afdianPurchase`）
 - [api/package.json](api/package.json)：`alipay-sdk` 依赖
-- `api/.env.local`：补 `ALIPAY_ENV=sandbox`、`ALIPAY_NOTIFY_URL`、沙箱 3 个 secret 默认值
+- `api/.env.local`：补 `ALIPAY_ENV=sandbox`、`ALIPAY_NOTIFY_URL`（仅本地 ngrok 用）、沙箱 3 个 secret 占位值
 
 ---
 
@@ -389,8 +396,8 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
    - 在订单 WAITING 时 `GET /api/alipay/order/query?outTradeNo=xxx` → `WAITING`
    - 沙箱付款后再查 → `SUCCESS`
 
-4. **兜底任务验证**：手动触发 `scheduledOrderCheck`，新建 1 条 6 分钟前的 WAITING 订单（直接写 Firestore），验证扫描到并能调通 alipay.trade.query
+4. **手动补单验证**：沙箱付款后手动将订单重置为 WAITING，调 `POST /api/alipay/order/active` → 奖励到账；用非本人 steamId 调用 → 返回 403
 
-5. **生产灰度**：先开放 1 个 productCode，观察 1–2 周 webhook 成功率 / 兜底任务命中率，再放开全部
+5. **生产灰度**：先开放 1 个 productCode（`MEMBER_PREMIUM`），观察 1–2 周 webhook 成功率，再放开全部
 
 6. **回归**：跑现有 afdian/kofi 单测确保 SECRET 改动没破坏其他模块。
