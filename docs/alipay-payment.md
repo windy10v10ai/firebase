@@ -321,7 +321,25 @@ npx qrcode "<上一步返回的 qrCode 字符串>"
   - 调 `applyRewards()` → `MembersService.createMember` 或 `PlayerService.upsertAddPoint`
   - 发 GA4 `alipayPurchase` 事件；回 `success` 纯文本
 - 单测：验签失败拒绝、金额不符拒绝、重复通知幂等、奖励正确分发
-- 验收：`npx qrcode <qrCode>` 生成二维码 → 沙箱 App 扫码付款（或手动 POST webhook 模拟）→ Firestore 订单变 SUCCESS → 会员/积分到账
+- 验收：手动 curl 模拟支付宝 webhook 回调，验证完整链路
+
+```bash
+# 1. 先创建一笔订单，拿到 outTradeNo
+curl -X POST http://localhost:5001/windy10v10ai/asia-northeast1/client/api/alipay/order/create \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: Invalid_NotOnDedicatedServer" \
+  -d '{"steamId":123456,"productCode":"MEMBER_PREMIUM","quantity":1}'
+
+# 2. 模拟支付宝回调（沙箱验签可在 webhook 实现中临时跳过）
+curl -X POST http://localhost:5001/windy10v10ai/asia-northeast1/client/api/alipay/webhook \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "out_trade_no=<上一步的outTradeNo>&trade_status=TRADE_SUCCESS&total_amount=28.00&buyer_user_id=sandbox_buyer&gmt_payment=2026-05-03+20:00:00"
+```
+
+检查点：
+- Firestore `alipay-order` 文档 `status: WAITING → SUCCESS`
+- 对应 steamId 会员/积分到账
+- 重复发送同一 webhook → 返回 `success` 但不重复发放奖励
 
 ### Step 4 — 上线（生产配置 + 灰度部署）
 **代码变更：** 无（仅配置）

@@ -21,6 +21,7 @@ export class AlipayOrder {
   buyerUserId?: string;
   /** 支付宝登录账号，脱敏后的手机号或邮箱，webhook 回写 */
   buyerLogonId?: string;
+  /** 用户实际付款时间（北京时间），webhook 回写，仅用于审计对账 */
   gmtPayment?: Date;
   rawNotify?: Record<string, unknown>;
   createdAt: Date;
