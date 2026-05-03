@@ -7,7 +7,6 @@ import { ALIPAY_PRODUCT_TABLE, ALIPAY_QR_EXPIRE_MS, AlipayProductSpec } from './
 import { CreateAlipayOrderResponseDto } from './dto/create-alipay-order-response.dto';
 import { CreateAlipayOrderDto } from './dto/create-alipay-order.dto';
 import { AlipayOrder } from './entities/alipay-order.entity';
-import { AlipayProductCode } from './enums/alipay-product-code.enum';
 import { AlipayTradeStatus } from './enums/alipay-trade-status.enum';
 
 @Injectable()

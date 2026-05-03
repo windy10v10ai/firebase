@@ -344,9 +344,27 @@ curl -X POST http://localhost:5001/windy10v10ai/asia-northeast1/client/api/alipa
 ### Step 4 — 上线（生产配置 + 灰度部署）
 **代码变更：** 无（仅配置）
 
+**密钥生成（用 openssl，无需安装支付宝密钥工具）：**
+
+```bash
+# 1. 生成 PKCS8 私钥
+openssl genrsa -out private_key_pkcs1.pem 2048
+openssl pkcs8 -topk8 -nocrypt -in private_key_pkcs1.pem -out private_key.pem
+
+# 2. 提取公钥
+openssl rsa -in private_key_pkcs1.pem -pubout -out public_key.pem
+
+# 3. 应用公钥（上传到支付宝控制台）
+cat public_key.pem | grep -v "PUBLIC KEY" | tr -d '\n'
+
+# 4. 应用私钥（填入 ALIPAY_APP_PRIVATE_KEY）
+cat private_key.pem | grep -v "PRIVATE KEY" | tr -d '\n'
+```
+
 **支付宝控制台操作：**
-1. 密钥工具生成 PKCS8 RSA2 密钥对 → 上传应用公钥 → 拿支付宝公钥
-2. 填写应用网关（异步通知地址）：`https://asia-northeast1-<project>.cloudfunctions.net/client/api/alipay/webhook`
+1. 将第 3 步输出粘贴到控制台"上传应用公钥"
+2. 控制台会返回**支付宝公钥** → 填入 `ALIPAY_PUBLIC_KEY`
+3. 填写应用网关（异步通知地址）：`https://asia-northeast1-<project>.cloudfunctions.net/client/api/alipay/webhook`
 
 **Firebase 操作：**
 ```bash
