@@ -20,8 +20,8 @@ export class AlipayService {
 
   async createOrder(dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
     const quantity = dto.quantity ?? 1;
-    const { spec, totalAmountCent, totalAmount } = this.calculatePrice(dto.productCode, quantity);
-    const subject = this.buildSubject(spec.subjectUnit, spec.reward.kind, quantity);
+    const { totalAmountCent, totalAmount } = this.calculatePrice(dto.productCode, quantity);
+    const subject = this.buildSubject(dto.productCode, quantity);
 
     const outTradeNo = this.generateOutTradeNo(dto.steamId);
     const now = new Date();
@@ -66,27 +66,33 @@ export class AlipayService {
   calculatePrice(
     productCode: AlipayProductCode,
     quantity: number,
-  ): { spec: AlipayProductSpec; totalAmountCent: number; totalAmount: string } {
-    const spec = ALIPAY_PRODUCT_TABLE[productCode];
-    if (!spec) {
-      throw new BadRequestException(`Unknown productCode: ${productCode}`);
-    }
+  ): { totalAmountCent: number; totalAmount: string } {
+    const spec = this.getSpec(productCode);
     if (!Number.isInteger(quantity) || quantity < 1) {
       throw new BadRequestException(`Invalid quantity: ${quantity}`);
     }
     const totalAmountCent = spec.priceCentPerUnit * quantity;
     const totalAmount = (totalAmountCent / 100).toFixed(2);
-    return { spec, totalAmountCent, totalAmount };
+    return { totalAmountCent, totalAmount };
   }
 
-  private buildSubject(subjectUnit: string, kind: string, quantity: number): string {
+  private getSpec(productCode: AlipayProductCode): AlipayProductSpec {
+    const spec = ALIPAY_PRODUCT_TABLE[productCode];
+    if (!spec) {
+      throw new BadRequestException(`Unknown productCode: ${productCode}`);
+    }
+    return spec;
+  }
+
+  private buildSubject(productCode: AlipayProductCode, quantity: number): string {
+    const spec = this.getSpec(productCode);
     if (quantity <= 1) {
-      return subjectUnit;
+      return spec.subjectUnit;
     }
-    if (kind === 'member') {
-      return `${subjectUnit} ${quantity}个月`;
+    if (spec.reward.kind === 'member') {
+      return `${spec.subjectUnit} ${quantity}个月`;
     }
-    return `${subjectUnit} ${quantity}份`;
+    return `${spec.subjectUnit} ${quantity}份`;
   }
 
   private generateOutTradeNo(steamId: number): string {

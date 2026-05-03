@@ -44,7 +44,6 @@ describe('AlipayService', () => {
       const r = service.calculatePrice(AlipayProductCode.MEMBER_PREMIUM, 1);
       expect(r.totalAmountCent).toBe(2800);
       expect(r.totalAmount).toBe('28.00');
-      expect(r.spec).toBe(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM);
     });
 
     it('3 份会员 ¥84.00（线性倍乘，无折扣）', () => {
