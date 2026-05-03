@@ -3,10 +3,15 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AlipayApiService } from './alipay.api.service';
-import { ALIPAY_PRODUCT_TABLE, ALIPAY_QR_EXPIRE_MS } from './alipay.constants';
+import {
+  ALIPAY_PRODUCT_TABLE,
+  ALIPAY_QR_EXPIRE_MS,
+  AlipayProductSpec,
+} from './alipay.constants';
 import { CreateAlipayOrderResponseDto } from './dto/create-alipay-order-response.dto';
 import { CreateAlipayOrderDto } from './dto/create-alipay-order.dto';
 import { AlipayOrder } from './entities/alipay-order.entity';
+import { AlipayProductCode } from './enums/alipay-product-code.enum';
 import { AlipayTradeStatus } from './enums/alipay-trade-status.enum';
 
 @Injectable()
@@ -18,14 +23,8 @@ export class AlipayService {
   ) {}
 
   async createOrder(dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
-    const spec = ALIPAY_PRODUCT_TABLE[dto.productCode];
-    if (!spec) {
-      throw new BadRequestException(`Unknown productCode: ${dto.productCode}`);
-    }
-
     const quantity = dto.quantity ?? 1;
-    const totalAmountCent = spec.priceCentPerUnit * quantity;
-    const totalAmount = (totalAmountCent / 100).toFixed(2);
+    const { spec, totalAmountCent, totalAmount } = this.calculatePrice(dto.productCode, quantity);
     const subject = this.buildSubject(spec.subjectUnit, spec.reward.kind, quantity);
 
     const outTradeNo = this.generateOutTradeNo(dto.steamId);
@@ -62,6 +61,26 @@ export class AlipayService {
       subject,
       expiresAt: expiresAt.toISOString(),
     };
+  }
+
+  /**
+   * 计算订单价格。独立成 method 以便后续接入折扣（多份阶梯、首充优惠、活动价等）：
+   * 折扣逻辑只需在此处加，调用方（createOrder / 未来的 GET /price 端点）无需感知。
+   */
+  calculatePrice(
+    productCode: AlipayProductCode,
+    quantity: number,
+  ): { spec: AlipayProductSpec; totalAmountCent: number; totalAmount: string } {
+    const spec = ALIPAY_PRODUCT_TABLE[productCode];
+    if (!spec) {
+      throw new BadRequestException(`Unknown productCode: ${productCode}`);
+    }
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new BadRequestException(`Invalid quantity: ${quantity}`);
+    }
+    const totalAmountCent = spec.priceCentPerUnit * quantity;
+    const totalAmount = (totalAmountCent / 100).toFixed(2);
+    return { spec, totalAmountCent, totalAmount };
   }
 
   private buildSubject(subjectUnit: string, kind: string, quantity: number): string {
