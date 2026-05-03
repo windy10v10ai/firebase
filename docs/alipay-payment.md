@@ -268,10 +268,22 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 ## 客户端调用方式
 
-### A. Web 测试页（前期联调，本期必做，见 Step 3）
-- 路径 `web/app/alipay-test/page.tsx`，仅 dev 环境暴露
-- 浏览器打开 → 选商品 → 调 `POST /api/alipay`（web Next.js route 代理到后端）→ 前端 `qrcode.react` 渲染图片 → 自动轮询 `/api/alipay/order/query`
-- 没有游戏客户端时也能完整跑通：下单 → 扫码 → 支付 → 看到状态翻转 → 验证奖励到账
+### A. 本地沙箱联调（终端生成二维码）
+
+```bash
+# 1. 调 create order 拿到 qrCode 字符串
+curl -X POST http://localhost:5001/windy10v10ai/asia-northeast1/client/api/alipay/order/create \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: Invalid_NotOnDedicatedServer" \
+  -d '{"steamId":123456,"productCode":"MEMBER_PREMIUM","quantity":1}'
+
+# 2. 终端渲染二维码
+npx qrcode "<上一步返回的 qrCode 字符串>"
+```
+
+用支付宝沙箱 App（仅 Android）扫码完成测试；无 Android 设备时，直接手动 POST webhook 模拟支付回调。
+
+> **注意**：真实支付宝 App 扫沙箱二维码会提示"订单已过期"，这是正常现象，沙箱订单只能用沙箱 App 扫。
 
 ### B. 游戏端正式接入（后期）
 1. `POST {API_DOMAIN}/api/alipay/order/create` → `{ steamId, productCode: "MEMBER_PREMIUM", quantity: 1 }`
@@ -283,12 +295,12 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 ## 分阶段实施步骤
 
-共 **6 步**，Step 1 已完成。Step 1–4 全程沙箱，Step 5 上线，Step 6 上线后补充用户自助补单。
+共 **5 步**，Step 1–2 已完成。Step 1–3 全程沙箱，Step 4 上线，Step 5 上线后补充用户自助补单。
 
 ### ✅ Step 1 — 文档落地（已完成）
 - 方案另存到 `docs/alipay-payment.md`
 
-### Step 2 — Alipay 模块骨架 + 创建二维码接口
+### ✅ Step 2 — Alipay 模块骨架 + 创建二维码接口（已完成）
 - `api/package.json` 加 `alipay-sdk` 依赖；`npm install`
 - [secret.service.ts](api/src/util/secret/secret.service.ts) 加 3 个枚举值（`ALIPAY_APP_ID` / `ALIPAY_APP_PRIVATE_KEY` / `ALIPAY_PUBLIC_KEY`）
 - [index.ts](api/index.ts) `commonSecrets` prod 分支登记 3 个 secret；路由 regex 加 `alipay`
@@ -299,15 +311,7 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 - `app.module.ts` imports 加 `AlipayModule`
 - 验收：`npm run build` 通过；`curl POST` 拿到 qrCode 字符串；Firestore 看到 WAITING 订单
 
-### Step 3 — Web 端二维码展示页（沙箱联调用，替代游戏客户端）
-- 新建 [web/app/api/alipay/route.ts](web/app/api/alipay) 代理到后端 create 接口
-- 新建 `web/app/alipay-test/page.tsx` 测试页：
-  - 表单：steamId 输入、productCode 下拉
-  - 提交后调 web proxy → 拿 `qrCode` 字符串 → 前端 `qrcode.react` 渲染图片
-  - 用 `outTradeNo` 每 2 秒轮询 query 接口，状态变化更新 UI
-- 验收：浏览器打开页面 → 输入 steamId → 看到二维码图片 → 用支付宝沙箱 App 扫码
-
-### Step 4 — 查询接口 + Webhook 验签 + 奖励发放（沙箱完整流程）
+### Step 3 — 查询接口 + Webhook 验签 + 奖励发放（沙箱完整流程）
 - `GET /api/alipay/order/query?outTradeNo=xxx`：直接读 Firestore 返回 `{ status }`
 - `POST /api/alipay/webhook`：
   - 接 form-urlencoded 中间件（参考 [kofi.controller.ts](api/src/kofi/kofi.controller.ts)）
@@ -316,9 +320,9 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
   - 调 `applyRewards()` → `MembersService.createMember` 或 `PlayerService.upsertAddPoint`
   - 发 GA4 `alipayPurchase` 事件；回 `success` 纯文本
 - 单测：验签失败拒绝、金额不符拒绝、重复通知幂等、奖励正确分发
-- 验收：ngrok 暴露 emulator → 沙箱付款 → Firestore 订单变 SUCCESS → 会员/积分到账 → web 页自动跳"支付成功"
+- 验收：`npx qrcode <qrCode>` 生成二维码 → 沙箱 App 扫码付款（或手动 POST webhook 模拟）→ Firestore 订单变 SUCCESS → 会员/积分到账
 
-### Step 5 — 上线（生产配置 + 灰度部署）
+### Step 4 — 上线（生产配置 + 灰度部署）
 **代码变更：** 无（仅配置）
 
 **支付宝控制台操作：**
@@ -335,7 +339,7 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 - 先放开 1 个 productCode（`MEMBER_PREMIUM`）观察 1–2 周，确认 webhook 到账率
 - 验收：真实支付宝付款 → 订单 SUCCESS → 会员到账
 
-### Step 6 — 手动补单接口
+### Step 5 — 手动补单接口
 > 场景：webhook 延迟/失败，用户在支付宝账单页看到「商家订单号」，在游戏界面输入后自助补单。
 
 - `POST /api/alipay/order/active { steamId, outTradeNo }`
@@ -386,10 +390,9 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 
 2. **本地沙箱联调**：
    - `firebase emulators:start --only functions,firestore`
-   - 用 sandbox appId/key 填到 `.env.local`
    - `curl POST http://localhost:5001/.../api/alipay/order/create` 拿 `qrCode`
-   - `npx qrcode <qrCode>` 在终端打印或用支付宝沙箱 App 扫
-   - 沙箱回调没有公网时，用 `ngrok http 5001` 暴露 webhook，把 ngrok 域名填进 `ALIPAY_NOTIFY_URL`
+   - `npx qrcode <qrCode>` 在终端打印二维码
+   - 手动 POST `/api/alipay/webhook` 模拟支付回调（无需 ngrok）
    - 观察 Firestore `alipay-order` 文档 `status: WAITING → SUCCESS`，对应 steamId 的会员/积分到账
 
 3. **轮询接口验证**：
