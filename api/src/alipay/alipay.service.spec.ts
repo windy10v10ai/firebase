@@ -41,13 +41,13 @@ describe('AlipayService', () => {
 
   describe('calculatePrice', () => {
     it('单份会员 ¥28.00（2800 分）', () => {
-      const r = service.calculatePrice(AlipayProductCode.MEMBER_PREMIUM, 1);
+      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, 1);
       expect(r.totalAmountCent).toBe(2800);
       expect(r.totalAmount).toBe('28.00');
     });
 
     it('3 份会员 ¥84.00（线性倍乘，无折扣）', () => {
-      const r = service.calculatePrice(AlipayProductCode.MEMBER_PREMIUM, 3);
+      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, 3);
       expect(r.totalAmountCent).toBe(8400);
       expect(r.totalAmount).toBe('84.00');
     });
@@ -57,23 +57,19 @@ describe('AlipayService', () => {
       [AlipayProductCode.POINTS_TIER2, 23800, '238.00'],
       [AlipayProductCode.POINTS_TIER3, 56800, '568.00'],
     ])('单份积分档位 %s 价格正确', (code, cent, yuan) => {
-      const r = service.calculatePrice(code, 1);
+      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE[code], 1);
       expect(r.totalAmountCent).toBe(cent);
       expect(r.totalAmount).toBe(yuan);
     });
 
     it('totalAmount 始终保留两位小数（满整元也带 .00）', () => {
-      expect(service.calculatePrice(AlipayProductCode.MEMBER_PREMIUM, 1).totalAmount).toBe('28.00');
-    });
-
-    it.each([0, -1, 1.5, NaN])('quantity 非法值 %s 抛 BadRequestException', (q) => {
-      expect(() => service.calculatePrice(AlipayProductCode.MEMBER_PREMIUM, q)).toThrow(
-        BadRequestException,
+      expect(service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, 1).totalAmount).toBe(
+        '28.00',
       );
     });
 
-    it('未知 productCode 抛 BadRequestException', () => {
-      expect(() => service.calculatePrice('NOPE' as AlipayProductCode, 1)).toThrow(
+    it.each([0, -1, 1.5, NaN])('quantity 非法值 %s 抛 BadRequestException', (q) => {
+      expect(() => service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, q)).toThrow(
         BadRequestException,
       );
     });

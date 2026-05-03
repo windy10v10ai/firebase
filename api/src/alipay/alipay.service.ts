@@ -19,9 +19,13 @@ export class AlipayService {
   ) {}
 
   async createOrder(dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
+    const spec = ALIPAY_PRODUCT_TABLE[dto.productCode];
+    if (!spec) {
+      throw new BadRequestException(`Unknown productCode: ${dto.productCode}`);
+    }
     const quantity = dto.quantity ?? 1;
-    const { totalAmountCent, totalAmount } = this.calculatePrice(dto.productCode, quantity);
-    const subject = this.buildSubject(dto.productCode, quantity);
+    const { totalAmountCent, totalAmount } = this.calculatePrice(spec, quantity);
+    const subject = this.buildSubject(spec, quantity);
 
     const outTradeNo = this.generateOutTradeNo(dto.steamId);
     const now = new Date();
@@ -61,13 +65,12 @@ export class AlipayService {
 
   /**
    * 计算订单价格。独立成 method 以便后续接入折扣（多份阶梯、首充优惠、活动价等）：
-   * 折扣逻辑只需在此处加，调用方（createOrder / 未来的 GET /price 端点）无需感知。
+   * 折扣逻辑只需在此处加，调用方无需感知。
    */
   calculatePrice(
-    productCode: AlipayProductCode,
+    spec: AlipayProductSpec,
     quantity: number,
   ): { totalAmountCent: number; totalAmount: string } {
-    const spec = this.getSpec(productCode);
     if (!Number.isInteger(quantity) || quantity < 1) {
       throw new BadRequestException(`Invalid quantity: ${quantity}`);
     }
@@ -76,16 +79,7 @@ export class AlipayService {
     return { totalAmountCent, totalAmount };
   }
 
-  private getSpec(productCode: AlipayProductCode): AlipayProductSpec {
-    const spec = ALIPAY_PRODUCT_TABLE[productCode];
-    if (!spec) {
-      throw new BadRequestException(`Unknown productCode: ${productCode}`);
-    }
-    return spec;
-  }
-
-  private buildSubject(productCode: AlipayProductCode, quantity: number): string {
-    const spec = this.getSpec(productCode);
+  private buildSubject(spec: AlipayProductSpec, quantity: number): string {
     if (quantity <= 1) {
       return spec.subjectUnit;
     }
