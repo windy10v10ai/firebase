@@ -67,10 +67,13 @@ export class AlipayService {
   }
 
   private buildSubject(subjectUnit: string, kind: string, quantity: number): string {
-    if (kind === 'member' && quantity > 1) {
+    if (quantity <= 1) {
+      return subjectUnit;
+    }
+    if (kind === 'member') {
       return `${subjectUnit} ${quantity}个月`;
     }
-    return subjectUnit;
+    return `${subjectUnit} ${quantity}份`;
   }
 
   private generateOutTradeNo(steamId: number): string {

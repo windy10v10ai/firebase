@@ -7,10 +7,10 @@ import { SECRET, SecretService } from '../util/secret/secret.service';
 interface PrecreateResponseData {
   code: string;
   msg: string;
-  out_trade_no?: string;
-  qr_code?: string;
-  sub_code?: string;
-  sub_msg?: string;
+  outTradeNo?: string;
+  qrCode?: string;
+  subCode?: string;
+  subMsg?: string;
 }
 
 @Injectable()
@@ -29,10 +29,18 @@ export class AlipayApiService {
         ? 'https://openapi.alipay.com/gateway.do'
         : 'https://openapi-sandbox.dl.alipaydev.com/gateway.do';
 
+    // .env 文件不支持多行，PEM 密钥换行符以 \n 字面量存储，此处还原
+    const privateKey = this.secretService
+      .getSecretValue(SECRET.ALIPAY_APP_PRIVATE_KEY)
+      .replace(/\\n/g, '\n');
+    const alipayPublicKey = this.secretService
+      .getSecretValue(SECRET.ALIPAY_PUBLIC_KEY)
+      .replace(/\\n/g, '\n');
+
     this.sdk = new AlipaySdk({
       appId: this.secretService.getSecretValue(SECRET.ALIPAY_APP_ID),
-      privateKey: this.secretService.getSecretValue(SECRET.ALIPAY_APP_PRIVATE_KEY),
-      alipayPublicKey: this.secretService.getSecretValue(SECRET.ALIPAY_PUBLIC_KEY),
+      privateKey,
+      alipayPublicKey,
       signType: 'RSA2',
       gateway,
       charset: 'utf-8',
@@ -56,12 +64,12 @@ export class AlipayApiService {
       },
     })) as PrecreateResponseData;
 
-    if (result.code !== '10000' || !result.qr_code) {
+    if (result.code !== '10000' || !result.qrCode) {
       logger.error('alipay.trade.precreate 调用失败', { outTradeNo, result });
       throw new InternalServerErrorException(
-        `alipay precreate failed: ${result.sub_msg || result.msg}`,
+        `alipay precreate failed: ${result.subMsg || result.msg}`,
       );
     }
-    return result.qr_code;
+    return result.qrCode;
   }
 }
