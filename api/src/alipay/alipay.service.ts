@@ -3,11 +3,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AlipayApiService } from './alipay.api.service';
-import {
-  ALIPAY_PRODUCT_TABLE,
-  ALIPAY_QR_EXPIRE_MS,
-  AlipayProductSpec,
-} from './alipay.constants';
+import { ALIPAY_PRODUCT_TABLE, ALIPAY_QR_EXPIRE_MS, AlipayProductSpec } from './alipay.constants';
 import { CreateAlipayOrderResponseDto } from './dto/create-alipay-order-response.dto';
 import { CreateAlipayOrderDto } from './dto/create-alipay-order.dto';
 import { AlipayOrder } from './entities/alipay-order.entity';
