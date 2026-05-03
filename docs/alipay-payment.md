@@ -210,7 +210,7 @@ const sdk = new AlipaySdk({
 ```
 
 封装方法：
-- `precreate(outTradeNo, amountYuan, subject, notifyUrl): Promise<{ qrCode }>`
+- `precreate(outTradeNo, amountYuan, subject): Promise<{ qrCode }>`（notify_url 在支付宝开放平台应用网关里配置，不在请求参数里传）
 - `query(outTradeNo): Promise<TradeQueryResult>`
 - `cancel(outTradeNo): Promise<void>`
 - `verifyNotifySign(params: Record<string,string>): boolean`（用 SDK 的 `checkNotifySign`）
@@ -229,7 +229,8 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 非 secret 配置（走 `.env.${ENVIRONMENT}` + ConfigModule）：
 - `ALIPAY_ENV=sandbox|prod`
-- `ALIPAY_NOTIFY_URL=https://<your-cf-domain>/api/alipay/webhook`
+
+> notify URL 全程在支付宝开放平台「应用网关」里配置（沙箱/生产各自一个），代码里不再读取 `ALIPAY_NOTIFY_URL` 环境变量；本地联调若需收回调用 ngrok 暴露后改控制台即可。
 
 [index.ts:34](api/index.ts) 的 `commonSecrets` 数组在 prod 分支增加 3 个 `defineSecret(...)`。
 
@@ -376,7 +377,7 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 - [api/src/util/secret/secret.service.ts](api/src/util/secret/secret.service.ts)：`SECRET` 枚举加 3 项
 - [api/src/analytics](api/src/analytics)：新增 `alipayPurchase` 方法（类比现有 `kofiPurchase`/`afdianPurchase`）
 - [api/package.json](api/package.json)：`alipay-sdk` 依赖
-- `api/.env.local`：补 `ALIPAY_ENV=sandbox`、`ALIPAY_NOTIFY_URL`（仅本地 ngrok 用）、沙箱 3 个 secret 占位值
+- `api/.env.local`：补 `ALIPAY_ENV=sandbox`、沙箱 3 个 secret 占位值
 
 ---
 

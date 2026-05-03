@@ -49,14 +49,7 @@ export class AlipayService {
       updatedAt: now,
     });
 
-    // 本地沙箱可在 .env.local 配 ALIPAY_NOTIFY_URL（ngrok 地址），生产用控制台设置
-    const notifyUrl = process.env.ALIPAY_NOTIFY_URL;
-    const qrCode = await this.alipayApiService.precreate(
-      outTradeNo,
-      totalAmount,
-      subject,
-      notifyUrl,
-    );
+    const qrCode = await this.alipayApiService.precreate(outTradeNo, totalAmount, subject);
 
     order.qrCode = qrCode;
     order.updatedAt = new Date();
