@@ -136,8 +136,8 @@ export const ALIPAY_PRODUCT_TABLE: Record<AlipayProductCode, AlipayProductSpec> 
 ```
 
 **quantity 语义**：
-- 会员：quantity = 月数（`POST { productCode: "MEMBER_PREMIUM", quantity: 3 }` → 3 个月，¥84.00）
-- 积分：首期固定 quantity=1；后续扩展多份时直接传数量
+- 会员：quantity = 月数（`POST { productCode: "MEMBER_PREMIUM", quantity: 3 }` → 3 个月，¥84.00），发放时 `MembersService.createMember({ steamId, month: quantity, level })`
+- 积分：UI 首期不暴露多份选项（前端固定 quantity=1），但接口允许传 quantity > 1；发放时积分数必须按 quantity 倍增 —— `PlayerService.upsertAddPoint(steamId, reward.points * quantity)`，不能只发单份
 
 **未来扩展位（已留口）**：
 - 折扣阶梯表（3/12/36 月会员折扣、积分多份折扣）
@@ -254,8 +254,8 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 `AlipayService.applyRewards(order)` 根据 `ALIPAY_PRODUCT_TABLE[productCode].reward.kind` 分发：
 
-- `member` → [`MembersService.createMember({ steamId, month, level })`](api/src/members/members.service.ts)
-- `points` → [`PlayerService.upsertAddPoint(steamId, points)`](api/src/player)
+- `member` → [`MembersService.createMember({ steamId, month: order.quantity, level })`](api/src/members/members.service.ts)
+- `points` → [`PlayerService.upsertAddPoint(steamId, reward.points * order.quantity)`](api/src/player)（积分必须按 quantity 倍发，不能只发单份）
 - 成功后写 `AlipayUser` + 调 `AnalyticsService.alipayPurchase(...)`（新增一个，类比 `afdianPurchase` / `kofiPurchase`）
 
 ---

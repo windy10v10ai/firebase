@@ -32,17 +32,9 @@ export class AlipayService {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + ALIPAY_QR_EXPIRE_MS);
 
-    // 本地沙箱可在 .env.local 配 ALIPAY_NOTIFY_URL（ngrok 地址），生产用控制台设置
-    const notifyUrl = process.env.ALIPAY_NOTIFY_URL;
-
-    const qrCode = await this.alipayApiService.precreate(
-      outTradeNo,
-      totalAmount,
-      subject,
-      notifyUrl,
-    );
-
-    await this.alipayOrderRepository.create({
+    // 先落库 WAITING（无 qrCode），确保 webhook 到达时一定能查到订单；
+    // precreate 成功后再 update 写入 qrCode，避免「二维码已生效但本地无记录」导致丢单。
+    const order = await this.alipayOrderRepository.create({
       id: outTradeNo,
       outTradeNo,
       steamId: dto.steamId,
@@ -51,11 +43,24 @@ export class AlipayService {
       totalAmountCent,
       subject,
       status: AlipayTradeStatus.WAITING,
-      qrCode,
+      qrCode: '',
       qrCodeExpiresAt: expiresAt,
       createdAt: now,
       updatedAt: now,
     });
+
+    // 本地沙箱可在 .env.local 配 ALIPAY_NOTIFY_URL（ngrok 地址），生产用控制台设置
+    const notifyUrl = process.env.ALIPAY_NOTIFY_URL;
+    const qrCode = await this.alipayApiService.precreate(
+      outTradeNo,
+      totalAmount,
+      subject,
+      notifyUrl,
+    );
+
+    order.qrCode = qrCode;
+    order.updatedAt = new Date();
+    await this.alipayOrderRepository.update(order);
 
     return {
       outTradeNo,
