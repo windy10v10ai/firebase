@@ -42,10 +42,12 @@ game ──(每 2s 轮询 GET /api/alipay/order/query?outTradeNo=xxx)──▶ c
                                                                                   ├─ 发 GA4 purchase 事件
                                                                                   └─ 返回 plain text "success"
 
-webhook 丢失时（用户手动补单）
-game ──(POST /api/alipay/order/active  {steamId, outTradeNo})──▶ cloudfunction
+webhook 丢失时（用户手动补单，支付宝交易号优先）
+game ──(POST /api/alipay/order/active  {steamId, alipayTradeNo})──▶ cloudfunction
+                                                                     ├─ 调 alipay.trade.query(trade_no) 取回订单详情
+                                                                     ├─ 用返回的 out_trade_no 反查 Firestore 订单
                                                                      ├─ 验证 order.steamId === 请求 steamId
-                                                                     ├─ 调 alipay.trade.query 确认支付宝侧已付款
+                                                                     ├─ 校验 trade_status === TRADE_SUCCESS
                                                                      ├─ 幂等：已 SUCCESS 直接返回成功
                                                                      └─ 走同款激活逻辑
 ```
@@ -70,7 +72,7 @@ api/src/alipay/
     create-alipay-order-response.dto.ts  出参 {outTradeNo, qrCode, totalAmount, expiresAt}
     query-alipay-order.dto.ts     {outTradeNo}
     alipay-notify.dto.ts          支付宝异步通知字段
-    active-alipay-order.dto.ts    手工补单 {outTradeNo, steamId}
+    active-alipay-order.dto.ts    手工补单 {alipayTradeNo, steamId}
   enums/
     alipay-product-code.enum.ts   MEMBER_PREMIUM / POINTS_TIER1..3
     alipay-trade-status.enum.ts   WAITING / SUCCESS / CLOSED / FAILED
@@ -87,7 +89,7 @@ api/src/alipay/
 | POST | `/api/alipay/order/create` | 生成订单 + 二维码 | `{ steamId: number, productCode: AlipayProductCode, quantity?: number }` |
 | GET  | `/api/alipay/order/query` | game 轮询用 | `?outTradeNo=xxx` |
 | POST | `/api/alipay/webhook` | 支付宝异步通知 | `application/x-www-form-urlencoded`（不要 JSON parser） |
-| POST | `/api/alipay/order/active` | 后台/手工补单 | `{ outTradeNo, steamId }` 复用 [admin pattern](api/src/afdian/afdian.controller.ts) |
+| POST | `/api/alipay/order/active` | 用户自助补单（支付宝交易号） | `{ alipayTradeNo, steamId }` |
 
 **create 返回示例：**
 ```json
@@ -263,7 +265,14 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 ## webhook 丢失兜底
 
-不做定时回扫。用户在支付宝账单页可看到「商家订单号」，通过游戏界面手动触发 `POST /api/alipay/order/active` 补单。二维码 2 小时到期未付款的订单，支付宝自动关单，Firestore 侧保持 WAITING 即可（历史记录，无需主动清理）。
+不做定时回扫。webhook 丢失场景由用户自助补单处理：在支付宝账单页复制**支付宝交易号**（`trade_no`，25 位数字，比商户订单号显眼），在游戏内输入触发 `POST /api/alipay/order/active`。
+
+**为什么用支付宝交易号而不是商户订单号：**
+- 支付宝账单详情中两个号都有，但 `trade_no` 位置更显眼，用户更容易找到
+- `trade_no` 是 25 位纯数字，比 `ali-{steamId}-{ts}-{rand}` 格式的 `out_trade_no` 更易输入
+- 后端拿 `trade_no` 调 `alipay.trade.query` 即可同时拿到 `out_trade_no` 反查本地订单
+
+二维码 2 小时到期未付款的订单，支付宝自动关单，Firestore 侧保持 WAITING 即可（历史记录，无需主动清理）。
 
 ---
 
@@ -374,16 +383,32 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 - 先放开 1 个 productCode（`MEMBER_PREMIUM`）观察 1–2 周，确认 webhook 到账率
 - 验收：真实支付宝付款 → 订单 SUCCESS → 会员到账
 
-### Step 5 — 手动补单接口
-> 场景：webhook 延迟/失败，用户在支付宝账单页看到「商家订单号」，在游戏界面输入后自助补单。
+### Step 5 — 用户自助补单接口（支付宝交易号）
+> 场景：webhook 延迟/失败，用户已在支付宝完成付款。让用户从支付宝账单复制**支付宝交易号**（`trade_no`，25 位数字），在游戏界面输入触发自助补单。
 
-- `POST /api/alipay/order/active { steamId, outTradeNo }`
-- 后端逻辑：
-  1. 验证 `order.steamId === 请求 steamId`（防止他人用你的订单号）
-  2. 调 `alipay.trade.query` 确认支付宝侧已付款（防止伪造未付款订单）
-  3. 幂等：已 SUCCESS 直接返回成功
-  4. 调 `applyRewards()`
-- 验收：手动将一条订单设为 WAITING → 用游戏客户端输入 outTradeNo → 奖励到账；用非本人 steamId 调用 → 403
+**入参**：`POST /api/alipay/order/active { steamId: number, alipayTradeNo: string }`（需 x-api-key）
+
+**后端流程**：
+1. 调 `alipay.trade.query({ trade_no: alipayTradeNo })` 取支付宝订单详情
+   - 不存在 → 提示用户输入错误
+   - `trade_status !== TRADE_SUCCESS` → 提示付款未完成
+2. 从 query 响应中取 `out_trade_no` 反查 Firestore `AlipayOrder`
+   - DB 无对应订单 → 异常情况（订单创建失败但用户已付款），返回错误码引导联系客服
+3. 验证 `order.steamId === 请求 steamId`（防止借他人订单激活）
+4. 校验 `query.total_amount === order.totalAmountCent / 100`（防金额篡改）
+5. 幂等：`order.status === SUCCESS` 直接返回成功
+6. 写入 `alipayTradeNo` / `buyerUserId` / `buyerLogonId` / `gmtPayment` 到订单
+7. 调 `applyRewards()` 发放会员/积分
+
+**安全性说明**：
+- `alipay.trade.query` 只能查到本商户应用下的订单 → 用户提交其他商户的 `trade_no` 直接 404
+- 不需要额外签名验证
+
+**验收**：
+- 手动将一条订单设为 WAITING → 客户端用支付宝交易号触发 active → 奖励到账
+- 重复触发同一订单 → 返回 `alreadyActive: true`，奖励不重复发放
+- 用非本人 steamId 调用 → 返回 403
+- 输入未付款的 `trade_no` → 返回付款未完成错误
 
 ### 未来可选项（所有 Step 完成后视需求实施）
 
@@ -401,7 +426,7 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
 - `api/src/alipay/alipay.api.service.ts`
 - `api/src/alipay/alipay.constants.ts`
 - `api/src/alipay/entities/alipay-order.entity.ts`
-- `api/src/alipay/dto/*.ts`（create / create-response / query / notify / active 共 5 个）
+- `api/src/alipay/dto/*.ts`（create / create-response / query / notify / active 共 5 个，active dto 字段为 `alipayTradeNo`）
 - `api/src/alipay/enums/*.ts`（2 个 enum）
 - `api/src/alipay/alipay.service.spec.ts`（单测：价格表、奖励分发、签名验证 mock）
 
@@ -434,7 +459,7 @@ firebase functions:secrets:set ALIPAY_PUBLIC_KEY
    - 在订单 WAITING 时 `GET /api/alipay/order/query?outTradeNo=xxx` → `WAITING`
    - 沙箱付款后再查 → `SUCCESS`
 
-4. **手动补单验证**：沙箱付款后手动将订单重置为 WAITING，调 `POST /api/alipay/order/active` → 奖励到账；用非本人 steamId 调用 → 返回 403
+4. **手动补单验证**：沙箱付款后手动将订单重置为 WAITING，用支付宝交易号调 `POST /api/alipay/order/active { steamId, alipayTradeNo }` → 奖励到账；用非本人 steamId 调用 → 返回 403；输入未付款的 trade_no → 返回付款未完成错误
 
 5. **生产灰度**：先开放 1 个 productCode（`MEMBER_PREMIUM`），观察 1–2 周 webhook 成功率，再放开全部
 

@@ -6,6 +6,7 @@ import { AlipayTradeStatus } from '../enums/alipay-trade-status.enum';
 @Collection('alipay-order')
 export class AlipayOrder {
   id: string;
+  /** 商家订单号 */
   outTradeNo: string;
   steamId: number;
   productCode: AlipayProductCode;
@@ -15,7 +16,7 @@ export class AlipayOrder {
   status: AlipayTradeStatus;
   qrCode: string;
   qrCodeExpiresAt: Date;
-  /** 支付宝侧交易流水号，webhook 回写 */
+  /** 支付宝 订单号，用户扫码后创建 webhook 回写 */
   alipayTradeNo?: string;
   /** 支付宝用户唯一 ID（UID），webhook 回写 */
   buyerUserId?: string;
