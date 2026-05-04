@@ -83,6 +83,10 @@ export class AlipayService {
       return spec.subjectUnit;
     }
     if (spec.reward.kind === 'member') {
+      // 12/24/36... 月按整年显示，其余按月
+      if (quantity % 12 === 0) {
+        return `${spec.subjectUnit} ${quantity / 12}年`;
+      }
       return `${spec.subjectUnit} ${quantity}个月`;
     }
     return `${spec.subjectUnit} ${quantity}份`;

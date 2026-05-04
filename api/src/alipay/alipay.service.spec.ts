@@ -99,6 +99,20 @@ describe('AlipayService', () => {
       expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} 3个月`);
     });
 
+    it.each([
+      [12, '1年'],
+      [24, '2年'],
+      [36, '3年'],
+    ])('会员 quantity=%i 显示 %s', async (quantity, label) => {
+      const res = await service.createOrder({ ...baseDto, quantity });
+      expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} ${label}`);
+    });
+
+    it('会员 quantity=13（非 12 倍数）仍按月显示', async () => {
+      const res = await service.createOrder({ ...baseDto, quantity: 13 });
+      expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} 13个月`);
+    });
+
     it('多份积分：subject 追加 N 份（区别于会员的"个月"）', async () => {
       const res = await service.createOrder({
         steamId: 1,
