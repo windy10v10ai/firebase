@@ -325,7 +325,8 @@ npx qrcode "<上一步返回的 qrCode 字符串>"
 - `GET /api/alipay/order/query?outTradeNo=xxx`：直接读 Firestore 返回 `{ status }`
 - `POST /api/alipay/webhook`：
   - 接 form-urlencoded 中间件（参考 [kofi.controller.ts](api/src/kofi/kofi.controller.ts)）
-  - SDK `checkNotifySign` 验签；`total_amount` 与订单匹配校验
+  - **安全顺序（硬性要求）**：`checkNotifySign` 必须是 webhook 处理的第一步，在任何 Firestore 读写、任何对 `out_trade_no` / `trade_status` / `total_amount` / `buyer_*` 字段的信任使用之前完成；验签失败立即返回 `failure`，不做任何状态变更
+  - 验签通过后再做：`total_amount` 与订单匹配校验
   - 幂等：`status===SUCCESS` 直接回 `success`
   - 调 `applyRewards()` → `MembersService.createMember` 或 `PlayerService.upsertAddPoint`
   - 发 GA4 `alipayPurchase` 事件；回 `success` 纯文本
