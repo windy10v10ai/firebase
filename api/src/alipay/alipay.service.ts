@@ -176,9 +176,25 @@ export class AlipayService {
         month: order.quantity,
         level: reward.level,
       });
+      logger.info('[Alipay] 奖励发放成功 - 会员', {
+        outTradeNo: order.outTradeNo,
+        steamId: order.steamId,
+        productCode: order.productCode,
+        quantity: order.quantity,
+        level: reward.level,
+        month: order.quantity,
+      });
     } else {
+      const points = reward.points * order.quantity;
       await this.playerService.upsertAddPoint(order.steamId, {
-        memberPointTotal: reward.points * order.quantity,
+        memberPointTotal: points,
+      });
+      logger.info('[Alipay] 奖励发放成功 - 积分', {
+        outTradeNo: order.outTradeNo,
+        steamId: order.steamId,
+        productCode: order.productCode,
+        quantity: order.quantity,
+        points,
       });
     }
   }
