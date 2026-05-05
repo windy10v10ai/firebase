@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import { AfdianOrder } from '../afdian/entities/afdian-order.entity';
+import { AlipayOrder } from '../alipay/entities/alipay-order.entity';
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiType } from '../kofi/enums/kofi-type.enum';
 
 import { AnalyticsService } from './analytics.service';
 
 type CURRENCY = 'CNY' | 'USD';
-type AFFILIATION = 'afdian' | 'kofi';
+type AFFILIATION = 'afdian' | 'kofi' | 'alipay';
 
 export interface PurchaseEvent {
   name: string;
@@ -94,6 +95,31 @@ export class AnalyticsPurchaseService {
         affiliation: 'kofi',
         currency: 'USD',
         transaction_id: order.messageId,
+        value: price,
+      },
+    };
+
+    await this.analyticsService.sendEvent(order.steamId.toString(), event);
+  }
+
+  async alipayPurchase(order: AlipayOrder) {
+    const price = order.totalAmountCent / 100;
+
+    const event: PurchaseEvent = {
+      name: 'purchase',
+      params: {
+        items: [
+          {
+            item_id: order.productCode,
+            item_name: `alipay-${order.productCode}`,
+            affiliation: 'alipay',
+            price,
+            currency: 'CNY',
+          },
+        ],
+        affiliation: 'alipay',
+        currency: 'CNY',
+        transaction_id: order.outTradeNo,
         value: price,
       },
     };

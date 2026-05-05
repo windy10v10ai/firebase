@@ -67,4 +67,13 @@ export class AlipayApiService {
     }
     return result.qrCode;
   }
+
+  /**
+   * 验签支付宝异步通知。
+   * 入参为通知请求 body 的所有字段（含 sign / sign_type）。
+   * SDK 内部会自动剔除 sign 字段后用 alipayPublicKey 校验签名。
+   */
+  verifyNotifySign(postData: Record<string, string | undefined>): boolean {
+    return this.getSdk().checkNotifySignV2(postData);
+  }
 }
