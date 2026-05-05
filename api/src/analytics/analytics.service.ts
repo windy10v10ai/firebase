@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions/v2';
 
 import { ResetPlayerPropertyDto } from '../player-info/dto/reset-player-property.dto';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
@@ -200,27 +201,45 @@ export class AnalyticsService {
       return true;
     }
 
-    const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
+    // GA4 best-effort：网络错误或非 204 一律仅 log，不抛错给上游业务（如 webhook）
+    try {
+      const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
 
-    const payload = {
-      client_id: userId,
-      user_id: userId,
-      non_personalized_ads: false,
-      events: [event],
-      user_properties: userProperties,
-    };
+      const payload = {
+        client_id: userId,
+        user_id: userId,
+        non_personalized_ads: false,
+        events: [event],
+        user_properties: userProperties,
+      };
 
-    const response = await fetch(
-      `${this.measurementProtocolUrl}?measurement_id=${this.measurementId}&api_secret=${apiSecret}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.measurementProtocolUrl}?measurement_id=${this.measurementId}&api_secret=${apiSecret}`,
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      },
-    );
+      );
 
-    return response.status === 204;
+      if (response.status !== 204) {
+        logger.warn('[Analytics] GA4 sendEvent 非 204', {
+          userId,
+          eventName: event.name,
+          status: response.status,
+        });
+        return false;
+      }
+      return true;
+    } catch (err) {
+      logger.error('[Analytics] GA4 sendEvent 异常', {
+        userId,
+        eventName: event.name,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return false;
+    }
   }
 }

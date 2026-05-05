@@ -149,7 +149,7 @@ export class AlipayService {
     order.alipayTradeNo = notify.trade_no;
     order.buyerUserId = notify.buyer_id;
     order.buyerLogonId = notify.buyer_logon_id;
-    order.gmtPayment = notify.gmt_payment ? new Date(notify.gmt_payment) : undefined;
+    order.gmtPayment = this.parseAlipayDateTime(notify.gmt_payment);
     order.rawNotify = { ...notify };
     order.updatedAt = new Date();
     await this.alipayOrderRepository.update(order);
@@ -233,5 +233,18 @@ export class AlipayService {
     const ts = Date.now();
     const rand = Math.random().toString(36).slice(2, 6);
     return `ali-${steamId}-${ts}-${rand}`;
+  }
+
+  /**
+   * 支付宝下行的 gmt_payment 是「YYYY-MM-DD HH:mm:ss」北京时间字符串。
+   * Cloud Functions 默认 UTC 时区，直接 new Date(str) 会被当成 UTC，导致存储时间晚 8 小时。
+   * 显式拼上 +08:00 偏移再解析，确保 Date 对象指向真实 UTC 时刻。
+   */
+  private parseAlipayDateTime(value: string | undefined): Date | undefined {
+    if (!value) {
+      return undefined;
+    }
+    const date = new Date(`${value.replace(' ', 'T')}+08:00`);
+    return Number.isNaN(date.getTime()) ? undefined : date;
   }
 }
