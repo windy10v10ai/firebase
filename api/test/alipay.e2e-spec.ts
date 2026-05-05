@@ -17,7 +17,24 @@ import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
  *   - mock 整个 AlipayApiService（precreate 不走外网，verifyNotifySign 由测试控制开关）
  *   - 其余链路（Firestore emulator / Members / Player / Analytics）保持真实
  *   - GA4 sendEvent 走真实代码但不会真发外网，断言落到「调用了 alipayPurchase」即可
+ *
+ * steamId 分配规则：每个 case 独立 steamId，避免跨 case 状态污染。
  */
+const STEAM_IDS = {
+  CREATE_MEMBER: 300010001,
+  CREATE_POINTS_QTY2: 300010002,
+  CREATE_UNKNOWN_CODE: 300010003,
+  CREATE_QTY_ZERO: 300010004,
+  WEBHOOK_MEMBER_QTY1: 300010005,
+  WEBHOOK_MEMBER_QTY3: 300010006,
+  WEBHOOK_POINTS_QTY2: 300010007,
+  WEBHOOK_TRADE_FINISHED: 300010008,
+  WEBHOOK_SIGN_INVALID: 300010009,
+  WEBHOOK_AMOUNT_MISMATCH: 300010010,
+  WEBHOOK_WAIT_BUYER_PAY: 300010011,
+  WEBHOOK_IDEMPOTENT: 300010012,
+} as const;
+
 describe('AlipayController (e2e)', () => {
   let app: INestApplication;
   const prefixPath = '/api/alipay';
@@ -39,15 +56,9 @@ describe('AlipayController (e2e)', () => {
     AppGlobalSettings(app);
     await app.init();
 
-    await createPlayer(app, { steamId: 300010001 });
-    await createPlayer(app, { steamId: 300010002 });
-    await createPlayer(app, { steamId: 300010003 });
-    await createPlayer(app, { steamId: 300010004 });
-    await createPlayer(app, { steamId: 300010005 });
-    await createPlayer(app, { steamId: 300010006 });
-    await createPlayer(app, { steamId: 300010007 });
-    await createPlayer(app, { steamId: 300010008 });
-    await createPlayer(app, { steamId: 300010009 });
+    for (const steamId of Object.values(STEAM_IDS)) {
+      await createPlayer(app, { steamId });
+    }
   });
 
   afterAll(async () => {
@@ -97,13 +108,14 @@ describe('AlipayController (e2e)', () => {
 
   describe('POST /alipay/order/create', () => {
     it('单份会员订单：返回 outTradeNo / qrCode / totalAmount=28.00，DB 写 WAITING', async () => {
+      const steamId = STEAM_IDS.CREATE_MEMBER;
       const res = await createOrder({
-        steamId: 300010001,
+        steamId,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
       });
 
       expect(res.status).toBe(201);
-      expect(res.body.outTradeNo).toMatch(/^ali-300010001-\d+-[a-z0-9]{4}$/);
+      expect(res.body.outTradeNo).toMatch(new RegExp(`^ali-${steamId}-\\d+-[a-z0-9]{4}$`));
       expect(res.body.totalAmount).toBe('28.00');
       expect(res.body.qrCode).toMatch(/^https:\/\/qr\.alipay\.com\//);
       expect(precreateMock).toHaveBeenCalledTimes(1);
@@ -115,7 +127,7 @@ describe('AlipayController (e2e)', () => {
 
     it('积分订单 quantity=2：totalAmount 按倍乘', async () => {
       const res = await createOrder({
-        steamId: 300010002,
+        steamId: STEAM_IDS.CREATE_POINTS_QTY2,
         productCode: AlipayProductCode.POINTS_TIER1,
         quantity: 2,
       });
@@ -126,7 +138,7 @@ describe('AlipayController (e2e)', () => {
 
     it('未知 productCode → 400', async () => {
       const res = await createOrder({
-        steamId: 300010003,
+        steamId: STEAM_IDS.CREATE_UNKNOWN_CODE,
         productCode: 'NOT_A_REAL_CODE' as AlipayProductCode,
       });
       expect(res.status).toBe(400);
@@ -134,7 +146,7 @@ describe('AlipayController (e2e)', () => {
 
     it('quantity=0 → 400', async () => {
       const res = await createOrder({
-        steamId: 300010003,
+        steamId: STEAM_IDS.CREATE_QTY_ZERO,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
         quantity: 0,
       });
@@ -158,7 +170,7 @@ describe('AlipayController (e2e)', () => {
 
   describe('POST /alipay/webhook - 成功路径', () => {
     it('MEMBER_PREMIUM quantity=1：响应 success（text/plain）+ 订单 SUCCESS + 会员/积分到账', async () => {
-      const steamId = 300010004;
+      const steamId = STEAM_IDS.WEBHOOK_MEMBER_QTY1;
       const order = await createOrder({
         steamId,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
@@ -185,7 +197,7 @@ describe('AlipayController (e2e)', () => {
     });
 
     it('MEMBER_PREMIUM quantity=3：发放 3 个月会员（积分 +3000）', async () => {
-      const steamId = 300010005;
+      const steamId = STEAM_IDS.WEBHOOK_MEMBER_QTY3;
       const order = await createOrder({
         steamId,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
@@ -203,7 +215,7 @@ describe('AlipayController (e2e)', () => {
     });
 
     it('POINTS_TIER1 quantity=2：积分 +7000（无 member 记录）', async () => {
-      const steamId = 300010006;
+      const steamId = STEAM_IDS.WEBHOOK_POINTS_QTY2;
       const order = await createOrder({
         steamId,
         productCode: AlipayProductCode.POINTS_TIER1,
@@ -224,7 +236,7 @@ describe('AlipayController (e2e)', () => {
     });
 
     it('TRADE_FINISHED 也按成功处理', async () => {
-      const steamId = 300010007;
+      const steamId = STEAM_IDS.WEBHOOK_TRADE_FINISHED;
       const order = await createOrder({
         steamId,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
@@ -243,7 +255,7 @@ describe('AlipayController (e2e)', () => {
 
   describe('POST /alipay/webhook - 异常路径', () => {
     it('验签失败：返回 failure，订单仍 WAITING，无奖励', async () => {
-      const steamId = 300010008;
+      const steamId = STEAM_IDS.WEBHOOK_SIGN_INVALID;
       const order = await createOrder({
         steamId,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
@@ -263,7 +275,7 @@ describe('AlipayController (e2e)', () => {
 
     it('金额不匹配：返回 failure，订单不变', async () => {
       const order = await createOrder({
-        steamId: 300010009,
+        steamId: STEAM_IDS.WEBHOOK_AMOUNT_MISMATCH,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
       });
       const outTradeNo = order.body.outTradeNo;
@@ -279,7 +291,7 @@ describe('AlipayController (e2e)', () => {
 
     it('trade_status=WAIT_BUYER_PAY：返回 failure', async () => {
       const order = await createOrder({
-        steamId: 300010001,
+        steamId: STEAM_IDS.WEBHOOK_WAIT_BUYER_PAY,
         productCode: AlipayProductCode.MEMBER_PREMIUM,
       });
       const outTradeNo = order.body.outTradeNo;
@@ -306,7 +318,7 @@ describe('AlipayController (e2e)', () => {
 
   describe('POST /alipay/webhook - 幂等', () => {
     it('重发同一 webhook：第 2 次返回 success 但奖励不重复发放', async () => {
-      const steamId = 300010002;
+      const steamId = STEAM_IDS.WEBHOOK_IDEMPOTENT;
       const order = await createOrder({
         steamId,
         productCode: AlipayProductCode.POINTS_TIER1,
