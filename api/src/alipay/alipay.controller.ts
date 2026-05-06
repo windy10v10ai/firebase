@@ -42,6 +42,7 @@ export class AlipayController {
     logger.info('Alipay webhook received', {
       outTradeNo: body?.out_trade_no,
       tradeStatus: body?.trade_status,
+      alipayTradeNo: body?.trade_no,
     });
     return this.alipayService.handleWebhook(body);
   }
