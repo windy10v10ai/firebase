@@ -74,6 +74,14 @@ export class AlipayApiService {
    * SDK 内部会自动剔除 sign 字段后用 alipayPublicKey 校验签名。
    */
   verifyNotifySign(postData: Record<string, string | undefined>): boolean {
-    return this.getSdk().checkNotifySignV2(postData);
+    try {
+      return this.getSdk().checkNotifySignV2(postData);
+    } catch (err) {
+      // 抛异常当作验签失败处理，避免伪造请求把 webhook 端点打成 500。
+      logger.warn('[Alipay] verifyNotifySign 抛异常，按验签失败处理', {
+        error: (err as Error).message,
+      });
+      return false;
+    }
   }
 }
