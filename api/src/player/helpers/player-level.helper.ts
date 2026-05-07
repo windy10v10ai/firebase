@@ -1,4 +1,3 @@
-import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 import { Player } from '../entities/player.entity';
 
 /**
@@ -79,10 +78,15 @@ export class PlayerLevelHelper {
 
   /**
    * 计算已使用的等级（从玩家属性中累加）
-   * @param properties 玩家属性数组
+   *
+   * TODO[migrate-usedlevel]: Step 3 切换读取路径后，此方法只剩 PlayerPropertyService.upgrade
+   *   一个调用方（用于计算写入 player.usedLevel 的绝对值）。届时把实现内联或下沉为
+   *   PlayerPropertyService 的 private 方法，并从此 helper 移除。
+   *
+   * @param properties 任何含 level 字段的对象数组（PropertyItem / PlayerPropertyItemDto 等）
    * @returns 已使用的等级总数
    */
-  static calculateUsedLevel(properties: PlayerPropertyItemDto[]): number {
+  static calculateUsedLevel(properties: Array<{ level: number }>): number {
     return properties.reduce((prev, curr) => prev + curr.level, 0);
   }
 }

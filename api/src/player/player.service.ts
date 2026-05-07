@@ -92,6 +92,12 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
+  async setUsedLevel(steamId: number, value: number): Promise<void> {
+    const player = await this.getOrNewPlayerBySteamId(steamId);
+    player.usedLevel = value < 0 ? 0 : value;
+    await this.playerRepository.update(player);
+  }
+
   private generateNewPlayerEntity(steamId: number): Player {
     return {
       id: steamId.toString(),
@@ -100,6 +106,7 @@ export class PlayerService {
       disconnectCount: 0,
       seasonPointTotal: 0,
       memberPointTotal: 0,
+      usedLevel: 0,
       lastMatchTime: null,
       conductPoint: 100,
     };

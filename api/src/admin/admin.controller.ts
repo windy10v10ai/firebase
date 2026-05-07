@@ -44,6 +44,11 @@ export class AdminController {
     return await this.adminService.migrateKofiUserFromName();
   }
 
+  @Post('/migration/backfill-used-level')
+  async backfillPlayerUsedLevel() {
+    return await this.adminService.backfillPlayerUsedLevel();
+  }
+
   @Get('/kofi/order/null-email')
   findKofiOrdersWithNullEmail() {
     return this.adminService.findKofiOrdersWithNullEmail();
