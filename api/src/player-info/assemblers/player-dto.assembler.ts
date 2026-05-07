@@ -66,11 +66,9 @@ export class PlayerDtoAssembler {
 
   /**
    * 计算可用等级
-   * TODO[migrate-usedlevel]: 回填脚本运行完成且校验一致后，
-   * 改为直接读取 player.usedLevel：return dto.totalLevel - dto.usedLevel
+   * 直接使用 player.usedLevel（PlayerPropertyService.upgrade/reset 维护）。
    */
   private calculateUseableLevel(dto: PlayerDto): number {
-    const usedLevel = PlayerLevelHelper.calculateUsedLevel(dto.properties);
-    return dto.totalLevel - usedLevel;
+    return dto.totalLevel - (dto.usedLevel ?? 0);
   }
 }
