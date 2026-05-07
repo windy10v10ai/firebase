@@ -10,13 +10,7 @@ import { GameController } from './game.controller';
 import { GameService } from './game.service';
 
 @Module({
-  imports: [
-    MembersModule,
-    PlayerModule,
-    PlayerInfoModule,
-    EventRewardsModule,
-    AnalyticsModule,
-  ],
+  imports: [MembersModule, PlayerModule, PlayerInfoModule, EventRewardsModule, AnalyticsModule],
   controllers: [GameController],
   providers: [GameService],
 })

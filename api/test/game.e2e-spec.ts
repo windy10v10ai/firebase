@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
+import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { addPlayerProperty, createPlayer, getPlayer } from './util/util-player';
 
 const gameStartUrl = '/api/game/start/';
