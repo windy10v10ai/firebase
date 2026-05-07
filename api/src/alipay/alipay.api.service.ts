@@ -50,8 +50,9 @@ export class AlipayApiService {
 
   async precreate(outTradeNo: string, totalAmount: string, subject: string): Promise<string> {
     const sdk = this.getSdk();
-    // notify_url 在支付宝开放平台应用网关里配置，不在 precreate 参数里传
+    const notifyUrl = process.env.ALIPAY_NOTIFY_URL;
     const result = (await sdk.exec('alipay.trade.precreate', {
+      notify_url: notifyUrl,
       bizContent: {
         out_trade_no: outTradeNo,
         total_amount: totalAmount,
