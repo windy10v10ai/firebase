@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
-import { ResetPlayerPropertyDto } from '../player-info/dto/reset-player-property.dto';
+import { ResetPlayerPropertyDto } from '../player-property/dto/reset-player-property.dto';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { PurchaseEvent } from './analytics.purchase.service';

@@ -3,9 +3,10 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
+import { ResetPlayerPropertyDto } from '../player-property/dto/reset-player-property.dto';
+import { PlayerPropertyService } from '../player-property/player-property.service';
 
 import { PlayerDto } from './dto/player.dto';
-import { ResetPlayerPropertyDto } from './dto/reset-player-property.dto';
 import { PlayerInfoService } from './player-info.service';
 
 @ApiTags('Player Info')
@@ -13,6 +14,7 @@ import { PlayerInfoService } from './player-info.service';
 export class PlayerInfoController {
   constructor(
     private readonly playerInfoService: PlayerInfoService,
+    private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
   ) {}
 
@@ -27,7 +29,7 @@ export class PlayerInfoController {
   async upgradePlayerProperty(
     @Body() updatePlayerPropertyDto: PlayerPropertyItemDto,
   ): Promise<PlayerDto> {
-    await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
+    await this.playerPropertyService.upgrade(updatePlayerPropertyDto);
     return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 
@@ -36,7 +38,7 @@ export class PlayerInfoController {
   async resetPlayerProperty(
     @Body() resetPlayerPropertyDto: ResetPlayerPropertyDto,
   ): Promise<PlayerDto> {
-    await this.playerInfoService.resetPlayerProperty(
+    await this.playerPropertyService.reset(
       resetPlayerPropertyDto.steamId,
       resetPlayerPropertyDto.useMemberPoint,
     );
