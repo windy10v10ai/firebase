@@ -39,16 +39,6 @@ export class AdminController {
     return this.afdianService.activeRecentOrder(100);
   }
 
-  @Post('/migration/kofi-user-from-name')
-  async migrateKofiUserFromName() {
-    return await this.adminService.migrateKofiUserFromName();
-  }
-
-  @Post('/migration/backfill-used-level')
-  async backfillPlayerUsedLevel() {
-    return await this.adminService.backfillPlayerUsedLevel();
-  }
-
   @Get('/kofi/order/null-email')
   findKofiOrdersWithNullEmail() {
     return this.adminService.findKofiOrdersWithNullEmail();
