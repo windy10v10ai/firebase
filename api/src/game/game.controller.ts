@@ -5,11 +5,10 @@ import {
   ParseArrayPipe,
   ParseIntPipe,
   Post,
-  Put,
   Query,
   Req,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { logger } from 'firebase-functions';
 
@@ -18,9 +17,7 @@ import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
-import { PlayerDto } from '../player-info/dto/player.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
-import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
 import { Public } from '../util/auth/public.decorator';
 import { SecretService } from '../util/secret/secret.service';
 
@@ -124,18 +121,5 @@ export class GameController {
     await this.analyticsService.gameEndMatch(gameEnd, serverType);
     await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
     return this.gameService.getOK();
-  }
-
-  @ApiOperation({
-    summary: 'Get player info (deprecated)',
-    description: '此端点已弃用，将在未来版本中移除。请使用新的 PlayerInfo API。',
-    deprecated: true,
-  })
-  @Put('addPlayerProperty')
-  async addPlayerProperty(
-    @Body() updatePlayerPropertyDto: PlayerPropertyItemDto,
-  ): Promise<PlayerDto> {
-    await this.playerInfoService.upgradePlayerProperty(updatePlayerPropertyDto);
-    return await this.playerInfoService.findPlayerDtoBySteamId(updatePlayerPropertyDto.steamId);
   }
 }
