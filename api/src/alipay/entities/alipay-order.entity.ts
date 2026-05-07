@@ -3,7 +3,7 @@ import { Collection } from 'fireorm';
 import { AlipayProductCode } from '../enums/alipay-product-code.enum';
 import { AlipayTradeStatus } from '../enums/alipay-trade-status.enum';
 
-@Collection('alipay-order')
+@Collection()
 export class AlipayOrder {
   id: string;
   /** 商家订单号 */
