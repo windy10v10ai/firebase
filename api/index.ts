@@ -80,7 +80,7 @@ export const admin = onRequest(
     minInstances: 0,
     maxInstances: 1,
     memory: '512MiB',
-    timeoutSeconds: 1800,
+    timeoutSeconds: 3600,
     secrets: commonSecrets,
   },
   async (req, res) => {
