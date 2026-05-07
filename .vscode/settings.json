@@ -6,6 +6,21 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "git.autofetch": true,
   "debug.javascript.autoAttachFilter": "smart",
+  "debug.javascript.autoAttachSmartPattern": [
+    "${workspaceFolder}/**",
+    "!**/node_modules/**",
+    "**/$KNOWN_TOOLS$",
+    "**/firebase-tools/**",
+    "**/.bin/firebase"
+  ],
+  "debug.javascript.terminalOptions": {
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+    "outFiles": [
+      "${workspaceFolder}/api/dist/**/*.js",
+      "${workspaceFolder}/api/**/*.js"
+    ],
+    "sourceMaps": true
+  },
   "typescript.preferences.importModuleSpecifier": "relative",
   "githubPullRequests.ignoredPullRequestBranches": ["develop"],
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],

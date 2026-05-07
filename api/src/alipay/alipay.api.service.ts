@@ -50,8 +50,9 @@ export class AlipayApiService {
 
   async precreate(outTradeNo: string, totalAmount: string, subject: string): Promise<string> {
     const sdk = this.getSdk();
-    // notify_url 在支付宝开放平台应用网关里配置，不在 precreate 参数里传
+    const notifyUrl = process.env.ALIPAY_NOTIFY_URL;
     const result = (await sdk.exec('alipay.trade.precreate', {
+      notify_url: notifyUrl,
       bizContent: {
         out_trade_no: outTradeNo,
         total_amount: totalAmount,
@@ -66,5 +67,22 @@ export class AlipayApiService {
       );
     }
     return result.qrCode;
+  }
+
+  /**
+   * 验签支付宝异步通知。
+   * 入参为通知请求 body 的所有字段（含 sign / sign_type）。
+   * SDK 内部会自动剔除 sign 字段后用 alipayPublicKey 校验签名。
+   */
+  verifyNotifySign(postData: Record<string, string | undefined>): boolean {
+    try {
+      return this.getSdk().checkNotifySignV2(postData);
+    } catch (err) {
+      // 抛异常当作验签失败处理，避免伪造请求把 webhook 端点打成 500。
+      logger.warn('[Alipay] verifyNotifySign 抛异常，按验签失败处理', {
+        error: (err as Error).message,
+      });
+      return false;
+    }
   }
 }
