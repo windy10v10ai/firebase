@@ -5,6 +5,9 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiUser } from '../kofi/entities/kofi-user.entity';
+import { Player } from '../player/entities/player.entity';
+import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
+import { PlayerProperty } from '../player-property/entities/player-property.entity';
 
 @Injectable()
 export class AdminService {
@@ -13,7 +16,70 @@ export class AdminService {
     private readonly kofiUserRepository: BaseFirestoreRepository<KofiUser>,
     @InjectRepository(KofiOrder)
     private readonly kofiOrderRepository: BaseFirestoreRepository<KofiOrder>,
+    @InjectRepository(Player)
+    private readonly playerRepository: BaseFirestoreRepository<Player>,
+    @InjectRepository(PlayerProperty)
+    private readonly playerPropertyRepository: BaseFirestoreRepository<PlayerProperty>,
   ) {}
+
+  /**
+   * 一次性回填脚本：根据 player-property 文档计算每个玩家的 usedLevel，并写入 Player.usedLevel。
+   *
+   * 重要：不能因 player.usedLevel 已存在就跳过。
+   * 因为部署后、回填前期间发生的 upgrade 双写是基于 levelDelta（增量）：
+   *   - 旧文档无 usedLevel 字段（undefined），addUsedLevel 把 undefined 当 0 起步
+   *   - 实际 properties 中的累计等级未被纳入
+   *   - 结果会少算（usedLevel < 真实累计）
+   * 因此必须始终拿 properties 累加值与 player.usedLevel 比对，不一致则校正。
+   *
+   * 幂等：再次运行结果一致。单条失败不中止，记入 failed 列表。
+   */
+  async backfillPlayerUsedLevel() {
+    const allPlayers = await this.playerRepository.find();
+    const total = allPlayers.length;
+    const result = {
+      total,
+      matched: 0,
+      corrected: 0,
+      failed: [] as Array<{ steamId: string; error: string }>,
+    };
+
+    logger.info(`[Backfill] start, total players=${total}`);
+
+    let i = 0;
+    for (const player of allPlayers) {
+      i++;
+      try {
+        const propertyDoc = await this.playerPropertyRepository.findById(player.id);
+        const expected = propertyDoc
+          ? PlayerLevelHelper.calculateUsedLevel(propertyDoc.properties ?? [])
+          : 0;
+        const current = player.usedLevel ?? 0;
+
+        if (current === expected) {
+          result.matched++;
+          logger.info(`[Backfill] (${i}/${total}) steamId=${player.id} usedLevel=${expected}`);
+          continue;
+        }
+
+        player.usedLevel = expected;
+        await this.playerRepository.update(player);
+        result.corrected++;
+        logger.info(
+          `[Backfill] (${i}/${total}) steamId=${player.id} usedLevel=${expected} (corrected from ${current})`,
+        );
+      } catch (e) {
+        const error = e instanceof Error ? e.message : String(e);
+        result.failed.push({ steamId: player.id, error });
+        logger.error(`[Backfill] (${i}/${total}) steamId=${player.id} failed: ${error}`);
+      }
+    }
+
+    logger.info(
+      `[Backfill] done, matched=${result.matched}, corrected=${result.corrected}, failed=${result.failed.length}`,
+    );
+    return result;
+  }
 
   async migrateKofiUserFromName() {
     const allKofiUsers = await this.kofiUserRepository.find();

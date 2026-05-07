@@ -269,7 +269,7 @@ describe('PlayerInfoController (e2e)', () => {
     it.each([
       [
         '点数用尽时添加属性应报错',
-        200000515,
+        200000518,
         [
           { name: 'property_cooldown_percentage', level: 3 }, // 先用尽
         ],
