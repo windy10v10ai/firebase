@@ -40,6 +40,9 @@ const commonSecrets = isLocal
       defineSecret(SECRET.AFDIAN_API_TOKEN),
       defineSecret(SECRET.GA4_API_SECRET),
       defineSecret(SECRET.KOFI_VERIFICATION_TOKEN),
+      defineSecret(SECRET.ALIPAY_APP_ID),
+      defineSecret(SECRET.ALIPAY_APP_PRIVATE_KEY),
+      defineSecret(SECRET.ALIPAY_PUBLIC_KEY),
     ];
 
 export const client = onRequest(
@@ -51,7 +54,7 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex = '^/api/(game|afdian|analytics|player|kofi).*';
+    const regex = '^/api/(game|afdian|analytics|player|kofi|alipay).*';
     callServerWithRegex(regex, req, res);
   },
 );

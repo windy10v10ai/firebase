@@ -1,0 +1,88 @@
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { AlipaySdk } from 'alipay-sdk';
+import { logger } from 'firebase-functions/v2';
+
+import { SECRET, SecretService } from '../util/secret/secret.service';
+
+interface PrecreateResponseData {
+  code: string;
+  msg: string;
+  outTradeNo?: string;
+  qrCode?: string;
+  subCode?: string;
+  subMsg?: string;
+}
+
+@Injectable()
+export class AlipayApiService {
+  private sdk?: AlipaySdk;
+
+  constructor(private readonly secretService: SecretService) {}
+
+  private getSdk(): AlipaySdk {
+    if (this.sdk) {
+      return this.sdk;
+    }
+    const env = process.env.ALIPAY_ENV ?? 'sandbox';
+    const gateway =
+      env === 'prod'
+        ? 'https://openapi.alipay.com/gateway.do'
+        : 'https://openapi-sandbox.dl.alipaydev.com/gateway.do';
+
+    // .env 文件不支持多行，PEM 密钥换行符以 \n 字面量存储，此处还原
+    const privateKey = this.secretService
+      .getSecretValue(SECRET.ALIPAY_APP_PRIVATE_KEY)
+      .replace(/\\n/g, '\n');
+    const alipayPublicKey = this.secretService
+      .getSecretValue(SECRET.ALIPAY_PUBLIC_KEY)
+      .replace(/\\n/g, '\n');
+
+    this.sdk = new AlipaySdk({
+      appId: this.secretService.getSecretValue(SECRET.ALIPAY_APP_ID),
+      privateKey,
+      alipayPublicKey,
+      signType: 'RSA2',
+      gateway,
+      charset: 'utf-8',
+    });
+    return this.sdk;
+  }
+
+  async precreate(outTradeNo: string, totalAmount: string, subject: string): Promise<string> {
+    const sdk = this.getSdk();
+    const notifyUrl = process.env.ALIPAY_NOTIFY_URL;
+    const result = (await sdk.exec('alipay.trade.precreate', {
+      notify_url: notifyUrl,
+      bizContent: {
+        out_trade_no: outTradeNo,
+        total_amount: totalAmount,
+        subject,
+      },
+    })) as PrecreateResponseData;
+
+    if (result.code !== '10000' || !result.qrCode) {
+      logger.error('alipay.trade.precreate 调用失败', { outTradeNo, result });
+      throw new InternalServerErrorException(
+        `alipay precreate failed: ${result.subMsg || result.msg}`,
+      );
+    }
+    return result.qrCode;
+  }
+
+  /**
+   * 验签支付宝异步通知。
+   * 入参为通知请求 body 的所有字段（含 sign / sign_type）。
+   * SDK 内部会自动剔除 sign 字段后用 alipayPublicKey 校验签名。
+   */
+  verifyNotifySign(postData: Record<string, string | undefined>): boolean {
+    try {
+      return this.getSdk().checkNotifySignV2(postData);
+    } catch (err) {
+      // 抛异常当作验签失败处理，避免伪造请求把 webhook 端点打成 500。
+      logger.warn('[Alipay] verifyNotifySign 抛异常，按验签失败处理', {
+        error: (err as Error).message,
+      });
+      return false;
+    }
+  }
+}

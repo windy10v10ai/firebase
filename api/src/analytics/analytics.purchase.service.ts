@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
 import { AfdianOrder } from '../afdian/entities/afdian-order.entity';
+import { OrderType } from '../afdian/enums/order-type.enum';
+import { AlipayOrder } from '../alipay/entities/alipay-order.entity';
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiType } from '../kofi/enums/kofi-type.enum';
 
 import { AnalyticsService } from './analytics.service';
 
 type CURRENCY = 'CNY' | 'USD';
-type AFFILIATION = 'afdian' | 'kofi';
+type AFFILIATION = 'afdian' | 'kofi' | 'alipay';
 
 export interface PurchaseEvent {
   name: string;
@@ -18,6 +20,7 @@ export interface PurchaseEvent {
       affiliation: AFFILIATION;
       price: number;
       currency: CURRENCY;
+      quantity: number;
     }[];
     affiliation: AFFILIATION;
     currency: CURRENCY;
@@ -32,6 +35,11 @@ export class AnalyticsPurchaseService {
 
   async afdianPurchase(afdianOrder: AfdianOrder) {
     const price = Number(afdianOrder.orderDto.total_amount);
+    const orderType = afdianOrder.orderType;
+    const isMember = orderType === OrderType.memberNormal || orderType === OrderType.memberPremium;
+    const quantity = isMember
+      ? afdianOrder.orderDto.month
+      : Number(afdianOrder.orderDto.sku_detail[0]?.count ?? 1);
 
     const event: PurchaseEvent = {
       name: 'purchase',
@@ -43,6 +51,7 @@ export class AnalyticsPurchaseService {
             affiliation: 'afdian',
             price,
             currency: 'CNY',
+            quantity,
           },
         ],
         affiliation: 'afdian',
@@ -79,6 +88,11 @@ export class AnalyticsPurchaseService {
         item_id = 'kofi-shop-order';
         break;
     }
+    const quantity =
+      order.type === KofiType.SHOP_ORDER
+        ? (order.shopItems?.[0]?.quantity ?? 1)
+        : Number((order.amount / 4).toFixed(1));
+
     const event: PurchaseEvent = {
       name: 'purchase',
       params: {
@@ -89,11 +103,38 @@ export class AnalyticsPurchaseService {
             affiliation: 'kofi',
             price,
             currency: 'USD',
+            quantity,
           },
         ],
         affiliation: 'kofi',
         currency: 'USD',
         transaction_id: order.messageId,
+        value: price,
+      },
+    };
+
+    await this.analyticsService.sendEvent(order.steamId.toString(), event);
+  }
+
+  async alipayPurchase(order: AlipayOrder) {
+    const price = order.totalAmountCent / 100;
+
+    const event: PurchaseEvent = {
+      name: 'purchase',
+      params: {
+        items: [
+          {
+            item_id: order.productCode,
+            item_name: `alipay-${order.productCode}`,
+            affiliation: 'alipay',
+            price,
+            currency: 'CNY',
+            quantity: order.quantity,
+          },
+        ],
+        affiliation: 'alipay',
+        currency: 'CNY',
+        transaction_id: order.outTradeNo,
         value: price,
       },
     };
