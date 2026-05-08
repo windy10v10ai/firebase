@@ -15,8 +15,9 @@ export class PlayerInfoService {
   async findPlayerInfoBySteamId(
     steamId: number,
     include: PlayerInfoInclude[],
-  ): Promise<PlayerInfoDto> {
+  ): Promise<PlayerInfoDto | undefined> {
     const player = await this.playerService.findBySteamId(steamId);
+    if (!player) return undefined;
     return this.playerDtoAssembler.assemblePlayerInfoDto(player, include);
   }
 
