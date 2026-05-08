@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PlayerService } from '../player/player.service';
 
@@ -15,9 +15,9 @@ export class PlayerInfoService {
   async findPlayerInfoBySteamId(
     steamId: number,
     include: PlayerInfoInclude[],
-  ): Promise<PlayerInfoDto | undefined> {
+  ): Promise<PlayerInfoDto> {
     const player = await this.playerService.findBySteamId(steamId);
-    if (!player) return undefined;
+    if (!player) throw new NotFoundException();
     return this.playerDtoAssembler.assemblePlayerInfoDto(player, include);
   }
 

@@ -97,16 +97,14 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.member).toBeUndefined();
     });
 
-    it('获取不存在的玩家 返回空对象', async () => {
+    it('获取不存在的玩家 返回404', async () => {
       const steamId = 200000699;
 
       const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`, {
         include: 'property,setting',
       });
 
-      expect(result.status).toEqual(200);
-      // 不存在的玩家返回空对象
-      expect(result.body).toEqual({});
+      expect(result.status).toEqual(404);
     });
 
     it('验证PlayerInfoDto计算字段正确性', async () => {
