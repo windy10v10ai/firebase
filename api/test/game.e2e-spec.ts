@@ -292,7 +292,7 @@ describe('PlayerController (e2e)', () => {
         expect(result.status).toEqual(200);
 
         const response = result.body;
-        // 验证 members 数组
+        // 验证 members 数组（向后兼容）
         expect(response.members).toBeDefined();
         expect(Array.isArray(response.members)).toBe(true);
         expect(response.members.length).toBeGreaterThanOrEqual(1);
@@ -305,6 +305,39 @@ describe('PlayerController (e2e)', () => {
         // 验证 pointInfo 数组
         expect(response.pointInfo).toBeDefined();
         expect(Array.isArray(response.pointInfo)).toBe(true);
+      });
+
+      it('验证会员玩家 players[i].member 已填充', async () => {
+        const steamId = 100000705;
+        mockDate('2023-12-01T00:00:00.000Z');
+
+        await post(app, memberPostUrl, {
+          steamId,
+          month: 1,
+          level: MemberLevel.PREMIUM,
+        });
+
+        const result = await callGameStart(app, [steamId]);
+        expect(result.status).toEqual(200);
+
+        const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
+        expect(player).toBeDefined();
+        expect(player.member).toBeDefined();
+        expect(player.member.steamId).toEqual(steamId);
+        expect(player.member.level).toEqual(MemberLevel.PREMIUM);
+        expect(player.member.enable).toBe(true);
+      });
+
+      it('验证非会员玩家 players[i].member 为 undefined', async () => {
+        const steamId = 100000706;
+        mockDate('2023-12-01T00:00:00.000Z');
+
+        const result = await callGameStart(app, [steamId]);
+        expect(result.status).toEqual(200);
+
+        const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
+        expect(player).toBeDefined();
+        expect(player.member).toBeUndefined();
       });
 
       it('验证 players 包含完整的计算字段', async () => {

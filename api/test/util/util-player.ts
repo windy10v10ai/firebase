@@ -6,7 +6,7 @@ import { PlayerSetting } from '../../src/player/entities/player-setting.entity';
 import { Player } from '../../src/player/entities/player.entity';
 import { PlayerSettingService } from '../../src/player/player-setting.service';
 import { PlayerService } from '../../src/player/player.service';
-import { PlayerDto } from '../../src/player-info/dto/player.dto';
+import { PlayerInfoDto } from '../../src/player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../../src/player-info/player-info.service';
 
 import { put } from './util-http';
@@ -63,8 +63,7 @@ export async function addPlayerProperty(
   expect(result.status).toEqual(200);
 }
 
-export async function getPlayerDto(app: INestApplication, steamId: number): Promise<PlayerDto> {
+export async function getPlayerDto(app: INestApplication, steamId: number): Promise<PlayerInfoDto> {
   const playerInfoService = app.get(PlayerInfoService);
-  const playerDto = await playerInfoService.findPlayerDtoBySteamId(steamId);
-  return playerDto;
+  return playerInfoService.findPlayerInfoBySteamId(steamId, ['property', 'setting']);
 }
