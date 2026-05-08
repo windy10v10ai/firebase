@@ -13,6 +13,14 @@ const RESET_PROPERTY_MEMBER_POINT_COST = 1000;
 
 @Injectable()
 export class PlayerPropertyService {
+  /**
+   * 累加 properties 中的 level，作为 player.usedLevel 的权威值。
+   * 调用方负责传入需要累加的列表（findBySteamId 已过滤 level > 0）。
+   */
+  static calculateUsedLevel(properties: PlayerPropertyItemDto[]): number {
+    return properties.reduce((sum, p) => sum + p.level, 0);
+  }
+
   static PROPERTY_NAME_LIST = [
     'property_cooldown_percentage',
     'property_movespeed_bonus_constant',
@@ -79,7 +87,7 @@ export class PlayerPropertyService {
     // 故意从 properties 累加而不是读 player.usedLevel：
     // properties 文档是权威源，每次 upgrade 用它重算可在部分失败重试时自愈，
     // 不会因为 player.usedLevel 此前的偏差而继续累积错误。
-    const currentUsedLevel = PlayerLevelHelper.calculateUsedLevel(existingProperties);
+    const currentUsedLevel = PlayerPropertyService.calculateUsedLevel(existingProperties);
     const totalLevel = PlayerLevelHelper.getPlayerTotalLevel(player);
     if (totalLevel - currentUsedLevel < levelDelta) {
       logger.warn('[Player Property] upgrade error: not enough useable level', {

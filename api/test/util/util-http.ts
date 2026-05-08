@@ -44,6 +44,13 @@ export function patch(app: INestApplication, url: string, body: object): request
   return request(app.getHttpServer()).patch(url).send(body).set(headers);
 }
 
+export function del(app: INestApplication, url: string, query: object = {}): request.Test {
+  const headers = {
+    'x-api-key': 'Invalid_NotOnDedicatedServer',
+  };
+  return request(app.getHttpServer()).delete(url).query(query).set(headers);
+}
+
 export function mockDate(date: string): void {
   const fackTimer = getFakeTimer();
   fackTimer.setSystemTime(new Date(date));

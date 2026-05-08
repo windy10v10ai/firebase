@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+import { MemberDto } from '../../members/dto/member.dto';
 import { PlayerSetting } from '../../player/entities/player-setting.entity';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 
-export class PlayerDto extends Player {
+export class PlayerInfoDto extends Player {
   @ApiProperty()
   seasonLevel: number;
   @ApiProperty()
@@ -23,6 +24,8 @@ export class PlayerDto extends Player {
   useableLevel: number;
   @ApiPropertyOptional()
   properties?: PlayerPropertyItemDto[];
-  @ApiProperty()
-  playerSetting: PlayerSetting;
+  @ApiPropertyOptional()
+  playerSetting?: PlayerSetting;
+  @ApiPropertyOptional()
+  member?: MemberDto;
 }

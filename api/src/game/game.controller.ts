@@ -72,12 +72,16 @@ export class GameController {
     await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType);
 
     // ----------------- 以下为返回数据 -----------------
-    // 获取玩家信息
     const steamIdsStr = steamIds.map((id) => id.toString());
-    const players = await this.playerInfoService.findPlayerDtoBySteamIds(steamIdsStr);
+    const players = await this.playerInfoService.findPlayerInfoBySteamIds(steamIdsStr, [
+      'member',
+      'property',
+      'setting',
+    ]);
 
     // 构建响应对象
     const response: GameStart = {
+      // TODO: remove members field after client migrates to reading from players[i].member
       members: members.map((m) => new MemberDto(m)),
       players,
       pointInfo,

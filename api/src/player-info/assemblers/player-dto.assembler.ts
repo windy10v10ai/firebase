@@ -1,54 +1,54 @@
 import { Injectable } from '@nestjs/common';
 
+import { MemberDto } from '../../members/dto/member.dto';
+import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerLevelHelper } from '../../player/helpers/player-level.helper';
 import { PlayerSettingService } from '../../player/player-setting.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
-import { PlayerDto } from '../dto/player.dto';
+import { PlayerInfoDto } from '../dto/player-info.dto';
 
-/**
- * PlayerDtoAssembler - Assembler 模式
- * 负责组装 Player 对象为 PlayerDto，包含数据获取和计算逻辑
- */
+export type PlayerInfoInclude = 'member' | 'property' | 'setting';
+
 @Injectable()
 export class PlayerDtoAssembler {
   constructor(
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly playerSettingService: PlayerSettingService,
+    private readonly membersService: MembersService,
   ) {}
 
-  /**
-   * 组装 Player 对象为 PlayerDto
-   * @param player Player 实体对象
-   * @returns 组装后的 PlayerDto
-   */
-  async assemblePlayerDto(player: Player): Promise<PlayerDto> {
-    const dto = player as PlayerDto;
+  async assemblePlayerInfoDto(
+    player: Player,
+    include: PlayerInfoInclude[],
+  ): Promise<PlayerInfoDto> {
+    const dto = player as PlayerInfoDto;
 
-    // 获取属性
-    const properties = await this.playerPropertyService.findBySteamId(+player.id);
-    dto.properties = properties || [];
-
-    // 获取设置
-    dto.playerSetting = await this.playerSettingService.getPlayerSettingOrGenerateDefault(
-      player.id,
-    );
-
-    // 计算等级相关数据（使用 PlayerLevelHelper）
     this.calculateLevelData(dto);
-
-    // 计算可用等级
     dto.useableLevel = this.calculateUseableLevel(dto);
+
+    const [properties, playerSetting, member] = await Promise.all([
+      include.includes('property') ? this.playerPropertyService.findBySteamId(+player.id) : null,
+      include.includes('setting')
+        ? this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id)
+        : null,
+      include.includes('member') ? this.membersService.findOne(+player.id) : null,
+    ]);
+
+    if (include.includes('property')) {
+      dto.properties = properties ?? [];
+    }
+    if (include.includes('setting')) {
+      dto.playerSetting = playerSetting;
+    }
+    if (include.includes('member') && member) {
+      dto.member = new MemberDto(member);
+    }
 
     return dto;
   }
 
-  /**
-   * 计算等级相关数据
-   * @param dto PlayerDto 对象
-   */
-  private calculateLevelData(dto: PlayerDto): void {
-    // 使用 PlayerLevelHelper 进行计算
+  private calculateLevelData(dto: PlayerInfoDto): void {
     const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(dto.seasonPointTotal);
     dto.seasonLevel = seasonLevel;
     dto.seasonCurrrentLevelPoint =
@@ -64,13 +64,7 @@ export class PlayerDtoAssembler {
     dto.totalLevel = seasonLevel + memberLevel;
   }
 
-  /**
-   * 计算可用等级
-   * TODO[migrate-usedlevel]: 回填脚本运行完成且校验一致后，
-   * 改为直接读取 player.usedLevel：return dto.totalLevel - dto.usedLevel
-   */
-  private calculateUseableLevel(dto: PlayerDto): number {
-    const usedLevel = PlayerLevelHelper.calculateUsedLevel(dto.properties);
-    return dto.totalLevel - usedLevel;
+  private calculateUseableLevel(dto: PlayerInfoDto): number {
+    return dto.totalLevel - (dto.usedLevel ?? 0);
   }
 }
