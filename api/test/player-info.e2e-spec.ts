@@ -1,11 +1,10 @@
 import { INestApplication } from '@nestjs/common';
 
-import { get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
+import { del, get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
 import { addPlayerProperty, createPlayer, getPlayerDto } from './util/util-player';
 
 const getPlayerInfoUrl = '/api/player';
 const upgradePlayerPropertyUrl = '/api/player/property';
-const resetPlayerPropertyUrl = '/api/player/property/reset';
 
 // 验证 PlayerDto 包含所有计算字段
 function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
@@ -18,7 +17,6 @@ function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): v
   expect(playerDto.totalLevel).toBeDefined();
   expect(playerDto.useableLevel).toBeDefined();
   expect(playerDto.properties).toBeDefined();
-  expect(playerDto.playerSetting).toBeDefined();
 }
 
 describe('PlayerInfoController (e2e)', () => {
@@ -32,8 +30,8 @@ describe('PlayerInfoController (e2e)', () => {
     restoreDate();
   });
 
-  describe('GET /api/player/:steamId 获取玩家信息', () => {
-    it('获取已存在玩家 返回完整PlayerDto', async () => {
+  describe('GET /api/player/:steamId/info 获取玩家信息', () => {
+    it('获取已存在玩家 include=property,setting 返回完整PlayerInfoDto', async () => {
       const steamId = 200000601;
       mockDate('2023-12-01T00:00:00.000Z');
       await createPlayer(app, {
@@ -45,7 +43,9 @@ describe('PlayerInfoController (e2e)', () => {
       // 添加一些属性
       await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
 
-      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`, {
+        include: 'property,setting',
+      });
 
       expect(result.status).toEqual(200);
       const playerDto = result.body;
@@ -59,19 +59,57 @@ describe('PlayerInfoController (e2e)', () => {
       // 属性
       expect(playerDto.properties).toHaveLength(1);
       expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
+      // member 未请求，不返回
+      expect(playerDto.member).toBeUndefined();
+    });
+
+    it('include=member 会员玩家 返回 member 字段', async () => {
+      const steamId = 200000602;
+      mockDate('2023-12-01T00:00:00.000Z');
+      await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 0 });
+      await post(app, '/api/members/', { steamId, month: 1, level: 'NORMAL' });
+
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`, { include: 'member' });
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.member).toBeDefined();
+      expect(playerDto.member.steamId).toEqual(steamId);
+      expect(playerDto.member.enable).toBe(true);
+      // property/setting 未请求，不返回
+      expect(playerDto.properties).toBeUndefined();
+      expect(playerDto.playerSetting).toBeUndefined();
+    });
+
+    it('include= 空 只返回核心字段', async () => {
+      const steamId = 200000603;
+      mockDate('2023-12-01T00:00:00.000Z');
+      await createPlayer(app, { steamId, seasonPointTotal: 100, memberPointTotal: 0 });
+
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.id).toEqual(steamId.toString());
+      expect(playerDto.seasonLevel).toBeDefined();
+      expect(playerDto.properties).toBeUndefined();
+      expect(playerDto.playerSetting).toBeUndefined();
+      expect(playerDto.member).toBeUndefined();
     });
 
     it('获取不存在的玩家 返回空对象', async () => {
       const steamId = 200000699;
 
-      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`, {
+        include: 'property,setting',
+      });
 
       expect(result.status).toEqual(200);
       // 不存在的玩家返回空对象
       expect(result.body).toEqual({});
     });
 
-    it('验证PlayerDto计算字段正确性', async () => {
+    it('验证PlayerInfoDto计算字段正确性', async () => {
       const steamId = 200000612;
       mockDate('2023-12-01T00:00:00.000Z');
       // 500分 = level 3 (getSeasonTotalPoint(3)=300, getSeasonTotalPoint(4)=600)
@@ -82,7 +120,7 @@ describe('PlayerInfoController (e2e)', () => {
         memberPointTotal: 100,
       });
 
-      const result = await get(app, `${getPlayerInfoUrl}/${steamId}`);
+      const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
 
       expect(result.status).toEqual(200);
       const playerDto = result.body;
@@ -100,7 +138,7 @@ describe('PlayerInfoController (e2e)', () => {
       mockDate('2023-12-01T00:00:00.000Z');
     });
 
-    it('添加玩家属性 返回更新后的PlayerDto', async () => {
+    it('添加玩家属性 返回更新后的PlayerInfoDto (含 member, property, setting)', async () => {
       const steamId = 200000501;
       // 先创建玩家
       await createPlayer(app, {
@@ -117,7 +155,7 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       expect(result.status).toEqual(200);
-      // 验证返回的 PlayerDto 结构
+      // 验证返回的 PlayerInfoDto 结构
       const playerDto = result.body;
       expect(playerDto.id).toEqual(steamId.toString());
       expect(playerDto.seasonPointTotal).toEqual(500);
@@ -128,6 +166,8 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.properties).toHaveLength(1);
       expect(playerDto.properties[0].name).toEqual('property_cooldown_percentage');
       expect(playerDto.properties[0].level).toEqual(2);
+      // property upgrade 不返回 member
+      expect(playerDto.member).toBeUndefined();
     });
 
     it('添加多个不同属性', async () => {
@@ -313,133 +353,77 @@ describe('PlayerInfoController (e2e)', () => {
     });
   });
 
-  describe('POST /api/player/property/reset 重置玩家属性', () => {
+  describe('DELETE /api/player/:steamId/property 重置玩家属性', () => {
     describe('可以重置', () => {
       it.each([
         [
           '使用勇士积分重置 level2',
           {
-            body: {
-              steamId: 200000402,
-              useMemberPoint: false,
-            },
-            before: {
-              seasonPointTotal: 200,
-              memberPointTotal: 0,
-            },
-            after: {
-              seasonPointTotal: 0,
-              memberPointTotal: 0,
-            },
-            expected: {
-              status: 201,
-              propertyLength: 0,
-            },
+            steamId: 200000402,
+            useMemberPoint: false,
+            before: { seasonPointTotal: 200, memberPointTotal: 0 },
+            after: { seasonPointTotal: 0, memberPointTotal: 0 },
           },
         ],
         [
           '使用勇士积分重置 level3',
           {
-            body: {
-              steamId: 200000403,
-              useMemberPoint: false,
-            },
-            before: {
-              seasonPointTotal: 300,
-              memberPointTotal: 1000,
-            },
-            after: {
-              seasonPointTotal: 0,
-              memberPointTotal: 1000,
-            },
-            expected: {
-              status: 201,
-              propertyLength: 0,
-            },
+            steamId: 200000403,
+            useMemberPoint: false,
+            before: { seasonPointTotal: 300, memberPointTotal: 1000 },
+            after: { seasonPointTotal: 0, memberPointTotal: 1000 },
           },
         ],
         [
           '使用会员积分，重置',
           {
-            body: {
-              steamId: 200000412,
-              useMemberPoint: true,
-            },
-            before: {
-              seasonPointTotal: 0,
-              memberPointTotal: 1000,
-            },
-            after: {
-              seasonPointTotal: 0,
-              memberPointTotal: 0,
-            },
-            expected: {
-              status: 201,
-              propertyLength: 0,
-            },
+            steamId: 200000412,
+            useMemberPoint: true,
+            before: { seasonPointTotal: 0, memberPointTotal: 1000 },
+            after: { seasonPointTotal: 0, memberPointTotal: 0 },
           },
         ],
         [
           '使用会员积分，重置',
           {
-            body: {
-              steamId: 200000413,
-              useMemberPoint: true,
-            },
-            before: {
-              seasonPointTotal: 999,
-              memberPointTotal: 2000,
-            },
-            after: {
-              seasonPointTotal: 999,
-              memberPointTotal: 1000,
-            },
-            expected: {
-              status: 201,
-              propertyLength: 0,
-            },
+            steamId: 200000413,
+            useMemberPoint: true,
+            before: { seasonPointTotal: 999, memberPointTotal: 2000 },
+            after: { seasonPointTotal: 999, memberPointTotal: 1000 },
           },
         ],
-      ])('%s', async (_, { body, before, after, expected }) => {
+      ])('%s', async (_, { steamId, useMemberPoint, before, after }) => {
         await createPlayer(app, {
-          steamId: body.steamId,
+          steamId,
           seasonPointTotal: before.seasonPointTotal,
           memberPointTotal: before.memberPointTotal,
         });
 
-        await addPlayerProperty(app, body.steamId, 'property_cooldown_percentage', 1);
+        await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
 
-        // 重置玩家属性
-        const result = await post(app, resetPlayerPropertyUrl, body);
-        expect(result.status).toEqual(expected.status);
+        const result = await del(app, `${getPlayerInfoUrl}/${steamId}/property`, {
+          useMemberPoint,
+        });
+        expect(result.status).toEqual(200);
 
         const player = result.body;
         expect(player?.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(player?.memberPointTotal).toEqual(after.memberPointTotal);
-        expect(player?.properties).toHaveLength(expected.propertyLength);
+        expect(player?.properties).toHaveLength(0);
+        expect(player?.member).toBeUndefined();
       });
     });
 
     describe('无法重置', () => {
       // 不存在的玩家
       it.each([
-        {
-          body: {
-            steamId: 200000421,
-            useMemberPoint: false,
-          },
-          status: 400,
-        },
-        {
-          body: {
-            steamId: 200000422,
-            useMemberPoint: true,
-          },
-          status: 400,
-        },
-      ])('不存在的玩家应返回400', async ({ body, status }) => {
-        const result = await post(app, resetPlayerPropertyUrl, body);
-        expect(result.status).toEqual(status);
+        { steamId: 200000421, useMemberPoint: false },
+        { steamId: 200000422, useMemberPoint: true },
+      ])('不存在的玩家应返回400', async ({ steamId, useMemberPoint }) => {
+        const result = await del(app, `${getPlayerInfoUrl}/${steamId}/property`, {
+          useMemberPoint,
+        });
+        expect(result.status).toEqual(400);
       });
 
       // 积分不足
@@ -447,62 +431,39 @@ describe('PlayerInfoController (e2e)', () => {
         [
           '使用勇士积分，积分不足',
           {
-            body: {
-              steamId: 200000401,
-              useMemberPoint: false,
-            },
-            before: {
-              seasonPointTotal: 199,
-              memberPointTotal: 0,
-            },
-            after: {
-              seasonPointTotal: 199,
-              memberPointTotal: 0,
-            },
-            expected: {
-              status: 400,
-              propertyLength: 1,
-            },
+            steamId: 200000401,
+            useMemberPoint: false,
+            before: { seasonPointTotal: 199, memberPointTotal: 0 },
+            after: { seasonPointTotal: 199, memberPointTotal: 0 },
           },
         ],
         [
           '使用会员积分，积分不足',
           {
-            body: {
-              steamId: 200000411,
-              useMemberPoint: true,
-            },
-            before: {
-              seasonPointTotal: 0,
-              memberPointTotal: 999,
-            },
-            after: {
-              seasonPointTotal: 0,
-              memberPointTotal: 999,
-            },
-            expected: {
-              status: 400,
-              propertyLength: 1,
-            },
+            steamId: 200000411,
+            useMemberPoint: true,
+            before: { seasonPointTotal: 0, memberPointTotal: 999 },
+            after: { seasonPointTotal: 0, memberPointTotal: 999 },
           },
         ],
-      ])('%s', async (_, { body, before, after, expected }) => {
+      ])('%s', async (_, { steamId, useMemberPoint, before, after }) => {
         await createPlayer(app, {
-          steamId: body.steamId,
+          steamId,
           seasonPointTotal: before.seasonPointTotal,
           memberPointTotal: before.memberPointTotal,
         });
 
-        await addPlayerProperty(app, body.steamId, 'property_cooldown_percentage', 1);
+        await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
 
-        // 重置玩家属性
-        const result = await post(app, resetPlayerPropertyUrl, body);
-        expect(result.status).toEqual(expected.status);
+        const result = await del(app, `${getPlayerInfoUrl}/${steamId}/property`, {
+          useMemberPoint,
+        });
+        expect(result.status).toEqual(400);
 
-        const playerDto = await getPlayerDto(app, body.steamId);
+        const playerDto = await getPlayerDto(app, steamId);
         expect(playerDto.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(playerDto.memberPointTotal).toEqual(after.memberPointTotal);
-        expect(playerDto.properties).toHaveLength(expected.propertyLength);
+        expect(playerDto.properties).toHaveLength(1);
       });
     });
   });
