@@ -8,7 +8,12 @@ import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
 import { AlipayApiService } from './alipay.api.service';
-import { ALIPAY_PRODUCT_TABLE, ALIPAY_QR_EXPIRE_MS, AlipayProductSpec } from './alipay.constants';
+import {
+  ALIPAY_PRODUCT_TABLE,
+  ALIPAY_QR_EXPIRE_MS,
+  AlipayProductSpec,
+  MEMBER_DISCOUNT_TIERS,
+} from './alipay.constants';
 import { AlipayNotifyDto } from './dto/alipay-notify.dto';
 import { CreateAlipayOrderResponseDto } from './dto/create-alipay-order-response.dto';
 import { CreateAlipayOrderDto } from './dto/create-alipay-order.dto';
@@ -38,7 +43,7 @@ export class AlipayService {
       throw new BadRequestException(`Unknown productCode: ${dto.productCode}`);
     }
     const quantity = dto.quantity ?? 1;
-    const { totalAmountCent, totalAmount } = this.calculatePrice(spec, quantity);
+    const { totalAmountCent, totalAmount, discountPercent } = this.calculatePrice(spec, quantity);
     const subject = this.buildSubject(spec, quantity);
 
     const outTradeNo = this.generateOutTradeNo(dto.steamId);
@@ -54,6 +59,7 @@ export class AlipayService {
       productCode: dto.productCode,
       quantity,
       totalAmountCent,
+      discountPercent,
       subject,
       status: AlipayTradeStatus.WAITING,
       qrCode: '',
@@ -200,19 +206,25 @@ export class AlipayService {
   }
 
   /**
-   * 计算订单价格。独立成 method 以便后续接入折扣（多份阶梯、首充优惠、活动价等）：
-   * 折扣逻辑只需在此处加，调用方无需感知。
+   * 计算订单价格。会员商品按月数查 MEMBER_DISCOUNT_TIERS 阶梯定价；
+   * 积分包按 priceCentPerUnit 线性计价。
    */
   calculatePrice(
     spec: AlipayProductSpec,
     quantity: number,
-  ): { totalAmountCent: number; totalAmount: string } {
+  ): { totalAmountCent: number; totalAmount: string; discountPercent: number } {
     if (!Number.isInteger(quantity) || quantity < 1) {
       throw new BadRequestException(`Invalid quantity: ${quantity}`);
     }
+    if (spec.reward.kind === 'member') {
+      const tier = MEMBER_DISCOUNT_TIERS.find((t) => quantity >= t.minMonths)!;
+      const totalAmountCent = tier.priceCentPerMonth * quantity;
+      const totalAmount = (totalAmountCent / 100).toFixed(2);
+      return { totalAmountCent, totalAmount, discountPercent: tier.discountPercent };
+    }
     const totalAmountCent = spec.priceCentPerUnit * quantity;
     const totalAmount = (totalAmountCent / 100).toFixed(2);
-    return { totalAmountCent, totalAmount };
+    return { totalAmountCent, totalAmount, discountPercent: 0 };
   }
 
   private buildSubject(spec: AlipayProductSpec, quantity: number): string {

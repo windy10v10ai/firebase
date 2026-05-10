@@ -14,6 +14,23 @@ export interface AlipayProductSpec {
   reward: AlipayReward;
 }
 
+export interface MemberDiscountTier {
+  /** 达到此月数起适用本档 */
+  minMonths: number;
+  /** 每月实际价格（分） */
+  priceCentPerMonth: number;
+  /** 相对原价 ¥29.80 的折扣百分比，如 6 表示 6% off */
+  discountPercent: number;
+}
+
+/** 从大到小排列，calculatePrice 取第一个满足 minMonths <= quantity 的档 */
+export const MEMBER_DISCOUNT_TIERS: MemberDiscountTier[] = [
+  { minMonths: 36, priceCentPerMonth: 2380, discountPercent: 20 },
+  { minMonths: 12, priceCentPerMonth: 2500, discountPercent: 16 },
+  { minMonths: 3, priceCentPerMonth: 2680, discountPercent: 10 },
+  { minMonths: 1, priceCentPerMonth: 2800, discountPercent: 6 },
+];
+
 export const ALIPAY_PRODUCT_TABLE: Record<AlipayProductCode, AlipayProductSpec> = {
   [AlipayProductCode.MEMBER_PREMIUM]: {
     subjectUnit: '10v10AI 高级会员',

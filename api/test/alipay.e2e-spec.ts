@@ -206,7 +206,7 @@ describe('AlipayController (e2e)', () => {
       const outTradeNo = order.body.outTradeNo;
 
       const res = await postWebhook(
-        buildNotify({ out_trade_no: outTradeNo, total_amount: '84.00' }),
+        buildNotify({ out_trade_no: outTradeNo, total_amount: '80.40' }),
       );
 
       expect(res.text).toBe('success');
