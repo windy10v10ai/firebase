@@ -8,7 +8,11 @@ import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
 import { AlipayApiService } from './alipay.api.service';
-import { ALIPAY_PRODUCT_TABLE, ALIPAY_QR_EXPIRE_MS } from './alipay.constants';
+import {
+  ALIPAY_PRODUCT_TABLE,
+  ALIPAY_QR_EXPIRE_MS,
+  MEMBER_DISCOUNT_TIERS,
+} from './alipay.constants';
 import { AlipayService } from './alipay.service';
 import { CreateAlipayOrderDto } from './dto/create-alipay-order.dto';
 import { AlipayOrder } from './entities/alipay-order.entity';
@@ -71,26 +75,37 @@ describe('AlipayService', () => {
   });
 
   describe('calculatePrice', () => {
-    it('单份会员 ¥28.00（2800 分）', () => {
-      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, 1);
-      expect(r.totalAmountCent).toBe(2800);
-      expect(r.totalAmount).toBe('28.00');
+    it.each([
+      [1, 2800, '28.00', 6],
+      [2, 5600, '56.00', 6],
+      [3, 8040, '80.40', 10],
+      [4, 10720, '107.20', 10],
+      [12, 30000, '300.00', 16],
+      [36, 85680, '856.80', 20],
+    ])('会员 quantity=%i → %i¢ / %s / discountPercent=%i', (quantity, cent, yuan, discount) => {
+      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, quantity);
+      expect(r.totalAmountCent).toBe(cent);
+      expect(r.totalAmount).toBe(yuan);
+      expect(r.discountPercent).toBe(discount);
     });
 
-    it('3 份会员 ¥84.00（线性倍乘，无折扣）', () => {
-      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, 3);
-      expect(r.totalAmountCent).toBe(8400);
-      expect(r.totalAmount).toBe('84.00');
+    it('MEMBER_DISCOUNT_TIERS 从大到小排列，确保 find 查表正确', () => {
+      for (let i = 0; i < MEMBER_DISCOUNT_TIERS.length - 1; i++) {
+        expect(MEMBER_DISCOUNT_TIERS[i].minMonths).toBeGreaterThan(
+          MEMBER_DISCOUNT_TIERS[i + 1].minMonths,
+        );
+      }
     });
 
     it.each([
       [AlipayProductCode.POINTS_TIER1, 7800, '78.00'],
       [AlipayProductCode.POINTS_TIER2, 23800, '238.00'],
       [AlipayProductCode.POINTS_TIER3, 56800, '568.00'],
-    ])('单份积分档位 %s 价格正确', (code, cent, yuan) => {
+    ])('单份积分档位 %s 价格正确，discountPercent=0', (code, cent, yuan) => {
       const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE[code], 1);
       expect(r.totalAmountCent).toBe(cent);
       expect(r.totalAmount).toBe(yuan);
+      expect(r.discountPercent).toBe(0);
     });
 
     it('totalAmount 始终保留两位小数（满整元也带 .00）', () => {
@@ -123,10 +138,10 @@ describe('AlipayService', () => {
       expect(new Date(res.expiresAt).getTime()).toBeGreaterThan(Date.now());
     });
 
-    it('多份会员：金额按 quantity 倍增、subject 追加月数', async () => {
+    it('3月会员：适用9折阶梯价 ¥80.40、subject 追加月数', async () => {
       const res = await service.createOrder({ ...baseDto, quantity: 3 });
 
-      expect(res.totalAmount).toBe('84.00');
+      expect(res.totalAmount).toBe('80.40');
       expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} 3个月`);
     });
 
@@ -213,6 +228,7 @@ describe('AlipayService', () => {
           productCode: baseDto.productCode,
           quantity: 2,
           totalAmountCent: 5600,
+          discountPercent: 6,
           status: AlipayTradeStatus.WAITING,
         }),
       );
@@ -355,11 +371,11 @@ describe('AlipayService', () => {
       const order = buildOrder({
         productCode: AlipayProductCode.MEMBER_PREMIUM,
         quantity: 3,
-        totalAmountCent: 8400,
+        totalAmountCent: 8040,
       });
       repo.findById.mockResolvedValueOnce(order);
 
-      await service.handleWebhook(buildNotify({ total_amount: '84.00' }));
+      await service.handleWebhook(buildNotify({ total_amount: '80.40' }));
 
       expect(membersService.createMember).toHaveBeenCalledWith({
         steamId: 123,

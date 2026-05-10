@@ -12,6 +12,8 @@ export class AlipayOrder {
   productCode: AlipayProductCode;
   quantity: number;
   totalAmountCent: number;
+  /** 下单时适用的折扣百分比（审计用），如 10 表示 10% off；积分包为 0 */
+  discountPercent: number;
   subject: string;
   status: AlipayTradeStatus;
   qrCode: string;
