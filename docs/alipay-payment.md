@@ -106,18 +106,29 @@ api/src/alipay/
 
 ## 商品/价格表（`alipay.constants.ts`）
 
-按用户答复，**首期仅卖单份**，后续扩展份数折扣 / 首充优惠：
+### 会员阶梯折扣
 
-### 定价对比
+购买月数越多，每月单价越低。价格由 `MEMBER_DISCOUNT_TIERS` 直接指定，服务端根据 `quantity` 自动查表计算总价。
+
+| 购买月数 | 每月单价 | 示例总价 | 折扣（vs ¥29.80） |
+|---------|---------|---------|-----------------|
+| 1 月    | ¥28.00  | ¥28.00  | 6% off  |
+| ≥3 月   | ¥26.80  | ¥80.40（3月）/ ¥107.20（4月） | 10% off |
+| ≥12 月  | ¥25.00  | ¥300.00（12月） | 16% off |
+| ≥36 月  | ¥23.80  | ¥856.80（36月） | 20% off |
+
+订单实体存储 `discountPercent`（如 `10`）供审计对账；create 接口不返回该字段，前端硬编码价格表展示。
+
+### 积分定价对比
 
 | 商品 | Afdian 原价 | Afdian 会员价 | **支付宝价** | vs 原价折扣 | 积分单价（分/元） |
 |------|-----------|------------|------------|-----------|--------------|
-| 会员/月 | ¥29.80 | — | **¥28.00** | 93.9折 | — |
+| 会员/月 | ¥29.80 | — | **¥28.00 起** | 6% off 起 | — |
 | 3500 积分 | ¥98.00 | ¥80.00 | **¥78.00** | 79.6折 | 44.87 |
 | 11000 积分 | ¥280.00 | ¥246.00 | **¥238.00** | 85.0折 | 46.22 |
 | 28000 积分 | ¥648.00 | ¥596.00 | **¥568.00** | 87.7折 | 49.30 |
 
-> 会员定价 ¥28.00，支付宝净收 ¥27.83，略低于 Afdian 净收 ¥28.01，属于有意让利。
+> 积分包不参与阶梯折扣，`quantity > 1` 按线性倍增计价。
 
 ```ts
 export enum AlipayProductCode {
@@ -141,10 +152,13 @@ export const ALIPAY_PRODUCT_TABLE: Record<AlipayProductCode, AlipayProductSpec> 
 - 会员：quantity = 月数（`POST { productCode: "MEMBER_PREMIUM", quantity: 3 }` → 3 个月，¥84.00），发放时 `MembersService.createMember({ steamId, month: quantity, level })`
 - 积分：UI 首期不暴露多份选项（前端固定 quantity=1），但接口允许传 quantity > 1；发放时积分数必须按 quantity 倍增 —— `PlayerService.upsertAddPoint(steamId, reward.points * quantity)`，不能只发单份
 
+**已实现**：
+- 会员阶梯折扣（≥3/12/36 月）：`MEMBER_DISCOUNT_TIERS` 常量 + `calculatePrice` 查表
+
 **未来扩展位（已留口）**：
-- 折扣阶梯表（3/12/36 月会员折扣、积分多份折扣）
-- `firstOrderDiscount` 标志：根据 `AlipayOrder` 是否存在该 steamId 的 SUCCESS 历史决定
-- 价格/折扣计算收敛到 `AlipayService.calculatePrice(productCode, quantity, isFirstOrder)`，奖励发放复用 `MembersService.createMember()` 和 `PlayerService.upsertAddPoint()`（已实现）
+- `firstOrderDiscount` 标志：根据 `AlipayOrder` 是否存在该 steamId 的 SUCCESS 历史决定首次优惠
+- 独立 `GET /api/alipay/order/price` 查询接口，让前端动态拉取各档价格与折扣信息（当前前端硬编码）
+- 积分多份折扣（目前积分包按线性倍增计价，`discountPercent=0`）
 
 ---
 
