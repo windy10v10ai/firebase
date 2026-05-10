@@ -8,7 +8,11 @@ import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
 import { AlipayApiService } from './alipay.api.service';
-import { ALIPAY_PRODUCT_TABLE, ALIPAY_QR_EXPIRE_MS, MEMBER_DISCOUNT_TIERS } from './alipay.constants';
+import {
+  ALIPAY_PRODUCT_TABLE,
+  ALIPAY_QR_EXPIRE_MS,
+  MEMBER_DISCOUNT_TIERS,
+} from './alipay.constants';
 import { AlipayService } from './alipay.service';
 import { CreateAlipayOrderDto } from './dto/create-alipay-order.dto';
 import { AlipayOrder } from './entities/alipay-order.entity';
@@ -78,15 +82,12 @@ describe('AlipayService', () => {
       [4, 10720, '107.20', 10],
       [12, 30000, '300.00', 16],
       [36, 85680, '856.80', 20],
-    ])(
-      '会员 quantity=%i → %i¢ / %s / discountPercent=%i',
-      (quantity, cent, yuan, discount) => {
-        const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, quantity);
-        expect(r.totalAmountCent).toBe(cent);
-        expect(r.totalAmount).toBe(yuan);
-        expect(r.discountPercent).toBe(discount);
-      },
-    );
+    ])('会员 quantity=%i → %i¢ / %s / discountPercent=%i', (quantity, cent, yuan, discount) => {
+      const r = service.calculatePrice(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM, quantity);
+      expect(r.totalAmountCent).toBe(cent);
+      expect(r.totalAmount).toBe(yuan);
+      expect(r.discountPercent).toBe(discount);
+    });
 
     it('MEMBER_DISCOUNT_TIERS 从大到小排列，确保 find 查表正确', () => {
       for (let i = 0; i < MEMBER_DISCOUNT_TIERS.length - 1; i++) {
