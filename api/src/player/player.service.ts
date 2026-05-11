@@ -56,15 +56,7 @@ export class PlayerService {
       player.winCount++;
     }
 
-    // 行为分惩罚：仅组队局，80分以下积分打折
-    const conductPoint = player.conductPoint ?? 100;
-    if (!isParty || conductPoint >= 80) {
-      player.seasonPointTotal += seasonPoint;
-    } else if (conductPoint >= 60) {
-      player.seasonPointTotal += Math.floor(seasonPoint * 0.8);
-    } else {
-      player.seasonPointTotal += Math.floor(seasonPoint * 0.5);
-    }
+    player.seasonPointTotal += seasonPoint;
 
     if (isDisconnect) {
       player.disconnectCount++;

@@ -793,53 +793,6 @@ describe('PlayerController (e2e)', () => {
       const player = await getPlayer(app, steamId1);
       expect(player.conductPoint).toEqual(96);
     });
-
-    it('行为分80以下积分打8折', async () => {
-      mockDate('2023-12-01T00:00:00.000Z');
-      const steamId1 = 100002031;
-      const steamId2 = 100002032;
-      await createPlayer(app, { steamId: steamId1, conductPoint: 75 });
-      await post(
-        app,
-        gameEndUrl,
-        createGameEndPayload({
-          players: [{ steamId: steamId1, battlePoints: 100 }, { steamId: steamId2 }],
-        }),
-      );
-      const player = await getPlayer(app, steamId1);
-      expect(player.seasonPointTotal).toEqual(80);
-    });
-
-    it('行为分60以下积分打5折', async () => {
-      mockDate('2023-12-01T00:00:00.000Z');
-      const steamId1 = 100002041;
-      const steamId2 = 100002042;
-      await createPlayer(app, { steamId: steamId1, conductPoint: 50 });
-      await post(
-        app,
-        gameEndUrl,
-        createGameEndPayload({
-          players: [{ steamId: steamId1, battlePoints: 100 }, { steamId: steamId2 }],
-        }),
-      );
-      const player = await getPlayer(app, steamId1);
-      expect(player.seasonPointTotal).toEqual(50);
-    });
-
-    it('单人局积分不打折', async () => {
-      mockDate('2023-12-01T00:00:00.000Z');
-      const steamId = 100002051;
-      await createPlayer(app, { steamId, conductPoint: 50 });
-      await post(
-        app,
-        gameEndUrl,
-        createGameEndPayload({
-          players: [{ steamId, battlePoints: 100 }],
-        }),
-      );
-      const player = await getPlayer(app, steamId);
-      expect(player.seasonPointTotal).toEqual(100);
-    });
   });
 
   describe('/api/game/end (Post) 响应体验证', () => {
