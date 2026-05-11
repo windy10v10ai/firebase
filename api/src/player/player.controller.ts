@@ -26,6 +26,13 @@ export class PlayerController {
     return this.playerRankingService.getRanking();
   }
 
+  // TODO: 临时统计接口，用完删除
+  @Get('/conduct-point-stats')
+  @ApiOperation({ summary: '[Temp] conductPoint distribution for players active since April 2026' })
+  getConductPointStats() {
+    return this.playerService.getConductPointStats();
+  }
+
   @Get(':id/setting')
   @ApiOperation({ summary: 'Get player setting' })
   async getPlayerSetting(@Param('id') id: string): Promise<PlayerSetting> {

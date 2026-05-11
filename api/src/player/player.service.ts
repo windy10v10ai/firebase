@@ -44,6 +44,7 @@ export class PlayerService {
     isWinner: boolean,
     seasonPoint: number,
     isDisconnect: boolean,
+    isParty: boolean,
   ) {
     if (isNaN(seasonPoint)) {
       seasonPoint = 0;
@@ -54,19 +55,31 @@ export class PlayerService {
     if (isWinner) {
       player.winCount++;
     }
-    player.seasonPointTotal += seasonPoint;
+
+    // 行为分惩罚：仅组队局，80分以下积分打折
+    const conductPoint = player.conductPoint ?? 100;
+    if (!isParty || conductPoint >= 80) {
+      player.seasonPointTotal += seasonPoint;
+    } else if (conductPoint >= 60) {
+      player.seasonPointTotal += Math.floor(seasonPoint * 0.8);
+    } else {
+      player.seasonPointTotal += Math.floor(seasonPoint * 0.5);
+    }
+
     if (isDisconnect) {
       player.disconnectCount++;
     }
-    // 行为分计算
-    if (isDisconnect) {
-      player.conductPoint -= 5;
-    } else {
-      player.conductPoint += 1;
+    // 行为分计算：只有组队时才计算
+    if (isParty) {
+      if (isDisconnect) {
+        player.conductPoint -= 10;
+      } else {
+        player.conductPoint += 1;
+      }
+      // conductPoint max 100 min 0
+      player.conductPoint = Math.min(100, player.conductPoint);
+      player.conductPoint = Math.max(0, player.conductPoint);
     }
-    // conductPoint max 100 min 0
-    player.conductPoint = Math.min(100, player.conductPoint);
-    player.conductPoint = Math.max(0, player.conductPoint);
 
     await this.playerRepository.update(player);
   }
@@ -92,10 +105,48 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
+  async setConductPoint(steamId: number, value: number): Promise<void> {
+    const player = await this.getOrNewPlayerBySteamId(steamId);
+    player.conductPoint = Math.min(100, Math.max(0, value));
+    await this.playerRepository.update(player);
+  }
+
   async setUsedLevel(steamId: number, value: number): Promise<void> {
     const player = await this.getOrNewPlayerBySteamId(steamId);
     player.usedLevel = value < 0 ? 0 : value;
     await this.playerRepository.update(player);
+  }
+
+  // TODO: 临时统计接口，用完删除
+  async getConductPointStats(): Promise<{
+    totalPlayers: number;
+    buckets: { range: string; count: number; percentage: string }[];
+  }> {
+    const aprilStart = new Date('2026-04-01T00:00:00.000Z');
+    const allPlayers = await this.playerRepository
+      .whereGreaterOrEqualThan('lastMatchTime', aprilStart)
+      .find();
+
+    const total = allPlayers.length;
+    const bucketDefs = [
+      { label: '100', min: 100, max: 100 },
+      { label: '80~99', min: 80, max: 99 },
+      { label: '60~89', min: 60, max: 79 },
+      { label: '0~59', min: 0, max: 59 },
+    ];
+
+    const buckets = bucketDefs.map(({ label, min, max }) => {
+      const count = allPlayers.filter(
+        (p) => (p.conductPoint ?? 100) >= min && (p.conductPoint ?? 100) <= max,
+      ).length;
+      return {
+        range: label,
+        count,
+        percentage: total > 0 ? ((count / total) * 100).toFixed(1) + '%' : '0%',
+      };
+    });
+
+    return { totalPlayers: total, buckets };
   }
 
   private generateNewPlayerEntity(steamId: number): Player {
