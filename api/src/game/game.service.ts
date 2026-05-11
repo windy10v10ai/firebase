@@ -35,31 +35,28 @@ export class GameService {
   }
 
   async addDailyMemberPoints(members: Member[]): Promise<PointInfoDto[]> {
-    const results = await Promise.all(
-      members.map(async (member) => {
-        const daliyMemberPoint = this.membersService.getDailyMemberPoint(member);
-        if (daliyMemberPoint <= 0) {
-          return undefined;
-        }
-        await Promise.all([
-          this.playerService.upsertAddPoint(member.steamId, {
-            memberPointTotal: daliyMemberPoint,
-          }),
-          this.membersService.updateMemberLastDailyDate(member),
-        ]);
-        const pointInfo: PointInfoDto = {
+    const pointInfoDtos: PointInfoDto[] = [];
+    for (const member of members) {
+      const daliyMemberPoint = this.membersService.getDailyMemberPoint(member);
+      // 判断是否为会员
+      if (daliyMemberPoint > 0) {
+        await this.playerService.upsertAddPoint(member.steamId, {
+          memberPointTotal: daliyMemberPoint,
+        });
+        await this.membersService.updateMemberLastDailyDate(member);
+        // 返回会员积分信息
+        pointInfoDtos.push({
           steamId: member.steamId,
           title: {
             cn: '获得会员经验',
             en: 'Get Member Experience',
           },
           memberPoint: daliyMemberPoint,
-        };
-        return pointInfo;
-      }),
-    );
+        });
+      }
+    }
 
-    return results.filter((r): r is PointInfoDto => r !== undefined);
+    return pointInfoDtos;
   }
 
   async upsertPlayerInfo(steamId: number): Promise<void> {
@@ -79,31 +76,23 @@ export class GameService {
     // 获取玩家奖励记录
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
 
-    const results = await Promise.all(
-      rewardResults.map(async (rewardResult) => {
-        // FIXME 活动每次需要更新
-        if (now < startTime || now > endTime || rewardResult.result?.mayDay2026) {
-          return undefined;
-        }
-        await Promise.all([
-          this.playerService.upsertAddPoint(rewardResult.steamId, {
-            seasonPointTotal: seasonRewardPoint,
-          }),
-          this.eventRewardsService.setReward(rewardResult.steamId),
-        ]);
-        const pointInfo: PointInfoDto = {
+    for (const rewardResult of rewardResults) {
+      // FIXME 活动每次需要更新
+      if (now >= startTime && now <= endTime && !rewardResult.result?.mayDay2026) {
+        await this.playerService.upsertAddPoint(rewardResult.steamId, {
+          seasonPointTotal: seasonRewardPoint,
+        });
+        await this.eventRewardsService.setReward(rewardResult.steamId);
+        pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
             cn: '五一快乐！',
             en: 'Happy May Day!',
           },
           seasonPoint: seasonRewardPoint,
-        };
-        return pointInfo;
-      }),
-    );
-
-    pointInfoDtos.push(...results.filter((r): r is PointInfoDto => r !== undefined));
+        });
+      }
+    }
     return pointInfoDtos;
   }
 
