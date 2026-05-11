@@ -45,16 +45,17 @@ export class AnalyticsService {
   }
 
   async gameStart(steamIds: number[], matchId: number, isLocal: boolean, serverType: SERVER_TYPE) {
-    for (const steamId of steamIds) {
-      const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
-        steam_id: steamId,
-        match_id: matchId,
-        is_local: isLocal,
-        server_type: serverType,
-      });
-
-      await this.sendEvent(steamId.toString(), event);
-    }
+    await Promise.all(
+      steamIds.map(async (steamId) => {
+        const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
+          steam_id: steamId,
+          match_id: matchId,
+          is_local: isLocal,
+          server_type: serverType,
+        });
+        await this.sendEvent(steamId.toString(), event);
+      }),
+    );
   }
 
   async playerResetProperty(dto: ResetPlayerPropertyDto): Promise<void> {
@@ -68,60 +69,64 @@ export class AnalyticsService {
   }
 
   async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
-    for (const player of dto.players) {
-      const event = await this.buildEvent('player_language', player.steamId, dto.matchId, {
-        steam_id: player.steamId,
-        language: player.language,
-        version: dto.version,
-        server_type: serverType,
-      });
+    await Promise.all(
+      dto.players.map(async (player) => {
+        const event = await this.buildEvent('player_language', player.steamId, dto.matchId, {
+          steam_id: player.steamId,
+          language: player.language,
+          version: dto.version,
+          server_type: serverType,
+        });
 
-      const userProperties = {
-        language: {
-          value: player.language,
-        },
-      };
+        const userProperties = {
+          language: {
+            value: player.language,
+          },
+        };
 
-      await this.sendEvent(player.steamId.toString(), event, userProperties);
-    }
+        await this.sendEvent(player.steamId.toString(), event, userProperties);
+      }),
+    );
   }
 
   // ------------------------ 通过game end API调用 ------------------------
   async gameEndPlayerBot(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
     const playerCount = gameEnd.players.filter((player) => player.steamId > 0).length;
-    for (const player of gameEnd.players) {
-      const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
-      // 机器人不纳入互动时间统计
-      const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
+    await Promise.all(
+      gameEnd.players.map(async (player) => {
+        const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
+        // 机器人不纳入互动时间统计
+        const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
 
-      const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
-        steam_id: player.steamId,
-        matchId: gameEnd.matchId,
-        engagement_time_msec,
-        difficulty: gameEnd.difficulty,
-        version: gameEnd.version,
-        player_count: playerCount,
-        is_winner: gameEnd.winnerTeamId === player.teamId,
-        win_metrics: gameEnd.winnerTeamId === player.teamId,
-        team_id: player.teamId,
-        hero_name: player.heroName,
-        hero_name_cn: GetHeroNameChinese(player.heroName),
-        points: player.battlePoints,
-        is_disconnect: player.isDisconnected,
-        server_type: serverType,
-        country: gameEnd.countryCode,
-      });
+        const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
+          steam_id: player.steamId,
+          matchId: gameEnd.matchId,
+          engagement_time_msec,
+          difficulty: gameEnd.difficulty,
+          version: gameEnd.version,
+          player_count: playerCount,
+          is_winner: gameEnd.winnerTeamId === player.teamId,
+          win_metrics: gameEnd.winnerTeamId === player.teamId,
+          team_id: player.teamId,
+          hero_name: player.heroName,
+          hero_name_cn: GetHeroNameChinese(player.heroName),
+          points: player.battlePoints,
+          is_disconnect: player.isDisconnected,
+          server_type: serverType,
+          country: gameEnd.countryCode,
+        });
 
-      const userProperties: UserProperties = {};
+        const userProperties: UserProperties = {};
 
-      if (player.steamId > 0 && gameEnd.countryCode) {
-        userProperties.country = {
-          value: gameEnd.countryCode,
-        };
-      }
+        if (player.steamId > 0 && gameEnd.countryCode) {
+          userProperties.country = {
+            value: gameEnd.countryCode,
+          };
+        }
 
-      await this.sendEvent(player.steamId.toString(), event, userProperties);
-    }
+        await this.sendEvent(player.steamId.toString(), event, userProperties);
+      }),
+    );
   }
 
   async gameEndMatch(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
