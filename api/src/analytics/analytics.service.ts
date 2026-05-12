@@ -7,6 +7,7 @@ import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.servic
 import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
+import { ItemListDto } from './dto/pick-item-dto';
 import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 export interface Event {
@@ -68,6 +69,44 @@ export class AnalyticsService {
     });
   }
 
+  /** @deprecated 临时恢复用于验证 game_end_bot event 减少原因，验证完毕后删除 */
+  async gameEndItemBuilds(dto: ItemListDto, serverType: SERVER_TYPE) {
+    for (const playerItems of dto.items) {
+      const itemSlots = [
+        { name: playerItems.slot1, type: 'normal' },
+        { name: playerItems.slot2, type: 'normal' },
+        { name: playerItems.slot3, type: 'normal' },
+        { name: playerItems.slot4, type: 'normal' },
+        { name: playerItems.slot5, type: 'normal' },
+        { name: playerItems.slot6, type: 'normal' },
+        { name: playerItems.neutralActiveSlot, type: 'neutral_active' },
+        { name: playerItems.neutralPassiveSlot, type: 'neutral_passive' },
+      ];
+
+      for (const slot of itemSlots) {
+        if (slot.name) {
+          const event = await this.buildEvent(
+            'game_end_item_build',
+            playerItems.steamId,
+            dto.matchId,
+            {
+              steam_id: playerItems.steamId,
+              match_id: dto.matchId,
+              item_name: slot.name,
+              type: slot.type,
+              difficulty: dto.difficulty,
+              version: dto.version,
+              win_metrics: dto.isWin,
+              server_type: serverType,
+            },
+          );
+
+          await this.sendEvent(playerItems.steamId.toString(), event);
+        }
+      }
+    }
+  }
+
   async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
     await Promise.all(
       dto.players.map(async (player) => {
@@ -111,6 +150,7 @@ export class AnalyticsService {
           hero_name: player.heroName,
           hero_name_cn: GetHeroNameChinese(player.heroName),
           points: player.battlePoints,
+          facet_id: player.facetId, // @deprecated 临时恢复用于验证 game_end_bot event 减少原因，验证完毕后删除
           is_disconnect: player.isDisconnected,
           server_type: serverType,
           country: gameEnd.countryCode,
