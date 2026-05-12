@@ -51,9 +51,7 @@ export class GameController {
     const pointInfo: PointInfoDto[] = [];
 
     // 创建新玩家，更新最后游戏时间
-    for (const steamId of steamIds) {
-      await this.gameService.upsertPlayerInfo(steamId);
-    }
+    await Promise.all(steamIds.map((steamId) => this.gameService.upsertPlayerInfo(steamId)));
 
     // 获取活动奖励
     const eventRewardInfo = await this.gameService.giveEventReward(steamIds);
@@ -102,8 +100,11 @@ export class GameController {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     const players = gameEnd.players;
-    for (const player of players) {
-      if (player.steamId > 0) {
+    await Promise.all(
+      players.map((player) => {
+        if (player.steamId <= 0) {
+          return undefined;
+        }
         const battlePoints = player.battlePoints;
         if (battlePoints < 0 || battlePoints > 500) {
           logger.warn('game/end: invalid battlePoints, skip upsert', {
@@ -111,19 +112,21 @@ export class GameController {
             serverType,
             battlePoints,
           });
-          continue;
+          return undefined;
         }
-        await this.playerService.upsertGameEnd(
+        return this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,
           player.battlePoints,
           player.isDisconnected,
         );
-      }
-    }
+      }),
+    );
 
-    await this.analyticsService.gameEndMatch(gameEnd, serverType);
-    await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
+    await Promise.all([
+      this.analyticsService.gameEndMatch(gameEnd, serverType),
+      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+    ]);
     return this.gameService.getOK();
   }
 }
