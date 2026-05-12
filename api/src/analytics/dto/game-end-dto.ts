@@ -39,6 +39,7 @@ export class GameEndPlayerDto {
   score: number;
   @ApiProperty()
   battlePoints: number;
+  // TODO: 临时恢复用于验证 game_end_bot event 减少原因，验证完毕后删除
   @ApiProperty()
   facetId: number;
 }

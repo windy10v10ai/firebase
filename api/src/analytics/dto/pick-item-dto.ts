@@ -1,3 +1,4 @@
+// TODO: 临时恢复用于验证 game_end_bot event 减少原因，验证完毕后删除整个文件
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
