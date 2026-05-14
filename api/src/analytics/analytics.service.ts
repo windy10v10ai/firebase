@@ -111,7 +111,7 @@ export class AnalyticsService {
           hero_name: player.heroName,
           hero_name_cn: GetHeroNameChinese(player.heroName),
           points: player.battlePoints,
-          facet_id: player.facetId, // @deprecated 临时恢复用于验证 game_end_bot event 减少原因，验证完毕后删除
+
           is_disconnect: player.isDisconnected,
           server_type: serverType,
           country: gameEnd.countryCode,
