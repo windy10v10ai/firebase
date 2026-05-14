@@ -15,6 +15,7 @@ export class AnalyticsController {
     private readonly secretService: SecretService,
   ) {}
 
+  /** @deprecated 改由客户端发送，客户端上线确认无误后删除此endpoint */
   @Post('/player/language')
   async trackPlayerLanguage(
     @Body() body: PlayerLanguageListDto,
