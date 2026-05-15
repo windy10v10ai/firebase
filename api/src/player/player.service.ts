@@ -6,6 +6,7 @@ import { AnalyticsService } from '../analytics/analytics.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { Player } from './entities/player.entity';
+import { PlayerConductService } from './player-conduct.service';
 
 @Injectable()
 export class PlayerService {
@@ -13,6 +14,7 @@ export class PlayerService {
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
     private readonly analyticsService: AnalyticsService,
+    private readonly playerConductService: PlayerConductService,
   ) {}
 
   /**
@@ -63,14 +65,10 @@ export class PlayerService {
     }
     // 行为分计算：只有组队时才计算
     if (isParty) {
-      if (isDisconnect) {
-        player.conductPoint -= 10;
-      } else {
-        player.conductPoint += 1;
-      }
-      // conductPoint max 100 min 0
-      player.conductPoint = Math.min(100, player.conductPoint);
-      player.conductPoint = Math.max(0, player.conductPoint);
+      player.conductPoint = this.playerConductService.calculateGameEndConductPoint(
+        player.conductPoint ?? 100,
+        isDisconnect,
+      );
     }
 
     await this.playerRepository.update(player);
@@ -97,9 +95,10 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
+  // 仅供测试初始化使用，生产代码不应调用；conductPoint 的正常变动走 PlayerConductService。
   async setConductPoint(steamId: number, value: number): Promise<void> {
     const player = await this.getOrNewPlayerBySteamId(steamId);
-    player.conductPoint = Math.min(100, Math.max(0, value));
+    player.conductPoint = this.playerConductService.clampConductPoint(value);
     await this.playerRepository.update(player);
   }
 
@@ -121,9 +120,10 @@ export class PlayerService {
 
     const total = allPlayers.length;
     const bucketDefs = [
-      { label: '100', min: 100, max: 100 },
+      { label: '110~120', min: 110, max: 120 },
+      { label: '100~109', min: 100, max: 109 },
       { label: '80~99', min: 80, max: 99 },
-      { label: '60~89', min: 60, max: 79 },
+      { label: '60~79', min: 60, max: 79 },
       { label: '0~59', min: 0, max: 59 },
     ];
 
@@ -152,6 +152,8 @@ export class PlayerService {
       usedLevel: 0,
       lastMatchTime: null,
       conductPoint: 100,
+      commendCount: 0,
+      reportCount: 0,
     };
   }
 }

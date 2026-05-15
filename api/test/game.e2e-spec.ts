@@ -793,6 +793,38 @@ describe('PlayerController (e2e)', () => {
       const player = await getPlayer(app, steamId1);
       expect(player.conductPoint).toEqual(96);
     });
+
+    it('组队局正常结束 conductPoint=100 时不再加', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId1 = 100002023;
+      const steamId2 = 100002024;
+      await createPlayer(app, { steamId: steamId1, conductPoint: 100 });
+      await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId: steamId1 }, { steamId: steamId2 }],
+        }),
+      );
+      const player = await getPlayer(app, steamId1);
+      expect(player.conductPoint).toEqual(100);
+    });
+
+    it('组队局秒退 conductPoint=120 -> 110（验证上限不被卡）', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId1 = 100002025;
+      const steamId2 = 100002026;
+      await createPlayer(app, { steamId: steamId1, conductPoint: 120 });
+      await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId: steamId1, isDisconnected: true }, { steamId: steamId2 }],
+        }),
+      );
+      const player = await getPlayer(app, steamId1);
+      expect(player.conductPoint).toEqual(110);
+    });
   });
 
   describe('/api/game/end (Post) 响应体验证', () => {
