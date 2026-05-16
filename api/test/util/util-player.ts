@@ -15,6 +15,7 @@ interface createPlayerParams {
   steamId: number;
   seasonPointTotal?: number;
   memberPointTotal?: number;
+  conductPoint?: number;
 }
 
 export async function createPlayer(
@@ -26,6 +27,9 @@ export async function createPlayer(
     seasonPointTotal: params.seasonPointTotal,
     memberPointTotal: params.memberPointTotal,
   });
+  if (params.conductPoint !== undefined) {
+    await playerService.setConductPoint(params.steamId, params.conductPoint);
+  }
 }
 
 export async function getPlayer(app: INestApplication, steamId: number): Promise<Player> {
