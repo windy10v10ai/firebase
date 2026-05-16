@@ -1,11 +1,14 @@
-import { Body, Controller, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../util/auth/public.decorator';
 
+import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
+import { Player } from './entities/player.entity';
+import { PlayerConductService } from './player-conduct.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
 import { PlayerService } from './player.service';
@@ -17,6 +20,7 @@ export class PlayerController {
     private readonly playerService: PlayerService,
     private readonly playerRankingService: PlayerRankingService,
     private readonly playerSettingService: PlayerSettingService,
+    private readonly playerConductService: PlayerConductService,
   ) {}
 
   @Public()
@@ -24,6 +28,13 @@ export class PlayerController {
   @ApiOperation({ summary: 'Get player rankings' })
   getRanking(): Promise<PlayerRanking> {
     return this.playerRankingService.getRanking();
+  }
+
+  // TODO: 临时统计接口，用完删除
+  @Get('/conduct-point-stats')
+  @ApiOperation({ summary: '[Temp] conductPoint distribution for players active since April 2026' })
+  getConductPointStats() {
+    return this.playerService.getConductPointStats();
   }
 
   @Get(':id/setting')
@@ -39,5 +50,11 @@ export class PlayerController {
     @Body() updatePlayerSettingDto: UpdatePlayerSettingDto,
   ): Promise<PlayerSetting> {
     return await this.playerSettingService.update(id, updatePlayerSettingDto);
+  }
+
+  @Post('/conduct')
+  @ApiOperation({ summary: 'Commend or report another player' })
+  async conduct(@Body() dto: ConductPlayerDto): Promise<Player> {
+    return this.playerConductService.conduct(dto);
   }
 }

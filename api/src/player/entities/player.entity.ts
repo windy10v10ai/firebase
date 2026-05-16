@@ -26,6 +26,12 @@ export class Player {
   // 行为分
   @ApiProperty()
   conductPoint: number;
+  // 被点赞次数
+  @ApiProperty({ default: 0 })
+  commendCount: number;
+  // 被举报次数
+  @ApiProperty({ default: 0 })
+  reportCount: number;
   // 最近一次游戏开始时间
   @ApiProperty()
   lastMatchTime: Date;

@@ -100,6 +100,7 @@ export class GameController {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     const players = gameEnd.players;
+    const isParty = players.filter((p) => p.steamId > 0).length >= 2;
     await Promise.all(
       players.map((player) => {
         if (player.steamId <= 0) {
@@ -119,6 +120,7 @@ export class GameController {
           player.teamId == gameEnd.winnerTeamId,
           player.battlePoints,
           player.isDisconnected,
+          isParty,
         );
       }),
     );

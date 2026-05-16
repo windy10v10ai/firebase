@@ -7,7 +7,6 @@ import {
   ParseArrayPipe,
   ParseBoolPipe,
   ParseIntPipe,
-  Post,
   Put,
   Query,
 } from '@nestjs/common';
@@ -77,12 +76,5 @@ export class PlayerInfoController {
     @Body() dto: PlayerPropertyItemDto,
   ): Promise<PlayerInfoDto> {
     return this.upgradePlayerProperty(dto.steamId, { name: dto.name, level: dto.level });
-  }
-
-  /** @deprecated Use DELETE /:steamId/property instead */
-  @Post('property/reset')
-  @ApiOperation({ summary: '[Deprecated] Reset player properties', deprecated: true })
-  async resetPlayerPropertyDeprecated(@Body() dto: ResetPlayerPropertyDto): Promise<PlayerInfoDto> {
-    return this.resetPlayerProperty(dto.steamId, dto.useMemberPoint);
   }
 }
