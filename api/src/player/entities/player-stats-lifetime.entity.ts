@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Collection } from 'fireorm';
 
-@Collection('playerStatsLifetime')
+@Collection()
 export class PlayerStatsLifetime {
   @ApiProperty()
   id: string;
