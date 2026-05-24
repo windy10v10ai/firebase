@@ -77,6 +77,7 @@ export class GameController {
       'member',
       'property',
       'setting',
+      'statsLifetime',
     ]);
 
     // 构建响应对象
