@@ -170,7 +170,7 @@ export class AnalyticsService {
       ti: player.teamId,
       dc: player.isDisconnected ? 1 : 0,
       l: player.level,
-      g: player.gold,
+      g: player.totalGoldEarned,
       k: player.kills,
       d: player.deaths,
       a: player.assists,

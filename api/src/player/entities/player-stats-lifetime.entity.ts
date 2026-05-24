@@ -22,5 +22,7 @@ export class PlayerStatsLifetime {
   @ApiProperty()
   towerKills: number;
   @ApiProperty()
+  totalGoldEarned: number;
+  @ApiProperty()
   updatedAt: Date;
 }

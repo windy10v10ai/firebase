@@ -66,7 +66,7 @@ function createGameEndPlayer(options: GameEndPlayerOptions) {
     healing: 0,
     lastHits: 50,
     towerKills: 1,
-    gold: 10000,
+    totalGoldEarned: 10000,
     battlePoints: options.battlePoints ?? 100,
     heroName: 'npc_dota_hero_medusa',
   };
@@ -556,7 +556,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: inputPoints,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -574,7 +574,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 3,
             towerKills: 0,
-            gold: 13273,
+            totalGoldEarned: 13273,
             battlePoints: 0,
             heroName: 'npc_dota_hero_chaos_knight',
           },
@@ -637,7 +637,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: points1,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -655,7 +655,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: points2,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -673,7 +673,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: points3,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -691,7 +691,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 3,
             towerKills: 0,
-            gold: 13273,
+            totalGoldEarned: 13273,
             battlePoints: 0,
             heroName: 'npc_dota_hero_chaos_knight',
           },
@@ -933,6 +933,7 @@ describe('PlayerController (e2e)', () => {
       expect(stats.damageTaken).toEqual(1000);
       expect(stats.healing).toEqual(0);
       expect(stats.towerKills).toEqual(1);
+      expect(stats.totalGoldEarned).toEqual(10000);
       expect(stats.updatedAt).toBeDefined();
     });
 
@@ -952,6 +953,7 @@ describe('PlayerController (e2e)', () => {
       expect(stats.damageTaken).toEqual(2000);
       expect(stats.healing).toEqual(0);
       expect(stats.towerKills).toEqual(2);
+      expect(stats.totalGoldEarned).toEqual(20000);
     });
 
     it('bot (steamId=0) 不写入 statsLifetime', async () => {
@@ -1024,6 +1026,7 @@ describe('PlayerController (e2e)', () => {
       expect(player.statsLifetime.damageTaken).toEqual(1000);
       expect(player.statsLifetime.healing).toEqual(0);
       expect(player.statsLifetime.towerKills).toEqual(1);
+      expect(player.statsLifetime.totalGoldEarned).toEqual(10000);
     });
   });
 

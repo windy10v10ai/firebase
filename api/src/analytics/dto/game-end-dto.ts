@@ -28,7 +28,7 @@ export class GameEndPlayerDto {
   @ApiProperty()
   level: number;
   @ApiProperty()
-  gold: number;
+  totalGoldEarned: number;
   @ApiProperty()
   kills: number;
   @ApiProperty()

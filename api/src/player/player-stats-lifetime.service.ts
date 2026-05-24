@@ -26,6 +26,7 @@ export class PlayerStatsLifetimeService {
       existing.damageTaken += player.damageTaken;
       existing.healing += player.healing;
       existing.towerKills += player.towerKills;
+      existing.totalGoldEarned += player.totalGoldEarned;
       existing.updatedAt = new Date();
       await this.repository.update(existing);
     } else {
@@ -39,6 +40,7 @@ export class PlayerStatsLifetimeService {
         damageTaken: player.damageTaken,
         healing: player.healing,
         towerKills: player.towerKills,
+        totalGoldEarned: player.totalGoldEarned,
         updatedAt: new Date(),
       });
     }
