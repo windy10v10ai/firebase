@@ -7,10 +7,12 @@ import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
+import { PlayerStatsLifetime } from './entities/player-stats-lifetime.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
+import { PlayerStatsLifetimeService } from './player-stats-lifetime.service';
 import { PlayerService } from './player.service';
 
 @ApiTags('Player')
@@ -21,6 +23,7 @@ export class PlayerController {
     private readonly playerRankingService: PlayerRankingService,
     private readonly playerSettingService: PlayerSettingService,
     private readonly playerConductService: PlayerConductService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
   ) {}
 
   @Public()
@@ -50,6 +53,13 @@ export class PlayerController {
     @Body() updatePlayerSettingDto: UpdatePlayerSettingDto,
   ): Promise<PlayerSetting> {
     return await this.playerSettingService.update(id, updatePlayerSettingDto);
+  }
+
+  @Public()
+  @Get(':id/stats/lifetime')
+  @ApiOperation({ summary: 'Get lifetime stats for a player' })
+  async getLifetimeStats(@Param('id') id: string): Promise<PlayerStatsLifetime | null> {
+    return this.playerStatsLifetimeService.findBySteamId(Number(id));
   }
 
   @Post('/conduct')
