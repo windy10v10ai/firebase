@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
@@ -40,26 +40,16 @@ export class GameEndPlayerDto {
   @ApiProperty()
   battlePoints: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lastHits?: number;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  heroDamage?: number;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  damageTaken?: number;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  healing?: number;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  towerKills?: number;
+  @ApiProperty()
+  lastHits: number;
+  @ApiProperty()
+  heroDamage: number;
+  @ApiProperty()
+  damageTaken: number;
+  @ApiProperty()
+  healing: number;
+  @ApiProperty()
+  towerKills: number;
 }
 
 export class GameEndDto extends EventBaseDto {
