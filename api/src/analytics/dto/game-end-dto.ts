@@ -28,7 +28,7 @@ export class GameEndPlayerDto {
   @ApiProperty()
   level: number;
   @ApiProperty()
-  gold: number;
+  totalGoldEarned: number;
   @ApiProperty()
   kills: number;
   @ApiProperty()
@@ -39,6 +39,17 @@ export class GameEndPlayerDto {
   score: number;
   @ApiProperty()
   battlePoints: number;
+
+  @ApiProperty()
+  lastHits: number;
+  @ApiProperty()
+  heroDamage: number;
+  @ApiProperty()
+  damageTaken: number;
+  @ApiProperty()
+  healing: number;
+  @ApiProperty()
+  towerKills: number;
 }
 
 export class GameEndDto extends EventBaseDto {

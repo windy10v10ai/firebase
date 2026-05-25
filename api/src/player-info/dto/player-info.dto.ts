@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { MemberDto } from '../../members/dto/member.dto';
 import { PlayerSetting } from '../../player/entities/player-setting.entity';
+import { PlayerStatsLifetime } from '../../player/entities/player-stats-lifetime.entity';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 
@@ -28,4 +29,6 @@ export class PlayerInfoDto extends Player {
   playerSetting?: PlayerSetting;
   @ApiPropertyOptional()
   member?: MemberDto;
+  @ApiPropertyOptional()
+  statsLifetime?: PlayerStatsLifetime;
 }

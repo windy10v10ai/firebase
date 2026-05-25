@@ -16,6 +16,7 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
+import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { Public } from '../util/auth/public.decorator';
@@ -35,6 +36,7 @@ export class GameController {
     private readonly analyticsService: AnalyticsService,
     private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
   ) {}
 
   @Public()
@@ -75,6 +77,7 @@ export class GameController {
       'member',
       'property',
       'setting',
+      'statsLifetime',
     ]);
 
     // 构建响应对象
@@ -128,6 +131,9 @@ export class GameController {
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
       this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+      ...players
+        .filter((p) => p.steamId > 0)
+        .map((p) => this.playerStatsLifetimeService.accumulate(p.steamId, p)),
     ]);
     return this.gameService.getOK();
   }
