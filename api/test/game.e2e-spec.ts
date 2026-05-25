@@ -4,7 +4,12 @@ import request from 'supertest';
 import { MemberLevel } from '../src/members/entities/members.entity';
 
 import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
-import { addPlayerProperty, createPlayer, getPlayer } from './util/util-player';
+import {
+  addPlayerProperty,
+  createPlayer,
+  getPlayer,
+  getPlayerStatsLifetime,
+} from './util/util-player';
 
 const gameStartUrl = '/api/game/start/';
 const gameEndUrl = '/api/game/end';
@@ -52,7 +57,7 @@ function createGameEndPlayer(options: GameEndPlayerOptions) {
     score: 10,
     damageTaken: 1000,
     steamId: options.steamId,
-    damage: 5000,
+    heroDamage: 5000,
     teamId: options.teamId ?? 2,
     level: 20,
     kills: 5,
@@ -61,7 +66,7 @@ function createGameEndPlayer(options: GameEndPlayerOptions) {
     healing: 0,
     lastHits: 50,
     towerKills: 1,
-    gold: 10000,
+    totalGoldEarned: 10000,
     battlePoints: options.battlePoints ?? 100,
     heroName: 'npc_dota_hero_medusa',
   };
@@ -542,7 +547,7 @@ describe('PlayerController (e2e)', () => {
             score: 23,
             damageTaken: 25000,
             steamId,
-            damage: 280000,
+            heroDamage: 280000,
             teamId: 2,
             level: 38,
             kills: 51,
@@ -551,7 +556,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: inputPoints,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -560,7 +565,7 @@ describe('PlayerController (e2e)', () => {
             score: 2,
             damageTaken: 18949,
             steamId: 0,
-            damage: 393,
+            heroDamage: 393,
             teamId: 3,
             level: 24,
             kills: 0,
@@ -569,7 +574,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 3,
             towerKills: 0,
-            gold: 13273,
+            totalGoldEarned: 13273,
             battlePoints: 0,
             heroName: 'npc_dota_hero_chaos_knight',
           },
@@ -623,7 +628,7 @@ describe('PlayerController (e2e)', () => {
             score: 23,
             damageTaken: 25000,
             steamId: steamId1,
-            damage: 280000,
+            heroDamage: 280000,
             teamId: 2,
             level: 38,
             kills: 51,
@@ -632,7 +637,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: points1,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -641,7 +646,7 @@ describe('PlayerController (e2e)', () => {
             score: 23,
             damageTaken: 25000,
             steamId: steamId2,
-            damage: 280000,
+            heroDamage: 280000,
             teamId: 2,
             level: 38,
             kills: 51,
@@ -650,7 +655,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: points2,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -659,7 +664,7 @@ describe('PlayerController (e2e)', () => {
             score: 23,
             damageTaken: 25000,
             steamId: steamId3,
-            damage: 280000,
+            heroDamage: 280000,
             teamId: 2,
             level: 38,
             kills: 51,
@@ -668,7 +673,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 200,
             towerKills: 10,
-            gold: 20000,
+            totalGoldEarned: 20000,
             battlePoints: points3,
             heroName: 'npc_dota_hero_medusa',
           },
@@ -677,7 +682,7 @@ describe('PlayerController (e2e)', () => {
             score: 2,
             damageTaken: 18949,
             steamId: 0,
-            damage: 393,
+            heroDamage: 393,
             teamId: 3,
             level: 24,
             kills: 0,
@@ -686,7 +691,7 @@ describe('PlayerController (e2e)', () => {
             healing: 0,
             lastHits: 3,
             towerKills: 0,
-            gold: 13273,
+            totalGoldEarned: 13273,
             battlePoints: 0,
             heroName: 'npc_dota_hero_chaos_knight',
           },
@@ -902,6 +907,126 @@ describe('PlayerController (e2e)', () => {
       const player = await getPlayer(app, steamId);
       expect(player.winCount).toEqual(0);
       expect(player.matchCount).toEqual(1);
+    });
+  });
+
+  describe('/api/game/end (Post) PlayerStatsLifetime 累计战绩', () => {
+    it('首次结算后 statsLifetime 正确写入', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100003001;
+
+      await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId }],
+        }),
+      );
+
+      const stats = await getPlayerStatsLifetime(app, steamId);
+      expect(stats).not.toBeNull();
+      expect(stats.kills).toEqual(5);
+      expect(stats.deaths).toEqual(3);
+      expect(stats.assists).toEqual(2);
+      expect(stats.lastHits).toEqual(50);
+      expect(stats.heroDamage).toEqual(5000);
+      expect(stats.damageTaken).toEqual(1000);
+      expect(stats.healing).toEqual(0);
+      expect(stats.towerKills).toEqual(1);
+      expect(stats.totalGoldEarned).toEqual(10000);
+      expect(stats.updatedAt).toBeDefined();
+    });
+
+    it('多次结算后 statsLifetime 正确累加', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100003002;
+
+      await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
+      await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
+
+      const stats = await getPlayerStatsLifetime(app, steamId);
+      expect(stats.kills).toEqual(10);
+      expect(stats.deaths).toEqual(6);
+      expect(stats.assists).toEqual(4);
+      expect(stats.lastHits).toEqual(100);
+      expect(stats.heroDamage).toEqual(10000);
+      expect(stats.damageTaken).toEqual(2000);
+      expect(stats.healing).toEqual(0);
+      expect(stats.towerKills).toEqual(2);
+      expect(stats.totalGoldEarned).toEqual(20000);
+    });
+
+    it('bot (steamId=0) 不写入 statsLifetime', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+
+      await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId: 100003003 }, { steamId: 0 }],
+        }),
+      );
+
+      const botStats = await getPlayerStatsLifetime(app, 0);
+      expect(botStats).toBeNull();
+    });
+
+    it('多人结算 各玩家战绩独立累计', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId1 = 100003011;
+      const steamId2 = 100003012;
+
+      await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId: steamId1 }, { steamId: steamId2 }],
+        }),
+      );
+
+      const stats1 = await getPlayerStatsLifetime(app, steamId1);
+      const stats2 = await getPlayerStatsLifetime(app, steamId2);
+      expect(stats1.kills).toEqual(5);
+      expect(stats2.kills).toEqual(5);
+    });
+  });
+
+  describe('/api/game/start (Get) statsLifetime 随开局数据返回', () => {
+    it('无战绩记录时 statsLifetime 为 undefined', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100003101;
+
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
+      expect(player).toBeDefined();
+      expect(player.statsLifetime).toBeUndefined();
+    });
+
+    it('有战绩记录时 statsLifetime 随开局数据返回', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100003102;
+
+      // 先打一局
+      await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
+
+      // 开局时应能读到战绩
+      const result = await callGameStart(app, [steamId]);
+      expect(result.status).toEqual(200);
+
+      const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
+      expect(player).toBeDefined();
+      expect(player.statsLifetime).toBeDefined();
+      expect(player.statsLifetime.kills).toEqual(5);
+      expect(player.statsLifetime.deaths).toEqual(3);
+      expect(player.statsLifetime.assists).toEqual(2);
+      expect(player.statsLifetime.lastHits).toEqual(50);
+      expect(player.statsLifetime.heroDamage).toEqual(5000);
+      expect(player.statsLifetime.damageTaken).toEqual(1000);
+      expect(player.statsLifetime.healing).toEqual(0);
+      expect(player.statsLifetime.towerKills).toEqual(1);
+      expect(player.statsLifetime.totalGoldEarned).toEqual(10000);
     });
   });
 

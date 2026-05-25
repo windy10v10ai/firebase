@@ -5,10 +5,11 @@ import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerLevelHelper } from '../../player/helpers/player-level.helper';
 import { PlayerSettingService } from '../../player/player-setting.service';
+import { PlayerStatsLifetimeService } from '../../player/player-stats-lifetime.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
 import { PlayerInfoDto } from '../dto/player-info.dto';
 
-export type PlayerInfoInclude = 'member' | 'property' | 'setting';
+export type PlayerInfoInclude = 'member' | 'property' | 'setting' | 'statsLifetime';
 
 @Injectable()
 export class PlayerDtoAssembler {
@@ -16,6 +17,7 @@ export class PlayerDtoAssembler {
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly playerSettingService: PlayerSettingService,
     private readonly membersService: MembersService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
   ) {}
 
   async assemblePlayerInfoDto(
@@ -27,12 +29,15 @@ export class PlayerDtoAssembler {
     this.calculateLevelData(dto);
     dto.useableLevel = this.calculateUseableLevel(dto);
 
-    const [properties, playerSetting, member] = await Promise.all([
+    const [properties, playerSetting, member, statsLifetime] = await Promise.all([
       include.includes('property') ? this.playerPropertyService.findBySteamId(+player.id) : null,
       include.includes('setting')
         ? this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id)
         : null,
       include.includes('member') ? this.membersService.findOne(+player.id) : null,
+      include.includes('statsLifetime')
+        ? this.playerStatsLifetimeService.findBySteamId(+player.id)
+        : null,
     ]);
 
     if (include.includes('property')) {
@@ -43,6 +48,9 @@ export class PlayerDtoAssembler {
     }
     if (include.includes('member') && member) {
       dto.member = new MemberDto(member);
+    }
+    if (include.includes('statsLifetime')) {
+      dto.statsLifetime = statsLifetime ?? undefined;
     }
 
     return dto;

@@ -3,8 +3,10 @@ import { INestApplication } from '@nestjs/common';
 import { MemberDto } from '../../src/members/dto/member.dto';
 import { MembersService } from '../../src/members/members.service';
 import { PlayerSetting } from '../../src/player/entities/player-setting.entity';
+import { PlayerStatsLifetime } from '../../src/player/entities/player-stats-lifetime.entity';
 import { Player } from '../../src/player/entities/player.entity';
 import { PlayerSettingService } from '../../src/player/player-setting.service';
+import { PlayerStatsLifetimeService } from '../../src/player/player-stats-lifetime.service';
 import { PlayerService } from '../../src/player/player.service';
 import { PlayerInfoDto } from '../../src/player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../../src/player-info/player-info.service';
@@ -70,4 +72,12 @@ export async function addPlayerProperty(
 export async function getPlayerDto(app: INestApplication, steamId: number): Promise<PlayerInfoDto> {
   const playerInfoService = app.get(PlayerInfoService);
   return playerInfoService.findPlayerInfoBySteamId(steamId, ['property', 'setting']);
+}
+
+export async function getPlayerStatsLifetime(
+  app: INestApplication,
+  steamId: number,
+): Promise<PlayerStatsLifetime | null> {
+  const service = app.get(PlayerStatsLifetimeService);
+  return service.findBySteamId(steamId);
 }
