@@ -989,6 +989,17 @@ describe('PlayerController (e2e)', () => {
       expect(stats1.kills).toEqual(5);
       expect(stats2.kills).toEqual(5);
     });
+
+    it('使用 Tenvten API Key 不写入 statsLifetime', async () => {
+      const steamId = 100003021;
+      await request(app.getHttpServer())
+        .post(gameEndUrl)
+        .send(createGameEndPayload({ players: [{ steamId }] }))
+        .set({ 'x-api-key': 'tenvten-apikey' });
+
+      const stats = await getPlayerStatsLifetime(app, steamId);
+      expect(stats).toBeNull();
+    });
   });
 
   describe('/api/game/start (Get) statsLifetime 随开局数据返回', () => {
