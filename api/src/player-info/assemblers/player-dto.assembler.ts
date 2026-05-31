@@ -28,6 +28,7 @@ export class PlayerDtoAssembler {
 
     this.calculateLevelData(dto);
     dto.useableLevel = this.calculateUseableLevel(dto);
+    this.calculateUseablePoints(dto);
 
     const [properties, playerSetting, member, statsLifetime] = await Promise.all([
       include.includes('property') ? this.playerPropertyService.findBySteamId(+player.id) : null,
@@ -74,5 +75,16 @@ export class PlayerDtoAssembler {
 
   private calculateUseableLevel(dto: PlayerInfoDto): number {
     return dto.totalLevel - (dto.usedLevel ?? 0);
+  }
+
+  private calculateUseablePoints(dto: PlayerInfoDto): void {
+    const usedLevel = dto.usedLevel ?? 0;
+    const usedSeasonLevel = Math.min(usedLevel, dto.seasonLevel);
+    const usedMemberLevel = usedLevel - usedSeasonLevel;
+
+    dto.useableSeasonPoint =
+      dto.seasonPointTotal - PlayerLevelHelper.getSeasonTotalPoint(usedSeasonLevel);
+    dto.useableMemberPoint =
+      dto.memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(usedMemberLevel);
   }
 }

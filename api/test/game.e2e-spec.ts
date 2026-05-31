@@ -34,9 +34,11 @@ function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): v
   expect(playerDto.seasonLevel).toBeDefined();
   expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
   expect(playerDto.seasonNextLevelPoint).toBeDefined();
+  expect(playerDto.useableSeasonPoint).toBeDefined();
   expect(playerDto.memberLevel).toBeDefined();
   expect(playerDto.memberCurrentLevelPoint).toBeDefined();
   expect(playerDto.memberNextLevelPoint).toBeDefined();
+  expect(playerDto.useableMemberPoint).toBeDefined();
   expect(playerDto.totalLevel).toBeDefined();
   expect(playerDto.useableLevel).toBeDefined();
   expect(playerDto.properties).toBeDefined();
