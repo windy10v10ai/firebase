@@ -1,13 +1,19 @@
+import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
+import { PlayerSettingService } from '../../player/player-setting.service';
+import { PlayerStatsLifetimeService } from '../../player/player-stats-lifetime.service';
+import { PlayerPropertyService } from '../../player-property/player-property.service';
 
 import { PlayerDtoAssembler } from './player-dto.assembler';
 
 function makeAssembler(): PlayerDtoAssembler {
   return new PlayerDtoAssembler(
-    { findBySteamId: jest.fn().mockResolvedValue([]) } as any,
-    { getPlayerSettingOrGenerateDefault: jest.fn().mockResolvedValue({}) } as any,
-    { findOne: jest.fn().mockResolvedValue(null) } as any,
-    { findBySteamId: jest.fn().mockResolvedValue(null) } as any,
+    { findBySteamId: jest.fn().mockResolvedValue([]) } as unknown as PlayerPropertyService,
+    {
+      getPlayerSettingOrGenerateDefault: jest.fn().mockResolvedValue({}),
+    } as unknown as PlayerSettingService,
+    { findOne: jest.fn().mockResolvedValue(null) } as unknown as MembersService,
+    { findBySteamId: jest.fn().mockResolvedValue(null) } as unknown as PlayerStatsLifetimeService,
   );
 }
 
