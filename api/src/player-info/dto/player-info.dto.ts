@@ -14,11 +14,15 @@ export class PlayerInfoDto extends Player {
   @ApiProperty()
   seasonNextLevelPoint: number;
   @ApiProperty()
+  useableSeasonPoint: number;
+  @ApiProperty()
   memberLevel: number;
   @ApiProperty()
   memberCurrentLevelPoint: number;
   @ApiProperty()
   memberNextLevelPoint: number;
+  @ApiProperty()
+  useableMemberPoint: number;
   @ApiProperty()
   totalLevel: number;
   @ApiProperty()
