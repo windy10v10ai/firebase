@@ -84,8 +84,7 @@ export class PlayerDtoAssembler {
 
     dto.useableSeasonPoint =
       dto.seasonPointTotal - PlayerLevelHelper.getSeasonTotalPoint(usedSeasonLevel);
-    // getMemberTotalPoint(1) = 0; clamp to 1 since level 0 is undefined in the helper
     dto.useableMemberPoint =
-      dto.memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(Math.max(1, usedMemberLevel));
+      dto.memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(usedMemberLevel);
   }
 }

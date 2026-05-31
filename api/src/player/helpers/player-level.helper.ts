@@ -63,6 +63,7 @@ export class PlayerLevelHelper {
    * @returns 累计积分
    */
   static getMemberTotalPoint(level: number): number {
+    if (level <= 0) return 0;
     level -= 1;
     return 100 * ((level * level) / 4 + level * 9.75);
   }
