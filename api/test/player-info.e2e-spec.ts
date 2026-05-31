@@ -228,46 +228,103 @@ describe('PlayerInfoController (e2e)', () => {
     });
 
     it.each([
-      ['添加属性 level=1 剩余 useableLevel=2', 200000514, 1, 2, 1, 2, 1],
-      ['添加属性 level=3 刚好用尽属性点', 200000515, 3, 2, 1, 0, 3],
-    ])(
-      '%s',
-      async (
-        _,
-        steamId,
-        level,
-        expectedSeasonLevel,
-        expectedMemberLevel,
-        expectedUseableLevel,
-        expectedPropertyLevel,
-      ) => {
-        // 创建玩家 100分 = level 2 (根据公式 getSeasonLevelBuyPoint(100) = 2)
-        // memberPointTotal 0分 = memberLevel 1 (根据公式 getMemberLevelBuyPoint(0) = 1)
-        await createPlayer(app, {
-          steamId,
+      [
+        '添加属性 level=1 剩余 useableLevel=2',
+        {
+          steamId: 200000514,
           seasonPointTotal: 100,
           memberPointTotal: 0,
-        });
+          level: 1,
+          expected: {
+            seasonLevel: 2,
+            memberLevel: 1,
+            totalLevel: 3,
+            useableLevel: 2,
+            propertyLevel: 1,
+            useableSeasonPoint: 100,
+            useableMemberPoint: 0,
+          },
+        },
+      ],
+      [
+        '添加属性 level=3 刚好用尽属性点',
+        {
+          steamId: 200000515,
+          seasonPointTotal: 100,
+          memberPointTotal: 0,
+          level: 3,
+          expected: {
+            seasonLevel: 2,
+            memberLevel: 1,
+            totalLevel: 3,
+            useableLevel: 0,
+            propertyLevel: 3,
+            useableSeasonPoint: 0,
+            useableMemberPoint: 0,
+          },
+        },
+      ],
+      [
+        'useableSeasonPoint 减少（season 部分消耗）',
+        {
+          steamId: 200000621,
+          seasonPointTotal: 300,
+          memberPointTotal: 0,
+          level: 2,
+          // usedSeasonLevel=2, getSeasonTotalPoint(2)=100 → 300-100=200
+          expected: {
+            seasonLevel: 3,
+            memberLevel: 1,
+            totalLevel: 4,
+            useableLevel: 2,
+            propertyLevel: 2,
+            useableSeasonPoint: 200,
+            useableMemberPoint: 0,
+          },
+        },
+      ],
+      [
+        'season 用尽后 useableMemberPoint 减少',
+        {
+          steamId: 200000622,
+          seasonPointTotal: 300,
+          memberPointTotal: 2050,
+          level: 5,
+          // usedSeasonLevel=3, usedMemberLevel=2, getMemberTotalPoint(2)=1000 → 2050-1000=1050
+          expected: {
+            seasonLevel: 3,
+            memberLevel: 3,
+            totalLevel: 6,
+            useableLevel: 1,
+            propertyLevel: 5,
+            useableSeasonPoint: 0,
+            useableMemberPoint: 1050,
+          },
+        },
+      ],
+    ])('%s', async (_, { steamId, seasonPointTotal, memberPointTotal, level, expected }) => {
+      await createPlayer(app, { steamId, seasonPointTotal, memberPointTotal });
 
-        const result = await put(app, upgradePlayerPropertyUrl, {
-          steamId,
-          name: 'property_cooldown_percentage',
-          level,
-        });
+      const result = await put(app, upgradePlayerPropertyUrl, {
+        steamId,
+        name: 'property_cooldown_percentage',
+        level,
+      });
 
-        expect(result.status).toEqual(200);
-        const playerDto = result.body;
-        expect(playerDto.seasonLevel).toEqual(expectedSeasonLevel);
-        expect(playerDto.memberLevel).toEqual(expectedMemberLevel);
-        expect(playerDto.totalLevel).toEqual(3); // seasonLevel 2 + memberLevel 1 = 3
-        expect(playerDto.useableLevel).toEqual(expectedUseableLevel);
-        const property = playerDto.properties.find(
-          (p: { name: string }) => p.name === 'property_cooldown_percentage',
-        );
-        expect(property).toBeDefined();
-        expect(property.level).toEqual(expectedPropertyLevel);
-      },
-    );
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.seasonLevel).toEqual(expected.seasonLevel);
+      expect(playerDto.memberLevel).toEqual(expected.memberLevel);
+      expect(playerDto.totalLevel).toEqual(expected.totalLevel);
+      expect(playerDto.useableLevel).toEqual(expected.useableLevel);
+      expect(playerDto.useableSeasonPoint).toEqual(expected.useableSeasonPoint);
+      expect(playerDto.useableMemberPoint).toEqual(expected.useableMemberPoint);
+      const property = playerDto.properties.find(
+        (p: { name: string }) => p.name === 'property_cooldown_percentage',
+      );
+      expect(property).toBeDefined();
+      expect(property.level).toEqual(expected.propertyLevel);
+    });
 
     it('分两次添加同一属性刚好用尽属性点应该成功', async () => {
       const steamId = 200000517;
@@ -352,67 +409,6 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       expect(result.status).toEqual(400);
-    });
-
-    describe('验证 useableSeasonPoint / useableMemberPoint 在加点后减少', () => {
-      it('使用勇士属性点后 useableSeasonPoint 减少', async () => {
-        const steamId = 200000621;
-        mockDate('2023-12-01T00:00:00.000Z');
-        // seasonLevel=3 (getSeasonTotalPoint(3)=300), memberLevel=1, totalLevel=4
-        await createPlayer(app, {
-          steamId,
-          seasonPointTotal: 300,
-          memberPointTotal: 0,
-        });
-
-        // 初始状态：未加任何属性
-        const initialResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
-        expect(initialResult.body.useableSeasonPoint).toEqual(300);
-        expect(initialResult.body.useableMemberPoint).toEqual(0);
-
-        // 加 2 级属性（usedLevel=2），usedSeasonLevel=2
-        const afterResult = await put(app, upgradePlayerPropertyUrl, {
-          steamId,
-          name: 'property_cooldown_percentage',
-          level: 2,
-        });
-
-        expect(afterResult.status).toEqual(200);
-        const playerDto = afterResult.body;
-        // getSeasonTotalPoint(2) = 100 → 300 - 100 = 200
-        expect(playerDto.useableSeasonPoint).toEqual(200);
-        expect(playerDto.useableMemberPoint).toEqual(0);
-      });
-
-      it('season 用尽后消耗 member，useableMemberPoint 减少', async () => {
-        const steamId = 200000622;
-        mockDate('2023-12-01T00:00:00.000Z');
-        // seasonLevel=3 (300分), memberLevel=3 (getMemberTotalPoint(3)=2050分), totalLevel=6
-        await createPlayer(app, {
-          steamId,
-          seasonPointTotal: 300,
-          memberPointTotal: 2050,
-        });
-
-        // 初始状态
-        const initialResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
-        expect(initialResult.body.useableSeasonPoint).toEqual(300);
-        expect(initialResult.body.useableMemberPoint).toEqual(2050);
-
-        // 加 5 级属性（usedLevel=5）：先耗尽 3 级 season，再用 2 级 member
-        const afterResult = await put(app, upgradePlayerPropertyUrl, {
-          steamId,
-          name: 'property_cooldown_percentage',
-          level: 5,
-        });
-
-        expect(afterResult.status).toEqual(200);
-        const playerDto = afterResult.body;
-        // usedSeasonLevel=3, 300 - getSeasonTotalPoint(3)=300 → 0
-        expect(playerDto.useableSeasonPoint).toEqual(0);
-        // usedMemberLevel=2, getMemberTotalPoint(2)=1000 → 2050 - 1000 = 1050
-        expect(playerDto.useableMemberPoint).toEqual(1050);
-      });
     });
   });
 
