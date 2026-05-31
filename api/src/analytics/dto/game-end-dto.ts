@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
@@ -14,6 +15,9 @@ export class GameEndGameOptionsDto {
   playerNumberDire: number;
   @ApiProperty({ default: 100 })
   towerPowerPct: number;
+  /** 客户端下一版起发送；未传时不参与刷分判断 */
+  @ApiProperty({ required: false })
+  respawnTimePct?: number;
 }
 
 export class GameEndPlayerDto {
@@ -28,12 +32,20 @@ export class GameEndPlayerDto {
   @ApiProperty()
   level: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   totalGoldEarned: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   kills: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   deaths: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   assists: number;
   @ApiProperty()
   score: number;
@@ -41,26 +53,40 @@ export class GameEndPlayerDto {
   battlePoints: number;
 
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   lastHits: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   heroDamage: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   damageTaken: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   healing: number;
   @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
   towerKills: number;
 }
 
 export class GameEndDto extends EventBaseDto {
   @ApiProperty({ type: GameEndGameOptionsDto })
+  @Type(() => GameEndGameOptionsDto)
   gameOptions: GameEndGameOptionsDto;
   @ApiProperty({ default: 2 })
   winnerTeamId: number;
   @ApiProperty()
   gameTimeMsec: number;
   @ApiProperty({ type: [GameEndPlayerDto], maxLength: 20 })
+  @IsArray()
   @IsNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => GameEndPlayerDto)
   players: GameEndPlayerDto[];
   @ApiProperty()
   countryCode?: string;
