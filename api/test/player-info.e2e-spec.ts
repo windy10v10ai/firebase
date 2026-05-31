@@ -9,11 +9,11 @@ const upgradePlayerPropertyUrl = '/api/player/property';
 // 验证 PlayerDto 包含所有计算字段
 function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
   expect(playerDto.seasonLevel).toBeDefined();
-  expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
   expect(playerDto.seasonNextLevelPoint).toBeDefined();
+  expect(playerDto.useableSeasonPoint).toBeDefined();
   expect(playerDto.memberLevel).toBeDefined();
-  expect(playerDto.memberCurrentLevelPoint).toBeDefined();
   expect(playerDto.memberNextLevelPoint).toBeDefined();
+  expect(playerDto.useableMemberPoint).toBeDefined();
   expect(playerDto.totalLevel).toBeDefined();
   expect(playerDto.useableLevel).toBeDefined();
   expect(playerDto.properties).toBeDefined();
@@ -123,9 +123,10 @@ describe('PlayerInfoController (e2e)', () => {
       expect(result.status).toEqual(200);
       const playerDto = result.body;
       expect(playerDto.seasonLevel).toEqual(3);
-      expect(playerDto.seasonCurrrentLevelPoint).toEqual(200); // 500 - 300 = 200
       expect(playerDto.seasonNextLevelPoint).toEqual(300); // 100 * 3 = 300
+      expect(playerDto.useableSeasonPoint).toEqual(500); // 500 - getSeasonTotalPoint(0) = 500
       expect(playerDto.memberLevel).toEqual(1);
+      expect(playerDto.useableMemberPoint).toEqual(100); // 100 - getMemberTotalPoint(1) = 100
       expect(playerDto.totalLevel).toEqual(4); // 3 + 1 = 4
       expect(playerDto.useableLevel).toEqual(4); // 没有使用任何属性
     });

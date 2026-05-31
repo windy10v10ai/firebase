@@ -32,11 +32,11 @@ function callGameStart(app: INestApplication, steamIds: number[]): request.Test 
 // 验证 PlayerDto 包含所有计算字段
 function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
   expect(playerDto.seasonLevel).toBeDefined();
-  expect(playerDto.seasonCurrrentLevelPoint).toBeDefined();
   expect(playerDto.seasonNextLevelPoint).toBeDefined();
+  expect(playerDto.useableSeasonPoint).toBeDefined();
   expect(playerDto.memberLevel).toBeDefined();
-  expect(playerDto.memberCurrentLevelPoint).toBeDefined();
   expect(playerDto.memberNextLevelPoint).toBeDefined();
+  expect(playerDto.useableMemberPoint).toBeDefined();
   expect(playerDto.totalLevel).toBeDefined();
   expect(playerDto.useableLevel).toBeDefined();
   expect(playerDto.properties).toBeDefined();
