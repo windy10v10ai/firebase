@@ -1,40 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
 export class GameEndGameOptionsDto {
-  @ApiProperty({ default: 1, required: false })
-  @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  multiplierRadiant?: number;
-  @ApiProperty({ default: 1, required: false })
-  @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  multiplierDire?: number;
-  @ApiProperty({ default: 1, required: false })
-  @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  playerNumberRadiant?: number;
-  @ApiProperty({ default: 1, required: false })
-  @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  playerNumberDire?: number;
-  @ApiProperty({ default: 100, required: false })
-  @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  towerPowerPct?: number;
-  /** 复活时间百分比；客户端上线后发送，未传则不参与刷分判断 */
+  @ApiProperty({ default: 1 })
+  multiplierRadiant: number;
+  @ApiProperty({ default: 1 })
+  multiplierDire: number;
+  @ApiProperty({ default: 1 })
+  playerNumberRadiant: number;
+  @ApiProperty({ default: 1 })
+  playerNumberDire: number;
+  @ApiProperty({ default: 100 })
+  towerPowerPct: number;
+  /** 客户端下一版起发送；未传时不参与刷分判断 */
   @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   respawnTimePct?: number;
 }
 
@@ -94,7 +76,6 @@ export class GameEndPlayerDto {
 
 export class GameEndDto extends EventBaseDto {
   @ApiProperty({ type: GameEndGameOptionsDto })
-  @ValidateNested()
   @Type(() => GameEndGameOptionsDto)
   gameOptions: GameEndGameOptionsDto;
   @ApiProperty({ default: 2 })

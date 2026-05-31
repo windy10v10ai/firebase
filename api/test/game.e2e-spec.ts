@@ -79,6 +79,14 @@ interface GameEndPayloadOptions {
   winnerTeamId?: number;
 }
 
+const defaultGameOptions = {
+  multiplierRadiant: 1,
+  multiplierDire: 1,
+  playerNumberRadiant: 1,
+  playerNumberDire: 1,
+  towerPowerPct: 100,
+};
+
 function createGameEndPayload(options: GameEndPayloadOptions = {}) {
   return {
     matchId: '8000000001',
@@ -86,7 +94,7 @@ function createGameEndPayload(options: GameEndPayloadOptions = {}) {
     winnerTeamId: options.winnerTeamId ?? 2,
     players: (options.players ?? []).map(createGameEndPlayer),
     gameTimeMsec: 900000,
-    gameOptions: {},
+    gameOptions: defaultGameOptions,
     difficulty: 5,
     steamId: 0,
   };
@@ -745,7 +753,7 @@ describe('PlayerController (e2e)', () => {
           winnerTeamId: 2,
           players: [],
           gameTimeMsec: 900000,
-          gameOptions: {},
+          gameOptions: defaultGameOptions,
           difficulty: 5,
           steamId: 0,
         })
@@ -1037,8 +1045,8 @@ describe('PlayerController (e2e)', () => {
       await post(app, gameEndUrl, {
         ...createGameEndPayload({ players: [{ steamId }] }),
         gameOptions: {
+          ...defaultGameOptions,
           multiplierRadiant: 3,
-          multiplierDire: 1,
         },
       });
 

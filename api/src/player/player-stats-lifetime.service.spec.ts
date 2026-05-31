@@ -1,6 +1,6 @@
 import { logger } from 'firebase-functions';
 
-import { GameEndPlayerDto } from '../analytics/dto/game-end-dto';
+import { GameEndGameOptionsDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 
 import { PlayerStatsLifetime } from './entities/player-stats-lifetime.entity';
 import { PlayerStatsLifetimeService } from './player-stats-lifetime.service';
@@ -33,6 +33,14 @@ describe('PlayerStatsLifetimeService', () => {
       ...overrides,
     }) as GameEndPlayerDto;
 
+  const defaultGameOptions: GameEndGameOptionsDto = {
+    multiplierRadiant: 1,
+    multiplierDire: 1,
+    playerNumberRadiant: 1,
+    playerNumberDire: 1,
+    towerPowerPct: 100,
+  };
+
   beforeEach(() => {
     findById.mockReset();
     update.mockReset();
@@ -62,13 +70,7 @@ describe('PlayerStatsLifetimeService', () => {
 
     await service.accumulate(123, basePlayer({ heroDamage: undefined as never }), {
       matchId: 'm-1',
-      gameOptions: {
-        multiplierRadiant: 1,
-        multiplierDire: 1,
-        playerNumberRadiant: 1,
-        playerNumberDire: 1,
-        towerPowerPct: 100,
-      },
+      gameOptions: defaultGameOptions,
     });
 
     expect(update).toHaveBeenCalledTimes(1);
@@ -96,13 +98,7 @@ describe('PlayerStatsLifetimeService', () => {
 
     await service.accumulate(123, basePlayer({ heroDamage: 321 }), {
       matchId: 'm-2',
-      gameOptions: {
-        multiplierRadiant: 1,
-        multiplierDire: 1,
-        playerNumberRadiant: 1,
-        playerNumberDire: 1,
-        towerPowerPct: 100,
-      },
+      gameOptions: defaultGameOptions,
     });
 
     const updated = update.mock.calls[0][0] as PlayerStatsLifetime;
@@ -114,13 +110,7 @@ describe('PlayerStatsLifetimeService', () => {
 
     await service.accumulate(0, basePlayer(), {
       matchId: 'm-bot',
-      gameOptions: {
-        multiplierRadiant: 1,
-        multiplierDire: 1,
-        playerNumberRadiant: 1,
-        playerNumberDire: 1,
-        towerPowerPct: 100,
-      },
+      gameOptions: defaultGameOptions,
     });
 
     expect(findById).not.toHaveBeenCalled();
@@ -134,11 +124,7 @@ describe('PlayerStatsLifetimeService', () => {
 
     await service.accumulate(123, basePlayer(), {
       matchId: 'm-respawn',
-      gameOptions: {
-        multiplierRadiant: 1,
-        multiplierDire: 1,
-        respawnTimePct: 30,
-      },
+      gameOptions: { ...defaultGameOptions, respawnTimePct: 30 },
     });
 
     expect(create).not.toHaveBeenCalled();
@@ -151,13 +137,7 @@ describe('PlayerStatsLifetimeService', () => {
 
     await service.accumulate(123, basePlayer(), {
       matchId: 'm-3',
-      gameOptions: {
-        multiplierRadiant: 3,
-        multiplierDire: 1,
-        playerNumberRadiant: 1,
-        playerNumberDire: 1,
-        towerPowerPct: 100,
-      },
+      gameOptions: { ...defaultGameOptions, multiplierRadiant: 3 },
     });
 
     expect(create).not.toHaveBeenCalled();
@@ -182,13 +162,7 @@ describe('PlayerStatsLifetimeService', () => {
 
     await service.accumulate(123, basePlayer({ totalGoldEarned: 999999999 }), {
       matchId: 'm-4',
-      gameOptions: {
-        multiplierRadiant: 1,
-        multiplierDire: 1,
-        playerNumberRadiant: 1,
-        playerNumberDire: 1,
-        towerPowerPct: 100,
-      },
+      gameOptions: defaultGameOptions,
     });
 
     const updated = update.mock.calls[0][0] as PlayerStatsLifetime;
