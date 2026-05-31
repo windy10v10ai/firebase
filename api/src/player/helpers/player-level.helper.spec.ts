@@ -131,6 +131,10 @@ describe('PlayerLevelHelper', () => {
     });
 
     describe('等级所需累计积分', () => {
+      it('0 -> 0', () => {
+        expect(PlayerLevelHelper.getMemberTotalPoint(0)).toBe(0);
+      });
+
       it('1 -> 0', () => {
         expect(PlayerLevelHelper.getMemberTotalPoint(1)).toBe(0);
       });
