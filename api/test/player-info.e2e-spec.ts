@@ -353,6 +353,67 @@ describe('PlayerInfoController (e2e)', () => {
 
       expect(result.status).toEqual(400);
     });
+
+    describe('验证 useableSeasonPoint / useableMemberPoint 在加点后减少', () => {
+      it('使用勇士属性点后 useableSeasonPoint 减少', async () => {
+        const steamId = 200000621;
+        mockDate('2023-12-01T00:00:00.000Z');
+        // seasonLevel=3 (getSeasonTotalPoint(3)=300), memberLevel=1, totalLevel=4
+        await createPlayer(app, {
+          steamId,
+          seasonPointTotal: 300,
+          memberPointTotal: 0,
+        });
+
+        // 初始状态：未加任何属性
+        const initialResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+        expect(initialResult.body.useableSeasonPoint).toEqual(300);
+        expect(initialResult.body.useableMemberPoint).toEqual(0);
+
+        // 加 2 级属性（usedLevel=2），usedSeasonLevel=2
+        const afterResult = await put(app, upgradePlayerPropertyUrl, {
+          steamId,
+          name: 'property_cooldown_percentage',
+          level: 2,
+        });
+
+        expect(afterResult.status).toEqual(200);
+        const playerDto = afterResult.body;
+        // getSeasonTotalPoint(2) = 100 → 300 - 100 = 200
+        expect(playerDto.useableSeasonPoint).toEqual(200);
+        expect(playerDto.useableMemberPoint).toEqual(0);
+      });
+
+      it('season 用尽后消耗 member，useableMemberPoint 减少', async () => {
+        const steamId = 200000622;
+        mockDate('2023-12-01T00:00:00.000Z');
+        // seasonLevel=3 (300分), memberLevel=3 (getMemberTotalPoint(3)=2050分), totalLevel=6
+        await createPlayer(app, {
+          steamId,
+          seasonPointTotal: 300,
+          memberPointTotal: 2050,
+        });
+
+        // 初始状态
+        const initialResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+        expect(initialResult.body.useableSeasonPoint).toEqual(300);
+        expect(initialResult.body.useableMemberPoint).toEqual(2050);
+
+        // 加 5 级属性（usedLevel=5）：先耗尽 3 级 season，再用 2 级 member
+        const afterResult = await put(app, upgradePlayerPropertyUrl, {
+          steamId,
+          name: 'property_cooldown_percentage',
+          level: 5,
+        });
+
+        expect(afterResult.status).toEqual(200);
+        const playerDto = afterResult.body;
+        // usedSeasonLevel=3, 300 - getSeasonTotalPoint(3)=300 → 0
+        expect(playerDto.useableSeasonPoint).toEqual(0);
+        // usedMemberLevel=2, getMemberTotalPoint(2)=1000 → 2050 - 1000 = 1050
+        expect(playerDto.useableMemberPoint).toEqual(1050);
+      });
+    });
   });
 
   describe('DELETE /api/player/:steamId/property 重置玩家属性', () => {
