@@ -2,7 +2,8 @@ import { GameEndGameOptionsDto } from '../analytics/dto/game-end-dto';
 
 export const STATS_LIFETIME_MAX_RADIANT_MULTIPLIER = 2;
 export const STATS_LIFETIME_MAX_DIRE_MULTIPLIER = 20;
-export const STATS_LIFETIME_MIN_RESPAWN_TIME = 50;
+/** 复活时间百分比低于此值视为刷分配置（与 issue #908 respawn_time < 50 同语义） */
+export const STATS_LIFETIME_MIN_RESPAWN_TIME_PCT = 50;
 
 export const PER_MATCH_MAX_KILLS = 1000;
 export const PER_MATCH_MAX_DEATHS = 1000;
@@ -44,13 +45,22 @@ export function shouldSkipStatsLifetimeForGameOptions(options?: GameEndGameOptio
   if (!options) {
     return false;
   }
-  if (options.multiplierRadiant > STATS_LIFETIME_MAX_RADIANT_MULTIPLIER) {
+  if (
+    options.multiplierRadiant != null &&
+    options.multiplierRadiant > STATS_LIFETIME_MAX_RADIANT_MULTIPLIER
+  ) {
     return true;
   }
-  if (options.multiplierDire > STATS_LIFETIME_MAX_DIRE_MULTIPLIER) {
+  if (
+    options.multiplierDire != null &&
+    options.multiplierDire > STATS_LIFETIME_MAX_DIRE_MULTIPLIER
+  ) {
     return true;
   }
-  if (options.respawnTime !== undefined && options.respawnTime < STATS_LIFETIME_MIN_RESPAWN_TIME) {
+  if (
+    options.respawnTimePct != null &&
+    options.respawnTimePct < STATS_LIFETIME_MIN_RESPAWN_TIME_PCT
+  ) {
     return true;
   }
   return false;

@@ -86,14 +86,7 @@ function createGameEndPayload(options: GameEndPayloadOptions = {}) {
     winnerTeamId: options.winnerTeamId ?? 2,
     players: (options.players ?? []).map(createGameEndPlayer),
     gameTimeMsec: 900000,
-    gameOptions: {
-      multiplierRadiant: 1,
-      multiplierDire: 1,
-      playerNumberRadiant: 1,
-      playerNumberDire: 1,
-      towerPowerPct: 100,
-      respawnTime: 100,
-    },
+    gameOptions: {},
     difficulty: 5,
     steamId: 0,
   };
@@ -752,14 +745,7 @@ describe('PlayerController (e2e)', () => {
           winnerTeamId: 2,
           players: [],
           gameTimeMsec: 900000,
-          gameOptions: {
-            multiplierRadiant: 1,
-            multiplierDire: 1,
-            playerNumberRadiant: 1,
-            playerNumberDire: 1,
-            towerPowerPct: 100,
-            respawnTime: 100,
-          },
+          gameOptions: {},
           difficulty: 5,
           steamId: 0,
         })
@@ -1053,10 +1039,6 @@ describe('PlayerController (e2e)', () => {
         gameOptions: {
           multiplierRadiant: 3,
           multiplierDire: 1,
-          playerNumberRadiant: 1,
-          playerNumberDire: 1,
-          towerPowerPct: 100,
-          respawnTime: 100,
         },
       });
 

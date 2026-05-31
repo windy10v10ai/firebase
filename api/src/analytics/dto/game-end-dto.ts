@@ -1,65 +1,53 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
 export class GameEndGameOptionsDto {
-  @ApiProperty({ default: 1 })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  multiplierRadiant: number;
-  @ApiProperty({ default: 1 })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  multiplierDire: number;
-  @ApiProperty({ default: 1 })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  playerNumberRadiant: number;
-  @ApiProperty({ default: 1 })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  playerNumberDire: number;
-  @ApiProperty({ default: 100 })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
-  towerPowerPct: number;
-  @ApiProperty({ required: false, default: 100 })
+  @ApiProperty({ default: 1, required: false })
   @IsOptional()
   @IsNumber({ allowNaN: false, allowInfinity: false })
   @Min(0)
-  respawnTime?: number;
+  multiplierRadiant?: number;
+  @ApiProperty({ default: 1, required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  multiplierDire?: number;
+  @ApiProperty({ default: 1, required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  playerNumberRadiant?: number;
+  @ApiProperty({ default: 1, required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  playerNumberDire?: number;
+  @ApiProperty({ default: 100, required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  towerPowerPct?: number;
+  /** 复活时间百分比；客户端上线后发送，未传则不参与刷分判断 */
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  respawnTimePct?: number;
 }
 
 export class GameEndPlayerDto {
   @ApiProperty({ default: 'npc_dota_hero_abaddon' })
-  @IsString()
-  @IsNotEmpty()
   heroName: string;
   @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   steamId: number;
   @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   teamId: number;
   @ApiProperty()
-  @IsBoolean()
   isDisconnected: boolean;
   @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   level: number;
   @ApiProperty()
   @IsNumber({ allowNaN: false, allowInfinity: false })
@@ -78,12 +66,8 @@ export class GameEndPlayerDto {
   @Min(0)
   assists: number;
   @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   score: number;
   @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   battlePoints: number;
 
   @ApiProperty()
@@ -114,12 +98,8 @@ export class GameEndDto extends EventBaseDto {
   @Type(() => GameEndGameOptionsDto)
   gameOptions: GameEndGameOptionsDto;
   @ApiProperty({ default: 2 })
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   winnerTeamId: number;
   @ApiProperty()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
-  @Min(0)
   gameTimeMsec: number;
   @ApiProperty({ type: [GameEndPlayerDto], maxLength: 20 })
   @IsArray()
@@ -128,7 +108,5 @@ export class GameEndDto extends EventBaseDto {
   @Type(() => GameEndPlayerDto)
   players: GameEndPlayerDto[];
   @ApiProperty()
-  @IsOptional()
-  @IsString()
   countryCode?: string;
 }

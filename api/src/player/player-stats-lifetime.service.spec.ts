@@ -128,6 +128,23 @@ describe('PlayerStatsLifetimeService', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it('should skip whole accumulation when respawnTimePct is below threshold', async () => {
+    const service = new PlayerStatsLifetimeService(repository as never);
+    findById.mockResolvedValueOnce(null);
+
+    await service.accumulate(123, basePlayer(), {
+      matchId: 'm-respawn',
+      gameOptions: {
+        multiplierRadiant: 1,
+        multiplierDire: 1,
+        respawnTimePct: 30,
+      },
+    });
+
+    expect(create).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('should skip whole accumulation for custom mode options', async () => {
     const service = new PlayerStatsLifetimeService(repository as never);
     findById.mockResolvedValueOnce(null);
