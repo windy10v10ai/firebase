@@ -60,10 +60,14 @@ export class PlayerDtoAssembler {
   private calculateLevelData(dto: PlayerInfoDto): void {
     const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(dto.seasonPointTotal);
     dto.seasonLevel = seasonLevel;
+    dto.seasonCurrrentLevelPoint =
+      dto.seasonPointTotal - PlayerLevelHelper.getSeasonTotalPoint(seasonLevel);
     dto.seasonNextLevelPoint = PlayerLevelHelper.getSeasonNextLevelPoint(seasonLevel);
 
     const memberLevel = PlayerLevelHelper.getMemberLevelBuyPoint(dto.memberPointTotal);
     dto.memberLevel = memberLevel;
+    dto.memberCurrentLevelPoint =
+      dto.memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(memberLevel);
     dto.memberNextLevelPoint = PlayerLevelHelper.getMemberNextLevelPoint(memberLevel);
 
     dto.totalLevel = seasonLevel + memberLevel;
