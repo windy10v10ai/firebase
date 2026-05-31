@@ -132,9 +132,12 @@ export class GameController {
       this.analyticsService.gameEndMatch(gameEnd, serverType),
       this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
       ...(serverType !== SERVER_TYPE.TENVTEN
-        ? players
-            .filter((p) => p.steamId > 0)
-            .map((p) => this.playerStatsLifetimeService.accumulate(p.steamId, p))
+        ? players.map((p) =>
+            this.playerStatsLifetimeService.accumulate(p.steamId, p, {
+              matchId: gameEnd.matchId,
+              gameOptions: gameEnd.gameOptions,
+            }),
+          )
         : []),
     ]);
     return this.gameService.getOK();

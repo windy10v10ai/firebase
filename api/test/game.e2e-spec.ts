@@ -86,7 +86,14 @@ function createGameEndPayload(options: GameEndPayloadOptions = {}) {
     winnerTeamId: options.winnerTeamId ?? 2,
     players: (options.players ?? []).map(createGameEndPlayer),
     gameTimeMsec: 900000,
-    gameOptions: {},
+    gameOptions: {
+      multiplierRadiant: 1,
+      multiplierDire: 1,
+      playerNumberRadiant: 1,
+      playerNumberDire: 1,
+      towerPowerPct: 100,
+      respawnTime: 100,
+    },
     difficulty: 5,
     steamId: 0,
   };
@@ -745,7 +752,14 @@ describe('PlayerController (e2e)', () => {
           winnerTeamId: 2,
           players: [],
           gameTimeMsec: 900000,
-          gameOptions: {},
+          gameOptions: {
+            multiplierRadiant: 1,
+            multiplierDire: 1,
+            playerNumberRadiant: 1,
+            playerNumberDire: 1,
+            towerPowerPct: 100,
+            respawnTime: 100,
+          },
           difficulty: 5,
           steamId: 0,
         })
@@ -998,6 +1012,53 @@ describe('PlayerController (e2e)', () => {
         .post(gameEndUrl)
         .send(createGameEndPayload({ players: [{ steamId }] }))
         .set({ 'x-api-key': 'tenvten-apikey' });
+
+      const stats = await getPlayerStatsLifetime(app, steamId);
+      expect(stats).toBeNull();
+    });
+
+    it('异常超大字段会被跳过，但其他字段继续累计', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100003022;
+
+      await post(
+        app,
+        gameEndUrl,
+        createGameEndPayload({
+          players: [{ steamId }],
+        }),
+      );
+
+      await post(app, gameEndUrl, {
+        ...createGameEndPayload({ players: [{ steamId }] }),
+        players: [
+          {
+            ...createGameEndPlayer({ steamId }),
+            heroDamage: 99999999999,
+          },
+        ],
+      });
+
+      const stats = await getPlayerStatsLifetime(app, steamId);
+      expect(stats.heroDamage).toEqual(5000);
+      expect(stats.kills).toEqual(10);
+    });
+
+    it('自定义刷分参数下不统计 statsLifetime', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const steamId = 100003023;
+
+      await post(app, gameEndUrl, {
+        ...createGameEndPayload({ players: [{ steamId }] }),
+        gameOptions: {
+          multiplierRadiant: 3,
+          multiplierDire: 1,
+          playerNumberRadiant: 1,
+          playerNumberDire: 1,
+          towerPowerPct: 100,
+          respawnTime: 100,
+        },
+      });
 
       const stats = await getPlayerStatsLifetime(app, steamId);
       expect(stats).toBeNull();
