@@ -4,7 +4,7 @@ import { del, get, initTest, mockDate, post, put, restoreDate } from './util/uti
 import { addPlayerProperty, createPlayer, getPlayerDto } from './util/util-player';
 
 const getPlayerInfoUrl = '/api/player';
-const upgradePlayerPropertyUrl = '/api/player/property';
+const upgradePlayerPropertyUrl = (steamId: number) => `/api/player/${steamId}/property`;
 const useMemberPointUrl = '/api/player/member-points/use';
 
 // 验证 PlayerDto 包含所有计算字段
@@ -200,7 +200,7 @@ describe('PlayerInfoController (e2e)', () => {
     });
   });
 
-  describe('PUT /api/player/property 升级玩家属性', () => {
+  describe('PUT /api/player/:steamId/property 升级玩家属性', () => {
     beforeEach(() => {
       mockDate('2023-12-01T00:00:00.000Z');
     });
@@ -215,8 +215,7 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 添加属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 2,
       });
@@ -246,15 +245,13 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 添加第一个属性
-      await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 1,
       });
 
       // 添加第二个属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_attackspeed_bonus_constant',
         level: 2,
       });
@@ -273,15 +270,13 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 第一次添加属性
-      await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 2,
       });
 
       // 第二次升级同一属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 3,
       });
@@ -368,8 +363,7 @@ describe('PlayerInfoController (e2e)', () => {
     ])('%s', async (_, { steamId, seasonPointTotal, memberPointTotal, level, expected }) => {
       await createPlayer(app, { steamId, seasonPointTotal, memberPointTotal });
 
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level,
       });
@@ -399,8 +393,7 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 第一次添加属性 level = 1
-      const firstResult = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const firstResult = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 1,
       });
@@ -411,8 +404,7 @@ describe('PlayerInfoController (e2e)', () => {
       expect(firstPlayerDto.useableLevel).toEqual(2); // 3 - 1 = 2
 
       // 第二次添加同一属性到 level = 3，刚好用尽剩余点数
-      const secondResult = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const secondResult = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 3, // 从 level 1 升级到 level 3，增加 2 点，刚好用尽
       });
@@ -453,8 +445,7 @@ describe('PlayerInfoController (e2e)', () => {
 
       // 执行前置操作（如果有）
       for (const prop of setupProperties) {
-        const firstResult = await put(app, upgradePlayerPropertyUrl, {
-          steamId,
+        const firstResult = await put(app, upgradePlayerPropertyUrl(steamId), {
           name: prop.name,
           level: prop.level,
         });
@@ -465,8 +456,7 @@ describe('PlayerInfoController (e2e)', () => {
       }
 
       // 尝试添加应该报错的属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: errorProperty.name,
         level: errorProperty.level,
       });
