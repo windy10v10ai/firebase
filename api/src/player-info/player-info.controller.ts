@@ -7,12 +7,15 @@ import {
   ParseArrayPipe,
   ParseBoolPipe,
   ParseIntPipe,
+  Post,
   Put,
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
+import { PlayerService } from '../player/player.service';
 import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
 import { ResetPlayerPropertyDto } from '../player-property/dto/reset-player-property.dto';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
@@ -29,6 +32,7 @@ export class PlayerInfoController {
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
+    private readonly playerService: PlayerService,
   ) {}
 
   @Get(':steamId/info')
@@ -45,6 +49,13 @@ export class PlayerInfoController {
     include: PlayerInfoInclude[] = [],
   ): Promise<PlayerInfoDto> {
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, include);
+  }
+
+  @Post('/member-points/use')
+  @ApiOperation({ summary: 'Use available member points' })
+  async useMemberPoint(@Body() dto: UsePlayerMemberPointsDto): Promise<PlayerInfoDto> {
+    await this.playerService.useMemberPoint(dto);
+    return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
   }
 
   @Put(':steamId/property')

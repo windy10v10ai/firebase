@@ -5,7 +5,6 @@ import { Public } from '../util/auth/public.decorator';
 
 import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
-import { UsePlayerMemberPointsDto } from './dto/use-player-member-points.dto';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { Player } from './entities/player.entity';
@@ -57,11 +56,5 @@ export class PlayerController {
   @ApiOperation({ summary: 'Commend or report another player' })
   async conduct(@Body() dto: ConductPlayerDto): Promise<Player> {
     return this.playerConductService.conduct(dto);
-  }
-
-  @Post('/member-points/use')
-  @ApiOperation({ summary: 'Use available member points' })
-  async useMemberPoint(@Body() dto: UsePlayerMemberPointsDto): Promise<Player> {
-    return this.playerService.useMemberPoint(dto);
   }
 }
