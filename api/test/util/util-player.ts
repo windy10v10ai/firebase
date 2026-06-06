@@ -61,8 +61,7 @@ export async function addPlayerProperty(
   property: string,
   value: number,
 ): Promise<void> {
-  const result = await put(app, `/api/player/property`, {
-    steamId,
+  const result = await put(app, `/api/player/${steamId}/property`, {
     name: property,
     level: value,
   });

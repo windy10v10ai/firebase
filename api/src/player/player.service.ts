@@ -120,7 +120,7 @@ export class PlayerService {
 
     player.usedMemberPoint = (player.usedMemberPoint ?? 0) + memberPoint;
     await this.playerRepository.update(player);
-    await this.analyticsService.playerUseMemberPoint(dto.steamId, memberPoint, dto.reason);
+    await this.analyticsService.playerUsePoint(dto.steamId, memberPoint, true, dto.reason);
     return player;
   }
 
