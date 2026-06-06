@@ -172,6 +172,10 @@ describe('PlayerInfoController (e2e)', () => {
           reason: 'e2e-test',
         });
         expect(useResult.status).toEqual(201);
+        expect(useResult.body.memberPointTotal).toEqual(100);
+        expect(useResult.body.usedMemberPoint).toEqual(25);
+        expect(useResult.body.useableMemberPoint).toEqual(75);
+        expect(useResult.body.useableSeasonPoint).toEqual(500);
 
         const afterResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
         expect(afterResult.status).toEqual(200);
