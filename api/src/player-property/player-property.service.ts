@@ -120,20 +120,18 @@ export class PlayerPropertyService {
 
     if (useMemberPoint) {
       const cost = RESET_PROPERTY_MEMBER_POINT_COST;
-      const useableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
-      if (useableMemberPoint < cost) {
+      if ((player.memberPointTotal ?? 0) < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
+      await this.playerService.upsertAddPoint(steamId, { memberPointTotal: -cost });
     } else {
       const seasonPointTotal = player.seasonPointTotal ?? 0;
       const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(seasonPointTotal);
       const cost = PlayerLevelHelper.getSeasonNextLevelPoint(seasonLevel);
-      const useableSeasonPoint = seasonPointTotal - (player.usedSeasonPoint ?? 0);
-      if (useableSeasonPoint < cost) {
+      if (seasonPointTotal < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.upsertAddPoint(steamId, { usedSeasonPoint: cost });
+      await this.playerService.upsertAddPoint(steamId, { seasonPointTotal: -cost });
     }
 
     await this.deleteBySteamId(steamId);

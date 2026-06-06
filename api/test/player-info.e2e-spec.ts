@@ -480,12 +480,7 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000402,
             useMemberPoint: false,
             before: { seasonPointTotal: 200, memberPointTotal: 0 },
-            after: {
-              seasonPointTotal: 200,
-              memberPointTotal: 0,
-              usedSeasonPoint: 200,
-              usedMemberPoint: 0,
-            },
+            after: { seasonPointTotal: 0, memberPointTotal: 0 },
           },
         ],
         [
@@ -494,12 +489,7 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000403,
             useMemberPoint: false,
             before: { seasonPointTotal: 300, memberPointTotal: 1000 },
-            after: {
-              seasonPointTotal: 300,
-              memberPointTotal: 1000,
-              usedSeasonPoint: 300,
-              usedMemberPoint: 0,
-            },
+            after: { seasonPointTotal: 0, memberPointTotal: 1000 },
           },
         ],
         [
@@ -508,12 +498,7 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000412,
             useMemberPoint: true,
             before: { seasonPointTotal: 0, memberPointTotal: 1000 },
-            after: {
-              seasonPointTotal: 0,
-              memberPointTotal: 1000,
-              usedSeasonPoint: 0,
-              usedMemberPoint: 1000,
-            },
+            after: { seasonPointTotal: 0, memberPointTotal: 0 },
           },
         ],
         [
@@ -522,12 +507,7 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000413,
             useMemberPoint: true,
             before: { seasonPointTotal: 999, memberPointTotal: 2000 },
-            after: {
-              seasonPointTotal: 999,
-              memberPointTotal: 2000,
-              usedSeasonPoint: 0,
-              usedMemberPoint: 1000,
-            },
+            after: { seasonPointTotal: 999, memberPointTotal: 1000 },
           },
         ],
       ])('%s', async (_, { steamId, useMemberPoint, before, after }) => {
@@ -547,8 +527,8 @@ describe('PlayerInfoController (e2e)', () => {
         const player = result.body;
         expect(player?.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(player?.memberPointTotal).toEqual(after.memberPointTotal);
-        expect(player?.usedSeasonPoint ?? 0).toEqual(after.usedSeasonPoint);
-        expect(player?.usedMemberPoint ?? 0).toEqual(after.usedMemberPoint);
+        expect(player?.usedSeasonPoint ?? 0).toEqual(0);
+        expect(player?.usedMemberPoint ?? 0).toEqual(0);
         expect(player?.properties).toHaveLength(0);
         expect(player?.member).toBeUndefined();
       });
