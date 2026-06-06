@@ -454,7 +454,7 @@ describe('PlayerController (e2e)', () => {
 
       it('steamIds刚好10个应正常返回', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
-        const steamIds = Array.from({ length: 10 }, (_, i) => 200000101 + i);
+        const steamIds = Array.from({ length: 10 }, (_, i) => 100004001 + i);
 
         const result = await callGameStart(app, steamIds);
         expect(result.status).toEqual(200);
