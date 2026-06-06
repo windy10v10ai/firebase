@@ -20,6 +20,14 @@ export class Player {
   @IsOptional()
   @IsNumber()
   memberPointTotal: number;
+  @ApiPropertyOptional({ default: 0 })
+  @IsOptional()
+  @IsNumber()
+  usedSeasonPoint?: number;
+  @ApiPropertyOptional({ default: 0 })
+  @IsOptional()
+  @IsNumber()
+  usedMemberPoint?: number;
   // 已使用等级（property 升级累计消耗的 level 总和）
   @ApiProperty()
   usedLevel: number;

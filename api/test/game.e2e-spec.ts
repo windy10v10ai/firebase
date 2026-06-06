@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
+import { get, getTestApiKey, initTest, mockDate, post, restoreDate } from './util/util-http';
 import {
   addPlayerProperty,
   createPlayer,
@@ -16,7 +16,7 @@ const gameEndUrl = '/api/game/end';
 const memberPostUrl = '/api/members/';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
-  const apiKey = 'Invalid_NotOnDedicatedServer';
+  const apiKey = getTestApiKey();
   const countryCode = 'CN';
   const headers = {
     'x-api-key': apiKey,
@@ -113,6 +113,14 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
+    it('未携带 API key 时返回 401', async () => {
+      const result = await request(app.getHttpServer())
+        .get(gameStartUrl)
+        .query({ steamIds: [100000000], matchId });
+
+      expect(result.status).toEqual(401);
+    });
+
     describe('单人开始', () => {
       it('普通玩家 新玩家 首次', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
