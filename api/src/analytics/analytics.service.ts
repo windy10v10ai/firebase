@@ -68,12 +68,19 @@ export class AnalyticsService {
     });
   }
 
-  async playerUseMemberPoint(steamId: number, memberPoint: number, reason: string): Promise<void> {
+  async playerUsePoint(
+    steamId: number,
+    points: number,
+    useMemberPoint: boolean,
+    reason: string,
+  ): Promise<void> {
     await this.sendEvent(steamId.toString(), {
-      name: 'player_use_member_point',
+      name: 'player_use_point',
       params: {
         steam_id: steamId,
-        member_point: memberPoint,
+        use_member_point: useMemberPoint,
+        point: points,
+        points,
         reason,
       },
     });
