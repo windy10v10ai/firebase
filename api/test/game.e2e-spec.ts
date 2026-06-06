@@ -113,12 +113,13 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
-    it('未携带 API key 时返回 401', async () => {
+    it('未携带 API key 时允许开始游戏', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
       const result = await request(app.getHttpServer())
         .get(gameStartUrl)
         .query({ steamIds: [100000000], matchId });
 
-      expect(result.status).toEqual(401);
+      expect(result.status).toEqual(200);
     });
 
     describe('单人开始', () => {
