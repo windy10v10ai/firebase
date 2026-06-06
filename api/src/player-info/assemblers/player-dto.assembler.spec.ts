@@ -25,6 +25,8 @@ function makePlayer(override: Partial<Player>): Player {
     disconnectCount: 0,
     seasonPointTotal: 0,
     memberPointTotal: 0,
+    usedSeasonPoint: 0,
+    usedMemberPoint: 0,
     usedLevel: 0,
     conductPoint: 100,
     commendCount: 0,
@@ -42,11 +44,17 @@ describe('PlayerDtoAssembler', () => {
   });
 
   describe('useableSeasonPoint / useableMemberPoint', () => {
-    it('usedLevel=0: full points available (零头 included)', async () => {
+    it('used point missing: full points available (零头 included)', async () => {
       // seasonLevel=3 (getSeasonTotalPoint(3)=300), 200-point 零头
       // memberLevel=1
       const dto = await assembler.assemblePlayerInfoDto(
-        makePlayer({ seasonPointTotal: 500, memberPointTotal: 100, usedLevel: 0 }),
+        makePlayer({
+          seasonPointTotal: 500,
+          memberPointTotal: 100,
+          usedLevel: 3,
+          usedSeasonPoint: undefined,
+          usedMemberPoint: undefined,
+        }),
         [],
       );
 
@@ -54,53 +62,51 @@ describe('PlayerDtoAssembler', () => {
       expect(dto.useableMemberPoint).toBe(100);
     });
 
-    it('优先勇士分配: usedLevel within seasonLevel uses only season pool', async () => {
-      // seasonLevel=3, usedLevel=2 → usedSeasonLevel=2, usedMemberLevel=0
-      // getSeasonTotalPoint(2) = 100
+    it('usedSeasonPoint reduces only season pool', async () => {
       const dto = await assembler.assemblePlayerInfoDto(
-        makePlayer({ seasonPointTotal: 300, memberPointTotal: 0, usedLevel: 2 }),
+        makePlayer({
+          seasonPointTotal: 300,
+          memberPointTotal: 1000,
+          usedLevel: 2,
+          usedSeasonPoint: 120,
+          usedMemberPoint: 0,
+        }),
         [],
       );
 
-      expect(dto.useableSeasonPoint).toBe(200); // 300 - 100
-      expect(dto.useableMemberPoint).toBe(0); // 0 - getMemberTotalPoint(1)=0
+      expect(dto.useableSeasonPoint).toBe(180);
+      expect(dto.useableMemberPoint).toBe(1000);
     });
 
-    it('usedLevel crosses into member pool', async () => {
-      // seasonLevel=3 (getSeasonTotalPoint(3)=300), memberLevel=3 (getMemberTotalPoint(3)=2050)
-      // usedLevel=5 → usedSeasonLevel=3, usedMemberLevel=2
-      // getMemberTotalPoint(2)=1000
+    it('usedMemberPoint reduces only member pool', async () => {
       const dto = await assembler.assemblePlayerInfoDto(
-        makePlayer({ seasonPointTotal: 300, memberPointTotal: 2050, usedLevel: 5 }),
+        makePlayer({
+          seasonPointTotal: 300,
+          memberPointTotal: 2050,
+          usedLevel: 5,
+          usedSeasonPoint: 0,
+          usedMemberPoint: 450,
+        }),
         [],
       );
 
-      expect(dto.useableSeasonPoint).toBe(0); // 300 - 300
-      expect(dto.useableMemberPoint).toBe(1050); // 2050 - 1000
+      expect(dto.useableSeasonPoint).toBe(300);
+      expect(dto.useableMemberPoint).toBe(1600);
     });
 
-    it('勇士升级波动: useableSeasonPoint decreases, useableMemberPoint increases', async () => {
-      // Before level up: seasonLevel=2 (getSeasonTotalPoint(2)=100), usedLevel=4
-      //   usedSeasonLevel=2, usedMemberLevel=2
-      //   useableSeasonPoint = 200-100 = 100
-      //   useableMemberPoint = 2050-getMemberTotalPoint(2)=2050-1000 = 1050
-      const dtoBefore = await assembler.assemblePlayerInfoDto(
-        makePlayer({ seasonPointTotal: 200, memberPointTotal: 2050, usedLevel: 4 }),
+    it('used point above total clamps available points to 0', async () => {
+      const dto = await assembler.assemblePlayerInfoDto(
+        makePlayer({
+          seasonPointTotal: 200,
+          memberPointTotal: 500,
+          usedSeasonPoint: 300,
+          usedMemberPoint: 600,
+        }),
         [],
       );
-      expect(dtoBefore.useableSeasonPoint).toBe(100);
-      expect(dtoBefore.useableMemberPoint).toBe(1050);
 
-      // After level up: seasonLevel=3 (350 points, getSeasonTotalPoint(3)=300), usedLevel=4
-      //   usedSeasonLevel=3, usedMemberLevel=1 → getMemberTotalPoint(1)=0
-      //   useableSeasonPoint = 350-300 = 50 (decreased)
-      //   useableMemberPoint = 2050-0 = 2050 (increased)
-      const dtoAfter = await assembler.assemblePlayerInfoDto(
-        makePlayer({ seasonPointTotal: 350, memberPointTotal: 2050, usedLevel: 4 }),
-        [],
-      );
-      expect(dtoAfter.useableSeasonPoint).toBe(50);
-      expect(dtoAfter.useableMemberPoint).toBe(2050);
+      expect(dto.useableSeasonPoint).toBe(0);
+      expect(dto.useableMemberPoint).toBe(0);
     });
   });
 });

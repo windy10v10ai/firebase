@@ -19,7 +19,6 @@ import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
-import { Public } from '../util/auth/public.decorator';
 import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
@@ -39,7 +38,6 @@ export class GameController {
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
   ) {}
 
-  @Public()
   @Get('start')
   async start(
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))

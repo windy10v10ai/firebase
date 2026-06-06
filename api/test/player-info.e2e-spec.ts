@@ -5,6 +5,7 @@ import { addPlayerProperty, createPlayer, getPlayerDto } from './util/util-playe
 
 const getPlayerInfoUrl = '/api/player';
 const upgradePlayerPropertyUrl = '/api/player/property';
+const useMemberPointUrl = '/api/player/member-points/use';
 
 // 验证 PlayerDto 包含所有计算字段
 function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
@@ -133,6 +134,66 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.totalLevel).toEqual(4); // 3 + 1 = 4
       expect(playerDto.useableLevel).toEqual(4); // 没有使用任何属性
     });
+
+    describe('可用积分计算', () => {
+      it('新用户没有积分', async () => {
+        const steamId = 200000631;
+        mockDate('2023-12-01T00:00:00.000Z');
+        await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 0 });
+
+        const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+
+        expect(result.status).toEqual(200);
+        expect(result.body.seasonPointTotal).toEqual(0);
+        expect(result.body.useableSeasonPoint).toEqual(0);
+        expect(result.body.memberPointTotal).toEqual(0);
+        expect(result.body.useableMemberPoint).toEqual(0);
+      });
+
+      it('有积分未消耗时可用积分等于总积分，消耗会员积分后相应减少', async () => {
+        const steamId = 200000632;
+        mockDate('2023-12-01T00:00:00.000Z');
+        await createPlayer(app, {
+          steamId,
+          seasonPointTotal: 500,
+          memberPointTotal: 100,
+        });
+
+        const beforeResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+        expect(beforeResult.status).toEqual(200);
+        expect(beforeResult.body.seasonPointTotal).toEqual(500);
+        expect(beforeResult.body.useableSeasonPoint).toEqual(500);
+        expect(beforeResult.body.memberPointTotal).toEqual(100);
+        expect(beforeResult.body.useableMemberPoint).toEqual(100);
+
+        const useResult = await post(app, useMemberPointUrl, {
+          steamId,
+          memberPoint: 25,
+          reason: 'e2e-test',
+        });
+        expect(useResult.status).toEqual(201);
+
+        const afterResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+        expect(afterResult.status).toEqual(200);
+        expect(afterResult.body.memberPointTotal).toEqual(100);
+        expect(afterResult.body.usedMemberPoint).toEqual(25);
+        expect(afterResult.body.useableMemberPoint).toEqual(75);
+        expect(afterResult.body.useableSeasonPoint).toEqual(500);
+      });
+
+      it('消耗会员积分必须至少为 1', async () => {
+        const steamId = 200000633;
+        await createPlayer(app, { steamId, memberPointTotal: 100 });
+
+        const result = await post(app, useMemberPointUrl, {
+          steamId,
+          memberPoint: 0,
+          reason: 'e2e-test',
+        });
+
+        expect(result.status).toEqual(400);
+      });
+    });
   });
 
   describe('PUT /api/player/property 升级玩家属性', () => {
@@ -259,46 +320,44 @@ describe('PlayerInfoController (e2e)', () => {
             totalLevel: 3,
             useableLevel: 0,
             propertyLevel: 3,
-            useableSeasonPoint: 0,
+            useableSeasonPoint: 100,
             useableMemberPoint: 0,
           },
         },
       ],
       [
-        'useableSeasonPoint 减少（season 部分消耗）',
+        '属性升级不影响 useableSeasonPoint',
         {
           steamId: 200000621,
           seasonPointTotal: 300,
           memberPointTotal: 0,
           level: 2,
-          // usedSeasonLevel=2, getSeasonTotalPoint(2)=100 → 300-100=200
           expected: {
             seasonLevel: 3,
             memberLevel: 1,
             totalLevel: 4,
             useableLevel: 2,
             propertyLevel: 2,
-            useableSeasonPoint: 200,
+            useableSeasonPoint: 300,
             useableMemberPoint: 0,
           },
         },
       ],
       [
-        'season 用尽后 useableMemberPoint 减少',
+        '属性升级不影响 useableMemberPoint',
         {
           steamId: 200000622,
           seasonPointTotal: 300,
           memberPointTotal: 2050,
           level: 5,
-          // usedSeasonLevel=3, usedMemberLevel=2, getMemberTotalPoint(2)=1000 → 2050-1000=1050
           expected: {
             seasonLevel: 3,
             memberLevel: 3,
             totalLevel: 6,
             useableLevel: 1,
             propertyLevel: 5,
-            useableSeasonPoint: 0,
-            useableMemberPoint: 1050,
+            useableSeasonPoint: 300,
+            useableMemberPoint: 2050,
           },
         },
       ],
@@ -421,7 +480,12 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000402,
             useMemberPoint: false,
             before: { seasonPointTotal: 200, memberPointTotal: 0 },
-            after: { seasonPointTotal: 0, memberPointTotal: 0 },
+            after: {
+              seasonPointTotal: 200,
+              memberPointTotal: 0,
+              usedSeasonPoint: 200,
+              usedMemberPoint: 0,
+            },
           },
         ],
         [
@@ -430,7 +494,12 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000403,
             useMemberPoint: false,
             before: { seasonPointTotal: 300, memberPointTotal: 1000 },
-            after: { seasonPointTotal: 0, memberPointTotal: 1000 },
+            after: {
+              seasonPointTotal: 300,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 300,
+              usedMemberPoint: 0,
+            },
           },
         ],
         [
@@ -439,7 +508,12 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000412,
             useMemberPoint: true,
             before: { seasonPointTotal: 0, memberPointTotal: 1000 },
-            after: { seasonPointTotal: 0, memberPointTotal: 0 },
+            after: {
+              seasonPointTotal: 0,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 1000,
+            },
           },
         ],
         [
@@ -448,7 +522,12 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000413,
             useMemberPoint: true,
             before: { seasonPointTotal: 999, memberPointTotal: 2000 },
-            after: { seasonPointTotal: 999, memberPointTotal: 1000 },
+            after: {
+              seasonPointTotal: 999,
+              memberPointTotal: 2000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 1000,
+            },
           },
         ],
       ])('%s', async (_, { steamId, useMemberPoint, before, after }) => {
@@ -468,6 +547,8 @@ describe('PlayerInfoController (e2e)', () => {
         const player = result.body;
         expect(player?.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(player?.memberPointTotal).toEqual(after.memberPointTotal);
+        expect(player?.usedSeasonPoint ?? 0).toEqual(after.usedSeasonPoint);
+        expect(player?.usedMemberPoint ?? 0).toEqual(after.usedMemberPoint);
         expect(player?.properties).toHaveLength(0);
         expect(player?.member).toBeUndefined();
       });
