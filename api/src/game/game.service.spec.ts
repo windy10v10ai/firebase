@@ -104,15 +104,11 @@ describe('GameService', () => {
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
 
-    it('should return GA4 config for TENVTEN server', () => {
+    it('should return undefined for TENVTEN server', () => {
       const result = service.getGA4Config(SERVER_TYPE.TENVTEN);
 
-      expect(result).toEqual({
-        measurementId: mockMeasurementId,
-        apiSecret: mockApiSecret,
-        serverType: SERVER_TYPE.TENVTEN,
-      });
-      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
+      expect(result).toBeUndefined();
+      expect(secretService.getSecretValue).not.toHaveBeenCalled();
     });
 
     it('should return undefined for LOCAL server', () => {

@@ -15,9 +15,15 @@ export async function initTest(): Promise<INestApplication> {
   return await app.init();
 }
 
+export function getTestApiKey(): string {
+  return (
+    process.env.SERVER_APIKEY_TEST ?? process.env.SERVER_APIKEY ?? 'Invalid_NotOnDedicatedServer'
+  );
+}
+
 export function get(app: INestApplication, url: string, query: object = {}): request.Test {
   const headers = {
-    'x-api-key': 'Invalid_NotOnDedicatedServer',
+    'x-api-key': getTestApiKey(),
     'x-country-code': 'CN',
   };
   return request(app.getHttpServer()).get(url).query(query).set(headers);
@@ -25,28 +31,28 @@ export function get(app: INestApplication, url: string, query: object = {}): req
 
 export function post(app: INestApplication, url: string, body: object): request.Test {
   const headers = {
-    'x-api-key': 'Invalid_NotOnDedicatedServer',
+    'x-api-key': getTestApiKey(),
   };
   return request(app.getHttpServer()).post(url).send(body).set(headers);
 }
 
 export function put(app: INestApplication, url: string, body: object): request.Test {
   const headers = {
-    'x-api-key': 'Invalid_NotOnDedicatedServer',
+    'x-api-key': getTestApiKey(),
   };
   return request(app.getHttpServer()).put(url).send(body).set(headers);
 }
 
 export function patch(app: INestApplication, url: string, body: object): request.Test {
   const headers = {
-    'x-api-key': 'Invalid_NotOnDedicatedServer',
+    'x-api-key': getTestApiKey(),
   };
   return request(app.getHttpServer()).patch(url).send(body).set(headers);
 }
 
 export function del(app: INestApplication, url: string, query: object = {}): request.Test {
   const headers = {
-    'x-api-key': 'Invalid_NotOnDedicatedServer',
+    'x-api-key': getTestApiKey(),
   };
   return request(app.getHttpServer()).delete(url).query(query).set(headers);
 }

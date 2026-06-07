@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
+import { UsePlayerMemberPointsDto } from './dto/use-player-member-points.dto';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
 
@@ -87,12 +88,40 @@ export class PlayerService {
     const player = await this.getOrNewPlayerBySteamId(steamId);
 
     if (updatePlayerDto.memberPointTotal) {
-      player.memberPointTotal += updatePlayerDto.memberPointTotal;
+      player.memberPointTotal = (player.memberPointTotal ?? 0) + updatePlayerDto.memberPointTotal;
     }
     if (updatePlayerDto.seasonPointTotal) {
-      player.seasonPointTotal += updatePlayerDto.seasonPointTotal;
+      player.seasonPointTotal = (player.seasonPointTotal ?? 0) + updatePlayerDto.seasonPointTotal;
+    }
+    if (updatePlayerDto.usedMemberPoint) {
+      player.usedMemberPoint = (player.usedMemberPoint ?? 0) + updatePlayerDto.usedMemberPoint;
+    }
+    if (updatePlayerDto.usedSeasonPoint) {
+      player.usedSeasonPoint = (player.usedSeasonPoint ?? 0) + updatePlayerDto.usedSeasonPoint;
     }
     return await this.playerRepository.update(player);
+  }
+
+  async useMemberPoint(dto: UsePlayerMemberPointsDto): Promise<Player> {
+    const memberPoint = Math.trunc(dto.memberPoint);
+    if (memberPoint < 1) {
+      throw new BadRequestException();
+    }
+
+    const player = await this.findBySteamId(dto.steamId);
+    if (!player) {
+      throw new BadRequestException();
+    }
+
+    const useableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
+    if (useableMemberPoint < memberPoint) {
+      throw new BadRequestException();
+    }
+
+    player.usedMemberPoint = (player.usedMemberPoint ?? 0) + memberPoint;
+    await this.playerRepository.update(player);
+    await this.analyticsService.playerUsePoint(dto.steamId, memberPoint, true, dto.reason);
+    return player;
   }
 
   // 仅供测试初始化使用，生产代码不应调用；conductPoint 的正常变动走 PlayerConductService。
@@ -149,6 +178,8 @@ export class PlayerService {
       disconnectCount: 0,
       seasonPointTotal: 0,
       memberPointTotal: 0,
+      usedSeasonPoint: 0,
+      usedMemberPoint: 0,
       usedLevel: 0,
       lastMatchTime: null,
       conductPoint: 100,

@@ -30,6 +30,16 @@
       "column_name": "member_point_total"
     },
     {
+      "name": "usedSeasonPoint",
+      "type": "number",
+      "column_name": "used_season_point"
+    },
+    {
+      "name": "usedMemberPoint",
+      "type": "number",
+      "column_name": "used_member_point"
+    },
+    {
       "name": "conductPoint",
       "type": "number",
       "column_name": "conduct_point"

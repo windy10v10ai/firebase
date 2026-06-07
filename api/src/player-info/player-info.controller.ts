@@ -7,13 +7,15 @@ import {
   ParseArrayPipe,
   ParseBoolPipe,
   ParseIntPipe,
+  Post,
   Put,
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { AnalyticsService } from '../analytics/analytics.service';
-import { PlayerPropertyItemDto } from '../player-property/dto/player-property-item.dto';
+import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
+import { PlayerService } from '../player/player.service';
 import { ResetPlayerPropertyDto } from '../player-property/dto/reset-player-property.dto';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -29,6 +31,7 @@ export class PlayerInfoController {
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly analyticsService: AnalyticsService,
+    private readonly playerService: PlayerService,
   ) {}
 
   @Get(':steamId/info')
@@ -45,6 +48,13 @@ export class PlayerInfoController {
     include: PlayerInfoInclude[] = [],
   ): Promise<PlayerInfoDto> {
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, include);
+  }
+
+  @Post('/member-points/use')
+  @ApiOperation({ summary: 'Use available member points' })
+  async useMemberPoint(@Body() dto: UsePlayerMemberPointsDto): Promise<PlayerInfoDto> {
+    await this.playerService.useMemberPoint(dto);
+    return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
   }
 
   @Put(':steamId/property')
@@ -67,14 +77,5 @@ export class PlayerInfoController {
     await this.playerPropertyService.reset(steamId, useMemberPoint);
     await this.analyticsService.playerResetProperty(resetDto);
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
-  }
-
-  /** @deprecated Use PUT /:steamId/property instead */
-  @Put('property')
-  @ApiOperation({ summary: '[Deprecated] Upgrade player property', deprecated: true })
-  async upgradePlayerPropertyDeprecated(
-    @Body() dto: PlayerPropertyItemDto,
-  ): Promise<PlayerInfoDto> {
-    return this.upgradePlayerProperty(dto.steamId, { name: dto.name, level: dto.level });
   }
 }

@@ -20,7 +20,7 @@ import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.serv
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { Public } from '../util/auth/public.decorator';
-import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
+import { SecretService } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
@@ -131,14 +131,12 @@ export class GameController {
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
       this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-      ...(serverType !== SERVER_TYPE.TENVTEN
-        ? players.map((p) =>
-            this.playerStatsLifetimeService.accumulate(p.steamId, p, {
-              matchId: gameEnd.matchId,
-              gameOptions: gameEnd.gameOptions,
-            }),
-          )
-        : []),
+      ...players.map((p) =>
+        this.playerStatsLifetimeService.accumulate(p.steamId, p, {
+          matchId: gameEnd.matchId,
+          gameOptions: gameEnd.gameOptions,
+        }),
+      ),
     ]);
     return this.gameService.getOK();
   }

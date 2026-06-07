@@ -68,6 +68,24 @@ export class AnalyticsService {
     });
   }
 
+  async playerUsePoint(
+    steamId: number,
+    points: number,
+    useMemberPoint: boolean,
+    reason: string,
+  ): Promise<void> {
+    await this.sendEvent(steamId.toString(), {
+      name: 'player_use_point',
+      params: {
+        steam_id: steamId,
+        use_member_point: useMemberPoint,
+        point: points,
+        points,
+        reason,
+      },
+    });
+  }
+
   async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
     await Promise.all(
       dto.players.map(async (player) => {
