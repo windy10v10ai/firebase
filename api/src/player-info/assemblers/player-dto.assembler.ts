@@ -58,16 +58,19 @@ export class PlayerDtoAssembler {
   }
 
   private calculateLevelData(dto: PlayerInfoDto): void {
-    const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(dto.seasonPointTotal);
+    const seasonPointTotal = dto.seasonPointTotal ?? 0;
+    const memberPointTotal = dto.memberPointTotal ?? 0;
+
+    const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(seasonPointTotal);
     dto.seasonLevel = seasonLevel;
     dto.seasonCurrrentLevelPoint =
-      dto.seasonPointTotal - PlayerLevelHelper.getSeasonTotalPoint(seasonLevel);
+      seasonPointTotal - PlayerLevelHelper.getSeasonTotalPoint(seasonLevel);
     dto.seasonNextLevelPoint = PlayerLevelHelper.getSeasonNextLevelPoint(seasonLevel);
 
-    const memberLevel = PlayerLevelHelper.getMemberLevelBuyPoint(dto.memberPointTotal);
+    const memberLevel = PlayerLevelHelper.getMemberLevelBuyPoint(memberPointTotal);
     dto.memberLevel = memberLevel;
     dto.memberCurrentLevelPoint =
-      dto.memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(memberLevel);
+      memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(memberLevel);
     dto.memberNextLevelPoint = PlayerLevelHelper.getMemberNextLevelPoint(memberLevel);
 
     dto.totalLevel = seasonLevel + memberLevel;
@@ -78,13 +81,7 @@ export class PlayerDtoAssembler {
   }
 
   private calculateUseablePoints(dto: PlayerInfoDto): void {
-    const usedLevel = dto.usedLevel ?? 0;
-    const usedSeasonLevel = Math.min(usedLevel, dto.seasonLevel);
-    const usedMemberLevel = usedLevel - usedSeasonLevel;
-
-    dto.useableSeasonPoint =
-      dto.seasonPointTotal - PlayerLevelHelper.getSeasonTotalPoint(usedSeasonLevel);
-    dto.useableMemberPoint =
-      dto.memberPointTotal - PlayerLevelHelper.getMemberTotalPoint(usedMemberLevel);
+    dto.useableSeasonPoint = Math.max(0, (dto.seasonPointTotal ?? 0) - (dto.usedSeasonPoint ?? 0));
+    dto.useableMemberPoint = Math.max(0, (dto.memberPointTotal ?? 0) - (dto.usedMemberPoint ?? 0));
   }
 }

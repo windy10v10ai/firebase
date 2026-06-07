@@ -4,7 +4,8 @@ import { del, get, initTest, mockDate, post, put, restoreDate } from './util/uti
 import { addPlayerProperty, createPlayer, getPlayerDto } from './util/util-player';
 
 const getPlayerInfoUrl = '/api/player';
-const upgradePlayerPropertyUrl = '/api/player/property';
+const upgradePlayerPropertyUrl = (steamId: number) => `/api/player/${steamId}/property`;
+const useMemberPointUrl = '/api/player/member-points/use';
 
 // 验证 PlayerDto 包含所有计算字段
 function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
@@ -133,9 +134,73 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.totalLevel).toEqual(4); // 3 + 1 = 4
       expect(playerDto.useableLevel).toEqual(4); // 没有使用任何属性
     });
+
+    describe('可用积分计算', () => {
+      it('新用户没有积分', async () => {
+        const steamId = 200000631;
+        mockDate('2023-12-01T00:00:00.000Z');
+        await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 0 });
+
+        const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+
+        expect(result.status).toEqual(200);
+        expect(result.body.seasonPointTotal).toEqual(0);
+        expect(result.body.useableSeasonPoint).toEqual(0);
+        expect(result.body.memberPointTotal).toEqual(0);
+        expect(result.body.useableMemberPoint).toEqual(0);
+      });
+
+      it('有积分未消耗时可用积分等于总积分，消耗会员积分后相应减少', async () => {
+        const steamId = 200000632;
+        mockDate('2023-12-01T00:00:00.000Z');
+        await createPlayer(app, {
+          steamId,
+          seasonPointTotal: 500,
+          memberPointTotal: 100,
+        });
+
+        const beforeResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+        expect(beforeResult.status).toEqual(200);
+        expect(beforeResult.body.seasonPointTotal).toEqual(500);
+        expect(beforeResult.body.useableSeasonPoint).toEqual(500);
+        expect(beforeResult.body.memberPointTotal).toEqual(100);
+        expect(beforeResult.body.useableMemberPoint).toEqual(100);
+
+        const useResult = await post(app, useMemberPointUrl, {
+          steamId,
+          memberPoint: 25,
+          reason: 'e2e-test',
+        });
+        expect(useResult.status).toEqual(201);
+        expect(useResult.body.memberPointTotal).toEqual(100);
+        expect(useResult.body.usedMemberPoint).toEqual(25);
+        expect(useResult.body.useableMemberPoint).toEqual(75);
+        expect(useResult.body.useableSeasonPoint).toEqual(500);
+
+        const afterResult = await get(app, `${getPlayerInfoUrl}/${steamId}/info`);
+        expect(afterResult.status).toEqual(200);
+        expect(afterResult.body.memberPointTotal).toEqual(100);
+        expect(afterResult.body.usedMemberPoint).toEqual(25);
+        expect(afterResult.body.useableMemberPoint).toEqual(75);
+        expect(afterResult.body.useableSeasonPoint).toEqual(500);
+      });
+
+      it('消耗会员积分必须至少为 1', async () => {
+        const steamId = 200000633;
+        await createPlayer(app, { steamId, memberPointTotal: 100 });
+
+        const result = await post(app, useMemberPointUrl, {
+          steamId,
+          memberPoint: 0,
+          reason: 'e2e-test',
+        });
+
+        expect(result.status).toEqual(400);
+      });
+    });
   });
 
-  describe('PUT /api/player/property 升级玩家属性', () => {
+  describe('PUT /api/player/:steamId/property 升级玩家属性', () => {
     beforeEach(() => {
       mockDate('2023-12-01T00:00:00.000Z');
     });
@@ -150,8 +215,7 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 添加属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 2,
       });
@@ -181,15 +245,13 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 添加第一个属性
-      await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 1,
       });
 
       // 添加第二个属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_attackspeed_bonus_constant',
         level: 2,
       });
@@ -208,15 +270,13 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 第一次添加属性
-      await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 2,
       });
 
       // 第二次升级同一属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 3,
       });
@@ -259,54 +319,51 @@ describe('PlayerInfoController (e2e)', () => {
             totalLevel: 3,
             useableLevel: 0,
             propertyLevel: 3,
-            useableSeasonPoint: 0,
+            useableSeasonPoint: 100,
             useableMemberPoint: 0,
           },
         },
       ],
       [
-        'useableSeasonPoint 减少（season 部分消耗）',
+        '属性升级不影响 useableSeasonPoint',
         {
           steamId: 200000621,
           seasonPointTotal: 300,
           memberPointTotal: 0,
           level: 2,
-          // usedSeasonLevel=2, getSeasonTotalPoint(2)=100 → 300-100=200
           expected: {
             seasonLevel: 3,
             memberLevel: 1,
             totalLevel: 4,
             useableLevel: 2,
             propertyLevel: 2,
-            useableSeasonPoint: 200,
+            useableSeasonPoint: 300,
             useableMemberPoint: 0,
           },
         },
       ],
       [
-        'season 用尽后 useableMemberPoint 减少',
+        '属性升级不影响 useableMemberPoint',
         {
           steamId: 200000622,
           seasonPointTotal: 300,
           memberPointTotal: 2050,
           level: 5,
-          // usedSeasonLevel=3, usedMemberLevel=2, getMemberTotalPoint(2)=1000 → 2050-1000=1050
           expected: {
             seasonLevel: 3,
             memberLevel: 3,
             totalLevel: 6,
             useableLevel: 1,
             propertyLevel: 5,
-            useableSeasonPoint: 0,
-            useableMemberPoint: 1050,
+            useableSeasonPoint: 300,
+            useableMemberPoint: 2050,
           },
         },
       ],
     ])('%s', async (_, { steamId, seasonPointTotal, memberPointTotal, level, expected }) => {
       await createPlayer(app, { steamId, seasonPointTotal, memberPointTotal });
 
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level,
       });
@@ -336,8 +393,7 @@ describe('PlayerInfoController (e2e)', () => {
       });
 
       // 第一次添加属性 level = 1
-      const firstResult = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const firstResult = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 1,
       });
@@ -348,8 +404,7 @@ describe('PlayerInfoController (e2e)', () => {
       expect(firstPlayerDto.useableLevel).toEqual(2); // 3 - 1 = 2
 
       // 第二次添加同一属性到 level = 3，刚好用尽剩余点数
-      const secondResult = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const secondResult = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: 'property_cooldown_percentage',
         level: 3, // 从 level 1 升级到 level 3，增加 2 点，刚好用尽
       });
@@ -390,8 +445,7 @@ describe('PlayerInfoController (e2e)', () => {
 
       // 执行前置操作（如果有）
       for (const prop of setupProperties) {
-        const firstResult = await put(app, upgradePlayerPropertyUrl, {
-          steamId,
+        const firstResult = await put(app, upgradePlayerPropertyUrl(steamId), {
           name: prop.name,
           level: prop.level,
         });
@@ -402,8 +456,7 @@ describe('PlayerInfoController (e2e)', () => {
       }
 
       // 尝试添加应该报错的属性
-      const result = await put(app, upgradePlayerPropertyUrl, {
-        steamId,
+      const result = await put(app, upgradePlayerPropertyUrl(steamId), {
         name: errorProperty.name,
         level: errorProperty.level,
       });
@@ -468,6 +521,8 @@ describe('PlayerInfoController (e2e)', () => {
         const player = result.body;
         expect(player?.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(player?.memberPointTotal).toEqual(after.memberPointTotal);
+        expect(player?.usedSeasonPoint ?? 0).toEqual(0);
+        expect(player?.usedMemberPoint ?? 0).toEqual(0);
         expect(player?.properties).toHaveLength(0);
         expect(player?.member).toBeUndefined();
       });

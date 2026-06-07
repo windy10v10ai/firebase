@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
+import { get, getTestApiKey, initTest, mockDate, post, restoreDate } from './util/util-http';
 import {
   addPlayerProperty,
   createPlayer,
@@ -16,7 +16,7 @@ const gameEndUrl = '/api/game/end';
 const memberPostUrl = '/api/members/';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
-  const apiKey = 'Invalid_NotOnDedicatedServer';
+  const apiKey = getTestApiKey();
   const countryCode = 'CN';
   const headers = {
     'x-api-key': apiKey,
@@ -113,6 +113,15 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
+    it('未携带 API key 时允许开始游戏', async () => {
+      mockDate('2023-12-01T00:00:00.000Z');
+      const result = await request(app.getHttpServer())
+        .get(gameStartUrl)
+        .query({ steamIds: [100000000], matchId });
+
+      expect(result.status).toEqual(200);
+    });
+
     describe('单人开始', () => {
       it('普通玩家 新玩家 首次', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
@@ -445,7 +454,7 @@ describe('PlayerController (e2e)', () => {
 
       it('steamIds刚好10个应正常返回', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
-        const steamIds = Array.from({ length: 10 }, (_, i) => 200000101 + i);
+        const steamIds = Array.from({ length: 10 }, (_, i) => 100004001 + i);
 
         const result = await callGameStart(app, steamIds);
         expect(result.status).toEqual(200);
@@ -741,7 +750,7 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('Tenvten API Key', () => {
-    it('游戏结算 使用 Tenvten API Key 应该返回 201', async () => {
+    it('游戏结算 使用 Tenvten API Key 应该返回 401', async () => {
       const headers = {
         'x-api-key': 'tenvten-apikey',
       };
@@ -758,7 +767,7 @@ describe('PlayerController (e2e)', () => {
           steamId: 0,
         })
         .set(headers);
-      expect(result.status).toEqual(201);
+      expect(result.status).toEqual(401);
     });
   });
 
@@ -998,17 +1007,6 @@ describe('PlayerController (e2e)', () => {
       const stats2 = await getPlayerStatsLifetime(app, steamId2);
       expect(stats1.kills).toEqual(5);
       expect(stats2.kills).toEqual(5);
-    });
-
-    it('使用 Tenvten API Key 不写入 statsLifetime', async () => {
-      const steamId = 100003021;
-      await request(app.getHttpServer())
-        .post(gameEndUrl)
-        .send(createGameEndPayload({ players: [{ steamId }] }))
-        .set({ 'x-api-key': 'tenvten-apikey' });
-
-      const stats = await getPlayerStatsLifetime(app, steamId);
-      expect(stats).toBeNull();
     });
 
     it('异常超大字段会被跳过，但其他字段继续累计', async () => {
