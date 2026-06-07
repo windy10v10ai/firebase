@@ -117,7 +117,8 @@ export class AnalyticsPurchaseService {
   }
 
   async alipayPurchase(order: AlipayOrder) {
-    const price = order.totalAmountCent / 100;
+    const totalAmount = order.totalAmountCent / 100;
+    const unitPrice = totalAmount / order.quantity;
 
     const event: PurchaseEvent = {
       name: 'purchase',
@@ -127,7 +128,7 @@ export class AnalyticsPurchaseService {
             item_id: order.productCode,
             item_name: `alipay-${order.productCode}`,
             affiliation: 'alipay',
-            price,
+            price: unitPrice,
             currency: 'CNY',
             quantity: order.quantity,
           },
@@ -135,7 +136,7 @@ export class AnalyticsPurchaseService {
         affiliation: 'alipay',
         currency: 'CNY',
         transaction_id: order.outTradeNo,
-        value: price,
+        value: totalAmount,
       },
     };
 
