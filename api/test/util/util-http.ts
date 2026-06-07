@@ -17,10 +17,7 @@ export async function initTest(): Promise<INestApplication> {
 
 export function getTestApiKey(): string {
   return (
-    process.env.SERVER_APIKEY_TEST ??
-    process.env.SERVER_APIKEY ??
-    process.env.SERVER_APIKEY_TENVTEN ??
-    'Invalid_NotOnDedicatedServer'
+    process.env.SERVER_APIKEY_TEST ?? process.env.SERVER_APIKEY ?? 'Invalid_NotOnDedicatedServer'
   );
 }
 

@@ -750,7 +750,7 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('Tenvten API Key', () => {
-    it('游戏结算 使用 Tenvten API Key 应该返回 201', async () => {
+    it('游戏结算 使用 Tenvten API Key 应该返回 401', async () => {
       const headers = {
         'x-api-key': 'tenvten-apikey',
       };
@@ -767,7 +767,7 @@ describe('PlayerController (e2e)', () => {
           steamId: 0,
         })
         .set(headers);
-      expect(result.status).toEqual(201);
+      expect(result.status).toEqual(401);
     });
   });
 
