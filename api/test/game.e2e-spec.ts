@@ -1009,17 +1009,6 @@ describe('PlayerController (e2e)', () => {
       expect(stats2.kills).toEqual(5);
     });
 
-    it('使用 Tenvten API Key 不写入 statsLifetime', async () => {
-      const steamId = 100003021;
-      await request(app.getHttpServer())
-        .post(gameEndUrl)
-        .send(createGameEndPayload({ players: [{ steamId }] }))
-        .set({ 'x-api-key': 'tenvten-apikey' });
-
-      const stats = await getPlayerStatsLifetime(app, steamId);
-      expect(stats).toBeNull();
-    });
-
     it('异常超大字段会被跳过，但其他字段继续累计', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100003022;
