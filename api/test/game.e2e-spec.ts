@@ -750,7 +750,7 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('Tenvten API Key', () => {
-    it('游戏结算 使用 Tenvten API Key 应该返回 201', async () => {
+    it('游戏结算 使用 Tenvten API Key 应该返回 401', async () => {
       const headers = {
         'x-api-key': 'tenvten-apikey',
       };
@@ -767,7 +767,7 @@ describe('PlayerController (e2e)', () => {
           steamId: 0,
         })
         .set(headers);
-      expect(result.status).toEqual(201);
+      expect(result.status).toEqual(401);
     });
   });
 
@@ -1007,17 +1007,6 @@ describe('PlayerController (e2e)', () => {
       const stats2 = await getPlayerStatsLifetime(app, steamId2);
       expect(stats1.kills).toEqual(5);
       expect(stats2.kills).toEqual(5);
-    });
-
-    it('使用 Tenvten API Key 不写入 statsLifetime', async () => {
-      const steamId = 100003021;
-      await request(app.getHttpServer())
-        .post(gameEndUrl)
-        .send(createGameEndPayload({ players: [{ steamId }] }))
-        .set({ 'x-api-key': 'tenvten-apikey' });
-
-      const stats = await getPlayerStatsLifetime(app, steamId);
-      expect(stats).toBeNull();
     });
 
     it('异常超大字段会被跳过，但其他字段继续累计', async () => {
