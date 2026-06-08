@@ -46,9 +46,16 @@ Backend for [Windy 10v10ai](https://github.com/windy10v10ai/firebase) with Fireb
   - Recommend install node use [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 
 ```bash
-# set/update node version
+# set/update node version (Linux / macOS, nvm-sh reads .nvmrc)
 nvm install
+nvm use
 nvm alias default $(cat .nvmrc)
+```
+
+```powershell
+# set/update node version (Windows, nvm-windows needs explicit version)
+nvm install $(Get-Content .nvmrc)
+nvm use $(Get-Content .nvmrc)
 ```
 
 ```bash

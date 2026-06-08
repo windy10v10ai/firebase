@@ -81,7 +81,7 @@ export class AnalyticsService {
         use_member_point: useMemberPoint,
         point: points,
         points,
-        reason,
+        type: reason,
       },
     });
   }
