@@ -7,7 +7,6 @@ import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.servic
 import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
-import { PlayerLanguageListDto } from './dto/player-language-dto';
 
 export interface Event {
   name: string;
@@ -22,9 +21,6 @@ export interface Event {
 
 interface UserProperties {
   country?: {
-    value: string;
-  };
-  language?: {
     value: string;
   };
 }
@@ -84,27 +80,6 @@ export class AnalyticsService {
         type: reason,
       },
     });
-  }
-
-  async trackPlayerLanguage(dto: PlayerLanguageListDto, serverType: SERVER_TYPE) {
-    await Promise.all(
-      dto.players.map(async (player) => {
-        const event = await this.buildEvent('player_language', player.steamId, dto.matchId, {
-          steam_id: player.steamId,
-          language: player.language,
-          version: dto.version,
-          server_type: serverType,
-        });
-
-        const userProperties = {
-          language: {
-            value: player.language,
-          },
-        };
-
-        await this.sendEvent(player.steamId.toString(), event, userProperties);
-      }),
-    );
   }
 
   // ------------------------ 通过game end API调用 ------------------------
