@@ -24,6 +24,10 @@ describe('PlayerSettingController (e2e)', () => {
         activeAbilityQuickCast: false,
         passiveAbilityQuickCast: false,
         passiveAbilityQuickCast2: false,
+        wardObserverKey: '',
+        wardObserverQuickCast: false,
+        wardSentryKey: '',
+        wardSentryQuickCast: false,
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
       });
@@ -39,6 +43,10 @@ describe('PlayerSettingController (e2e)', () => {
         activeAbilityQuickCast: true,
         passiveAbilityQuickCast: true,
         passiveAbilityQuickCast2: false,
+        wardObserverKey: 'Y',
+        wardObserverQuickCast: true,
+        wardSentryKey: 'U',
+        wardSentryQuickCast: false,
       };
 
       const response = await put(app, `${playerUrl}/${testPlayer}/setting`, updateData);
@@ -60,6 +68,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast2).toEqual(false);
+      expect(playerSetting.wardObserverKey).toEqual('Y');
+      expect(playerSetting.wardObserverQuickCast).toEqual(true);
+      expect(playerSetting.wardSentryKey).toEqual('U');
+      expect(playerSetting.wardSentryQuickCast).toEqual(false);
     });
 
     it('更新玩家设置 - 默认不记住快捷键但保留快速施法', async () => {
@@ -72,6 +84,10 @@ describe('PlayerSettingController (e2e)', () => {
         activeAbilityQuickCast: true,
         passiveAbilityQuickCast: false,
         passiveAbilityQuickCast2: true,
+        wardObserverKey: 'Y',
+        wardObserverQuickCast: true,
+        wardSentryKey: 'U',
+        wardSentryQuickCast: true,
       });
 
       expect(response.status).toEqual(200);
@@ -85,6 +101,10 @@ describe('PlayerSettingController (e2e)', () => {
           activeAbilityQuickCast: true,
           passiveAbilityQuickCast: false,
           passiveAbilityQuickCast2: true,
+          wardObserverKey: '',
+          wardObserverQuickCast: true,
+          wardSentryKey: '',
+          wardSentryQuickCast: true,
         }),
       );
 
@@ -98,6 +118,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast).toEqual(false);
       expect(playerSetting.passiveAbilityQuickCast2).toEqual(true);
+      expect(playerSetting.wardObserverKey).toEqual('');
+      expect(playerSetting.wardObserverQuickCast).toEqual(true);
+      expect(playerSetting.wardSentryKey).toEqual('');
+      expect(playerSetting.wardSentryQuickCast).toEqual(true);
     });
 
     it('更新玩家设置 - 记忆快捷键后，再取消记忆快捷键但保留快速施法', async () => {
@@ -111,6 +135,10 @@ describe('PlayerSettingController (e2e)', () => {
         activeAbilityQuickCast: true,
         passiveAbilityQuickCast: false,
         passiveAbilityQuickCast2: true,
+        wardObserverKey: 'Y',
+        wardObserverQuickCast: true,
+        wardSentryKey: 'U',
+        wardSentryQuickCast: true,
       });
 
       // 设置不记住快捷键
@@ -130,6 +158,10 @@ describe('PlayerSettingController (e2e)', () => {
           activeAbilityQuickCast: true,
           passiveAbilityQuickCast: false,
           passiveAbilityQuickCast2: true,
+          wardObserverKey: '',
+          wardObserverQuickCast: true,
+          wardSentryKey: '',
+          wardSentryQuickCast: true,
         }),
       );
 
@@ -143,6 +175,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.activeAbilityQuickCast).toEqual(true);
       expect(playerSetting.passiveAbilityQuickCast).toEqual(false);
       expect(playerSetting.passiveAbilityQuickCast2).toEqual(true);
+      expect(playerSetting.wardObserverKey).toEqual('');
+      expect(playerSetting.wardObserverQuickCast).toEqual(true);
+      expect(playerSetting.wardSentryKey).toEqual('');
+      expect(playerSetting.wardSentryQuickCast).toEqual(true);
     });
   });
 
