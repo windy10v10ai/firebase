@@ -30,6 +30,12 @@ export class PlayerSettingService {
     if (updatePlayerSettingDto.passiveAbilityQuickCast2 !== undefined) {
       setting.passiveAbilityQuickCast2 = updatePlayerSettingDto.passiveAbilityQuickCast2;
     }
+    if (updatePlayerSettingDto.wardObserverQuickCast !== undefined) {
+      setting.wardObserverQuickCast = updatePlayerSettingDto.wardObserverQuickCast;
+    }
+    if (updatePlayerSettingDto.wardSentryQuickCast !== undefined) {
+      setting.wardSentryQuickCast = updatePlayerSettingDto.wardSentryQuickCast;
+    }
     if (setting.isRememberAbilityKey) {
       if (updatePlayerSettingDto.activeAbilityKey !== undefined) {
         setting.activeAbilityKey = updatePlayerSettingDto.activeAbilityKey;
@@ -40,10 +46,18 @@ export class PlayerSettingService {
       if (updatePlayerSettingDto.passiveAbilityKey2 !== undefined) {
         setting.passiveAbilityKey2 = updatePlayerSettingDto.passiveAbilityKey2;
       }
+      if (updatePlayerSettingDto.wardObserverKey !== undefined) {
+        setting.wardObserverKey = updatePlayerSettingDto.wardObserverKey;
+      }
+      if (updatePlayerSettingDto.wardSentryKey !== undefined) {
+        setting.wardSentryKey = updatePlayerSettingDto.wardSentryKey;
+      }
     } else {
       setting.activeAbilityKey = '';
       setting.passiveAbilityKey = '';
       setting.passiveAbilityKey2 = '';
+      setting.wardObserverKey = '';
+      setting.wardSentryKey = '';
     }
     setting.updatedAt = new Date();
     return this.playerSettingRepository.update(setting);
@@ -68,6 +82,10 @@ export class PlayerSettingService {
       activeAbilityQuickCast: false,
       passiveAbilityQuickCast: false,
       passiveAbilityQuickCast2: false,
+      wardObserverKey: '',
+      wardObserverQuickCast: false,
+      wardSentryKey: '',
+      wardSentryQuickCast: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

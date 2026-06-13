@@ -25,6 +25,16 @@ export class PlayerSetting {
   @ApiProperty()
   passiveAbilityQuickCast2: boolean;
 
+  // 真假眼改键
+  @ApiProperty({ required: false })
+  wardObserverKey?: string;
+  @ApiProperty({ required: false })
+  wardObserverQuickCast?: boolean;
+  @ApiProperty({ required: false })
+  wardSentryKey?: string;
+  @ApiProperty({ required: false })
+  wardSentryQuickCast?: boolean;
+
   // 为未来其他设置预留
 
   @Exclude()
