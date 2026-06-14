@@ -473,8 +473,18 @@ describe('PlayerInfoController (e2e)', () => {
           {
             steamId: 200000402,
             useMemberPoint: false,
-            before: { seasonPointTotal: 200, memberPointTotal: 0 },
-            after: { seasonPointTotal: 0, memberPointTotal: 0 },
+            before: {
+              seasonPointTotal: 200,
+              memberPointTotal: 0,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 0,
+            },
+            after: {
+              seasonPointTotal: 200,
+              memberPointTotal: 0,
+              usedSeasonPoint: 200,
+              usedMemberPoint: 0,
+            },
           },
         ],
         [
@@ -482,8 +492,18 @@ describe('PlayerInfoController (e2e)', () => {
           {
             steamId: 200000403,
             useMemberPoint: false,
-            before: { seasonPointTotal: 300, memberPointTotal: 1000 },
-            after: { seasonPointTotal: 0, memberPointTotal: 1000 },
+            before: {
+              seasonPointTotal: 300,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 0,
+            },
+            after: {
+              seasonPointTotal: 300,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 300,
+              usedMemberPoint: 0,
+            },
           },
         ],
         [
@@ -491,17 +511,37 @@ describe('PlayerInfoController (e2e)', () => {
           {
             steamId: 200000412,
             useMemberPoint: true,
-            before: { seasonPointTotal: 0, memberPointTotal: 1000 },
-            after: { seasonPointTotal: 0, memberPointTotal: 0 },
+            before: {
+              seasonPointTotal: 0,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 0,
+            },
+            after: {
+              seasonPointTotal: 0,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 1000,
+            },
           },
         ],
         [
-          '使用会员积分，重置',
+          '使用会员积分，重置（总积分充足但已用部分积分）',
           {
             steamId: 200000413,
             useMemberPoint: true,
-            before: { seasonPointTotal: 999, memberPointTotal: 2000 },
-            after: { seasonPointTotal: 999, memberPointTotal: 1000 },
+            before: {
+              seasonPointTotal: 999,
+              memberPointTotal: 2000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 500,
+            },
+            after: {
+              seasonPointTotal: 999,
+              memberPointTotal: 2000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 1500,
+            },
           },
         ],
       ])('%s', async (_, { steamId, useMemberPoint, before, after }) => {
@@ -509,6 +549,8 @@ describe('PlayerInfoController (e2e)', () => {
           steamId,
           seasonPointTotal: before.seasonPointTotal,
           memberPointTotal: before.memberPointTotal,
+          usedSeasonPoint: before.usedSeasonPoint,
+          usedMemberPoint: before.usedMemberPoint,
         });
 
         await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
@@ -521,8 +563,8 @@ describe('PlayerInfoController (e2e)', () => {
         const player = result.body;
         expect(player?.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(player?.memberPointTotal).toEqual(after.memberPointTotal);
-        expect(player?.usedSeasonPoint ?? 0).toEqual(0);
-        expect(player?.usedMemberPoint ?? 0).toEqual(0);
+        expect(player?.usedSeasonPoint ?? 0).toEqual(after.usedSeasonPoint);
+        expect(player?.usedMemberPoint ?? 0).toEqual(after.usedMemberPoint);
         expect(player?.properties).toHaveLength(0);
         expect(player?.member).toBeUndefined();
       });
@@ -540,24 +582,44 @@ describe('PlayerInfoController (e2e)', () => {
         expect(result.status).toEqual(400);
       });
 
-      // 积分不足
+      // 可用积分不足
       it.each([
         [
-          '使用勇士积分，积分不足',
+          '使用勇士积分，总积分充足但可用积分不足',
           {
             steamId: 200000401,
             useMemberPoint: false,
-            before: { seasonPointTotal: 199, memberPointTotal: 0 },
-            after: { seasonPointTotal: 199, memberPointTotal: 0 },
+            before: {
+              seasonPointTotal: 200,
+              memberPointTotal: 0,
+              usedSeasonPoint: 1,
+              usedMemberPoint: 0,
+            },
+            after: {
+              seasonPointTotal: 200,
+              memberPointTotal: 0,
+              usedSeasonPoint: 1,
+              usedMemberPoint: 0,
+            },
           },
         ],
         [
-          '使用会员积分，积分不足',
+          '使用会员积分，总积分充足但可用积分不足',
           {
             steamId: 200000411,
             useMemberPoint: true,
-            before: { seasonPointTotal: 0, memberPointTotal: 999 },
-            after: { seasonPointTotal: 0, memberPointTotal: 999 },
+            before: {
+              seasonPointTotal: 0,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 1,
+            },
+            after: {
+              seasonPointTotal: 0,
+              memberPointTotal: 1000,
+              usedSeasonPoint: 0,
+              usedMemberPoint: 1,
+            },
           },
         ],
       ])('%s', async (_, { steamId, useMemberPoint, before, after }) => {
@@ -565,6 +627,8 @@ describe('PlayerInfoController (e2e)', () => {
           steamId,
           seasonPointTotal: before.seasonPointTotal,
           memberPointTotal: before.memberPointTotal,
+          usedSeasonPoint: before.usedSeasonPoint,
+          usedMemberPoint: before.usedMemberPoint,
         });
 
         await addPlayerProperty(app, steamId, 'property_cooldown_percentage', 1);
@@ -577,6 +641,8 @@ describe('PlayerInfoController (e2e)', () => {
         const playerDto = await getPlayerDto(app, steamId);
         expect(playerDto.seasonPointTotal).toEqual(after.seasonPointTotal);
         expect(playerDto.memberPointTotal).toEqual(after.memberPointTotal);
+        expect(playerDto.usedSeasonPoint ?? 0).toEqual(after.usedSeasonPoint);
+        expect(playerDto.usedMemberPoint ?? 0).toEqual(after.usedMemberPoint);
         expect(playerDto.properties).toHaveLength(1);
       });
     });

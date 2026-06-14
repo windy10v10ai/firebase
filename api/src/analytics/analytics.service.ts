@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
-import { ResetPlayerPropertyDto } from '../player-property/dto/reset-player-property.dto';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { PurchaseEvent } from './analytics.purchase.service';
@@ -52,16 +51,6 @@ export class AnalyticsService {
         await this.sendEvent(steamId.toString(), event);
       }),
     );
-  }
-
-  async playerResetProperty(dto: ResetPlayerPropertyDto): Promise<void> {
-    await this.sendEvent(dto.steamId.toString(), {
-      name: 'player_reset_property',
-      params: {
-        steam_id: dto.steamId,
-        use_member_point: dto.useMemberPoint,
-      },
-    });
   }
 
   async playerUsePoint(
