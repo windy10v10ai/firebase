@@ -64,21 +64,27 @@ export class GameService {
   }
 
   // 活动赠送勇士积分/会员
-  async giveEventReward(steamIds: number[]): Promise<PointInfoDto[]> {
+  async giveEventReward(steamIds: number[], serverType: SERVER_TYPE): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    const startTime = new Date('2026-04-29T00:00:00.000Z');
-    const endTime = new Date('2026-05-10T23:59:59.999Z');
-    const seasonRewardPoint = 5100;
+    // FIXME 活动每次需要更新
+    const startTime = new Date('2026-06-18T00:00:00.000Z');
+    const endTime = new Date('2026-06-22T23:59:59.999Z');
+    const seasonRewardPoint = 5000;
 
     const now = new Date();
+
+    // 仅windy主机参与活动
+    if (serverType !== SERVER_TYPE.WINDY) {
+      return pointInfoDtos;
+    }
 
     // 获取玩家奖励记录
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= startTime && now <= endTime && !rewardResult.result?.mayDay2026) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.dragonBoat2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: seasonRewardPoint,
         });
@@ -86,8 +92,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '五一快乐！',
-            en: 'Happy May Day!',
+            cn: '端午节快乐！',
+            en: 'Dragon Boat Festival Bonus!',
           },
           seasonPoint: seasonRewardPoint,
         });
