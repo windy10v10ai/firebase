@@ -484,6 +484,8 @@ describe('PlayerInfoController (e2e)', () => {
               memberPointTotal: 0,
               usedSeasonPoint: 200,
               usedMemberPoint: 0,
+              useableSeasonPoint: 0,
+              useableMemberPoint: 0,
             },
           },
         ],
@@ -503,6 +505,8 @@ describe('PlayerInfoController (e2e)', () => {
               memberPointTotal: 1000,
               usedSeasonPoint: 300,
               usedMemberPoint: 0,
+              useableSeasonPoint: 0,
+              useableMemberPoint: 1000,
             },
           },
         ],
@@ -522,6 +526,8 @@ describe('PlayerInfoController (e2e)', () => {
               memberPointTotal: 1000,
               usedSeasonPoint: 0,
               usedMemberPoint: 1000,
+              useableSeasonPoint: 0,
+              useableMemberPoint: 0,
             },
           },
         ],
@@ -541,6 +547,8 @@ describe('PlayerInfoController (e2e)', () => {
               memberPointTotal: 2000,
               usedSeasonPoint: 0,
               usedMemberPoint: 1500,
+              useableSeasonPoint: 999,
+              useableMemberPoint: 500,
             },
           },
         ],
@@ -565,6 +573,8 @@ describe('PlayerInfoController (e2e)', () => {
         expect(player?.memberPointTotal).toEqual(after.memberPointTotal);
         expect(player?.usedSeasonPoint ?? 0).toEqual(after.usedSeasonPoint);
         expect(player?.usedMemberPoint ?? 0).toEqual(after.usedMemberPoint);
+        expect(player?.useableSeasonPoint).toEqual(after.useableSeasonPoint);
+        expect(player?.useableMemberPoint).toEqual(after.useableMemberPoint);
         expect(player?.properties).toHaveLength(0);
         expect(player?.member).toBeUndefined();
       });
@@ -600,6 +610,8 @@ describe('PlayerInfoController (e2e)', () => {
               memberPointTotal: 0,
               usedSeasonPoint: 1,
               usedMemberPoint: 0,
+              useableSeasonPoint: 199,
+              useableMemberPoint: 0,
             },
           },
         ],
@@ -619,6 +631,8 @@ describe('PlayerInfoController (e2e)', () => {
               memberPointTotal: 1000,
               usedSeasonPoint: 0,
               usedMemberPoint: 1,
+              useableSeasonPoint: 0,
+              useableMemberPoint: 999,
             },
           },
         ],
@@ -643,6 +657,8 @@ describe('PlayerInfoController (e2e)', () => {
         expect(playerDto.memberPointTotal).toEqual(after.memberPointTotal);
         expect(playerDto.usedSeasonPoint ?? 0).toEqual(after.usedSeasonPoint);
         expect(playerDto.usedMemberPoint ?? 0).toEqual(after.usedMemberPoint);
+        expect(playerDto.useableSeasonPoint).toEqual(after.useableSeasonPoint);
+        expect(playerDto.useableMemberPoint).toEqual(after.useableMemberPoint);
         expect(playerDto.properties).toHaveLength(1);
       });
     });
