@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { AnalyticsService } from '../analytics/analytics.service';
 import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 import { PlayerService } from '../player/player.service';
 
@@ -10,6 +11,7 @@ import { PlayerPropertyItemDto } from './dto/player-property-item.dto';
 import { PlayerProperty } from './entities/player-property.entity';
 
 const RESET_PROPERTY_MEMBER_POINT_COST = 1000;
+const RESET_PROPERTY_REASON = 'reset_property';
 
 @Injectable()
 export class PlayerPropertyService {
@@ -53,6 +55,7 @@ export class PlayerPropertyService {
     @InjectRepository(PlayerProperty)
     private readonly playerPropertyRepository: BaseFirestoreRepository<PlayerProperty>,
     private readonly playerService: PlayerService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   /**
@@ -111,7 +114,8 @@ export class PlayerPropertyService {
 
   /**
    * 重置玩家属性
-   * 消耗赛季积分或会员积分，删除 property 文档，并将 player.usedLevel 重置为 0
+   * 消耗赛季可用积分或会员可用积分（usedSeasonPoint/usedMemberPoint 增加，不影响积分总数和等级），
+   * 删除 property 文档，并将 player.usedLevel 重置为 0
    */
   async reset(steamId: number, useMemberPoint: boolean): Promise<void> {
     const player = await this.playerService.findBySteamId(steamId);
@@ -121,18 +125,22 @@ export class PlayerPropertyService {
 
     if (useMemberPoint) {
       const cost = RESET_PROPERTY_MEMBER_POINT_COST;
-      if ((player.memberPointTotal ?? 0) < cost) {
+      const useableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
+      if (useableMemberPoint < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.upsertAddPoint(steamId, { memberPointTotal: -cost });
+      await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
+      await this.analyticsService.playerUsePoint(steamId, cost, true, RESET_PROPERTY_REASON);
     } else {
       const seasonPointTotal = player.seasonPointTotal ?? 0;
       const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(seasonPointTotal);
       const cost = PlayerLevelHelper.getSeasonNextLevelPoint(seasonLevel);
-      if (seasonPointTotal < cost) {
+      const useableSeasonPoint = seasonPointTotal - (player.usedSeasonPoint ?? 0);
+      if (useableSeasonPoint < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.upsertAddPoint(steamId, { seasonPointTotal: -cost });
+      await this.playerService.upsertAddPoint(steamId, { usedSeasonPoint: cost });
+      await this.analyticsService.playerUsePoint(steamId, cost, false, RESET_PROPERTY_REASON);
     }
 
     await this.deleteBySteamId(steamId);

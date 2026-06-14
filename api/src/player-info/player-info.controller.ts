@@ -13,10 +13,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
-import { AnalyticsService } from '../analytics/analytics.service';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
-import { ResetPlayerPropertyDto } from '../player-property/dto/reset-player-property.dto';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
@@ -30,7 +28,6 @@ export class PlayerInfoController {
   constructor(
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerPropertyService: PlayerPropertyService,
-    private readonly analyticsService: AnalyticsService,
     private readonly playerService: PlayerService,
   ) {}
 
@@ -73,9 +70,7 @@ export class PlayerInfoController {
     @Param('steamId', ParseIntPipe) steamId: number,
     @Query('useMemberPoint', ParseBoolPipe) useMemberPoint: boolean,
   ): Promise<PlayerInfoDto> {
-    const resetDto: ResetPlayerPropertyDto = { steamId, useMemberPoint };
     await this.playerPropertyService.reset(steamId, useMemberPoint);
-    await this.analyticsService.playerResetProperty(resetDto);
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
   }
 }
