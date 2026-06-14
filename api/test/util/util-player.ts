@@ -17,6 +17,8 @@ interface createPlayerParams {
   steamId: number;
   seasonPointTotal?: number;
   memberPointTotal?: number;
+  usedSeasonPoint?: number;
+  usedMemberPoint?: number;
   conductPoint?: number;
 }
 
@@ -28,6 +30,8 @@ export async function createPlayer(
   await playerService.upsertAddPoint(params.steamId, {
     seasonPointTotal: params.seasonPointTotal,
     memberPointTotal: params.memberPointTotal,
+    usedSeasonPoint: params.usedSeasonPoint,
+    usedMemberPoint: params.usedMemberPoint,
   });
   if (params.conductPoint !== undefined) {
     await playerService.setConductPoint(params.steamId, params.conductPoint);
