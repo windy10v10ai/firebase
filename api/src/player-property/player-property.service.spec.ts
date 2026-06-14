@@ -1,6 +1,14 @@
 import { PlayerPropertyService } from './player-property.service';
 
 describe('PlayerPropertyService', () => {
+  describe('validatePropertyName', () => {
+    it('should accept slow immune property', () => {
+      const service = new PlayerPropertyService({} as never, {} as never);
+
+      expect(() => service.validatePropertyName('property_slow_immune')).not.toThrow();
+    });
+  });
+
   describe('calculateUsedLevel', () => {
     it('should return 0 for empty array', () => {
       expect(PlayerPropertyService.calculateUsedLevel([])).toBe(0);

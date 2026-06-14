@@ -45,6 +45,7 @@ export class PlayerPropertyService {
     'property_mana_regen_total_percentage',
     'property_ignore_movespeed_limit',
     'property_cannot_miss',
+    'property_slow_immune',
     'property_flying',
   ];
 
