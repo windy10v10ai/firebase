@@ -1,6 +1,35 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Collection } from 'fireorm';
+
+export class GamePresetCustomOptions {
+  @ApiProperty()
+  multiplierRadiant: number;
+  @ApiProperty()
+  multiplierDire: number;
+  @ApiProperty()
+  playerNumberRadiant: number;
+  @ApiProperty()
+  playerNumberDire: number;
+  @ApiProperty()
+  towerPowerPct: number;
+  @ApiProperty()
+  respawnTimePct: number;
+  @ApiProperty()
+  startingGoldPlayer: number;
+  @ApiProperty()
+  startingGoldBot: number;
+  @ApiProperty()
+  maxLevel: number;
+  @ApiProperty()
+  fixedAbility: string;
+  @ApiProperty()
+  forceRandomHero: number;
+  @ApiProperty()
+  enablePlayerAttribute: number;
+  @ApiProperty()
+  midOnlyMode: number;
+}
 
 @Collection()
 export class PlayerSetting {
@@ -35,7 +64,13 @@ export class PlayerSetting {
   @ApiProperty({ required: false })
   wardSentryQuickCast?: boolean;
 
-  // 为未来其他设置预留
+  // 按地图游戏预设
+  @ApiPropertyOptional()
+  gamePresetDota?: { difficulty: number };
+  @ApiPropertyOptional()
+  gamePresetHard?: { difficulty: number };
+  @ApiPropertyOptional()
+  gamePresetCustom?: { gameOptions: GamePresetCustomOptions };
 
   @Exclude()
   createdAt: Date;

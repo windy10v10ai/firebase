@@ -88,3 +88,36 @@ export class FooService {
 
 - TypeScript 文件：`kebab-case`，按职责加后缀：`*.controller.ts` / `*.service.ts` / `*.module.ts` / `*.entity.ts` / `*.dto.ts`
 - 测试：`*.spec.ts`（unit）、`*.e2e-spec.ts`（e2e）
+
+## Firestore 操作规范
+
+### 删除字段
+
+`undefined` 赋值**不会**删除 Firestore 字段，字段会保留旧值。需要删除字段时必须用 `FieldValue.delete()`：
+
+```ts
+import { FieldValue } from 'firebase-admin/firestore';
+
+// ✅ 正确：真正删除字段
+preset[dto.map] = FieldValue.delete() as any;
+
+// ❌ 错误：字段不会被删除
+preset[dto.map] = undefined;
+```
+
+### E2E 测试规范
+
+- **有 Firestore 持久化副作用的 bug 必须先写 e2e 复现（验证 bug 确实发生），再修复，再验证测试通过**
+- E2E 用 `test/` 目录下的 `*.e2e-spec.ts`，通过 HTTP 请求验证完整行为（包括持久化后重新读取）
+- 各测试用例使用独立 steamId（不同用例间不共享），避免状态污染
+- 工具函数放 `test/util/` 下复用
+
+## 模块化模式（player 子模块为例）
+
+新增独立子功能时遵循以下模式：
+
+1. `entities/foo.entity.ts` — Firestore `@Collection()` + 字段定义
+2. `dto/update-foo.dto.ts` — 请求体 DTO（class-validator 校验）
+3. `foo.service.ts` — 业务逻辑，`getOrGenerateDefault` 负责首次创建
+4. `player.module.ts` — `FireormModule.forFeature` 注册 entity，`providers`/`exports` 注册 service
+5. `player.controller.ts` — 添加路由，鉴权与现有接口一致

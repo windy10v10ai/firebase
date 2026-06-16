@@ -4,11 +4,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../util/auth/public.decorator';
 
 import { ConductPlayerDto } from './dto/conduct-player.dto';
+import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
+import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
 import { PlayerService } from './player.service';
@@ -21,6 +23,7 @@ export class PlayerController {
     private readonly playerRankingService: PlayerRankingService,
     private readonly playerSettingService: PlayerSettingService,
     private readonly playerConductService: PlayerConductService,
+    private readonly playerGamePresetService: PlayerGamePresetService,
   ) {}
 
   @Public()
@@ -50,6 +53,15 @@ export class PlayerController {
     @Body() updatePlayerSettingDto: UpdatePlayerSettingDto,
   ): Promise<PlayerSetting> {
     return await this.playerSettingService.update(id, updatePlayerSettingDto);
+  }
+
+  @Put(':id/game-preset')
+  @ApiOperation({ summary: 'Save or clear a per-map game preset' })
+  async updatePlayerGamePreset(
+    @Param('id') id: string,
+    @Body() dto: UpdatePlayerGamePresetDto,
+  ): Promise<PlayerSetting> {
+    return this.playerGamePresetService.update(id, dto);
   }
 
   @Post('/conduct')
