@@ -63,6 +63,11 @@ export class PlayerSettingService {
     return this.playerSettingRepository.update(setting);
   }
 
+  async updateRaw(setting: PlayerSetting): Promise<PlayerSetting> {
+    await this.playerSettingRepository.update(setting);
+    return this.playerSettingRepository.findById(setting.id);
+  }
+
   public async getPlayerSettingOrGenerateDefault(playerId: string): Promise<PlayerSetting> {
     const setting = await this.playerSettingRepository.findById(playerId);
     if (setting) {

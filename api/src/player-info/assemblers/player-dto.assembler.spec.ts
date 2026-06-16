@@ -1,5 +1,6 @@
 import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
+import { PlayerGamePresetService } from '../../player/player-game-preset.service';
 import { PlayerSettingService } from '../../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../../player/player-stats-lifetime.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
@@ -14,6 +15,7 @@ function makeAssembler(): PlayerDtoAssembler {
     } as unknown as PlayerSettingService,
     { findOne: jest.fn().mockResolvedValue(null) } as unknown as MembersService,
     { findBySteamId: jest.fn().mockResolvedValue(null) } as unknown as PlayerStatsLifetimeService,
+    { extractPreset: jest.fn().mockReturnValue(null) } as unknown as PlayerGamePresetService,
   );
 }
 
