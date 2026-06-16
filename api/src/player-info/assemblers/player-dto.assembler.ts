@@ -4,7 +4,6 @@ import { MemberDto } from '../../members/dto/member.dto';
 import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerLevelHelper } from '../../player/helpers/player-level.helper';
-import { PlayerGamePresetService } from '../../player/player-game-preset.service';
 import { PlayerSettingService } from '../../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../../player/player-stats-lifetime.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
@@ -19,7 +18,6 @@ export class PlayerDtoAssembler {
     private readonly playerSettingService: PlayerSettingService,
     private readonly membersService: MembersService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
-    private readonly playerGamePresetService: PlayerGamePresetService,
   ) {}
 
   async assemblePlayerInfoDto(
@@ -48,7 +46,6 @@ export class PlayerDtoAssembler {
     }
     if (include.includes('setting')) {
       dto.playerSetting = playerSetting;
-      dto.gamePreset = this.playerGamePresetService.extractPreset(playerSetting);
     }
     if (include.includes('member') && member) {
       dto.member = new MemberDto(member);

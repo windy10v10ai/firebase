@@ -16,7 +16,7 @@ describe('PlayerGamePresetController (e2e)', () => {
   });
 
   describe(`${playerUrl}/:id/game-preset (Put)`, () => {
-    it('保存 dota 难度', async () => {
+    it('保存 dota 难度 - 返回 PlayerSetting 含 gamePresetDota', async () => {
       const steamId = 300500001;
       const res = await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'dota',
@@ -24,12 +24,12 @@ describe('PlayerGamePresetController (e2e)', () => {
         difficulty: 3,
       });
       expect(res.status).toEqual(200);
-      expect(res.body.dota).toEqual({ difficulty: 3 });
-      expect(res.body.hard).toBeUndefined();
-      expect(res.body.custom).toBeUndefined();
+      expect(res.body.gamePresetDota).toEqual({ difficulty: 3 });
+      expect(res.body.gamePresetHard).toBeUndefined();
+      expect(res.body.gamePresetCustom).toBeUndefined();
     });
 
-    it('保存 hard 难度', async () => {
+    it('保存 hard 难度 - 返回 PlayerSetting 含 gamePresetHard', async () => {
       const steamId = 300500002;
       const res = await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'hard',
@@ -37,10 +37,10 @@ describe('PlayerGamePresetController (e2e)', () => {
         difficulty: 7,
       });
       expect(res.status).toEqual(200);
-      expect(res.body.hard).toEqual({ difficulty: 7 });
+      expect(res.body.gamePresetHard).toEqual({ difficulty: 7 });
     });
 
-    it('保存 custom 整套 KV', async () => {
+    it('保存 custom 整套 KV - 返回 PlayerSetting 含 gamePresetCustom', async () => {
       const steamId = 300500003;
       const gameOptions = {
         multiplierRadiant: 1,
@@ -63,7 +63,7 @@ describe('PlayerGamePresetController (e2e)', () => {
         gameOptions,
       });
       expect(res.status).toEqual(200);
-      expect(res.body.custom).toEqual({ gameOptions });
+      expect(res.body.gamePresetCustom).toEqual({ gameOptions });
     });
 
     it('保存多张图后各槽位独立保留', async () => {
@@ -73,27 +73,20 @@ describe('PlayerGamePresetController (e2e)', () => {
         remember: true,
         difficulty: 2,
       });
-      await put(app, `${playerUrl}/${steamId}/game-preset`, {
-        map: 'hard',
-        remember: true,
-        difficulty: 6,
-      });
-
       const res = await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'hard',
         remember: true,
         difficulty: 7,
       });
       expect(res.status).toEqual(200);
-      // dota 槽位应保留
-      expect(res.body.dota).toEqual({ difficulty: 2 });
-      // hard 槽位更新
-      expect(res.body.hard).toEqual({ difficulty: 7 });
+      // dota 槽位保留
+      expect(res.body.gamePresetDota).toEqual({ difficulty: 2 });
+      // hard 槽位写入
+      expect(res.body.gamePresetHard).toEqual({ difficulty: 7 });
     });
 
-    it('remember: false 应清除对应槽位，其余槽位不受影响', async () => {
+    it('remember: false 应清除对应 flat 字段，其余槽位不受影响', async () => {
       const steamId = 300500005;
-      // 先保存两张图
       await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'dota',
         remember: true,
@@ -105,16 +98,15 @@ describe('PlayerGamePresetController (e2e)', () => {
         difficulty: 6,
       });
 
-      // 清除 dota 槽位
       const res = await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'dota',
         remember: false,
       });
       expect(res.status).toEqual(200);
       // dota 槽位应被清除
-      expect(res.body.dota).toBeUndefined();
+      expect(res.body.gamePresetDota).toBeUndefined();
       // hard 槽位应保留
-      expect(res.body.hard).toEqual({ difficulty: 6 });
+      expect(res.body.gamePresetHard).toEqual({ difficulty: 6 });
     });
   });
 });

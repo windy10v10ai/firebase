@@ -10,7 +10,7 @@ import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
-import { PlayerGamePreset, PlayerGamePresetService } from './player-game-preset.service';
+import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
 import { PlayerService } from './player.service';
@@ -60,7 +60,7 @@ export class PlayerController {
   async updatePlayerGamePreset(
     @Param('id') id: string,
     @Body() dto: UpdatePlayerGamePresetDto,
-  ): Promise<PlayerGamePreset> {
+  ): Promise<PlayerSetting> {
     return this.playerGamePresetService.update(id, dto);
   }
 
