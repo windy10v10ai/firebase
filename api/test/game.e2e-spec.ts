@@ -29,6 +29,21 @@ function callGameStart(app: INestApplication, steamIds: number[]): request.Test 
     .set(headers);
 }
 
+// 使用 windy 主机 API key 发起游戏开始请求
+function callGameStartAsWindyHost(app: INestApplication, steamIds: number[]): request.Test {
+  const apiKey = process.env.SERVER_APIKEY ?? 'Invalid_NotOnDedicatedServer';
+  const countryCode = 'CN';
+  const headers = {
+    'x-api-key': apiKey,
+    'x-country-code': countryCode,
+  };
+
+  return request(app.getHttpServer())
+    .get(gameStartUrl)
+    .query({ steamIds, matchId: 1 })
+    .set(headers);
+}
+
 // 验证 PlayerDto 包含所有计算字段
 function expectPlayerDtoHasComputedFields(playerDto: Record<string, unknown>): void {
   expect(playerDto.seasonLevel).toBeDefined();
@@ -471,12 +486,12 @@ describe('PlayerController (e2e)', () => {
     });
 
     describe('事件奖励', () => {
-      it('活动期间内首次登录 获得活动积分', async () => {
+      it('windy主机 活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000901;
-        // 活动期间: 2026-04-29 ~ 2026-05-10
-        mockDate('2026-05-01T00:00:00.000Z');
+        // 活动期间: 2026-06-18 ~ 2026-06-22
+        mockDate('2026-06-19T00:00:00.000Z');
 
-        const result = await callGameStart(app, [steamId]);
+        const result = await callGameStartAsWindyHost(app, [steamId]);
         expect(result.status).toEqual(200);
 
         // 验证获得了活动积分
@@ -486,26 +501,26 @@ describe('PlayerController (e2e)', () => {
             p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeDefined();
-        expect(eventReward.seasonPoint).toEqual(5100);
+        expect(eventReward.seasonPoint).toEqual(5000);
 
         // 验证玩家积分
         const player = await getPlayer(app, steamId);
-        expect(player.seasonPointTotal).toEqual(5100);
+        expect(player.seasonPointTotal).toEqual(5000);
         expect(player.memberPointTotal).toEqual(0);
       });
 
-      it('活动期间内第二次登录 不重复获得积分', async () => {
+      it('windy主机 活动期间内第二次登录 不重复获得积分', async () => {
         const steamId = 100000902;
-        mockDate('2026-05-01T00:00:00.000Z');
+        mockDate('2026-06-19T00:00:00.000Z');
 
         // 第一次登录
-        await callGameStart(app, [steamId]);
+        await callGameStartAsWindyHost(app, [steamId]);
         const player1 = await getPlayer(app, steamId);
-        expect(player1.seasonPointTotal).toEqual(5100);
+        expect(player1.seasonPointTotal).toEqual(5000);
         expect(player1.memberPointTotal).toEqual(0);
 
         // 第二次登录
-        const result = await callGameStart(app, [steamId]);
+        const result = await callGameStartAsWindyHost(app, [steamId]);
         expect(result.status).toEqual(200);
 
         // 不应该再获得活动积分
@@ -518,14 +533,36 @@ describe('PlayerController (e2e)', () => {
 
         // 积分不变
         const player2 = await getPlayer(app, steamId);
-        expect(player2.seasonPointTotal).toEqual(5100);
+        expect(player2.seasonPointTotal).toEqual(5000);
         expect(player2.memberPointTotal).toEqual(0);
       });
 
-      it('活动期间外 不获得活动积分', async () => {
+      it('windy主机 活动期间外 不获得活动积分', async () => {
         const steamId = 100000903;
         // 活动期间外
-        mockDate('2026-05-11T00:00:00.000Z');
+        mockDate('2026-06-23T00:00:00.000Z');
+
+        const result = await callGameStartAsWindyHost(app, [steamId]);
+        expect(result.status).toEqual(200);
+
+        // 不应该获得活动积分
+        const pointInfo = result.body.pointInfo;
+        const eventReward = pointInfo.find(
+          (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
+            p.steamId === steamId && p.seasonPoint,
+        );
+        expect(eventReward).toBeUndefined();
+
+        // 玩家积分为0
+        const player = await getPlayer(app, steamId);
+        expect(player.seasonPointTotal).toEqual(0);
+        expect(player.memberPointTotal).toEqual(0);
+      });
+
+      it('非windy主机 活动期间内 不获得活动积分', async () => {
+        const steamId = 100000904;
+        // 活动期间内
+        mockDate('2026-06-19T00:00:00.000Z');
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);

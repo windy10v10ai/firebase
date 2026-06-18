@@ -35,12 +35,12 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        mayDay2026: true,
+        dragonBoat2026: true,
       });
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.mayDay2026 = true;
+      eventReward.dragonBoat2026 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
