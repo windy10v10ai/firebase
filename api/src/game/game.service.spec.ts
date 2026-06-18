@@ -13,6 +13,8 @@ import { GameService } from './game.service';
 describe('GameService', () => {
   let service: GameService;
   let secretService: jest.Mocked<SecretService>;
+  let playerService: jest.Mocked<PlayerService>;
+  let eventRewardsService: jest.Mocked<EventRewardsService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -33,7 +35,10 @@ describe('GameService', () => {
         },
         {
           provide: EventRewardsService,
-          useValue: {},
+          useValue: {
+            getRewardResults: jest.fn(),
+            setReward: jest.fn(),
+          },
         },
         {
           provide: PlayerPropertyService,
@@ -58,6 +63,8 @@ describe('GameService', () => {
 
     service = moduleRef.get<GameService>(GameService);
     secretService = moduleRef.get(SecretService);
+    playerService = moduleRef.get(PlayerService);
+    eventRewardsService = moduleRef.get(EventRewardsService);
   });
   describe('getOK', () => {
     it('should return OK', () => {
@@ -140,6 +147,69 @@ describe('GameService', () => {
       });
 
       expect(() => service.getGA4Config(SERVER_TYPE.WINDY)).toThrow('Secret not found');
+    });
+  });
+
+  describe('giveEventReward', () => {
+    const steamId = 100000001;
+
+    afterEach(() => {
+      jest.useRealTimers();
+      jest.clearAllMocks();
+    });
+
+    it('windy主机 活动期间内 未领取 应发放端午节积分', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-19T00:00:00.000Z'));
+      eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
+
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
+
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        seasonPointTotal: 5000,
+      });
+      expect(eventRewardsService.setReward).toHaveBeenCalledWith(steamId);
+      expect(result).toEqual([
+        {
+          steamId,
+          title: {
+            cn: '端午节快乐！',
+            en: 'Dragon Boat Festival Bonus!',
+          },
+          seasonPoint: 5000,
+        },
+      ]);
+    });
+
+    it('非windy主机 活动期间内 不应发放', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-19T00:00:00.000Z'));
+
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
+
+      expect(eventRewardsService.getRewardResults).not.toHaveBeenCalled();
+      expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    it('windy主机 活动期间外 不应发放', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-23T00:00:00.000Z'));
+      eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
+
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
+
+      expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    it('windy主机 活动期间内 已领取 不应重复发放', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-19T00:00:00.000Z'));
+      eventRewardsService.getRewardResults.mockResolvedValue([
+        { steamId, result: { id: steamId.toString(), steamId, dragonBoat2026: true } },
+      ]);
+
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
+
+      expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
     });
   });
 });

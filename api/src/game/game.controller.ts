@@ -48,6 +48,7 @@ export class GameController {
     @Req() req: Request,
   ): Promise<GameStart> {
     const apiKey = req.headers['x-api-key'] as string;
+    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     steamIds = this.gameService.validateSteamIds(steamIds);
 
     const pointInfo: PointInfoDto[] = [];
@@ -56,7 +57,7 @@ export class GameController {
     await Promise.all(steamIds.map((steamId) => this.gameService.upsertPlayerInfo(steamId)));
 
     // 获取活动奖励
-    const eventRewardInfo = await this.gameService.giveEventReward(steamIds);
+    const eventRewardInfo = await this.gameService.giveEventReward(steamIds, serverType);
     pointInfo.push(...eventRewardInfo);
 
     // 获取会员 添加每日会员积分
@@ -68,7 +69,6 @@ export class GameController {
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
     const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType);
 
     // ----------------- 以下为返回数据 -----------------
