@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 
 import { del, get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
-import { addPlayerProperty, createPlayer, getPlayerDto } from './util/util-player';
+import { addPlayerProperty, awakenHero, createPlayer, getPlayerDto } from './util/util-player';
 
 const getPlayerInfoUrl = '/api/player';
 const upgradePlayerPropertyUrl = (steamId: number) => `/api/player/${steamId}/property`;
@@ -661,6 +661,87 @@ describe('PlayerInfoController (e2e)', () => {
         expect(playerDto.useableMemberPoint).toEqual(after.useableMemberPoint);
         expect(playerDto.properties).toHaveLength(1);
       });
+    });
+  });
+
+  describe('PUT /api/player/:steamId/hero-awakening 觉醒英雄', () => {
+    const validHeroName = 'npc_dota_hero_axe';
+
+    it('使用赛季积分觉醒成功，返回 awakenedHeroes 且不含积分字段', async () => {
+      const steamId = 200000701;
+      await createPlayer(app, { steamId, seasonPointTotal: 10000, memberPointTotal: 0 });
+
+      const result = await awakenHero(app, steamId, validHeroName, false);
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.awakenedHeroes).toHaveLength(1);
+      expect(playerDto.awakenedHeroes[0].heroName).toEqual(validHeroName);
+      expect(playerDto.awakenedHeroes[0].usedSeasonPoint).toBeUndefined();
+      expect(playerDto.awakenedHeroes[0].usedMemberPoint).toBeUndefined();
+      expect(playerDto.useableSeasonPoint).toEqual(0);
+    });
+
+    it('使用会员积分觉醒成功，消耗 5000', async () => {
+      const steamId = 200000702;
+      await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 5000 });
+
+      const result = await awakenHero(app, steamId, validHeroName, true);
+
+      expect(result.status).toEqual(200);
+      const playerDto = result.body;
+      expect(playerDto.awakenedHeroes).toHaveLength(1);
+      expect(playerDto.useableMemberPoint).toEqual(0);
+    });
+
+    it('积分不足应返回400', async () => {
+      const steamId = 200000703;
+      await createPlayer(app, { steamId, seasonPointTotal: 9999, memberPointTotal: 0 });
+
+      const result = await awakenHero(app, steamId, validHeroName, false);
+
+      expect(result.status).toEqual(400);
+    });
+
+    it('无效英雄名应返回400', async () => {
+      const steamId = 200000704;
+      await createPlayer(app, { steamId, seasonPointTotal: 10000, memberPointTotal: 0 });
+
+      const result = await awakenHero(app, steamId, 'not_a_real_hero', false);
+
+      expect(result.status).toEqual(400);
+    });
+
+    it('重复觉醒同一英雄应返回400', async () => {
+      const steamId = 200000705;
+      await createPlayer(app, { steamId, seasonPointTotal: 20000, memberPointTotal: 0 });
+
+      const firstResult = await awakenHero(app, steamId, validHeroName, false);
+      expect(firstResult.status).toEqual(200);
+
+      const secondResult = await awakenHero(app, steamId, validHeroName, false);
+      expect(secondResult.status).toEqual(400);
+    });
+
+    it('觉醒不同英雄分别成功累加到 awakenedHeroes', async () => {
+      const steamId = 200000706;
+      await createPlayer(app, { steamId, seasonPointTotal: 20000, memberPointTotal: 0 });
+
+      await awakenHero(app, steamId, 'npc_dota_hero_axe', false);
+      const result = await awakenHero(app, steamId, 'npc_dota_hero_abaddon', false);
+
+      expect(result.status).toEqual(200);
+      const heroNames = result.body.awakenedHeroes.map((h: { heroName: string }) => h.heroName);
+      expect(heroNames).toContain('npc_dota_hero_axe');
+      expect(heroNames).toContain('npc_dota_hero_abaddon');
+    });
+
+    it('不存在的玩家应返回400', async () => {
+      const steamId = 200000799;
+
+      const result = await awakenHero(app, steamId, validHeroName, false);
+
+      expect(result.status).toEqual(400);
     });
   });
 
