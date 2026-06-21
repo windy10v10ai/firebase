@@ -2,6 +2,7 @@ import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerSettingService } from '../../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../../player/player-stats-lifetime.service';
+import { PlayerHeroAwakeningService } from '../../player-hero-awakening/player-hero-awakening.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
 
 import { PlayerDtoAssembler } from './player-dto.assembler';
@@ -14,6 +15,7 @@ function makeAssembler(): PlayerDtoAssembler {
     } as unknown as PlayerSettingService,
     { findOne: jest.fn().mockResolvedValue(null) } as unknown as MembersService,
     { findBySteamId: jest.fn().mockResolvedValue(null) } as unknown as PlayerStatsLifetimeService,
+    { findBySteamId: jest.fn().mockResolvedValue([]) } as unknown as PlayerHeroAwakeningService,
   );
 }
 
