@@ -15,9 +15,11 @@ describe('PlayerHeroAwakeningService', () => {
       upsertAddPoint: jest.fn().mockResolvedValue({}),
     };
     const playerHeroAwakeningRepository = {
-      findById: jest.fn().mockResolvedValue(
-        player ? { id: steamId.toString(), steamId, awakenings: existingAwakenings } : null,
-      ),
+      findById: jest
+        .fn()
+        .mockResolvedValue(
+          player ? { id: steamId.toString(), steamId, awakenings: existingAwakenings } : null,
+        ),
       create: jest.fn().mockImplementation((doc) => Promise.resolve(doc)),
       update: jest.fn().mockImplementation((doc) => Promise.resolve(doc)),
     };
@@ -99,9 +101,9 @@ describe('PlayerHeroAwakeningService', () => {
     it('无效英雄名应报错', async () => {
       const { service, playerService } = createService({ seasonPointTotal: 10000 });
 
-      await expect(
-        service.awaken(steamId, 'npc_dota_hero_not_a_real_hero', false),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.awaken(steamId, 'npc_dota_hero_not_a_real_hero', false)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
     });
 
