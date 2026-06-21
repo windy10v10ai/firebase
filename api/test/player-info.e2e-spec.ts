@@ -694,13 +694,64 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.useableMemberPoint).toEqual(0);
     });
 
-    it('积分不足应返回400', async () => {
-      const steamId = 200000703;
-      await createPlayer(app, { steamId, seasonPointTotal: 9999, memberPointTotal: 0 });
+    it.each([
+      [
+        '赛季积分总数不足',
+        200000711,
+        {
+          useMemberPoint: false,
+          seasonPointTotal: 9999,
+          memberPointTotal: 0,
+          usedSeasonPoint: 0,
+          usedMemberPoint: 0,
+        },
+      ],
+      [
+        '赛季总积分充足但可用积分不足（已使用部分积分）',
+        200000712,
+        {
+          useMemberPoint: false,
+          seasonPointTotal: 10000,
+          memberPointTotal: 0,
+          usedSeasonPoint: 1,
+          usedMemberPoint: 0,
+        },
+      ],
+      [
+        '会员积分总数不足',
+        200000713,
+        {
+          useMemberPoint: true,
+          seasonPointTotal: 0,
+          memberPointTotal: 4999,
+          usedSeasonPoint: 0,
+          usedMemberPoint: 0,
+        },
+      ],
+      [
+        '会员总积分充足但可用积分不足（已使用部分积分）',
+        200000714,
+        {
+          useMemberPoint: true,
+          seasonPointTotal: 0,
+          memberPointTotal: 5000,
+          usedSeasonPoint: 0,
+          usedMemberPoint: 1,
+        },
+      ],
+    ])('%s应返回400，且不产生副作用', async (_, steamId, params) => {
+      await createPlayer(app, { steamId, ...params });
 
-      const result = await awakenHero(app, steamId, validHeroName, false);
+      const result = await awakenHero(app, steamId, validHeroName, params.useMemberPoint);
 
       expect(result.status).toEqual(400);
+
+      // 验证失败后没有副作用：未扣分、未写入 awakenedHeroes
+      const playerDto = await getPlayerDto(app, steamId);
+      expect(playerDto.seasonPointTotal).toEqual(params.seasonPointTotal);
+      expect(playerDto.memberPointTotal).toEqual(params.memberPointTotal);
+      expect(playerDto.usedSeasonPoint ?? 0).toEqual(params.usedSeasonPoint ?? 0);
+      expect(playerDto.usedMemberPoint ?? 0).toEqual(params.usedMemberPoint ?? 0);
     });
 
     it('无效英雄名应返回400', async () => {
