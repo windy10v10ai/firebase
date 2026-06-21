@@ -15,6 +15,8 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
+import { AwakenHeroDto } from '../player-hero-awakening/dto/awaken-hero.dto';
+import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero-awakening.service';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 
@@ -29,6 +31,7 @@ export class PlayerInfoController {
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly playerService: PlayerService,
+    private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
   ) {}
 
   @Get(':steamId/info')
@@ -72,5 +75,15 @@ export class PlayerInfoController {
   ): Promise<PlayerInfoDto> {
     await this.playerPropertyService.reset(steamId, useMemberPoint);
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
+  }
+
+  @Put(':steamId/hero-awakening')
+  @ApiOperation({ summary: 'Awaken a hero, spending season or member points' })
+  async awakenHero(
+    @Param('steamId', ParseIntPipe) steamId: number,
+    @Body() dto: AwakenHeroDto,
+  ): Promise<PlayerInfoDto> {
+    await this.playerHeroAwakeningService.awaken(steamId, dto.heroName, dto.useMemberPoint);
+    return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['heroAwakening']);
   }
 }

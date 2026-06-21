@@ -72,6 +72,15 @@ export async function addPlayerProperty(
   expect(result.status).toEqual(200);
 }
 
+export async function awakenHero(
+  app: INestApplication,
+  steamId: number,
+  heroName: string,
+  useMemberPoint: boolean,
+) {
+  return put(app, `/api/player/${steamId}/hero-awakening`, { heroName, useMemberPoint });
+}
+
 export async function getPlayerDto(app: INestApplication, steamId: number): Promise<PlayerInfoDto> {
   const playerInfoService = app.get(PlayerInfoService);
   return playerInfoService.findPlayerInfoBySteamId(steamId, ['property', 'setting']);

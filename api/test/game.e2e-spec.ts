@@ -6,6 +6,7 @@ import { MemberLevel } from '../src/members/entities/members.entity';
 import { get, getTestApiKey, initTest, mockDate, post, restoreDate } from './util/util-http';
 import {
   addPlayerProperty,
+  awakenHero,
   createPlayer,
   getPlayer,
   getPlayerStatsLifetime,
@@ -402,6 +403,26 @@ describe('PlayerController (e2e)', () => {
         // 验证计算字段存在
         expectPlayerDtoHasComputedFields(player);
         expect(player.properties.length).toBeGreaterThanOrEqual(1);
+      });
+
+      it('验证 game/start 返回已觉醒英雄列表', async () => {
+        const steamId = 100000703;
+        mockDate('2023-12-01T00:00:00.000Z');
+
+        await createPlayer(app, {
+          steamId,
+          seasonPointTotal: 10000,
+          memberPointTotal: 0,
+        });
+        await awakenHero(app, steamId, 'npc_dota_hero_axe', false);
+
+        const result = await callGameStart(app, [steamId]);
+        expect(result.status).toEqual(200);
+
+        const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
+        expect(player).toBeDefined();
+        expect(player.awakenedHeroes).toHaveLength(1);
+        expect(player.awakenedHeroes[0].heroName).toEqual('npc_dota_hero_axe');
       });
 
       it('验证 pointInfo 包含正确的会员积分信息', async () => {
