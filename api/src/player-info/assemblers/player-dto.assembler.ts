@@ -6,10 +6,16 @@ import { Player } from '../../player/entities/player.entity';
 import { PlayerLevelHelper } from '../../player/helpers/player-level.helper';
 import { PlayerSettingService } from '../../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../../player/player-stats-lifetime.service';
+import { PlayerHeroAwakeningService } from '../../player-hero-awakening/player-hero-awakening.service';
 import { PlayerPropertyService } from '../../player-property/player-property.service';
 import { PlayerInfoDto } from '../dto/player-info.dto';
 
-export type PlayerInfoInclude = 'member' | 'property' | 'setting' | 'statsLifetime';
+export type PlayerInfoInclude =
+  | 'member'
+  | 'property'
+  | 'setting'
+  | 'statsLifetime'
+  | 'heroAwakening';
 
 @Injectable()
 export class PlayerDtoAssembler {
@@ -18,6 +24,7 @@ export class PlayerDtoAssembler {
     private readonly playerSettingService: PlayerSettingService,
     private readonly membersService: MembersService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
   ) {}
 
   async assemblePlayerInfoDto(
@@ -30,7 +37,7 @@ export class PlayerDtoAssembler {
     dto.useableLevel = this.calculateUseableLevel(dto);
     this.calculateUseablePoints(dto);
 
-    const [properties, playerSetting, member, statsLifetime] = await Promise.all([
+    const [properties, playerSetting, member, statsLifetime, heroAwakenings] = await Promise.all([
       include.includes('property') ? this.playerPropertyService.findBySteamId(+player.id) : null,
       include.includes('setting')
         ? this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id)
@@ -38,6 +45,9 @@ export class PlayerDtoAssembler {
       include.includes('member') ? this.membersService.findOne(+player.id) : null,
       include.includes('statsLifetime')
         ? this.playerStatsLifetimeService.findBySteamId(+player.id)
+        : null,
+      include.includes('heroAwakening')
+        ? this.playerHeroAwakeningService.findBySteamId(+player.id)
         : null,
     ]);
 
@@ -52,6 +62,9 @@ export class PlayerDtoAssembler {
     }
     if (include.includes('statsLifetime')) {
       dto.statsLifetime = statsLifetime ?? undefined;
+    }
+    if (include.includes('heroAwakening')) {
+      dto.awakenedHeroes = (heroAwakenings ?? []).map(({ heroName }) => ({ heroName }));
     }
 
     return dto;

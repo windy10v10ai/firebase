@@ -78,6 +78,7 @@ export class GameController {
       'property',
       'setting',
       'statsLifetime',
+      'heroAwakening',
     ]);
 
     // 构建响应对象
