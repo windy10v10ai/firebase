@@ -50,6 +50,8 @@ feature/<issue-id>-<short-kebab-summary>
 
 非 issue 驱动的改动可使用 `fix/...`、`chore/...`、`docs/...` 前缀，命名规则同上。
 
+**不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/superpowers/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
+
 ## 推送到 develop 的流程
 
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
