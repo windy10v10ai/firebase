@@ -64,7 +64,7 @@ export class PlayerHeroAwakeningService {
       item.usedSeasonPoint = cost;
     }
     await this.saveAwakening(doc, item, isRandomHit);
-    await this.analyticsService.playerUsePoint(steamId, cost, true, reason);
+    await this.analyticsService.playerUsePoint(steamId, cost, useMemberPoint, reason);
   }
 
   private resolveCost(useMemberPoint: boolean, isRandomHit: boolean): number {
