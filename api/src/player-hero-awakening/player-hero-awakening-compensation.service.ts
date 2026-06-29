@@ -11,6 +11,8 @@ const DEFAULT_BATCH_SIZE = 100;
 
 export interface HeroAwakeningCompensationResult {
   processedCount: number;
+  totalRefundSeasonPoint: number;
+  totalRefundMemberPoint: number;
 }
 
 @Injectable()
@@ -33,6 +35,8 @@ export class PlayerHeroAwakeningCompensationService {
     batchSize: number = DEFAULT_BATCH_SIZE,
   ): Promise<HeroAwakeningCompensationResult> {
     let processedCount = 0;
+    let totalRefundSeasonPoint = 0;
+    let totalRefundMemberPoint = 0;
     let lastSteamId: number | undefined;
 
     while (true) {
@@ -46,22 +50,29 @@ export class PlayerHeroAwakeningCompensationService {
       }
 
       for (const doc of batch) {
-        await this.compensateOne(doc, ++processedCount);
+        const { refundSeasonPoint, refundMemberPoint } = await this.compensateOne(
+          doc,
+          ++processedCount,
+        );
+        totalRefundSeasonPoint += refundSeasonPoint;
+        totalRefundMemberPoint += refundMemberPoint;
       }
 
       lastSteamId = batch[batch.length - 1].steamId;
     }
 
-    return { processedCount };
+    return { processedCount, totalRefundSeasonPoint, totalRefundMemberPoint };
   }
 
-  private async compensateOne(doc: PlayerHeroAwakening, sequence: number): Promise<void> {
+  private async compensateOne(
+    doc: PlayerHeroAwakening,
+    sequence: number,
+  ): Promise<{ refundSeasonPoint: number; refundMemberPoint: number }> {
     const refundSeasonPoint = doc.awakenings.reduce((sum, a) => sum + (a.usedSeasonPoint ?? 0), 0);
     const refundMemberPoint = doc.awakenings.reduce((sum, a) => sum + (a.usedMemberPoint ?? 0), 0);
 
     const playerBefore = await this.playerService.findBySteamId(doc.steamId);
-    const useableSeasonPointBefore =
-      (playerBefore?.seasonPointTotal ?? 0) - (playerBefore?.usedSeasonPoint ?? 0);
+    const usedSeasonPointBefore = playerBefore?.usedSeasonPoint ?? 0;
 
     await this.playerService.reduceUsedPoint(doc.steamId, {
       usedSeasonPoint: refundSeasonPoint,
@@ -71,8 +82,7 @@ export class PlayerHeroAwakeningCompensationService {
     await this.playerHeroAwakeningRepository.delete(doc.id);
 
     const playerAfter = await this.playerService.findBySteamId(doc.steamId);
-    const useableSeasonPointAfter =
-      (playerAfter?.seasonPointTotal ?? 0) - (playerAfter?.usedSeasonPoint ?? 0);
+    const usedSeasonPointAfter = playerAfter?.usedSeasonPoint ?? 0;
 
     logger.log('[Hero Awakening Compensation] refunded', {
       sequence,
@@ -80,8 +90,10 @@ export class PlayerHeroAwakeningCompensationService {
       refundSeasonPoint,
       refundMemberPoint,
       removedHeroes: doc.awakenings.map((a) => a.heroName),
-      useableSeasonPointBefore,
-      useableSeasonPointAfter,
+      usedSeasonPointBefore,
+      usedSeasonPointAfter,
     });
+
+    return { refundSeasonPoint, refundMemberPoint };
   }
 }
