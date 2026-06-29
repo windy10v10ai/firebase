@@ -55,8 +55,6 @@ export class PlayerHeroAwakeningService {
       }
       await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
       item.usedMemberPoint = cost;
-      await this.saveAwakening(doc, item, isRandomHit);
-      await this.analyticsService.playerUsePoint(steamId, cost, true, reason);
     } else {
       const useableSeasonPoint = (player.seasonPointTotal ?? 0) - (player.usedSeasonPoint ?? 0);
       if (useableSeasonPoint < cost) {
@@ -64,9 +62,9 @@ export class PlayerHeroAwakeningService {
       }
       await this.playerService.upsertAddPoint(steamId, { usedSeasonPoint: cost });
       item.usedSeasonPoint = cost;
-      await this.saveAwakening(doc, item, isRandomHit);
-      await this.analyticsService.playerUsePoint(steamId, cost, false, reason);
     }
+    await this.saveAwakening(doc, item, isRandomHit);
+    await this.analyticsService.playerUsePoint(steamId, cost, true, reason);
   }
 
   private resolveCost(useMemberPoint: boolean, isRandomHit: boolean): number {
