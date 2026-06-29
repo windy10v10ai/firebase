@@ -33,8 +33,8 @@ export class PlayerHeroAwakeningService {
 
     const existing = await this.findBySteamId(steamId);
     if (existing.some((a) => a.heroName === heroName)) {
-      logger.warn('[Hero Awakening] awaken error: already awakened', { steamId, heroName });
-      throw new BadRequestException();
+      logger.warn('[Hero Awakening] awaken no-op: already awakened', { steamId, heroName });
+      return;
     }
 
     const item: HeroAwakeningItem = { heroName };

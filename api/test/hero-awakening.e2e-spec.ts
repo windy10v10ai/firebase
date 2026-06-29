@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 
 import { initTest, put } from './util/util-http';
-import { createPlayer } from './util/util-player';
+import { awakenHero, createPlayer } from './util/util-player';
 
 describe('HeroAwakeningController (e2e)', () => {
   const playerUrl = '/api/player';
@@ -56,6 +56,26 @@ describe('HeroAwakeningController (e2e)', () => {
 
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.status).toBeLessThan(500);
+    });
+  });
+
+  describe(`${playerUrl}/:steamId/hero-awakening (Put) - 重复认领`, () => {
+    it('已觉醒英雄重复认领应 no-op 成功，不二次扣分', async () => {
+      const testPlayer = 300500010;
+      await createPlayer(app, { steamId: testPlayer, seasonPointTotal: 100000 });
+      const heroName = 'npc_dota_hero_axe';
+
+      const first = await awakenHero(app, testPlayer, heroName, false);
+      expect(first.status).toEqual(200);
+      const usedSeasonPointAfterFirst = first.body.usedSeasonPoint;
+
+      const second = await awakenHero(app, testPlayer, heroName, false);
+
+      expect(second.status).toEqual(200);
+      expect(second.body.usedSeasonPoint).toEqual(usedSeasonPointAfterFirst);
+      expect(
+        second.body.awakenedHeroes.filter((h: { heroName: string }) => h.heroName === heroName),
+      ).toHaveLength(1);
     });
   });
 });

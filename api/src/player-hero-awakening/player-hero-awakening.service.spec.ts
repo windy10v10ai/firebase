@@ -134,16 +134,15 @@ describe('PlayerHeroAwakeningService', () => {
       );
     });
 
-    it('重复觉醒同一英雄应报错', async () => {
-      const { service, playerService } = createService(
+    it('重复觉醒同一英雄应 no-op 成功，不扣分、不重复写入', async () => {
+      const { service, playerService, playerHeroAwakeningRepository } = createService(
         { seasonPointTotal: 20000, usedSeasonPoint: 0 },
         [{ heroName: validHeroName }],
       );
 
-      await expect(service.awaken(steamId, validHeroName, false)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.awaken(steamId, validHeroName, false)).resolves.toBeUndefined();
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+      expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
     });
   });
 
