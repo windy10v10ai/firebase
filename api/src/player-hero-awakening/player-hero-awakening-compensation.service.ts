@@ -7,7 +7,7 @@ import { PlayerService } from '../player/player.service';
 
 import { PlayerHeroAwakening } from './entities/player-hero-awakening.entity';
 
-const DEFAULT_BATCH_SIZE = 200;
+const DEFAULT_BATCH_SIZE = 100;
 
 export interface HeroAwakeningCompensationResult {
   processedCount: number;
