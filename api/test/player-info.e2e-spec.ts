@@ -763,7 +763,7 @@ describe('PlayerInfoController (e2e)', () => {
       expect(result.status).toEqual(400);
     });
 
-    it('重复觉醒同一英雄应返回400', async () => {
+    it('重复觉醒同一英雄应 no-op 成功并返回200', async () => {
       const steamId = 200000705;
       await createPlayer(app, { steamId, seasonPointTotal: 20000, memberPointTotal: 0 });
 
@@ -771,7 +771,7 @@ describe('PlayerInfoController (e2e)', () => {
       expect(firstResult.status).toEqual(200);
 
       const secondResult = await awakenHero(app, steamId, validHeroName, false);
-      expect(secondResult.status).toEqual(400);
+      expect(secondResult.status).toEqual(200);
     });
 
     it('觉醒不同英雄分别成功累加到 awakenedHeroes', async () => {

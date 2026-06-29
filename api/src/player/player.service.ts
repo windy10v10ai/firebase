@@ -84,6 +84,24 @@ export class PlayerService {
     return players;
   }
 
+  async reduceUsedPoint(
+    steamId: number,
+    dto: Pick<UpdatePlayerDto, 'usedSeasonPoint' | 'usedMemberPoint'>,
+  ) {
+    const player = await this.playerRepository.findById(steamId.toString());
+    if (!player) {
+      return;
+    }
+
+    if (dto.usedSeasonPoint) {
+      player.usedSeasonPoint = Math.max(0, (player.usedSeasonPoint ?? 0) - dto.usedSeasonPoint);
+    }
+    if (dto.usedMemberPoint) {
+      player.usedMemberPoint = Math.max(0, (player.usedMemberPoint ?? 0) - dto.usedMemberPoint);
+    }
+    return await this.playerRepository.update(player);
+  }
+
   async upsertAddPoint(steamId: number, updatePlayerDto: UpdatePlayerDto) {
     const player = await this.getOrNewPlayerBySteamId(steamId);
 
