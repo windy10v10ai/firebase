@@ -218,6 +218,26 @@ describe('PlayerHeroAwakeningService', () => {
     });
   });
 
+  describe('resolveCost', () => {
+    it.each([
+      [false, false, 10000],
+      [false, true, 5000],
+      [true, false, 5000],
+      [true, true, 2500],
+    ])(
+      'useMemberPoint=%s, isRandomHit=%s -> %i',
+      async (useMemberPoint, isRandomHit, expectedCost) => {
+        const { service } = createService({ seasonPointTotal: 0 });
+
+        const cost = (
+          service as unknown as { resolveCost: (a: boolean, b: boolean) => number }
+        ).resolveCost(useMemberPoint, isRandomHit);
+
+        expect(cost).toEqual(expectedCost);
+      },
+    );
+  });
+
   describe('ensureRandomCandidates', () => {
     it('无进行中候选集时，存入并返回入参 candidates', async () => {
       const { service, playerHeroAwakeningRepository } = createService({

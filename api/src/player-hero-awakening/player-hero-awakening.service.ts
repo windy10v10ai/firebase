@@ -48,9 +48,7 @@ export class PlayerHeroAwakeningService {
     const reason = isRandomHit ? HERO_AWAKENING_REASON_RANDOM : HERO_AWAKENING_REASON;
 
     if (useMemberPoint) {
-      const cost = isRandomHit
-        ? HERO_AWAKENING_MEMBER_POINT_COST_RANDOM
-        : HERO_AWAKENING_MEMBER_POINT_COST;
+      const cost = this.resolveCost(true, isRandomHit);
       const useableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
       if (useableMemberPoint < cost) {
         throw new BadRequestException();
@@ -60,9 +58,7 @@ export class PlayerHeroAwakeningService {
       await this.saveAwakening(doc, item, isRandomHit);
       await this.analyticsService.playerUsePoint(steamId, cost, true, reason);
     } else {
-      const cost = isRandomHit
-        ? HERO_AWAKENING_SEASON_POINT_COST_RANDOM
-        : HERO_AWAKENING_SEASON_POINT_COST;
+      const cost = this.resolveCost(false, isRandomHit);
       const useableSeasonPoint = (player.seasonPointTotal ?? 0) - (player.usedSeasonPoint ?? 0);
       if (useableSeasonPoint < cost) {
         throw new BadRequestException();
@@ -72,6 +68,15 @@ export class PlayerHeroAwakeningService {
       await this.saveAwakening(doc, item, isRandomHit);
       await this.analyticsService.playerUsePoint(steamId, cost, false, reason);
     }
+  }
+
+  private resolveCost(useMemberPoint: boolean, isRandomHit: boolean): number {
+    if (useMemberPoint) {
+      return isRandomHit
+        ? HERO_AWAKENING_MEMBER_POINT_COST_RANDOM
+        : HERO_AWAKENING_MEMBER_POINT_COST;
+    }
+    return isRandomHit ? HERO_AWAKENING_SEASON_POINT_COST_RANDOM : HERO_AWAKENING_SEASON_POINT_COST;
   }
 
   async ensureRandomCandidates(steamId: number, candidates: string[]): Promise<string[]> {
