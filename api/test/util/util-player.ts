@@ -81,6 +81,14 @@ export async function awakenHero(
   return put(app, `/api/player/${steamId}/hero-awakening`, { heroName, useMemberPoint });
 }
 
+export async function ensureRandomHeroAwakeningCandidates(
+  app: INestApplication,
+  steamId: number,
+  candidates: string[],
+) {
+  return put(app, `/api/player/${steamId}/hero-awakening/random`, { candidates });
+}
+
 export async function getPlayerDto(app: INestApplication, steamId: number): Promise<PlayerInfoDto> {
   const playerInfoService = app.get(PlayerInfoService);
   return playerInfoService.findPlayerInfoBySteamId(steamId, ['property', 'setting']);

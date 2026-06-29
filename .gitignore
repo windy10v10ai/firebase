@@ -130,3 +130,6 @@ api/swagger-spec.yaml
 # Firebase
 .firebase/
 firestore-backup/
+
+# Local Claude superpowers specs/plans
+docs/superpowers/

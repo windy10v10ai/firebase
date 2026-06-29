@@ -50,14 +50,17 @@ feature/<issue-id>-<short-kebab-summary>
 
 非 issue 驱动的改动可使用 `fix/...`、`chore/...`、`docs/...` 前缀，命名规则同上。
 
+**不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/superpowers/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
+
 ## 推送到 develop 的流程
 
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
 
 1. 实现完成后先跑完整校验（unit + lint + e2e，见上方「测试」一节），全部通过才能推送
 2. `git push -u origin <branch-name>`
-3. `gh pr create`，base 为 `develop`；PR body 用 `## Summary` + `## Test plan`（勾选已跑过的校验项），不需要审批的小改动也走这个流程
+3. `gh pr create`，base 为 `develop`；PR body 用 `## Summary` + `## Test plan`（勾选已跑过的校验项），不需要审批的小改动也走这个流程；标题用英文
 4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
+5. 不再依赖 `.github/workflows/create_develop_pr.yml` 自动建 PR（已废弃删除）——push 后必须显式执行第 3 步
 
 ## 命名规范
 
