@@ -5,6 +5,7 @@ import { AfdianService } from '../afdian/afdian.service';
 import { ActiveAfdianOrderDto } from '../afdian/dto/active-afdian-order.dto';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
 import { MembersService } from '../members/members.service';
+import { PlayerHeroAwakeningCompensationService } from '../player-hero-awakening/player-hero-awakening-compensation.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
@@ -17,6 +18,7 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly afdianService: AfdianService,
     private readonly membersService: MembersService,
+    private readonly playerHeroAwakeningCompensationService: PlayerHeroAwakeningCompensationService,
   ) {}
 
   @Post('/member')
@@ -42,5 +44,10 @@ export class AdminController {
   @Get('/kofi/order/null-email')
   findKofiOrdersWithNullEmail() {
     return this.adminService.findKofiOrdersWithNullEmail();
+  }
+
+  @Post('/hero-awakening/compensation')
+  runHeroAwakeningCompensation() {
+    return this.playerHeroAwakeningCompensationService.runCompensation();
   }
 }
