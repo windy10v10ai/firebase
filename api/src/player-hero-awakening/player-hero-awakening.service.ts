@@ -47,8 +47,8 @@ export class PlayerHeroAwakeningService {
     const item: HeroAwakeningItem = { heroName };
     const reason = isRandomHit ? HERO_AWAKENING_REASON_RANDOM : HERO_AWAKENING_REASON;
 
+    const cost = this.resolveCost(useMemberPoint, isRandomHit);
     if (useMemberPoint) {
-      const cost = this.resolveCost(true, isRandomHit);
       const useableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
       if (useableMemberPoint < cost) {
         throw new BadRequestException();
@@ -58,7 +58,6 @@ export class PlayerHeroAwakeningService {
       await this.saveAwakening(doc, item, isRandomHit);
       await this.analyticsService.playerUsePoint(steamId, cost, true, reason);
     } else {
-      const cost = this.resolveCost(false, isRandomHit);
       const useableSeasonPoint = (player.seasonPointTotal ?? 0) - (player.usedSeasonPoint ?? 0);
       if (useableSeasonPoint < cost) {
         throw new BadRequestException();
