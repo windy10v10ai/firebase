@@ -34,6 +34,25 @@ describe('PlayerHeroAwakeningService', () => {
     return { service, playerService, playerHeroAwakeningRepository, analyticsService };
   }
 
+  function createServiceWithRandomCandidates(
+    player: Record<string, number | undefined> | null,
+    existingCandidates: string[],
+    existingAwakenings: { heroName: string }[] = [],
+  ) {
+    const helpers = createService(player, existingAwakenings);
+    helpers.playerHeroAwakeningRepository.findById = jest.fn().mockResolvedValue(
+      player
+        ? {
+            id: steamId.toString(),
+            steamId,
+            awakenings: existingAwakenings,
+            randomCandidates: { candidates: existingCandidates, createdAt: new Date() },
+          }
+        : null,
+    );
+    return helpers;
+  }
+
   describe('awaken', () => {
     it('使用赛季可用积分觉醒：扣减 usedSeasonPoint，写入 usedSeasonPoint=10000，不写 usedMemberPoint', async () => {
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
@@ -125,6 +144,72 @@ describe('PlayerHeroAwakeningService', () => {
         BadRequestException,
       );
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ensureRandomCandidates', () => {
+    it('无进行中候选集时，存入并返回入参 candidates', async () => {
+      const { service, playerHeroAwakeningRepository } = createService({
+        seasonPointTotal: 10000,
+      });
+      const candidates = ['npc_dota_hero_axe', 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
+
+      const result = await service.ensureRandomCandidates(steamId, candidates);
+
+      expect(result).toEqual(candidates);
+      const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
+      expect(savedDoc.randomCandidates.candidates).toEqual(candidates);
+      expect(savedDoc.randomCandidates.createdAt).toBeInstanceOf(Date);
+    });
+
+    it('已有未消费候选集时，原样返回旧值，忽略入参', async () => {
+      const existingCandidates = ['npc_dota_hero_axe', 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
+      const { service, playerHeroAwakeningRepository } = createServiceWithRandomCandidates(
+        { seasonPointTotal: 10000 },
+        existingCandidates,
+      );
+      const newCandidates = ['npc_dota_hero_pudge', 'npc_dota_hero_sven', 'npc_dota_hero_tiny'];
+
+      const result = await service.ensureRandomCandidates(steamId, newCandidates);
+
+      expect(result).toEqual(existingCandidates);
+      expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('玩家不存在应报错', async () => {
+      const { service } = createService(null);
+
+      await expect(service.ensureRandomCandidates(steamId, ['npc_dota_hero_axe'])).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('candidates 含无效英雄名应报错，不写入', async () => {
+      const { service, playerHeroAwakeningRepository } = createService({
+        seasonPointTotal: 10000,
+      });
+
+      await expect(
+        service.ensureRandomCandidates(steamId, [
+          'npc_dota_hero_axe',
+          'npc_dota_hero_not_a_real_hero',
+        ]),
+      ).rejects.toThrow(BadRequestException);
+      expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('已有未消费候选集时，即使新 body 含无效英雄名也不报错（body 被忽略，不会校验）', async () => {
+      const existingCandidates = ['npc_dota_hero_axe', 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
+      const { service } = createServiceWithRandomCandidates(
+        { seasonPointTotal: 10000 },
+        existingCandidates,
+      );
+
+      const result = await service.ensureRandomCandidates(steamId, [
+        'npc_dota_hero_not_a_real_hero',
+      ]);
+
+      expect(result).toEqual(existingCandidates);
     });
   });
 });

@@ -62,6 +62,31 @@ export class PlayerHeroAwakeningService {
     }
   }
 
+  async ensureRandomCandidates(steamId: number, candidates: string[]): Promise<string[]> {
+    const player = await this.playerService.findBySteamId(steamId);
+    if (!player) {
+      throw new BadRequestException();
+    }
+
+    const id = steamId.toString();
+    let doc = await this.playerHeroAwakeningRepository.findById(id);
+
+    if (doc?.randomCandidates) {
+      return doc.randomCandidates.candidates;
+    }
+
+    candidates.forEach((heroName) => GetHeroId(heroName));
+
+    if (!doc) {
+      doc = { id, steamId, awakenings: [] };
+      await this.playerHeroAwakeningRepository.create(doc);
+    }
+
+    doc.randomCandidates = { candidates, createdAt: new Date() };
+    await this.playerHeroAwakeningRepository.update(doc);
+    return candidates;
+  }
+
   async findBySteamId(steamId: number): Promise<HeroAwakeningItem[]> {
     const doc = await this.playerHeroAwakeningRepository.findById(steamId.toString());
     return doc?.awakenings ?? [];
