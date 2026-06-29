@@ -89,6 +89,9 @@ export class PlayerHeroAwakeningService {
     }
 
     candidates.forEach((heroName) => GetHeroId(heroName));
+    if (candidates.some((heroName) => doc.awakenings.some((a) => a.heroName === heroName))) {
+      throw new BadRequestException();
+    }
 
     doc.randomCandidates = { candidates, createdAt: new Date() };
     await this.playerHeroAwakeningRepository.update(doc);

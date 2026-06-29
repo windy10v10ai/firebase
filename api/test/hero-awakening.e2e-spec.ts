@@ -57,6 +57,19 @@ describe('HeroAwakeningController (e2e)', () => {
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.status).toBeLessThan(500);
     });
+
+    it('candidates 含已被该玩家觉醒的英雄应报错', async () => {
+      const testPlayer = 300500004;
+      await createPlayer(app, { steamId: testPlayer, seasonPointTotal: 100000 });
+      await awakenHero(app, testPlayer, 'npc_dota_hero_axe', false);
+
+      const response = await put(app, `${playerUrl}/${testPlayer}/hero-awakening/random`, {
+        candidates: ['npc_dota_hero_axe', 'npc_dota_hero_bane', 'npc_dota_hero_lina'],
+      });
+
+      expect(response.status).toBeGreaterThanOrEqual(400);
+      expect(response.status).toBeLessThan(500);
+    });
   });
 
   describe(`${playerUrl}/:steamId/hero-awakening (Put) - 重复认领`, () => {

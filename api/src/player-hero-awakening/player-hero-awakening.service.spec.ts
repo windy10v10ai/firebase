@@ -302,5 +302,38 @@ describe('PlayerHeroAwakeningService', () => {
 
       expect(result).toEqual(existingCandidates);
     });
+
+    it('candidates 含已被该玩家觉醒的英雄应报错，不写入', async () => {
+      const { service, playerHeroAwakeningRepository } = createService(
+        { seasonPointTotal: 10000 },
+        [{ heroName: validHeroName }],
+      );
+
+      await expect(
+        service.ensureRandomCandidates(steamId, [
+          validHeroName,
+          'npc_dota_hero_bane',
+          'npc_dota_hero_lina',
+        ]),
+      ).rejects.toThrow(BadRequestException);
+      expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('已有未消费候选集时，即使新 body 含已觉醒英雄也不报错（body 被忽略，不会校验）', async () => {
+      const existingCandidates = [
+        'npc_dota_hero_bane',
+        'npc_dota_hero_lina',
+        'npc_dota_hero_pudge',
+      ];
+      const { service } = createServiceWithRandomCandidates(
+        { seasonPointTotal: 10000 },
+        existingCandidates,
+        [{ heroName: validHeroName }],
+      );
+
+      const result = await service.ensureRandomCandidates(steamId, [validHeroName]);
+
+      expect(result).toEqual(existingCandidates);
+    });
   });
 });
