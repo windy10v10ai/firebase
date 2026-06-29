@@ -16,6 +16,7 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
 import { AwakenHeroDto } from '../player-hero-awakening/dto/awaken-hero.dto';
+import { EnsureRandomCandidatesDto } from '../player-hero-awakening/dto/ensure-random-candidates.dto';
 import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero-awakening.service';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -85,5 +86,18 @@ export class PlayerInfoController {
   ): Promise<PlayerInfoDto> {
     await this.playerHeroAwakeningService.awaken(steamId, dto.heroName, dto.useMemberPoint);
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['heroAwakening']);
+  }
+
+  @Put(':steamId/hero-awakening/random')
+  @ApiOperation({ summary: 'Ensure random hero awakening candidates exist (idempotent, free)' })
+  async ensureRandomHeroAwakeningCandidates(
+    @Param('steamId', ParseIntPipe) steamId: number,
+    @Body() dto: EnsureRandomCandidatesDto,
+  ): Promise<{ candidates: string[] }> {
+    const candidates = await this.playerHeroAwakeningService.ensureRandomCandidates(
+      steamId,
+      dto.candidates,
+    );
+    return { candidates };
   }
 }
