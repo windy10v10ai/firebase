@@ -58,8 +58,9 @@ feature/<issue-id>-<short-kebab-summary>
 
 1. 实现完成后先跑完整校验（unit + lint + e2e，见上方「测试」一节），全部通过才能推送
 2. `git push -u origin <branch-name>`
-3. `gh pr create`，base 为 `develop`；PR body 用 `## Summary` + `## Test plan`（勾选已跑过的校验项），不需要审批的小改动也走这个流程
-4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
+3. **push 到 `feature/*` 分支会触发 `.github/workflows/create_develop_pr.yml` 自动创建 PR**（base `develop`，draft 状态，title 取自分支名解析出的 issue 标题，body 固定为 `## Issue\n- [ ] fix #<issue-id>`）——不要再手动 `gh pr create`，会因为 PR 已存在而报错
+4. 自动创建的 PR body 太简单时，用 `gh api repos/<owner>/<repo>/pulls/<number> -X PATCH -F body=@<file>` 补充 `## Summary` + `## Test plan`（勾选已跑过的校验项）；`gh pr edit`/`gh pr create` 在本仓库会因为 Projects (classic) 被弃用而报 GraphQL 错误，统一用 `gh api ... -X PATCH` 改标题/正文
+5. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
 
 ## 命名规范
 
