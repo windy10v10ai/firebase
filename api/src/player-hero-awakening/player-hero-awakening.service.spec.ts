@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { FieldValue } from 'firebase-admin/firestore';
 
 import { PlayerHeroAwakeningService } from './player-hero-awakening.service';
 
@@ -143,6 +144,77 @@ describe('PlayerHeroAwakeningService', () => {
       await expect(service.awaken(steamId, validHeroName, false)).resolves.toBeUndefined();
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
       expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('命中随机候选集 + 赛季积分：扣半价 5000，清空 randomCandidates', async () => {
+      const candidates = [validHeroName, 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
+      const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
+        createServiceWithRandomCandidates(
+          { seasonPointTotal: 10000, usedSeasonPoint: 0 },
+          candidates,
+        );
+
+      await service.awaken(steamId, validHeroName, false);
+
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedSeasonPoint: 5000,
+      });
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
+        steamId,
+        5000,
+        false,
+        'hero_awakening_random',
+      );
+      const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
+      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 5000 }]);
+      expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);
+    });
+
+    it('命中随机候选集 + 会员积分：扣半价 2500，清空 randomCandidates', async () => {
+      const candidates = [validHeroName, 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
+      const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
+        createServiceWithRandomCandidates(
+          { memberPointTotal: 2500, usedMemberPoint: 0 },
+          candidates,
+        );
+
+      await service.awaken(steamId, validHeroName, true);
+
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedMemberPoint: 2500,
+      });
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
+        steamId,
+        2500,
+        true,
+        'hero_awakening_random',
+      );
+      const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
+      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 2500 }]);
+      expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);
+    });
+
+    it('未命中候选集：维持赛季全价 10000，候选集保留', async () => {
+      const candidates = ['npc_dota_hero_bane', 'npc_dota_hero_lina', 'npc_dota_hero_pudge'];
+      const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
+        createServiceWithRandomCandidates(
+          { seasonPointTotal: 10000, usedSeasonPoint: 0 },
+          candidates,
+        );
+
+      await service.awaken(steamId, validHeroName, false);
+
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedSeasonPoint: 10000,
+      });
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
+        steamId,
+        10000,
+        false,
+        'hero_awakening',
+      );
+      const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
+      expect(savedDoc.randomCandidates.candidates).toEqual(candidates);
     });
   });
 
