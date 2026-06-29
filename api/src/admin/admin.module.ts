@@ -13,6 +13,7 @@ import { AdminService } from './admin.service';
   imports: [
     MembersModule,
     AfdianModule,
+    // TODO: 仅为一次性 hero-awakening 补偿迁移端点引入，随机觉醒上线执行完后删除
     PlayerHeroAwakeningModule,
     FireormModule.forFeature([KofiOrder]),
   ],

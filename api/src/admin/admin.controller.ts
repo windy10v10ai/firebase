@@ -46,6 +46,7 @@ export class AdminController {
     return this.adminService.findKofiOrdersWithNullEmail();
   }
 
+  // TODO: 一次性迁移端点，随机觉醒上线执行完后删除
   @Post('/hero-awakening/compensation')
   runHeroAwakeningCompensation() {
     return this.playerHeroAwakeningCompensationService.runCompensation();

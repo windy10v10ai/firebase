@@ -21,8 +21,9 @@ export class PlayerHeroAwakeningCompensationService {
     private readonly playerService: PlayerService,
   ) {}
 
+  // TODO: 一次性迁移，随机觉醒上线执行完后删除本 service、admin 端点及相关 module 注册。
   /**
-   * 一次性迁移：随机觉醒上线时，把所有已花费的觉醒积分（季卡/会员）全额退回，
+   * 把所有已花费的觉醒积分（季卡/会员）全额退回，
    * 并清空该玩家的觉醒状态，让所有玩家在新价格体系下重新选择。
    *
    * 用 PlayerHeroAwakening 文档是否存在代替单独的"已处理"标记位——
