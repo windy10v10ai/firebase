@@ -129,13 +129,13 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
-    it('未携带 API key 时允许开始游戏', async () => {
+    it('未携带 API key 时返回400', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const result = await request(app.getHttpServer())
         .get(gameStartUrl)
         .query({ steamIds: [100000000], matchId });
 
-      expect(result.status).toEqual(200);
+      expect(result.status).toEqual(400);
     });
 
     describe('单人开始', () => {
@@ -317,7 +317,7 @@ describe('PlayerController (e2e)', () => {
     });
 
     describe('响应体验证', () => {
-      it('验证响应体结构完整性 (members, players, pointInfo)', async () => {
+      it('验证响应体结构完整性 (players, pointInfo)', async () => {
         const steamId = 100000701;
         mockDate('2023-12-01T00:00:00.000Z');
 
@@ -332,10 +332,6 @@ describe('PlayerController (e2e)', () => {
         expect(result.status).toEqual(200);
 
         const response = result.body;
-        // 验证 members 数组（向后兼容）
-        expect(response.members).toBeDefined();
-        expect(Array.isArray(response.members)).toBe(true);
-        expect(response.members.length).toBeGreaterThanOrEqual(1);
 
         // 验证 players 数组
         expect(response.players).toBeDefined();
@@ -461,7 +457,9 @@ describe('PlayerController (e2e)', () => {
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
 
-        const member = result.body.members.find((m: { steamId: number }) => m.steamId === steamId);
+        const player = result.body.players.find((p: { id: string }) => p.id === String(steamId));
+        expect(player).toBeDefined();
+        const member = player.member;
         expect(member).toBeDefined();
         expect(member.steamId).toEqual(steamId);
         expect(member.level).toEqual(MemberLevel.PREMIUM);
@@ -807,10 +805,10 @@ describe('PlayerController (e2e)', () => {
     });
   });
 
-  describe('Tenvten API Key', () => {
-    it('游戏结算 使用 Tenvten API Key 应该返回 401', async () => {
+  describe('无效 API Key', () => {
+    it('游戏结算 使用无效 API Key 应该返回 401', async () => {
       const headers = {
-        'x-api-key': 'tenvten-apikey',
+        'x-api-key': 'invalid-apikey',
       };
       const result = await request(app.getHttpServer())
         .post(gameEndUrl)
