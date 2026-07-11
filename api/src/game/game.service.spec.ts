@@ -111,13 +111,6 @@ describe('GameService', () => {
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
 
-    it('should return undefined for TENVTEN server', () => {
-      const result = service.getGA4Config(SERVER_TYPE.TENVTEN);
-
-      expect(result).toBeUndefined();
-      expect(secretService.getSecretValue).not.toHaveBeenCalled();
-    });
-
     it('should return undefined for LOCAL server', () => {
       const result = service.getGA4Config(SERVER_TYPE.LOCAL);
 

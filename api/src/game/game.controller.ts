@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -14,13 +15,12 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
-import { MemberDto } from '../members/dto/member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { Public } from '../util/auth/public.decorator';
-import { SecretService } from '../util/secret/secret.service';
+import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
@@ -49,6 +49,9 @@ export class GameController {
   ): Promise<GameStart> {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
+    if (serverType === SERVER_TYPE.UNKNOWN) {
+      throw new BadRequestException('Unknown server type');
+    }
     steamIds = this.gameService.validateSteamIds(steamIds);
 
     const pointInfo: PointInfoDto[] = [];
@@ -83,8 +86,6 @@ export class GameController {
 
     // 构建响应对象
     const response: GameStart = {
-      // TODO: remove members field after client migrates to reading from players[i].member
-      members: members.map((m) => new MemberDto(m)),
       players,
       pointInfo,
     };
