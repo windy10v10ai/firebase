@@ -457,7 +457,7 @@ describe('PlayerController (e2e)', () => {
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
 
-        const player = result.body.players.find((p: { steamId: number }) => p.steamId === steamId);
+        const player = result.body.players.find((p: { id: string }) => p.id === String(steamId));
         expect(player).toBeDefined();
         const member = player.member;
         expect(member).toBeDefined();
