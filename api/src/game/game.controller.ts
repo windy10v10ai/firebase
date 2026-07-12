@@ -71,7 +71,7 @@ export class GameController {
 
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
-    const isLocal = apiKey === 'Invalid_NotOnDedicatedServer';
+    const isLocal = serverType === SERVER_TYPE.LOCAL;
     await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType);
 
     // ----------------- 以下为返回数据 -----------------
