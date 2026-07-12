@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -18,6 +17,7 @@ import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
+import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { Public } from '../util/auth/public.decorator';
 import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
@@ -50,7 +50,11 @@ export class GameController {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     if (serverType === SERVER_TYPE.UNKNOWN) {
-      throw new BadRequestException('Unknown server type');
+      logger.warn('game/start: unknown server type', { apiKey });
+      return {
+        players: [{} as PlayerInfoDto],
+        pointInfo: [],
+      };
     }
     steamIds = this.gameService.validateSteamIds(steamIds);
 
