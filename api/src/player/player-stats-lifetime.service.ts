@@ -31,7 +31,7 @@ export class PlayerStatsLifetimeService {
     }
 
     if (shouldSkipStatsLifetimeForGameOptions(context.gameOptions)) {
-      logger.warn('game/end: skip statsLifetime by gameOptions', {
+      logger.log('game/end: skip statsLifetime by gameOptions', {
         steamId,
         matchId: context.matchId,
         gameOptions: context.gameOptions,
