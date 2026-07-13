@@ -45,6 +45,7 @@ export class GameController {
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
+    @Query('version') version: string,
     @Req() req: Request,
   ): Promise<GameStart> {
     const apiKey = req.headers['x-api-key'] as string;
@@ -76,7 +77,7 @@ export class GameController {
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
     const isLocal = serverType === SERVER_TYPE.LOCAL;
-    await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType);
+    await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType, version);
 
     // ----------------- 以下为返回数据 -----------------
     const steamIdsStr = steamIds.map((id) => id.toString());
