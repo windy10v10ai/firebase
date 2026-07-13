@@ -39,7 +39,13 @@ export class AnalyticsService {
     await this.sendEvent(steamId.toString(), event);
   }
 
-  async gameStart(steamIds: number[], matchId: number, isLocal: boolean, serverType: SERVER_TYPE) {
+  async gameStart(
+    steamIds: number[],
+    matchId: number,
+    isLocal: boolean,
+    serverType: SERVER_TYPE,
+    version: string,
+  ) {
     await Promise.all(
       steamIds.map(async (steamId) => {
         const event = await this.buildEvent('game_load', steamId, matchId.toString(), {
@@ -47,6 +53,7 @@ export class AnalyticsService {
           match_id: matchId,
           is_local: isLocal,
           server_type: serverType,
+          version,
         });
         await this.sendEvent(steamId.toString(), event);
       }),
