@@ -1,8 +1,6 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { Public } from '../util/auth/public.decorator';
-
 import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
@@ -26,7 +24,6 @@ export class PlayerController {
     private readonly playerGamePresetService: PlayerGamePresetService,
   ) {}
 
-  @Public()
   @Get('/ranking')
   @ApiOperation({ summary: 'Get player rankings' })
   getRanking(): Promise<PlayerRanking> {

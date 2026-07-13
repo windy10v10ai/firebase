@@ -22,7 +22,7 @@
     "test:e2e": "firebase emulators:exec --only firestore \"jest --config ./test/jest-e2e.json\" --project windy10v10ai"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.24",
+    "@nestjs/common": "^11.1.27",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.9",
     "@nestjs/mapped-types": "*",
@@ -38,7 +38,7 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.21",
+    "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.24",
     "@types/express": "^5.0.6",

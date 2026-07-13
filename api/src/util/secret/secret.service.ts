@@ -13,6 +13,7 @@ export enum SECRET {
   AFDIAN_API_TOKEN = 'AFDIAN_API_TOKEN',
   SERVER_APIKEY = 'SERVER_APIKEY',
   SERVER_APIKEY_TEST = 'SERVER_APIKEY_TEST',
+  LOCAL_APIKEY = 'LOCAL_APIKEY',
   GA4_API_SECRET = 'GA4_API_SECRET',
   KOFI_VERIFICATION_TOKEN = 'KOFI_VERIFICATION_TOKEN',
   ALIPAY_APP_ID = 'ALIPAY_APP_ID',
@@ -40,8 +41,8 @@ export class SecretService {
     if (apiKey === testKey) {
       return SERVER_TYPE.TEST;
     }
-
-    if (apiKey === 'Invalid_NotOnDedicatedServer') {
+    const localKey = this.getSecretValue(SECRET.LOCAL_APIKEY);
+    if (apiKey === localKey) {
       return SERVER_TYPE.LOCAL;
     }
 
