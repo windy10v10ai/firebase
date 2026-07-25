@@ -49,6 +49,7 @@ export class PlayerPropertyService {
     'property_cannot_miss',
     'property_slow_immune',
     'property_flying',
+    'property_aoe_bonus_constant_stacking',
   ];
 
   constructor(
