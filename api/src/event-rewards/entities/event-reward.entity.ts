@@ -27,4 +27,5 @@ export class EventReward {
   compensation20260301?: boolean; // 补偿活动：1000会员积分+5000赛季积分
   mayDay2026?: boolean; // 51活动：5100会员积分
   dragonBoat2026?: boolean;
+  aoeBonusProperty2026?: boolean; // 新属性 AOE Bonus 上线奖励：5000勇士积分
 }
