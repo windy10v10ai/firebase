@@ -35,12 +35,12 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        dragonBoat2026: true,
+        aoeBonusProperty2026: true,
       });
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.dragonBoat2026 = true;
+      eventReward.aoeBonusProperty2026 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }

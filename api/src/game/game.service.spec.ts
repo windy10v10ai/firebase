@@ -151,8 +151,8 @@ describe('GameService', () => {
       jest.clearAllMocks();
     });
 
-    it('windy主机 活动期间内 未领取 应发放端午节积分', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-06-19T00:00:00.000Z'));
+    it('windy主机 活动期间内 未领取 应发放新属性作用范围活动积分', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-07-27T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
@@ -165,8 +165,8 @@ describe('GameService', () => {
         {
           steamId,
           title: {
-            cn: '端午节快乐！',
-            en: 'Dragon Boat Festival Bonus!',
+            cn: '新属性作用范围',
+            en: 'New Property: AOE Bonus',
           },
           seasonPoint: 5000,
         },
@@ -174,7 +174,7 @@ describe('GameService', () => {
     });
 
     it('非windy主机 活动期间内 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-06-19T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-07-27T00:00:00.000Z'));
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
 
@@ -184,7 +184,7 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间外 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-06-23T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-01T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
@@ -194,9 +194,9 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间内 已领取 不应重复发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-06-19T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-07-27T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([
-        { steamId, result: { id: steamId.toString(), steamId, dragonBoat2026: true } },
+        { steamId, result: { id: steamId.toString(), steamId, aoeBonusProperty2026: true } },
       ]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
