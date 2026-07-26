@@ -68,6 +68,16 @@ export class PlayerSetting {
   @ApiProperty({ required: false })
   inventorySlot9QuickCast?: boolean;
 
+  // 真假眼改键（不受 isRememberAbilityKey 影响，始终无条件写入/保留）
+  @ApiProperty({ required: false })
+  wardObserverKey?: string;
+  @ApiProperty({ required: false })
+  wardObserverQuickCast?: boolean;
+  @ApiProperty({ required: false })
+  wardSentryKey?: string;
+  @ApiProperty({ required: false })
+  wardSentryQuickCast?: boolean;
+
   // 按地图游戏预设
   @ApiPropertyOptional()
   gamePresetDota?: { difficulty: number };
