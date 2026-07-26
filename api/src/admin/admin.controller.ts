@@ -6,6 +6,7 @@ import { ActiveAfdianOrderDto } from '../afdian/dto/active-afdian-order.dto';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerHeroAwakeningCompensationService } from '../player-hero-awakening/player-hero-awakening-compensation.service';
+import { PlayerPropertyResetService } from '../player-property/player-property-reset.service';
 import { Public } from '../util/auth/public.decorator';
 
 import { AdminService } from './admin.service';
@@ -19,6 +20,7 @@ export class AdminController {
     private readonly afdianService: AfdianService,
     private readonly membersService: MembersService,
     private readonly playerHeroAwakeningCompensationService: PlayerHeroAwakeningCompensationService,
+    private readonly playerPropertyResetService: PlayerPropertyResetService,
   ) {}
 
   @Post('/member')
@@ -50,5 +52,11 @@ export class AdminController {
   @Post('/hero-awakening/compensation')
   runHeroAwakeningCompensation() {
     return this.playerHeroAwakeningCompensationService.runCompensation();
+  }
+
+  // 批量重置所有 usedLevel 与 PlayerProperty 不一致的玩家属性加点，供后续需要重置属性时复用
+  @Post('/player-property/reset')
+  resetPlayerProperty() {
+    return this.playerPropertyResetService.resetAll();
   }
 }

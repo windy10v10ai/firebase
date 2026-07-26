@@ -84,6 +84,10 @@ export class PlayerService {
     return players;
   }
 
+  async findAllWithUsedLevelGreaterThanZero(): Promise<Player[]> {
+    return this.playerRepository.whereGreaterThan('usedLevel', 0).find();
+  }
+
   async reduceUsedPoint(
     steamId: number,
     dto: Pick<UpdatePlayerDto, 'usedSeasonPoint' | 'usedMemberPoint'>,
