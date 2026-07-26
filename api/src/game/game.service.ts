@@ -68,8 +68,8 @@ export class GameService {
     const pointInfoDtos: PointInfoDto[] = [];
 
     // FIXME 活动每次需要更新
-    const startTime = new Date('2026-06-18T00:00:00.000Z');
-    const endTime = new Date('2026-06-22T23:59:59.999Z');
+    const startTime = new Date('2026-07-26T00:00:00.000Z');
+    const endTime = new Date('2026-07-31T23:59:59.999Z');
     const seasonRewardPoint = 5000;
 
     const now = new Date();
@@ -84,7 +84,7 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= startTime && now <= endTime && !rewardResult.result?.dragonBoat2026) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.aoeBonusProperty2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: seasonRewardPoint,
         });
@@ -92,8 +92,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '端午节快乐！',
-            en: 'Dragon Boat Festival Bonus!',
+            cn: '新属性作用范围',
+            en: 'New Property: AOE Bonus',
           },
           seasonPoint: seasonRewardPoint,
         });
