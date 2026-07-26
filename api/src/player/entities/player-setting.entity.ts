@@ -54,15 +54,19 @@ export class PlayerSetting {
   @ApiProperty()
   passiveAbilityQuickCast2: boolean;
 
-  // 真假眼改键
+  // 背包 7/8/9 格改键
   @ApiProperty({ required: false })
-  wardObserverKey?: string;
+  inventorySlot7Key?: string;
   @ApiProperty({ required: false })
-  wardObserverQuickCast?: boolean;
+  inventorySlot7QuickCast?: boolean;
   @ApiProperty({ required: false })
-  wardSentryKey?: string;
+  inventorySlot8Key?: string;
   @ApiProperty({ required: false })
-  wardSentryQuickCast?: boolean;
+  inventorySlot8QuickCast?: boolean;
+  @ApiProperty({ required: false })
+  inventorySlot9Key?: string;
+  @ApiProperty({ required: false })
+  inventorySlot9QuickCast?: boolean;
 
   // 按地图游戏预设
   @ApiPropertyOptional()
