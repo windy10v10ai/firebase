@@ -23,16 +23,22 @@ export class PlayerPropertyResetService {
    */
   async resetAll(): Promise<PlayerPropertyResetResult> {
     const players = await this.playerService.findAllWithUsedLevelGreaterThanZero();
+    const total = players.length;
+    logger.log('[Player Property Reset] start', { total });
 
+    let processed = 0;
     for (const player of players) {
       const steamId = Number(player.id);
       await this.playerPropertyService.deleteBySteamId(steamId);
+      processed++;
       logger.log('[Player Property Reset] reset', {
         steamId,
         previousUsedLevel: player.usedLevel,
+        progress: `${processed}/${total}`,
       });
     }
 
-    return { processedCount: players.length };
+    logger.log('[Player Property Reset] done', { processedCount: processed });
+    return { processedCount: processed };
   }
 }
