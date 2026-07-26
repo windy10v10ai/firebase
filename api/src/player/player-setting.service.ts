@@ -48,6 +48,18 @@ export class PlayerSettingService {
     if (updatePlayerSettingDto.inventorySlot9QuickCast !== undefined) {
       setting.inventorySlot9QuickCast = updatePlayerSettingDto.inventorySlot9QuickCast;
     }
+    if (updatePlayerSettingDto.wardObserverKey !== undefined) {
+      setting.wardObserverKey = updatePlayerSettingDto.wardObserverKey;
+    }
+    if (updatePlayerSettingDto.wardObserverQuickCast !== undefined) {
+      setting.wardObserverQuickCast = updatePlayerSettingDto.wardObserverQuickCast;
+    }
+    if (updatePlayerSettingDto.wardSentryKey !== undefined) {
+      setting.wardSentryKey = updatePlayerSettingDto.wardSentryKey;
+    }
+    if (updatePlayerSettingDto.wardSentryQuickCast !== undefined) {
+      setting.wardSentryQuickCast = updatePlayerSettingDto.wardSentryQuickCast;
+    }
     if (setting.isRememberAbilityKey) {
       if (updatePlayerSettingDto.activeAbilityKey !== undefined) {
         setting.activeAbilityKey = updatePlayerSettingDto.activeAbilityKey;
@@ -97,6 +109,10 @@ export class PlayerSettingService {
       inventorySlot8QuickCast: false,
       inventorySlot9Key: '',
       inventorySlot9QuickCast: false,
+      wardObserverKey: '',
+      wardObserverQuickCast: false,
+      wardSentryKey: '',
+      wardSentryQuickCast: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

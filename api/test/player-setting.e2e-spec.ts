@@ -30,6 +30,10 @@ describe('PlayerSettingController (e2e)', () => {
         inventorySlot8QuickCast: false,
         inventorySlot9Key: '',
         inventorySlot9QuickCast: false,
+        wardObserverKey: '',
+        wardObserverQuickCast: false,
+        wardSentryKey: '',
+        wardSentryQuickCast: false,
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
       });
@@ -51,6 +55,10 @@ describe('PlayerSettingController (e2e)', () => {
         inventorySlot8QuickCast: false,
         inventorySlot9Key: 'F3',
         inventorySlot9QuickCast: true,
+        wardObserverKey: 'Y',
+        wardObserverQuickCast: true,
+        wardSentryKey: 'U',
+        wardSentryQuickCast: false,
       };
 
       const response = await put(app, `${playerUrl}/${testPlayer}/setting`, updateData);
@@ -78,11 +86,15 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.inventorySlot8QuickCast).toEqual(false);
       expect(playerSetting.inventorySlot9Key).toEqual('F3');
       expect(playerSetting.inventorySlot9QuickCast).toEqual(true);
+      expect(playerSetting.wardObserverKey).toEqual('Y');
+      expect(playerSetting.wardObserverQuickCast).toEqual(true);
+      expect(playerSetting.wardSentryKey).toEqual('U');
+      expect(playerSetting.wardSentryQuickCast).toEqual(false);
     });
 
-    it('更新玩家设置 - 默认不记住快捷键但保留快速施法和背包格改键', async () => {
+    it('更新玩家设置 - 默认不记住快捷键但保留快速施法、背包格改键和真假眼改键', async () => {
       const testPlayer = 300400003;
-      // 先设置快捷键、快速施法和背包格改键
+      // 先设置快捷键、快速施法、背包格改键和真假眼改键
       const response = await put(app, `${playerUrl}/${testPlayer}/setting`, {
         activeAbilityKey: 'Q',
         passiveAbilityKey: 'E',
@@ -96,6 +108,10 @@ describe('PlayerSettingController (e2e)', () => {
         inventorySlot8QuickCast: false,
         inventorySlot9Key: 'F3',
         inventorySlot9QuickCast: true,
+        wardObserverKey: 'Y',
+        wardObserverQuickCast: true,
+        wardSentryKey: 'U',
+        wardSentryQuickCast: true,
       });
 
       expect(response.status).toEqual(200);
@@ -115,6 +131,10 @@ describe('PlayerSettingController (e2e)', () => {
           inventorySlot8QuickCast: false,
           inventorySlot9Key: 'F3',
           inventorySlot9QuickCast: true,
+          wardObserverKey: 'Y',
+          wardObserverQuickCast: true,
+          wardSentryKey: 'U',
+          wardSentryQuickCast: true,
         }),
       );
 
@@ -134,11 +154,15 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.inventorySlot8QuickCast).toEqual(false);
       expect(playerSetting.inventorySlot9Key).toEqual('F3');
       expect(playerSetting.inventorySlot9QuickCast).toEqual(true);
+      expect(playerSetting.wardObserverKey).toEqual('Y');
+      expect(playerSetting.wardObserverQuickCast).toEqual(true);
+      expect(playerSetting.wardSentryKey).toEqual('U');
+      expect(playerSetting.wardSentryQuickCast).toEqual(true);
     });
 
-    it('更新玩家设置 - 记忆技能改键后，再取消记忆但保留快速施法和背包格改键', async () => {
+    it('更新玩家设置 - 记忆技能改键后，再取消记忆但保留快速施法、背包格改键和真假眼改键', async () => {
       const testPlayer = 300400004;
-      // 先设置快捷键、快速施法和背包格改键
+      // 先设置快捷键、快速施法、背包格改键和真假眼改键
       await put(app, `${playerUrl}/${testPlayer}/setting`, {
         isRememberAbilityKey: true,
         activeAbilityKey: 'Q',
@@ -153,6 +177,10 @@ describe('PlayerSettingController (e2e)', () => {
         inventorySlot8QuickCast: false,
         inventorySlot9Key: 'F3',
         inventorySlot9QuickCast: true,
+        wardObserverKey: 'Y',
+        wardObserverQuickCast: true,
+        wardSentryKey: 'U',
+        wardSentryQuickCast: true,
       });
 
       // 设置不记住技能改键
@@ -178,10 +206,14 @@ describe('PlayerSettingController (e2e)', () => {
           inventorySlot8QuickCast: false,
           inventorySlot9Key: 'F3',
           inventorySlot9QuickCast: true,
+          wardObserverKey: 'Y',
+          wardObserverQuickCast: true,
+          wardSentryKey: 'U',
+          wardSentryQuickCast: true,
         }),
       );
 
-      // 验证更新后的设置：技能改键被清空，背包格改键与快速施法保留
+      // 验证更新后的设置：技能改键被清空，背包格改键、真假眼改键与快速施法保留
       const playerSetting = await getPlayerSetting(app, testPlayer.toString());
       expect(playerSetting.id).toEqual(testPlayer.toString());
       expect(playerSetting.isRememberAbilityKey).toEqual(false);
@@ -197,6 +229,10 @@ describe('PlayerSettingController (e2e)', () => {
       expect(playerSetting.inventorySlot8QuickCast).toEqual(false);
       expect(playerSetting.inventorySlot9Key).toEqual('F3');
       expect(playerSetting.inventorySlot9QuickCast).toEqual(true);
+      expect(playerSetting.wardObserverKey).toEqual('Y');
+      expect(playerSetting.wardObserverQuickCast).toEqual(true);
+      expect(playerSetting.wardSentryKey).toEqual('U');
+      expect(playerSetting.wardSentryQuickCast).toEqual(true);
     });
   });
 
