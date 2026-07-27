@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
@@ -72,6 +72,13 @@ export class GameEndPlayerDto {
   @IsNumber({ allowNaN: false, allowInfinity: false })
   @Min(0)
   towerKills: number;
+
+  /** 0 = 未觉醒，1 = 已觉醒；预留扩展，不可断言只有 0/1。旧客户端不发送时按 0 统计 */
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  awaken?: number;
 }
 
 export class GameEndDto extends EventBaseDto {
