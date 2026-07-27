@@ -104,6 +104,7 @@ export class AnalyticsService {
           is_disconnect: player.isDisconnected,
           server_type: serverType,
           country: gameEnd.countryCode,
+          awaken: player.awaken ?? 0,
         });
 
         const userProperties: UserProperties = {};
