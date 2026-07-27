@@ -95,7 +95,7 @@ export const scheduledOrderCheck = onSchedule(
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
-    timeoutSeconds: 1800,
+    timeoutSeconds: 540,
     secrets: commonSecrets,
   },
   async () => {
