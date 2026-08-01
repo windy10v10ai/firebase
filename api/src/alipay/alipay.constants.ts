@@ -38,19 +38,19 @@ export const ALIPAY_PRODUCT_TABLE: Record<AlipayProductCode, AlipayProductSpec> 
     reward: { kind: 'member', level: MemberLevel.PREMIUM },
   },
   [AlipayProductCode.POINTS_TIER1]: {
-    subjectUnit: '10v10AI 会员积分 3500',
+    subjectUnit: '10v10AI 会员积分 4000',
     priceCentPerUnit: 7800,
-    reward: { kind: 'points', points: 3500 },
+    reward: { kind: 'points', points: 4000 },
   },
   [AlipayProductCode.POINTS_TIER2]: {
-    subjectUnit: '10v10AI 会员积分 11000',
+    subjectUnit: '10v10AI 会员积分 12500',
     priceCentPerUnit: 23800,
-    reward: { kind: 'points', points: 11000 },
+    reward: { kind: 'points', points: 12500 },
   },
   [AlipayProductCode.POINTS_TIER3]: {
-    subjectUnit: '10v10AI 会员积分 28000',
+    subjectUnit: '10v10AI 会员积分 31000',
     priceCentPerUnit: 56800,
-    reward: { kind: 'points', points: 28000 },
+    reward: { kind: 'points', points: 31000 },
   },
 };
 

@@ -22,15 +22,15 @@ interface ShopItem {
 const SHOP_ITEMS: Record<string, ShopItem> = {
   TIER1: {
     code: '74a1b5be84',
-    points: 3500,
+    points: 4000,
   },
   TIER2: {
     code: '0e9591aa5d',
-    points: 11000,
+    points: 12500,
   },
   TIER3: {
     code: '3d4304d9a7',
-    points: 28000,
+    points: 31000,
   },
 };
 

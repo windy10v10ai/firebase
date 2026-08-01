@@ -395,15 +395,15 @@ describe('AlipayService', () => {
       await service.handleWebhook(buildNotify({ total_amount: '156.00' }));
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(123, {
-        memberPointTotal: 7000, // 3500 * 2
+        memberPointTotal: 8000, // 4000 * 2
       });
       expect(membersService.createMember).not.toHaveBeenCalled();
     });
 
     it.each([
-      [AlipayProductCode.POINTS_TIER1, 1, 7800, '78.00', 3500],
-      [AlipayProductCode.POINTS_TIER2, 1, 23800, '238.00', 11000],
-      [AlipayProductCode.POINTS_TIER3, 1, 56800, '568.00', 28000],
+      [AlipayProductCode.POINTS_TIER1, 1, 7800, '78.00', 4000],
+      [AlipayProductCode.POINTS_TIER2, 1, 23800, '238.00', 12500],
+      [AlipayProductCode.POINTS_TIER3, 1, 56800, '568.00', 31000],
     ])(
       '积分档位 %s 单份发放正确积分',
       async (code, quantity, totalAmountCent, amountStr, points) => {
