@@ -331,7 +331,7 @@ describe('AlipayController (e2e)', () => {
       );
       expect(r1.text).toBe('success');
       const afterFirst = (await getPlayer(app, steamId)).memberPointTotal;
-      expect(afterFirst - beforePoints).toBe(3500);
+      expect(afterFirst - beforePoints).toBe(4000);
 
       const r2 = await postWebhook(
         buildNotify({ out_trade_no: outTradeNo, total_amount: '78.00' }),
