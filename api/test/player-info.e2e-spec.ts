@@ -682,9 +682,9 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.useableSeasonPoint).toEqual(0);
     });
 
-    it('使用会员积分觉醒成功，消耗 5000', async () => {
+    it('使用会员积分觉醒成功，消耗 4000', async () => {
       const steamId = 200000702;
-      await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 5000 });
+      await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 4000 });
 
       const result = await awakenHero(app, steamId, validHeroName, true);
 
@@ -723,7 +723,7 @@ describe('PlayerInfoController (e2e)', () => {
         {
           useMemberPoint: true,
           seasonPointTotal: 0,
-          memberPointTotal: 4999,
+          memberPointTotal: 3999,
           usedSeasonPoint: 0,
           usedMemberPoint: 0,
         },
@@ -734,7 +734,7 @@ describe('PlayerInfoController (e2e)', () => {
         {
           useMemberPoint: true,
           seasonPointTotal: 0,
-          memberPointTotal: 5000,
+          memberPointTotal: 4000,
           usedSeasonPoint: 0,
           usedMemberPoint: 1,
         },
