@@ -167,7 +167,7 @@ describe('HeroAwakeningController (e2e)', () => {
       expect(ensureResponse.body).toEqual({ candidates: newCandidates });
     });
 
-    it('会员积分命中候选集：扣半价 2500', async () => {
+    it('会员积分命中候选集：扣半价 2000', async () => {
       const testPlayer = 300500023;
       await createPlayer(app, { steamId: testPlayer, memberPointTotal: 100000 });
       const candidates = ['npc_dota_hero_axe', 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
@@ -176,7 +176,7 @@ describe('HeroAwakeningController (e2e)', () => {
       const response = await awakenHero(app, testPlayer, 'npc_dota_hero_axe', true);
 
       expect(response.status).toEqual(200);
-      expect(response.body.usedMemberPoint).toEqual(2500);
+      expect(response.body.usedMemberPoint).toEqual(2000);
     });
 
     it('余额不足返回 4xx', async () => {
