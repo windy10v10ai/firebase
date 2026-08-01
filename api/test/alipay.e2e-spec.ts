@@ -214,7 +214,7 @@ describe('AlipayController (e2e)', () => {
       expect(player.memberPointTotal).toBe(3000); // 1000 * 3 个月
     });
 
-    it('POINTS_TIER1 quantity=2：积分 +7000（无 member 记录）', async () => {
+    it('POINTS_TIER1 quantity=2：积分 +8000（无 member 记录）', async () => {
       const steamId = STEAM_IDS.WEBHOOK_POINTS_QTY2;
       const order = await createOrder({
         steamId,
@@ -229,7 +229,7 @@ describe('AlipayController (e2e)', () => {
 
       expect(res.text).toBe('success');
       const player = await getPlayer(app, steamId);
-      expect(player.memberPointTotal).toBe(7000);
+      expect(player.memberPointTotal).toBe(8000);
 
       // 积分订单不应创建 member 记录
       await expect(getMemberDto(app, steamId)).rejects.toThrow();
