@@ -30,9 +30,9 @@ enum PlanId {
 }
 
 enum PlanPoint {
-  tire1 = 3500,
-  tire2 = 11000,
-  tire3 = 28000,
+  tire1 = 4000,
+  tire2 = 12500,
+  tire3 = 31000,
 }
 
 @Injectable()

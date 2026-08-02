@@ -749,7 +749,7 @@ describe('KofiController (e2e)', () => {
     describe('Ko-fi Webhook购买商品', () => {
       it.each([
         [
-          '单个商品 Tier1 3500积分',
+          '单个商品 Tier1 4000积分',
           200010101,
           'single-item-t1@example.com',
           [
@@ -759,10 +759,10 @@ describe('KofiController (e2e)', () => {
               variation_name: null,
             },
           ],
-          3500,
+          4000,
         ],
         [
-          '单个商品 Tier2 11000积分',
+          '单个商品 Tier2 12500积分',
           200010102,
           'single-item-t2@example.com',
           [
@@ -772,10 +772,10 @@ describe('KofiController (e2e)', () => {
               variation_name: null,
             },
           ],
-          11000,
+          12500,
         ],
         [
-          '单个商品 Tier3 28000积分',
+          '单个商品 Tier3 31000积分',
           200010103,
           'single-item-t3@example.com',
           [
@@ -785,7 +785,7 @@ describe('KofiController (e2e)', () => {
               variation_name: null,
             },
           ],
-          28000,
+          31000,
         ],
         [
           '一个商品多件',
@@ -798,7 +798,7 @@ describe('KofiController (e2e)', () => {
               variation_name: null,
             },
           ],
-          22000,
+          25000,
         ],
         [
           '多种商品多件',
@@ -816,7 +816,7 @@ describe('KofiController (e2e)', () => {
               variation_name: null,
             },
           ],
-          35000,
+          39000,
         ],
       ])('%s', async (_, memberId, email, shopItems, expectedPoints) => {
         // 创建玩家

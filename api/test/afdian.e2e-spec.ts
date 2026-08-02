@@ -337,7 +337,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010623',
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: '6f73a48e546011eda08052540025c377', // tire1 3500
+              plan_id: '6f73a48e546011eda08052540025c377', // tire1 4000
               month: month,
               remark: `${memberId}`,
               product_type: 1,
@@ -355,7 +355,7 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
-        expect(player.memberPointTotal).toEqual(3500);
+        expect(player.memberPointTotal).toEqual(4000);
       });
 
       it('爱发电Webhook购买会员积分 单次多个', async () => {
@@ -369,7 +369,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010624',
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: '0783fa70688a11edacd452540025c377', // tire3 28000
+              plan_id: '0783fa70688a11edacd452540025c377', // tire3 31000
               month: month,
               remark: `${memberId}`,
               product_type: 1,
@@ -387,7 +387,7 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate.body).toEqual({ ec: 200, em: 'ok' });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
-        expect(player.memberPointTotal).toEqual(56000);
+        expect(player.memberPointTotal).toEqual(62000);
       });
 
       it('爱发电Webhook购买会员积分 多次', async () => {
@@ -401,7 +401,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010625',
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: '6f73a48e546011eda08052540025c377', // tire1 3500
+              plan_id: '6f73a48e546011eda08052540025c377', // tire1 4000
               month: month,
               remark: `${memberId}`,
               product_type: 1,
@@ -423,7 +423,7 @@ describe('MemberController (e2e)', () => {
             createWebhookRequest({
               out_trade_no: '202106232138371083454010626',
               user_id: 'adf397fe8374811eaacee52540025c377',
-              plan_id: '29df1632688911ed9e7052540025c377', // tire2 11000
+              plan_id: '29df1632688911ed9e7052540025c377', // tire2 12500
               month: month,
               remark: `${memberId}`,
               product_type: 1,
@@ -441,7 +441,7 @@ describe('MemberController (e2e)', () => {
         expect(responseCreate2.body).toEqual({ ec: 200, em: 'ok' });
         // 检查玩家积分
         const player = await getPlayer(app, memberId);
-        expect(player.memberPointTotal).toEqual(14500);
+        expect(player.memberPointTotal).toEqual(16500);
       });
     });
   });

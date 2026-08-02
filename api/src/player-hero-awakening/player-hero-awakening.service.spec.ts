@@ -74,23 +74,23 @@ describe('PlayerHeroAwakeningService', () => {
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 10000 }]);
     });
 
-    it('使用会员可用积分觉醒：扣减 usedMemberPoint=5000，不写 usedSeasonPoint', async () => {
+    it('使用会员可用积分觉醒：扣减 usedMemberPoint=4000，不写 usedSeasonPoint', async () => {
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
-        createService({ memberPointTotal: 5000, usedMemberPoint: 0 });
+        createService({ memberPointTotal: 4000, usedMemberPoint: 0 });
 
       await service.awaken(steamId, validHeroName, true);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedMemberPoint: 5000,
+        usedMemberPoint: 4000,
       });
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
-        5000,
+        4000,
         true,
         'hero_awakening',
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
-      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 5000 }]);
+      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 4000 }]);
     });
 
     it('赛季可用积分不足应报错，不扣分不写入', async () => {
@@ -108,7 +108,7 @@ describe('PlayerHeroAwakeningService', () => {
 
     it('会员可用积分不足应报错', async () => {
       const { service, playerService } = createService({
-        memberPointTotal: 5000,
+        memberPointTotal: 4000,
         usedMemberPoint: 1,
       });
 
@@ -170,27 +170,27 @@ describe('PlayerHeroAwakeningService', () => {
       expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);
     });
 
-    it('命中随机候选集 + 会员积分：扣半价 2500，清空 randomCandidates', async () => {
+    it('命中随机候选集 + 会员积分：扣半价 2000，清空 randomCandidates', async () => {
       const candidates = [validHeroName, 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
         createServiceWithRandomCandidates(
-          { memberPointTotal: 2500, usedMemberPoint: 0 },
+          { memberPointTotal: 2000, usedMemberPoint: 0 },
           candidates,
         );
 
       await service.awaken(steamId, validHeroName, true);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedMemberPoint: 2500,
+        usedMemberPoint: 2000,
       });
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
-        2500,
+        2000,
         true,
         'hero_awakening_random',
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
-      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 2500 }]);
+      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 2000 }]);
       expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);
     });
 
@@ -222,8 +222,8 @@ describe('PlayerHeroAwakeningService', () => {
     it.each([
       [false, false, 10000],
       [false, true, 5000],
-      [true, false, 5000],
-      [true, true, 2500],
+      [true, false, 4000],
+      [true, true, 2000],
     ])(
       'useMemberPoint=%s, isRandomHit=%s -> %i',
       async (useMemberPoint, isRandomHit, expectedCost) => {
