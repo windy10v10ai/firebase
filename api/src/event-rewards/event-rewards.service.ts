@@ -35,12 +35,12 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        aoeBonusProperty2026: true,
+        awaken20260802: true,
       });
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.aoeBonusProperty2026 = true;
+      eventReward.awaken20260802 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }

@@ -68,9 +68,9 @@ export class GameService {
     const pointInfoDtos: PointInfoDto[] = [];
 
     // FIXME 活动每次需要更新
-    const startTime = new Date('2026-07-26T00:00:00.000Z');
-    const endTime = new Date('2026-07-31T23:59:59.999Z');
-    const seasonRewardPoint = 5000;
+    const startTime = new Date('2026-08-02T00:00:00.000Z');
+    const endTime = new Date('2026-08-09T23:59:59.999Z');
+    const memberRewardPoint = 2000;
 
     const now = new Date();
 
@@ -84,18 +84,18 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= startTime && now <= endTime && !rewardResult.result?.aoeBonusProperty2026) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.awaken20260802) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          seasonPointTotal: seasonRewardPoint,
+          memberPointTotal: memberRewardPoint,
         });
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '新属性作用范围',
-            en: 'New Property: AOE Bonus',
+            cn: '觉醒活动奖励',
+            en: 'Awaken Event Reward',
           },
-          seasonPoint: seasonRewardPoint,
+          memberPoint: memberRewardPoint,
         });
       }
     }

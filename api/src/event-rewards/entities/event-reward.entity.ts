@@ -28,4 +28,5 @@ export class EventReward {
   mayDay2026?: boolean; // 51活动：5100会员积分
   dragonBoat2026?: boolean;
   aoeBonusProperty2026?: boolean; // 新属性 AOE Bonus 上线奖励：5000勇士积分
+  awaken20260802?: boolean; // 觉醒活动奖励（8/2-8/9，登录发放）：2000会员积分
 }
