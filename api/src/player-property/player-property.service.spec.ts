@@ -46,7 +46,6 @@ describe('PlayerPropertyService', () => {
     function createService(player: Record<string, number | undefined>) {
       const playerService = {
         findBySteamId: jest.fn().mockResolvedValue(player),
-        consumeMemberPoint: jest.fn().mockResolvedValue({}),
         upsertAddPoint: jest.fn().mockResolvedValue({}),
         setUsedLevel: jest.fn().mockResolvedValue({}),
       };
@@ -72,13 +71,15 @@ describe('PlayerPropertyService', () => {
 
       await service.reset(steamId, true);
 
-      expect(playerService.consumeMemberPoint).toHaveBeenCalledWith(
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedMemberPoint: 1000,
+      });
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         1000,
+        true,
         'reset_property',
       );
-      expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
-      expect(analyticsService.playerUsePoint).not.toHaveBeenCalled();
     });
 
     it('使用会员积分重置：总积分充足但可用积分不足应报错', async () => {
@@ -88,7 +89,6 @@ describe('PlayerPropertyService', () => {
       });
 
       await expect(service.reset(steamId, true)).rejects.toThrow(BadRequestException);
-      expect(playerService.consumeMemberPoint).not.toHaveBeenCalled();
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
     });
 

@@ -13,7 +13,6 @@ describe('PlayerHeroAwakeningService', () => {
   ) {
     const playerService = {
       findBySteamId: jest.fn().mockResolvedValue(player),
-      consumeMemberPoint: jest.fn().mockResolvedValue({}),
       upsertAddPoint: jest.fn().mockResolvedValue({}),
     };
     const playerHeroAwakeningRepository = {
@@ -81,13 +80,15 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, true);
 
-      expect(playerService.consumeMemberPoint).toHaveBeenCalledWith(
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedMemberPoint: 4000,
+      });
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         4000,
+        true,
         'hero_awakening',
       );
-      expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
-      expect(analyticsService.playerUsePoint).not.toHaveBeenCalled();
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 4000 }]);
     });
@@ -114,7 +115,6 @@ describe('PlayerHeroAwakeningService', () => {
       await expect(service.awaken(steamId, validHeroName, true)).rejects.toThrow(
         BadRequestException,
       );
-      expect(playerService.consumeMemberPoint).not.toHaveBeenCalled();
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
     });
 
@@ -180,13 +180,15 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, true);
 
-      expect(playerService.consumeMemberPoint).toHaveBeenCalledWith(
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedMemberPoint: 2000,
+      });
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         2000,
+        true,
         'hero_awakening_random',
       );
-      expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
-      expect(analyticsService.playerUsePoint).not.toHaveBeenCalled();
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 2000 }]);
       expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);

@@ -53,7 +53,7 @@ export class PlayerHeroAwakeningService {
       if (useableMemberPoint < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.consumeMemberPoint(steamId, cost, reason);
+      await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
       item.usedMemberPoint = cost;
     } else {
       const useableSeasonPoint = (player.seasonPointTotal ?? 0) - (player.usedSeasonPoint ?? 0);
@@ -64,9 +64,7 @@ export class PlayerHeroAwakeningService {
       item.usedSeasonPoint = cost;
     }
     await this.saveAwakening(doc, item, isRandomHit);
-    if (!useMemberPoint) {
-      await this.analyticsService.playerUsePoint(steamId, cost, false, reason);
-    }
+    await this.analyticsService.playerUsePoint(steamId, cost, useMemberPoint, reason);
   }
 
   private resolveCost(useMemberPoint: boolean, isRandomHit: boolean): number {

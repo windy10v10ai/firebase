@@ -124,34 +124,26 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
-  async consumeMemberPoint(steamId: number, memberPoint: number, reason: string): Promise<Player> {
-    const normalizedMemberPoint = Math.trunc(memberPoint);
-    if (!Number.isFinite(normalizedMemberPoint) || normalizedMemberPoint < 1) {
+  async useMemberPoint(dto: UsePlayerMemberPointsDto): Promise<Player> {
+    const memberPoint = Math.trunc(dto.memberPoint);
+    if (memberPoint < 1) {
       throw new BadRequestException();
     }
 
-    const player = await this.playerRepository.runTransaction(async (transactionRepository) => {
-      const player = await transactionRepository.findById(steamId.toString());
-      if (!player) {
-        throw new BadRequestException();
-      }
+    const player = await this.findBySteamId(dto.steamId);
+    if (!player) {
+      throw new BadRequestException();
+    }
 
-      const availableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
-      if (availableMemberPoint < normalizedMemberPoint) {
-        throw new BadRequestException();
-      }
+    const useableMemberPoint = (player.memberPointTotal ?? 0) - (player.usedMemberPoint ?? 0);
+    if (useableMemberPoint < memberPoint) {
+      throw new BadRequestException();
+    }
 
-      player.usedMemberPoint = (player.usedMemberPoint ?? 0) + normalizedMemberPoint;
-      await transactionRepository.update(player);
-      return player;
-    });
-
-    await this.analyticsService.playerUsePoint(steamId, normalizedMemberPoint, true, reason);
+    player.usedMemberPoint = (player.usedMemberPoint ?? 0) + memberPoint;
+    await this.playerRepository.update(player);
+    await this.analyticsService.playerUsePoint(dto.steamId, memberPoint, true, dto.reason);
     return player;
-  }
-
-  async useMemberPoint(dto: UsePlayerMemberPointsDto): Promise<Player> {
-    return this.consumeMemberPoint(dto.steamId, dto.memberPoint, dto.reason);
   }
 
   // 仅供测试初始化使用，生产代码不应调用；conductPoint 的正常变动走 PlayerConductService。

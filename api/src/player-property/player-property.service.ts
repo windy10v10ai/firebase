@@ -130,7 +130,8 @@ export class PlayerPropertyService {
       if (useableMemberPoint < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.consumeMemberPoint(steamId, cost, RESET_PROPERTY_REASON);
+      await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
+      await this.analyticsService.playerUsePoint(steamId, cost, true, RESET_PROPERTY_REASON);
     } else {
       const seasonPointTotal = player.seasonPointTotal ?? 0;
       const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(seasonPointTotal);
