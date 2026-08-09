@@ -1,14 +1,22 @@
-﻿import { DailyChallengeMatchContributionDto } from '../dto/daily-challenge-match-contribution.dto';
+import { DailyChallengeMatchContributionDto } from '../dto/daily-challenge-match-contribution.dto';
+import { DailyChallengeGlobalContribution } from '../entities/daily-challenge-global-contribution.entity';
+import { DailyChallengeMatchLedger } from '../entities/daily-challenge-match-ledger.entity';
+import { DailyChallengeRewardLedger } from '../entities/daily-challenge-reward-ledger.entity';
 import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
 import {
   ChallengeMetric,
   ChallengeScope,
   ChallengeUnit,
   DAILY_CHALLENGE_METRIC_UNIT,
+  DailyChallengeRewardSource,
 } from '../types/daily-challenge.types';
 
 import { DailyChallengeGenerationService } from './daily-challenge-generation.service';
 import { DailyChallengeProgressService } from './daily-challenge-progress.service';
+import {
+  DailyChallengeMatchContributionMutation,
+  DailyChallengeMatchContributionResult,
+} from './daily-challenge-progress.store';
 
 const now = new Date('2026-08-04T03:00:00.000Z');
 
@@ -100,11 +108,16 @@ const createLedgerId = (
   steamId = 483215844,
 ) => `${dayId}_${new Date(matchStartedAt).getTime()}_${encodeURIComponent(matchId)}_${steamId}`;
 
+type MatchContributionMutator = (
+  state: PlayerDailyChallenge | null,
+  globalContribution: DailyChallengeGlobalContribution | null,
+) => DailyChallengeMatchContributionMutation;
+
 class MemoryProgressStore {
   readonly states = new Map<string, PlayerDailyChallenge>();
-  readonly ledgers = new Map<string, any>();
-  readonly globalContributions = new Map<string, any>();
-  readonly rewards = new Map<string, any>();
+  readonly ledgers = new Map<string, DailyChallengeMatchLedger>();
+  readonly globalContributions = new Map<string, DailyChallengeGlobalContribution>();
+  readonly rewards = new Map<string, DailyChallengeRewardLedger>();
 
   async getState(stateId: string) {
     const state = this.states.get(stateId);
@@ -114,9 +127,9 @@ class MemoryProgressStore {
   async runMatchContribution(
     ledgerId: string,
     stateId: string,
-    globalContributionIdOrMutate: string | any,
-    maybeMutate?: any,
-  ) {
+    globalContributionIdOrMutate: string | MatchContributionMutator,
+    maybeMutate?: MatchContributionMutator,
+  ): Promise<DailyChallengeMatchContributionResult> {
     const existing = this.ledgers.get(ledgerId);
     if (existing) {
       return { ledger: structuredClone(existing), ledgerCreated: false };
@@ -125,14 +138,17 @@ class MemoryProgressStore {
     const state = this.states.get(stateId);
     const globalContributionId =
       typeof globalContributionIdOrMutate === 'string' ? globalContributionIdOrMutate : stateId;
-    const mutate = maybeMutate ?? globalContributionIdOrMutate;
+    const mutate =
+      typeof globalContributionIdOrMutate === 'string'
+        ? maybeMutate!
+        : globalContributionIdOrMutate;
     const globalContribution = this.globalContributions.get(globalContributionId);
     const mutation = mutate(
       state ? structuredClone(state) : null,
       globalContribution ? structuredClone(globalContribution) : null,
     );
 
-    let personalRewardGrant: { reward: any; created: boolean } | undefined;
+    let personalRewardGrant: DailyChallengeMatchContributionResult['personalRewardGrant'];
     if (mutation.personalReward) {
       const existingReward = this.rewards.get(mutation.personalReward.id);
       const reward = existingReward ?? mutation.personalReward;
@@ -271,11 +287,13 @@ const createService = (store: MemoryProgressStore = new MemoryProgressStore()) =
     generationService,
     playerService,
     service: new DailyChallengeProgressService(
-      store as any,
-      clock as any,
-      rewardService as any,
-      generationService as any,
-      playerService as any,
+      ...([
+        store,
+        clock,
+        rewardService,
+        generationService,
+        playerService,
+      ] as unknown as ConstructorParameters<typeof DailyChallengeProgressService>),
     ),
   };
 };
@@ -465,11 +483,11 @@ describe('DailyChallengeProgressService', () => {
   );
   it('reports a transaction reward even when its idempotent reward ledger already exists', async () => {
     const store = new MemoryProgressStore();
-    const existingReward = {
+    const existingReward: DailyChallengeRewardLedger = {
       id: '2026-08-04_483215844_personal_assignment-1',
       dayId: '2026-08-04',
       steamId: 483215844,
-      source: 'personal',
+      source: DailyChallengeRewardSource.PERSONAL,
       assignmentId: 'assignment-1',
       taskSnapshot: createState().acceptedTask!,
       configVersionId: 'v1',
@@ -785,7 +803,7 @@ describe('DailyChallengeProgressService', () => {
         acceptedAssignmentId: undefined,
         personalMetrics: [],
         globalMetrics: [{ metric: ChallengeMetric.HERO_DAMAGE, value: 120000 }],
-        ...(overrides as any),
+        ...(overrides as Partial<DailyChallengeMatchContributionDto['players'][number]>),
       }),
       eligible ? [{ steamId: 483215844, heroName: 'npc_dota_hero_lina' }] : [],
       now,
@@ -958,7 +976,7 @@ describe('DailyChallengeProgressService', () => {
       ...state.acceptedTask!,
       metric: 'physical_damage' as ChallengeMetric,
       target: 500000,
-    } as any;
+    } as NonNullable<PlayerDailyChallenge['acceptedTask']>;
     store.states.set(state.id, state);
     const contribution = createContribution({
       personalMetrics: [{ metric: 'physical_damage' as ChallengeMetric, value: 300000 }],
@@ -990,7 +1008,7 @@ describe('DailyChallengeProgressService', () => {
       ...state.acceptedTask!,
       metric,
       target: value * 2,
-    } as any;
+    } as NonNullable<PlayerDailyChallenge['acceptedTask']>;
     store.states.set(state.id, state);
     const contribution = createContribution({
       personalMetrics: [{ metric, value }],
@@ -1014,7 +1032,10 @@ describe('DailyChallengeProgressService', () => {
   it('accepts a contribution exactly at the conservative single-match damage limit', async () => {
     const { service, store } = createService();
     const state = createState();
-    state.acceptedTask = { ...state.acceptedTask!, target: 100000000 } as any;
+    state.acceptedTask = {
+      ...state.acceptedTask!,
+      target: 100000000,
+    } as NonNullable<PlayerDailyChallenge['acceptedTask']>;
     store.states.set(state.id, state);
 
     await service.applyGameEnd(

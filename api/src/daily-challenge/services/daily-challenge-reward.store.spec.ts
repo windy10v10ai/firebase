@@ -53,7 +53,7 @@ const setupFirestore = (ledgerExists: boolean, playerExists = true) => {
       callback(transaction),
     ),
   };
-  mockedGetFirestore.mockReturnValue(db as any);
+  mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
   return { reads, rewardRef, playerRef, transaction, db };
 };
 
@@ -73,7 +73,7 @@ describe('DailyChallengeRewardStore.grant', () => {
     const { reads, rewardRef, playerRef, transaction, db } = setupFirestore(false);
 
     const result = await new DailyChallengeRewardStore().grantInTransaction(
-      transaction as any,
+      transaction as unknown as Parameters<DailyChallengeRewardStore['grantInTransaction']>[0],
       reward,
     );
 
@@ -94,7 +94,10 @@ describe('DailyChallengeRewardStore.grant', () => {
     const { reads, rewardRef, playerRef, transaction } = setupFirestore(false, false);
 
     await expect(
-      new DailyChallengeRewardStore().grantInTransaction(transaction as any, reward),
+      new DailyChallengeRewardStore().grantInTransaction(
+        transaction as unknown as Parameters<DailyChallengeRewardStore['grantInTransaction']>[0],
+        reward,
+      ),
     ).rejects.toThrow('Player 483215844 does not exist');
 
     expect(reads).toEqual([rewardRef.path, playerRef.path]);
@@ -151,7 +154,7 @@ describe('DailyChallengeRewardStore notifications', () => {
         callback(transaction),
       ),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const claimedAt = new Date('2026-08-04T04:00:00.000Z');
 
     const result = await new DailyChallengeRewardStore().claimPending([483215844], claimedAt);
@@ -191,7 +194,7 @@ describe('DailyChallengeRewardStore notifications', () => {
         callback(transaction),
       ),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const claimedAt = new Date('2026-08-04T04:00:00.000Z');
 
     await expect(
@@ -214,7 +217,7 @@ describe('DailyChallengeRewardStore notifications', () => {
         where: jest.fn(() => ({ get })),
       })),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
 
     await expect(new DailyChallengeRewardStore().countUnread(483215844)).resolves.toBe(2);
   });
@@ -235,7 +238,7 @@ describe('DailyChallengeRewardStore notifications', () => {
       })),
       batch: jest.fn().mockReturnValueOnce(batches[0]).mockReturnValueOnce(batches[1]),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const viewedAt = new Date('2026-08-04T04:00:00.000Z');
 
     await expect(new DailyChallengeRewardStore().markViewed(483215844, viewedAt)).resolves.toBe(
@@ -263,7 +266,7 @@ describe('DailyChallengeRewardStore notifications', () => {
       })),
       batch: jest.fn(() => ({ update, commit })),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const viewedAt = new Date('2026-08-04T04:00:00.000Z');
 
     await expect(new DailyChallengeRewardStore().markViewed(483215844, viewedAt)).resolves.toBe(2);
@@ -295,7 +298,7 @@ describe('DailyChallengeRewardStore history', () => {
     const orderBy = jest.fn(() => ({ limit }));
     const where = jest.fn(() => ({ orderBy }));
     const db = { collection: jest.fn(() => ({ where })) };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
 
     await expect(new DailyChallengeRewardStore().listRecent(483215844, 20)).resolves.toEqual([
       expect.objectContaining({ id: 'newer-reward' }),

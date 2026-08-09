@@ -27,7 +27,12 @@ const taskSnapshot = {
 describe('DailyChallengeRewardService', () => {
   const createService = () => {
     const store = { grant: jest.fn(async (reward) => ({ reward, created: true })) };
-    return { service: new DailyChallengeRewardService(store as any), store };
+    return {
+      service: new DailyChallengeRewardService(
+        store as unknown as ConstructorParameters<typeof DailyChallengeRewardService>[0],
+      ),
+      store,
+    };
   };
 
   it('uses a reconstructable personal reward id and keeps the task assignment', async () => {

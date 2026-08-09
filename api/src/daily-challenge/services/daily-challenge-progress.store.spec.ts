@@ -5,6 +5,9 @@ jest.mock('firebase-admin/firestore', () => ({
 
 import { getFirestore } from 'firebase-admin/firestore';
 
+import { DailyChallengeMatchLedger } from '../entities/daily-challenge-match-ledger.entity';
+import { DailyChallengeRewardLedger } from '../entities/daily-challenge-reward-ledger.entity';
+import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
 import { ChallengeMetric } from '../types/daily-challenge.types';
 
 import { DailyChallengeProgressStore } from './daily-challenge-progress.store';
@@ -12,9 +15,11 @@ import { DailyChallengeProgressStore } from './daily-challenge-progress.store';
 const mockedGetFirestore = getFirestore as jest.MockedFunction<typeof getFirestore>;
 
 const createStore = (rewardStore = { grantInTransaction: jest.fn() }) =>
-  new DailyChallengeProgressStore(rewardStore as any);
+  new DailyChallengeProgressStore(
+    rewardStore as unknown as ConstructorParameters<typeof DailyChallengeProgressStore>[0],
+  );
 
-const storedLedger = {
+const storedLedger: DailyChallengeMatchLedger = {
   id: 'match-1_483215844',
   matchId: 'match-1',
   steamId: 483215844,
@@ -24,6 +29,8 @@ const storedLedger = {
   metric: ChallengeMetric.HERO_DAMAGE,
   reportedValue: 300000,
   appliedPersonalProgress: 300000,
+  reportedGlobalValue: 0,
+  appliedGlobalContribution: 0,
   createdAt: new Date('2026-08-04T03:00:00.000Z'),
 };
 
@@ -79,7 +86,7 @@ const setupFirestore = (options: { ledgerExists: boolean; stateExists?: boolean 
       callback(transaction),
     ),
   };
-  mockedGetFirestore.mockReturnValue(db as any);
+  mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
   return { reads, ledgerRef, stateRef, transaction };
 };
 
@@ -105,7 +112,9 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
 
   it('normalizes legacy player state before passing it to a match mutator', async () => {
     const { transaction } = setupFirestore({ ledgerExists: false });
-    const mutate = jest.fn(() => ({ ledger: storedLedger as any }));
+    const mutate = jest.fn(() => ({
+      ledger: storedLedger as Omit<DailyChallengeMatchLedger, 'id'>,
+    }));
 
     await createStore().runMatchContribution(
       'match-legacy_483215844',
@@ -134,8 +143,11 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
       storedLedger.id,
       '2026-08-04_483215844',
       () => ({
-        state: updatedState as any,
-        ledger: { ...storedLedger, id: undefined, acceptedAssignmentId: undefined } as any,
+        state: updatedState as unknown as PlayerDailyChallenge,
+        ledger: { ...storedLedger, id: undefined, acceptedAssignmentId: undefined } as Omit<
+          DailyChallengeMatchLedger,
+          'id'
+        >,
       }),
     );
 
@@ -175,9 +187,9 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
       storedLedger.id,
       '2026-08-04_483215844',
       () => ({
-        state: updatedState as any,
-        personalReward: reward as any,
-        ledger: { ...storedLedger, id: undefined } as any,
+        state: updatedState as unknown as PlayerDailyChallenge,
+        personalReward: reward as DailyChallengeRewardLedger,
+        ledger: { ...storedLedger, id: undefined } as Omit<DailyChallengeMatchLedger, 'id'>,
       }),
     );
 
@@ -202,7 +214,7 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
       grantInTransaction: jest.fn().mockRejectedValue(new Error('Player 483215844 does not exist')),
     };
     const mutate = jest.fn(() => ({
-      state: { ...createState(), progress: 300000 } as any,
+      state: { ...createState(), progress: 300000 } as PlayerDailyChallenge,
       personalReward: {
         id: '2026-08-04_483215844_personal_assignment-1',
         dayId: '2026-08-04',
@@ -212,8 +224,8 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
         seasonPoint: 100,
         notificationStatus: 'notified',
         createdAt: new Date('2026-08-04T03:00:00.000Z'),
-      } as any,
-      ledger: { ...storedLedger, id: undefined } as any,
+      } as DailyChallengeRewardLedger,
+      ledger: { ...storedLedger, id: undefined } as Omit<DailyChallengeMatchLedger, 'id'>,
     }));
 
     await expect(
@@ -234,7 +246,10 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
       stateExists: false,
     });
     const mutate = jest.fn(() => ({
-      ledger: { ...storedLedger, id: undefined, appliedPersonalProgress: 0 } as any,
+      ledger: { ...storedLedger, id: undefined, appliedPersonalProgress: 0 } as Omit<
+        DailyChallengeMatchLedger,
+        'id'
+      >,
     }));
 
     await createStore().runMatchContribution(storedLedger.id, '2026-08-04_483215844', mutate);
@@ -286,7 +301,7 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
         callback(transaction),
       ),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const globalContribution = {
       id: '2026-08-04_483215844',
       dayId: '2026-08-04',
@@ -309,7 +324,7 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
           matchId: 'match-global',
           reportedGlobalValue: 120000,
           appliedGlobalContribution: 120000,
-        } as any,
+        } as Omit<DailyChallengeMatchLedger, 'id'>,
       }),
     );
 
@@ -362,14 +377,14 @@ describe('DailyChallengeProgressStore.runMatchContribution', () => {
         callback(transaction),
       ),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const mutate = jest.fn(() => ({
       ledger: {
         ...storedLedger,
         matchId: 'match-frozen',
         appliedPersonalProgress: 0,
         appliedGlobalContribution: 0,
-      } as any,
+      } as Omit<DailyChallengeMatchLedger, 'id'>,
     }));
 
     await createStore().runMatchContribution(

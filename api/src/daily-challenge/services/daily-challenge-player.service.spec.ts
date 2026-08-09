@@ -1,4 +1,9 @@
 ﻿import { DAILY_CHALLENGE_CONFIG as config } from '../config/tasks';
+import { DailyChallengeDay } from '../entities/daily-challenge-day.entity';
+import {
+  DailyChallengeAccountState,
+  PlayerDailyChallenge,
+} from '../entities/player-daily-challenge.entity';
 import { ChallengeScope } from '../types/daily-challenge.types';
 
 import { DailyChallengeDayService } from './daily-challenge-day.service';
@@ -22,9 +27,9 @@ const window = {
 };
 
 class MemoryDailyChallengeDayStore extends DailyChallengeDayStore {
-  days = new Map<string, any>();
+  days = new Map<string, DailyChallengeDay>();
 
-  async getOrCreate(dayId: string, factory: () => any): Promise<any> {
+  async getOrCreate(dayId: string, factory: () => DailyChallengeDay): Promise<DailyChallengeDay> {
     if (!this.days.has(dayId)) {
       this.days.set(dayId, structuredClone(factory()));
     }
@@ -33,24 +38,27 @@ class MemoryDailyChallengeDayStore extends DailyChallengeDayStore {
 }
 
 class MemoryDailyChallengePlayerStore extends DailyChallengePlayerStore {
-  states = new Map<string, any>();
+  states = new Map<string, PlayerDailyChallenge>();
   operations = new Map<string, DailyChallengeStoredOperation>();
-  accounts = new Map<number, { member: any; player: any }>();
+  accounts = new Map<number, DailyChallengeAccountState>();
   private queue: Promise<void> = Promise.resolve();
 
-  async getOrCreateState(id: string, factory: () => any): Promise<any> {
+  async getOrCreateState(
+    id: string,
+    factory: () => PlayerDailyChallenge,
+  ): Promise<PlayerDailyChallenge> {
     if (!this.states.has(id)) {
       this.states.set(id, factory());
     }
     return structuredClone(this.states.get(id));
   }
 
-  async getState(id: string): Promise<any> {
+  async getState(id: string): Promise<PlayerDailyChallenge | null> {
     const value = this.states.get(id);
     return value ? structuredClone(value) : null;
   }
 
-  async getAccountState(steamId: number): Promise<any> {
+  async getAccountState(steamId: number): Promise<DailyChallengeAccountState> {
     return structuredClone(
       this.accounts.get(steamId) ?? {
         member: null,
@@ -115,23 +123,24 @@ const createServices = (store = new MemoryDailyChallengePlayerStore()) => {
     getCurrentProgress: jest.fn().mockResolvedValue(0),
   };
   const dayService = new DailyChallengeDayService(
-    new MemoryDailyChallengeDayStore(),
-    generation,
-    clock as any,
+    ...([new MemoryDailyChallengeDayStore(), generation, clock] as unknown as ConstructorParameters<
+      typeof DailyChallengeDayService
+    >),
   );
   const playerService = new DailyChallengePlayerService(
-    store,
-    dayService,
-    generation,
-    clock as any,
-    rewardNotificationService as any,
-    globalProgressStore as any,
+    ...([
+      store,
+      dayService,
+      generation,
+      clock,
+      rewardNotificationService,
+      globalProgressStore,
+    ] as unknown as ConstructorParameters<typeof DailyChallengePlayerService>),
   );
   const refreshService = new DailyChallengeRefreshService(
-    store,
-    generation,
-    clock as any,
-    playerService,
+    ...([store, generation, clock, playerService] as unknown as ConstructorParameters<
+      typeof DailyChallengeRefreshService
+    >),
   );
   return {
     store,
@@ -149,7 +158,7 @@ describe('daily challenge player state and actions', () => {
       if (steamId === 483215845) {
         throw new Error('corrupt daily challenge state');
       }
-      return { steamId } as any;
+      return { steamId } as Awaited<ReturnType<DailyChallengePlayerService['getSnapshot']>>;
     });
 
     await expect(playerService.getSnapshots([483215844, 483215845], now)).resolves.toEqual([

@@ -2,6 +2,15 @@ import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { GameController } from './game.controller';
 
+type GameRequest = Parameters<GameController['start']>[3];
+type GameEndInput = Parameters<GameController['end']>[0];
+
+const createController = (...dependencies: unknown[]) =>
+  new GameController(...(dependencies as ConstructorParameters<typeof GameController>));
+const createRequest = (): GameRequest =>
+  ({ headers: { 'x-api-key': 'local-key' } }) as unknown as GameRequest;
+const asGameEndInput = (value: unknown): GameEndInput => value as GameEndInput;
+
 describe('GameController daily challenge snapshot', () => {
   it('includes one current-day challenge snapshot per validated player at game start', async () => {
     const gameService = {
@@ -34,23 +43,21 @@ describe('GameController daily challenge snapshot', () => {
     const dailyChallengeRewardNotificationService = {
       claimPointInfo: jest.fn().mockResolvedValue([challengeReward]),
     };
-    const controller = new GameController(
-      gameService as any,
-      membersService as any,
-      playerService as any,
-      analyticsService as any,
-      secretService as any,
-      playerInfoService as any,
-      playerStatsLifetimeService as any,
-      dailyChallengePlayerService as any,
-      {} as any,
-      dailyChallengeSettlementService as any,
-      dailyChallengeRewardNotificationService as any,
+    const controller = createController(
+      gameService,
+      membersService,
+      playerService,
+      analyticsService,
+      secretService,
+      playerInfoService,
+      playerStatsLifetimeService,
+      dailyChallengePlayerService,
+      {},
+      dailyChallengeSettlementService,
+      dailyChallengeRewardNotificationService,
     );
 
-    const result = await controller.start([483215844], 123, 'test-version', {
-      headers: { 'x-api-key': 'local-key' },
-    } as any);
+    const result = await controller.start([483215844], 123, 'test-version', createRequest());
 
     const matchStartedAt = dailyChallengePlayerService.getSnapshots.mock.calls[0][1];
     expect(matchStartedAt).toBeInstanceOf(Date);
@@ -87,24 +94,22 @@ describe('GameController daily challenge snapshot', () => {
     const dailyChallengePlayerService = {
       getSnapshots: jest.fn().mockRejectedValue(new Error('daily challenge unavailable')),
     };
-    const controller = new GameController(
-      gameService as any,
-      membersService as any,
-      {} as any,
-      analyticsService as any,
-      secretService as any,
-      playerInfoService as any,
-      {} as any,
-      dailyChallengePlayerService as any,
-      {} as any,
-      { reconcile: jest.fn().mockResolvedValue(undefined) } as any,
-      { claimPointInfo: jest.fn().mockResolvedValue([]) } as any,
+    const controller = createController(
+      gameService,
+      membersService,
+      {},
+      analyticsService,
+      secretService,
+      playerInfoService,
+      {},
+      dailyChallengePlayerService,
+      {},
+      { reconcile: jest.fn().mockResolvedValue(undefined) },
+      { claimPointInfo: jest.fn().mockResolvedValue([]) },
     );
 
     await expect(
-      controller.start([483215844], 123, 'test-version', {
-        headers: { 'x-api-key': 'local-key' },
-      } as any),
+      controller.start([483215844], 123, 'test-version', createRequest()),
     ).resolves.toMatchObject({
       players: [{ steamId: 483215844 }],
       pointInfo: [],
@@ -112,59 +117,55 @@ describe('GameController daily challenge snapshot', () => {
   });
 
   it('keeps game start available when catch-up settlement fails', async () => {
-    const controller = new GameController(
+    const controller = createController(
       {
         validateSteamIds: jest.fn((steamIds) => steamIds),
         upsertPlayerInfo: jest.fn(),
         giveEventReward: jest.fn().mockResolvedValue([]),
         addDailyMemberPoints: jest.fn().mockResolvedValue([]),
         getGA4Config: jest.fn(),
-      } as any,
-      { findBySteamIds: jest.fn().mockResolvedValue([]) } as any,
-      {} as any,
-      { gameStart: jest.fn() } as any,
-      { getServerTypeByApiKey: jest.fn().mockReturnValue(SERVER_TYPE.LOCAL) } as any,
-      { findPlayerInfoBySteamIds: jest.fn().mockResolvedValue([{ steamId: 483215844 }]) } as any,
-      {} as any,
-      { getSnapshots: jest.fn().mockResolvedValue([]) } as any,
-      {} as any,
-      { reconcile: jest.fn().mockRejectedValue(new Error('settlement unavailable')) } as any,
-      { claimPointInfo: jest.fn().mockResolvedValue([]) } as any,
+      },
+      { findBySteamIds: jest.fn().mockResolvedValue([]) },
+      {},
+      { gameStart: jest.fn() },
+      { getServerTypeByApiKey: jest.fn().mockReturnValue(SERVER_TYPE.LOCAL) },
+      { findPlayerInfoBySteamIds: jest.fn().mockResolvedValue([{ steamId: 483215844 }]) },
+      {},
+      { getSnapshots: jest.fn().mockResolvedValue([]) },
+      {},
+      { reconcile: jest.fn().mockRejectedValue(new Error('settlement unavailable')) },
+      { claimPointInfo: jest.fn().mockResolvedValue([]) },
     );
 
     await expect(
-      controller.start([483215844], 123, 'test-version', {
-        headers: { 'x-api-key': 'local-key' },
-      } as any),
+      controller.start([483215844], 123, 'test-version', createRequest()),
     ).resolves.toMatchObject({ players: [{ steamId: 483215844 }], pointInfo: [] });
   });
 
   it('keeps game start available when pending reward claim fails', async () => {
     const dailyChallengePlayerService = { getSnapshots: jest.fn().mockResolvedValue([]) };
-    const controller = new GameController(
+    const controller = createController(
       {
         validateSteamIds: jest.fn((steamIds) => steamIds),
         upsertPlayerInfo: jest.fn(),
         giveEventReward: jest.fn().mockResolvedValue([]),
         addDailyMemberPoints: jest.fn().mockResolvedValue([]),
         getGA4Config: jest.fn(),
-      } as any,
-      { findBySteamIds: jest.fn().mockResolvedValue([]) } as any,
-      {} as any,
-      { gameStart: jest.fn() } as any,
-      { getServerTypeByApiKey: jest.fn().mockReturnValue(SERVER_TYPE.LOCAL) } as any,
-      { findPlayerInfoBySteamIds: jest.fn().mockResolvedValue([{ steamId: 483215844 }]) } as any,
-      {} as any,
-      dailyChallengePlayerService as any,
-      {} as any,
-      { reconcile: jest.fn().mockResolvedValue(undefined) } as any,
-      { claimPointInfo: jest.fn().mockRejectedValue(new Error('claim unavailable')) } as any,
+      },
+      { findBySteamIds: jest.fn().mockResolvedValue([]) },
+      {},
+      { gameStart: jest.fn() },
+      { getServerTypeByApiKey: jest.fn().mockReturnValue(SERVER_TYPE.LOCAL) },
+      { findPlayerInfoBySteamIds: jest.fn().mockResolvedValue([{ steamId: 483215844 }]) },
+      {},
+      dailyChallengePlayerService,
+      {},
+      { reconcile: jest.fn().mockResolvedValue(undefined) },
+      { claimPointInfo: jest.fn().mockRejectedValue(new Error('claim unavailable')) },
     );
 
     await expect(
-      controller.start([483215844], 123, 'test-version', {
-        headers: { 'x-api-key': 'local-key' },
-      } as any),
+      controller.start([483215844], 123, 'test-version', createRequest()),
     ).resolves.toMatchObject({ players: [{ steamId: 483215844 }], pointInfo: [] });
     expect(dailyChallengePlayerService.getSnapshots).toHaveBeenCalled();
   });
@@ -199,18 +200,18 @@ describe('GameController daily challenge progress', () => {
           progressImplementation ?? (() => Promise.resolve({ ledgers: [], rewards: [] })),
         ),
     };
-    const controller = new GameController(
-      gameService as any,
-      {} as any,
-      playerService as any,
-      analyticsService as any,
-      secretService as any,
-      {} as any,
-      playerStatsLifetimeService as any,
-      dailyChallengePlayerService as any,
-      dailyChallengeProgressService as any,
-      {} as any,
-      {} as any,
+    const controller = createController(
+      gameService,
+      {},
+      playerService,
+      analyticsService,
+      secretService,
+      {},
+      playerStatsLifetimeService,
+      dailyChallengePlayerService,
+      dailyChallengeProgressService,
+      {},
+      {},
     );
     return {
       controller,
@@ -274,12 +275,7 @@ describe('GameController daily challenge progress', () => {
     const { controller, playerService, dailyChallengeProgressService } = createHarness();
     const gameEnd = createGameEnd();
 
-    await controller.end(
-      gameEnd as any,
-      {
-        headers: { 'x-api-key': 'local-key' },
-      } as any,
-    );
+    await controller.end(asGameEndInput(gameEnd), createRequest());
 
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
     expect(playerService.upsertGameEnd).toHaveBeenCalledWith(483215844, true, 100, true, true);
@@ -301,10 +297,7 @@ describe('GameController daily challenge progress', () => {
     };
     const { controller } = createHarness(() => Promise.resolve({ ledgers: [], rewards: [reward] }));
 
-    const result = await controller.end(
-      createGameEnd() as any,
-      { headers: { 'x-api-key': 'local-key' } } as any,
-    );
+    const result = await controller.end(asGameEndInput(createGameEnd()), createRequest());
 
     expect(result).toEqual({ result: 'OK', dailyChallengeRewards: [reward] });
   });
@@ -317,10 +310,7 @@ describe('GameController daily challenge progress', () => {
     const gameEnd = createGameEnd();
     gameEnd.players[0].isDisconnected = false;
 
-    const result = await controller.end(
-      gameEnd as any,
-      { headers: { 'x-api-key': 'local-key' } } as any,
-    );
+    const result = await controller.end(asGameEndInput(gameEnd), createRequest());
 
     expect(dailyChallengePlayerService.getSnapshots).toHaveBeenCalledWith(
       [483215844],
@@ -345,9 +335,7 @@ describe('GameController daily challenge progress', () => {
     const gameEnd = createGameEnd();
     gameEnd.players[0].isDisconnected = false;
 
-    await expect(
-      controller.end(gameEnd as any, { headers: { 'x-api-key': 'local-key' } } as any),
-    ).resolves.toEqual({
+    await expect(controller.end(asGameEndInput(gameEnd), createRequest())).resolves.toEqual({
       result: 'OK',
       dailyChallengeRewards: [reward],
       dailyChallenges: [snapshot],
@@ -361,9 +349,9 @@ describe('GameController daily challenge progress', () => {
     const gameEnd = createGameEnd();
     gameEnd.players[0].isDisconnected = false;
 
-    await expect(
-      controller.end(gameEnd as any, { headers: { 'x-api-key': 'local-key' } } as any),
-    ).resolves.toEqual({ result: 'OK' });
+    await expect(controller.end(asGameEndInput(gameEnd), createRequest())).resolves.toEqual({
+      result: 'OK',
+    });
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
 
@@ -372,14 +360,9 @@ describe('GameController daily challenge progress', () => {
       Promise.reject(new Error('daily challenge progress unavailable')),
     );
 
-    await expect(
-      controller.end(
-        createGameEnd() as any,
-        {
-          headers: { 'x-api-key': 'local-key' },
-        } as any,
-      ),
-    ).resolves.toEqual({ result: 'OK' });
+    await expect(controller.end(asGameEndInput(createGameEnd()), createRequest())).resolves.toEqual(
+      { result: 'OK' },
+    );
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
 
@@ -387,12 +370,7 @@ describe('GameController daily challenge progress', () => {
     const { controller, dailyChallengeProgressService } = createHarness();
 
     await expect(
-      controller.end(
-        createGameEnd(false) as any,
-        {
-          headers: { 'x-api-key': 'local-key' },
-        } as any,
-      ),
+      controller.end(asGameEndInput(createGameEnd(false)), createRequest()),
     ).resolves.toEqual({ result: 'OK' });
     expect(dailyChallengeProgressService.applyGameEnd).not.toHaveBeenCalled();
   });

@@ -1,4 +1,5 @@
-﻿import { DailyChallengeRewardLedger } from '../entities/daily-challenge-reward-ledger.entity';
+﻿import { DailyChallengeTaskSnapshotDto } from '../dto/daily-challenge-task-snapshot.dto';
+import { DailyChallengeRewardLedger } from '../entities/daily-challenge-reward-ledger.entity';
 import {
   DailyChallengeContributionTier,
   DailyChallengeRewardSource,
@@ -38,7 +39,7 @@ describe('DailyChallengeRewardNotificationService', () => {
             target: 100,
             progress: 100,
             rewardSeasonPoint: 100,
-          } as any,
+          } as unknown as DailyChallengeTaskSnapshotDto,
           configVersionId: 'daily-v7',
           configVersion: 7,
         }),
@@ -104,7 +105,7 @@ describe('DailyChallengeRewardNotificationService', () => {
       target: 500000,
       progress: 500000,
       rewardSeasonPoint: 100,
-    } as any;
+    } as unknown as DailyChallengeTaskSnapshotDto;
     const store = {
       listRecent: jest.fn().mockResolvedValue([
         reward({

@@ -1,4 +1,5 @@
 ﻿import { DAILY_CHALLENGE_CONFIG } from '../config/tasks';
+import { DailyChallengeDay } from '../entities/daily-challenge-day.entity';
 import { ChallengeDayStatus, ChallengeScope } from '../types/daily-challenge.types';
 
 import { DailyChallengeDayService } from './daily-challenge-day.service';
@@ -14,9 +15,9 @@ const window = {
 };
 
 class MemoryDailyChallengeDayStore extends DailyChallengeDayStore {
-  private readonly days = new Map<string, any>();
+  private readonly days = new Map<string, DailyChallengeDay>();
 
-  async getOrCreate(dayId: string, factory: () => any): Promise<any> {
+  async getOrCreate(dayId: string, factory: () => DailyChallengeDay): Promise<DailyChallengeDay> {
     if (!this.days.has(dayId)) {
       this.days.set(dayId, structuredClone(factory()));
     }
@@ -27,9 +28,11 @@ class MemoryDailyChallengeDayStore extends DailyChallengeDayStore {
 describe('DailyChallengeDayService', () => {
   it('freezes one code-configured global task for every player on the challenge day', async () => {
     const service = new DailyChallengeDayService(
-      new MemoryDailyChallengeDayStore(),
-      new DailyChallengeGenerationService(),
-      { getWindow: jest.fn(() => window) } as any,
+      ...([
+        new MemoryDailyChallengeDayStore(),
+        new DailyChallengeGenerationService(),
+        { getWindow: jest.fn(() => window) },
+      ] as unknown as ConstructorParameters<typeof DailyChallengeDayService>),
     );
 
     const first = await service.getOrCreate(now);

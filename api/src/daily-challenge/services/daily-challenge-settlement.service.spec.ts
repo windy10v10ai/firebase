@@ -16,8 +16,8 @@ import { DailyChallengeSettlementService } from './daily-challenge-settlement.se
 import { DailyChallengeSettlementStore } from './daily-challenge-settlement.store';
 import { DailyChallengeStreakService } from './daily-challenge-streak.service';
 
-const closesAt = new Date('2026-08-04T02:00:00.000Z');
-const now = new Date('2026-08-04T02:01:00.000Z');
+const closesAt = new Date(2026, 7, 4, 2, 0, 0, 0);
+const now = new Date(2026, 7, 4, 2, 1, 0, 0);
 
 const createDay = (overrides: Partial<DailyChallengeDay> = {}): DailyChallengeDay => ({
   id: '2026-08-03',
@@ -43,12 +43,12 @@ const createDay = (overrides: Partial<DailyChallengeDay> = {}): DailyChallengeDa
     middleRewardSeasonPoint: 90,
     baseRewardSeasonPoint: 80,
   },
-  startsAt: new Date('2026-08-02T00:00:00.000Z'),
-  endsAt: new Date('2026-08-03T00:00:00.000Z'),
+  startsAt: new Date(2026, 7, 3, 0, 0, 0, 0),
+  endsAt: new Date(2026, 7, 4, 0, 0, 0, 0),
   closesAt,
   status: ChallengeDayStatus.OPEN,
-  createdAt: new Date('2026-08-02T00:00:00.000Z'),
-  updatedAt: new Date('2026-08-02T00:00:00.000Z'),
+  createdAt: new Date(2026, 7, 3, 0, 0, 0, 0),
+  updatedAt: new Date(2026, 7, 3, 0, 0, 0, 0),
   ...overrides,
 });
 
@@ -74,8 +74,8 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
   dayId: '2026-08-03',
   configVersionId: 'config-v1',
   configVersion: 1,
-  startsAt: new Date('2026-08-02T00:00:00.000Z'),
-  endsAt: new Date('2026-08-03T00:00:00.000Z'),
+  startsAt: new Date(2026, 7, 3, 0, 0, 0, 0),
+  endsAt: new Date(2026, 7, 4, 0, 0, 0, 0),
   globalRewardTiers: createDay().globalRewardTiers,
   totalRounds: 3,
   currentRound: 3,
@@ -102,15 +102,15 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
     rewardSeasonPoint: 100,
   },
   progress: 50,
-  completedAt: new Date('2026-08-02T12:00:00.000Z'),
+  completedAt: new Date(2026, 7, 3, 12, 0, 0, 0),
   unreadRewardCount: 0,
   streakDays: 0,
   streakMilestones: [
     { days: 3, rewardSeasonPoint: 50 },
     { days: 7, rewardSeasonPoint: 100 },
   ],
-  createdAt: new Date('2026-08-02T00:00:00.000Z'),
-  updatedAt: new Date('2026-08-02T12:00:00.000Z'),
+  createdAt: new Date(2026, 7, 3, 0, 0, 0, 0),
+  updatedAt: new Date(2026, 7, 3, 12, 0, 0, 0),
   ...overrides,
 });
 

@@ -43,7 +43,9 @@ describe('DailyChallengeGlobalFreezeStore.streamContributionPages', () => {
     query.orderBy.mockReturnValue(query);
     query.limit.mockReturnValue(query);
     query.startAfter.mockReturnValue(query);
-    mockedGetFirestore.mockReturnValue({ collection: jest.fn().mockReturnValue(query) } as any);
+    mockedGetFirestore.mockReturnValue({
+      collection: jest.fn().mockReturnValue(query),
+    } as unknown as ReturnType<typeof getFirestore>);
 
     const pages = [];
     for await (const page of new DailyChallengeGlobalFreezeStore().streamContributionPages(

@@ -45,7 +45,9 @@ describe('DailyChallengeSettlementStore.listEndedDays', () => {
     const limit = jest.fn().mockReturnValue(firstQuery);
     const orderBy = jest.fn().mockReturnValue({ limit });
     const where = jest.fn().mockReturnValue({ orderBy });
-    mockedGetFirestore.mockReturnValue({ collection: jest.fn().mockReturnValue({ where }) } as any);
+    mockedGetFirestore.mockReturnValue({
+      collection: jest.fn().mockReturnValue({ where }),
+    } as unknown as ReturnType<typeof getFirestore>);
 
     const result = await new DailyChallengeSettlementStore().listEndedDays(
       new Date('2026-08-04T00:00:00.000Z'),
@@ -88,7 +90,9 @@ describe('DailyChallengeSettlementStore.streamGlobalRankingPages', () => {
     const limit = jest.fn().mockReturnValue(firstQuery);
     const orderBy = jest.fn().mockReturnValue({ limit });
     const where = jest.fn().mockReturnValue({ orderBy });
-    mockedGetFirestore.mockReturnValue({ collection: jest.fn().mockReturnValue({ where }) } as any);
+    mockedGetFirestore.mockReturnValue({
+      collection: jest.fn().mockReturnValue({ where }),
+    } as unknown as ReturnType<typeof getFirestore>);
 
     const pages = [];
     for await (const page of new DailyChallengeSettlementStore().streamGlobalRankingPages(
@@ -110,7 +114,9 @@ describe('DailyChallengeSettlementStore.streamGlobalRankingPages', () => {
     const limit = jest.fn().mockReturnValue(query);
     const orderBy = jest.fn().mockReturnValue({ limit });
     const where = jest.fn().mockReturnValue({ orderBy });
-    mockedGetFirestore.mockReturnValue({ collection: jest.fn().mockReturnValue({ where }) } as any);
+    mockedGetFirestore.mockReturnValue({
+      collection: jest.fn().mockReturnValue({ where }),
+    } as unknown as ReturnType<typeof getFirestore>);
 
     for await (const _page of new DailyChallengeSettlementStore().streamGlobalRankingPages(
       '2026-08-03',
@@ -157,7 +163,7 @@ describe('DailyChallengeSettlementStore.listPlayerStates legacy compatibility', 
     const where = jest.fn().mockReturnValue({ get });
     mockedGetFirestore.mockReturnValue({
       collection: jest.fn().mockReturnValue({ where }),
-    } as any);
+    } as unknown as ReturnType<typeof getFirestore>);
 
     const states = await new DailyChallengeSettlementStore().listPlayerStates('2026-08-04');
 

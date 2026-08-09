@@ -5,6 +5,8 @@ jest.mock('firebase-admin/firestore', () => ({
 
 import { getFirestore } from 'firebase-admin/firestore';
 
+import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
+
 import {
   DailyChallengePlayerStore,
   normalizeDailyChallengePlayerStateData,
@@ -45,7 +47,7 @@ describe('DailyChallengePlayerStore.runOperation', () => {
     };
     const db = {
       collection: jest.fn((name: string) => ({
-        doc: jest.fn((_id: string) => {
+        doc: jest.fn(() => {
           if (name === 'daily_challenge_operation_ledger') {
             return operationRef;
           }
@@ -62,7 +64,7 @@ describe('DailyChallengePlayerStore.runOperation', () => {
         callback(transaction),
       ),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
 
     const store = new DailyChallengePlayerStore();
     const mutate = jest.fn(() => {
@@ -124,7 +126,7 @@ const createLegacyState = (overrides: Record<string, unknown> = {}) => ({
 describe('normalizeDailyChallengePlayerStateData', () => {
   it('upgrades an unfinished schema version 1 state with deterministic rounds and star defaults', () => {
     const state = normalizeDailyChallengePlayerStateData(
-      createLegacyState() as any,
+      createLegacyState() as Partial<PlayerDailyChallenge> & Record<string, unknown>,
       '2026-08-04_483215844',
     );
 
@@ -165,7 +167,7 @@ describe('DailyChallengePlayerStore.getOrCreateState legacy upgrade', () => {
         Promise.resolve(callback(transaction)),
       ),
     };
-    mockedGetFirestore.mockReturnValue(db as any);
+    mockedGetFirestore.mockReturnValue(db as unknown as ReturnType<typeof getFirestore>);
     const factory = jest.fn();
 
     const result = await new DailyChallengePlayerStore().getOrCreateState(

@@ -23,7 +23,9 @@ describe('DailyChallengeGlobalProgressStore', () => {
     query.aggregate.mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: () => ({ total: 123 }) }),
     });
-    mockedGetFirestore.mockReturnValue({ collection: jest.fn().mockReturnValue(query) } as any);
+    mockedGetFirestore.mockReturnValue({
+      collection: jest.fn().mockReturnValue(query),
+    } as unknown as ReturnType<typeof getFirestore>);
 
     const result = await new DailyChallengeGlobalProgressStore().getCurrentProgress({
       dayId: '2026-08-08',

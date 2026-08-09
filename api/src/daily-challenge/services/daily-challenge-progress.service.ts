@@ -231,92 +231,28 @@ export class DailyChallengeProgressService {
     matchStartedAt: Date,
     now: Date,
   ) {
-    const task = state?.acceptedTask;
-    const metricContribution = task
-      ? this.findUniqueMetricContribution(contribution.personalMetrics, task.metric)
-      : undefined;
-    const reportedValue = metricContribution?.value ?? 0;
-    const personalContributionIsReasonable =
-      task !== undefined &&
-      metricContribution !== undefined &&
-      this.isReasonableContribution(task.metric, reportedValue);
-    const personalRequiredDataVersion = task ? this.getRequiredDataVersion(task.metric) : 1;
-    const acceptedWithinMatchWindow = Boolean(
-      state?.acceptedAt && state.acceptedAt.getTime() <= matchStartedAt.getTime() + 10 * 60 * 1000,
+    const personal = this.buildPersonalMutation(
+      dataVersion,
+      contribution,
+      eligiblePlayer,
+      state,
+      config,
+      matchStartedAt,
+      now,
     );
-    const canApply =
-      contribution.normallySettled &&
-      acceptedWithinMatchWindow &&
-      dataVersion >= personalRequiredDataVersion &&
-      eligiblePlayer !== undefined &&
-      state !== null &&
-      task !== undefined &&
-      contribution.acceptedAssignmentId === task.assignmentId &&
-      personalContributionIsReasonable &&
-      (task.scope !== ChallengeScope.PERSONAL_HERO || task.heroName === eligiblePlayer.heroName);
-
-    const globalTask = state?.globalTask;
-    const globalMetricContribution = globalTask
-      ? this.findUniqueMetricContribution(contribution.globalMetrics, globalTask.metric)
-      : undefined;
-    const reportedGlobalValue = globalMetricContribution?.value ?? 0;
-    const globalContributionIsReasonable =
-      globalTask !== undefined &&
-      globalMetricContribution !== undefined &&
-      this.isReasonableContribution(globalTask.metric, reportedGlobalValue);
-    const globalRequiredDataVersion = globalTask
-      ? this.getRequiredDataVersion(globalTask.metric)
-      : 1;
-    const canApplyGlobal =
-      contribution.normallySettled &&
-      eligiblePlayer !== undefined &&
-      globalTask !== undefined &&
-      dataVersion >= globalRequiredDataVersion &&
-      globalContributionIsReasonable &&
-      (globalContribution === null || globalContribution.assignmentId === globalTask.assignmentId);
-
-    let nextState: PlayerDailyChallenge | undefined;
-    let nextGlobalContribution: DailyChallengeGlobalContribution | undefined;
-    let appliedPersonalProgress = 0;
-    let appliedGlobalContribution = 0;
-    let completedPersonalTaskNow: DailyChallengeTaskSnapshotDto | undefined;
-
-    if (canApply) {
-      const nextProgress = Math.min(task.target, state.progress + reportedValue);
-      appliedPersonalProgress = nextProgress - state.progress;
-      const progressedTask: DailyChallengeTaskSnapshotDto = {
-        ...task,
-        progress: nextProgress,
-      };
-      nextState = {
-        ...state,
-        progress: nextProgress,
-        acceptedTask: progressedTask,
-        updatedAt: now,
-      };
-      if (!state.completedAt && nextProgress >= task.target) {
-        completedPersonalTaskNow = progressedTask;
-        nextState = this.advanceCompletedRound(state, progressedTask, config, now);
-      }
-    }
-
-    if (canApplyGlobal) {
-      appliedGlobalContribution = reportedGlobalValue;
-      nextGlobalContribution = {
-        id: `${dayId}_${contribution.steamId}`,
-        dayId,
-        steamId: contribution.steamId,
-        assignmentId: globalTask.assignmentId,
-        metric: globalTask.metric,
-        value: (globalContribution?.value ?? 0) + reportedGlobalValue,
-        createdAt: globalContribution?.createdAt ?? now,
-        updatedAt: now,
-      };
-    }
+    const global = this.buildGlobalMutation(
+      dayId,
+      dataVersion,
+      contribution,
+      eligiblePlayer,
+      state,
+      globalContribution,
+      now,
+    );
 
     return {
-      ...(nextState ? { state: nextState } : {}),
-      ...(nextGlobalContribution ? { globalContribution: nextGlobalContribution } : {}),
+      ...(personal.state ? { state: personal.state } : {}),
+      ...(global.contribution ? { globalContribution: global.contribution } : {}),
       ledger: {
         matchId,
         matchStartedAt,
@@ -326,23 +262,127 @@ export class DailyChallengeProgressService {
         ...(contribution.acceptedAssignmentId
           ? { acceptedAssignmentId: contribution.acceptedAssignmentId }
           : {}),
-        ...(task ? { metric: task.metric } : {}),
-        reportedValue,
-        appliedPersonalProgress,
-        ...(completedPersonalTaskNow
+        ...(personal.task ? { metric: personal.task.metric } : {}),
+        reportedValue: personal.reportedValue,
+        appliedPersonalProgress: personal.appliedProgress,
+        ...(personal.completedTask && state
           ? {
               personalReward: {
-                taskSnapshot: completedPersonalTaskNow,
+                taskSnapshot: personal.completedTask,
                 configVersionId: state.configVersionId,
                 configVersion: state.configVersion,
               },
             }
           : {}),
-        ...(globalTask ? { globalMetric: globalTask.metric } : {}),
-        reportedGlobalValue,
-        appliedGlobalContribution,
+        ...(global.task ? { globalMetric: global.task.metric } : {}),
+        reportedGlobalValue: global.reportedValue,
+        appliedGlobalContribution: global.appliedProgress,
         createdAt: now,
       },
+    };
+  }
+
+  private buildPersonalMutation(
+    dataVersion: number,
+    contribution: DailyChallengePlayerContributionDto,
+    eligiblePlayer: DailyChallengeEligiblePlayer | undefined,
+    state: PlayerDailyChallenge | null,
+    config: typeof DAILY_CHALLENGE_CONFIG,
+    matchStartedAt: Date,
+    now: Date,
+  ) {
+    const task = state?.acceptedTask;
+    const metricContribution = task
+      ? this.findUniqueMetricContribution(contribution.personalMetrics, task.metric)
+      : undefined;
+    const reportedValue = metricContribution?.value ?? 0;
+    const acceptedWithinMatchWindow = Boolean(
+      state?.acceptedAt && state.acceptedAt.getTime() <= matchStartedAt.getTime() + 10 * 60 * 1000,
+    );
+    const canApply = Boolean(
+      contribution.normallySettled &&
+      acceptedWithinMatchWindow &&
+      task &&
+      metricContribution &&
+      dataVersion >= this.getRequiredDataVersion(task.metric) &&
+      eligiblePlayer &&
+      state &&
+      contribution.acceptedAssignmentId === task.assignmentId &&
+      this.isReasonableContribution(task.metric, reportedValue) &&
+      (task.scope !== ChallengeScope.PERSONAL_HERO || task.heroName === eligiblePlayer.heroName),
+    );
+
+    if (!canApply || !state || !task) {
+      return { task, reportedValue, appliedProgress: 0 };
+    }
+
+    const nextProgress = Math.min(task.target, state.progress + reportedValue);
+    const progressedTask: DailyChallengeTaskSnapshotDto = {
+      ...task,
+      progress: nextProgress,
+    };
+    const completedTask =
+      !state.completedAt && nextProgress >= task.target ? progressedTask : undefined;
+    const nextState = completedTask
+      ? this.advanceCompletedRound(state, progressedTask, config, now)
+      : {
+          ...state,
+          progress: nextProgress,
+          acceptedTask: progressedTask,
+          updatedAt: now,
+        };
+
+    return {
+      task,
+      reportedValue,
+      appliedProgress: nextProgress - state.progress,
+      completedTask,
+      state: nextState,
+    };
+  }
+
+  private buildGlobalMutation(
+    dayId: string,
+    dataVersion: number,
+    contribution: DailyChallengePlayerContributionDto,
+    eligiblePlayer: DailyChallengeEligiblePlayer | undefined,
+    state: PlayerDailyChallenge | null,
+    current: DailyChallengeGlobalContribution | null,
+    now: Date,
+  ) {
+    const task = state?.globalTask;
+    const metricContribution = task
+      ? this.findUniqueMetricContribution(contribution.globalMetrics, task.metric)
+      : undefined;
+    const reportedValue = metricContribution?.value ?? 0;
+    const canApply = Boolean(
+      contribution.normallySettled &&
+      eligiblePlayer &&
+      task &&
+      metricContribution &&
+      dataVersion >= this.getRequiredDataVersion(task.metric) &&
+      this.isReasonableContribution(task.metric, reportedValue) &&
+      (!current || current.assignmentId === task.assignmentId),
+    );
+
+    if (!canApply || !task) {
+      return { task, reportedValue, appliedProgress: 0 };
+    }
+
+    return {
+      task,
+      reportedValue,
+      appliedProgress: reportedValue,
+      contribution: {
+        id: `${dayId}_${contribution.steamId}`,
+        dayId,
+        steamId: contribution.steamId,
+        assignmentId: task.assignmentId,
+        metric: task.metric,
+        value: (current?.value ?? 0) + reportedValue,
+        createdAt: current?.createdAt ?? now,
+        updatedAt: now,
+      } satisfies DailyChallengeGlobalContribution,
     };
   }
 

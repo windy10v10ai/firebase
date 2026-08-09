@@ -15,9 +15,9 @@ describe('DailyChallengeGameController match start attribution', () => {
       getWindow: jest.fn().mockReturnValue({ dayId: '2026-08-04' }),
     };
     const controller = new DailyChallengeGameController(
-      playerService as any,
-      {} as any,
-      clock as any,
+      ...([playerService, {}, clock] as unknown as ConstructorParameters<
+        typeof DailyChallengeGameController
+      >),
     );
 
     const result = await controller.matchStart([483215844]);
