@@ -363,7 +363,7 @@ describe('GameController daily challenge progress', () => {
 
     await expect(
       controller.end(gameEnd as any, { headers: { 'x-api-key': 'local-key' } } as any),
-    ).resolves.toBe('OK');
+    ).resolves.toEqual({ result: 'OK' });
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
 
@@ -379,7 +379,7 @@ describe('GameController daily challenge progress', () => {
           headers: { 'x-api-key': 'local-key' },
         } as any,
       ),
-    ).resolves.toBe('OK');
+    ).resolves.toEqual({ result: 'OK' });
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
 
@@ -393,7 +393,7 @@ describe('GameController daily challenge progress', () => {
           headers: { 'x-api-key': 'local-key' },
         } as any,
       ),
-    ).resolves.toBe('OK');
+    ).resolves.toEqual({ result: 'OK' });
     expect(dailyChallengeProgressService.applyGameEnd).not.toHaveBeenCalled();
   });
 });

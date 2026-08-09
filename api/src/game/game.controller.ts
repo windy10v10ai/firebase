@@ -152,14 +152,11 @@ export class GameController {
   async end(
     @Body() gameEnd: GameEndDto,
     @Req() req: Request,
-  ): Promise<
-    | string
-    | {
-        result: string;
-        dailyChallengeRewards?: DailyChallengeGameEndRewardDto[];
-        dailyChallenges?: DailyChallengePlayerSnapshotDto[];
-      }
-  > {
+  ): Promise<{
+    result: string;
+    dailyChallengeRewards?: DailyChallengeGameEndRewardDto[];
+    dailyChallenges?: DailyChallengePlayerSnapshotDto[];
+  }> {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     const players = gameEnd.players;
@@ -227,9 +224,6 @@ export class GameController {
       ),
     ]);
     const result = this.gameService.getOK();
-    if (dailyChallengeRewards.length === 0 && dailyChallenges.length === 0) {
-      return result;
-    }
     return {
       result,
       ...(dailyChallengeRewards.length > 0 ? { dailyChallengeRewards } : {}),
