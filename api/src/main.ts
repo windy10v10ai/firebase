@@ -1,6 +1,7 @@
-import * as fs from 'fs';
+﻿import * as fs from 'fs';
 
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { dump } from 'js-yaml';
 
@@ -8,7 +9,9 @@ import { AppModule } from './app.module';
 import { AppGlobalSettings } from './util/settings';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
   AppGlobalSettings(app);
 
   if (process.env.ENVIRONMENT == 'local') {

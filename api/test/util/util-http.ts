@@ -1,4 +1,5 @@
-import { INestApplication } from '@nestjs/common';
+﻿import { INestApplication } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
@@ -10,7 +11,9 @@ export async function initTest(): Promise<INestApplication> {
     imports: [AppModule],
   }).compile();
 
-  const app = moduleFixture.createNestApplication();
+  const app = moduleFixture.createNestApplication<NestExpressApplication>({
+    bodyParser: false,
+  });
   AppGlobalSettings(app);
   return await app.init();
 }

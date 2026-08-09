@@ -18,6 +18,48 @@ describe('PlayerService', () => {
     return { service, playerRepository };
   }
 
+  describe('consumeMemberPoint', () => {
+    it('spends member points through a repository transaction and records analytics once', async () => {
+      const transactionPlayer = {
+        id: steamId.toString(),
+        memberPointTotal: 100,
+        usedMemberPoint: 10,
+      };
+      const transactionRepository = {
+        findById: jest.fn().mockResolvedValue(transactionPlayer),
+        update: jest.fn().mockImplementation((player) => Promise.resolve(player)),
+      };
+      const playerRepository = {
+        runTransaction: jest.fn((callback) => callback(transactionRepository)),
+        findById: jest.fn(),
+        update: jest.fn(),
+      };
+      const analyticsService = { playerUsePoint: jest.fn().mockResolvedValue(undefined) };
+      const service = new PlayerService(
+        playerRepository as never,
+        analyticsService as never,
+        {} as never,
+      );
+
+      const result = await service.consumeMemberPoint(steamId, 40, 'daily_challenge_refresh');
+
+      expect(playerRepository.runTransaction).toHaveBeenCalledTimes(1);
+      expect(transactionRepository.findById).toHaveBeenCalledWith(steamId.toString());
+      expect(transactionRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ usedMemberPoint: 50 }),
+      );
+      expect(playerRepository.findById).not.toHaveBeenCalled();
+      expect(playerRepository.update).not.toHaveBeenCalled();
+      expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
+        steamId,
+        40,
+        true,
+        'daily_challenge_refresh',
+      );
+      expect(result.usedMemberPoint).toBe(50);
+    });
+  });
+
   describe('reduceUsedPoint', () => {
     it('扣减 usedSeasonPoint，不低于 0', async () => {
       const { service, playerRepository } = createService({

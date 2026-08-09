@@ -1,5 +1,5 @@
-import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
+﻿import { NestFactory } from '@nestjs/core';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import express from 'express';
 import * as functions from 'firebase-functions';
 import { logger } from 'firebase-functions';
@@ -17,7 +17,7 @@ const server = express();
 
 const adapter = new ExpressAdapter(server);
 const createApp = async () => {
-  const app = await NestFactory.create(AppModule, adapter, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, adapter, {
     bodyParser: false, // 禁用内置的 body parser，避免 router 检测带来的兼容性问题
   });
 

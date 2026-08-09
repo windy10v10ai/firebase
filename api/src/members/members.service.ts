@@ -7,6 +7,7 @@ import {
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { ChallengeDayClockService } from '../daily-challenge/services/challenge-day-clock.service';
 import { PlayerService } from '../player/player.service';
 
 import { CreateMemberDto } from './dto/create-member.dto';
@@ -25,6 +26,7 @@ export class MembersService {
     @InjectRepository(Member)
     private readonly membersRepository: BaseFirestoreRepository<Member>,
     private readonly playerService: PlayerService,
+    private readonly challengeDayClockService: ChallengeDayClockService,
   ) {}
 
   async createMember(createMemberDto: CreateMemberDto) {
@@ -185,12 +187,11 @@ export class MembersService {
   }
 
   getDailyMemberPoint(member: Member): number {
-    const todayZero = new Date();
-    todayZero.setHours(0, 0, 0, 0);
+    const { startsAt } = this.challengeDayClockService.getWindow();
 
     if (MembersService.IsMemberEnable(member)) {
       // 判断是否为当日首次登陆
-      if (!member?.lastDailyDate || member.lastDailyDate < todayZero) {
+      if (!member?.lastDailyDate || member.lastDailyDate < startsAt) {
         return this.MEMBER_DAILY_POINT;
       }
     }
