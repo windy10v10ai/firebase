@@ -1,34 +1,41 @@
-# 每日挑战后端文档索引
+# 每日挑战后端最终文档
 
-本目录只保留每日挑战系统的最终后端资料。配套游戏端实现位于 `windy10v10ai/game` 仓库的同名功能 PR；两个 PR 必须配套评审和部署，任一侧单独上线都不能形成完整功能。
+> 最后核对：2026-08-09。
 
-| 文档 | 用途 |
-| --- | --- |
-| [后端实施说明](backend-implementation.md) | NestJS 模块、比赛结算、奖励、共同进度和故障隔离 |
-| [接口协议](api-contract.md) | 玩家接口、配置接口、`/game/start` 与 `/game/end` 扩展 |
-| [数据模型与状态机](data-model-and-state-machine.md) | Firestore 集合、冻结快照、幂等和日终排名 |
-| [配置与运营手册](configuration-and-operations.md) | 正式任务池、积分参数、发布、回滚和运营检查 |
-| [后端测试与验收](backend-verification.md) | 静态、Emulator、API 与跨仓库联调门禁 |
+本目录只保留每日挑战上线所需的最终需求、接口、实现和配置说明。配套 Game PR 负责 UI、三语文案和比赛侧数据采集；Firebase PR 负责任务生成、进度、奖励、结算和持久化。两侧必须按同一协议配套发布。
 
-## 代码真相源
+## 文档
 
-- 模块入口：`api/src/daily-challenge/daily-challenge.module.ts`
-- 玩家与管理接口：`api/src/daily-challenge/controllers/`
-- DTO、类型和校验：`api/src/daily-challenge/dto/`、`types/`、`validators/`
-- 生成、进度、结算、奖励和连续完成：`api/src/daily-challenge/services/`
-- Firestore 实体与索引：`api/src/daily-challenge/entities/`、`firestore.indexes.json`
-- 最终任务池：`config/daily-challenge/daily-challenge-hero-pool-v1.json`
-- 本地 Emulator 测试 GUI：`tools/daily-challenge-local/`
+| 文档                                          | 内容                                                |
+| --------------------------------------------- | --------------------------------------------------- |
+| [接口协议](api-contract.md)                   | 玩家接口、`/game/start`、`/game/end` 和任务快照字段 |
+| [后端实现](backend-implementation.md)         | 模块职责、挑战日、进度、结算、幂等和 Firestore 数据 |
+| [配置与运维](configuration-and-operations.md) | 代码任务池、积分参数、修改流程和发布检查            |
 
-## 已冻结的产品规则
+## 最终产品规则
 
-- 每个挑战日一个共同任务；每名玩家最多完成三轮个人任务。
-- 每轮三个候选固定为两个通用任务和一个英雄专属任务；每个候选独立随机星级，允许同一轮出现混合星级或三个同星。
-- 一、二、三星默认奖励分别为 80、100、120 赛季积分；刷新消耗会员积分，所有任务奖励都不发会员积分。
-- 个人任务正常赛后结算达标即发奖；共同任务按日冻结排名并在次日自动发奖。
-- 共同任务贡献不依赖玩家是否接取个人任务；个人任务未接取不累计进度。
-- 挑战日边界复用会员每日积分赠送的刷新边界。
+- 每个挑战日生成 1 个全服共同任务。
+- 每名玩家每天最多完成 3 轮个人任务；每轮提供 2 个通用任务和 1 个当前英雄专属任务，玩家三选一。
+- 三个候选的星级独立随机，允许混合星级，也允许三个同星。
+- 玩家接取后才累计个人进度；比赛开始后 10 分钟内接取才计入该局。
+- 一、二、三星默认奖励为 80、100、120 赛季积分；个人任务完成后立即发放并进入下一轮。
+- 会员每天第一次刷新免费，之后按代码配置消耗会员积分；每日付费刷新上限由价格数组长度决定，当前为 5 次。
+- 共同任务统计所有正常结算玩家的有效贡献，不要求接取个人任务；挑战日结束后冻结排名，达标后按贡献档位发赛季积分。
+- 连续完成中断后从第一天重新计算；达到最高里程碑后进入下一循环。
+- 挑战日边界与会员每日积分共用 `ChallengeDayClockService`；比赛按开始时间归属挑战日。
+
+## 真相源
+
+- 任务池和奖励参数：`api/src/daily-challenge/config/tasks.ts`
+- 任务定义类型：`api/src/daily-challenge/types/daily-challenge-config.types.ts`
+- 指标、单位和数据版本：`api/src/daily-challenge/types/daily-challenge.types.ts`
+- 玩家接口：`api/src/daily-challenge/controllers/daily-challenge-game.controller.ts`
+- 游戏开始/结束集成：`api/src/game/game.controller.ts`
+- 共享挑战日时钟：`api/src/util/challenge-day-clock.service.ts`
+- UI 三语任务文案：Game 仓库 `addon_*.txt`
+
+后端不再提供任务配置管理接口，不从 JSON 或 Firestore 动态加载任务池，也不下发任务标题和描述。
 
 ## 验证边界
 
-单元测试、构建和 Firestore Emulator 验证不能替代 Dota 游戏内实测。最终验收必须结合配套 game PR 的 `docs/daily-challenge/gameplay-verification.md`。本地 AI vs AI 与线上 AI 是否完全一致尚未证明，不可把本地样本直接当作线上平衡结论。
+单元测试、lint 和 Nest 构建只能证明后端静态与逻辑层结果，不能替代 Dota 游戏内结算、UI 和线上 AI 行为验证。

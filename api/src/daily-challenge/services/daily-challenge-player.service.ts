@@ -1,6 +1,8 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
+import { ChallengeDayClockService } from '../../util/challenge-day-clock.service';
+import { DAILY_CHALLENGE_CONFIG } from '../config/tasks';
 import { AcceptDailyChallengeDto } from '../dto/accept-daily-challenge.dto';
 import { DailyChallengePlayerSnapshotDto } from '../dto/daily-challenge-player-snapshot.dto';
 import { DailyChallengeRewardHistoryDto } from '../dto/daily-challenge-reward-history.dto';
@@ -13,12 +15,11 @@ import {
 } from '../entities/player-daily-challenge.entity';
 import {
   ChallengeDayStatus,
+  DAILY_CHALLENGE_METRIC_UNIT,
   DAILY_CHALLENGE_SNAPSHOT_VERSION,
 } from '../types/daily-challenge.types';
 
-import { ChallengeDayClockService } from './challenge-day-clock.service';
 import { dailyChallengeConflict } from './daily-challenge-action.error';
-import { DailyChallengeConfigService } from './daily-challenge-config.service';
 import { DailyChallengeDayService } from './daily-challenge-day.service';
 import {
   DailyChallengeGenerationService,
@@ -37,7 +38,6 @@ import { DailyChallengeRewardNotificationService } from './daily-challenge-rewar
 export class DailyChallengePlayerService {
   constructor(
     private readonly store: DailyChallengePlayerStore,
-    private readonly configService: DailyChallengeConfigService,
     private readonly dayService: DailyChallengeDayService,
     private readonly generationService: DailyChallengeGenerationService,
     private readonly clockService: ChallengeDayClockService,
@@ -270,15 +270,11 @@ export class DailyChallengePlayerService {
     return tasks.map((task) => ({
       assignmentId: `${dayId}-${steamId}-round-${currentRound}-refresh-${refreshIndex}-${task.id}`,
       taskId: task.id,
-      revision: task.revision,
       configVersion,
       scope: task.scope,
       metric: task.metric,
       ...(task.heroName ? { heroName: task.heroName } : {}),
-      unit: task.unit,
-      minDataVersion: task.minDataVersion,
-      title: task.title,
-      description: task.description,
+      unit: DAILY_CHALLENGE_METRIC_UNIT[task.metric],
       star: task.star,
       round: currentRound,
       totalRounds,
@@ -290,13 +286,9 @@ export class DailyChallengePlayerService {
 
   private async ensureState(steamId: number, now: Date): Promise<PlayerDailyChallenge> {
     const day = await this.dayService.getOrCreate(now);
-    const configVersion = await this.configService.getVersion(day.configVersionId);
-    if (!configVersion) {
-      throw new Error(`Daily challenge config version ${day.configVersionId} is missing`);
-    }
     const id = this.createStateId(day.dayId, steamId);
     return this.store.getOrCreateState(id, () => {
-      const personalConfig = resolvePersonalChallengeConfig(configVersion.snapshot);
+      const personalConfig = resolvePersonalChallengeConfig(DAILY_CHALLENGE_CONFIG);
       const currentRound = 1;
       const candidates = this.generationService.generatePlayerCandidates({
         dayId: day.dayId,
@@ -304,7 +296,7 @@ export class DailyChallengePlayerService {
         currentRound,
         refreshIndex: 0,
         configVersion: day.configVersion,
-        tasks: configVersion.snapshot.tasks,
+        tasks: DAILY_CHALLENGE_CONFIG.tasks,
         seenTaskIds: [],
         personalStarWeights: personalConfig.starWeights,
       });
@@ -335,14 +327,14 @@ export class DailyChallengePlayerService {
         completedTasks: [],
         candidates: candidateSnapshots,
         seenTaskIds: candidateSnapshots.map((candidate) => candidate.taskId),
-        refreshCostsMemberPoint: [...configVersion.snapshot.refreshCostsMemberPoint],
+        refreshCostsMemberPoint: [...DAILY_CHALLENGE_CONFIG.refreshCostsMemberPoint],
         refreshIndex: 0,
         freeRefreshUsed: false,
         paidRefreshesUsed: 0,
         progress: 0,
         unreadRewardCount: 0,
         streakDays: 0,
-        streakMilestones: configVersion.snapshot.streakMilestones.map((milestone) => ({
+        streakMilestones: DAILY_CHALLENGE_CONFIG.streakMilestones.map((milestone) => ({
           ...milestone,
         })),
         createdAt: now,

@@ -1,5 +1,5 @@
-﻿import { DailyChallengeConfigSnapshot } from '../types/daily-challenge-config.types';
-import { ChallengeMetric, ChallengeScope, ChallengeUnit } from '../types/daily-challenge.types';
+﻿import { DAILY_CHALLENGE_CONFIG as config } from '../config/tasks';
+import { ChallengeScope } from '../types/daily-challenge.types';
 
 import { DailyChallengeDayService } from './daily-challenge-day.service';
 import { DailyChallengeDayStore } from './daily-challenge-day.store';
@@ -19,62 +19,6 @@ const window = {
   startsAt: new Date('2026-08-03T16:00:00.000Z'),
   endsAt: new Date('2026-08-04T16:00:00.000Z'),
   closesAt: new Date('2026-08-04T18:00:00.000Z'),
-};
-
-const task = (id: string, scope: ChallengeScope, category: string) => ({
-  id,
-  revision: 1,
-  enabled: true,
-  scope,
-  metric: ChallengeMetric.HERO_DAMAGE,
-  unit: ChallengeUnit.DAMAGE,
-  category,
-  title: { cn: id, en: id, ru: id },
-  description: { cn: id, en: id, ru: id },
-  target: 100,
-  rewardSeasonPoint: 100,
-  weight: 1,
-  expectedMatches: 2,
-  cooldownDays: 0,
-  minDataVersion: 1,
-  groupTags: [],
-  mutexTags: [],
-  ...(scope === ChallengeScope.PERSONAL_HERO ? { heroName: `npc_dota_hero_${id}` } : {}),
-});
-
-const config: DailyChallengeConfigSnapshot = {
-  id: 'daily-challenge',
-  version: 7,
-  tasks: [
-    task('damage-1', ChallengeScope.PERSONAL_GENERAL, 'damage'),
-    task('damage-2', ChallengeScope.PERSONAL_GENERAL, 'damage'),
-    task('healing-1', ChallengeScope.PERSONAL_GENERAL, 'healing'),
-    task('tower-1', ChallengeScope.PERSONAL_GENERAL, 'tower'),
-    task('assist-1', ChallengeScope.PERSONAL_GENERAL, 'assist'),
-    task('hero-lina', ChallengeScope.PERSONAL_HERO, 'hero_damage'),
-    task('hero-cm', ChallengeScope.PERSONAL_HERO, 'hero_control'),
-    task('hero-axe', ChallengeScope.PERSONAL_HERO, 'hero_tank'),
-    task('global-bots', ChallengeScope.GLOBAL, 'bot_kills'),
-  ],
-  globalTargetPolicies: {
-    'global-bots': {
-      launchTarget: 10000,
-      minTarget: 1000,
-      maxTarget: 100000,
-      perPlayerExpectedContribution: 100,
-      completionFactor: 1,
-      maxDailyChangeRatio: 0.2,
-    },
-  },
-  globalRewardTiers: {
-    topPercent: 10,
-    middlePercent: 30,
-    topRewardSeasonPoint: 100,
-    middleRewardSeasonPoint: 90,
-    baseRewardSeasonPoint: 80,
-  },
-  refreshCostsMemberPoint: [10, 20, 30, 50, 50],
-  streakMilestones: [{ days: 3, rewardSeasonPoint: 100 }],
 };
 
 class MemoryDailyChallengeDayStore extends DailyChallengeDayStore {
@@ -160,10 +104,6 @@ class MemoryDailyChallengePlayerStore extends DailyChallengePlayerStore {
 }
 
 const createServices = (store = new MemoryDailyChallengePlayerStore()) => {
-  const configService = {
-    getPublished: jest.fn().mockResolvedValue({ id: 'v7', version: 7, snapshot: config }),
-    getVersion: jest.fn().mockResolvedValue({ id: 'v7', version: 7, snapshot: config }),
-  };
   const clock = { getWindow: jest.fn(() => window) };
   const generation = new DailyChallengeGenerationService();
   const rewardNotificationService = {
@@ -176,13 +116,11 @@ const createServices = (store = new MemoryDailyChallengePlayerStore()) => {
   };
   const dayService = new DailyChallengeDayService(
     new MemoryDailyChallengeDayStore(),
-    configService as any,
     generation,
     clock as any,
   );
   const playerService = new DailyChallengePlayerService(
     store,
-    configService as any,
     dayService,
     generation,
     clock as any,
@@ -191,7 +129,6 @@ const createServices = (store = new MemoryDailyChallengePlayerStore()) => {
   );
   const refreshService = new DailyChallengeRefreshService(
     store,
-    configService as any,
     generation,
     clock as any,
     playerService,
@@ -283,16 +220,15 @@ describe('daily challenge player state and actions', () => {
       scope: ChallengeScope.PERSONAL_HERO,
       heroName: expect.stringMatching(/^npc_dota_hero_/),
     });
-    expect(first.candidates.every((candidate) => candidate.revision === 1)).toBe(true);
     expect(new Set(first.candidates.map((candidate) => candidate.assignmentId)).size).toBe(3);
     expect(first.needsSelection).toBe(true);
     expect(first.globalRewardTiers).toEqual(config.globalRewardTiers);
     expect(first.refresh.freeRefreshAvailable).toBe(false);
     expect(first.streak).toEqual({
       currentDays: 0,
-      cycleTargetDays: 3,
+      cycleTargetDays: 30,
       nextMilestoneDays: 3,
-      nextMilestoneRewardSeasonPoint: 100,
+      nextMilestoneRewardSeasonPoint: 50,
     });
   });
 
@@ -330,12 +266,22 @@ describe('daily challenge player state and actions', () => {
 
     const accepted = await playerService.accept(
       483215844,
-      { schemaVersion: 2, dayId: window.dayId, assignmentId, requestId: 'accept-1' },
+      {
+        schemaVersion: 2,
+        dayId: window.dayId,
+        assignmentId,
+        requestId: 'accept-1',
+      },
       now,
     );
     const duplicate = await playerService.accept(
       483215844,
-      { schemaVersion: 2, dayId: window.dayId, assignmentId, requestId: 'accept-1' },
+      {
+        schemaVersion: 2,
+        dayId: window.dayId,
+        assignmentId,
+        requestId: 'accept-1',
+      },
       now,
     );
 
@@ -445,12 +391,20 @@ describe('daily challenge player state and actions', () => {
     const [first, second] = await Promise.all([
       refreshService.refresh(
         483215844,
-        { schemaVersion: 2, dayId: window.dayId, requestId: 'same-paid-request' },
+        {
+          schemaVersion: 2,
+          dayId: window.dayId,
+          requestId: 'same-paid-request',
+        },
         now,
       ),
       refreshService.refresh(
         483215844,
-        { schemaVersion: 2, dayId: window.dayId, requestId: 'same-paid-request' },
+        {
+          schemaVersion: 2,
+          dayId: window.dayId,
+          requestId: 'same-paid-request',
+        },
         now,
       ),
     ]);
@@ -487,7 +441,9 @@ describe('daily challenge player state and actions', () => {
         { schemaVersion: 2, dayId: window.dayId, requestId: 'no-balance' },
         now,
       ),
-    ).rejects.toMatchObject({ response: { code: 'insufficient_member_points' } });
+    ).rejects.toMatchObject({
+      response: { code: 'insufficient_member_points' },
+    });
 
     const state = [...store.states.values()][0];
     state.paidRefreshesUsed = config.refreshCostsMemberPoint.length;
@@ -538,7 +494,11 @@ describe('daily challenge player state and actions', () => {
     await expect(
       refreshService.refresh(
         483215844,
-        { schemaVersion: 2, dayId: window.dayId, requestId: 'completed-refresh' },
+        {
+          schemaVersion: 2,
+          dayId: window.dayId,
+          requestId: 'completed-refresh',
+        },
         now,
       ),
     ).rejects.toMatchObject({

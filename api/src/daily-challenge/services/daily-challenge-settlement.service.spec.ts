@@ -1,4 +1,5 @@
-﻿import { DailyChallengeDay } from '../entities/daily-challenge-day.entity';
+﻿import { ChallengeDayClockService } from '../../util/challenge-day-clock.service';
+import { DailyChallengeDay } from '../entities/daily-challenge-day.entity';
 import { DailyChallengeGlobalRanking } from '../entities/daily-challenge-global-ranking.entity';
 import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
 import {
@@ -9,7 +10,6 @@ import {
   DailyChallengeContributionTier,
 } from '../types/daily-challenge.types';
 
-import { ChallengeDayClockService } from './challenge-day-clock.service';
 import { DailyChallengeGlobalFreezeService } from './daily-challenge-global-freeze.service';
 import { DailyChallengeRewardService } from './daily-challenge-reward.service';
 import { DailyChallengeSettlementService } from './daily-challenge-settlement.service';
@@ -28,13 +28,10 @@ const createDay = (overrides: Partial<DailyChallengeDay> = {}): DailyChallengeDa
   globalTask: {
     assignmentId: '2026-08-03-global-damage',
     taskId: 'global-damage',
-    revision: 1,
     configVersion: 1,
     scope: ChallengeScope.GLOBAL,
     metric: ChallengeMetric.HERO_DAMAGE,
     unit: ChallengeUnit.DAMAGE,
-    title: { cn: '共同伤害', en: 'Global damage', ru: 'Global damage' },
-    description: { cn: '造成伤害', en: 'Deal damage', ru: 'Deal damage' },
     target: 100,
     progress: 0,
     rewardSeasonPoint: 0,
@@ -58,7 +55,6 @@ const createDay = (overrides: Partial<DailyChallengeDay> = {}): DailyChallengeDa
 const createCompletedTask = (round: number) => ({
   assignmentId: `personal-${round}`,
   taskId: 'personal-damage',
-  revision: 1,
   configVersion: 1,
   star: 2 as const,
   round,
@@ -66,8 +62,6 @@ const createCompletedTask = (round: number) => ({
   scope: ChallengeScope.PERSONAL_GENERAL,
   metric: ChallengeMetric.HERO_DAMAGE,
   unit: ChallengeUnit.DAMAGE,
-  title: { cn: '??', en: 'Damage', ru: 'Damage' },
-  description: { cn: '造成伤害', en: 'Deal damage', ru: 'Deal damage' },
   target: 50,
   progress: 50,
   rewardSeasonPoint: 100,
@@ -96,7 +90,6 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
   acceptedTask: {
     assignmentId: 'personal-1',
     taskId: 'personal-damage',
-    revision: 1,
     configVersion: 1,
     star: 2,
     round: 3,
@@ -104,8 +97,6 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
     scope: ChallengeScope.PERSONAL_GENERAL,
     metric: ChallengeMetric.HERO_DAMAGE,
     unit: ChallengeUnit.DAMAGE,
-    title: { cn: '伤害', en: 'Damage', ru: 'Damage' },
-    description: { cn: '造成伤害', en: 'Deal damage', ru: 'Deal damage' },
     target: 50,
     progress: 50,
     rewardSeasonPoint: 100,

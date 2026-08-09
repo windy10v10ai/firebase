@@ -1,11 +1,11 @@
 ﻿import { Body, Controller, Get, ParseArrayPipe, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
+import { ChallengeDayClockService } from '../../util/challenge-day-clock.service';
 import { AcceptDailyChallengeDto } from '../dto/accept-daily-challenge.dto';
 import { DailyChallengeMatchStartResponseDto } from '../dto/daily-challenge-match-start-response.dto';
 import { RefreshDailyChallengeDto } from '../dto/refresh-daily-challenge.dto';
 import { ViewDailyChallengeDto } from '../dto/view-daily-challenge.dto';
-import { ChallengeDayClockService } from '../services/challenge-day-clock.service';
 import { DailyChallengePlayerService } from '../services/daily-challenge-player.service';
 import { DailyChallengeRefreshService } from '../services/daily-challenge-refresh.service';
 

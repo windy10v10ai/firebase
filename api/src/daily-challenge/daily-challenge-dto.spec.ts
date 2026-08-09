@@ -18,12 +18,6 @@ const validTask = {
   scope: ChallengeScope.PERSONAL_GENERAL,
   metric: ChallengeMetric.HERO_DAMAGE,
   unit: ChallengeUnit.DAMAGE,
-  title: { cn: '造成伤害', en: 'Deal damage', ru: 'Наносите урон' },
-  description: {
-    cn: '累计造成50万伤害',
-    en: 'Deal 500,000 damage',
-    ru: 'Нанесите 500 000 урона',
-  },
   target: 500000,
   progress: 120000,
   rewardSeasonPoint: 100,
@@ -31,39 +25,19 @@ const validTask = {
 
 describe('daily challenge DTO validation', () => {
   it('accepts a supported non-negative integer task snapshot', async () => {
-    const dto = plainToInstance(DailyChallengeTaskSnapshotDto, {
-      ...validTask,
-      revision: 1,
-    });
+    const dto = plainToInstance(DailyChallengeTaskSnapshotDto, validTask);
 
     await expect(validate(dto)).resolves.toHaveLength(0);
-  });
-
-  it('requires a positive task revision in every task snapshot', async () => {
-    const missingRevision = plainToInstance(DailyChallengeTaskSnapshotDto, validTask);
-    const invalidRevision = plainToInstance(DailyChallengeTaskSnapshotDto, {
-      ...validTask,
-      revision: 0,
-    });
-
-    expect((await validate(missingRevision)).some((error) => error.property === 'revision')).toBe(
-      true,
-    );
-    expect((await validate(invalidRevision)).some((error) => error.property === 'revision')).toBe(
-      true,
-    );
   });
 
   it('accepts a hero name only when it is a non-empty string', async () => {
     const validHeroTask = plainToInstance(DailyChallengeTaskSnapshotDto, {
       ...validTask,
-      revision: 1,
       scope: ChallengeScope.PERSONAL_HERO,
       heroName: 'npc_dota_hero_lina',
     });
     const invalidHeroTask = plainToInstance(DailyChallengeTaskSnapshotDto, {
       ...validTask,
-      revision: 1,
       scope: ChallengeScope.PERSONAL_HERO,
       heroName: '',
     });
@@ -73,6 +47,7 @@ describe('daily challenge DTO validation', () => {
       true,
     );
   });
+
   it('rejects an unknown metric', async () => {
     const dto = plainToInstance(DailyChallengeTaskSnapshotDto, {
       ...validTask,
@@ -103,7 +78,7 @@ describe('daily challenge DTO validation', () => {
       currentRound: 1,
       completedRoundCount: 0,
       completedTasks: [],
-      candidates: [{ ...validTask, revision: 1 }],
+      candidates: [validTask],
       unreadRewardCount: 0,
       recentRewards: [],
       needsSelection: true,

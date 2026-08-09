@@ -1,14 +1,14 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { ChallengeDayClockService } from '../../util/challenge-day-clock.service';
+import { DAILY_CHALLENGE_CONFIG } from '../config/tasks';
 import { RefreshDailyChallengeDto } from '../dto/refresh-daily-challenge.dto';
 import {
   DailyChallengeActionResult,
   PlayerDailyChallenge,
 } from '../entities/player-daily-challenge.entity';
 
-import { ChallengeDayClockService } from './challenge-day-clock.service';
 import { dailyChallengeConflict } from './daily-challenge-action.error';
-import { DailyChallengeConfigService } from './daily-challenge-config.service';
 import { DailyChallengeGenerationService } from './daily-challenge-generation.service';
 import { resolvePersonalChallengeConfig } from './daily-challenge-personal-config';
 import { DailyChallengePlayerService } from './daily-challenge-player.service';
@@ -18,7 +18,6 @@ import { DailyChallengePlayerStore } from './daily-challenge-player.store';
 export class DailyChallengeRefreshService {
   constructor(
     private readonly store: DailyChallengePlayerStore,
-    private readonly configService: DailyChallengeConfigService,
     private readonly generationService: DailyChallengeGenerationService,
     private readonly clockService: ChallengeDayClockService,
     private readonly playerService: DailyChallengePlayerService,
@@ -38,10 +37,6 @@ export class DailyChallengeRefreshService {
     const currentState = await this.store.getState(stateId);
     if (!currentState) {
       throw dailyChallengeConflict('day_closed', '今日挑战状态不存在');
-    }
-    const configVersion = await this.configService.getVersion(currentState.configVersionId);
-    if (!configVersion) {
-      throw dailyChallengeConflict('day_closed', '今日挑战配置不可用');
     }
     const operationId = `refresh:${dto.dayId}:${steamId}:${dto.requestId}`;
     const operation = await this.store.runOperation(operationId, stateId, steamId, (context) => {
@@ -76,7 +71,7 @@ export class DailyChallengeRefreshService {
         throw dailyChallengeConflict('insufficient_member_points', '会员积分不足');
       }
 
-      const personalConfig = resolvePersonalChallengeConfig(configVersion.snapshot);
+      const personalConfig = resolvePersonalChallengeConfig(DAILY_CHALLENGE_CONFIG);
       const refreshIndex = context.state.refreshIndex + 1;
       const tasks = this.generationService.generatePlayerCandidates({
         dayId: dto.dayId,
@@ -84,7 +79,7 @@ export class DailyChallengeRefreshService {
         currentRound: context.state.currentRound,
         refreshIndex,
         configVersion: context.state.configVersion,
-        tasks: configVersion.snapshot.tasks,
+        tasks: DAILY_CHALLENGE_CONFIG.tasks,
         seenTaskIds: context.state.seenTaskIds,
         personalStarWeights: personalConfig.starWeights,
       });

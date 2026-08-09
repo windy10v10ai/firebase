@@ -1,6 +1,8 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
+import { ChallengeDayClockService } from '../../util/challenge-day-clock.service';
+import { DAILY_CHALLENGE_CONFIG } from '../config/tasks';
 import { DailyChallengeGameEndRewardDto } from '../dto/daily-challenge-game-end-reward.dto';
 import {
   DailyChallengeMatchContributionDto,
@@ -10,7 +12,6 @@ import { DailyChallengeTaskSnapshotDto } from '../dto/daily-challenge-task-snaps
 import { DailyChallengeGlobalContribution } from '../entities/daily-challenge-global-contribution.entity';
 import { DailyChallengeMatchLedger } from '../entities/daily-challenge-match-ledger.entity';
 import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
-import { DailyChallengeConfigSnapshot } from '../types/daily-challenge-config.types';
 import {
   ChallengeMetric,
   ChallengeScope,
@@ -19,8 +20,6 @@ import {
   DailyChallengeRewardSource,
 } from '../types/daily-challenge.types';
 
-import { ChallengeDayClockService } from './challenge-day-clock.service';
-import { DailyChallengeConfigService } from './daily-challenge-config.service';
 import { DailyChallengeGenerationService } from './daily-challenge-generation.service';
 import { resolvePersonalChallengeConfig } from './daily-challenge-personal-config';
 import { DailyChallengePlayerService } from './daily-challenge-player.service';
@@ -43,7 +42,6 @@ export class DailyChallengeProgressService {
     private readonly store: DailyChallengeProgressStore,
     private readonly clock: ChallengeDayClockService,
     private readonly rewardService: DailyChallengeRewardService,
-    private readonly configService: DailyChallengeConfigService,
     private readonly generationService: DailyChallengeGenerationService,
     private readonly playerService: DailyChallengePlayerService,
   ) {}
@@ -82,10 +80,6 @@ export class DailyChallengeProgressService {
       );
       const eligiblePlayer = eligiblePlayerBySteamId.get(playerContribution.steamId);
 
-      const preloadedState = await this.store.getState(stateId);
-      const configVersion = preloadedState
-        ? await this.configService.getVersion(preloadedState.configVersionId)
-        : null;
       const contributionResult = await this.store.runMatchContribution(
         ledgerId,
         stateId,
@@ -99,7 +93,7 @@ export class DailyChallengeProgressService {
             eligiblePlayer,
             state,
             globalContribution,
-            configVersion?.snapshot,
+            DAILY_CHALLENGE_CONFIG,
             matchStartedAt,
             now,
           );
@@ -221,14 +215,8 @@ export class DailyChallengeProgressService {
     return maximum !== undefined && Number.isSafeInteger(value) && value >= 0 && value <= maximum;
   }
 
-  private getRequiredDataVersion(task: {
-    metric: ChallengeMetric;
-    minDataVersion?: number;
-  }): number {
-    return Math.max(
-      task.minDataVersion ?? 1,
-      DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION[task.metric] ?? 1,
-    );
+  private getRequiredDataVersion(metric: ChallengeMetric): number {
+    return DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION[metric] ?? 1;
   }
 
   private buildMutation(
@@ -239,7 +227,7 @@ export class DailyChallengeProgressService {
     eligiblePlayer: DailyChallengeEligiblePlayer | undefined,
     state: PlayerDailyChallenge | null,
     globalContribution: DailyChallengeGlobalContribution | null,
-    config: DailyChallengeConfigSnapshot | undefined,
+    config: typeof DAILY_CHALLENGE_CONFIG,
     matchStartedAt: Date,
     now: Date,
   ) {
@@ -252,7 +240,7 @@ export class DailyChallengeProgressService {
       task !== undefined &&
       metricContribution !== undefined &&
       this.isReasonableContribution(task.metric, reportedValue);
-    const personalRequiredDataVersion = task ? this.getRequiredDataVersion(task) : 1;
+    const personalRequiredDataVersion = task ? this.getRequiredDataVersion(task.metric) : 1;
     const acceptedWithinMatchWindow = Boolean(
       state?.acceptedAt && state.acceptedAt.getTime() <= matchStartedAt.getTime() + 10 * 60 * 1000,
     );
@@ -276,7 +264,9 @@ export class DailyChallengeProgressService {
       globalTask !== undefined &&
       globalMetricContribution !== undefined &&
       this.isReasonableContribution(globalTask.metric, reportedGlobalValue);
-    const globalRequiredDataVersion = globalTask ? this.getRequiredDataVersion(globalTask) : 1;
+    const globalRequiredDataVersion = globalTask
+      ? this.getRequiredDataVersion(globalTask.metric)
+      : 1;
     const canApplyGlobal =
       contribution.normallySettled &&
       eligiblePlayer !== undefined &&
@@ -359,7 +349,7 @@ export class DailyChallengeProgressService {
   private advanceCompletedRound(
     state: PlayerDailyChallenge,
     completedTask: DailyChallengeTaskSnapshotDto,
-    config: DailyChallengeConfigSnapshot | undefined,
+    config: typeof DAILY_CHALLENGE_CONFIG,
     now: Date,
   ): PlayerDailyChallenge {
     const completedRoundCount = state.completedRoundCount + 1;
@@ -383,9 +373,6 @@ export class DailyChallengeProgressService {
       };
     }
 
-    if (!config) {
-      throw new Error(`Daily challenge config ${state.configVersionId} is unavailable`);
-    }
     if (config.version !== state.configVersion) {
       throw new Error(`Daily challenge config version mismatch for ${state.id}`);
     }

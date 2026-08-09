@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { FireormModule } from 'nestjs-fireorm';
 
-import { DailyChallengeModule } from '../daily-challenge/daily-challenge.module';
 import { PlayerModule } from '../player/player.module';
+import { ChallengeDayClockModule } from '../util/challenge-day-clock.module';
 
 import { Member } from './entities/members.entity';
 import { MembersController } from './members.controller';
 import { MembersService } from './members.service';
 
 @Module({
-  imports: [FireormModule.forFeature([Member]), PlayerModule, DailyChallengeModule],
+  imports: [FireormModule.forFeature([Member]), PlayerModule, ChallengeDayClockModule],
   controllers: [MembersController],
   providers: [MembersService],
   exports: [MembersService],

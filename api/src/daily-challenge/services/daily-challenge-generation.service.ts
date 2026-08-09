@@ -5,8 +5,8 @@ import {
   DailyChallengeTaskDefinition,
 } from '../types/daily-challenge-config.types';
 import {
+  ChallengeMetric,
   ChallengeScope,
-  DAILY_CHALLENGE_MATCH_DATA_VERSION,
   DailyChallengePersonalStar,
 } from '../types/daily-challenge.types';
 
@@ -18,7 +18,6 @@ export interface GeneratePlayerCandidatesInput {
   configVersion: number;
   tasks: DailyChallengeTaskDefinition[];
   seenTaskIds: string[];
-  recentTaskIds?: string[];
   personalStarWeights?: DailyChallengePersonalStarValues;
 }
 
@@ -31,25 +30,19 @@ export class DailyChallengeGenerationService {
   generatePlayerCandidates(
     input: GeneratePlayerCandidatesInput,
   ): GeneratedDailyChallengeCandidate[] {
-    const enabled = this.filterAvailableTasks(input.tasks, input.dayId);
     const seen = new Set(input.seenTaskIds);
-    const recent = new Set(input.recentTaskIds ?? []);
     const seedBase = `${input.dayId}:${input.steamId}:${input.currentRound ?? 1}:${input.refreshIndex}:${input.configVersion}`;
+    const general = input.tasks.filter((task) => task.scope === ChallengeScope.PERSONAL_GENERAL);
+    const hero = input.tasks.filter((task) => task.scope === ChallengeScope.PERSONAL_HERO);
 
-    const general = enabled.filter((task) => task.scope === ChallengeScope.PERSONAL_GENERAL);
-    const hero = enabled.filter((task) => task.scope === ChallengeScope.PERSONAL_HERO);
-
-    const firstGeneral = this.pickWithFallback(general, `${seedBase}:general:0`, seen, recent);
+    const firstGeneral = this.pickWithFallback(general, `${seedBase}:general:0`, seen);
     const secondGeneralPool = general.filter(
-      (task) => task.id !== firstGeneral.id && task.category !== firstGeneral.category,
+      (task) =>
+        task.id !== firstGeneral.id &&
+        this.getMetricCategory(task.metric) !== this.getMetricCategory(firstGeneral.metric),
     );
-    const secondGeneral = this.pickWithFallback(
-      secondGeneralPool,
-      `${seedBase}:general:1`,
-      seen,
-      recent,
-    );
-    const heroTask = this.pickWithFallback(hero, `${seedBase}:hero:0`, seen, recent);
+    const secondGeneral = this.pickWithFallback(secondGeneralPool, `${seedBase}:general:1`, seen);
+    const heroTask = this.pickWithFallback(hero, `${seedBase}:hero:0`, seen);
 
     const starWeights = input.personalStarWeights ?? { 1: 1, 2: 1, 3: 1 };
     return [firstGeneral, secondGeneral, heroTask].map((task, index) => ({
@@ -62,66 +55,46 @@ export class DailyChallengeGenerationService {
     dayId: string,
     configVersion: number,
     tasks: DailyChallengeTaskDefinition[],
-    recentTaskIds: string[] = [],
   ): DailyChallengeTaskDefinition {
-    const recent = new Set(recentTaskIds);
-    const pool = this.filterAvailableTasks(tasks, dayId).filter(
-      (task) => task.scope === ChallengeScope.GLOBAL,
-    );
-    return this.pickWithFallback(pool, `${dayId}:${configVersion}:global`, new Set(), recent);
-  }
-
-  private filterAvailableTasks(
-    tasks: DailyChallengeTaskDefinition[],
-    dayId: string,
-  ): DailyChallengeTaskDefinition[] {
-    return tasks.filter(
-      (task) =>
-        task.enabled &&
-        task.minDataVersion <= DAILY_CHALLENGE_MATCH_DATA_VERSION &&
-        (!task.availableFrom || task.availableFrom <= dayId) &&
-        (!task.availableUntil || task.availableUntil >= dayId),
-    );
+    const pool = tasks.filter((task) => task.scope === ChallengeScope.GLOBAL);
+    return this.pick(pool, `${dayId}:${configVersion}:global`);
   }
 
   private pickWithFallback(
     pool: DailyChallengeTaskDefinition[],
     seed: string,
     seen: Set<string>,
-    recent: Set<string>,
   ): DailyChallengeTaskDefinition {
-    // recentTaskIds contains tasks seen in recent challenge days. Only tasks with
-    // a positive cooldown remain excluded; cooldownDays = 0 is explicitly reusable.
-    const coolingDown = new Set(
-      pool.filter((task) => task.cooldownDays > 0 && recent.has(task.id)).map((task) => task.id),
-    );
-    const preferred = pool.filter((task) => !seen.has(task.id) && !coolingDown.has(task.id));
     const unseen = pool.filter((task) => !seen.has(task.id));
-    return this.pickWeighted(
-      preferred.length > 0 ? preferred : unseen.length > 0 ? unseen : pool,
-      seed,
-    );
+    return this.pick(unseen.length > 0 ? unseen : pool, seed);
   }
 
-  private pickWeighted(
-    pool: DailyChallengeTaskDefinition[],
-    seed: string,
-  ): DailyChallengeTaskDefinition {
+  private pick(pool: DailyChallengeTaskDefinition[], seed: string): DailyChallengeTaskDefinition {
     if (pool.length === 0) {
-      throw new InternalServerErrorException('每日挑战任务池容量不足');
+      throw new InternalServerErrorException('???????????');
     }
-
     const sorted = [...pool].sort((left, right) => left.id.localeCompare(right.id));
-    const totalWeight = sorted.reduce((total, task) => total + task.weight, 0);
-    let cursor = (this.hash(seed) / 0x100000000) * totalWeight;
+    return sorted[this.hash(seed) % sorted.length];
+  }
 
-    for (const task of sorted) {
-      cursor -= task.weight;
-      if (cursor < 0) {
-        return task;
-      }
+  private getMetricCategory(metric: ChallengeMetric): string {
+    switch (metric) {
+      case ChallengeMetric.HERO_DAMAGE:
+      case ChallengeMetric.PHYSICAL_DAMAGE:
+      case ChallengeMetric.MAGICAL_DAMAGE:
+      case ChallengeMetric.PURE_DAMAGE:
+        return 'damage';
+      case ChallengeMetric.STUN_DURATION_MS:
+      case ChallengeMetric.SLOW_DURATION_MS:
+      case ChallengeMetric.ROOT_DURATION_MS:
+      case ChallengeMetric.SILENCE_DURATION_MS:
+      case ChallengeMetric.TAUNT_DURATION_MS:
+      case ChallengeMetric.BREAK_DURATION_MS:
+      case ChallengeMetric.DEBUFF_DURATION_MS:
+        return 'control';
+      default:
+        return metric;
     }
-    return sorted[sorted.length - 1];
   }
 
   private pickStar(

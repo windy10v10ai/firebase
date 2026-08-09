@@ -1,6 +1,11 @@
 ﻿import { DailyChallengeMatchContributionDto } from '../dto/daily-challenge-match-contribution.dto';
 import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
-import { ChallengeMetric, ChallengeScope, ChallengeUnit } from '../types/daily-challenge.types';
+import {
+  ChallengeMetric,
+  ChallengeScope,
+  ChallengeUnit,
+  DAILY_CHALLENGE_METRIC_UNIT,
+} from '../types/daily-challenge.types';
 
 import { DailyChallengeGenerationService } from './daily-challenge-generation.service';
 import { DailyChallengeProgressService } from './daily-challenge-progress.service';
@@ -19,13 +24,10 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
   globalTask: {
     assignmentId: 'global-assignment-1',
     taskId: 'global-damage',
-    revision: 1,
     configVersion: 1,
     scope: ChallengeScope.GLOBAL,
     metric: ChallengeMetric.HERO_DAMAGE,
     unit: ChallengeUnit.DAMAGE,
-    title: { cn: '共同伤害', en: 'Global damage', ru: 'Global damage' },
-    description: { cn: '共同造成伤害', en: 'Deal damage together', ru: 'Deal damage together' },
     target: 1000000,
     progress: 0,
     rewardSeasonPoint: 0,
@@ -50,7 +52,6 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
   acceptedTask: {
     assignmentId: 'assignment-1',
     taskId: 'lina-damage',
-    revision: 1,
     configVersion: 1,
     star: 2,
     round: 1,
@@ -59,8 +60,6 @@ const createState = (overrides: Partial<PlayerDailyChallenge> = {}): PlayerDaily
     metric: ChallengeMetric.HERO_DAMAGE,
     heroName: 'npc_dota_hero_lina',
     unit: ChallengeUnit.DAMAGE,
-    title: { cn: '火女伤害', en: 'Lina damage', ru: 'Lina damage' },
-    description: { cn: '使用火女造成伤害', en: 'Deal damage as Lina', ru: 'Deal damage as Lina' },
     target: 500000,
     progress: 0,
     rewardSeasonPoint: 100,
@@ -230,62 +229,6 @@ const createService = (store: MemoryProgressStore = new MemoryProgressStore()) =
           }),
       ),
   };
-  const config = {
-    id: 'daily-challenge',
-    version: 1,
-    personalRoundsPerDay: 3,
-    personalStarRewards: { 1: 80, 2: 100, 3: 120 },
-    personalStarWeights: { 1: 1, 2: 1, 3: 1 },
-    personalDefaultStarMultipliers: { 1: 0.75, 2: 1, 3: 1.5 },
-    tasks: [
-      ...['damage-a', 'healing-a', 'tower-a', 'assist-a'].map((id, index) => ({
-        id,
-        revision: 1,
-        enabled: true,
-        scope: ChallengeScope.PERSONAL_GENERAL,
-        metric: index === 1 ? ChallengeMetric.HEALING : ChallengeMetric.HERO_DAMAGE,
-        unit: ChallengeUnit.DAMAGE,
-        category: id.split('-')[0],
-        title: { cn: id, en: id, ru: id },
-        description: { cn: id, en: id, ru: id },
-        target: 100,
-        rewardSeasonPoint: 100,
-        weight: 1,
-        expectedMatches: 1,
-        cooldownDays: 0,
-        minDataVersion: 1,
-        groupTags: [],
-        mutexTags: [],
-      })),
-      ...['hero-lina', 'hero-cm'].map((id) => ({
-        id,
-        revision: 1,
-        enabled: true,
-        scope: ChallengeScope.PERSONAL_HERO,
-        metric: ChallengeMetric.HERO_DAMAGE,
-        unit: ChallengeUnit.DAMAGE,
-        category: id,
-        title: { cn: id, en: id, ru: id },
-        description: { cn: id, en: id, ru: id },
-        target: 100,
-        rewardSeasonPoint: 100,
-        weight: 1,
-        expectedMatches: 1,
-        cooldownDays: 0,
-        minDataVersion: 1,
-        groupTags: [],
-        mutexTags: [],
-        heroName: `npc_dota_${id.replace('hero-', 'hero_')}`,
-      })),
-    ],
-    globalTargetPolicies: {},
-    globalRewardTiers: createState().globalRewardTiers,
-    refreshCostsMemberPoint: [10, 20, 30, 40, 50],
-    streakMilestones: [{ days: 3, rewardSeasonPoint: 100 }],
-  };
-  const configService = {
-    getVersion: jest.fn().mockResolvedValue({ id: 'v1', version: 1, snapshot: config }),
-  };
   const generationService = new DailyChallengeGenerationService();
   const playerService = {
     createTaskSnapshots: jest
@@ -304,15 +247,11 @@ const createService = (store: MemoryProgressStore = new MemoryProgressStore()) =
           tasks.map((task) => ({
             assignmentId: `${dayId}-${steamId}-round-${currentRound}-refresh-${refreshIndex}-${task.id}`,
             taskId: task.id,
-            revision: task.revision,
             configVersion,
             scope: task.scope,
             metric: task.metric,
             ...(task.heroName ? { heroName: task.heroName } : {}),
-            unit: task.unit,
-            minDataVersion: task.minDataVersion,
-            title: task.title,
-            description: task.description,
+            unit: DAILY_CHALLENGE_METRIC_UNIT[task.metric],
             star: task.star,
             round: currentRound,
             totalRounds,
@@ -329,14 +268,12 @@ const createService = (store: MemoryProgressStore = new MemoryProgressStore()) =
     store,
     clock,
     rewardService,
-    configService,
     generationService,
     playerService,
     service: new DailyChallengeProgressService(
       store as any,
       clock as any,
       rewardService as any,
-      configService as any,
       generationService as any,
       playerService as any,
     ),
@@ -366,7 +303,10 @@ describe('DailyChallengeProgressService', () => {
     expect(state.progress).toBe(0);
     expect(state.acceptedTask).toBeUndefined();
     expect(state.completedTasks).toEqual([
-      expect.objectContaining({ assignmentId: 'assignment-1', progress: 500000 }),
+      expect.objectContaining({
+        assignmentId: 'assignment-1',
+        progress: 500000,
+      }),
     ]);
     expect(state.completedRoundCount).toBe(1);
     expect(state.currentRound).toBe(2);
@@ -390,7 +330,10 @@ describe('DailyChallengeProgressService', () => {
     expect(rewardService.buildPersonalReward).toHaveBeenCalledWith(
       '2026-08-04',
       483215844,
-      expect.objectContaining({ assignmentId: 'assignment-1', rewardSeasonPoint: 100 }),
+      expect.objectContaining({
+        assignmentId: 'assignment-1',
+        rewardSeasonPoint: 100,
+      }),
       'v1',
       1,
       now,
@@ -443,7 +386,10 @@ describe('DailyChallengeProgressService', () => {
     expect(rewardService.grantPersonal).not.toHaveBeenCalled();
     expect(store.rewards.size).toBe(1);
     expect(store.states.get('2026-08-04_483215844')).toEqual(stateAfterFirst);
-    expect(stateAfterFirst).toMatchObject({ currentRound: 2, completedRoundCount: 1 });
+    expect(stateAfterFirst).toMatchObject({
+      currentRound: 2,
+      completedRoundCount: 1,
+    });
   });
 
   it.each([true, false])(
@@ -548,7 +494,10 @@ describe('DailyChallengeProgressService', () => {
     expect(rewardService.buildPersonalReward).toHaveBeenCalledWith(
       '2026-08-04',
       483215844,
-      expect.objectContaining({ assignmentId: 'assignment-1', rewardSeasonPoint: 100 }),
+      expect.objectContaining({
+        assignmentId: 'assignment-1',
+        rewardSeasonPoint: 100,
+      }),
       'v1',
       1,
       now,
@@ -638,7 +587,6 @@ describe('DailyChallengeProgressService', () => {
         ...createState().acceptedTask!,
         scope: ChallengeScope.PERSONAL_GENERAL,
         metric: ChallengeMetric.PHYSICAL_DAMAGE,
-        minDataVersion: 2,
         target: 300000,
         rewardSeasonPoint: 100,
       },
@@ -680,7 +628,10 @@ describe('DailyChallengeProgressService', () => {
       ],
     });
     expect(result.rewards).toEqual([
-      expect.objectContaining({ seasonPoint: 100, assignmentId: 'assignment-1' }),
+      expect.objectContaining({
+        seasonPoint: 100,
+        assignmentId: 'assignment-1',
+      }),
     ]);
   });
 
@@ -931,7 +882,6 @@ describe('DailyChallengeProgressService', () => {
       ...state.acceptedTask!,
       metric: ChallengeMetric.PHYSICAL_DAMAGE,
       unit: ChallengeUnit.DAMAGE,
-      minDataVersion: 1,
       target: 500000,
     };
     store.states.set(state.id, state);
@@ -961,7 +911,6 @@ describe('DailyChallengeProgressService', () => {
       ...state.globalTask!,
       metric: ChallengeMetric.BOT_KILLS,
       unit: ChallengeUnit.COUNT,
-      minDataVersion: 1,
       target: 100,
     };
     store.states.set(state.id, state);
@@ -982,31 +931,6 @@ describe('DailyChallengeProgressService', () => {
     expect(store.globalContributions.size).toBe(0);
     expect(getLedger(store, 'match-stale-global-min-version')).toMatchObject({
       reportedGlobalValue: 20,
-      appliedGlobalContribution: 0,
-    });
-  });
-  it('rejects personal and global metrics below each task minimum data version', async () => {
-    const { service, store } = createService();
-    const state = createState();
-    state.acceptedTask = { ...state.acceptedTask!, minDataVersion: 2 } as any;
-    state.globalTask = { ...state.globalTask!, minDataVersion: 2 } as any;
-    store.states.set(state.id, state);
-    const contribution = createContribution({
-      globalMetrics: [{ metric: ChallengeMetric.HERO_DAMAGE, value: 90000 }],
-    });
-    contribution.dataVersion = 1;
-
-    await service.applyGameEnd(
-      'match-old-data-version',
-      contribution,
-      [{ steamId: 483215844, heroName: 'npc_dota_hero_lina' }],
-      now,
-    );
-
-    expect(store.states.get(state.id)?.progress).toBe(0);
-    expect(store.globalContributions.size).toBe(0);
-    expect(getLedger(store, 'match-old-data-version')).toMatchObject({
-      appliedPersonalProgress: 0,
       appliedGlobalContribution: 0,
     });
   });
@@ -1033,7 +957,6 @@ describe('DailyChallengeProgressService', () => {
     state.acceptedTask = {
       ...state.acceptedTask!,
       metric: 'physical_damage' as ChallengeMetric,
-      minDataVersion: 2,
       target: 500000,
     } as any;
     store.states.set(state.id, state);
@@ -1066,12 +989,12 @@ describe('DailyChallengeProgressService', () => {
     state.acceptedTask = {
       ...state.acceptedTask!,
       metric,
-      minDataVersion:
-        metric === ChallengeMetric.HERO_DAMAGE || metric === ChallengeMetric.KILLS ? 1 : 2,
       target: value * 2,
     } as any;
     store.states.set(state.id, state);
-    const contribution = createContribution({ personalMetrics: [{ metric, value }] });
+    const contribution = createContribution({
+      personalMetrics: [{ metric, value }],
+    });
     contribution.dataVersion = 2;
 
     await service.applyGameEnd(
@@ -1139,7 +1062,12 @@ describe('DailyChallengeProgressService', () => {
     await service.applyGameEnd(
       'match-unknown-metric',
       createContribution({
-        personalMetrics: [{ metric: 'hard_control_target_ms' as ChallengeMetric, value: 100000 }],
+        personalMetrics: [
+          {
+            metric: 'hard_control_target_ms' as ChallengeMetric,
+            value: 100000,
+          },
+        ],
       }),
       [{ steamId: 483215844, heroName: 'npc_dota_hero_lina' }],
       now,

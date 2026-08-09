@@ -1,15 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 import {
   ChallengeMetric,
@@ -17,8 +7,6 @@ import {
   ChallengeUnit,
   DailyChallengePersonalStar,
 } from '../types/daily-challenge.types';
-
-import { LocalizedTextDto } from './localized-text.dto';
 
 export class DailyChallengeTaskSnapshotDto {
   @ApiProperty()
@@ -30,11 +18,6 @@ export class DailyChallengeTaskSnapshotDto {
   @IsString()
   @IsNotEmpty()
   taskId: string;
-
-  @ApiProperty({ minimum: 1 })
-  @IsInt()
-  @Min(1)
-  revision: number;
 
   @ApiProperty({ enum: ChallengeScope })
   @IsEnum(ChallengeScope)
@@ -76,22 +59,6 @@ export class DailyChallengeTaskSnapshotDto {
   @ApiProperty({ enum: ChallengeUnit })
   @IsEnum(ChallengeUnit)
   unit: ChallengeUnit;
-
-  @ApiPropertyOptional({ minimum: 1, default: 1 })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  minDataVersion?: number;
-
-  @ApiProperty({ type: LocalizedTextDto })
-  @ValidateNested()
-  @Type(() => LocalizedTextDto)
-  title: LocalizedTextDto;
-
-  @ApiProperty({ type: LocalizedTextDto })
-  @ValidateNested()
-  @Type(() => LocalizedTextDto)
-  description: LocalizedTextDto;
 
   @ApiProperty()
   @IsInt()

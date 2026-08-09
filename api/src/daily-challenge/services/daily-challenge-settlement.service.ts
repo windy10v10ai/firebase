@@ -1,10 +1,10 @@
 ﻿import { Injectable } from '@nestjs/common';
 
+import { ChallengeDayClockService } from '../../util/challenge-day-clock.service';
 import { DailyChallengeDay } from '../entities/daily-challenge-day.entity';
 import { PlayerDailyChallenge } from '../entities/player-daily-challenge.entity';
 import { ChallengeDayStatus } from '../types/daily-challenge.types';
 
-import { ChallengeDayClockService } from './challenge-day-clock.service';
 import { DailyChallengeGlobalFreezeService } from './daily-challenge-global-freeze.service';
 import { DailyChallengeRewardService } from './daily-challenge-reward.service';
 import { DailyChallengeSettlementStore } from './daily-challenge-settlement.store';

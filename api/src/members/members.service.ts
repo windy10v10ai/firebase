@@ -7,8 +7,8 @@ import {
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { ChallengeDayClockService } from '../daily-challenge/services/challenge-day-clock.service';
 import { PlayerService } from '../player/player.service';
+import { ChallengeDayClockService } from '../util/challenge-day-clock.service';
 
 import { CreateMemberDto } from './dto/create-member.dto';
 import { MemberDto } from './dto/member.dto';

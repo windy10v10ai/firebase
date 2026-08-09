@@ -3,24 +3,11 @@ import {
   DailyChallengePersonalStarValues,
   DailyChallengeTaskDefinition,
 } from '../types/daily-challenge-config.types';
-import { ChallengeUnit, DailyChallengePersonalStar } from '../types/daily-challenge.types';
-
-export const DEFAULT_PERSONAL_ROUNDS_PER_DAY = 3;
-export const DEFAULT_PERSONAL_STAR_REWARDS: Readonly<DailyChallengePersonalStarValues> = {
-  1: 80,
-  2: 100,
-  3: 120,
-};
-export const DEFAULT_PERSONAL_STAR_WEIGHTS: Readonly<DailyChallengePersonalStarValues> = {
-  1: 1,
-  2: 1,
-  3: 1,
-};
-export const DEFAULT_PERSONAL_STAR_MULTIPLIERS: Readonly<DailyChallengePersonalStarValues> = {
-  1: 0.75,
-  2: 1,
-  3: 1.5,
-};
+import {
+  ChallengeUnit,
+  DAILY_CHALLENGE_METRIC_UNIT,
+  DailyChallengePersonalStar,
+} from '../types/daily-challenge.types';
 
 export interface ResolvedPersonalChallengeConfig {
   roundsPerDay: number;
@@ -39,17 +26,15 @@ export function resolvePersonalChallengeConfig(
   >,
 ): ResolvedPersonalChallengeConfig {
   return {
-    roundsPerDay: config.personalRoundsPerDay ?? DEFAULT_PERSONAL_ROUNDS_PER_DAY,
-    starRewards: cloneStarValues(config.personalStarRewards ?? DEFAULT_PERSONAL_STAR_REWARDS),
-    starWeights: cloneStarValues(config.personalStarWeights ?? DEFAULT_PERSONAL_STAR_WEIGHTS),
-    defaultStarMultipliers: cloneStarValues(
-      config.personalDefaultStarMultipliers ?? DEFAULT_PERSONAL_STAR_MULTIPLIERS,
-    ),
+    roundsPerDay: config.personalRoundsPerDay,
+    starRewards: cloneStarValues(config.personalStarRewards),
+    starWeights: cloneStarValues(config.personalStarWeights),
+    defaultStarMultipliers: cloneStarValues(config.personalDefaultStarMultipliers),
   };
 }
 
 export function resolvePersonalTaskTarget(
-  task: Pick<DailyChallengeTaskDefinition, 'target' | 'starTargets' | 'unit'>,
+  task: Pick<DailyChallengeTaskDefinition, 'target' | 'starTargets' | 'metric'>,
   star: DailyChallengePersonalStar,
   defaultMultipliers: Readonly<DailyChallengePersonalStarValues>,
 ): number {
@@ -59,7 +44,7 @@ export function resolvePersonalTaskTarget(
   }
 
   const scaled = task.target * defaultMultipliers[star];
-  if (task.unit === ChallengeUnit.MILLISECOND && scaled >= 1000) {
+  if (DAILY_CHALLENGE_METRIC_UNIT[task.metric] === ChallengeUnit.MILLISECOND && scaled >= 1000) {
     return Math.max(1, Math.round(scaled / 1000) * 1000);
   }
   return Math.max(1, Math.round(scaled));

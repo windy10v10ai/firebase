@@ -1,4 +1,4 @@
-import { ChallengeDayClockService } from '../daily-challenge/services/challenge-day-clock.service';
+﻿import { ChallengeDayClockService } from '../util/challenge-day-clock.service';
 
 import { Member, MemberLevel } from './entities/members.entity';
 import { MembersService } from './members.service';

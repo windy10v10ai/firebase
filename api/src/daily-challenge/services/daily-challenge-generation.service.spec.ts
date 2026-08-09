@@ -1,38 +1,25 @@
-import { ChallengeMetric, ChallengeScope, ChallengeUnit } from '../types/daily-challenge.types';
+﻿import { ChallengeMetric, ChallengeScope } from '../types/daily-challenge.types';
 
 import { DailyChallengeGenerationService } from './daily-challenge-generation.service';
 
-const task = (id: string, scope: ChallengeScope, category: string, weight = 1) => ({
+const task = (id: string, scope: ChallengeScope, metric: ChallengeMetric) => ({
   id,
-  revision: 1,
-  enabled: true,
   scope,
-  metric: ChallengeMetric.HERO_DAMAGE,
-  unit: ChallengeUnit.DAMAGE,
-  category,
-  title: { cn: id, en: id, ru: id },
-  description: { cn: id, en: id, ru: id },
+  metric,
   target: 100,
-  rewardSeasonPoint: 100,
-  weight,
-  expectedMatches: 2,
-  cooldownDays: 0,
-  minDataVersion: 1,
-  groupTags: [],
-  mutexTags: [],
   ...(scope === ChallengeScope.PERSONAL_HERO ? { heroName: `npc_dota_hero_${id}` } : {}),
 });
 
 const tasks = [
-  task('damage-1', ChallengeScope.PERSONAL_GENERAL, 'damage', 10),
-  task('damage-2', ChallengeScope.PERSONAL_GENERAL, 'damage', 5),
-  task('healing-1', ChallengeScope.PERSONAL_GENERAL, 'healing', 10),
-  task('tower-1', ChallengeScope.PERSONAL_GENERAL, 'tower', 3),
-  task('hero-lina', ChallengeScope.PERSONAL_HERO, 'hero_damage', 10),
-  task('hero-cm', ChallengeScope.PERSONAL_HERO, 'hero_control', 10),
-  task('hero-axe', ChallengeScope.PERSONAL_HERO, 'hero_tank', 10),
-  task('global-bots', ChallengeScope.GLOBAL, 'bot_kills', 10),
-  task('global-roshan', ChallengeScope.GLOBAL, 'roshan_kills', 10),
+  task('damage-1', ChallengeScope.PERSONAL_GENERAL, ChallengeMetric.HERO_DAMAGE),
+  task('damage-2', ChallengeScope.PERSONAL_GENERAL, ChallengeMetric.PHYSICAL_DAMAGE),
+  task('healing-1', ChallengeScope.PERSONAL_GENERAL, ChallengeMetric.HEALING),
+  task('tower-1', ChallengeScope.PERSONAL_GENERAL, ChallengeMetric.TOWER_KILLS),
+  task('hero-lina', ChallengeScope.PERSONAL_HERO, ChallengeMetric.HERO_DAMAGE),
+  task('hero-cm', ChallengeScope.PERSONAL_HERO, ChallengeMetric.STUN_DURATION_MS),
+  task('hero-axe', ChallengeScope.PERSONAL_HERO, ChallengeMetric.DAMAGE_TAKEN),
+  task('global-bots', ChallengeScope.GLOBAL, ChallengeMetric.BOT_KILLS),
+  task('global-roshan', ChallengeScope.GLOBAL, ChallengeMetric.ROSHAN_KILLS),
 ];
 
 describe('DailyChallengeGenerationService', () => {
@@ -53,7 +40,7 @@ describe('DailyChallengeGenerationService', () => {
     );
   });
 
-  it('returns two different general categories and one hero task', () => {
+  it('returns two different general metric categories and one hero task', () => {
     const result = service.generatePlayerCandidates({
       dayId: '2026-08-04',
       steamId: 483215844,
@@ -66,7 +53,7 @@ describe('DailyChallengeGenerationService', () => {
     expect(result).toHaveLength(3);
     expect(result[0].scope).toBe(ChallengeScope.PERSONAL_GENERAL);
     expect(result[1].scope).toBe(ChallengeScope.PERSONAL_GENERAL);
-    expect(result[0].category).not.toBe(result[1].category);
+    expect(result[0].metric).not.toBe(result[1].metric);
     expect(result[2].scope).toBe(ChallengeScope.PERSONAL_HERO);
   });
 
@@ -92,51 +79,17 @@ describe('DailyChallengeGenerationService', () => {
     expect(refreshed.every((item) => !first.some((old) => old.id === item.id))).toBe(true);
   });
 
-  it('uses cooldownDays when deciding which recent tasks remain excluded', () => {
-    const cooling = task('cooling', ChallengeScope.PERSONAL_GENERAL, 'damage');
-    const reusable = task('reusable', ChallengeScope.PERSONAL_GENERAL, 'damage');
-    cooling.cooldownDays = 2;
-    reusable.cooldownDays = 0;
-
-    const pickWeighted = jest
-      .spyOn(service as any, 'pickWeighted')
-      .mockImplementation((pool: Array<{ id: string }>) => pool[0]);
-
-    const result = (service as any).pickWithFallback(
-      [cooling, reusable],
-      'cooldown-seed',
-      new Set<string>(),
-      new Set<string>(['cooling', 'reusable']),
-    );
-
-    expect(result.id).toBe('reusable');
-    expect(pickWeighted).toHaveBeenCalledWith([reusable], 'cooldown-seed');
-    pickWeighted.mockRestore();
-  });
-
-  it('does not draw tasks that require a newer match contribution data version', () => {
-    const futureGeneral = task(
-      'future-general',
-      ChallengeScope.PERSONAL_GENERAL,
-      'future_damage',
-      100000,
-    );
-    futureGeneral.minDataVersion = 3;
-    const futureGlobal = task('future-global', ChallengeScope.GLOBAL, 'future_global', 100000);
-    futureGlobal.minDataVersion = 3;
-
-    const candidates = service.generatePlayerCandidates({
+  it('falls back to seen tasks after the matching pool is exhausted', () => {
+    const result = service.generatePlayerCandidates({
       dayId: '2026-08-04',
       steamId: 483215844,
-      refreshIndex: 0,
+      refreshIndex: 2,
       configVersion: 7,
-      tasks: [...tasks, futureGeneral],
-      seenTaskIds: [],
+      tasks,
+      seenTaskIds: tasks.map((item) => item.id),
     });
-    const global = service.generateGlobalTask('2026-08-04', 7, [...tasks, futureGlobal]);
 
-    expect(candidates.map((item) => item.id)).not.toContain('future-general');
-    expect(global.id).not.toBe('future-global');
+    expect(result).toHaveLength(3);
   });
 
   it('selects a deterministic global task for a challenge day and config version', () => {
@@ -145,22 +98,6 @@ describe('DailyChallengeGenerationService', () => {
 
     expect(first).toEqual(second);
     expect(first.scope).toBe(ChallengeScope.GLOBAL);
-  });
-
-  it('draws dataVersion 2 tasks with the current generator', () => {
-    const v2Tasks = tasks.map((item) => ({ ...item, minDataVersion: 2 }));
-
-    expect(
-      service.generatePlayerCandidates({
-        dayId: '2026-08-04',
-        steamId: 483215844,
-        refreshIndex: 0,
-        configVersion: 8,
-        tasks: v2Tasks,
-        seenTaskIds: [],
-      }),
-    ).toHaveLength(3);
-    expect(service.generateGlobalTask('2026-08-04', 8, v2Tasks).scope).toBe(ChallengeScope.GLOBAL);
   });
 
   it('assigns each candidate an independently deterministic star while preserving 2 general + 1 hero', () => {
@@ -173,20 +110,17 @@ describe('DailyChallengeGenerationService', () => {
       tasks,
       seenTaskIds: [],
       personalStarWeights: { 1: 1, 2: 1, 3: 1 },
-    } as any;
+    };
 
-    const first = service.generatePlayerCandidates(input) as any[];
-    const second = service.generatePlayerCandidates(input) as any[];
+    const first = service.generatePlayerCandidates(input);
+    const second = service.generatePlayerCandidates(input);
 
     expect(first).toEqual(second);
     expect(first).toHaveLength(3);
     expect(first[0].scope).toBe(ChallengeScope.PERSONAL_GENERAL);
     expect(first[1].scope).toBe(ChallengeScope.PERSONAL_GENERAL);
-    expect(first[0].category).not.toBe(first[1].category);
+    expect(first[0].metric).not.toBe(first[1].metric);
     expect(first[2].scope).toBe(ChallengeScope.PERSONAL_HERO);
-    expect(first.map((candidate) => candidate.star)).toEqual(
-      expect.arrayContaining([expect.any(Number)]),
-    );
     expect(first.every((candidate) => [1, 2, 3].includes(candidate.star))).toBe(true);
   });
 
@@ -202,7 +136,7 @@ describe('DailyChallengeGenerationService', () => {
           tasks,
           seenTaskIds: [],
           personalStarWeights: { 1: 1, 2: 1, 3: 1 },
-        } as any)
+        })
         .map((candidate) => candidate.star),
     );
 
@@ -219,8 +153,31 @@ describe('DailyChallengeGenerationService', () => {
       tasks,
       seenTaskIds: [],
       personalStarWeights: { 1: 0, 2: 0, 3: 10 },
-    } as any) as any[];
+    });
 
     expect(result.map((candidate) => candidate.star)).toEqual([3, 3, 3]);
+  });
+
+  it('uses the current round in the stable seed', () => {
+    const firstRound = service.generatePlayerCandidates({
+      dayId: '2026-08-04',
+      steamId: 483215844,
+      currentRound: 1,
+      refreshIndex: 0,
+      configVersion: 7,
+      tasks,
+      seenTaskIds: [],
+    });
+    const secondRound = service.generatePlayerCandidates({
+      dayId: '2026-08-04',
+      steamId: 483215844,
+      currentRound: 2,
+      refreshIndex: 0,
+      configVersion: 7,
+      tasks,
+      seenTaskIds: [],
+    });
+
+    expect(secondRound).not.toEqual(firstRound);
   });
 });

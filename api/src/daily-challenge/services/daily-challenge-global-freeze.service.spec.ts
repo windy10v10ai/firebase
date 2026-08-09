@@ -23,13 +23,10 @@ const createDay = (overrides: Partial<DailyChallengeDay> = {}): DailyChallengeDa
   globalTask: {
     assignmentId: '2026-08-04-global-damage',
     taskId: 'global-damage',
-    revision: 1,
     configVersion: 1,
     scope: ChallengeScope.GLOBAL,
     metric: ChallengeMetric.HERO_DAMAGE,
     unit: ChallengeUnit.DAMAGE,
-    title: { cn: '共同伤害', en: 'Global damage', ru: 'Global damage' },
-    description: { cn: '造成伤害', en: 'Deal damage', ru: 'Deal damage' },
     target: 100,
     progress: 0,
     rewardSeasonPoint: 0,
