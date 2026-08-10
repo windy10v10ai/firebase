@@ -37,22 +37,36 @@ export class GameService {
   async addDailyMemberPoints(members: Member[]): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
     for (const member of members) {
-      const daliyMemberPoint = this.membersService.getDailyMemberPoint(member);
+      const { dailyPoint, catchUpDays, catchUpPoint } =
+        this.membersService.getCheckInPoints(member);
+      const totalPoint = dailyPoint + catchUpPoint;
       // 判断是否为会员
-      if (daliyMemberPoint > 0) {
+      if (totalPoint > 0) {
         await this.playerService.upsertAddPoint(member.steamId, {
-          memberPointTotal: daliyMemberPoint,
+          memberPointTotal: totalPoint,
         });
         await this.membersService.updateMemberLastDailyDate(member);
-        // 返回会员积分信息
-        pointInfoDtos.push({
-          steamId: member.steamId,
-          title: {
-            cn: '获得会员经验',
-            en: 'Get Member Experience',
-          },
-          memberPoint: daliyMemberPoint,
-        });
+
+        if (dailyPoint > 0) {
+          pointInfoDtos.push({
+            steamId: member.steamId,
+            title: {
+              cn: '获得会员经验',
+              en: 'Get Member Experience',
+            },
+            memberPoint: dailyPoint,
+          });
+        }
+        if (catchUpDays > 0) {
+          pointInfoDtos.push({
+            steamId: member.steamId,
+            title: {
+              cn: `补签会员经验 x${catchUpDays}天`,
+              en: `Member Check-in Catch-up x${catchUpDays} day(s)`,
+            },
+            memberPoint: catchUpPoint,
+          });
+        }
       }
     }
 
