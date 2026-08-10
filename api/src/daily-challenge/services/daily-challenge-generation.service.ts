@@ -71,7 +71,7 @@ export class DailyChallengeGenerationService {
 
   private pick(pool: DailyChallengeTaskDefinition[], seed: string): DailyChallengeTaskDefinition {
     if (pool.length === 0) {
-      throw new InternalServerErrorException('???????????');
+      throw new InternalServerErrorException('每日挑战任务池容量不足');
     }
     const sorted = [...pool].sort((left, right) => left.id.localeCompare(right.id));
     return sorted[this.hash(seed) % sorted.length];
