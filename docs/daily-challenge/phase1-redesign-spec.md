@@ -52,9 +52,11 @@ Phase1 不为 Phase2/3 预留任何字段或接口位。接口不做版本管理
 
 | 星级 | 目标倍率 | 赛季积分 |
 | --- | --- | --- |
-| 1★ | 0.75 | 80 |
-| 2★ | 1.0 | 100 |
-| 3★ | 1.5 | 120 |
+| 1★ | 0.75 | 60 |
+| 2★ | 1.0 | 80 |
+| 3★ | 1.5 | 100 |
+
+单日个人赛季积分上限 300（三轮全 3★）。
 
 星级由 seed 确定性掷出，权重 1:1:1。毫秒类指标 Phase1 不使用，因此取整规则简化为 `Math.max(1, Math.round(target * multiplier))`。
 
@@ -193,7 +195,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
           "metric": "hero_damage",
           "star": 2,
           "target": 500000,
-          "rewardSeasonPoint": 100
+          "rewardSeasonPoint": 80
         },
         {
           "taskId": "general_healing_1",
@@ -201,7 +203,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
           "metric": "healing",
           "star": 1,
           "target": 225000,
-          "rewardSeasonPoint": 80
+          "rewardSeasonPoint": 60
         },
         {
           "taskId": "hero_lina_1",
@@ -210,14 +212,14 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
           "heroName": "npc_dota_hero_lina",
           "star": 3,
           "target": 900000,
-          "rewardSeasonPoint": 120
+          "rewardSeasonPoint": 100
         }
       ],
       "todayCompleted": [
-        { "taskId": "general_kills_1", "star": 1, "seasonPoint": 80 }
+        { "taskId": "general_kills_1", "star": 1, "seasonPoint": 60 }
       ],
       "history": [
-        { "dayId": "2026-08-09", "rounds": 3, "seasonPoint": 300 }
+        { "dayId": "2026-08-09", "rounds": 3, "seasonPoint": 240 }
       ]
     }
   ]
@@ -263,7 +265,7 @@ export class GameEndDto extends EventBaseDto {
 {
   "result": "OK",
   "dailyChallengeRewards": [
-    { "steamId": 483215844, "taskId": "general_kills_1", "seasonPoint": 80 }
+    { "steamId": 483215844, "taskId": "general_kills_1", "seasonPoint": 60 }
   ]
 }
 ```
@@ -429,3 +431,55 @@ api/src/daily-challenge/
 - Panorama UI 全套（页面、候选卡、星级徽章、历史面板、结算页积分）
 - 三语本地化资源——文案 key 按 `scope` + `metric` 拼，Phase1 只需要 7 个 metric 的模板
 - `game-end.ts`：在 `players[i]` 上多发 `dailyChallengeTaskId`，顶层多发 `dailyChallengeDayId`
+
+## 14. 现有实现（PR #1040 / #2310）的去留
+
+现有后端 11599 行按去留分类：
+
+### 14.1 跨阶段复用（约 3300 行，其中 2837 是任务池数据）
+
+| 文件 | 行数 | 处置 |
+| --- | --- | --- |
+| `config/tasks.ts` | 2837 | **保留结构与 127 英雄清单**。数值按第 12 节重标，`metric` 收敛到 7 个 |
+| `config/tasks.spec.ts` | 234 | 保留大部分守卫（id 唯一、英雄任务必带 `heroName`、`target` 正整数、星级递增），删掉 404/19/381 数量断言和 `dataVersion` 断言 |
+| `services/daily-challenge-generation.service.ts` | 134 | **核心算法直接复用**（FNV-1a、seeded pick、`pickStar`）。删掉 `getMetricCategory()` 的伤害族/控制族归并和 `seenTaskIds` 回退后约 90 行 |
+| `services/daily-challenge-generation.service.spec.ts` | 183 | 同上，按新签名调整 |
+| `services/daily-challenge-personal-config.ts` + spec | 136 | 保留星级目标解析，删掉毫秒取整分支 |
+| `util/challenge-day-clock.service.ts` | — | 保留，删掉 `closesAt` 和 120 分钟宽限（那是共同任务封口用的） |
+
+**game 仓库的 Panorama UI 是最大的可保留资产**：761 行 `styles.less` + 8 个组件 + 三语本地化资源，Phase1 基本不动，只需按新快照结构调整字段名。
+
+### 14.2 Phase2（连续完成）：代码不保留，产品规则保留
+
+`daily-challenge-streak.service.ts`（49 行）+ spec（93 行）作废。
+
+`settle()` 的 `previousDays + 1` 和 `streakCycleId` 归属判定，存在的唯一原因是"streak 状态存在每天的文档里，必须跨天读上一天"。新模型下连续天数直接数 `history` 里连续的 `dayId`，这套逻辑失去意义。
+
+**保留的是产品规则**：里程碑 3/7/14/30 天 → 50/120/300/800 赛季积分，到最高里程碑后清零重新循环。
+
+### 14.3 Phase3（全服共同任务）：算法思路保留，代码不保留
+
+约 2000 行作废：`global-freeze.service/store`、`global-ranking.service`、`global-progress.store`、`settlement.service/store`、`day.service/store/entity`、`global-contribution/ranking` 两个 entity，及其全部 spec。
+
+原因是数据模型变了——新设计没有 `daily_challenge_days`、没有挑战日状态机，这些代码全部建立在那两样东西之上。
+
+**值得在 Phase3 照着重写的两个算法**：
+
+1. `global-freeze.store` 的分页流式扫描（500 条一批），避免一次性读取全服贡献
+2. `global-ranking.service` 的 cursor 分档：一次遍历算出 top 10% / next 30% / rest，不需要对全量排序
+
+**Phase3 开工前应重新评估共同任务的形态**。如果改成"全服达标 → 所有有效贡献者拿固定积分"，就不需要排名、不需要 `rankings` collection、不需要冻结时刻，只要一个 `daily_challenge_global/{dayId}` 文档累加 + 一个达标标志——上面两个算法里只剩分页扫描还用得上。排名玩法的价值（80/90/100 三档，最高档比保底多 25%，且玩家局内看不到自己排第几）与它引入的复杂度是否匹配，需要单独决策。
+
+### 14.4 因架构改变而作废（约 6000 行）
+
+`progress.service`（452 + 1103 spec）、`player.service`（381 + 544）、`player.store`（377 + 202）、`progress.store`（194 + 408）、`reward.service/store`（126 + 155 + 426 spec）、`reward-notification`（79 + 150）、`refresh.service`（144）、controllers（88）、全部 dto（约 330）、`match/reward/operation` 三个 ledger entity（73）、`types`（179）、module（71）、协议类 spec（267）。
+
+### 14.5 PR 处理建议
+
+**不要在 PR #1040 上改**，另开 Phase1 PR 从 `develop` 切：
+
+- 保留比例约 30%，其中大头还是任务池数据，实际等于重写
+- #1040 在贡献者的 fork 分支上，在别人分支上做这种规模的重写不合适
+- #1040 保持可读状态，Phase2/3 开工时还能回来查 14.2 / 14.3 里那些算法
+
+game PR #2310 同理：另开分支，从中挑出 Panorama UI 与三语资源。
