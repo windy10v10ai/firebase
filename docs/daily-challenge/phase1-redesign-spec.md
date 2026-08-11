@@ -74,7 +74,49 @@ return unit === MILLISECOND && scaled >= 1000
 
 每轮 3 个候选中固定 1 个是英雄专属。客户端在判定时检查本局英雄是否匹配 `heroName`，不匹配则该任务不可完成（UI 上应直接标记为"需要 XXX"）。
 
-### 3.5 已删除的机制
+### 3.5 生效条件（模式门控）
+
+自定义选项会让 target 失去意义——5 倍金钱下「打 50 万英雄伤害」是白送。现有 `battlePoints` 对自定义模式用的是**倍率缩放**（`GetCustomModeMultiplier`），这对固定 target 的任务无效，因此每日挑战需要一个**二值门控**。
+
+判定在客户端，复用现有函数：
+
+```ts
+const DAILY_CHALLENGE_MIN_MULTIPLIER = 1;
+
+function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost: boolean): boolean {
+  // 秒活让击杀/伤害类任务失去意义，单独拦截：
+  // 它在倍率里只乘 0.7，配合加难选项后仍可能高于阈值
+  if (option.respawnTimePercentage < 100) {
+    return false;
+  }
+  // 作弊模式与 localhost 返回 0，自定义模式走 GetCustomModeMultiplier
+  return (
+    GameEndPoint.GetDifficultyMultiplier(difficulty, isLocalhost, option) >=
+    DAILY_CHALLENGE_MIN_MULTIPLIER
+  );
+}
+```
+
+阈值 1.0 的依据：全默认选项下 `GetCustomModeMultiplier` 恰好等于 1.0（`1 → ×1.1`（金钱倍率 < 1.3）`→ -0.1`（塔强度 ≤ 150）`→ ×1.0`（敌方 10 人）），所以这条线正好放行"没改任何设置"、拦下"改简单了"。
+
+| 场景 | 倍率 | 每日挑战 |
+| --- | --- | --- |
+| 全默认 | 1.0 | 生效 |
+| 预设难度 1~8 | 1.2 ~ 2.4 | 生效 |
+| 敌方金钱 20 倍（更难）| 2.3 | 生效 |
+| 玩家金钱 5 倍 | 0.1 | 禁用 |
+| 中路模式 / 固定技能 | 0.8 | 禁用 |
+| 敌方人数 5 | 0.5 | 禁用 |
+| 秒活（任意加难组合）| — | 禁用（独立规则）|
+| 作弊模式 / localhost | 0 | 禁用 |
+
+禁用时客户端的行为：**不展示候选、不判定、不计分、不上报 `dailyChallengeTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
+
+服务端不参与这个判定：`/game/start` 照常下发候选（此时对局选项可能尚未最终确定），由客户端在局内决定是否启用。
+
+`option.respawnTimePercentage < 100` 采用的是"任意复活时间削减都禁用"的保守口径。若只想拦真正的秒活，可收紧为 `<= 10`（与倍率函数里 ×0.7 那一档对齐）。
+
+### 3.6 已删除的机制
 
 | 机制 | 处置 |
 | --- | --- |
@@ -91,7 +133,8 @@ return unit === MILLISECOND && scaled >= 1000
 
 ### 4.1 客户端（game 仓库）
 
-- **指标采集**：`src/vscripts/modules/daily-challenge/` 全部保留——19 个指标的采集、归属判定、modifier 分类
+- **模式门控**：按 3.5 判定本局是否启用每日挑战
+- **指标采集**：`src/vscripts/modules/daily-challenge/` 全部保留——18 个指标的采集、归属判定、modifier 分类
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
 - **全部文案**：`addon_schinese/english/russian.txt`，按 `scope` + `metric` 拼本地化 key，替换 `{hero}` / `{target}`。英雄名走 DOTA 自带的 `#npc_dota_hero_*`。`unit`（次数/伤害/秒）由 `metric` 在客户端映射
@@ -109,13 +152,56 @@ return unit === MILLISECOND && scaled >= 1000
 
 **候选生成必须留在服务端**——否则玩家可以自己宣称抽到了三个最容易的任务。这是唯一不可下放的部分。`target` 和 `rewardSeasonPoint` 由服务端随候选下发，客户端只是执行服务端定的规则，**任务池仍然是单一来源**，不存在两端各维护一份的漂移风险。
 
-## 5. 指标范围
+## 5. 指标范围与口径
 
-**19 个指标全部保留**：`hero_damage`、`physical/magical/pure_damage`、`damage_taken`、`healing`、`kills`、`assists`、`last_hits`、`tower_kills`、`bot_kills`、`roshan_kills`，以及 7 个控制时长（`stun` / `slow` / `root` / `silence` / `taunt` / `break` / `debuff`）。
+**18 个指标**（原 19 个删去 `bot_kills`，见 5.3）。服务端不看数值，指标多少对服务端没有成本。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
 
-服务端不看数值，所以指标多少对服务端没有成本。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），其余三张 metric 映射表全部删除。
+### 5.1 口径
 
-**运维约定（替代 `dataVersion`）**：新增 metric 的任务，必须在客户端发布**之后**才上线到任务池。DOTA2 自定义游戏进服强制更新，客户端版本分裂窗口很短。若违反，老客户端拿到无法采集的 metric 时应在 UI 上禁用该候选而非静默失败。
+标定 target 之前必须先理解每个指标怎么算的。以下口径来自 game PR #2310 的实现，**firebase 仓库此前没有任何地方记录它们**。
+
+| 指标 | 来源 | 口径 |
+| --- | --- | --- |
+| `kills` | `PlayerResource.GetKills()` | DOTA 原生击杀数 |
+| `assists` | `PlayerResource.GetAssists()` | DOTA 原生 |
+| `last_hits` | `PlayerResource.GetLastHits()` | DOTA 原生 |
+| `tower_kills` | `PlayerResource.GetTowerKills()` | DOTA 原生 |
+| `hero_damage` | `PlayerResource.GetRawPlayerDamage()` | DOTA 原生 |
+| `healing` | `PlayerResource.GetHealing()` | DOTA 原生 |
+| `damage_taken` | 遍历敌方玩家 `GetDamageDoneToHero()` 求和 | 只统计**敌方**造成的伤害 |
+| `physical/magical/pure_damage` | `SetDamageFilter` 拦截，按 `DamageTypes` 分类 | 只统计对**敌方 bot 英雄**的伤害；召唤物伤害归主人 |
+| `roshan_kills` | `entity_killed` 事件，`GetUnitName() === 'npc_dota_roshan'` | 只算最后一击者 |
+| 7 个 `*_duration_ms` | 每 0.25 秒扫描敌方 bot 英雄的 modifier | 见 5.2 |
+
+### 5.2 控制时长的四个关键特性
+
+判定靠 modifier state 位（`daily-challenge-modifier-classifier.ts`）：`stun` = `IsStunDebuff()` 或 state[5]；`root` = state[0]；`silence` = state[3]；`taunt` = state[48]；`break` = state[30]；`slow` = `IsDebuff()` 且命中移速类 `modifierfunction` 或名单；`debuff` = 任意 `IsDebuff()`。
+
+1. **单位是「人·秒」，AOE 控制线性翻倍。** 去重 key 是 `${playerId}:${targetPlayerId}`——对同一目标叠 3 个眩晕只算一次，但同时控住 5 个目标 2 秒 = 10 秒。撼地者 target 130 秒 vs 莉娜 90 秒的差距由此而来。
+2. **只统计对敌方 bot 英雄的控制。** 控住真人玩家完全不计。
+3. **`debuff_duration` 是其余所有控制的超集。** 同一个眩晕 modifier 同时计入 `stun` 和 `debuff`，所以 `debuff` ≥ 其他控制之和。
+4. **采样精度 0.25 秒，单次最多累计 1 秒**（`MAX_SCAN_DELTA_SECONDS`）。短控制可能漏采；服务器卡顿时统计会偏低。
+
+`slow` 的判定依赖一个**硬编码白名单**（5 个 modifier 名）加移速 `modifierfunction` 匹配，覆盖不完整。给某个英雄配 `slow_duration` 任务前，必须确认它的减速技能真能被捕获，否则该任务永远无法完成。其余控制类同理。
+
+### 5.3 删除 `bot_kills`
+
+`bot_kills` 与 `kills` 在本模式下语义几乎等价——都是击杀敌方英雄，差别只有「排除真人玩家」和「排除转生中的目标」两点，关系恒为 `bot_kills ≤ kills`。保留两个指标会让同一轮的两个通用候选出现「击杀 20」和「击杀 50 个 Bot」这种实质重复的选项，把三选一稀释成二选一。
+
+统一用 `PlayerResource.GetKills()`：
+
+- `general_bot_kills`（50）删除，合并进 `general_kills`
+- `hero_sniper_3`（50）、`hero_phantom_assassin_2`（60）改用 `KILLS`
+- `global_bot_kills`（10000，Phase3）改为按 `kills` 全服累计
+- `ChallengeMetric.BOT_KILLS` 从 enum 删除
+- 客户端 `telemetry.ts` 的 `bot_kills` 计数分支删除（`onEntityKilled` 保留，`roshan_kills` 仍需要它）
+- 三语资源里 3 条 `bot_kills` 文案删除
+
+`kills` 走 `PlayerResource.GetKills()`，客户端 `metric-snapshot.ts` 已经在读，**零新增采集代码**。
+
+### 5.4 运维约定（替代 `dataVersion`）
+
+新增 metric 的任务，必须在客户端发布**之后**才上线到任务池。DOTA2 自定义游戏进服强制更新，客户端版本分裂窗口很短。若违反，老客户端拿到无法采集的 metric 时应在 UI 上禁用该候选而非静默失败。
 
 ## 6. 数据模型
 
@@ -440,11 +526,16 @@ api/src/daily-challenge/
 
 ### 13.2 新增
 
+- **模式门控**：按 3.5 判定本局是否启用；禁用时不展示候选、不判定、不计分、不上报
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
 - `game-end.ts`：`players[i]` 多发 `dailyChallengeTaskId`，顶层多发 `dailyChallengeDayId`
 
-### 13.3 删除
+### 13.3 删除 `bot_kills` 采集
+
+`telemetry.ts` 的 `bot_kills` 计数分支删除（`onEntityKilled` 保留，`roshan_kills` 仍需要它），三语资源里 3 条 `bot_kills` 文案删除。详见 5.3。
+
+### 13.4 删除
 
 - `daily-challenge-match-context.ts` 的挑战日顺序保护、`confirmMatchStart()`
 - `shouldReplaceDailyChallengeSnapshot()` 及 VScript store / Panorama client 两层防回退
