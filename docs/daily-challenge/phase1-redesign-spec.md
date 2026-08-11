@@ -37,9 +37,13 @@ Phase1 不为 Phase2/3 预留任何字段或接口位。接口不做版本管理
 - 候选在 `/game/start` 时由服务端生成并随响应下发，**带 `target` 和 `rewardSeasonPoint`**
 - 玩家在客户端本地选择，**不产生任何 API 调用**
 - 客户端局内累计指标、判定达标、结算时把奖励计入本局赛季积分
-- `/game/end` 上报"我完成的是哪个 taskId"，服务端记一轮完成
+- `/game/end` 上报完成的 `taskId` 与该任务的奖励值，服务端记一轮完成
 - 完成一轮后，下一轮候选在**下一次** `/game/start` 生成；同一局内不推进第二轮
 - 未完成时候选不变，玩家下一局可以改选同一组里的另一个
+
+**`/game/start` 在 loading 阶段调用**（`Game.StartGame()` 设置 `loading_status = 1` 时），**早于选英雄**。因此玩家先看到候选、再决定选什么英雄——英雄专属任务是可以主动达成的，不是抽到就认命。
+
+轮数 3 是当前默认值，后续按实际情况调整；它只是一个常量，改动不影响任何数据结构。
 
 ### 3.2 进度模型
 
@@ -89,7 +93,11 @@ return Math.max(1, Math.round(scaled));
 
 ### 3.4 英雄专属任务
 
-每轮 3 个候选中固定 1 个是英雄专属。客户端在判定时检查本局英雄是否匹配 `heroName`，不匹配则该任务不可完成（UI 上应直接标记为"需要 XXX"）。
+每轮 3 个候选中固定 1 个是英雄专属。客户端在判定时检查本局英雄是否匹配 `heroName`，不匹配则该任务不可完成。
+
+候选早于选英雄下发（见 3.1），且**本模式允许重复选择同一英雄**，所以不存在"英雄被别人抢走导致任务不可能完成"的情况——玩家只要愿意就一定能选到。
+
+**UI 必须在选英雄阶段就展示英雄专属候选**，否则玩家选完英雄才看到"用莉娜打出 X 伤害"，这一轮的英雄任务就白白作废了。
 
 ### 3.5 生效条件（模式门控）
 
@@ -163,7 +171,9 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 职责收缩为两件事：
 
 - **候选生成**：确定性抽取 + 星级掷点，下发 `taskId` / `scope` / `metric` / `heroName` / `star` / `target` / `rewardSeasonPoint`
-- **轮次记录**：`/game/end` 上报 `taskId` 后记一轮完成，推进轮次、跨天重置、维护 history
+- **轮次记录**：`/game/end` 上报 `taskId` + 奖励值后记一轮完成，推进轮次、跨天重置、维护 history
+
+`/game/end` 上服务端是纯记录器——不重算候选、不验证 taskId、不验证数值、不发放积分（见 8.3.1）。
 
 **服务端不再需要**：`ChallengeMetric` → `GameEndPlayerDto` 字段映射、`DAILY_CHALLENGE_METRIC_MAX_MATCH_CONTRIBUTION`、`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION`、`DAILY_CHALLENGE_METRIC_UNIT`、达标判定逻辑、赛季积分发放路径。
 
@@ -338,6 +348,36 @@ player_stats: JSON.stringify({
 
 `game_end_player` 变 **20 个参数**，留 5 个余量；值 68 字符，在 100 以内。BigQuery 侧用 `JSON_VALUE()` 解析。
 
+### 5A.2A 赛季积分的拆分维度
+
+`points`（= `battlePoints`）现在只有总额。积分实际由三部分构成（`game-end.ts`）：
+
+```
+score + gameTimePoints            = basePoints
+basePoints × 难度倍率 × 胜负倍率   = rawBattlePoints
+round(raw × 行为分倍率)            = finalBattlePoints
+finalBattlePoints - rawBattlePoints = pointModifier   ← 行为分加成/惩罚
+```
+
+再加上 Phase1 的每日挑战奖励。为了能按英雄、难度、胜负、国家切分这三个维度，`game_end_player` 增加**两个独立数值参数**（第三个可推导）：
+
+| 参数 | 来源 | 说明 |
+| --- | --- | --- |
+| `point_modifier` | `finalBattlePoints - rawBattlePoints` | 行为分加成，可正可负 |
+| `point_daily_challenge` | `player.dailyChallengeSeasonPoint` | Phase1 上线后才有值 |
+
+基础积分 = `points - point_modifier - point_daily_challenge`，不必单独发送。
+
+**用独立参数而非打包 JSON**：这三个要注册成 GA4 自定义指标、直接求和求平均；`player_stats` 那 7 个是一次性标定用的分析数据，打包无妨。
+
+**不新开 event**：积分维度要按英雄/难度/胜负/国家切分，而这些维度全都已经在 `game_end_player` 上。独立 event 需要靠 `session_id` join 才能关联，GA4 界面里做不到，只能退化成 BigQuery SQL。
+
+参数预算变为 **22 / 25**，剩 3 个。不够时 `win_metrics`（与 `is_winner` 逐字重复）和 `hero_name_cn`（可从 `hero_name` 推导）是两个可回收的名额。
+
+**`point_modifier` 不依赖每日挑战，建议随 #1050 一起上线。** `point_daily_challenge` 需等 Phase1，字段可先留位。
+
+**语义变更提醒**：每日挑战上线后 `battlePoints` 含挑战积分，`points` 的时间序列会在上线当天跳变。有 `point_daily_challenge` 可反推纯对局积分，但 BigQuery 看板说明里要标注这个断点。
+
 **不做 `?? 0` 兜底。** `stuns` 的 `0` 表示「本局没控到人」，是真实观测值；若把「没上报」也记成 `0`，标定时无法区分两者，那批假零会把分位数整体拉低。字段缺失时 `JSON.stringify` 自动丢弃该 key，BigQuery 得到 `NULL`，标定查询用 `IS NOT NULL` 排除即可。
 
 （这与 issue #1014 的 `awaken ?? 0` 相反——`awaken` 的 `0` 就是「未觉醒」，缺省按 0 语义正确。）
@@ -418,11 +458,11 @@ export interface DailyChallengeHistoryEntry {
 
 ### 6.2 候选不落库
 
-候选由 `(dayId, steamId, round)` 确定性生成——taskId、星级、目标、奖励全部可重算。因此不存 `candidates`、不存 `star`、不存 `target`。
+候选由 `(dayId, steamId, round)` 确定性生成——taskId、星级、目标、奖励全部可算出。因此不存 `candidates`、不存 `star`、不存 `target`。
 
-跨天迟到的 `/game/end` 也靠重算验证：上报 `dayId=昨天` 时，用昨天的 dayId 重新生成候选来验证 `taskId`，不需要保留任何昨天的快照。
+生成只发生在 `/game/start`。`/game/end` **不重算、不验证**（见 8.3.1），上报什么就记什么，奖励值由客户端一并发来。跨天迟到局同理，不需要保留任何昨天的快照。
 
-**运维约束（替代 `configVersion`）**：已上线任务的 `id` 与 `metric` 不得修改；任务池变更只在挑战日边界部署。违反时，跨天迟到局的候选重算会失配，该局的轮次不被记录（玩家的积分已由客户端加过，不会丢分，只会丢一次轮次计数）。
+**因此不存在任务池的运维约束。** 早期设计要求"已上线任务的 `id` 与 `metric` 不得修改、只在挑战日边界部署"，那是为了让 `/game/end` 的重算与当初下发的候选一致。取消重算后这条约束一并消失——任务池可以随时改，最坏情况是玩家已看到的候选在下次 `/game/start` 变了，属于 UX 抖动而非数据错误。`configVersion` 因此彻底没有存在必要。
 
 ### 6.3 全部派生、不落库的值
 
@@ -500,7 +540,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.2 `POST /game/end`
 
-请求：`GameEndPlayerDto` 新增一个可选字段，`GameEndDto` 顶层新增一个可选字段。挑战积分由客户端**直接计入 `battlePoints`**，不单独传。
+请求：`GameEndPlayerDto` 新增两个可选字段，`GameEndDto` 顶层新增一个可选字段。挑战积分由客户端**直接计入 `battlePoints`**——`dailyChallengeSeasonPoint` 不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
 ```ts
 export class GameEndPlayerDto {
@@ -510,6 +550,13 @@ export class GameEndPlayerDto {
   @IsOptional()
   @IsString()
   dailyChallengeTaskId?: string;
+
+  /** 该任务的奖励值，取自 /game/start 下发的候选；与 taskId 同时发送 */
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  dailyChallengeSeasonPoint?: number;
 }
 
 export class GameEndDto extends EventBaseDto {
@@ -522,6 +569,8 @@ export class GameEndDto extends EventBaseDto {
   dailyChallengeDayId?: string;
 }
 ```
+
+`dailyChallengeSeasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `todaySeasonPoint` / `history[].seasonPoint` 里记一个数，而客户端已经知道这个数（`/game/start` 下发的），重算一遍没有意义。
 
 现有的 `DailyChallengeMatchContributionDto`（66 行，含 `schemaVersion` / `dataVersion` / `personalMetrics` / `globalMetrics`）整个删除。
 
@@ -601,18 +650,29 @@ if (文档.dayId !== today):
     else if (dailyChallengeDayId === history[0]?.dayId):  → 回写 history[0]
     else: 丢弃并 logger.warn                              // 太旧或不匹配
 if (taskId 已在该桶的已完成记录里): 直接返回              // 幂等
-round = 该桶已完成轮数 + 1
-if (round > 3): 丢弃并 logger.warn
-candidates = generateCandidates(dailyChallengeDayId, steamId, round)
-task = candidates.find(c => c.taskId === dailyChallengeTaskId)
-if (!task): 丢弃并 logger.warn                            // 任务池变更或客户端异常
+if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 写入对应桶：
-    当天    → completedTaskIds.push(taskId); todaySeasonPoint += task.rewardSeasonPoint
-    history → history[0].rounds += 1; history[0].seasonPoint += task.rewardSeasonPoint
+    当天    → completedTaskIds.push(taskId); todaySeasonPoint += dailyChallengeSeasonPoint
+    history → history[0].rounds += 1; history[0].seasonPoint += dailyChallengeSeasonPoint
 写回
 ```
 
-服务端不验证指标数值，不发放积分——积分已由客户端计入 `battlePoints`，在同一个 `/game/end` 请求里通过既有的 `upsertGameEnd()` 入账。
+**服务端不重算候选、不验证 taskId、不验证指标数值、不发放积分。** 它在 `/game/end` 上是一个纯记录器。
+
+### 8.3.1 为什么去掉候选重算验证
+
+早期设计在这里重算 `generateCandidates(dayId, steamId, round)`，再断言上报的 `taskId` 在候选里。这一步被整个移除，原因有二：
+
+1. **与信任前提自相矛盾。** 全套设计建立在"`/game/end` 经 `x-api-key` 校验、数据可信"之上——达标判定、指标数值、积分计算全部交给客户端。唯独在 taskId 上做防伪造校验，防的是一个已经被授予了远大得多权限的对象，纯属多余。
+2. **它唯一的实际产出（`rewardSeasonPoint`）由客户端一起发过来即可。** 服务端记 `todaySeasonPoint` / `history[].seasonPoint` 只是为了给 UI 展示统计数字，客户端本来就知道这个值（它是 `/game/start` 下发的）。
+
+移除后 `generateCandidates()` 只在 `/game/start` 调用。
+
+**连带解除一条运维约束**：6.2 原先要求"已上线任务的 `id` 与 `metric` 不得修改、任务池只在挑战日边界部署"，那是为了让跨天迟到局能重算出一致的候选。不再重算后，任务池可以随时改——最坏情况是玩家已看到的候选在下次 `/game/start` 变了，属于 UX 抖动而非数据错误。
+
+客户端 bug 导致的加分与轮次记录不一致，属于客户端的责任范围，API 不做兜底校验。
+
+### 8.3.2 其他
 
 `history[0]` 的幂等判定用 `rounds` 计数无法区分具体 taskId，因此跨天回写路径下重复上报会重复计数。这是可接受的：跨天迟到本身罕见，且只影响 history 的统计数字，不影响积分。
 
@@ -626,7 +686,7 @@ if (!task): 丢弃并 logger.warn                            // 任务池变更�
 | --- | --- |
 | `/game/start` 每日挑战失败 | `logger.warn`，响应里省略 `dailyChallenges`，不阻断开局 |
 | `/game/end` 单个玩家失败 | `logger.warn`，跳过该玩家，其余玩家继续 |
-| `dailyChallengeTaskId` 不在重算出的候选里 | 丢弃 + `logger.warn`（任务池被中途改动，或客户端异常） |
+| 该日期桶已完成 3 轮 | 丢弃 + `logger.warn` |
 | `dailyChallengeDayId` 既非当天也非 `history[0]` | 丢弃 + `logger.warn` |
 | 同一 taskId 重复上报 | 幂等忽略 |
 | `battlePoints` 超过 500 | cap 到 500 + `logger.warn` |
@@ -670,7 +730,7 @@ api/src/daily-challenge/
 - 生成器：同一 `(dayId, steamId, round)` 结果稳定；不同 round 结果不同；固定 2 通用 + 1 英雄；同轮两个通用任务不同类；星级落在 1~3
 - 星级目标：`Math.round(target * multiplier)`，毫秒类取整到整千，1★/2★/3★ 递增
 - 跨天重置：`dayId` 变化时汇总进 history、裁到 30 条、`completedTaskIds` 与 `todaySeasonPoint` 清空；当天无完成时不写 history 条目
-- 轮次记录：taskId 在候选里才记；`round > 3` 丢弃；掉线玩家跳过
+- 轮次记录：已完成 3 轮时丢弃；掉线玩家跳过；`todaySeasonPoint` 累加客户端上报的奖励值
 - 幂等：同一 taskId 重复上报不重复计数、不重复加 `todaySeasonPoint`
 - 跨天迟到：`dayId === history[0].dayId` 时正确回写
 - `battlePoints` cap：超限截断到 500 且不丢弃该玩家结算
