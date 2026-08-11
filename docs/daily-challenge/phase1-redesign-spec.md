@@ -353,20 +353,41 @@ player_stats: JSON.stringify({
 `points`（= `battlePoints`）现在只有总额。积分实际由三部分构成（`game-end.ts`）：
 
 ```
-score + gameTimePoints            = basePoints
-basePoints × 难度倍率 × 胜负倍率   = rawBattlePoints
-round(raw × 行为分倍率)            = finalBattlePoints
-finalBattlePoints - rawBattlePoints = pointModifier   ← 行为分加成/惩罚
+score + gameTimePoints              = basePoints
+basePoints × 难度倍率 × 胜负倍率     = rawBattlePoints
+round(raw × 行为分倍率)              = settledPoints
+settledPoints - rawBattlePoints     = pointModifier      ← 行为分加成/惩罚
+settledPoints + 每日挑战奖励          = battlePoints        ← 实际入账总额
 ```
 
-再加上 Phase1 的每日挑战奖励。为了能按英雄、难度、胜负、国家切分这三个维度，`game_end_player` 增加**两个独立数值参数**（第三个可推导）：
+#### game 侧必须固定计算顺序
+
+**行为分倍率只作用于对局积分，不作用于每日挑战奖励。**
+
+```ts
+const rawBattlePoints = this.CalculatePlayerBattlePoints(playerDto, difficultyMultiplier, winnerTeamId);
+const conductMultiplier = this.GetConductMultiplier(conductPoint, isTeamGame);
+const settledPoints = Math.max(0, Math.round(rawBattlePoints * conductMultiplier));
+
+playerDto.pointModifier = settledPoints - rawBattlePoints;   // 纯行为分，在加挑战积分之前算
+playerDto.dailyChallengeSeasonPoint = dcPoints;
+playerDto.battlePoints = settledPoints + dcPoints;           // 总额
+```
+
+若挑战积分先并入再乘行为分倍率，会有两个后果：`pointModifier` 混入挑战积分而不再是纯行为分；候选卡上写着「80 分」的奖励实到 96 或 64，UI 与实际不符。
+
+#### GA4 参数
+
+为了能按英雄、难度、胜负、国家切分这三个维度，`game_end_player` 增加**两个独立数值参数**（第三个可推导）：
 
 | 参数 | 来源 | 说明 |
 | --- | --- | --- |
-| `point_modifier` | `finalBattlePoints - rawBattlePoints` | 行为分加成，可正可负 |
+| `point_modifier` | `player.pointModifier` | 行为分加成，可正可负 |
 | `point_daily_challenge` | `player.dailyChallengeSeasonPoint` | Phase1 上线后才有值 |
 
 基础积分 = `points - point_modifier - point_daily_challenge`，不必单独发送。
+
+`pointModifier` 必须由 game 侧作为**独立字段**发送，服务端不能用 `battlePoints` 反推——总额里已经含了挑战积分，减不出来。
 
 **用独立参数而非打包 JSON**：这三个要注册成 GA4 自定义指标、直接求和求平均；`player_stats` 那 7 个是一次性标定用的分析数据，打包无妨。
 
@@ -384,12 +405,16 @@ finalBattlePoints - rawBattlePoints = pointModifier   ← 行为分加成/惩罚
 
 ### 5A.3 `GameEndPlayerDto` 新增字段
 
-| 新字段 | 来源 |
-| --- | --- |
-| `stuns` | `PlayerResource.GetStuns()` |
-| `roshanKills` | `PlayerResource.GetRoshanKills()` |
+| 新字段 | 来源 | 时机 |
+| --- | --- | --- |
+| `stuns` | `PlayerResource.GetStuns()` | #1050 |
+| `roshanKills` | `PlayerResource.GetRoshanKills()` | #1050 |
+| `pointModifier` | `settledPoints - rawBattlePoints` | **#1050，不依赖每日挑战** |
+| `dailyChallengeSeasonPoint` | `/game/start` 下发的候选奖励 | Phase1 |
 
 其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，只是没进 GA4。
+
+`pointModifier` 在 game 侧已经算好（用于结算界面括号展示，写进 `player_stats` net table），只是从未发给 API，加一行即可。**它不依赖每日挑战，建议随 #1050 一起上线**——一旦 Phase1 上线后 `battlePoints` 含挑战积分，就再也无法从总额反推行为分了。
 
 两个新字段声明为 `@IsOptional()`。它们**不参与每日挑战的判定机制**——判定在客户端完成，服务端不看数值；作用是让服务端把它们转发进 GA4，积累标定数据，顺带补上 analytics 的空白。
 
@@ -540,7 +565,9 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.2 `POST /game/end`
 
-请求：`GameEndPlayerDto` 新增两个可选字段，`GameEndDto` 顶层新增一个可选字段。挑战积分由客户端**直接计入 `battlePoints`**——`dailyChallengeSeasonPoint` 不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
+请求：`GameEndPlayerDto` 新增两个可选字段（另有 `pointModifier` 随 #1050 先行，见 5A.3），`GameEndDto` 顶层新增一个可选字段。
+
+挑战积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyChallengeSeasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
 ```ts
 export class GameEndPlayerDto {
