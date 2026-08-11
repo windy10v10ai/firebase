@@ -311,15 +311,19 @@ GA4 每个 event 上限 25 个参数，每个参数值上限 100 字符。
 ```ts
 // analytics.service.ts gameEndPlayerBot()
 player_stats: JSON.stringify({
-  hd: player.heroDamage ?? 0,  dt: player.damageTaken ?? 0,
-  he: player.healing ?? 0,     lh: player.lastHits ?? 0,
-  tk: player.towerKills ?? 0,  st: player.stuns ?? 0,
-  rk: player.roshanKills ?? 0,
+  hd: player.heroDamage,  dt: player.damageTaken,
+  he: player.healing,     lh: player.lastHits,
+  tk: player.towerKills,  st: player.stuns,
+  rk: player.roshanKills,
 }),
 // {"hd":523456,"dt":412345,"he":123456,"lh":85,"tk":3,"st":45,"rk":1}  ≈ 68 字符
 ```
 
-`game_end_player` 变 **20 个参数**，留 5 个余量；值 68 字符，在 100 以内。BigQuery 侧用 `JSON_VALUE()` 解析。全部字段用 `?? 0` 兜底，避免老客户端或回滚时缺字段。
+`game_end_player` 变 **20 个参数**，留 5 个余量；值 68 字符，在 100 以内。BigQuery 侧用 `JSON_VALUE()` 解析。
+
+**不做 `?? 0` 兜底。** `stuns` 的 `0` 表示「本局没控到人」，是真实观测值；若把「没上报」也记成 `0`，标定时无法区分两者，那批假零会把分位数整体拉低。字段缺失时 `JSON.stringify` 自动丢弃该 key，BigQuery 得到 `NULL`，标定查询用 `IS NOT NULL` 排除即可。
+
+（这与 issue #1014 的 `awaken ?? 0` 相反——`awaken` 的 `0` 就是「未觉醒」，缺省按 0 语义正确。）
 
 ### 5A.3 `GameEndPlayerDto` 新增字段
 
@@ -666,17 +670,52 @@ api/src/daily-challenge/
 
 各用例使用独立 steamId（遵循仓库 e2e 规范）。
 
-## 12. 需要在实施前定的事
+## 12. Phase1 的工作分解
 
-0. **先补 GA4 统计并积累数据（见第 5A 节）。** 10 个指标里只有 3 个在 BigQuery 有历史。必须先让 game 发送 `stuns` / `roshanKills` 两个新字段、API 把 7 个缺失指标打包进 `game_end_player`，跑够一段时间攒出分布，才谈得上标定。**这是 Phase1 的第 0 步，其余全部依赖它。**
+Phase1 不是一个可以一次做完的改动，它有一条硬顺序：**先攒数据 → 再设计任务池 → 最后实现机制**。前两步的产出是后一步的输入，不能并行。
 
-1. **任务池数值全部要重标。** 现有 404 条的 `target` 是按跨局累积标的（如 `general_hero_damage: 500000`）。改成单局达标后必须按"单局可达"重新标定，用 BigQuery 历史对局取分位数（例如 2★ = P50，1★ = P30，3★ = P75）。
+### 12.1 第 0 步：补 GA4 统计并积累数据
 
-   还需要**实机验证 `GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄。这三点决定 `stun_duration` 的 target 怎么标。
+见第 5A 节。10 个指标里只有 3 个在 BigQuery 有历史。让 game 发送 `stuns` / `roshanKills`，API 把 7 个缺失指标打包进 `game_end_player`，跑够一段时间攒出分布。
 
-2. **英雄专属任务规模。** 默认保持 127 英雄 × 3 = 381 条。可以考虑降到 127 × 1（每个英雄一条，抽到时按本局英雄匹配）以大幅缩小任务池文件。
+**其余所有工作都依赖它。** 对应 issue：windy10v10ai/firebase#1050。
 
-3. **每天轮数** 默认保持 3。
+积累多久取决于日活，需要单独确认——目标是每个英雄都有足够样本量支撑分位数（英雄专属任务按英雄标定，样本要按英雄切分，冷门英雄是瓶颈）。
+
+同期由 game 侧**实机验证 `GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄。这三点决定 `stun_duration` 的 target 怎么标。
+
+### 12.2 任务池重新设计（独立工作项，本 spec 不覆盖）
+
+**404 条任务里有 204 条用的是被删除的指标**：
+
+| 被删指标 | 任务数 |
+| --- | ---: |
+| `magical_damage` | 82 |
+| `physical_damage` | 64 |
+| `slow_duration_ms` | 24 |
+| `debuff_duration_ms` | 12 |
+| `root_duration_ms` | 8 |
+| `silence_duration_ms` | 7 |
+| `pure_damage` | 4 |
+| `taunt_duration_ms` | 2 |
+| `break_duration_ms` | 1 |
+| **合计** | **204** |
+
+超过一半。而且剩下的 10 个指标里，英雄任务能用的差异化维度大幅收窄——原本靠「魔法/物理/纯粹伤害 + 六种控制」区分英雄定位，现在只剩 `hero_damage` / `damage_taken` / `healing` / `stun_duration` / `kills` / `assists` / `last_hits` / `tower_kills` / `total_gold_earned` / `roshan_kills`。
+
+这不是机械替换能解决的，需要重新想清楚「用 10 个指标怎么表达 127 个英雄的玩法特色」。**单独作为一项工作，在 12.1 攒够数据后再做**，产出是一份新的 `config/tasks.ts` 设计。
+
+该工作项需一并决定：
+
+- **通用任务的数量与难度档划分**（原 19 条一一对应 19 个 metric，现在只剩 10 个 metric，可能需要同一 metric 配多个难度档）
+- **英雄专属任务规模**：保持 127 × 3 = 381 条，还是降到 127 × 1
+- **数值标定**：原 `target` 全部按跨局累积标定（如 `general_hero_damage: 500000`），改成单局达标后按 12.1 的分位数重标（例如 2★ = P50，1★ = P30，3★ = P75）
+
+### 12.3 机制实现（本 spec 覆盖的部分）
+
+第 6~11 节描述的数据模型、接口契约、服务端逻辑、测试策略。**不依赖 12.2**——机制与任务池内容正交，可以用现有任务池的占位数值先实现并测试，等 12.2 产出后替换 `config/tasks.ts` 即可。
+
+唯一需要提前定的参数：**每天轮数**，默认保持 3。
 
 ## 13. 客户端需要同步的改动（game 仓库）
 
@@ -724,7 +763,7 @@ api/src/daily-challenge/
 
 | 文件 | 行数 | 处置 |
 | --- | --- | --- |
-| `config/tasks.ts` | 2837 | **保留结构与 127 英雄清单**。但 404 条里有 **204 条用的是被删指标**（魔法 82 + 物理 64 + 纯粹 4 + 减速 24 + debuff 12 + 缠绕 8 + 沉默 7 + 嘲讽 2 + 破坏 1），超过一半需要重新设计而非机械替换；其余按第 12 节重标数值 |
+| `config/tasks.ts` | 2837 | **保留文件结构与 127 英雄清单**，但内容需要重新设计——404 条里 204 条用的是被删指标。见 12.2，独立工作项 |
 | `config/tasks.spec.ts` | 234 | 保留大部分守卫，删掉 `dataVersion` 断言和共同任务相关断言 |
 | `services/daily-challenge-generation.service.ts` | 134 | **核心算法直接复用**（FNV-1a、seeded pick、`pickStar`、`getMetricCategory`）。删掉 `seenTaskIds` 回退后约 110 行 |
 | `services/daily-challenge-generation.service.spec.ts` | 183 | 同上，按新签名调整 |
