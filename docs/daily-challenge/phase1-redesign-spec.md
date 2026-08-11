@@ -221,6 +221,58 @@ GetRoshanKills(playerId: PlayerID): number;
 
 **`GetStuns()` 的口径必须实机验证**：返回值单位是秒还是毫秒、是否为浮点、是否只统计对敌方英雄。这三点决定 target 怎么标，见 12.1。
 
+### 5.2A 伤害分类的采集与开销
+
+三个伤害分类指标是唯一没有原生 API 的一组，靠 `SetDamageFilter` 事件累加：
+
+```
+SetDamageFilter (damage-observer.ts)
+  → EntIndexToHScript 解出 attacker / victim / inflictor
+  → telemetry.onTakeDamage
+      isEnemyBotRealHero(victim)?          ← 绝大多数伤害在此被拒
+      resolveDailyChallengeHumanPlayerId(attacker, inflictor.GetCaster())
+          沿 GetOwnerEntity() 回溯最多 6 层，必须落到真人玩家
+      isEnemyTeam?
+      classifyDamageMetric(damage_type)    PURE / MAGICAL / PHYSICAL
+      accumulator.add(playerId, metric, event.damage)
+```
+
+filter 无条件 `return true`，只观察不修改数值。
+
+**主分支未使用 `SetDamageFilter`**（现有三个 filter 是 `SetExecuteOrderFilter`、`SetModifyGoldFilter`、`SetModifyExperienceFilter`），不存在覆盖冲突——`SetDamageFilter` 全局唯一，若将来有其他模块要用，必须共享同一个回调。
+
+#### 减免前 / 减免后（必须实测）
+
+**预期是减免前（pre-mitigation）**：`SetDamageFilter` 的设计意图是让你在伤害落地前修改 `damage`，引擎随后才套用护甲、魔抗、伤害格挡。`DamageFilterEvent` 的类型定义没有相关注释，因此**这条必须实机验证**。
+
+若成立，两个后果直接影响标定：
+
+1. **`physical + magical + pure` ≠ `hero_damage`，且会显著大于**。`GetRawPlayerDamage()` 是 DOTA 记录的实际造成伤害（减免后），两者不同口径，比值随目标护甲/魔抗浮动。
+2. 伤害分类的 target **不能**按 `hero_damage` 的比例推算，必须独立标定——这是 5A 节要把三者塞进 GA4 攒历史的原因。
+
+验证方法：开一局打完，对比 `physicalDamage + magicalDamage + pureDamage` 与 `heroDamage` 的比值，跑几局看是否稳定。
+
+#### 开销
+
+早退顺序是关键，`isEnemyBotRealHero(victim)` 是第一道过滤，小兵互殴、塔打小兵、打真人玩家、打建筑全在此被拒：
+
+| 路径 | 引擎调用 | 分配 |
+| --- | --- | --- |
+| 拒绝（绝大多数） | ~8 次 | 0 |
+| 接受（打到敌方 bot 英雄） | ~16–22 次 | 2 次（`pending` 数组 + `visited` Set） |
+
+按 10v10 后期 200–500 次伤害事件/秒、其中 30–80 次打到敌方 bot 英雄估算，合计约 **5,200 次调用/秒 + 120 次分配/秒**——对比被删除的轮询（3.5 万次/秒 + 1,200 次分配/秒），调用少 7 倍、分配少 10 倍。
+
+三条优化可再降一个量级：
+
+1. **预建敌方 bot 英雄的 entIndex 集合**。英雄局中不变，开局建一次，`isEnemyBotRealHero` 从 6 次引擎调用降为一次 Set 查询。拒绝路径 8 → 3。
+2. **先解 victim，拒绝后再解 attacker**。现在无条件解两个。拒绝路径 3 → 2。
+3. **`resolveDailyChallengeHumanPlayerId` 加快速路径**。attacker 本身是真人英雄时直接 `GetPlayerOwnerID()` 命中返回，不分配 array 与 Set。接受路径分配降为 0。
+
+优化后约 **1,600 次调用/秒、接近零分配**。
+
+上述伤害频率（200–500 次/秒）是推算而非实测。**建议在验证 `GetStuns()` 口径的同一局里，加一个计数器统计 filter 的实际触发频率**；若实际频率显著更高，第 1、3 条优化从可选变为必需。
+
 ### 5.3 删除 `bot_kills`
 
 `bot_kills` 与 `kills` 在本模式下语义几乎等价——都是击杀敌方英雄，差别只有「排除真人玩家」和「排除转生中的目标」两点，关系恒为 `bot_kills ≤ kills`。保留两个指标会让同一轮的两个通用候选出现「击杀 20」和「击杀 50 个 Bot」这种实质重复的选项，把三选一稀释成二选一。
@@ -647,7 +699,12 @@ api/src/daily-challenge/
 
 0. **先补 GA4 统计并积累数据（见第 5A 节）。** 13 个指标里只有 3 个在 BigQuery 有历史。必须先让 game 发送 5 个新字段、API 打包进 `game_end_player`，跑够一段时间攒出分布，才谈得上标定。**这是 Phase1 的第 0 步，其余全部依赖它。**
 
-1. **任务池数值全部要重标。** 现有 404 条的 `target` 是按跨局累积标的（如 `general_hero_damage: 500000`）。改成单局达标后必须按"单局可达"重新标定，用 BigQuery 历史对局取分位数（例如 2★ = P50，1★ = P30，3★ = P75）。同时需要**实机验证 `GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄。
+1. **任务池数值全部要重标。** 现有 404 条的 `target` 是按跨局累积标的（如 `general_hero_damage: 500000`）。改成单局达标后必须按"单局可达"重新标定，用 BigQuery 历史对局取分位数（例如 2★ = P50，1★ = P30，3★ = P75）。
+
+   同一局实机验证里要一并确认三件事：
+   - **`GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄
+   - **伤害 filter 是否为减免前的值**（见 5.2A），决定伤害分类能否与 `hero_damage` 换算
+   - **damage filter 的实际触发频率**，决定 5.2A 的三条优化是可选还是必需
 
 2. **英雄专属任务规模。** 默认保持 127 英雄 × 3 = 381 条。可以考虑降到 127 × 1（每个英雄一条，抽到时按本局英雄匹配）以大幅缩小任务池文件。
 
