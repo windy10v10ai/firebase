@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml/badge.svg)](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml)
 [![Deploy Firebase](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml/badge.svg?branch=main)](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml)
-[![License: MIT](https://img.shields.io/github/license/windy10v10ai/firebase.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 [![CodeFactor](https://www.codefactor.io/repository/github/windy10v10ai/firebase/badge)](https://www.codefactor.io/repository/github/windy10v10ai/firebase)
 <br>
 [![GitHub issues](https://img.shields.io/github/issues/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/issues)
@@ -13,6 +13,16 @@
 
 Backend for [Windy 10v10ai](https://github.com/windy10v10ai/firebase) with Firebase
 
+# License
+
+Licensed under the **GNU GPL v3** ([`LICENSE`](LICENSE)), with a Steam/Workshop
+distribution exception and notes on prior MIT releases in
+[`LICENSE.EXCEPTIONS.md`](LICENSE.EXCEPTIONS.md).
+<br>
+本项目采用 **GNU GPL v3** 协议（见 [`LICENSE`](LICENSE)），并附带 Steam/创意工坊
+分发例外，相关说明及此前 MIT 版本的处理见 [`LICENSE.EXCEPTIONS.md`](LICENSE.EXCEPTIONS.md)。
+
+- [License](#license)
 - [Built With](#built-with)
 - [Get Start](#get-start)
   - [Installation](#installation)
