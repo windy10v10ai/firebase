@@ -67,4 +67,45 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { awaken: number } };
     expect(event.params.awaken).toBe(0);
   });
+
+  it('sends player stats including stuns and Roshan kills', async () => {
+    const service = new AnalyticsService(null);
+    const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
+
+    const gameEnd = buildGameEnd([
+      buildPlayer({
+        heroDamage: 523456,
+        damageTaken: 412345,
+        healing: 123456,
+        lastHits: 85,
+        towerKills: 3,
+        stuns: 45,
+        roshanKills: 1,
+      }),
+    ]);
+    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.TEST);
+
+    const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { player_stats: string } };
+    expect(JSON.parse(event.params.player_stats)).toEqual({
+      hd: 523456,
+      dt: 412345,
+      he: 123456,
+      lh: 85,
+      tk: 3,
+      st: 45,
+      rk: 1,
+    });
+  });
+
+  it('omits stuns and Roshan kills from player stats when not provided', async () => {
+    const service = new AnalyticsService(null);
+    const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
+
+    await service.gameEndPlayerBot(buildGameEnd([buildPlayer()]), SERVER_TYPE.TEST);
+
+    const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { player_stats: string } };
+    const playerStats = JSON.parse(event.params.player_stats) as Record<string, number>;
+    expect(playerStats).not.toHaveProperty('st');
+    expect(playerStats).not.toHaveProperty('rk');
+  });
 });

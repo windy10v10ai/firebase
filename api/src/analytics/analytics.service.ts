@@ -105,6 +105,15 @@ export class AnalyticsService {
           server_type: serverType,
           country: gameEnd.countryCode,
           awaken: player.awaken ?? 0,
+          player_stats: JSON.stringify({
+            hd: player.heroDamage,
+            dt: player.damageTaken,
+            he: player.healing,
+            lh: player.lastHits,
+            tk: player.towerKills,
+            st: player.stuns,
+            rk: player.roshanKills,
+          }),
         });
 
         const userProperties: UserProperties = {};

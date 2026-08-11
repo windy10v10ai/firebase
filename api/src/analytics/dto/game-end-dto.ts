@@ -79,6 +79,18 @@ export class GameEndPlayerDto {
   @IsNumber()
   @Min(0)
   awaken?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stuns?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  roshanKills?: number;
 }
 
 export class GameEndDto extends EventBaseDto {
