@@ -134,7 +134,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 ### 4.1 客户端（game 仓库）
 
 - **模式门控**：按 3.5 判定本局是否启用每日挑战
-- **指标采集**：13 个指标里 10 个走 `PlayerResource` 原生 API（零成本），仅伤害分类需要 `SetDamageFilter` 事件累加。轮询模块全部删除，见 5.2
+- **指标读取**：10 个指标全部走 `PlayerResource` 原生 API，局内展示与结算判定时各读一次。**没有采集代码**——无定时器、无 filter、无高频事件监听，见 5.2 / 5.2A
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
 - **全部文案**：`addon_schinese/english/russian.txt`，按 `scope` + `metric` 拼本地化 key，替换 `{hero}` / `{target}`。英雄名走 DOTA 自带的 `#npc_dota_hero_*`。`unit`（次数/伤害/秒）由 `metric` 在客户端映射
@@ -154,29 +154,30 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 
 ## 5. 指标范围与口径
 
-**13 个指标**，从原 19 个收敛而来。收敛的三条依据：能用 DOTA 原生 API 的一律用原生；语义重复的合并；需要轮询的一律删除。
+**10 个指标，全部来自 DOTA 原生 API。** 从原 19 个收敛而来，依据是一条硬约束加两条清理：
 
-服务端不看数值，指标多少对服务端没有成本——收敛是为了客户端性能和任务质量，不是为了服务端。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
+> **客户端不得为每日挑战引入任何定时器、伤害 filter 或高频事件监听。** 10v10 后期伤害与 modifier 事件频率极高，任何 per-event 回调都是卡顿风险，而每日挑战不值得让对局体验承担这个代价。
+
+在这条约束下，只有能通过 `PlayerResource` 在结算时刻一次读取的指标才能保留。此外语义重复的合并（`bot_kills` → `kills`，见 5.3）。
+
+服务端不看数值，指标多少对服务端没有成本——收敛完全是为了客户端性能。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
 
 ### 5.1 指标清单
 
-| 指标 | 来源 | 客户端成本 |
-| --- | --- | --- |
-| `kills` | `PlayerResource.GetKills()` | 零 |
-| `assists` | `PlayerResource.GetAssists()` | 零 |
-| `last_hits` | `PlayerResource.GetLastHits()` | 零 |
-| `tower_kills` | `PlayerResource.GetTowerKills()` | 零 |
-| `hero_damage` | `PlayerResource.GetRawPlayerDamage()` | 零 |
-| `healing` | `PlayerResource.GetHealing()` | 零 |
-| `total_gold_earned` | `PlayerResource.GetTotalEarnedGold()` 减虚拟金币回转 | 零 |
-| `damage_taken` | 遍历敌方玩家 `GetDamageDoneToHero()` 求和 | 一次循环 |
-| `stun_duration` | **`PlayerResource.GetStuns()`** | 零（改用原生，见 5.2） |
-| `roshan_kills` | **`PlayerResource.GetRoshanKills()`** | 零（改用原生） |
-| `physical_damage` | `SetDamageFilter` 按 `DamageTypes` 分类 | 事件驱动 |
-| `magical_damage` | 同上 | 事件驱动 |
-| `pure_damage` | 同上 | 事件驱动 |
+| 指标 | 来源 |
+| --- | --- |
+| `kills` | `PlayerResource.GetKills()` |
+| `assists` | `PlayerResource.GetAssists()` |
+| `last_hits` | `PlayerResource.GetLastHits()` |
+| `tower_kills` | `PlayerResource.GetTowerKills()` |
+| `hero_damage` | `PlayerResource.GetRawPlayerDamage()` |
+| `healing` | `PlayerResource.GetHealing()` |
+| `total_gold_earned` | `PlayerResource.GetTotalEarnedGold()` 减虚拟金币回转 |
+| `damage_taken` | 遍历敌方玩家 `GetDamageDoneToHero()` 求和 |
+| `stun_duration` | `PlayerResource.GetStuns()` |
+| `roshan_kills` | `PlayerResource.GetRoshanKills()` |
 
-前 10 个全部走 `PlayerResource` 原生 API，与 `game-end.ts` 同源。只有伤害分类没有原生 API（引擎不按伤害类型分玩家累计），靠 `SetDamageFilter` 回调累加——纯事件驱动，无定时器。
+全部与 `game-end.ts` 同源。客户端**没有任何采集代码**：局内进度展示时读一次，结算判定时读一次，成本是 10 次 `PlayerResource` 调用。
 
 **`GetTotalEarnedGold()` 的口径要与 `game-end.ts` 保持一致**：减去 `player_virtual_gold` 的 `transferred_back_total`，否则与结算页 money 列对不上。
 
@@ -221,57 +222,37 @@ GetRoshanKills(playerId: PlayerID): number;
 
 **`GetStuns()` 的口径必须实机验证**：返回值单位是秒还是毫秒、是否为浮点、是否只统计对敌方英雄。这三点决定 target 怎么标，见 12.1。
 
-### 5.2A 伤害分类的采集与开销
+### 5.2A 删除伤害分类（`physical` / `magical` / `pure`）
 
-三个伤害分类指标是唯一没有原生 API 的一组，靠 `SetDamageFilter` 事件累加：
+这三个指标是唯一没有原生 API 的一组，原实现靠 `SetDamageFilter` 逐次伤害累加。**两条独立的理由都指向删除。**
 
-```
-SetDamageFilter (damage-observer.ts)
-  → EntIndexToHScript 解出 attacker / victim / inflictor
-  → telemetry.onTakeDamage
-      isEnemyBotRealHero(victim)?          ← 绝大多数伤害在此被拒
-      resolveDailyChallengeHumanPlayerId(attacker, inflictor.GetCaster())
-          沿 GetOwnerEntity() 回溯最多 6 层，必须落到真人玩家
-      isEnemyTeam?
-      classifyDamageMetric(damage_type)    PURE / MAGICAL / PHYSICAL
-      accumulator.add(playerId, metric, event.damage)
-```
+#### 理由一：per-damage 回调是卡顿风险
 
-filter 无条件 `return true`，只观察不修改数值。
+10v10 后期伤害事件频率极高——小兵互殴、防御塔攻击、AOE 技能对多目标、持续伤害每跳，全部会触发 filter。
 
-**主分支未使用 `SetDamageFilter`**（现有三个 filter 是 `SetExecuteOrderFilter`、`SetModifyGoldFilter`、`SetModifyExperienceFilter`），不存在覆盖冲突——`SetDamageFilter` 全局唯一，若将来有其他模块要用，必须共享同一个回调。
+原实现的早退顺序是好的：`isEnemyBotRealHero(victim)` 是第一道过滤，打小兵、打防御塔、打建筑、打真人玩家的伤害**都不会被计入**。但**回调本身仍要为每一次这样的伤害触发再拒绝**——约 8 次引擎调用。命中的路径（打到敌方 bot 英雄）还要额外走 owner 链回溯，每次分配一个数组和一个 Set。
 
-#### 减免前 / 减免后（必须实测）
+即便加上"预建 bot 英雄 entIndex 集合"、"先解 victim 再解 attacker"、"owner 回溯加快速路径"这三条优化，也只是把成本压低，无法消除"每次伤害都要进一次 Lua"这个本质开销。而后期伤害频率是随对局进程增长的，最卡的时刻恰好是回调最密集的时刻。
 
-**预期是减免前（pre-mitigation）**：`SetDamageFilter` 的设计意图是让你在伤害落地前修改 `damage`，引擎随后才套用护甲、魔抗、伤害格挡。`DamageFilterEvent` 的类型定义没有相关注释，因此**这条必须实机验证**。
+**对局流畅度优先于任务多样性**，因此不做优化、直接删除。
 
-若成立，两个后果直接影响标定：
+#### 理由二：税前伤害不衡量真实贡献
 
-1. **`physical + magical + pure` ≠ `hero_damage`，且会显著大于**。`GetRawPlayerDamage()` 是 DOTA 记录的实际造成伤害（减免后），两者不同口径，比值随目标护甲/魔抗浮动。
-2. 伤害分类的 target **不能**按 `hero_damage` 的比例推算，必须独立标定——这是 5A 节要把三者塞进 GA4 攒历史的原因。
+`SetDamageFilter` 在伤害落地前触发，拿到的是**减免前**的原始值，引擎随后才套用护甲、魔抗、伤害格挡。
 
-验证方法：开一局打完，对比 `physicalDamage + magicalDamage + pureDamage` 与 `heroDamage` 的比值，跑几局看是否稳定。
+这让指标本身失去意义：同样 1000 点税前物理伤害，打脆皮和打高护甲目标的实际贡献差一倍以上，但记账完全相同。玩家为了刷任务会倾向于打最肉的目标——与"打出有效伤害"的直觉背道而驰。
 
-#### 开销
+而 `GetRawPlayerDamage()`（即 `hero_damage`）是 DOTA 记录的**实际造成伤害**，口径正确。这也意味着两者根本无法互相换算，`physical + magical + pure` 会显著大于 `hero_damage`。
 
-早退顺序是关键，`isEnemyBotRealHero(victim)` 是第一道过滤，小兵互殴、塔打小兵、打真人玩家、打建筑全在此被拒：
+#### 后果
 
-| 路径 | 引擎调用 | 分配 |
-| --- | --- | --- |
-| 拒绝（绝大多数） | ~8 次 | 0 |
-| 接受（打到敌方 bot 英雄） | ~16–22 次 | 2 次（`pending` 数组 + `visited` Set） |
+- `ChallengeMetric` 删除 `PHYSICAL_DAMAGE` / `MAGICAL_DAMAGE` / `PURE_DAMAGE`
+- 客户端删除 `daily-challenge-damage-observer.ts`、`daily-challenge-damage-event.ts`
+- 删除后 `telemetry.ts` 再无任何输入源，`accumulator.ts` 再无写入方，`ownership.ts` 再无调用方——三者一并删除
+- **客户端的采集代码归零**，见 13.3
+- 伤害类任务统一用 `hero_damage`；英雄差异化改由 `heroName` + 目标值 + 其他指标承担
 
-按 10v10 后期 200–500 次伤害事件/秒、其中 30–80 次打到敌方 bot 英雄估算，合计约 **5,200 次调用/秒 + 120 次分配/秒**——对比被删除的轮询（3.5 万次/秒 + 1,200 次分配/秒），调用少 7 倍、分配少 10 倍。
-
-三条优化可再降一个量级：
-
-1. **预建敌方 bot 英雄的 entIndex 集合**。英雄局中不变，开局建一次，`isEnemyBotRealHero` 从 6 次引擎调用降为一次 Set 查询。拒绝路径 8 → 3。
-2. **先解 victim，拒绝后再解 attacker**。现在无条件解两个。拒绝路径 3 → 2。
-3. **`resolveDailyChallengeHumanPlayerId` 加快速路径**。attacker 本身是真人英雄时直接 `GetPlayerOwnerID()` 命中返回，不分配 array 与 Set。接受路径分配降为 0。
-
-优化后约 **1,600 次调用/秒、接近零分配**。
-
-上述伤害频率（200–500 次/秒）是推算而非实测。**建议在验证 `GetStuns()` 口径的同一局里，加一个计数器统计 filter 的实际触发频率**；若实际频率显著更高，第 1、3 条优化从可选变为必需。
+主分支未使用 `SetDamageFilter`（现有三个 filter 是 `SetExecuteOrderFilter`、`SetModifyGoldFilter`、`SetModifyExperienceFilter`），删除不影响任何现有功能。
 
 ### 5.3 删除 `bot_kills`
 
@@ -305,7 +286,7 @@ filter 无条件 `return true`，只观察不修改数值。
   l: level, g: totalGoldEarned, k: kills, d: deaths, a: assists, p: score }
 ```
 
-对照 13 个指标：
+对照 10 个指标：
 
 | 指标 | BigQuery 有历史 |
 | --- | :---: |
@@ -313,19 +294,19 @@ filter 无条件 `return true`，只观察不修改数值。
 | `assists` | ✅（`a`） |
 | `total_gold_earned` | ✅（`g`） |
 | `last_hits` / `tower_kills` / `hero_damage` / `healing` / `damage_taken` | ❌ |
-| `stun_duration` / `roshan_kills` / `physical` / `magical` / `pure_damage` | ❌ |
+| `stun_duration` / `roshan_kills` | ❌ |
 
-**13 个里只有 3 个能查历史分位数。**
+**10 个里只有 3 个能查历史分位数。**
 
 ### 5A.2 GA4 参数限额
 
 GA4 每个 event 上限 25 个参数，每个参数值上限 100 字符。
 
-`game_end_player` 当前 **19 个参数**（16 个显式 + `buildEvent` 追加的 `session_id` / `session_number` / `debug_mode`），剩 6 个空位。直接加 7 个指标会到 26，超 1 个。
+`game_end_player` 当前 **19 个参数**（16 个显式 + `buildEvent` 追加的 `session_id` / `session_number` / `debug_mode`），剩 6 个空位。7 个缺失指标直接各占一个会到 26，超 1 个。
 
 `buildPlayerJson()` 的输出已约 81 字符，贴近 100 上限，无法再塞字段。
 
-因此采用 **JSON 参数**打包。十个字段塞进一个 JSON 约 107 字符、超 100 上限，所以拆成两个：
+因此用**一个 JSON 参数**打包：
 
 ```ts
 // analytics.service.ts gameEndPlayerBot()
@@ -336,30 +317,20 @@ player_stats: JSON.stringify({
   rk: player.roshanKills ?? 0,
 }),
 // {"hd":523456,"dt":412345,"he":123456,"lh":85,"tk":3,"st":45,"rk":1}  ≈ 68 字符
-
-damage_split: JSON.stringify({
-  pd: player.physicalDamage ?? 0,
-  md: player.magicalDamage ?? 0,
-  pu: player.pureDamage ?? 0,
-}),
-// {"pd":234567,"md":289012,"pu":12345}  ≈ 36 字符
 ```
 
-`game_end_player` 变 **21 个参数**，留 4 个余量。BigQuery 侧用 `JSON_VALUE()` 解析。全部字段用 `?? 0` 兜底，避免老客户端或回滚时缺字段。
+`game_end_player` 变 **20 个参数**，留 5 个余量；值 68 字符，在 100 以内。BigQuery 侧用 `JSON_VALUE()` 解析。全部字段用 `?? 0` 兜底，避免老客户端或回滚时缺字段。
 
 ### 5A.3 `GameEndPlayerDto` 新增字段
 
-| 新字段 | 来源 | 用途 |
-| --- | --- | --- |
-| `stuns` | `PlayerResource.GetStuns()` | 指标 + 标定 |
-| `roshanKills` | `PlayerResource.GetRoshanKills()` | 指标 + 标定 |
-| `physicalDamage` | `SetDamageFilter` 累加 | 仅标定 |
-| `magicalDamage` | 同上 | 仅标定 |
-| `pureDamage` | 同上 | 仅标定 |
+| 新字段 | 来源 |
+| --- | --- |
+| `stuns` | `PlayerResource.GetStuns()` |
+| `roshanKills` | `PlayerResource.GetRoshanKills()` |
 
 其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，只是没进 GA4。
 
-**这 5 个新字段不参与每日挑战的判定机制**——判定在客户端完成，服务端不看数值。它们存在的唯一目的是积累标定数据，顺带补上 analytics 的空白。全部声明为 `@IsOptional()`。
+两个新字段声明为 `@IsOptional()`。它们**不参与每日挑战的判定机制**——判定在客户端完成，服务端不看数值；作用是让服务端把它们转发进 GA4，积累标定数据，顺带补上 analytics 的空白。
 
 ### 5A.4 上线顺序：无硬依赖，建议 game 先行
 
@@ -475,15 +446,15 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
         {
           "taskId": "general_stun_1",
           "scope": "personal_general",
-          "metric": "stun_duration_ms",
+          "metric": "stun_duration",
           "star": 1,
-          "target": 45000,
+          "target": 45,
           "rewardSeasonPoint": 60
         },
         {
           "taskId": "hero_lina_1",
           "scope": "personal_hero",
-          "metric": "magical_damage",
+          "metric": "hero_damage",
           "heroName": "npc_dota_hero_lina",
           "star": 3,
           "target": 900000,
@@ -697,14 +668,11 @@ api/src/daily-challenge/
 
 ## 12. 需要在实施前定的事
 
-0. **先补 GA4 统计并积累数据（见第 5A 节）。** 13 个指标里只有 3 个在 BigQuery 有历史。必须先让 game 发送 5 个新字段、API 打包进 `game_end_player`，跑够一段时间攒出分布，才谈得上标定。**这是 Phase1 的第 0 步，其余全部依赖它。**
+0. **先补 GA4 统计并积累数据（见第 5A 节）。** 10 个指标里只有 3 个在 BigQuery 有历史。必须先让 game 发送 `stuns` / `roshanKills` 两个新字段、API 把 7 个缺失指标打包进 `game_end_player`，跑够一段时间攒出分布，才谈得上标定。**这是 Phase1 的第 0 步，其余全部依赖它。**
 
 1. **任务池数值全部要重标。** 现有 404 条的 `target` 是按跨局累积标的（如 `general_hero_damage: 500000`）。改成单局达标后必须按"单局可达"重新标定，用 BigQuery 历史对局取分位数（例如 2★ = P50，1★ = P30，3★ = P75）。
 
-   同一局实机验证里要一并确认三件事：
-   - **`GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄
-   - **伤害 filter 是否为减免前的值**（见 5.2A），决定伤害分类能否与 `hero_damage` 换算
-   - **damage filter 的实际触发频率**，决定 5.2A 的三条优化是可选还是必需
+   还需要**实机验证 `GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄。这三点决定 `stun_duration` 的 target 怎么标。
 
 2. **英雄专属任务规模。** 默认保持 127 英雄 × 3 = 381 条。可以考虑降到 127 × 1（每个英雄一条，抽到时按本局英雄匹配）以大幅缩小任务池文件。
 
@@ -714,28 +682,41 @@ api/src/daily-challenge/
 
 ### 13.1 保留
 
-- `src/vscripts/modules/daily-challenge/` **全部 6 个采集模块**（accumulator、contribution-collector、damage-observer、modifier-classifier、metric-snapshot、telemetry）——判定移到客户端后，这些是核心而非可选
 - Panorama UI 全套（页面、候选卡、星级徽章、历史面板、结算页积分）
-- 三语本地化资源，含 19 个 metric 的模板
+- 三语本地化资源——按 10 个 metric 重新裁剪模板
+- `daily-challenge-controller.ts` 的 UI 交互与状态管理部分
 
 ### 13.2 新增
 
 - **模式门控**：按 3.5 判定本局是否启用；禁用时不展示候选、不判定、不计分、不上报
+- **指标读取**：一个函数，按 `metric` 分发到对应的 `PlayerResource` 调用，局内展示与结算判定时各调一次
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
-- `game-end.ts`：`players[i]` 多发 `dailyChallengeTaskId`，顶层多发 `dailyChallengeDayId`
+- `game-end.ts`：`players[i]` 多发 `dailyChallengeTaskId` / `stuns` / `roshanKills`，顶层多发 `dailyChallengeDayId`
 
-### 13.3 删除 `bot_kills` 采集
+### 13.3 删除全部采集模块
 
-`telemetry.ts` 的 `bot_kills` 计数分支删除（`onEntityKilled` 保留，`roshan_kills` 仍需要它），三语资源里 3 条 `bot_kills` 文案删除。详见 5.3。
+10 个指标全部走 `PlayerResource` 原生 API，采集代码归零：
 
-### 13.4 删除
+| 模块 | 原因 |
+| --- | --- |
+| `daily-challenge-modifier-classifier.ts` | 6 个控制指标删除（5.2） |
+| `daily-challenge-damage-observer.ts` | 伤害分类删除（5.2A） |
+| `daily-challenge-damage-event.ts` | 同上 |
+| `daily-challenge-telemetry.ts` | 三个输入源（modifier 扫描 / 伤害 filter / `entity_killed`）全部消失，无剩余职责 |
+| `daily-challenge-accumulator.ts` | 无写入方 |
+| `daily-challenge-ownership.ts` | 无调用方 |
+| `daily-challenge-contribution-collector.ts` | 服务端不再接收指标数值 |
+| `daily-challenge-metric-snapshot.ts` | 由 13.2 的指标读取函数取代，`damage_taken` 的循环逻辑可直接搬过去 |
+
+`stun_duration` 与 `roshan_kills` 改用 `GetStuns()` / `GetRoshanKills()`，`bot_kills` 并入 `kills`——`entity_killed` 监听随之删除。三语资源里 3 条 `bot_kills` 文案删除。
+
+### 13.4 其余删除
 
 - `daily-challenge-match-context.ts` 的挑战日顺序保护、`confirmMatchStart()`
 - `shouldReplaceDailyChallengeSnapshot()` 及 VScript store / Panorama client 两层防回退
 - `daily-challenge-snapshot.ts` 的独立接口调用（accept / refresh / view / snapshot）
 - `DailyChallengeSnapshotVersion` 类型与全部版本兼容分支
-- `contribution-collector` 里向服务端上报 `personalMetrics` / `globalMetrics` 的部分（采集逻辑保留，上报改为只发 taskId）
 
 ## 14. 现有实现（PR #1040 / #2310）的去留
 
@@ -743,7 +724,7 @@ api/src/daily-challenge/
 
 | 文件 | 行数 | 处置 |
 | --- | --- | --- |
-| `config/tasks.ts` | 2837 | **保留结构与 127 英雄清单**。数值按第 12 节重标，19 个 metric 全部保留 |
+| `config/tasks.ts` | 2837 | **保留结构与 127 英雄清单**。但 404 条里有 **204 条用的是被删指标**（魔法 82 + 物理 64 + 纯粹 4 + 减速 24 + debuff 12 + 缠绕 8 + 沉默 7 + 嘲讽 2 + 破坏 1），超过一半需要重新设计而非机械替换；其余按第 12 节重标数值 |
 | `config/tasks.spec.ts` | 234 | 保留大部分守卫，删掉 `dataVersion` 断言和共同任务相关断言 |
 | `services/daily-challenge-generation.service.ts` | 134 | **核心算法直接复用**（FNV-1a、seeded pick、`pickStar`、`getMetricCategory`）。删掉 `seenTaskIds` 回退后约 110 行 |
 | `services/daily-challenge-generation.service.spec.ts` | 183 | 同上，按新签名调整 |
@@ -751,7 +732,7 @@ api/src/daily-challenge/
 | `types/daily-challenge.types.ts` | 137 | 保留 `ChallengeScope` / `ChallengeMetric` enum，删掉三张 metric 映射表和两个版本常量 |
 | `util/challenge-day-clock.service.ts` | — | 保留，删掉 `closesAt` 和 120 分钟宽限 |
 
-**game 仓库的资产保留比例大幅提高**：6 个采集模块（约 1700 行含测试）从"作废"变为"核心"，加上 Panorama UI，PR #2310 的可保留比例超过 80%。
+**game 仓库**：8 个采集模块（约 1700 行含测试）全部删除，见 13.3。可保留的是 Panorama UI 全套与三语资源——这仍是 PR #2310 的大头，但可保留比例约 50%，而非采集模块留下时的 80%。
 
 ### 14.2 Phase2（连续完成）：代码不保留，产品规则保留
 
