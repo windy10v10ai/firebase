@@ -134,7 +134,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 ### 4.1 客户端（game 仓库）
 
 - **模式门控**：按 3.5 判定本局是否启用每日挑战
-- **指标采集**：`src/vscripts/modules/daily-challenge/` 全部保留——18 个指标的采集、归属判定、modifier 分类
+- **指标采集**：13 个指标里 10 个走 `PlayerResource` 原生 API（零成本），仅伤害分类需要 `SetDamageFilter` 事件累加。轮询模块全部删除，见 5.2
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
 - **全部文案**：`addon_schinese/english/russian.txt`，按 `scope` + `metric` 拼本地化 key，替换 `{hero}` / `{target}`。英雄名走 DOTA 自带的 `#npc_dota_hero_*`。`unit`（次数/伤害/秒）由 `metric` 在客户端映射
@@ -154,35 +154,72 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 
 ## 5. 指标范围与口径
 
-**18 个指标**（原 19 个删去 `bot_kills`，见 5.3）。服务端不看数值，指标多少对服务端没有成本。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
+**13 个指标**，从原 19 个收敛而来。收敛的三条依据：能用 DOTA 原生 API 的一律用原生；语义重复的合并；需要轮询的一律删除。
 
-### 5.1 口径
+服务端不看数值，指标多少对服务端没有成本——收敛是为了客户端性能和任务质量，不是为了服务端。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
 
-标定 target 之前必须先理解每个指标怎么算的。以下口径来自 game PR #2310 的实现，**firebase 仓库此前没有任何地方记录它们**。
+### 5.1 指标清单
 
-| 指标 | 来源 | 口径 |
+| 指标 | 来源 | 客户端成本 |
 | --- | --- | --- |
-| `kills` | `PlayerResource.GetKills()` | DOTA 原生击杀数 |
-| `assists` | `PlayerResource.GetAssists()` | DOTA 原生 |
-| `last_hits` | `PlayerResource.GetLastHits()` | DOTA 原生 |
-| `tower_kills` | `PlayerResource.GetTowerKills()` | DOTA 原生 |
-| `hero_damage` | `PlayerResource.GetRawPlayerDamage()` | DOTA 原生 |
-| `healing` | `PlayerResource.GetHealing()` | DOTA 原生 |
-| `damage_taken` | 遍历敌方玩家 `GetDamageDoneToHero()` 求和 | 只统计**敌方**造成的伤害 |
-| `physical/magical/pure_damage` | `SetDamageFilter` 拦截，按 `DamageTypes` 分类 | 只统计对**敌方 bot 英雄**的伤害；召唤物伤害归主人 |
-| `roshan_kills` | `entity_killed` 事件，`GetUnitName() === 'npc_dota_roshan'` | 只算最后一击者 |
-| 7 个 `*_duration_ms` | 每 0.25 秒扫描敌方 bot 英雄的 modifier | 见 5.2 |
+| `kills` | `PlayerResource.GetKills()` | 零 |
+| `assists` | `PlayerResource.GetAssists()` | 零 |
+| `last_hits` | `PlayerResource.GetLastHits()` | 零 |
+| `tower_kills` | `PlayerResource.GetTowerKills()` | 零 |
+| `hero_damage` | `PlayerResource.GetRawPlayerDamage()` | 零 |
+| `healing` | `PlayerResource.GetHealing()` | 零 |
+| `total_gold_earned` | `PlayerResource.GetTotalEarnedGold()` 减虚拟金币回转 | 零 |
+| `damage_taken` | 遍历敌方玩家 `GetDamageDoneToHero()` 求和 | 一次循环 |
+| `stun_duration` | **`PlayerResource.GetStuns()`** | 零（改用原生，见 5.2） |
+| `roshan_kills` | **`PlayerResource.GetRoshanKills()`** | 零（改用原生） |
+| `physical_damage` | `SetDamageFilter` 按 `DamageTypes` 分类 | 事件驱动 |
+| `magical_damage` | 同上 | 事件驱动 |
+| `pure_damage` | 同上 | 事件驱动 |
 
-### 5.2 控制时长的四个关键特性
+前 10 个全部走 `PlayerResource` 原生 API，与 `game-end.ts` 同源。只有伤害分类没有原生 API（引擎不按伤害类型分玩家累计），靠 `SetDamageFilter` 回调累加——纯事件驱动，无定时器。
 
-判定靠 modifier state 位（`daily-challenge-modifier-classifier.ts`）：`stun` = `IsStunDebuff()` 或 state[5]；`root` = state[0]；`silence` = state[3]；`taunt` = state[48]；`break` = state[30]；`slow` = `IsDebuff()` 且命中移速类 `modifierfunction` 或名单；`debuff` = 任意 `IsDebuff()`。
+**`GetTotalEarnedGold()` 的口径要与 `game-end.ts` 保持一致**：减去 `player_virtual_gold` 的 `transferred_back_total`，否则与结算页 money 列对不上。
 
-1. **单位是「人·秒」，AOE 控制线性翻倍。** 去重 key 是 `${playerId}:${targetPlayerId}`——对同一目标叠 3 个眩晕只算一次，但同时控住 5 个目标 2 秒 = 10 秒。撼地者 target 130 秒 vs 莉娜 90 秒的差距由此而来。
-2. **只统计对敌方 bot 英雄的控制。** 控住真人玩家完全不计。
-3. **`debuff_duration` 是其余所有控制的超集。** 同一个眩晕 modifier 同时计入 `stun` 和 `debuff`，所以 `debuff` ≥ 其他控制之和。
-4. **采样精度 0.25 秒，单次最多累计 1 秒**（`MAX_SCAN_DELTA_SECONDS`）。短控制可能漏采；服务器卡顿时统计会偏低。
+### 5.2 删除 6 个控制时长指标，`stun` 改用原生 API
 
-`slow` 的判定依赖一个**硬编码白名单**（5 个 modifier 名）加移速 `modifierfunction` 匹配，覆盖不完整。给某个英雄配 `slow_duration` 任务前，必须确认它的减速技能真能被捕获，否则该任务永远无法完成。其余控制类同理。
+原实现每 **0.25 秒**扫描全部敌方 bot 英雄的 modifier 来累计控制时长。逐层拆开单次扫描的成本：
+
+```
+getBotHeroes()                    24 次循环 × 3 调用                  ≈ 72
+每个 bot 英雄（10 个）             isEnemyBotRealHero 6 + FindAllModifiers
+每个 modifier（20~40 个）：
+  isActiveModifier                GetDuration + GetRemainingTime       2
+  IsNull / GetCaster / GetAuraOwner                                    3
+  resolveHumanPlayerId            owner 链回溯                       3~5
+  isEnemyTeam                                                          2
+  classify:  CheckStateToTable    1 次调用 + 一张 ~50 项的表分配        1
+             IsDebuff / IsStunDebuff                                   2
+             HasFunction × 10                                         10
+             GetName() × 5   ← slowModifierNames.some() 每次重新调用    5
+                                                              小计 ≈ 29
+```
+
+**10 英雄 × 30 modifier × 29 ≈ 8,700 次引擎调用/扫描，×4 次/秒 ≈ 每秒 3.5 万次**，外加每秒约 1,200 次表分配（`CheckStateToTable` 每次新建）。在 10v10 这种本就吃服务器的模式里会有感知，GC 压力比调用次数更麻烦。
+
+`@moddota/dota-lua-types@4.38.2` 里确认存在原生 API：
+
+```ts
+GetStuns(playerId: PlayerID): number;         // DOTA 记分板同款「Stuns」
+GetRoshanKills(playerId: PlayerID): number;
+```
+
+**7 个控制时长里只有 `stun` 有原生 API**，`slow` / `root` / `silence` / `taunt` / `break` / `debuff` 都没有。因此：
+
+- `stun_duration` 改用 `GetStuns()`——DOTA 官方口径，比自己扫 modifier 更权威
+- 其余 6 个控制指标**删除**
+- `roshan_kills` 改用 `GetRoshanKills()`
+- **轮询整个消失**：`daily-challenge-modifier-classifier.ts`（87 行）、telemetry 里 0.25 秒扫描循环、`ignoreCurrentlyActiveEffectsForMetric`、`entity_killed` 监听全部删除
+
+代价：约 110 条英雄任务 + 6 条通用任务要换指标。控制型英雄的任务特色会变弱，但多数可替代——斧王换 `damage_taken`（承受伤害本就是他的定位），水晶室女换 `stun_duration`（冰封禁制与大招都算眩晕）。
+
+被删掉的 `slow` 本来就依赖一个**硬编码白名单**（5 个 modifier 名）加移速 `modifierfunction` 匹配，覆盖不完整——不在名单里的减速技能永远统计不到，配了任务也无法完成。删除同时消除了这个隐患。
+
+**`GetStuns()` 的口径必须实机验证**：返回值单位是秒还是毫秒、是否为浮点、是否只统计对敌方英雄。这三点决定 target 怎么标，见 12.1。
 
 ### 5.3 删除 `bot_kills`
 
@@ -194,14 +231,112 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 - `hero_sniper_3`（50）、`hero_phantom_assassin_2`（60）改用 `KILLS`
 - `global_bot_kills`（10000，Phase3）改为按 `kills` 全服累计
 - `ChallengeMetric.BOT_KILLS` 从 enum 删除
-- 客户端 `telemetry.ts` 的 `bot_kills` 计数分支删除（`onEntityKilled` 保留，`roshan_kills` 仍需要它）
+- 客户端 `telemetry.ts` 的 `bot_kills` 计数分支删除
 - 三语资源里 3 条 `bot_kills` 文案删除
-
-`kills` 走 `PlayerResource.GetKills()`，客户端 `metric-snapshot.ts` 已经在读，**零新增采集代码**。
 
 ### 5.4 运维约定（替代 `dataVersion`）
 
 新增 metric 的任务，必须在客户端发布**之后**才上线到任务池。DOTA2 自定义游戏进服强制更新，客户端版本分裂窗口很短。若违反，老客户端拿到无法采集的 metric 时应在 UI 上禁用该候选而非静默失败。
+
+## 5A. 数值标定的数据前置（Phase1 的第一步）
+
+标 target 需要历史分布，但**现在 BigQuery 里几乎没有可用的单局数据**。
+
+### 5A.1 现状
+
+单局数据进 BigQuery 只有一条路：GA4 event → GA4 的 BigQuery 导出。`extensions/` 下的 firestore-bigquery-export 只导出 `Players` 和 `Members` 两个 collection，全是累计值。
+
+`GameEndPlayerDto` 有 17 个字段，但进 GA4 的只有 `points`（battlePoints）和 `awaken`。其余靠 `game_end_match` 的 `buildPlayerJson()` 打包成一个 JSON 字符串，且只含 10 个字段：
+
+```ts
+{ hi: heroId, si: steamId, ti: teamId, dc: isDisconnected,
+  l: level, g: totalGoldEarned, k: kills, d: deaths, a: assists, p: score }
+```
+
+对照 13 个指标：
+
+| 指标 | BigQuery 有历史 |
+| --- | :---: |
+| `kills` | ✅（`k`） |
+| `assists` | ✅（`a`） |
+| `total_gold_earned` | ✅（`g`） |
+| `last_hits` / `tower_kills` / `hero_damage` / `healing` / `damage_taken` | ❌ |
+| `stun_duration` / `roshan_kills` / `physical` / `magical` / `pure_damage` | ❌ |
+
+**13 个里只有 3 个能查历史分位数。**
+
+### 5A.2 GA4 参数限额
+
+GA4 每个 event 上限 25 个参数，每个参数值上限 100 字符。
+
+`game_end_player` 当前 **19 个参数**（16 个显式 + `buildEvent` 追加的 `session_id` / `session_number` / `debug_mode`），剩 6 个空位。直接加 7 个指标会到 26，超 1 个。
+
+`buildPlayerJson()` 的输出已约 81 字符，贴近 100 上限，无法再塞字段。
+
+因此采用 **JSON 参数**打包。十个字段塞进一个 JSON 约 107 字符、超 100 上限，所以拆成两个：
+
+```ts
+// analytics.service.ts gameEndPlayerBot()
+player_stats: JSON.stringify({
+  hd: player.heroDamage ?? 0,  dt: player.damageTaken ?? 0,
+  he: player.healing ?? 0,     lh: player.lastHits ?? 0,
+  tk: player.towerKills ?? 0,  st: player.stuns ?? 0,
+  rk: player.roshanKills ?? 0,
+}),
+// {"hd":523456,"dt":412345,"he":123456,"lh":85,"tk":3,"st":45,"rk":1}  ≈ 68 字符
+
+damage_split: JSON.stringify({
+  pd: player.physicalDamage ?? 0,
+  md: player.magicalDamage ?? 0,
+  pu: player.pureDamage ?? 0,
+}),
+// {"pd":234567,"md":289012,"pu":12345}  ≈ 36 字符
+```
+
+`game_end_player` 变 **21 个参数**，留 4 个余量。BigQuery 侧用 `JSON_VALUE()` 解析。全部字段用 `?? 0` 兜底，避免老客户端或回滚时缺字段。
+
+### 5A.3 `GameEndPlayerDto` 新增字段
+
+| 新字段 | 来源 | 用途 |
+| --- | --- | --- |
+| `stuns` | `PlayerResource.GetStuns()` | 指标 + 标定 |
+| `roshanKills` | `PlayerResource.GetRoshanKills()` | 指标 + 标定 |
+| `physicalDamage` | `SetDamageFilter` 累加 | 仅标定 |
+| `magicalDamage` | 同上 | 仅标定 |
+| `pureDamage` | 同上 | 仅标定 |
+
+其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，只是没进 GA4。
+
+**这 5 个新字段不参与每日挑战的判定机制**——判定在客户端完成，服务端不看数值。它们存在的唯一目的是积累标定数据，顺带补上 analytics 的空白。全部声明为 `@IsOptional()`。
+
+### 5A.4 上线顺序：无硬依赖，建议 game 先行
+
+`api/src/util/settings.ts` 的 `ValidationPipe` 配置是 `forbidUnknownValues: false`，且未开启 `whitelist` / `forbidNonWhitelisted`：
+
+```ts
+new ValidationPipe({ transform: true, forbidUnknownValues: false })
+```
+
+未知字段被静默接受，不会返回 400。因此 game 先发送新字段而 API 的 DTO 尚未声明，请求照常通过，字段被忽略——**不存在"game 先上线导致整局结算失败"的风险**。
+
+建议顺序：
+
+1. **game 先上线**——DOTA2 自定义游戏进服强制更新，玩家一进即为新版本，数据立刻开始积累
+2. **API 随后上线**——DTO 声明 + analytics 打包，上线即可收到 game 已在发送的字段
+
+反向顺序（API 先）也安全，但要干等 game 发版才有数据，白白浪费积累窗口。
+
+### 5A.5 顺带发现的既有问题（独立于每日挑战）
+
+`game_end_match` 的参数数量随人数线性增长：`6 个基础 + N 个 player_N + 4 个 buildEvent`。
+
+- 5 真人 + 10 bot = 15 名玩家 → 25 个，刚好触顶
+- 6 真人 + 10 bot = 16 名玩家 → 26 个，超限
+- 10v10 满员 20 名玩家 → 30 个，超限 5 个
+
+超出的参数会被 GA4 静默丢弃，也就是说排在后面的 `player_N` 很可能从未进入 BigQuery。本 spec 不修这个，但建议单独确认。
+
+另注：`game_end_player` 里 `is_winner` 与 `win_metrics` 是逐字重复的两个参数，删掉其一可以腾出一个空位——需先确认没有现存看板依赖。
 
 ## 6. 数据模型
 
@@ -510,7 +645,9 @@ api/src/daily-challenge/
 
 ## 12. 需要在实施前定的事
 
-1. **任务池数值全部要重标。** 现有 404 条的 `target` 是按跨局累积标的（如 `general_hero_damage: 500000`）。改成单局达标后必须按"单局可达"重新标定，建议用 BigQuery 里的历史对局数据取分位数（例如 2★ 目标 = 该指标的 P50，1★ = P30，3★ = P75）。**这是 Phase1 的前置工作，不是实施细节。**
+0. **先补 GA4 统计并积累数据（见第 5A 节）。** 13 个指标里只有 3 个在 BigQuery 有历史。必须先让 game 发送 5 个新字段、API 打包进 `game_end_player`，跑够一段时间攒出分布，才谈得上标定。**这是 Phase1 的第 0 步，其余全部依赖它。**
+
+1. **任务池数值全部要重标。** 现有 404 条的 `target` 是按跨局累积标的（如 `general_hero_damage: 500000`）。改成单局达标后必须按"单局可达"重新标定，用 BigQuery 历史对局取分位数（例如 2★ = P50，1★ = P30，3★ = P75）。同时需要**实机验证 `GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄。
 
 2. **英雄专属任务规模。** 默认保持 127 英雄 × 3 = 381 条。可以考虑降到 127 × 1（每个英雄一条，抽到时按本局英雄匹配）以大幅缩小任务池文件。
 
