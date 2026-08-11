@@ -61,14 +61,31 @@ Phase1 不为 Phase2/3 预留任何字段或接口位。接口不做版本管理
 
 单日个人赛季积分上限 300（三轮全 3★）。
 
-星级由 seed 确定性掷出，权重 1:1:1。毫秒类指标的目标取整到整千，其余四舍五入到整数：
+星级由 seed 确定性掷出，权重 1:1:1。
+
+**小整数指标用加法档，大数值用乘法档。** 乘法对小整数会退化——`target = 1` 时三档算出 `1 / 1 / 2`，`target = 2` 时 `2 / 2 / 3`，都有重复：
 
 ```ts
-const scaled = task.target * multipliers[star];
-return unit === MILLISECOND && scaled >= 1000
-  ? Math.max(1, Math.round(scaled / 1000) * 1000)
-  : Math.max(1, Math.round(scaled));
+const SMALL_TARGET_THRESHOLD = 10;
+
+const scaled =
+  task.target < SMALL_TARGET_THRESHOLD
+    ? task.target + (star - 1)              // t / t+1 / t+2
+    : task.target * multipliers[star];      // 0.75 / 1.0 / 1.5
+
+return Math.max(1, Math.round(scaled));
 ```
+
+| 指标 | target | 三档 |
+| --- | ---: | --- |
+| `roshan_kills` | 1 | 1 / 2 / 3 |
+| `tower_kills` | 3 | 3 / 4 / 5 |
+| `kills` | 20 | 15 / 20 / 30 |
+| `hero_damage` | 500000 | 375000 / 500000 / 750000 |
+
+若不这样处理，`roshan_kills` 要靠乘法拉开三档就得把 target 标到 ≥ 3，意味着 3★ 需要单局击杀 5 次肉山，不现实。顺带把 `tower_kills` 从 `2 / 3 / 5` 修正为 `3 / 4 / 5`，跨度更合理。
+
+原实现的毫秒取整分支删除——`stun_duration` 改用 `GetStuns()` 后单位由 5.1 的实机验证决定。
 
 ### 3.4 英雄专属任务
 
@@ -686,30 +703,57 @@ Phase1 不是一个可以一次做完的改动，它有一条硬顺序：**先�
 
 ### 12.2 任务池重新设计（独立工作项，本 spec 不覆盖）
 
-**404 条任务里有 204 条用的是被删除的指标**：
+404 条任务里有 204 条用了被删除的指标。但**实际需要人工决定的远没有那么多**——多数英雄的另外两条任务不受影响，机械替换即可。
 
-| 被删指标 | 任务数 |
-| --- | ---: |
-| `magical_damage` | 82 |
-| `physical_damage` | 64 |
-| `slow_duration_ms` | 24 |
-| `debuff_duration_ms` | 12 |
-| `root_duration_ms` | 8 |
-| `silence_duration_ms` | 7 |
-| `pure_damage` | 4 |
-| `taunt_duration_ms` | 2 |
-| `break_duration_ms` | 1 |
-| **合计** | **204** |
+对现有任务池按下列规则跑一遍后的实测结果：
 
-超过一半。而且剩下的 10 个指标里，英雄任务能用的差异化维度大幅收窄——原本靠「魔法/物理/纯粹伤害 + 六种控制」区分英雄定位，现在只剩 `hero_damage` / `damage_taken` / `healing` / `stun_duration` / `kills` / `assists` / `last_hits` / `tower_kills` / `total_gold_earned` / `roshan_kills`。
+| 替换规则 | 影响 |
+| --- | --- |
+| `magical` / `physical` / `pure_damage` → `hero_damage` | 150 条，机械替换 |
+| `root_duration` → `stun_duration` | 8 条，机械替换（见下） |
+| `bot_kills` → `kills` | 4 条，机械替换（见 5.3） |
+| `slow` / `silence` / `taunt` / `break` / `debuff` | 46 条，**需人工指定** |
+| `roshan_kills` 退出英雄任务 | 2 条，**需人工指定** |
+| 同一英雄内 `hero_damage` 重复 | 32 个英雄，各需换掉一条 |
 
-这不是机械替换能解决的，需要重新想清楚「用 10 个指标怎么表达 127 个英雄的玩法特色」。**单独作为一项工作，在 12.1 攒够数据后再做**，产出是一份新的 `config/tasks.ts` 设计。
+**合计 74 / 381 条英雄任务需要人工指定指标，65 个英雄完全不需要改动。**
 
-该工作项需一并决定：
+`root_duration → stun_duration` 的依据是 DOTA 的 `GetStuns()` 会把缠绕时长一并计入。**这一条与 5.1 的其他口径问题一起实机验证**；若不成立，这 8 条要并入"需人工指定"。
 
-- **通用任务的数量与难度档划分**（原 19 条一一对应 19 个 metric，现在只剩 10 个 metric，可能需要同一 metric 配多个难度档）
-- **英雄专属任务规模**：保持 127 × 3 = 381 条，还是降到 127 × 1
+#### 可用的空槽很充裕
+
+需要改动的 62 个英雄身上，剩余可选指标数：
+
+```
+last_hits / total_gold_earned   67 个英雄可用
+kills / assists                 64
+tower_kills                     63
+damage_taken                    61
+stun_duration                   52
+healing                         44
+```
+
+每个英雄至少有 8 个空槽，不存在无解的英雄。
+
+#### 约束
+
+1. **同一英雄的 3 条任务不得出现重复指标。** 32 个 `hero_damage` 冲突必须各换掉一条。
+2. **`roshan_kills` 只做通用任务，不做英雄专属。** 单局肉山击杀归属唯一，做成英雄任务时能否完成基本靠运气而非英雄操作。
+3. **小整数指标的三档由 3.3 的加法规则保证互不相同**，任务池不需要为此调整 target。
+
+#### 差异化的降级要接受
+
+原本靠「魔法/物理/纯粹伤害 + 六种控制」表达英雄定位，现在莉娜与幽鬼的任务都会是 `hero_damage`，只有数值不同。
+
+损失比看上去小：`stun_duration` 保留（52 个英雄可用）覆盖控制型英雄，`healing`（44）覆盖辅助，`damage_taken`（61）覆盖坦克，`last_hits` / `total_gold_earned` 覆盖 Farm 核。剩下的靠 `heroName` 限定加数值高低区分。
+
+#### 该工作项还需一并决定
+
+- **通用任务的数量与难度档划分**：原 19 条一一对应 19 个 metric，现在只剩 10 个 metric，可能需要同一 metric 配多个难度档
+- **英雄专属任务规模**：保持 127 × 3 = 381 条，还是降到 127 × 1（12.1 若发现冷门英雄样本量不足，127 × 1 需要的样本更少）
 - **数值标定**：原 `target` 全部按跨局累积标定（如 `general_hero_damage: 500000`），改成单局达标后按 12.1 的分位数重标（例如 2★ = P50，1★ = P30，3★ = P75）
+
+工作量约一天，瓶颈仍是 12.1 的数据积累。
 
 ### 12.3 机制实现（本 spec 覆盖的部分）
 
