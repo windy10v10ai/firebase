@@ -85,11 +85,14 @@ return Math.max(1, Math.round(scaled));
 | `roshan_kills` | 1 | 1 / 2 / 3 |
 | `tower_kills` | 3 | 3 / 4 / 5 |
 | `kills` | 20 | 15 / 20 / 30 |
+| `stun_duration` | 45（秒） | 34 / 45 / 68 |
 | `hero_damage` | 500000 | 375000 / 500000 / 750000 |
+
+`stun_duration` 的 target 为整数秒、通常两位数，走乘法档。判定时与 `GetStuns()` 的浮点返回值直接比较，不取整。
 
 若不这样处理，`roshan_kills` 要靠乘法拉开三档就得把 target 标到 ≥ 3，意味着 3★ 需要单局击杀 5 次肉山，不现实。顺带把 `tower_kills` 从 `2 / 3 / 5` 修正为 `3 / 4 / 5`，跨度更合理。
 
-原实现的毫秒取整分支删除——`stun_duration` 改用 `GetStuns()` 后单位由 5.1 的实机验证决定。
+原实现的毫秒取整分支删除——`stun_duration` 改用 `GetStuns()` 后单位是秒（见 5.2），不需要取整到整千。
 
 ### 3.4 英雄专属任务
 
@@ -201,7 +204,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 | `healing` | `PlayerResource.GetHealing()` |
 | `total_gold_earned` | `PlayerResource.GetTotalEarnedGold()` 减虚拟金币回转 |
 | `damage_taken` | 遍历敌方玩家 `GetDamageDoneToHero()` 求和 |
-| `stun_duration` | `PlayerResource.GetStuns()` |
+| `stun_duration` | `PlayerResource.GetStuns()`，单位**秒（浮点）**，含缠绕时长 |
 | `roshan_kills` | `PlayerResource.GetRoshanKills()` |
 
 全部与 `game-end.ts` 同源。客户端**没有任何采集代码**：局内进度展示时读一次，结算判定时读一次，成本是 10 次 `PlayerResource` 调用。
@@ -247,7 +250,12 @@ GetRoshanKills(playerId: PlayerID): number;
 
 被删掉的 `slow` 本来就依赖一个**硬编码白名单**（5 个 modifier 名）加移速 `modifierfunction` 匹配，覆盖不完整——不在名单里的减速技能永远统计不到，配了任务也无法完成。删除同时消除了这个隐患。
 
-**`GetStuns()` 的口径必须实机验证**：返回值单位是秒还是毫秒、是否为浮点、是否只统计对敌方英雄。这三点决定 target 怎么标，见 12.1。
+#### `GetStuns()` 的口径（已实机验证）
+
+- **单位为秒，返回浮点数**。target 按整数秒标定（如 45），判定用浮点比较 `GetStuns() >= target`
+- **缠绕（root）时长计入**。因此原任务池里 8 条 `root_duration` 任务可机械替换为 `stun_duration`，见 12.2
+
+**UI 展示必须用 `Math.floor()` 取整，不能用 `Math.round()`。** 玩家在 44.7 秒时若显示「45 / 45」却未完成，会直接被判定为 bug；向下取整显示「44 / 45」才与判定一致。
 
 ### 5.2A 删除伤害分类（`physical` / `magical` / `pure`）
 
@@ -356,7 +364,6 @@ player_stats: JSON.stringify({
 score + gameTimePoints              = basePoints
 basePoints × 难度倍率 × 胜负倍率     = rawBattlePoints
 round(raw × 行为分倍率)              = settledPoints
-settledPoints - rawBattlePoints     = pointModifier      ← 行为分加成/惩罚
 settledPoints + 每日挑战奖励          = battlePoints        ← 实际入账总额
 ```
 
@@ -369,33 +376,31 @@ const rawBattlePoints = this.CalculatePlayerBattlePoints(playerDto, difficultyMu
 const conductMultiplier = this.GetConductMultiplier(conductPoint, isTeamGame);
 const settledPoints = Math.max(0, Math.round(rawBattlePoints * conductMultiplier));
 
-playerDto.pointModifier = settledPoints - rawBattlePoints;   // 纯行为分，在加挑战积分之前算
-playerDto.dailyChallengeSeasonPoint = dcPoints;
-playerDto.battlePoints = settledPoints + dcPoints;           // 总额
+playerDto.dailyChallengeSeasonPoint = dcPoints;      // 单独字段，不入账
+playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 ```
 
-若挑战积分先并入再乘行为分倍率，会有两个后果：`pointModifier` 混入挑战积分而不再是纯行为分；候选卡上写着「80 分」的奖励实到 96 或 64，UI 与实际不符。
+这是玩法正确性要求，与统计无关：若挑战积分先并入再乘行为分倍率，候选卡上写着「80 分」的奖励会实到 96 或 64，UI 与到手数额不符。
 
 #### GA4 参数
 
-为了能按英雄、难度、胜负、国家切分这三个维度，`game_end_player` 增加**两个独立数值参数**（第三个可推导）：
+`game_end_player` 增加**一个数值参数**：
 
 | 参数 | 来源 | 说明 |
 | --- | --- | --- |
-| `point_modifier` | `player.pointModifier` | 行为分加成，可正可负 |
 | `point_daily_challenge` | `player.dailyChallengeSeasonPoint` | Phase1 上线后才有值 |
 
-基础积分 = `points - point_modifier - point_daily_challenge`，不必单独发送。
+对局积分 = `points - point_daily_challenge`。
 
-`pointModifier` 必须由 game 侧作为**独立字段**发送，服务端不能用 `battlePoints` 反推——总额里已经含了挑战积分，减不出来。
+行为分加成（`settledPoints - rawBattlePoints`）**不做统计**——现有总分维度已够用，不为此增加字段。
+
+参数预算：`player_stats`（#1050 已合并）后为 20，加本参数变 **21 / 25**，剩 4 个。
 
 **用独立参数而非打包 JSON**：这三个要注册成 GA4 自定义指标、直接求和求平均；`player_stats` 那 7 个是一次性标定用的分析数据，打包无妨。
 
-**不新开 event**：积分维度要按英雄/难度/胜负/国家切分，而这些维度全都已经在 `game_end_player` 上。独立 event 需要靠 `session_id` join 才能关联，GA4 界面里做不到，只能退化成 BigQuery SQL。
+**不新开 event**：这个维度要按英雄/难度/胜负/国家切分，而这些维度全都已经在 `game_end_player` 上。独立 event 需要靠 `session_id` join 才能关联，GA4 界面里做不到，只能退化成 BigQuery SQL。
 
-参数预算变为 **22 / 25**，剩 3 个。不够时 `win_metrics`（与 `is_winner` 逐字重复）和 `hero_name_cn`（可从 `hero_name` 推导）是两个可回收的名额。
-
-**`point_modifier` 不依赖每日挑战，建议随 #1050 一起上线。** `point_daily_challenge` 需等 Phase1，字段可先留位。
+不够时 `win_metrics`（与 `is_winner` 逐字重复）和 `hero_name_cn`（可从 `hero_name` 推导）是两个可回收的名额。
 
 **语义变更提醒**：每日挑战上线后 `battlePoints` 含挑战积分，`points` 的时间序列会在上线当天跳变。有 `point_daily_challenge` 可反推纯对局积分，但 BigQuery 看板说明里要标注这个断点。
 
@@ -405,16 +410,15 @@ playerDto.battlePoints = settledPoints + dcPoints;           // 总额
 
 ### 5A.3 `GameEndPlayerDto` 新增字段
 
-| 新字段 | 来源 | 时机 |
+| 新字段 | 来源 | 状态 |
 | --- | --- | --- |
-| `stuns` | `PlayerResource.GetStuns()` | #1050 |
-| `roshanKills` | `PlayerResource.GetRoshanKills()` | #1050 |
-| `pointModifier` | `settledPoints - rawBattlePoints` | **#1050，不依赖每日挑战** |
+| `stuns` | `PlayerResource.GetStuns()` | ✅ #1050 已合并 |
+| `roshanKills` | `PlayerResource.GetRoshanKills()` | ✅ #1050 已合并 |
 | `dailyChallengeSeasonPoint` | `/game/start` 下发的候选奖励 | Phase1 |
 
-其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，只是没进 GA4。
+其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，#1050 已把它们打包进 `player_stats` 参数。
 
-`pointModifier` 在 game 侧已经算好（用于结算界面括号展示，写进 `player_stats` net table），只是从未发给 API，加一行即可。**它不依赖每日挑战，建议随 #1050 一起上线**——一旦 Phase1 上线后 `battlePoints` 含挑战积分，就再也无法从总额反推行为分了。
+**数据积累从 #1050 上线之日起算**（见 12.1）。
 
 两个新字段声明为 `@IsOptional()`。它们**不参与每日挑战的判定机制**——判定在客户端完成，服务端不看数值；作用是让服务端把它们转发进 GA4，积累标定数据，顺带补上 analytics 的空白。
 
@@ -565,7 +569,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.2 `POST /game/end`
 
-请求：`GameEndPlayerDto` 新增两个可选字段（另有 `pointModifier` 随 #1050 先行，见 5A.3），`GameEndDto` 顶层新增一个可选字段。
+请求：`GameEndPlayerDto` 新增两个可选字段（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。
 
 挑战积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyChallengeSeasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
@@ -780,13 +784,13 @@ Phase1 不是一个可以一次做完的改动，它有一条硬顺序：**先�
 
 ### 12.1 第 0 步：补 GA4 统计并积累数据
 
-见第 5A 节。10 个指标里只有 3 个在 BigQuery 有历史。让 game 发送 `stuns` / `roshanKills`，API 把 7 个缺失指标打包进 `game_end_player`，跑够一段时间攒出分布。
+见第 5A 节。10 个指标里只有 3 个在 BigQuery 有历史。**windy10v10ai/firebase#1050 已合并**——`stuns` / `roshanKills` 两个字段与 `player_stats` 打包参数已上线，数据从上线之日起开始积累。
 
-**其余所有工作都依赖它。** 对应 issue：windy10v10ai/firebase#1050。
+`GetStuns()` 的口径实机验证亦已完成，结论见 5.2。
 
-积累多久取决于日活，需要单独确认——目标是每个英雄都有足够样本量支撑分位数（英雄专属任务按英雄标定，样本要按英雄切分，冷门英雄是瓶颈）。
+**其余所有工作都依赖数据积累。** 剩下的唯一问题是**攒多久**——取决于日活，需要单独确认。
 
-同期由 game 侧**实机验证 `GetStuns()` 的口径**：单位是秒还是毫秒、是否浮点、是否只统计对敌方英雄。这三点决定 `stun_duration` 的 target 怎么标。
+判断标准不是总局数，而是**冷门英雄的样本量**：英雄专属任务按英雄标定分位数，样本要按英雄切分，127 个英雄里最冷门的那批是瓶颈。若冷门英雄迟迟凑不够，12.2 里「127 × 3 还是 127 × 1」的选择就多了一条依据——127 × 1 需要的样本量更少。
 
 ### 12.2 任务池重新设计（独立工作项，本 spec 不覆盖）
 
@@ -805,7 +809,9 @@ Phase1 不是一个可以一次做完的改动，它有一条硬顺序：**先�
 
 **合计 74 / 381 条英雄任务需要人工指定指标，65 个英雄完全不需要改动。**
 
-`root_duration → stun_duration` 的依据是 DOTA 的 `GetStuns()` 会把缠绕时长一并计入。**这一条与 5.1 的其他口径问题一起实机验证**；若不成立，这 8 条要并入"需人工指定"。
+`root_duration → stun_duration` 的依据是 `GetStuns()` 把缠绕时长一并计入，**已实机验证成立**（见 5.2）。
+
+同时 `stun_duration` 的单位由毫秒改为秒，原任务池里 `general_stun_duration: 60000` 这类数值要一并换算重标。
 
 #### 可用的空槽很充裕
 
@@ -898,7 +904,7 @@ healing                         44
 | `config/tasks.spec.ts` | 234 | 保留大部分守卫，删掉 `dataVersion` 断言和共同任务相关断言 |
 | `services/daily-challenge-generation.service.ts` | 134 | **核心算法直接复用**（FNV-1a、seeded pick、`pickStar`、`getMetricCategory`）。删掉 `seenTaskIds` 回退后约 110 行 |
 | `services/daily-challenge-generation.service.spec.ts` | 183 | 同上，按新签名调整 |
-| `services/daily-challenge-personal-config.ts` + spec | 136 | 保留星级目标解析（含毫秒取整） |
+| `services/daily-challenge-personal-config.ts` + spec | 136 | 保留星级目标解析，删掉毫秒取整分支，改按 3.3 的加法/乘法双档 |
 | `types/daily-challenge.types.ts` | 137 | 保留 `ChallengeScope` / `ChallengeMetric` enum，删掉三张 metric 映射表和两个版本常量 |
 | `util/challenge-day-clock.service.ts` | — | 保留，删掉 `closesAt` 和 120 分钟宽限 |
 
