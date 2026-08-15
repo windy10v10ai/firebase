@@ -800,6 +800,23 @@ else:
 
 当天没有任何完成记录时不写 history 条目——`history` 只记录有完成的天。Phase2 数连续天数时靠 `dayId` 连续性判断，不依赖空条目占位。
 
+#### history 的插入与淘汰
+
+```ts
+const HISTORY_MAX_ENTRIES = 30;
+
+history.unshift(entry);              // 最新在前，插到 index 0
+history.length = HISTORY_MAX_ENTRIES;  // 超长时截断尾部，淘汰最旧的
+```
+
+三点容易读错的语义：
+
+- **30 条不是"最近 30 天"，是最近 30 个「有完成的天」。** 没玩或一轮没完成的日子不占位，所以 30 条可能横跨几个月
+- **只有跨天重置这一条路径会增加长度**，因此只有这里需要截断。8.3 的跨天回写只修改 `history[0]` 的内容，不改变长度
+- 顺序恒为 `dayId` 降序。插入时不需要排序——新条目的 `dayId` 必然大于 `history[0]`
+
+文档大小无需担心：30 条 × 最多 3 个 task × `{ taskId, star }` 约 6KB，远低于 Firestore 单文档 1MB 上限。
+
 新玩家在第一次 `/game/start` 时懒创建，不需要任何初始化数据投放。
 
 ### 8.3 `/game/end` 流程
@@ -836,6 +853,30 @@ if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 客户端 bug 导致的加分与轮次记录不一致，属于客户端的责任范围，API 不做兜底校验。
 
 ### 8.3.2 其他
+
+#### 跨天完成的归属：看 `dailyTaskDayId`，不看到达时刻
+
+**任务日归属由客户端回传的 `dailyTaskDayId` 决定**，它来自 `/game/start` 的响应。因此一局跨过午夜不影响归属。
+
+最常见的情况其实**不走**跨天回写分支：
+
+```
+day1 23:50  /game/start  → 下发 dayId = day1，玩家保存
+day2 00:30  /game/end    → 回传 dailyTaskDayId = day1
+                           此时文档.dayId 仍是 day1 —— 跨天重置只发生在 /game/start，
+                           而这一局进行期间玩家不可能开新局
+                        → 走"当天"分支，正常记进 completedTasks
+day2 之后    /game/start  → 文档.dayId(day1) ≠ today(day2)，触发跨天重置，
+                           day1 的 completedTasks 整体挪进 history[0]，day2 从第 1 轮开始
+```
+
+结果：那次跨午夜的完成算进 **day1** 的额度，day2 仍有完整的 3 轮。玩家在 day1 23:50 开局打满第 3 轮、day2 又是全新 3 轮，是正常行为而非漏洞——他确实在两个任务日各玩了一局。
+
+**`history[0]` 回写分支只在一种情况触发**：`/game/end` 迟到到玩家已经开了下一局之后，即中间夹了一次触发重置的 `/game/start`。这要求结算请求失败并重试跨越了一整局，罕见。
+
+**已知取舍**：若 day1 一轮都没完成，8.2 就不写 history 条目，那么上面这条迟到的 day1 报告会找不到 `history[0].dayId === day1`，被丢弃 + `logger.warn`，玩家白打一轮。补法是找不到时新建条目插到 index 0，但要额外处理插入位置判断；考虑到触发条件（结算重试跨越整局）与损失（一天中的一轮）都极小，**不补**。
+
+#### 其余
 
 `history[]` 存的是 `tasks` 数组而非轮数计数，因此跨天回写路径与当天路径拥有**完全相同的幂等性**——两边都按 taskId 去重。（早期设计里 history 只存 `rounds: number`，跨天重复上报会重复计数；改存 taskIds 后这个缺口自然消失。）
 
@@ -981,7 +1022,8 @@ export const DAILY_TASKS: TaskDefinition[] = [
 - 生成器去重：传入 `completedTaskIds` 后，候选里不含其中任何一个；同一 taskId 不因星级不同而漏掉；未完成的 taskId 不受影响
 - 打满短路：`completedTasks.length >= 3` 时 `candidates` 为空且**生成器未被调用**（用 spy 断言），不依赖生成器自己处理 round=4
 - 星级目标：小整数走加法档、大数值走乘法档，两条路径下 1★/2★/3★ 都严格递增（见 3.3）
-- 跨天重置：`dayId` 变化时把 `completedTasks` 整体挪进 history、裁到 30 条、当日字段清空；当天无完成时不写 history 条目
+- 跨天重置：`dayId` 变化时把 `completedTasks` 整体挪进 history、当日字段清空；当天无完成时不写 history 条目
+- history 插入淘汰：新条目进 index 0；已有 30 条时插入后仍为 30 条且淘汰的是**最旧**的那条；`dayId` 保持降序
 - 轮次记录：已完成 3 轮时丢弃；掉线玩家跳过；`completedTasks` 记下 `star`；`todaySeasonPoint` 累加客户端上报的奖励值
 - 幂等：同一 taskId 重复上报不重复计数、不重复加 `todaySeasonPoint`
 - 跨天迟到：`dayId === history[0].dayId` 时正确回写，且**同样按 taskId 幂等**
@@ -995,7 +1037,8 @@ export const DAILY_TASKS: TaskDefinition[] = [
 - 轮间去重：第 2、3 轮的候选里不出现前面已完成的 taskId
 - 跨天：第 1 天完成 2 轮 → 第 2 天开局，history 出现第 1 天条目（含 `tasks` 明细）、当日字段清空
 - 旧客户端兼容：不带任何 `dailyTask*` 字段的 `/game/end`，既不创建也不修改文档（见 12.4）
-- 跨天迟到局：第 2 天已开局后，上报 `dailyTaskDayId = 第 1 天` 的 `/game/end`，正确回写 `history[0]`
+- 跨午夜的一局：第 1 天开局拿到候选，不再开局、直接在第 2 天上报 `dailyTaskDayId = 第 1 天`，应记进**当天**桶（此时文档 `dayId` 仍是第 1 天）；随后第 2 天开局才触发重置，且第 2 天仍有完整 3 轮
+- 跨天迟到局：第 2 天已开局（已重置）后，才上报 `dailyTaskDayId = 第 1 天` 的 `/game/end`，正确回写 `history[0]`
 - `/game/end` 重试：同一 taskId 调两次，`completedTasks` 不重复
 - 一个玩家数据异常不影响同局其他玩家结算
 - `battlePoints = 580` 时玩家仍完成基础结算，`seasonPointTotal` 只 +500
