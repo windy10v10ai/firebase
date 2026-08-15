@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { INestApplication } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
@@ -36,7 +36,7 @@ const STEAM_IDS = {
 } as const;
 
 describe('AlipayController (e2e)', () => {
-  let app: INestApplication;
+  let app: NestExpressApplication;
   const prefixPath = '/api/alipay';
 
   // 让测试可控的 mock：默认验签通过，单独 case 可设 false 模拟伪造
@@ -52,7 +52,9 @@ describe('AlipayController (e2e)', () => {
       .useValue({ precreate: precreateMock, verifyNotifySign: verifyMock })
       .compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication<NestExpressApplication>({
+      bodyParser: false,
+    });
     AppGlobalSettings(app);
     await app.init();
 

@@ -1,4 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+import { DailyChallengeRewardDetailDto } from '../../daily-challenge/dto/daily-challenge-reward-detail.dto';
 
 export class PointInfoDto {
   @ApiProperty()
@@ -12,4 +14,6 @@ export class PointInfoDto {
   seasonPoint?: number;
   @ApiProperty()
   memberPoint?: number;
+  @ApiPropertyOptional({ type: DailyChallengeRewardDetailDto })
+  dailyChallengeReward?: DailyChallengeRewardDetailDto;
 }

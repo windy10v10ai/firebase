@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
 
+import { DailyChallengeMatchContributionDto } from '../../daily-challenge/dto/daily-challenge-match-contribution.dto';
+
 import { EventBaseDto } from './event-base-dto';
 
 export class GameEndGameOptionsDto {
@@ -109,4 +111,10 @@ export class GameEndDto extends EventBaseDto {
   players: GameEndPlayerDto[];
   @ApiProperty()
   countryCode?: string;
+
+  @ApiProperty({ required: false, type: DailyChallengeMatchContributionDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DailyChallengeMatchContributionDto)
+  dailyChallenge?: DailyChallengeMatchContributionDto;
 }

@@ -1,4 +1,4 @@
-import { SERVER_TYPE } from '../util/secret/secret.service';
+import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { AnalyticsService } from './analytics.service';
 import { GameEndDto, GameEndPlayerDto } from './dto/game-end-dto';
@@ -107,5 +107,30 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     const playerStats = JSON.parse(event.params.player_stats) as Record<string, number>;
     expect(playerStats).not.toHaveProperty('st');
     expect(playerStats).not.toHaveProperty('rk');
+  });
+});
+
+describe('AnalyticsService.sendEvent', () => {
+  it('skips external GA4 requests in the local environment', async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalEnvironment = process.env.ENVIRONMENT;
+    const secretService = { getSecretValue: jest.fn().mockReturnValue('secret') };
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 204 } as Response);
+
+    process.env.NODE_ENV = 'development';
+    process.env.ENVIRONMENT = 'local';
+
+    try {
+      const service = new AnalyticsService(secretService as unknown as SecretService);
+      const event = await service.buildEvent('game_load', 1, '123', {});
+
+      await expect(service.sendEvent('1', event)).resolves.toBe(true);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(secretService.getSecretValue).not.toHaveBeenCalled();
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      process.env.ENVIRONMENT = originalEnvironment;
+      fetchSpy.mockRestore();
+    }
   });
 });

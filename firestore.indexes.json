@@ -1,4 +1,51 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "daily_challenge_reward_ledger",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "steamId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "daily_challenge_global_contributions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "dayId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "value",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "steamId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "daily_challenge_global_rankings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "dayId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "steamId",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

@@ -14,6 +14,12 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { DailyChallengeGameEndRewardDto } from '../daily-challenge/dto/daily-challenge-game-end-reward.dto';
+import { DailyChallengePlayerSnapshotDto } from '../daily-challenge/dto/daily-challenge-player-snapshot.dto';
+import { DailyChallengePlayerService } from '../daily-challenge/services/daily-challenge-player.service';
+import { DailyChallengeProgressService } from '../daily-challenge/services/daily-challenge-progress.service';
+import { DailyChallengeRewardNotificationService } from '../daily-challenge/services/daily-challenge-reward-notification.service';
+import { DailyChallengeSettlementService } from '../daily-challenge/services/daily-challenge-settlement.service';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
@@ -37,6 +43,10 @@ export class GameController {
     private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly dailyChallengePlayerService: DailyChallengePlayerService,
+    private readonly dailyChallengeProgressService: DailyChallengeProgressService,
+    private readonly dailyChallengeSettlementService: DailyChallengeSettlementService,
+    private readonly dailyChallengeRewardNotificationService: DailyChallengeRewardNotificationService,
   ) {}
 
   @Public()
@@ -58,6 +68,7 @@ export class GameController {
       };
     }
     steamIds = this.gameService.validateSteamIds(steamIds);
+    const matchStartedAt = new Date();
 
     const pointInfo: PointInfoDto[] = [];
 
@@ -73,6 +84,24 @@ export class GameController {
     // 添加每日会员积分
     const memberDailyPointInfo = await this.gameService.addDailyMemberPoints(members);
     pointInfo.push(...memberDailyPointInfo);
+
+    // Catch up ended challenge days without blocking the base game start.
+    try {
+      await this.dailyChallengeSettlementService.reconcile(matchStartedAt);
+    } catch (error) {
+      logger.warn('game/start: daily challenge settlement unavailable', { error });
+    }
+
+    // Points are already granted by the idempotent ledger; only claim display notices here.
+    try {
+      const challengePointInfo = await this.dailyChallengeRewardNotificationService.claimPointInfo(
+        steamIds,
+        matchStartedAt,
+      );
+      pointInfo.push(...challengePointInfo);
+    } catch (error) {
+      logger.warn('game/start: daily challenge reward notifications unavailable', { error });
+    }
 
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
@@ -90,10 +119,24 @@ export class GameController {
     ]);
 
     // 构建响应对象
+    // Daily challenges are an optional extension and must not block the base game start response.
+    let dailyChallenges: Awaited<ReturnType<DailyChallengePlayerService['getSnapshots']>>;
+    try {
+      dailyChallenges = await this.dailyChallengePlayerService.getSnapshots(
+        steamIds,
+        matchStartedAt,
+      );
+    } catch (error) {
+      logger.warn('game/start: daily challenge snapshots unavailable', { error });
+    }
     const response: GameStart = {
       players,
       pointInfo,
+      matchStartedAt: matchStartedAt.toISOString(),
     };
+    if (dailyChallenges) {
+      response.dailyChallenges = dailyChallenges;
+    }
 
     // 获取GA4配置信息
     const ga4Config = this.gameService.getGA4Config(serverType);
@@ -106,34 +149,69 @@ export class GameController {
 
   @ApiBody({ type: GameEndDto })
   @Post('end')
-  async end(@Body() gameEnd: GameEndDto, @Req() req: Request): Promise<string> {
+  async end(
+    @Body() gameEnd: GameEndDto,
+    @Req() req: Request,
+  ): Promise<{
+    result: string;
+    dailyChallengeRewards?: DailyChallengeGameEndRewardDto[];
+    dailyChallenges?: DailyChallengePlayerSnapshotDto[];
+  }> {
     const apiKey = req.headers['x-api-key'] as string;
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     const players = gameEnd.players;
     const isParty = players.filter((p) => p.steamId > 0).length >= 2;
+    const eligiblePlayers = players.filter((player) => {
+      if (player.steamId <= 0) {
+        return false;
+      }
+      if (!this.isEligibleForBaseSettlement(player.steamId, player.battlePoints)) {
+        logger.warn('game/end: invalid battlePoints, skip upsert', {
+          steamId: player.steamId,
+          serverType,
+          battlePoints: player.battlePoints,
+        });
+        return false;
+      }
+      return true;
+    });
     await Promise.all(
-      players.map((player) => {
-        if (player.steamId <= 0) {
-          return undefined;
-        }
-        const battlePoints = player.battlePoints;
-        if (battlePoints < 0 || battlePoints > 500) {
-          logger.warn('game/end: invalid battlePoints, skip upsert', {
-            steamId: player.steamId,
-            serverType,
-            battlePoints,
-          });
-          return undefined;
-        }
-        return this.playerService.upsertGameEnd(
+      eligiblePlayers.map((player) =>
+        this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,
           player.battlePoints,
           player.isDisconnected,
           isParty,
-        );
-      }),
+        ),
+      ),
     );
+
+    let dailyChallengeRewards: DailyChallengeGameEndRewardDto[] = [];
+    let dailyChallenges: DailyChallengePlayerSnapshotDto[] = [];
+    if (gameEnd.dailyChallenge) {
+      const challengeEligiblePlayers = eligiblePlayers.filter((player) => !player.isDisconnected);
+      const challengeNow = new Date();
+      try {
+        const challengeResult = await this.dailyChallengeProgressService.applyGameEnd(
+          gameEnd.matchId,
+          gameEnd.dailyChallenge,
+          challengeEligiblePlayers.map(({ steamId, heroName }) => ({ steamId, heroName })),
+          challengeNow,
+        );
+        dailyChallengeRewards = challengeResult.rewards;
+        try {
+          dailyChallenges = await this.dailyChallengePlayerService.getSnapshots(
+            challengeEligiblePlayers.map(({ steamId }) => steamId),
+            challengeNow,
+          );
+        } catch (error) {
+          logger.warn('game/end: daily challenge snapshots unavailable', { error });
+        }
+      } catch (error) {
+        logger.warn('game/end: daily challenge progress unavailable', { error });
+      }
+    }
 
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
@@ -145,6 +223,15 @@ export class GameController {
         }),
       ),
     ]);
-    return this.gameService.getOK();
+    const result = this.gameService.getOK();
+    return {
+      result,
+      ...(dailyChallengeRewards.length > 0 ? { dailyChallengeRewards } : {}),
+      ...(dailyChallenges.length > 0 ? { dailyChallenges } : {}),
+    };
+  }
+
+  private isEligibleForBaseSettlement(steamId: number, battlePoints: number): boolean {
+    return steamId > 0 && battlePoints >= 0 && battlePoints <= 500;
   }
 }

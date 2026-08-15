@@ -202,7 +202,7 @@ export class AnalyticsService {
 
   async sendEvent(userId: string, event: Event | PurchaseEvent, userProperties?: UserProperties) {
     // 在e2e测试环境中跳过发送GA4事件
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' || process.env.ENVIRONMENT === 'local') {
       return true;
     }
 

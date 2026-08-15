@@ -918,7 +918,7 @@ describe('PlayerController (e2e)', () => {
       const result = await post(app, gameEndUrl, createGameEndPayload());
 
       expect(result.status).toEqual(201);
-      expect(result.text).toEqual('OK');
+      expect(result.body).toEqual({ result: 'OK' });
     });
 
     it('断开连接的玩家 正确记录disconnectCount', async () => {

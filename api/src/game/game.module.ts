@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { DailyChallengeModule } from '../daily-challenge/daily-challenge.module';
 import { EventRewardsModule } from '../event-rewards/event-rewards.module';
 import { MembersModule } from '../members/members.module';
 import { PlayerModule } from '../player/player.module';
@@ -10,7 +11,14 @@ import { GameController } from './game.controller';
 import { GameService } from './game.service';
 
 @Module({
-  imports: [MembersModule, PlayerModule, PlayerInfoModule, EventRewardsModule, AnalyticsModule],
+  imports: [
+    MembersModule,
+    PlayerModule,
+    PlayerInfoModule,
+    EventRewardsModule,
+    AnalyticsModule,
+    DailyChallengeModule,
+  ],
   controllers: [GameController],
   providers: [GameService],
 })
