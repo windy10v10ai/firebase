@@ -859,6 +859,16 @@ healing                         44
 
 唯一需要提前定的参数：**每天轮数**，默认保持 3。
 
+### 12.4 上线顺序：API 先，game 后
+
+与 5A.4（#1050 建议 game 先行）**相反**。Phase1 必须 API 先上线，中间会有一段旧 game 对新 API 的窗口期。
+
+**API 新 / game 旧是安全的**：三个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyChallengeTaskId` 与 `dailyChallengeDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyChallenges` 被旧客户端忽略。窗口期会创建出 `completedTaskIds` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
+
+唯一需要注意的是 GA4 的 `point_daily_challenge` **要用 `?? 0` 兜底**（与 5A.2A 末尾针对 `stuns` 的结论相反）：窗口期玩家确实没有挑战积分，0 语义正确；若留空则 BigQuery 里 `points - NULL = NULL`，整个窗口期的对局积分维度算不出来。
+
+**反向顺序（game 先）不可行**：旧 API 静默接受未知字段，挑战积分会照常并入 `battlePoints` 入账，但完成记录永不落库——`currentRound` 恒为 0，玩家每局拿到同一批候选，可无限刷分。且 7.3 的 cap 改动必须先于 game 上线，否则 3★ 顶破 500 会丢掉该玩家整个基础结算。
+
 ## 13. 客户端需要同步的改动（game 仓库）
 
 ### 13.1 保留
