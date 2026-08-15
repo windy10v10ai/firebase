@@ -418,9 +418,13 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 
 | 参数 | 来源 | 说明 |
 | --- | --- | --- |
-| `point_daily_task` | `player.dailyTaskSeasonPoint` | Phase1 上线后才有值 |
+| `point_daily_task` | `player.dailyTaskSeasonPoint ?? 0` | 缺省兜底为 0，理由见下 |
 
 对局积分 = `points - point_daily_task`。
+
+**这个参数必须 `?? 0` 兜底**，与下文针对 `stuns` 的结论相反。字段缺值不是罕见情况：API 先上线的窗口期（见 12.4）旧客户端不发，而**玩家没完成任务的对局同样不发，那才是常态**。若缺值时省略 key，BigQuery 得到 `NULL`，`points - NULL = NULL`，绝大多数行的对局积分算不出来，每张看板都得记得写 `COALESCE`。
+
+判据是「`0` 和『没上报』是不是同一件事」：`point_daily_task` 的 `0` 表示"没拿到任务积分"，而没上报的原因（没完成 / 功能未上线）同样是没拿到任务积分——两者一致，兜底为 0 不引入任何失真。
 
 行为分加成（`settledPoints - rawBattlePoints`）**不做统计**——现有总分维度已够用，不为此增加字段。
 
@@ -434,7 +438,9 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 
 **语义变更提醒**：每日挑战上线后 `battlePoints` 含挑战积分，`points` 的时间序列会在上线当天跳变。有 `point_daily_task` 可反推纯对局积分，但 BigQuery 看板说明里要标注这个断点。
 
-**不做 `?? 0` 兜底。** `stuns` 的 `0` 表示「本局没控到人」，是真实观测值；若把「没上报」也记成 `0`，标定时无法区分两者，那批假零会把分位数整体拉低。字段缺失时 `JSON.stringify` 自动丢弃该 key，BigQuery 得到 `NULL`，标定查询用 `IS NOT NULL` 排除即可。
+**`stuns` 相反，不做 `?? 0` 兜底。** 它的 `0` 表示「本局没控到人」，是真实观测值；若把「没上报」也记成 `0`，标定时无法区分两者，那批假零会把分位数整体拉低。字段缺失时 `JSON.stringify` 自动丢弃该 key，BigQuery 得到 `NULL`，标定查询用 `IS NOT NULL` 排除即可。
+
+两个字段结论相反，是因为判据不是"要不要兜底"而是"`0` 和『没上报』是不是同一件事"——`point_daily_task` 是，`stuns` 不是。
 
 （这与 issue #1014 的 `awaken ?? 0` 相反——`awaken` 的 `0` 就是「未觉醒」，缺省按 0 语义正确。）
 
@@ -969,7 +975,7 @@ healing                         44
 
 **API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyTaskId` 与 `dailyTaskDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyTasks` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
 
-唯一需要注意的是 GA4 的 `point_daily_task` **要用 `?? 0` 兜底**（与 5A.2A 末尾针对 `stuns` 的结论相反）：窗口期玩家确实没有挑战积分，0 语义正确；若留空则 BigQuery 里 `points - NULL = NULL`，整个窗口期的对局积分维度算不出来。
+GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即可——窗口期玩家确实没有任务积分，0 语义正确，不需要为窗口期做任何特殊处理。
 
 **反向顺序（game 先）不可行**：旧 API 静默接受未知字段，挑战积分会照常并入 `battlePoints` 入账，但完成记录永不落库——`currentRound` 恒为 0，玩家每局拿到同一批候选，可无限刷分。且 7.3 的 cap 改动必须先于 game 上线，否则 3★ 顶破 500 会丢掉该玩家整个基础结算。
 
