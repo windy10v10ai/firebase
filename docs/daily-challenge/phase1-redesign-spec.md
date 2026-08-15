@@ -110,11 +110,12 @@ return Math.max(1, Math.round(scaled));
 
 ```ts
 const DAILY_CHALLENGE_MIN_MULTIPLIER = 1;
+const INSTANT_RESPAWN_THRESHOLD = 40;
 
 function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost: boolean): boolean {
   // 秒活让击杀/伤害类任务失去意义，单独拦截：
   // 它在倍率里只乘 0.7，配合加难选项后仍可能高于阈值
-  if (option.respawnTimePercentage < 100) {
+  if (option.respawnTimePercentage < INSTANT_RESPAWN_THRESHOLD) {
     return false;
   }
   // 作弊模式与 localhost 返回 0，自定义模式走 GetCustomModeMultiplier
@@ -135,14 +136,18 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 | 玩家金钱 5 倍 | 0.1 | 禁用 |
 | 中路模式 / 固定技能 | 0.8 | 禁用 |
 | 敌方人数 5 | 0.5 | 禁用 |
-| 秒活（任意加难组合）| — | 禁用（独立规则）|
+| 复活时间「慢」(120) | 1.0 | 生效 |
+| 复活时间「快」(50) | 全默认下 0.9 | 禁用（走倍率规则）|
+| 复活时间「秒活」(10) | — | 禁用（独立规则，任意加难组合都拦）|
 | 作弊模式 / localhost | 0 | 禁用 |
 
 禁用时客户端的行为：**不展示候选、不判定、不计分、不上报 `dailyChallengeTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
 
 服务端不参与这个判定：`/game/start` 照常下发候选（此时对局选项可能尚未最终确定），由客户端在局内决定是否启用。
 
-`option.respawnTimePercentage < 100` 采用的是"任意复活时间削减都禁用"的保守口径。若只想拦真正的秒活，可收紧为 `<= 10`（与倍率函数里 ×0.7 那一档对齐）。
+**阈值 40 的依据**：复活时间下拉只有四档——120（慢）/ 100（正常）/ 50（快）/ 10（秒活）（`content/panorama/layout/custom_game/custom_loading_screen.xml`）。`< 40` 落在 10 与 50 之间，精确命中秒活那一档，且比 `<= 10` 多留余量——将来若加入 25、30 之类的新档位会被一并拦下。
+
+**「快」(50) 不走这条独立规则**，交给倍率规则处理：它在 `GetCustomModeMultiplier` 里乘 0.9，全默认下得 0.9 < 1.0 即已禁用；只有配上加难选项把倍率顶回 1.0 以上才放行，这与其他自定义选项的处理方式一致。独立规则只留给秒活，是因为秒活让击杀/伤害类任务彻底失去意义，不该被加难选项补偿掉。
 
 ### 3.6 已删除的机制
 
