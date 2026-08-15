@@ -159,6 +159,19 @@ function isDailyTaskEnabled(difficulty: number, isLocalhost: boolean): boolean {
 | custom 地图（自定义模式），无论选项如何 | 禁用 |
 | 作弊模式 / localhost | 禁用 |
 
+#### 掉线玩家不结算
+
+**结算时 `isDisconnected` 为真的玩家，本局不算完成任何任务、不加分**——哪怕他在退出之前指标已经达标。
+
+两端都要执行这条，且必须是同一条规则：
+
+- **服务端**：8.3 的准入条件已含 `!isDisconnected`，不写 `completedTasks`、不累加 `todaySeasonPoint`
+- **客户端**：`game-end.ts` 构建 `playerDto` 时，若该玩家 `isDisconnected`，**既不设 `dailyTask` 字段，也不把奖励加进 `battlePoints`**
+
+客户端那半边不能省。若客户端照常加分而服务端跳过记录，玩家就拿到了分但轮次没被消耗——下一局面对同一组候选，可以把同一个任务再完成一次再拿一次分。这正是 8.3.1 所说"客户端 bug 导致的加分与轮次记录不一致"，而服务端按设计不做兜底校验。
+
+`isDisconnected` 在结算时客户端本来就知道（它是 `GameEndPlayerDto` 的现有字段），不需要新增任何数据。
+
 #### 为什么不用难度倍率做门控
 
 早期设计用 `GetDifficultyMultiplier(...) >= 1` 当门控，有两个问题：
@@ -200,7 +213,7 @@ function isDailyTaskEnabled(difficulty: number, isLocalhost: boolean): boolean {
 - **模式门控**：按 3.5 判定本局是否启用——只认预设难度 1~8，自定义模式一律禁用
 - **指标读取**：10 个指标全部走 `PlayerResource` 原生 API，局内展示与结算判定时各读一次。**没有采集代码**——无定时器、无 filter、无高频事件监听，见 5.2 / 5.2A
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定
-- **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
+- **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`；**`isDisconnected` 的玩家不计分、不上报**，与服务端 8.3 的准入条件保持一致（见 3.5）
 - **全部文案**：`addon_schinese/english/russian.txt`，按 `scope` + `metric` 拼本地化 key，替换 `{hero}` / `{target}`。英雄名走 DOTA 自带的 `#npc_dota_hero_*`。`unit`（次数/伤害/秒）由 `metric` 在客户端映射
 - **候选选择**：本地状态，零网络请求
 - **UI**：HUD 入口、挑战面板、候选卡、星级徽章、今日记录、历史列表、结算页积分
@@ -1026,7 +1039,8 @@ export const DAILY_TASKS: TaskDefinition[] = [
 - 星级目标：小整数走加法档、大数值走乘法档，两条路径下 1★/2★/3★ 都严格递增（见 3.3）
 - 跨天重置：`dayId` 变化时把 `completedTasks` 整体挪进 history、当日字段清空；当天无完成时不写 history 条目
 - history 插入淘汰：新条目进 index 0；已有 30 条时插入后仍为 30 条且淘汰的是**最旧**的那条；`dayId` 保持降序
-- 轮次记录：已完成 3 轮时丢弃；掉线玩家跳过；`completedTasks` 记下 `star`；`todaySeasonPoint` 累加客户端上报的奖励值
+- 轮次记录：已完成 3 轮时丢弃；`completedTasks` 记下 `star`；`todaySeasonPoint` 累加客户端上报的奖励值
+- 掉线玩家：`isDisconnected` 为真时，即使带了完整的 `dailyTask` 也不写 `completedTasks`、不累加 `todaySeasonPoint`（见 3.5）
 - 幂等：同一 taskId 重复上报不重复计数、不重复加 `todaySeasonPoint`
 - `dayId` 不符：上报的 `dailyTaskDayId` 与文档 `dayId` 不同时丢弃并 warn，不写任何字段
 - `battlePoints` cap：超限截断到 500 且不丢弃该玩家结算
@@ -1043,6 +1057,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
 - `dayId` 不符：第 2 天已开局（已重置）后才上报 `dailyTaskDayId = 第 1 天`，该玩家的任务记录被丢弃，但其 `battlePoints` 结算与同局其他玩家均不受影响
 - `/game/end` 重试：同一 taskId 调两次，`completedTasks` 不重复
 - 一个玩家数据异常不影响同局其他玩家结算
+- 掉线玩家：同一局里一个 `isDisconnected` 玩家带完整 `dailyTask`、一个正常玩家也带——只有正常玩家被记录，掉线玩家的文档不产生任何变化
 - `battlePoints = 580` 时玩家仍完成基础结算，`seasonPointTotal` 只 +500
 
 各用例使用独立 steamId（遵循仓库 e2e 规范）。
@@ -1151,6 +1166,7 @@ GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即�
 - **指标读取**：一个函数，按 `metric` 分发到对应的 `PlayerResource` 调用，局内展示与结算判定时各调一次
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`（加在行为分倍率之后，见 5A.2A）
+- **掉线不结算**：构建 `playerDto` 时若 `isDisconnected` 为真，既不设 `dailyTask` 也不把奖励加进 `battlePoints`，哪怕退出前指标已达标（见 3.5）
 - **未知候选保护**：按 5.4，不认识的 `taskId` / `metric` 不得崩溃，不展示或标为不可完成，且不判定不上报
 - `game-end.ts`：`players[i]` 多发 `dailyTask` 对象（`taskId` / `star` / `seasonPoint` 必须齐全，缺一不可，否则整局结算会被 400；`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyTaskDayId`
 
