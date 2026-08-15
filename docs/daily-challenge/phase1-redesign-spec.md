@@ -309,7 +309,16 @@ GetRoshanKills(playerId: PlayerID): number;
 
 ### 5.4 运维约定（替代 `dataVersion`）
 
-新增 metric 的任务，必须在客户端发布**之后**才上线到任务池。DOTA2 自定义游戏进服强制更新，客户端版本分裂窗口很短。若违反，老客户端拿到无法采集的 metric 时应在 UI 上禁用该候选而非静默失败。
+新增 metric 的任务，必须在客户端发布**之后**才上线到任务池。DOTA2 自定义游戏进服强制更新，客户端版本分裂窗口很短。
+
+**客户端必须对无法识别的候选做保护。** 这不只是"新增 metric"这一种情况——任务池随时可改（见 8.3.1），老客户端拿到未知 `taskId` 或未知 `metric` 是必须容忍的正常状态：
+
+- **不得崩溃、不得中断整组候选的展示**——一个候选不认识不能连累另外两个
+- 处理方式二选一：**不展示该候选**（该轮退化为二选一），或**展示但标为不可完成**（本地化文案缺失时同样按此处理）
+- 无论哪种，都**不判定、不计分、不上报** `dailyChallengeTaskId`
+- 记一条客户端日志，便于发现任务池与客户端版本脱节
+
+服务端不需要任何配合：它不认识 metric，也不校验 taskId。
 
 ## 5A. 数值标定的数据前置（Phase1 的第一步）
 
@@ -462,37 +471,53 @@ new ValidationPipe({ transform: true, forbidUnknownValues: false })
 
 ```ts
 // api/src/daily-challenge/entities/player-daily-challenge.entity.ts
-@Collection('player_daily_challenges')
-export class PlayerDailyChallenge {
+@Collection()
+export class PlayerDailyChallenge {   // → 集合名 PlayerDailyChallenges
+  @Exclude()
   id: string;                 // = steamId.toString()
   steamId: number;
-  dayId: string;              // 'YYYY-MM-DD'，读到时若 !== 今天则触发跨天重置
+  dayId: string;              // 'YYYYMMDD'，读到时若 !== 今天则触发跨天重置
 
-  completedTaskIds: string[]; // 今天已完成的 taskId，长度 0~3
-  todaySeasonPoint: number;   // 今日累计，跨天时汇总进 history
-  history: DailyChallengeHistoryEntry[];  // 最近 30 天，最新在前
+  completedTasks: CompletedTask[] = [];   // 今天已完成，0~3，顺序即轮次
+  todaySeasonPoint: number;               // 今日累计，跨天时汇总进 history
+  history: DailyChallengeHistoryEntry[] = [];  // 最近 30 天，最新在前
 
   updatedAt: Date;
 }
 
+export interface CompletedTask {
+  taskId: string;
+  star: number;         // 1~3，用于历史面板还原目标与奖励
+}
+
 export interface DailyChallengeHistoryEntry {
   dayId: string;
-  rounds: number;       // 当天完成轮数
-  seasonPoint: number;  // 当天获得赛季积分
+  tasks: CompletedTask[];  // 当天完成的任务，轮数 = length
+  seasonPoint: number;     // 当天获得赛季积分
 }
 ```
 
 五个业务字段。文档数固定等于玩家数，永不增长。
 
+**写法对齐仓库现状**：仓库里 14 个 entity 全部使用裸 `@Collection()`，集合名由 fireorm 按 `pluralize.plural(类名)` 推导（`Player → Players`、`PlayerHeroAwakening → PlayerHeroAwakenings`）。`id` 上的 `@Exclude()` 与数组字段的 `= []` 默认值同样沿用 [player-hero-awakening.entity.ts](../../api/src/player-hero-awakening/entities/player-hero-awakening.entity.ts) 的写法。
+
+**`dayId` 对齐现有日界口径**：格式 `YYYYMMDD`、**UTC** 日界，与 `PlayerRanking.id`（`new Date().toISOString().slice(0, 10).replace(/-/g, '')`）和会员签到（`setUTCHours(0, 0, 0, 0)`）一致。原 PR 的 `ChallengeDayClockService` 用的是服务器本地时区（`setHours()` / `getFullYear()`）加 `YYYY-MM-DD`，两个维度都与仓库现状不符——Cloud Functions 默认 UTC 所以当前表现一致，但那是隐式依赖，运行时时区一变日界就漂。
+
+**`taskId` 结构**（沿用现有任务池）：通用任务 `general_<metric>`，英雄任务 `hero_<hero>_<1|2|3>`——后缀是该英雄的第几条任务，**不是星级**。星级正交，因此必须单独存 `star`，否则历史面板无法还原当时的目标值与奖励。
+
 ### 6.1 幂等是免费的
 
-不需要 `processedMatchIds`：**taskId 天然幂等**。同一个 taskId 不会在两轮里出现（`round` 进 seed），重复上报时它已经在 `completedTaskIds` 里，直接忽略。
+不需要 `processedMatchIds`：**taskId 就是幂等键**。生成候选时会排除当天已完成的 taskId（见 8.1），因此同一个 taskId 在一天内最多被完成一次；重复上报时它已经在 `completedTasks` 里，直接忽略。
+
+去重必须做在 **task 级而非 (task, star) 级**——1★ 完成过的任务，3★ 的同一任务也不应再出现，否则玩家一天三轮打的是同一件事。这也是 `star` 要单独成字段、不拼进 taskId 的原因：拼成 `general_kills_2` 之后，服务端得反解字符串才能按 task 去重。
 
 而赛季积分不在服务端加，所以 `/game/end` 重放也不会重复发分——重放会重复累加 `battlePoints`，但那是既有缺陷（见 9.2），不是本设计引入的。
 
 ### 6.2 候选不落库
 
-候选由 `(dayId, steamId, round)` 确定性生成——taskId、星级、目标、奖励全部可算出。因此不存 `candidates`、不存 `star`、不存 `target`。
+候选由 `(dayId, steamId, round)` 加当天已完成的 taskId 列表确定性生成——taskId、星级、目标、奖励全部可算出。因此不存 `candidates`、不存 `target`。
+
+已完成任务的 `star` 是唯一的例外：它在候选被完成之后才有保留价值（历史面板要还原当时的目标与奖励），而重算它会重新引入"任务池不得修改"的运维约束，正是 8.3.1 刚去掉的那条。存一个整数比留一条约束便宜。
 
 生成只发生在 `/game/start`。`/game/end` **不重算、不验证**（见 8.3.1），上报什么就记什么，奖励值由客户端一并发来。跨天迟到局同理，不需要保留任何昨天的快照。
 
@@ -500,7 +525,7 @@ export interface DailyChallengeHistoryEntry {
 
 ### 6.3 全部派生、不落库的值
 
-`totalRounds`（常量 3）、`currentRound` = `completedTaskIds.length + 1`、`completedRoundCount` = `completedTaskIds.length`、`needsSelection` = `completedTaskIds.length < 3`、`startsAt` / `endsAt`（从 `dayId` 算）、`candidates` 及其 `star` / `target` / `rewardSeasonPoint`。
+`totalRounds`（常量 3）、`currentRound` = `completedTasks.length + 1`、`completedRoundCount` = `completedTasks.length`、`needsSelection` = `completedTasks.length < 3`、`history[].rounds` = `history[].tasks.length`、`startsAt` / `endsAt`（从 `dayId` 算）、`candidates` 及其 `target` / `rewardSeasonPoint`。
 
 ### 6.4 与现状对比
 
@@ -526,12 +551,12 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
   "dailyChallenges": [
     {
       "steamId": 483215844,
-      "dayId": "2026-08-11",
+      "dayId": "20260811",
       "totalRounds": 3,
       "currentRound": 2,
       "candidates": [
         {
-          "taskId": "general_hero_damage_2",
+          "taskId": "general_hero_damage",
           "scope": "personal_general",
           "metric": "hero_damage",
           "star": 2,
@@ -539,11 +564,11 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
           "rewardSeasonPoint": 80
         },
         {
-          "taskId": "general_stun_1",
+          "taskId": "general_stun_duration",
           "scope": "personal_general",
           "metric": "stun_duration",
           "star": 1,
-          "target": 45,
+          "target": 34,
           "rewardSeasonPoint": 60
         },
         {
@@ -556,10 +581,20 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
           "rewardSeasonPoint": 100
         }
       ],
-      "completedTaskIds": ["general_kills_1"],
+      "completedTasks": [
+        { "taskId": "general_kills", "star": 1 }
+      ],
       "todaySeasonPoint": 60,
       "history": [
-        { "dayId": "2026-08-10", "rounds": 3, "seasonPoint": 240 }
+        {
+          "dayId": "20260810",
+          "tasks": [
+            { "taskId": "general_last_hits", "star": 3 },
+            { "taskId": "hero_lina_2", "star": 2 },
+            { "taskId": "general_healing", "star": 1 }
+          ],
+          "seasonPoint": 240
+        }
       ]
     }
   ]
@@ -574,7 +609,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.2 `POST /game/end`
 
-请求：`GameEndPlayerDto` 新增两个可选字段（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。
+请求：`GameEndPlayerDto` 新增三个可选字段（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。三个字段要么同时发送、要么都不发送。
 
 挑战积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyChallengeSeasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
@@ -586,6 +621,14 @@ export class GameEndPlayerDto {
   @IsOptional()
   @IsString()
   dailyChallengeTaskId?: string;
+
+  /** 该候选的星级 1~3，取自 /game/start 下发的候选；与 taskId 同时发送 */
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(3)
+  dailyChallengeStar?: number;
 
   /** 该任务的奖励值，取自 /game/start 下发的候选；与 taskId 同时发送 */
   @ApiProperty({ required: false })
@@ -601,12 +644,12 @@ export class GameEndDto extends EventBaseDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  @Matches(/^\d{8}$/)
   dailyChallengeDayId?: string;
 }
 ```
 
-`dailyChallengeSeasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `todaySeasonPoint` / `history[].seasonPoint` 里记一个数，而客户端已经知道这个数（`/game/start` 下发的），重算一遍没有意义。
+`dailyChallengeStar` 与 `dailyChallengeSeasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `completedTasks` / `todaySeasonPoint` 里记两个数，而客户端已经知道它们（都是 `/game/start` 下发的），重算一遍没有意义。`seasonPoint` 记的是**实际入账数额**而非由 `star` 查表得出，这样奖励表将来调整不会让历史记录的分数跟着变。
 
 现有的 `DailyChallengeMatchContributionDto`（66 行，含 `schemaVersion` / `dataVersion` / `personalMetrics` / `globalMetrics`）整个删除。
 
@@ -642,17 +685,29 @@ const settledPoints = Math.min(MAX_BATTLE_POINTS_PER_MATCH, Math.max(0, battlePo
 ### 8.1 候选生成
 
 ```ts
-generateCandidates(dayId: string, steamId: number, round: number): Candidate[]
+generateCandidates(
+  dayId: string,
+  steamId: number,
+  round: number,
+  completedTaskIds: string[],   // 当天已完成，从池中排除
+): Candidate[]
 ```
 
 seed = `${dayId}:${steamId}:${round}`，FNV-1a 哈希取模，从排序后的任务池中抽取：
 
-1. 抽 1 个通用任务
-2. 抽第 2 个通用任务，排除与第 1 个同类的 metric（沿用现有 `getMetricCategory()` 的伤害族 / 控制族归并，避免同轮出现两个控制时长任务）
-3. 抽 1 个英雄任务
-4. 每个候选独立掷星级，权重 1:1:1
+1. **先从两个池中剔除 `completedTaskIds`**
+2. 抽 1 个通用任务
+3. 抽第 2 个通用任务，排除与第 1 个同类的 metric（沿用现有 `getMetricCategory()` 的伤害族 / 控制族归并，避免同轮出现两个控制时长任务）
+4. 抽 1 个英雄任务
+5. 每个候选独立掷星级，权重 1:1:1
 
-同一天不同轮之间不做去重（`seenTaskIds` 删除）：`round` 进 seed 已经让不同轮抽到不同结果。
+**当天已完成的任务不再出现在后续轮次的候选里。** 这是 taskId 能当幂等键的前提——否则第 2 轮可能抽回第 1 轮已完成的任务，玩家打完之后服务端按幂等忽略，这一轮白打而客户端的分已经加进 `battlePoints` 了，两边对不上。通用池只有十几条、一天要抽 6 个通用候选，撞车概率并不低。
+
+排除按 **taskId** 而非 `(taskId, star)`：1★ 完成过的任务，3★ 的同一任务也不该再出现。
+
+**未完成**的候选不排除——同一个任务可以在后续轮次再次出现，这与 3.1 "未完成时候选不变，玩家下一局可以改选同一组里的另一个"是一致的。
+
+因此生成不再是 seed 的纯函数，而依赖当天的完成列表。这不影响确定性（完成列表已落库、可复现），也不影响任何调用方：取消 `/game/end` 重算后（见 8.3.1），生成只发生在 `/game/start`，而那里本来就已经把文档读出来了。
 
 ### 8.2 `/game/start` 流程
 
@@ -661,14 +716,14 @@ seed = `${dayId}:${steamId}:${round}`，FNV-1a 哈希取模，从排序后的任
 ```
 读文档（不存在 → 视为新玩家，dayId = ''）
 if (文档.dayId !== today):
-    if (completedTaskIds 非空):
-        history.unshift({ dayId: 文档.dayId, rounds: completedTaskIds.length, seasonPoint: todaySeasonPoint })
+    if (completedTasks 非空):
+        history.unshift({ dayId: 文档.dayId, tasks: completedTasks, seasonPoint: todaySeasonPoint })
         history 裁到 30 条
     dayId = today
-    completedTaskIds = []
+    completedTasks = []
     todaySeasonPoint = 0
     写回
-返回快照（candidates 现算）
+返回快照（candidates 按 completedTasks 现算）
 ```
 
 当天没有任何完成记录时不写 history 条目——`history` 只记录有完成的天。Phase2 数连续天数时靠 `dayId` 连续性判断，不依赖空条目占位。
@@ -685,11 +740,11 @@ if (文档.dayId !== today):
     if (dailyChallengeDayId === 文档.dayId):              → 当天
     else if (dailyChallengeDayId === history[0]?.dayId):  → 回写 history[0]
     else: 丢弃并 logger.warn                              // 太旧或不匹配
-if (taskId 已在该桶的已完成记录里): 直接返回              // 幂等
+if (taskId 已在该桶的 tasks 里): 直接返回                 // 幂等
 if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 写入对应桶：
-    当天    → completedTaskIds.push(taskId); todaySeasonPoint += dailyChallengeSeasonPoint
-    history → history[0].rounds += 1; history[0].seasonPoint += dailyChallengeSeasonPoint
+    当天    → completedTasks.push({ taskId, star }); todaySeasonPoint += dailyChallengeSeasonPoint
+    history → history[0].tasks.push({ taskId, star }); history[0].seasonPoint += dailyChallengeSeasonPoint
 写回
 ```
 
@@ -710,7 +765,7 @@ if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 
 ### 8.3.2 其他
 
-`history[0]` 的幂等判定用 `rounds` 计数无法区分具体 taskId，因此跨天回写路径下重复上报会重复计数。这是可接受的：跨天迟到本身罕见，且只影响 history 的统计数字，不影响积分。
+`history[]` 存的是 `tasks` 数组而非轮数计数，因此跨天回写路径与当天路径拥有**完全相同的幂等性**——两边都按 taskId 去重。（早期设计里 history 只存 `rounds: number`，跨天重复上报会重复计数；改存 taskIds 后这个缺口自然消失。）
 
 **每个玩家独立事务，独立 try/catch。** 现有实现里任何一个玩家抛异常会中断整局结算并留下半写状态，Phase1 必须逐人隔离。
 
@@ -755,7 +810,7 @@ api/src/daily-challenge/
 └── daily-challenge.module.ts
 ```
 
-`ChallengeDayClockService` 保留在 `api/src/util/`（现有位置），去掉 `closesAt` 和 120 分钟宽限——那是共同任务封口用的。
+`ChallengeDayClockService` **不保留**。去掉 `closesAt` 和 120 分钟宽限（那是共同任务封口用的）之后，它只剩一个日期格式化函数，而这个函数与 `PlayerRankingService.getDateString()` 完全重复。做法是把那个私有方法提成共享工具，两边都用，日界口径也就天然一致了。
 
 现有 11599 行（含 2837 行任务池和全部测试）预计降到约 350 行实现 + 任务池 + 测试。
 
@@ -763,21 +818,24 @@ api/src/daily-challenge/
 
 **Unit**
 
-- 生成器：同一 `(dayId, steamId, round)` 结果稳定；不同 round 结果不同；固定 2 通用 + 1 英雄；同轮两个通用任务不同类；星级落在 1~3
-- 星级目标：`Math.round(target * multiplier)`，毫秒类取整到整千，1★/2★/3★ 递增
-- 跨天重置：`dayId` 变化时汇总进 history、裁到 30 条、`completedTaskIds` 与 `todaySeasonPoint` 清空；当天无完成时不写 history 条目
-- 轮次记录：已完成 3 轮时丢弃；掉线玩家跳过；`todaySeasonPoint` 累加客户端上报的奖励值
+- 生成器：同一 `(dayId, steamId, round, completedTaskIds)` 结果稳定；不同 round 结果不同；固定 2 通用 + 1 英雄；同轮两个通用任务不同类；星级落在 1~3
+- 生成器去重：传入 `completedTaskIds` 后，候选里不含其中任何一个；同一 taskId 不因星级不同而漏掉；未完成的 taskId 不受影响
+- 星级目标：小整数走加法档、大数值走乘法档，两条路径下 1★/2★/3★ 都严格递增（见 3.3）
+- 跨天重置：`dayId` 变化时把 `completedTasks` 整体挪进 history、裁到 30 条、当日字段清空；当天无完成时不写 history 条目
+- 轮次记录：已完成 3 轮时丢弃；掉线玩家跳过；`completedTasks` 记下 `star`；`todaySeasonPoint` 累加客户端上报的奖励值
 - 幂等：同一 taskId 重复上报不重复计数、不重复加 `todaySeasonPoint`
-- 跨天迟到：`dayId === history[0].dayId` 时正确回写
+- 跨天迟到：`dayId === history[0].dayId` 时正确回写，且**同样按 taskId 幂等**
 - `battlePoints` cap：超限截断到 500 且不丢弃该玩家结算
 - 配置守卫：任务池 id 唯一、英雄任务必带 `heroName`、通用任务不带、`target` 为正整数、`metric` 在 enum 内
 
 **E2E**（`api/test/daily-challenge.e2e-spec.ts`）
 
 - 完整一天：开局 → 上报完成第 1 轮 → 再开局拿到第 2 轮候选 → 完成 → 第 3 轮 → 三轮完成后 `candidates` 为空
-- 跨天：第 1 天完成 2 轮 → 第 2 天开局，history 出现第 1 天条目、当日字段清空
+- 轮间去重：第 2、3 轮的候选里不出现前面已完成的 taskId
+- 跨天：第 1 天完成 2 轮 → 第 2 天开局，history 出现第 1 天条目（含 `tasks` 明细）、当日字段清空
+- 旧客户端兼容：不带任何 `dailyChallenge*` 字段的 `/game/end`，既不创建也不修改文档（见 12.4）
 - 跨天迟到局：第 2 天已开局后，上报 `dailyChallengeDayId = 第 1 天` 的 `/game/end`，正确回写 `history[0]`
-- `/game/end` 重试：同一 taskId 调两次，`completedTaskIds` 不重复
+- `/game/end` 重试：同一 taskId 调两次，`completedTasks` 不重复
 - 一个玩家数据异常不影响同局其他玩家结算
 - `battlePoints = 580` 时玩家仍完成基础结算，`seasonPointTotal` 只 +500
 
@@ -847,7 +905,7 @@ healing                         44
 
 #### 该工作项还需一并决定
 
-- **通用任务的数量与难度档划分**：原 19 条一一对应 19 个 metric，现在只剩 10 个 metric，可能需要同一 metric 配多个难度档
+- **通用任务的数量与难度档划分**：原 19 条一一对应 19 个 metric（id 即 `general_<metric>`），现在只剩 10 个 metric，可能需要同一 metric 配多个难度档。**8.1 的轮间去重给了这条一个下限**：一天要抽 6 个通用候选（3 轮 × 2），且已完成的会退出池子，池子太小会让第 3 轮的可选面过窄
 - **英雄专属任务规模**：保持 127 × 3 = 381 条，还是降到 127 × 1（12.1 若发现冷门英雄样本量不足，127 × 1 需要的样本更少）
 - **数值标定**：原 `target` 全部按跨局累积标定（如 `general_hero_damage: 500000`），改成单局达标后按 12.1 的分位数重标（例如 2★ = P50，1★ = P30，3★ = P75）
 
@@ -863,7 +921,7 @@ healing                         44
 
 与 5A.4（#1050 建议 game 先行）**相反**。Phase1 必须 API 先上线，中间会有一段旧 game 对新 API 的窗口期。
 
-**API 新 / game 旧是安全的**：三个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyChallengeTaskId` 与 `dailyChallengeDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyChallenges` 被旧客户端忽略。窗口期会创建出 `completedTaskIds` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
+**API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyChallengeTaskId` 与 `dailyChallengeDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyChallenges` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
 
 唯一需要注意的是 GA4 的 `point_daily_challenge` **要用 `?? 0` 兜底**（与 5A.2A 末尾针对 `stuns` 的结论相反）：窗口期玩家确实没有挑战积分，0 语义正确；若留空则 BigQuery 里 `points - NULL = NULL`，整个窗口期的对局积分维度算不出来。
 
@@ -882,8 +940,9 @@ healing                         44
 - **模式门控**：按 3.5 判定本局是否启用；禁用时不展示候选、不判定、不计分、不上报
 - **指标读取**：一个函数，按 `metric` 分发到对应的 `PlayerResource` 调用，局内展示与结算判定时各调一次
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
-- **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
-- `game-end.ts`：`players[i]` 多发 `dailyChallengeTaskId` / `stuns` / `roshanKills`，顶层多发 `dailyChallengeDayId`
+- **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`（加在行为分倍率之后，见 5A.2A）
+- **未知候选保护**：按 5.4，不认识的 `taskId` / `metric` 不得崩溃，不展示或标为不可完成，且不判定不上报
+- `game-end.ts`：`players[i]` 多发 `dailyChallengeTaskId` / `dailyChallengeStar` / `dailyChallengeSeasonPoint`（`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyChallengeDayId`
 
 ### 13.3 删除全部采集模块
 
