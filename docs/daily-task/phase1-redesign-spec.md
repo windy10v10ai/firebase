@@ -155,7 +155,7 @@ function isDailyTaskEnabled(difficulty: number, isLocalhost: boolean): boolean {
 
 #### 客户端与服务端的分工
 
-禁用时客户端：**不展示候选、不判定、不计分、不上报 `dailyTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
+禁用时客户端：**不展示候选、不判定、不计分、不上报 `dailyTask`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
 
 服务端不参与判定：`/game/start` 照常下发候选（此时难度可能还在投票中），由客户端在局内决定是否启用。
 
@@ -331,7 +331,7 @@ GetRoshanKills(playerId: PlayerID): number;
 
 - **不得崩溃、不得中断整组候选的展示**——一个候选不认识不能连累另外两个
 - 处理方式二选一：**不展示该候选**（该轮退化为二选一），或**展示但标为不可完成**（本地化文案缺失时同样按此处理）
-- 无论哪种，都**不判定、不计分、不上报** `dailyTaskId`
+- 无论哪种，都**不判定、不计分、不上报** `dailyTask`
 - 记一条客户端日志，便于发现任务池与客户端版本脱节
 
 服务端不需要任何配合：它不认识 metric，也不校验 taskId。
@@ -406,7 +406,7 @@ const rawBattlePoints = this.CalculatePlayerBattlePoints(playerDto, difficultyMu
 const conductMultiplier = this.GetConductMultiplier(conductPoint, isTeamGame);
 const settledPoints = Math.max(0, Math.round(rawBattlePoints * conductMultiplier));
 
-playerDto.dailyTaskSeasonPoint = dcPoints;      // 单独字段，不入账
+playerDto.dailyTask = { taskId, star, seasonPoint: dcPoints };  // 不入账
 playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 ```
 
@@ -418,7 +418,7 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 
 | 参数 | 来源 | 说明 |
 | --- | --- | --- |
-| `point_daily_task` | `player.dailyTaskSeasonPoint ?? 0` | 缺省兜底为 0，理由见下 |
+| `point_daily_task` | `player.dailyTask?.seasonPoint ?? 0` | 缺省兜底为 0，理由见下 |
 
 对局积分 = `points - point_daily_task`。
 
@@ -450,7 +450,7 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 | --- | --- | --- |
 | `stuns` | `PlayerResource.GetStuns()` | ✅ #1050 已合并 |
 | `roshanKills` | `PlayerResource.GetRoshanKills()` | ✅ #1050 已合并 |
-| `dailyTaskSeasonPoint` | `/game/start` 下发的候选奖励 | Phase1 |
+| `dailyTask`（含 `seasonPoint`）| `/game/start` 下发的候选奖励 | Phase1 |
 
 其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，#1050 已把它们打包进 `player_stats` 参数。
 
@@ -631,38 +631,45 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.2 `POST /game/end`
 
-请求：`GameEndPlayerDto` 新增三个可选字段（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。三个字段要么同时发送、要么都不发送。
+请求：`GameEndPlayerDto` 新增**一个可选的嵌套对象**（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。
 
-挑战积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyTaskSeasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
+任务积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyTask.seasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
 ```ts
-export class GameEndPlayerDto {
-  // ... 现有字段不变，battlePoints 已含每日挑战奖励
-  /** 本局完成的每日挑战任务；未完成时不发送 */
-  @ApiProperty({ required: false })
-  @IsOptional()
+export class DailyTaskResultDto {
+  /** 本局完成的每日任务 */
+  @ApiProperty()
   @IsString()
-  dailyTaskId?: string;
+  @IsNotEmpty()
+  taskId: string;
 
-  /** 该候选的星级 1~3，取自 /game/start 下发的候选；与 taskId 同时发送 */
-  @ApiProperty({ required: false })
-  @IsOptional()
+  /** 该候选的星级 1~3 */
+  @ApiProperty()
   @IsInt()
   @Min(1)
   @Max(3)
-  dailyTaskStar?: number;
+  star: number;
 
-  /** 该任务的奖励值，取自 /game/start 下发的候选；与 taskId 同时发送 */
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber()
+  /** 该任务的奖励值，取自 /game/start 下发的候选 */
+  @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
   @Min(0)
-  dailyTaskSeasonPoint?: number;
+  seasonPoint: number;
+}
+
+export class GameEndPlayerDto {
+  // ... 现有字段不变，battlePoints 已含每日任务奖励
+  /** 未完成任务时整个对象不发送；发送则三个字段必须齐全 */
+  @ApiProperty({ type: DailyTaskResultDto, required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DailyTaskResultDto)
+  dailyTask?: DailyTaskResultDto;
 }
 
 export class GameEndDto extends EventBaseDto {
   // ... 现有字段不变
-  /** 本局归属的挑战日，取自 /game/start 响应 */
+  /** 本局归属的任务日，取自 /game/start 响应 */
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
@@ -671,7 +678,25 @@ export class GameEndDto extends EventBaseDto {
 }
 ```
 
-`dailyTaskStar` 与 `dailyTaskSeasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `completedTasks` / `todaySeasonPoint` 里记两个数，而客户端已经知道它们（都是 `/game/start` 下发的），重算一遍没有意义。`seasonPoint` 记的是**实际入账数额**而非由 `star` 查表得出，这样奖励表将来调整不会让历史记录的分数跟着变。
+#### 为什么用嵌套 DTO 而不是三个扁平可选字段
+
+"三个字段要么全发、要么全不发"是一条真实约束。写成三个 `@IsOptional()` 的扁平字段时它只是注释，写成嵌套对象则由 `@ValidateNested()` 强制执行——**外层可选，内层必选**，正好表达这个语义。仓库已有先例：`GameEndDto.gameOptions` 就是嵌套 DTO。
+
+顺带消掉了字段名里的手动前缀：`dailyTask.taskId` 而不是 `dailyTaskTaskId`，嵌套本身就是命名空间（见 10.1）。
+
+**代价是校验失败会 400，而 400 会打掉整局所有玩家的结算**，与第 9 节"每日任务永不阻断结算"的原则相冲突。仍然选嵌套，因为：
+
+- 风险是理论上的——客户端这个对象只可能整体来自 `/game/start` 下发的候选，构造上产生不出"有 taskId 没 star"的中间态
+- 扁平可选的失败模式更糟：校验通过，服务端把 `star: undefined` 静默写进 Firestore，没有任何信号
+- 400 是响的，DOTA2 强制更新，坏版本几分钟内暴露
+
+**同时保留 8.3 的存在性检查**（三个字段齐全才记录，否则 `logger.warn` 跳过）。两者防的不是同一件事：校验防畸形请求，运行时检查防"校验被绕过时写进半条记录"。
+
+**注意别照抄 `gameOptions` 的写法**：它只有 `@Type()` 没有 `@ValidateNested()`，内层字段也没有任何校验器，等于纯结构嵌套、不做校验。这里要显式加 `@ValidateNested()`。
+
+`dailyTaskDayId` 留在 `GameEndDto` 顶层而不进 `dailyTask`：它每局一个值，放进 per-player 对象会在 10 个玩家上重复 10 次。
+
+`star` 与 `seasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `completedTasks` / `todaySeasonPoint` 里记两个数，而客户端已经知道它们（都是 `/game/start` 下发的），重算一遍没有意义。`seasonPoint` 记的是**实际入账数额**而非由 `star` 查表得出，这样奖励表将来调整不会让历史记录的分数跟着变。
 
 现有的 `DailyChallengeMatchContributionDto`（66 行，含 `schemaVersion` / `dataVersion` / `personalMetrics` / `globalMetrics`）整个删除。
 
@@ -754,7 +779,7 @@ if (文档.dayId !== today):
 
 ### 8.3 `/game/end` 流程
 
-对每个满足条件的玩家（`steamId > 0`、`!isDisconnected`、`dailyTaskId` 非空、`dailyTaskDayId` 非空）跑一个事务：
+对每个满足条件的玩家（`steamId > 0`、`!isDisconnected`、`dailyTask` 存在、`dailyTaskDayId` 非空）跑一个事务：
 
 ```
 读文档
@@ -765,8 +790,8 @@ if (文档.dayId !== today):
 if (taskId 已在该桶的 tasks 里): 直接返回                 // 幂等
 if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 写入对应桶：
-    当天    → completedTasks.push({ taskId, star }); todaySeasonPoint += dailyTaskSeasonPoint
-    history → history[0].tasks.push({ taskId, star }); history[0].seasonPoint += dailyTaskSeasonPoint
+    当天    → completedTasks.push({ taskId, star }); todaySeasonPoint += dailyTask.seasonPoint
+    history → history[0].tasks.push({ taskId, star }); history[0].seasonPoint += dailyTask.seasonPoint
 写回
 ```
 
@@ -844,7 +869,8 @@ api/src/daily-task/
 | `DailyChallengeHistoryEntry` | `DailyTaskHistoryEntry` |
 | `ChallengeMetric` / `ChallengeScope` | `TaskMetric` / `TaskScope` |
 | `Candidate` | `TaskCandidate` |
-| `dailyChallengeTaskId` / `…Star` / `…SeasonPoint` / `…DayId` | `dailyTaskId` / `dailyTaskStar` / `dailyTaskSeasonPoint` / `dailyTaskDayId` |
+| `dailyChallengeTaskId` / `…Star` / `…SeasonPoint` | 合并为嵌套对象 `dailyTask: { taskId, star, seasonPoint }`（见 7.2）|
+| `dailyChallengeDayId` | `dailyTaskDayId`（留在 `GameEndDto` 顶层）|
 | `/game/start` 响应 `dailyChallenges` | `dailyTasks` |
 | GA4 参数 `point_daily_challenge` | `point_daily_task` |
 
@@ -973,7 +999,7 @@ healing                         44
 
 与 5A.4（#1050 建议 game 先行）**相反**。Phase1 必须 API 先上线，中间会有一段旧 game 对新 API 的窗口期。
 
-**API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyTaskId` 与 `dailyTaskDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyTasks` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
+**API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyTask` 与 `dailyTaskDayId` 同时存在才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyTasks` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
 
 GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即可——窗口期玩家确实没有任务积分，0 语义正确，不需要为窗口期做任何特殊处理。
 
@@ -994,7 +1020,7 @@ GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即�
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`（加在行为分倍率之后，见 5A.2A）
 - **未知候选保护**：按 5.4，不认识的 `taskId` / `metric` 不得崩溃，不展示或标为不可完成，且不判定不上报
-- `game-end.ts`：`players[i]` 多发 `dailyTaskId` / `dailyTaskStar` / `dailyTaskSeasonPoint`（`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyTaskDayId`
+- `game-end.ts`：`players[i]` 多发 `dailyTask` 对象（`taskId` / `star` / `seasonPoint` 必须齐全，缺一不可，否则整局结算会被 400；`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyTaskDayId`
 
 ### 13.3 删除全部采集模块
 
