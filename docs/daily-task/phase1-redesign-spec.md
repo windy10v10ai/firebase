@@ -909,6 +909,65 @@ api/src/daily-task/
 
 GA4 的 `point_daily_task` 现在改是免费的——自定义维度还没注册，一旦注册并开始有数据，改名就要同时动看板和历史查询。
 
+### 10.2 `config/tasks.ts` 的最终结构
+
+任务**内容**的重新设计是独立工作项（见 12.2），但**结构**在本 spec 内定死：
+
+```ts
+// api/src/daily-task/config/tasks.ts
+import { TaskMetric, TaskScope } from '../types/daily-task.types';
+
+export interface TaskDefinition {
+  /** general_<metric> | hero_<hero>_<1|2|3> */
+  id: string;
+  scope: TaskScope;
+  metric: TaskMetric;
+  /** 2★ 基准值；1★ / 3★ 由 3.3 的加法/乘法双档推导，不落库、不写进配置 */
+  target: number;
+  /** 仅 PERSONAL_HERO 有 */
+  heroName?: string;
+}
+
+export const ROUNDS_PER_DAY = 3;
+export const STAR_REWARDS = { 1: 60, 2: 80, 3: 100 } as const;
+export const STAR_TARGET_MULTIPLIERS = { 1: 0.75, 2: 1, 3: 1.5 } as const;
+export const SMALL_TARGET_THRESHOLD = 10;
+
+export const DAILY_TASKS: TaskDefinition[] = [
+  // 通用任务：一个 metric 至少一条，id 为 general_<metric>
+  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 20 },
+  // ...
+  // 英雄任务：127 英雄 × N 条，id 为 hero_<hero>_<序号>
+  {
+    id: 'hero_lina_1',
+    scope: TaskScope.PERSONAL_HERO,
+    metric: TaskMetric.HERO_DAMAGE,
+    target: 550000,
+    heroName: 'npc_dota_hero_lina',
+  },
+];
+```
+
+**条目形状不变**——现有的 `{ id, scope, metric, target, heroName? }` 已经是最小集，五个字段每个都在用。
+
+**拆掉底部的 `DailyChallengeConfigSnapshot` 包装对象**，改为模块级 `const`。两个原因：仓库规范首选模块级 `SCREAMING_SNAKE_CASE` 常量；而那个包装对象存在的理由是配合 `configVersion` 做整体快照，`configVersion` 在 6.2 已经删了。
+
+包装对象里的字段处置：
+
+| 字段 | 处置 |
+| --- | --- |
+| `personalRoundsPerDay: 3` | → `ROUNDS_PER_DAY` |
+| `personalStarRewards: {1:80, 2:100, 3:120}` | → `STAR_REWARDS`，数值改为 **60 / 80 / 100** |
+| `personalDefaultStarMultipliers` | → `STAR_TARGET_MULTIPLIERS`，另加 `SMALL_TARGET_THRESHOLD`（见 3.3）|
+| `personalStarWeights: {1:1,2:1,3:1}` | **删除**——星级改为每轮 1/2/3 各一个的固定分配，没有权重可言（见 3.3）|
+| `globalRewardTiers` | 删除（Phase3）|
+| `refreshCostsMemberPoint` | 删除（付费刷新整个删）|
+| `streakMilestones` | 删除（Phase2）|
+
+**metric 命名去掉单位后缀**：`SLOW_DURATION_MS` 这类 `_MS` 结尾的 metric 随 5.2 一起删除，保留的 `STUN_DURATION` 单位是**秒**，不带后缀。单位由 metric 在客户端映射到文案，不进配置。
+
+配置守卫测试（`tasks.spec.ts`）断言：id 唯一、`PERSONAL_HERO` 必带 `heroName`、`PERSONAL_GENERAL` 必不带、`target` 为正整数、`metric` 在 enum 内、同一英雄的多条任务 metric 不重复。
+
 `ChallengeDayClockService` **不保留**。去掉 `closesAt` 和 120 分钟宽限（那是共同任务封口用的）之后，它只剩一个日期格式化函数，而这个函数与 `PlayerRankingService.getDateString()` 完全重复。做法是把那个私有方法提成共享工具，两边都用，日界口径也就天然一致了。
 
 现有 11599 行（含 2837 行任务池和全部测试）预计降到约 350 行实现 + 任务池 + 测试。
