@@ -106,50 +106,64 @@ return Math.max(1, Math.round(scaled));
 
 ### 3.5 生效条件（模式门控）
 
-自定义选项会让 target 失去意义——5 倍金钱下「打 50 万英雄伤害」是白送。现有 `battlePoints` 对自定义模式用的是**倍率缩放**（`GetCustomModeMultiplier`），这对固定 target 的任务无效，因此每日挑战需要一个**二值门控**。
+自定义选项会让 target 失去意义——5 倍金钱下「打 50 万英雄伤害」是白送。**只有预设难度 1~8 的对局启用每日任务，自定义模式一律禁用。**
 
-判定在客户端，复用现有函数：
+判定在客户端：
 
 ```ts
-const DAILY_TASK_MIN_MULTIPLIER = 1;
-const INSTANT_RESPAWN_THRESHOLD = 40;
+const PRESET_DIFFICULTY_MIN = 1;
+const PRESET_DIFFICULTY_MAX = 8;
 
-function isDailyTaskEnabled(option: Option, difficulty: number, isLocalhost: boolean): boolean {
-  // 秒活让击杀/伤害类任务失去意义，单独拦截：
-  // 它在倍率里只乘 0.7，配合加难选项后仍可能高于阈值
-  if (option.respawnTimePercentage < INSTANT_RESPAWN_THRESHOLD) {
+function isDailyTaskEnabled(difficulty: number, isLocalhost: boolean): boolean {
+  if (GameRules.IsCheatMode() || isLocalhost) {
     return false;
   }
-  // 作弊模式与 localhost 返回 0，自定义模式走 GetCustomModeMultiplier
-  return (
-    GameEndPoint.GetDifficultyMultiplier(difficulty, isLocalhost, option) >=
-    DAILY_TASK_MIN_MULTIPLIER
-  );
+  return difficulty >= PRESET_DIFFICULTY_MIN && difficulty <= PRESET_DIFFICULTY_MAX;
 }
 ```
 
-阈值 1.0 的依据：全默认选项下 `GetCustomModeMultiplier` 恰好等于 1.0（`1 → ×1.1`（金钱倍率 < 1.3）`→ -0.1`（塔强度 ≤ 150）`→ ×1.0`（敌方 10 人）），所以这条线正好放行"没改任何设置"、拦下"改简单了"。
+#### 为什么一个 difficulty 判断就够
 
-| 场景 | 倍率 | 每日挑战 |
+难度取值由**地图**锁死（`content/panorama/layout/custom_game/team_select/team_select.js`）：
+
+| 地图 | `difficulty` | 自定义选项下拉 |
 | --- | --- | --- |
-| 全默认 | 1.0 | 生效 |
-| 预设难度 1~8 | 1.2 ~ 2.4 | 生效 |
-| 敌方金钱 20 倍（更难）| 2.3 | 生效 |
-| 玩家金钱 5 倍 | 0.1 | 禁用 |
-| 中路模式 / 固定技能 | 0.8 | 禁用 |
-| 敌方人数 5 | 0.5 | 禁用 |
-| 复活时间「慢」(120) | 1.0 | 生效 |
-| 复活时间「快」(50) | 全默认下 0.9 | 禁用（走倍率规则）|
-| 复活时间「秒活」(10) | — | 禁用（独立规则，任意加难组合都拦）|
-| 作弊模式 / localhost | 0 | 禁用 |
+| `dota` | 1~5 | disabled |
+| `hard` | 6~8 | disabled |
+| `custom` | **只能是 0** | 解锁 |
 
-禁用时客户端的行为：**不展示候选、不判定、不计分、不上报 `dailyTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
+选项下拉的 `enabled` 就是靠"难度是否为 0"控制的（见 `content/panorama/scripts/custom_game/game_mode.js` 中 `ApplyCustomPresetToDropdowns` 的调用条件）。因此：
 
-服务端不参与这个判定：`/game/start` 照常下发候选（此时对局选项可能尚未最终确定），由客户端在局内决定是否启用。
+- **`difficulty ∈ 1..8` 恰好等价于「预设难度 + 选项全默认」**，不存在"投了难度 3 又把金钱调 5 倍"这种组合
+- `GetDifficultyMultiplier` 的 `switch` 命中 1~8 时压根不读 `option`，`GetCustomModeMultiplier` 只在 custom 地图（difficulty 0）上执行
 
-**阈值 40 的依据**：复活时间下拉只有四档——120（慢）/ 100（正常）/ 50（快）/ 10（秒活）（`content/panorama/layout/custom_game/custom_loading_screen.xml`）。`< 40` 落在 10 与 50 之间，精确命中秒活那一档，且比 `<= 10` 多留余量——将来若加入 25、30 之类的新档位会被一并拦下。
+| 场景 | 每日任务 |
+| --- | --- |
+| dota 地图，难度 1~5 | 生效 |
+| hard 地图，难度 6~8 | 生效 |
+| custom 地图（自定义模式），无论选项如何 | 禁用 |
+| 作弊模式 / localhost | 禁用 |
 
-**「快」(50) 不走这条独立规则**，交给倍率规则处理：它在 `GetCustomModeMultiplier` 里乘 0.9，全默认下得 0.9 < 1.0 即已禁用；只有配上加难选项把倍率顶回 1.0 以上才放行，这与其他自定义选项的处理方式一致。独立规则只留给秒活，是因为秒活让击杀/伤害类任务彻底失去意义，不该被加难选项补偿掉。
+#### 为什么不用难度倍率做门控
+
+早期设计用 `GetDifficultyMultiplier(...) >= 1` 当门控，有两个问题：
+
+1. **它多放行了 custom 地图。** difficulty 为 0 时走 `GetCustomModeMultiplier`，一字未改得 1.0、敌方金钱 20 倍得 2.3，都会通过——而这些正是要拦的自定义模式。
+2. **倍率是积分缩放函数，不是指标分布保持函数。** 敌方金钱 20 倍倍率 2.3（更难，加分更多），但英雄伤害的可得量被推高数倍（任务反而更容易）。拿它当二值门控是把两件事混为一谈。
+
+改成白名单后，`DAILY_TASK_MIN_MULTIPLIER`、倍率场景表、以及**秒活的独立规则**全部不再需要——复活时间下拉只在 custom 地图上可用，而 custom 已经整个禁用了。
+
+#### 客户端与服务端的分工
+
+禁用时客户端：**不展示候选、不判定、不计分、不上报 `dailyTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
+
+服务端不参与判定：`/game/start` 照常下发候选（此时难度可能还在投票中），由客户端在局内决定是否启用。
+
+#### 标定样本因此天然对齐
+
+`game_end_player` 已经在发 `difficulty`（`api/src/analytics/analytics.service.ts`），12.1 的标定查询直接 `WHERE difficulty BETWEEN 1 AND 8` 就得到与线上启用条件完全一致的样本，不需要解析 `game_options`，也不需要新增 GA4 参数。
+
+**dota(1~5) 与 hard(6~8) 不做区分，1~8 共用同一套任务与同一套 target。** 两张地图的 bot 强度不同、指标分布也不同，但分层会让任务池和标定复杂度翻倍，收益不足以抵消。
 
 ### 3.6 已删除的机制
 
@@ -168,7 +182,7 @@ function isDailyTaskEnabled(option: Option, difficulty: number, isLocalhost: boo
 
 ### 4.1 客户端（game 仓库）
 
-- **模式门控**：按 3.5 判定本局是否启用每日挑战
+- **模式门控**：按 3.5 判定本局是否启用——只认预设难度 1~8，自定义模式一律禁用
 - **指标读取**：10 个指标全部走 `PlayerResource` 原生 API，局内展示与结算判定时各读一次。**没有采集代码**——无定时器、无 filter、无高频事件监听，见 5.2 / 5.2A
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`
@@ -883,6 +897,10 @@ Phase1 不是一个可以一次做完的改动，它有一条硬顺序：**先�
 
 判断标准不是总局数，而是**冷门英雄的样本量**：英雄专属任务按英雄标定分位数，样本要按英雄切分，127 个英雄里最冷门的那批是瓶颈。若冷门英雄迟迟凑不够，12.2 里「127 × 3 还是 127 × 1」的选择就多了一条依据——127 × 1 需要的样本量更少。
 
+**样本范围：`WHERE difficulty BETWEEN 1 AND 8`**，与 3.5 的启用条件完全一致——自定义模式的对局不启用每日任务，其指标分布也不该进入标定。`difficulty` 是 `game_end_player` 的现有参数，不需要额外改动。
+
+dota(1~5) 与 hard(6~8) **合并标定，不分层**（见 3.5）：1~8 共用同一套任务与同一套 target。这也意味着冷门英雄的样本量按合并后计算，比分层时更容易凑够。
+
 ### 12.2 任务池重新设计（独立工作项，本 spec 不覆盖）
 
 404 条任务里有 204 条用了被删除的指标。但**实际需要人工决定的远没有那么多**——多数英雄的另外两条任务不受影响，机械替换即可。
@@ -965,7 +983,7 @@ healing                         44
 
 ### 13.2 新增
 
-- **模式门控**：按 3.5 判定本局是否启用；禁用时不展示候选、不判定、不计分、不上报
+- **模式门控**：按 3.5 判定本局是否启用（`difficulty` 落在 1~8 之外即禁用）；禁用时不展示候选、不判定、不计分、不上报
 - **指标读取**：一个函数，按 `metric` 分发到对应的 `PlayerResource` 调用，局内展示与结算判定时各调一次
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`（加在行为分倍率之后，见 5A.2A）
