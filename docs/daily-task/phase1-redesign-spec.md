@@ -4,6 +4,8 @@
 状态：待评审
 替代：PR #1040（firebase）+ PR #2310（game）的后端设计
 
+> 标识符统一用 `task`，不再用 `challenge`（见 10.1）。「每日挑战」在本文中指这个**功能**，也是界面显示名；代码里的模块、类型、字段一律 `dailyTask` / `task`。
+
 ## 1. 背景
 
 现有实现把四个玩法（个人任务、全服共同任务、连续完成、付费刷新）一次性做完，代价是：
@@ -109,10 +111,10 @@ return Math.max(1, Math.round(scaled));
 判定在客户端，复用现有函数：
 
 ```ts
-const DAILY_CHALLENGE_MIN_MULTIPLIER = 1;
+const DAILY_TASK_MIN_MULTIPLIER = 1;
 const INSTANT_RESPAWN_THRESHOLD = 40;
 
-function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost: boolean): boolean {
+function isDailyTaskEnabled(option: Option, difficulty: number, isLocalhost: boolean): boolean {
   // 秒活让击杀/伤害类任务失去意义，单独拦截：
   // 它在倍率里只乘 0.7，配合加难选项后仍可能高于阈值
   if (option.respawnTimePercentage < INSTANT_RESPAWN_THRESHOLD) {
@@ -121,7 +123,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
   // 作弊模式与 localhost 返回 0，自定义模式走 GetCustomModeMultiplier
   return (
     GameEndPoint.GetDifficultyMultiplier(difficulty, isLocalhost, option) >=
-    DAILY_CHALLENGE_MIN_MULTIPLIER
+    DAILY_TASK_MIN_MULTIPLIER
   );
 }
 ```
@@ -141,7 +143,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 | 复活时间「秒活」(10) | — | 禁用（独立规则，任意加难组合都拦）|
 | 作弊模式 / localhost | 0 | 禁用 |
 
-禁用时客户端的行为：**不展示候选、不判定、不计分、不上报 `dailyChallengeTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
+禁用时客户端的行为：**不展示候选、不判定、不计分、不上报 `dailyTaskId`**。服务端因此不会记录轮次，玩家**不损失当天的轮次机会**——下一局正常模式仍然面对同一组候选。
 
 服务端不参与这个判定：`/game/start` 照常下发候选（此时对局选项可能尚未最终确定），由客户端在局内决定是否启用。
 
@@ -183,7 +185,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 
 `/game/end` 上服务端是纯记录器——不重算候选、不验证 taskId、不验证数值、不发放积分（见 8.3.1）。
 
-**服务端不再需要**：`ChallengeMetric` → `GameEndPlayerDto` 字段映射、`DAILY_CHALLENGE_METRIC_MAX_MATCH_CONTRIBUTION`、`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION`、`DAILY_CHALLENGE_METRIC_UNIT`、达标判定逻辑、赛季积分发放路径。
+**服务端不再需要**：`TaskMetric` → `GameEndPlayerDto` 字段映射、`DAILY_CHALLENGE_METRIC_MAX_MATCH_CONTRIBUTION`、`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION`、`DAILY_CHALLENGE_METRIC_UNIT`、达标判定逻辑、赛季积分发放路径。
 
 **候选生成必须留在服务端**——否则玩家可以自己宣称抽到了三个最容易的任务。这是唯一不可下放的部分。`target` 和 `rewardSeasonPoint` 由服务端随候选下发，客户端只是执行服务端定的规则，**任务池仍然是单一来源**，不存在两端各维护一份的漂移风险。
 
@@ -195,7 +197,7 @@ function isDailyChallengeEnabled(option: Option, difficulty: number, isLocalhost
 
 在这条约束下，只有能通过 `PlayerResource` 在结算时刻一次读取的指标才能保留。此外语义重复的合并（`bot_kills` → `kills`，见 5.3）。
 
-服务端不看数值，指标多少对服务端没有成本——收敛完全是为了客户端性能。`ChallengeMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
+服务端不看数值，指标多少对服务端没有成本——收敛完全是为了客户端性能。`TaskMetric` enum 保留（候选要下发 metric 给客户端），`DAILY_CHALLENGE_METRIC_MIN_DATA_VERSION` / `_UNIT` / `_MAX_MATCH_CONTRIBUTION` 三张表全部删除。
 
 ### 5.1 指标清单
 
@@ -286,7 +288,7 @@ GetRoshanKills(playerId: PlayerID): number;
 
 #### 后果
 
-- `ChallengeMetric` 删除 `PHYSICAL_DAMAGE` / `MAGICAL_DAMAGE` / `PURE_DAMAGE`
+- `TaskMetric` 删除 `PHYSICAL_DAMAGE` / `MAGICAL_DAMAGE` / `PURE_DAMAGE`
 - 客户端删除 `daily-challenge-damage-observer.ts`、`daily-challenge-damage-event.ts`
 - 删除后 `telemetry.ts` 再无任何输入源，`accumulator.ts` 再无写入方，`ownership.ts` 再无调用方——三者一并删除
 - **客户端的采集代码归零**，见 13.3
@@ -303,7 +305,7 @@ GetRoshanKills(playerId: PlayerID): number;
 - `general_bot_kills`（50）删除，合并进 `general_kills`
 - `hero_sniper_3`（50）、`hero_phantom_assassin_2`（60）改用 `KILLS`
 - `global_bot_kills`（10000，Phase3）改为按 `kills` 全服累计
-- `ChallengeMetric.BOT_KILLS` 从 enum 删除
+- `TaskMetric.BOT_KILLS` 从 enum 删除
 - 客户端 `telemetry.ts` 的 `bot_kills` 计数分支删除
 - 三语资源里 3 条 `bot_kills` 文案删除
 
@@ -315,7 +317,7 @@ GetRoshanKills(playerId: PlayerID): number;
 
 - **不得崩溃、不得中断整组候选的展示**——一个候选不认识不能连累另外两个
 - 处理方式二选一：**不展示该候选**（该轮退化为二选一），或**展示但标为不可完成**（本地化文案缺失时同样按此处理）
-- 无论哪种，都**不判定、不计分、不上报** `dailyChallengeTaskId`
+- 无论哪种，都**不判定、不计分、不上报** `dailyTaskId`
 - 记一条客户端日志，便于发现任务池与客户端版本脱节
 
 服务端不需要任何配合：它不认识 metric，也不校验 taskId。
@@ -390,7 +392,7 @@ const rawBattlePoints = this.CalculatePlayerBattlePoints(playerDto, difficultyMu
 const conductMultiplier = this.GetConductMultiplier(conductPoint, isTeamGame);
 const settledPoints = Math.max(0, Math.round(rawBattlePoints * conductMultiplier));
 
-playerDto.dailyChallengeSeasonPoint = dcPoints;      // 单独字段，不入账
+playerDto.dailyTaskSeasonPoint = dcPoints;      // 单独字段，不入账
 playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 ```
 
@@ -402,9 +404,9 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 
 | 参数 | 来源 | 说明 |
 | --- | --- | --- |
-| `point_daily_challenge` | `player.dailyChallengeSeasonPoint` | Phase1 上线后才有值 |
+| `point_daily_task` | `player.dailyTaskSeasonPoint` | Phase1 上线后才有值 |
 
-对局积分 = `points - point_daily_challenge`。
+对局积分 = `points - point_daily_task`。
 
 行为分加成（`settledPoints - rawBattlePoints`）**不做统计**——现有总分维度已够用，不为此增加字段。
 
@@ -416,7 +418,7 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 
 不够时 `win_metrics`（与 `is_winner` 逐字重复）和 `hero_name_cn`（可从 `hero_name` 推导）是两个可回收的名额。
 
-**语义变更提醒**：每日挑战上线后 `battlePoints` 含挑战积分，`points` 的时间序列会在上线当天跳变。有 `point_daily_challenge` 可反推纯对局积分，但 BigQuery 看板说明里要标注这个断点。
+**语义变更提醒**：每日挑战上线后 `battlePoints` 含挑战积分，`points` 的时间序列会在上线当天跳变。有 `point_daily_task` 可反推纯对局积分，但 BigQuery 看板说明里要标注这个断点。
 
 **不做 `?? 0` 兜底。** `stuns` 的 `0` 表示「本局没控到人」，是真实观测值；若把「没上报」也记成 `0`，标定时无法区分两者，那批假零会把分位数整体拉低。字段缺失时 `JSON.stringify` 自动丢弃该 key，BigQuery 得到 `NULL`，标定查询用 `IS NOT NULL` 排除即可。
 
@@ -428,7 +430,7 @@ playerDto.battlePoints = settledPoints + dcPoints;   // 总额，实际入账
 | --- | --- | --- |
 | `stuns` | `PlayerResource.GetStuns()` | ✅ #1050 已合并 |
 | `roshanKills` | `PlayerResource.GetRoshanKills()` | ✅ #1050 已合并 |
-| `dailyChallengeSeasonPoint` | `/game/start` 下发的候选奖励 | Phase1 |
+| `dailyTaskSeasonPoint` | `/game/start` 下发的候选奖励 | Phase1 |
 
 其余 5 个缺失指标（`heroDamage` / `damageTaken` / `healing` / `lastHits` / `towerKills`）DTO 里已经有，#1050 已把它们打包进 `player_stats` 参数。
 
@@ -470,9 +472,9 @@ new ValidationPipe({ transform: true, forbidUnknownValues: false })
 每日挑战**只新增一个 collection**。赛季积分仍写入既有的 `Players` collection，且不新增写入点（见 7.2）。
 
 ```ts
-// api/src/daily-challenge/entities/player-daily-challenge.entity.ts
+// api/src/daily-task/entities/player-daily-task.entity.ts
 @Collection()
-export class PlayerDailyChallenge {   // → 集合名 PlayerDailyChallenges
+export class PlayerDailyTask {   // → 集合名 PlayerDailyTasks
   @Exclude()
   id: string;                 // = steamId.toString()
   steamId: number;
@@ -480,7 +482,7 @@ export class PlayerDailyChallenge {   // → 集合名 PlayerDailyChallenges
 
   completedTasks: CompletedTask[] = [];   // 今天已完成，0~3，顺序即轮次
   todaySeasonPoint: number;               // 今日累计，跨天时汇总进 history
-  history: DailyChallengeHistoryEntry[] = [];  // 最近 30 天，最新在前
+  history: DailyTaskHistoryEntry[] = [];  // 最近 30 天，最新在前
 
   updatedAt: Date;
 }
@@ -490,7 +492,7 @@ export interface CompletedTask {
   star: number;         // 1~3，用于历史面板还原目标与奖励
 }
 
-export interface DailyChallengeHistoryEntry {
+export interface DailyTaskHistoryEntry {
   dayId: string;
   tasks: CompletedTask[];  // 当天完成的任务，轮数 = length
   seasonPoint: number;     // 当天获得赛季积分
@@ -544,11 +546,11 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.1 `GET /game/start`
 
-响应新增（沿用现有 `dailyChallenges` 数组字段名，结构简化）：
+响应新增（沿用现有 `dailyTasks` 数组字段名，结构简化）：
 
 ```json
 {
-  "dailyChallenges": [
+  "dailyTasks": [
     {
       "steamId": 483215844,
       "dayId": "20260811",
@@ -611,7 +613,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 请求：`GameEndPlayerDto` 新增三个可选字段（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。三个字段要么同时发送、要么都不发送。
 
-挑战积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyChallengeSeasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
+挑战积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyTaskSeasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
 ```ts
 export class GameEndPlayerDto {
@@ -620,7 +622,7 @@ export class GameEndPlayerDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  dailyChallengeTaskId?: string;
+  dailyTaskId?: string;
 
   /** 该候选的星级 1~3，取自 /game/start 下发的候选；与 taskId 同时发送 */
   @ApiProperty({ required: false })
@@ -628,14 +630,14 @@ export class GameEndPlayerDto {
   @IsInt()
   @Min(1)
   @Max(3)
-  dailyChallengeStar?: number;
+  dailyTaskStar?: number;
 
   /** 该任务的奖励值，取自 /game/start 下发的候选；与 taskId 同时发送 */
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  dailyChallengeSeasonPoint?: number;
+  dailyTaskSeasonPoint?: number;
 }
 
 export class GameEndDto extends EventBaseDto {
@@ -645,11 +647,11 @@ export class GameEndDto extends EventBaseDto {
   @IsOptional()
   @IsString()
   @Matches(/^\d{8}$/)
-  dailyChallengeDayId?: string;
+  dailyTaskDayId?: string;
 }
 ```
 
-`dailyChallengeStar` 与 `dailyChallengeSeasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `completedTasks` / `todaySeasonPoint` 里记两个数，而客户端已经知道它们（都是 `/game/start` 下发的），重算一遍没有意义。`seasonPoint` 记的是**实际入账数额**而非由 `star` 查表得出，这样奖励表将来调整不会让历史记录的分数跟着变。
+`dailyTaskStar` 与 `dailyTaskSeasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `completedTasks` / `todaySeasonPoint` 里记两个数，而客户端已经知道它们（都是 `/game/start` 下发的），重算一遍没有意义。`seasonPoint` 记的是**实际入账数额**而非由 `star` 查表得出，这样奖励表将来调整不会让历史记录的分数跟着变。
 
 现有的 `DailyChallengeMatchContributionDto`（66 行，含 `schemaVersion` / `dataVersion` / `personalMetrics` / `globalMetrics`）整个删除。
 
@@ -690,7 +692,7 @@ generateCandidates(
   steamId: number,
   round: number,
   completedTaskIds: string[],   // 当天已完成，从池中排除
-): Candidate[]
+): TaskCandidate[]
 ```
 
 seed = `${dayId}:${steamId}:${round}`，FNV-1a 哈希取模，从排序后的任务池中抽取：
@@ -732,19 +734,19 @@ if (文档.dayId !== today):
 
 ### 8.3 `/game/end` 流程
 
-对每个满足条件的玩家（`steamId > 0`、`!isDisconnected`、`dailyChallengeTaskId` 非空、`dailyChallengeDayId` 非空）跑一个事务：
+对每个满足条件的玩家（`steamId > 0`、`!isDisconnected`、`dailyTaskId` 非空、`dailyTaskDayId` 非空）跑一个事务：
 
 ```
 读文档
 确定目标日期桶：
-    if (dailyChallengeDayId === 文档.dayId):              → 当天
-    else if (dailyChallengeDayId === history[0]?.dayId):  → 回写 history[0]
+    if (dailyTaskDayId === 文档.dayId):              → 当天
+    else if (dailyTaskDayId === history[0]?.dayId):  → 回写 history[0]
     else: 丢弃并 logger.warn                              // 太旧或不匹配
 if (taskId 已在该桶的 tasks 里): 直接返回                 // 幂等
 if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 写入对应桶：
-    当天    → completedTasks.push({ taskId, star }); todaySeasonPoint += dailyChallengeSeasonPoint
-    history → history[0].tasks.push({ taskId, star }); history[0].seasonPoint += dailyChallengeSeasonPoint
+    当天    → completedTasks.push({ taskId, star }); todaySeasonPoint += dailyTaskSeasonPoint
+    history → history[0].tasks.push({ taskId, star }); history[0].seasonPoint += dailyTaskSeasonPoint
 写回
 ```
 
@@ -775,10 +777,10 @@ if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 
 | 情况 | 行为 |
 | --- | --- |
-| `/game/start` 每日挑战失败 | `logger.warn`，响应里省略 `dailyChallenges`，不阻断开局 |
+| `/game/start` 每日挑战失败 | `logger.warn`，响应里省略 `dailyTasks`，不阻断开局 |
 | `/game/end` 单个玩家失败 | `logger.warn`，跳过该玩家，其余玩家继续 |
 | 该日期桶已完成 3 轮 | 丢弃 + `logger.warn` |
-| `dailyChallengeDayId` 既非当天也非 `history[0]` | 丢弃 + `logger.warn` |
+| `dailyTaskDayId` 既非当天也非 `history[0]` | 丢弃 + `logger.warn` |
 | 同一 taskId 重复上报 | 幂等忽略 |
 | `battlePoints` 超过 500 | cap 到 500 + `logger.warn` |
 
@@ -793,22 +795,48 @@ if (该桶已完成轮数 >= 3): 丢弃并 logger.warn
 ## 10. 模块结构
 
 ```
-api/src/daily-challenge/
+api/src/daily-task/
 ├── config/
-│   ├── tasks.ts                                # 任务池 + 数值配置
-│   └── tasks.spec.ts                           # 配置守卫测试
+│   ├── tasks.ts                           # 任务池 + 数值配置
+│   └── tasks.spec.ts                      # 配置守卫测试
 ├── entities/
-│   └── player-daily-challenge.entity.ts
+│   └── player-daily-task.entity.ts
 ├── dto/
-│   └── daily-challenge-snapshot.dto.ts
+│   └── daily-task-snapshot.dto.ts
 ├── services/
-│   ├── daily-challenge-generation.service.ts   # 确定性候选生成
-│   ├── daily-challenge.service.ts              # 开局快照 + 轮次记录
-│   └── daily-challenge.store.ts                # Firestore 读写
+│   ├── daily-task-generation.service.ts   # 确定性候选生成
+│   ├── daily-task.service.ts              # 开局快照 + 轮次记录
+│   └── daily-task.store.ts                # Firestore 读写
 ├── types/
-│   └── daily-challenge.types.ts                # ChallengeScope / ChallengeMetric enum
-└── daily-challenge.module.ts
+│   └── daily-task.types.ts                # TaskScope / TaskMetric enum
+└── daily-task.module.ts
 ```
+
+### 10.1 命名：统一用 `task`，不用 `challenge`
+
+原实现两个词混用——`challenge` 指系统、`task` 指任务池条目，于是 `ChallengeMetric` 和 `taskId` 并存，每加一个标识符都要先判断它落在哪一层。**Phase1 只保留 `task` 一个词。**
+
+`task` 本来就是这套东西的主导词汇（`config/tasks.ts`、任务池、`taskId`、`completedTasks`），消掉 `challenge` 之后不需要任何规则——规则再清晰也是要记的，不存在的规则才是零成本。
+
+| 原名 | 改名 |
+| --- | --- |
+| `PlayerDailyChallenge` / 集合 `PlayerDailyChallenges` | `PlayerDailyTask` / `PlayerDailyTasks` |
+| `DailyChallengeHistoryEntry` | `DailyTaskHistoryEntry` |
+| `ChallengeMetric` / `ChallengeScope` | `TaskMetric` / `TaskScope` |
+| `Candidate` | `TaskCandidate` |
+| `dailyChallengeTaskId` / `…Star` / `…SeasonPoint` / `…DayId` | `dailyTaskId` / `dailyTaskStar` / `dailyTaskSeasonPoint` / `dailyTaskDayId` |
+| `/game/start` 响应 `dailyChallenges` | `dailyTasks` |
+| GA4 参数 `point_daily_challenge` | `point_daily_task` |
+
+`PlayerDailyTask` 单数装 `completedTasks[]`，与仓库现有的 `PlayerHeroAwakening` 装 `awakenings[]` 是同一个模式。
+
+模块内部类型不带 `dailyTask` 前缀——`daily-task/types/` 这个路径已经给了上下文；只有挂在 `GameEndPlayerDto` 上的字段需要前缀做命名空间，因为它们与 `heroDamage`、`towerKills` 这些无关字段并排。
+
+**game 侧必须同一批改名。** 否则等于把模块内的用词分裂换成跨仓库、正好落在 API 边界上的分裂——那是更糟的一种。成本不高：13.3 本来就要删掉 8 个采集模块，剩下要改的只有 controller 与 DTO。
+
+**界面显示名不受影响。**「每日挑战」是展示文案，与标识符是两回事；要不要顺势改成「每日任务」是独立的产品决定。
+
+GA4 的 `point_daily_task` 现在改是免费的——自定义维度还没注册，一旦注册并开始有数据，改名就要同时动看板和历史查询。
 
 `ChallengeDayClockService` **不保留**。去掉 `closesAt` 和 120 分钟宽限（那是共同任务封口用的）之后，它只剩一个日期格式化函数，而这个函数与 `PlayerRankingService.getDateString()` 完全重复。做法是把那个私有方法提成共享工具，两边都用，日界口径也就天然一致了。
 
@@ -828,13 +856,13 @@ api/src/daily-challenge/
 - `battlePoints` cap：超限截断到 500 且不丢弃该玩家结算
 - 配置守卫：任务池 id 唯一、英雄任务必带 `heroName`、通用任务不带、`target` 为正整数、`metric` 在 enum 内
 
-**E2E**（`api/test/daily-challenge.e2e-spec.ts`）
+**E2E**（`api/test/daily-task.e2e-spec.ts`）
 
 - 完整一天：开局 → 上报完成第 1 轮 → 再开局拿到第 2 轮候选 → 完成 → 第 3 轮 → 三轮完成后 `candidates` 为空
 - 轮间去重：第 2、3 轮的候选里不出现前面已完成的 taskId
 - 跨天：第 1 天完成 2 轮 → 第 2 天开局，history 出现第 1 天条目（含 `tasks` 明细）、当日字段清空
-- 旧客户端兼容：不带任何 `dailyChallenge*` 字段的 `/game/end`，既不创建也不修改文档（见 12.4）
-- 跨天迟到局：第 2 天已开局后，上报 `dailyChallengeDayId = 第 1 天` 的 `/game/end`，正确回写 `history[0]`
+- 旧客户端兼容：不带任何 `dailyTask*` 字段的 `/game/end`，既不创建也不修改文档（见 12.4）
+- 跨天迟到局：第 2 天已开局后，上报 `dailyTaskDayId = 第 1 天` 的 `/game/end`，正确回写 `history[0]`
 - `/game/end` 重试：同一 taskId 调两次，`completedTasks` 不重复
 - 一个玩家数据异常不影响同局其他玩家结算
 - `battlePoints = 580` 时玩家仍完成基础结算，`seasonPointTotal` 只 +500
@@ -921,9 +949,9 @@ healing                         44
 
 与 5A.4（#1050 建议 game 先行）**相反**。Phase1 必须 API 先上线，中间会有一段旧 game 对新 API 的窗口期。
 
-**API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyChallengeTaskId` 与 `dailyChallengeDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyChallenges` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
+**API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyTaskId` 与 `dailyTaskDayId` 同时非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyTasks` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
 
-唯一需要注意的是 GA4 的 `point_daily_challenge` **要用 `?? 0` 兜底**（与 5A.2A 末尾针对 `stuns` 的结论相反）：窗口期玩家确实没有挑战积分，0 语义正确；若留空则 BigQuery 里 `points - NULL = NULL`，整个窗口期的对局积分维度算不出来。
+唯一需要注意的是 GA4 的 `point_daily_task` **要用 `?? 0` 兜底**（与 5A.2A 末尾针对 `stuns` 的结论相反）：窗口期玩家确实没有挑战积分，0 语义正确；若留空则 BigQuery 里 `points - NULL = NULL`，整个窗口期的对局积分维度算不出来。
 
 **反向顺序（game 先）不可行**：旧 API 静默接受未知字段，挑战积分会照常并入 `battlePoints` 入账，但完成记录永不落库——`currentRound` 恒为 0，玩家每局拿到同一批候选，可无限刷分。且 7.3 的 cap 改动必须先于 game 上线，否则 3★ 顶破 500 会丢掉该玩家整个基础结算。
 
@@ -932,8 +960,8 @@ healing                         44
 ### 13.1 保留
 
 - Panorama UI 全套（页面、候选卡、星级徽章、历史面板、结算页积分）
-- 三语本地化资源——按 10 个 metric 重新裁剪模板
-- `daily-challenge-controller.ts` 的 UI 交互与状态管理部分
+- 三语本地化资源——按 10 个 metric 重新裁剪模板；**显示文案保持「每日挑战」不变**，改名只动标识符（见 10.1）
+- `daily-challenge-controller.ts` 的 UI 交互与状态管理部分——文件与标识符随 10.1 改名为 `daily-task-controller.ts`
 
 ### 13.2 新增
 
@@ -942,7 +970,7 @@ healing                         44
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`（加在行为分倍率之后，见 5A.2A）
 - **未知候选保护**：按 5.4，不认识的 `taskId` / `metric` 不得崩溃，不展示或标为不可完成，且不判定不上报
-- `game-end.ts`：`players[i]` 多发 `dailyChallengeTaskId` / `dailyChallengeStar` / `dailyChallengeSeasonPoint`（`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyChallengeDayId`
+- `game-end.ts`：`players[i]` 多发 `dailyTaskId` / `dailyTaskStar` / `dailyTaskSeasonPoint`（`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyTaskDayId`
 
 ### 13.3 删除全部采集模块
 
@@ -972,6 +1000,8 @@ healing                         44
 
 ### 14.1 跨阶段复用（约 3300 行，其中 2837 是任务池数据）
 
+下表的路径是**现有** PR 的文件名。复用的部分一律迁到 `api/src/daily-task/`，文件名与标识符按 10.1 改名，下面不再逐行重复。
+
 | 文件 | 行数 | 处置 |
 | --- | --- | --- |
 | `config/tasks.ts` | 2837 | **保留文件结构与 127 英雄清单**，但内容需要重新设计——404 条里 204 条用的是被删指标。见 12.2，独立工作项 |
@@ -979,8 +1009,8 @@ healing                         44
 | `services/daily-challenge-generation.service.ts` | 134 | **核心算法直接复用**（FNV-1a、seeded pick、`pickStar`、`getMetricCategory`）。删掉 `seenTaskIds` 回退后约 110 行 |
 | `services/daily-challenge-generation.service.spec.ts` | 183 | 同上，按新签名调整 |
 | `services/daily-challenge-personal-config.ts` + spec | 136 | 保留星级目标解析，删掉毫秒取整分支，改按 3.3 的加法/乘法双档 |
-| `types/daily-challenge.types.ts` | 137 | 保留 `ChallengeScope` / `ChallengeMetric` enum，删掉三张 metric 映射表和两个版本常量 |
-| `util/challenge-day-clock.service.ts` | — | 保留，删掉 `closesAt` 和 120 分钟宽限 |
+| `types/daily-challenge.types.ts` | 137 | 保留 enum 内容，删掉三张 metric 映射表和两个版本常量；随模块改名为 `types/daily-task.types.ts`，enum 改名 `TaskScope` / `TaskMetric`（见 10.1）|
+| `util/challenge-day-clock.service.ts` | — | **不保留**，日期函数与 `PlayerRankingService.getDateString()` 合并为共享工具（见 10） |
 
 **game 仓库**：8 个采集模块（约 1700 行含测试）全部删除，见 13.3。可保留的是 Panorama UI 全套与三语资源——这仍是 PR #2310 的大头，但可保留比例约 50%，而非采集模块留下时的 80%。
 
