@@ -640,7 +640,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 }
 ```
 
-三轮全部完成时 `candidates` 为空数组。没有 `schemaVersion`、没有 `unit`、没有 `assignmentId`、没有 `progress`。
+三轮全部完成时 `candidates` 为空数组（服务端直接短路，不调用生成器，见 8.2），`currentRound` 为 4。没有 `schemaVersion`、没有 `unit`、没有 `assignmentId`、没有 `progress`。
 
 `dayId` 由客户端保存，`/game/end` 时原样回传。
 
@@ -789,8 +789,14 @@ if (文档.dayId !== today):
     completedTasks = []
     todaySeasonPoint = 0
     写回
-返回快照（candidates 按 completedTasks 现算）
+if (completedTasks.length >= 3):
+    candidates = []                                   // 当天已打满，不调用生成器
+else:
+    candidates = generateCandidates(dayId, steamId, completedTasks.length + 1, 已完成 taskId)
+返回快照
 ```
+
+**三轮打满后直接短路，不调用生成器**——这是正确性守卫而非优化。`round = completedTasks.length + 1` 此时是 4，而根本没有第 4 轮；生成器不认识这个边界，会照样按 seed 算出一组候选，那是必须不能下发的垃圾。同理，去重后的池子在这时也已经少了 3 条，没有意义再抽。
 
 当天没有任何完成记录时不写 history 条目——`history` 只记录有完成的天。Phase2 数连续天数时靠 `dayId` 连续性判断，不依赖空条目占位。
 
@@ -914,6 +920,7 @@ GA4 的 `point_daily_task` 现在改是免费的——自定义维度还没注�
 - 生成器：同一 `(dayId, steamId, round, completedTaskIds)` 结果稳定；不同 round 结果不同；固定 2 通用 + 1 英雄；同轮两个通用任务不同类
 - 星级分配：每轮三个候选的星级恰为 `{1, 2, 3}` 的一个排列——不重复、不缺失；多个 seed 下六种排列都出现得到
 - 生成器去重：传入 `completedTaskIds` 后，候选里不含其中任何一个；同一 taskId 不因星级不同而漏掉；未完成的 taskId 不受影响
+- 打满短路：`completedTasks.length >= 3` 时 `candidates` 为空且**生成器未被调用**（用 spy 断言），不依赖生成器自己处理 round=4
 - 星级目标：小整数走加法档、大数值走乘法档，两条路径下 1★/2★/3★ 都严格递增（见 3.3）
 - 跨天重置：`dayId` 变化时把 `completedTasks` 整体挪进 history、裁到 30 条、当日字段清空；当天无完成时不写 history 条目
 - 轮次记录：已完成 3 轮时丢弃；掉线玩家跳过；`completedTasks` 记下 `star`；`todaySeasonPoint` 累加客户端上报的奖励值
