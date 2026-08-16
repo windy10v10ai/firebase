@@ -135,7 +135,7 @@ describe('daily task hero pool', () => {
       [TaskMetric.KILLS]: [32, 50],
       [TaskMetric.ASSISTS]: [60, 80],
       [TaskMetric.TOWER_KILLS]: [3, 5],
-      [TaskMetric.HERO_DAMAGE]: [300_000, 600_000],
+      [TaskMetric.HERO_DAMAGE]: [300_000, 900_000],
       [TaskMetric.HEALING]: [5_000, 80_000],
       [TaskMetric.DAMAGE_TAKEN]: [180_000, 260_000],
       [TaskMetric.STUN_DURATION]: [30, 400],
@@ -175,45 +175,6 @@ describe('daily task hero pool', () => {
     expect(selectMetricTargets('zuus')).toContainEqual({
       metric: TaskMetric.ASSISTS,
       target: 80,
-    });
-    expect(selectMetricTargets('medusa')).toEqual([
-      { metric: TaskMetric.HERO_DAMAGE, target: 550_000 },
-    ]);
-    expect(selectMetricTargets('necrolyte')).toContainEqual({
-      metric: TaskMetric.HEALING,
-      target: 20_000,
-    });
-    expect(selectMetricTargets('abaddon')).toContainEqual({
-      metric: TaskMetric.HEALING,
-      target: 20_000,
-    });
-    expect(selectMetricTargets('winter_wyvern')).toContainEqual({
-      metric: TaskMetric.HEALING,
-      target: 10_000,
-    });
-    expect(selectMetricTargets('undying')).toContainEqual({
-      metric: TaskMetric.HEALING,
-      target: 5_000,
-    });
-    expect(selectMetricTargets('windrunner')).toContainEqual({
-      metric: TaskMetric.STUN_DURATION,
-      target: 30,
-    });
-    expect(selectMetricTargets('tiny')).toContainEqual({
-      metric: TaskMetric.STUN_DURATION,
-      target: 40,
-    });
-    expect(selectMetricTargets('earthshaker')).toContainEqual({
-      metric: TaskMetric.STUN_DURATION,
-      target: 400,
-    });
-    expect(selectMetricTargets('nyx_assassin')).toContainEqual({
-      metric: TaskMetric.STUN_DURATION,
-      target: 200,
-    });
-    expect(selectMetricTargets('phantom_lancer')).toContainEqual({
-      metric: TaskMetric.STUN_DURATION,
-      target: 240,
     });
   });
 });

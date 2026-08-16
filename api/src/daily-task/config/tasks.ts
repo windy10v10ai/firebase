@@ -242,7 +242,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_zuus_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 550_000,
+    target: 900_000,
     heroName: 'npc_dota_hero_zuus',
   },
   {
@@ -970,7 +970,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_lich_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 350_000,
+    target: 600_000,
     heroName: 'npc_dota_hero_lich',
   },
   {
@@ -1362,7 +1362,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_skywrath_mage_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 350_000,
+    target: 800_000,
     heroName: 'npc_dota_hero_skywrath_mage',
   },
   {
@@ -1460,7 +1460,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_techies_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 400_000,
+    target: 600_000,
     heroName: 'npc_dota_hero_techies',
   },
   {
