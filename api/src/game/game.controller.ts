@@ -15,7 +15,7 @@ import { logger } from 'firebase-functions';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
-import { LocalSettlementService } from '../local-settlement/local-settlement.service';
+import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
@@ -41,7 +41,7 @@ export class GameController {
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly dailyTaskService: DailyTaskService,
-    private readonly localSettlementService: LocalSettlementService,
+    private readonly localHostService: LocalHostService,
   ) {}
 
   @Public()
@@ -165,7 +165,7 @@ export class GameController {
     }
 
     const clientIp = getClientIp(req);
-    await this.localSettlementService.settle(gameEnd, clientIp);
+    await this.localHostService.settle(gameEnd, clientIp);
     return this.gameService.getOK();
   }
 }

@@ -1,22 +1,24 @@
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 
-import { LocalSettlementRateLimit } from './entities/local-settlement-rate-limit.entity';
-import { LocalSettlementService } from './local-settlement.service';
+import { LocalRateLimit } from './entities/local-rate-limit.entity';
+import { LocalHostService } from './local-host.service';
 
 function createFakeRateLimitRepository() {
-  const store = new Map<string, LocalSettlementRateLimit>();
-  const transactionRepo = {
-    findById: jest.fn((id: string) => Promise.resolve(store.get(id) ?? null)),
-    update: jest.fn((doc: LocalSettlementRateLimit) => {
-      store.set(doc.id, doc);
-      return Promise.resolve(doc);
-    }),
-    create: jest.fn((doc: LocalSettlementRateLimit) => {
-      store.set(doc.id, doc);
-      return Promise.resolve(doc);
-    }),
-  };
+  const store = new Map<string, LocalRateLimit>();
+  const findById = jest.fn((id: string) => Promise.resolve(store.get(id) ?? null));
+  const update = jest.fn((doc: LocalRateLimit) => {
+    store.set(doc.id, doc);
+    return Promise.resolve(doc);
+  });
+  const create = jest.fn((doc: LocalRateLimit) => {
+    store.set(doc.id, doc);
+    return Promise.resolve(doc);
+  });
+  const transactionRepo = { findById, update, create };
   const repository = {
+    findById,
+    update,
+    create,
     runTransaction: jest.fn(
       (executor: (tran: typeof transactionRepo) => Promise<unknown>): Promise<unknown> =>
         executor(transactionRepo),
@@ -66,18 +68,20 @@ function createGameEndDto(overrides: Partial<GameEndDto> = {}): GameEndDto {
   };
 }
 
-describe('LocalSettlementService', () => {
-  function createService(existingPlayer: { matchCount: number } | null = { matchCount: 20 }) {
+describe('LocalHostService', () => {
+  function createService(existingPlayers: Record<number, { matchCount: number } | undefined> = {}) {
     const { repository, store } = createFakeRateLimitRepository();
     const playerService = {
       normalizeBattlePoints: jest.fn((points: number) => Math.min(500, Math.max(0, points))),
-      findBySteamId: jest.fn().mockResolvedValue(existingPlayer),
+      findBySteamId: jest.fn((steamId: number) =>
+        Promise.resolve(steamId in existingPlayers ? existingPlayers[steamId] : { matchCount: 20 }),
+      ),
       addLocalSeasonPoints: jest.fn().mockResolvedValue(undefined),
     };
     const dailyTaskService = {
       recordGameEnd: jest.fn().mockResolvedValue(undefined),
     };
-    const service = new LocalSettlementService(
+    const service = new LocalHostService(
       repository as never,
       playerService as never,
       dailyTaskService as never,
@@ -104,8 +108,18 @@ describe('LocalSettlementService', () => {
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
   });
 
-  it('玩家不存在时拒绝，不加分', async () => {
-    const { service, playerService } = createService(null);
+  it('玩家不存在时拒绝，不加分，也不记录每日任务', async () => {
+    const { service, playerService, dailyTaskService } = createService({ 1: undefined });
+    const gameEnd = createGameEndDto();
+
+    await service.settle(gameEnd, '1.2.3.4');
+
+    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
+  });
+
+  it('matchCount <= 1 时拒绝', async () => {
+    const { service, playerService } = createService({ 1: { matchCount: 1 } });
     const gameEnd = createGameEndDto();
 
     await service.settle(gameEnd, '1.2.3.4');
@@ -113,16 +127,22 @@ describe('LocalSettlementService', () => {
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
   });
 
-  it('matchCount 不足 10 时拒绝', async () => {
-    const { service, playerService } = createService({ matchCount: 5 });
-    const gameEnd = createGameEndDto();
+  it('多人比赛中只要有一人未通过检查，整场比赛都不结算、不记录每日任务', async () => {
+    const { service, playerService, dailyTaskService } = createService({
+      1: { matchCount: 20 },
+      2: { matchCount: 1 }, // 这个玩家不满足 matchCount 门槛
+    });
+    const gameEnd = createGameEndDto({
+      players: [createPlayerDto({ steamId: 1 }), createPlayerDto({ steamId: 2 })],
+    });
 
     await service.settle(gameEnd, '1.2.3.4');
 
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
   });
 
-  it('30 分钟内重复结算（不同 matchId）拒绝', async () => {
+  it('20 分钟内重复结算（不同 matchId）拒绝', async () => {
     const { service, playerService } = createService();
 
     await service.settle(createGameEndDto({ matchId: 'match-1' }), '1.2.3.4');
@@ -131,7 +151,7 @@ describe('LocalSettlementService', () => {
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
   });
 
-  it('同一 matchId 重试视为幂等，不重复加分', async () => {
+  it('同一 matchId 重试直接算失败，不重复加分', async () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ matchId: 'match-1' });
 
@@ -143,9 +163,6 @@ describe('LocalSettlementService', () => {
 
   it('当日累计超过 1000 时整条拒绝，不部分发放', async () => {
     const { service, playerService } = createService();
-    playerService.normalizeBattlePoints.mockImplementation((points: number) =>
-      Math.min(500, Math.max(0, points)),
-    );
 
     // 800 + 500 (clamp 后) = 1300 > 1000，第二次应被拒绝
     await service.settle(
@@ -166,7 +183,7 @@ describe('LocalSettlementService', () => {
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
   });
 
-  it('同一 IP 30 分钟内两个不同 matchId：第二次整体被拒，不处理任何玩家', async () => {
+  it('同一 IP 20 分钟内两个不同 matchId：第二次整体被拒，不处理任何玩家', async () => {
     const { service, playerService } = createService();
 
     await service.settle(createGameEndDto({ matchId: 'match-1' }), '1.2.3.4');
@@ -189,9 +206,22 @@ describe('LocalSettlementService', () => {
     await service.settle(gameEnd, '1.2.3.4');
     await service.settle(gameEnd, '1.2.3.4');
 
-    // 两次都放行到玩家层（不会被 IP 限流拦在外面）；第二次命中幂等，
-    // 在读到 lastRequestMatchId 相同后直接短路，不会再读 Player、也不重复加分。
-    expect(playerService.findBySteamId).toHaveBeenCalledTimes(1);
+    // 两次都放行到玩家层（不会被 IP 限流拦在外面）；第二次命中同一 matchId 直接算失败，不重复加分。
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
+  });
+
+  it('拿不到真实 IP（unknown）时不做 IP 限流', async () => {
+    const { service, playerService } = createService();
+
+    await service.settle(createGameEndDto({ matchId: 'match-1' }), 'unknown');
+    await service.settle(
+      createGameEndDto({
+        matchId: 'match-2',
+        players: [createPlayerDto({ steamId: 2 })],
+      }),
+      'unknown',
+    );
+
+    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(2);
   });
 });
