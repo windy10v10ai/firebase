@@ -101,7 +101,7 @@ return Math.max(1, Math.round(scaled));
 | --- | ---: | --- |
 | `roshan_kills` | 1 | 1 / 2 / 3 |
 | `tower_kills` | 3 | 3 / 4 / 5 |
-| `kills` | 20 | 20 / 30 / 40 |
+| `kills` | 60 | 60 / 90 / 120 |
 | `stun_duration` | 45（秒） | 45 / 68 / 90 |
 | `hero_damage` | 500000 | 500000 / 750000 / 1000000 |
 
@@ -637,7 +637,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
           "scope": "personal_general",
           "metric": "kills",
           "star": 1,
-          "target": 80,
+          "target": 60,
           "rewardSeasonPoint": 60
         }
       ],
@@ -1025,7 +1025,7 @@ export const SMALL_TARGET_THRESHOLD = 10;
 
 export const DAILY_TASKS: TaskDefinition[] = [
   // 通用任务：一个 metric 至少一条，id 为 general_<metric>
-  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 20 },
+  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 60 },
   // ...
   // 英雄任务：127 英雄 × N 条，id 为 hero_<hero>_<序号>
   {
