@@ -126,18 +126,15 @@ return Math.max(1, Math.round(scaled));
 判定在客户端：
 
 ```ts
-const PRESET_DIFFICULTY_MIN = 1;
-const PRESET_DIFFICULTY_MAX = 8;
-
-function isDailyTaskEnabled(difficulty: number, isLocalhost: boolean): boolean {
-  if (GameRules.IsCheatMode() || isLocalhost) {
+function isDailyTaskEnabled(): boolean {
+  if (EnvironmentHelper.IsInvalidGameEnvironment()) { // 作弊模式或 localhost
     return false;
   }
-  return difficulty >= PRESET_DIFFICULTY_MIN && difficulty <= PRESET_DIFFICULTY_MAX;
+  return GetMapName() !== 'custom';
 }
 ```
 
-#### 为什么一个 difficulty 判断就够
+#### 为什么用地图名判断
 
 难度取值由**地图**锁死（`content/panorama/layout/custom_game/team_select/team_select.js`）：
 
@@ -147,9 +144,10 @@ function isDailyTaskEnabled(difficulty: number, isLocalhost: boolean): boolean {
 | `hard` | 6~8 | disabled |
 | `custom` | **只能是 0** | 解锁 |
 
-选项下拉的 `enabled` 就是靠"难度是否为 0"控制的（见 `content/panorama/scripts/custom_game/game_mode.js` 中 `ApplyCustomPresetToDropdowns` 的调用条件）。因此：
+选项下拉的 `enabled` 就是靠"难度是否为 0"控制的（见 `content/panorama/scripts/custom_game/game_mode.js` 中 `ApplyCustomPresetToDropdowns` 的调用条件）。因此，地图名与每日任务的模式门控一一对应：
 
-- **`difficulty ∈ 1..8` 恰好等价于「预设难度 + 选项全默认」**，不存在"投了难度 3 又把金钱调 5 倍"这种组合
+- `dota` / `hard` 地图只能使用预设难度，`custom` 地图才会解锁自定义选项
+- `GetMapName()` 在选英雄和难度投票完成前就可确定，不需要等待 `difficulty`
 - `GetDifficultyMultiplier` 的 `switch` 命中 1~8 时压根不读 `option`，`GetCustomModeMultiplier` 只在 custom 地图（difficulty 0）上执行
 
 | 场景 | 每日任务 |
@@ -661,12 +659,18 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 
 ### 7.2 `POST /game/end`
 
-请求：`GameEndPlayerDto` 新增**一个可选的嵌套对象**（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层新增一个可选字段。
+请求：`GameEndPlayerDto` 新增**一个可选的嵌套对象**（`stuns` / `roshanKills` 已随 #1050 合并），`GameEndDto` 顶层不新增每日任务字段。
 
 任务积分由客户端**计入 `battlePoints` 总额**，且必须加在行为分倍率之后（见 5A.2A）。`dailyTask.seasonPoint` 本身不参与入账，只用于服务端记录统计数字与 GA4 拆分维度。
 
 ```ts
 export class DailyTaskResultDto {
+  /** 本局归属的任务日，取自 /game/start 响应 */
+  @ApiProperty()
+  @IsString()
+  @Matches(/^\d{8}$/)
+  dayId: string;
+
   /** 本局完成的每日任务 */
   @ApiProperty()
   @IsString()
@@ -697,20 +701,11 @@ export class GameEndPlayerDto {
   dailyTask?: DailyTaskResultDto;
 }
 
-export class GameEndDto extends EventBaseDto {
-  // ... 现有字段不变
-  /** 本局归属的任务日，取自 /game/start 响应 */
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @Matches(/^\d{8}$/)
-  dailyTaskDayId?: string;
-}
 ```
 
-#### 为什么用嵌套 DTO 而不是三个扁平可选字段
+#### 为什么用嵌套 DTO 而不是四个扁平可选字段
 
-"三个字段要么全发、要么全不发"是一条真实约束。写成三个 `@IsOptional()` 的扁平字段时它只是注释，写成嵌套对象则由 `@ValidateNested()` 强制执行——**外层可选，内层必选**，正好表达这个语义。仓库已有先例：`GameEndDto.gameOptions` 就是嵌套 DTO。
+"四个字段要么全发、要么全不发"是一条真实约束。写成四个 `@IsOptional()` 的扁平字段时它只是注释，写成嵌套对象则由 `@ValidateNested()` 强制执行——**外层可选，内层必选**，正好表达这个语义。仓库已有先例：`GameEndDto.gameOptions` 就是嵌套 DTO。
 
 顺带消掉了字段名里的手动前缀：`dailyTask.taskId` 而不是 `dailyTaskTaskId`，嵌套本身就是命名空间（见 10.1）。
 
@@ -720,11 +715,11 @@ export class GameEndDto extends EventBaseDto {
 - 扁平可选的失败模式更糟：校验通过，服务端把 `star: undefined` 静默写进 Firestore，没有任何信号
 - 400 是响的，DOTA2 强制更新，坏版本几分钟内暴露
 
-**同时保留 8.3 的存在性检查**（三个字段齐全才记录，否则 `logger.warn` 跳过）。两者防的不是同一件事：校验防畸形请求，运行时检查防"校验被绕过时写进半条记录"。
+**同时保留 8.3 的存在性检查**（四个字段齐全才记录，否则 `logger.warn` 跳过）。两者防的不是同一件事：校验防畸形请求，运行时检查防"校验被绕过时写进半条记录"。
 
 **注意别照抄 `gameOptions` 的写法**：它只有 `@Type()` 没有 `@ValidateNested()`，内层字段也没有任何校验器，等于纯结构嵌套、不做校验。这里要显式加 `@ValidateNested()`。
 
-`dailyTaskDayId` 留在 `GameEndDto` 顶层而不进 `dailyTask`：它每局一个值，放进 per-player 对象会在 10 个玩家上重复 10 次。
+`dayId` 放进 `dailyTask`：它离开每日任务没有独立意义，服务端的准入条件也要求 `dailyTask` 存在且 `dailyTask.dayId` 非空。嵌套对象本身就是命名空间，因此不再保留 `dailyTask` 前缀。
 
 `star` 与 `seasonPoint` 由客户端发来而非服务端重算，是 8.3.1 的直接结果：服务端要往 `completedTasks` / `todaySeasonPoint` 里记两个数，而客户端已经知道它们（都是 `/game/start` 下发的），重算一遍没有意义。`seasonPoint` 记的是**实际入账数额**而非由 `star` 查表得出，这样奖励表将来调整不会让历史记录的分数跟着变。
 
@@ -844,11 +839,11 @@ history.length = HISTORY_MAX_ENTRIES;  // 超长时截断尾部，淘汰最旧�
 
 ### 8.3 `/game/end` 流程
 
-对每个满足条件的玩家（`steamId > 0`、`!isDisconnected`、`dailyTask` 存在、`dailyTaskDayId` 非空）跑一个事务：
+对每个满足条件的玩家（`steamId > 0`、`!isDisconnected`、`dailyTask` 存在、`dailyTask.dayId` 非空）跑一个事务：
 
 ```
 读文档
-if (dailyTaskDayId !== 文档.dayId): 丢弃并 logger.warn    // 日期不匹配，见下
+if (dailyTask.dayId !== 文档.dayId): 丢弃并 logger.warn     // 日期不匹配，见下
 if (taskId 已在 completedTasks 里): 直接返回              // 幂等
 if (completedTasks.length >= 3): 丢弃并 logger.warn
 completedTasks.push({ taskId, star })
@@ -873,15 +868,15 @@ todaySeasonPoint += dailyTask.seasonPoint
 
 ### 8.3.2 其他
 
-#### 跨天完成的归属：看 `dailyTaskDayId`，不看到达时刻
+#### 跨天完成的归属：看 `dailyTask.dayId`，不看到达时刻
 
-**任务日归属由客户端回传的 `dailyTaskDayId` 决定**，它来自 `/game/start` 的响应。因此一局跨过午夜不影响归属。
+**任务日归属由客户端回传的 `dailyTask.dayId` 决定**，它来自 `/game/start` 的响应。因此一局跨过午夜不影响归属。
 
 跨过午夜的一局**不需要任何特殊处理**：
 
 ```
 day1 23:50  /game/start  → 下发 dayId = day1，客户端保存
-day2 00:30  /game/end    → 回传 dailyTaskDayId = day1
+day2 00:30  /game/end    → 回传 dailyTask.dayId = day1
                            文档.dayId 此时仍是 day1 —— 跨天重置只发生在 /game/start，
                            而这一局进行期间玩家开不了新局
                         → dayId 匹配，正常记进 completedTasks
@@ -893,7 +888,7 @@ day2 再开局  /game/start  → 文档.dayId(day1) ≠ today(day2)，触发跨�
 
 #### 为什么没有"回写昨天"的分支
 
-早期设计里还有一条 `dailyTaskDayId === history[0].dayId → 回写 history[0]` 的分支，用于 `/game/end` 迟到到玩家已开下一局之后的情况。**这条分支不可达，已删除**：
+早期设计里还有一条 `dailyTask.dayId === history[0].dayId → 回写 history[0]` 的分支，用于 `/game/end` 迟到到玩家已开下一局之后的情况。**这条分支不可达，已删除**：
 
 - `/game/end` 走 `ApiClient.sendWithRetry`，`RETRY_TIMES = 3`、`TIMEOUT_SECONDS = 10`，**最大迟到 30 秒**，之后彻底放弃（不落盘、不再重试）
 - 30 秒远不够走完结算画面 → 退出 → 重新排队 → loading，下一局的 `/game/start` 不可能挤进来
@@ -914,7 +909,7 @@ day2 再开局  /game/start  → 文档.dayId(day1) ≠ today(day2)，触发跨�
 | `/game/start` 每日挑战失败 | `logger.warn`，响应里省略 `dailyTasks`，不阻断开局 |
 | `/game/end` 单个玩家失败 | `logger.warn`，跳过该玩家，其余玩家继续 |
 | 当天已完成 3 轮 | 丢弃 + `logger.warn` |
-| `dailyTaskDayId` 与文档 `dayId` 不符 | 丢弃 + `logger.warn` |
+| `dailyTask.dayId` 与文档 `dayId` 不符 | 丢弃 + `logger.warn` |
 | 同一 taskId 重复上报 | 幂等忽略 |
 | `battlePoints` 超过 500 | cap 到 500 + `logger.warn` |
 
@@ -961,7 +956,7 @@ api/src/daily-task/
 | `ChallengeMetric` / `ChallengeScope` | `TaskMetric` / `TaskScope` |
 | `Candidate` | `TaskCandidate` |
 | `dailyChallengeTaskId` / `…Star` / `…SeasonPoint` | 合并为嵌套对象 `dailyTask: { taskId, star, seasonPoint }`（见 7.2）|
-| `dailyChallengeDayId` | `dailyTaskDayId`（留在 `GameEndDto` 顶层）|
+| `dailyChallengeDayId` | `dailyTask.dayId`（嵌套在 `dailyTask`）|
 | `/game/start` 响应 `dailyChallenges` | `dailyTasks` |
 | GA4 参数 `point_daily_challenge` | `point_daily_task` |
 
@@ -1052,7 +1047,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
 - 轮次记录：已完成 3 轮时丢弃；`completedTasks` 记下 `star`；`todaySeasonPoint` 累加客户端上报的奖励值
 - 掉线玩家：`isDisconnected` 为真时，即使带了完整的 `dailyTask` 也不写 `completedTasks`、不累加 `todaySeasonPoint`（见 3.5）
 - 幂等：同一 taskId 重复上报不重复计数、不重复加 `todaySeasonPoint`
-- `dayId` 不符：上报的 `dailyTaskDayId` 与文档 `dayId` 不同时丢弃并 warn，不写任何字段
+- `dayId` 不符：上报的 `dailyTask.dayId` 与文档 `dayId` 不同时丢弃并 warn，不写任何字段
 - `battlePoints` cap：超限截断到 500 且不丢弃该玩家结算
 - 配置守卫：任务池 id 唯一、英雄任务必带 `heroName`、通用任务不带、`target` 为正整数、`metric` 在 enum 内
 
@@ -1063,8 +1058,8 @@ export const DAILY_TASKS: TaskDefinition[] = [
 - 轮间去重：第 2、3 轮的候选里不出现前面已完成的 taskId
 - 跨天：第 1 天完成 2 轮 → 第 2 天开局，history 出现第 1 天条目（含 `tasks` 明细）、当日字段清空
 - 旧客户端兼容：不带任何 `dailyTask*` 字段的 `/game/end`，既不创建也不修改文档（见 12.5）
-- 跨午夜的一局：第 1 天开局拿到候选，不再开局、直接在第 2 天上报 `dailyTaskDayId = 第 1 天`，应记进**当天**桶（此时文档 `dayId` 仍是第 1 天）；随后第 2 天开局才触发重置，且第 2 天仍有完整 3 轮
-- `dayId` 不符：第 2 天已开局（已重置）后才上报 `dailyTaskDayId = 第 1 天`，该玩家的任务记录被丢弃，但其 `battlePoints` 结算与同局其他玩家均不受影响
+- 跨午夜的一局：第 1 天开局拿到候选，不再开局、直接在第 2 天上报 `dailyTask.dayId = 第 1 天`，应记进**当天**桶（此时文档 `dayId` 仍是第 1 天）；随后第 2 天开局才触发重置，且第 2 天仍有完整 3 轮
+- `dayId` 不符：第 2 天已开局（已重置）后才上报 `dailyTask.dayId = 第 1 天`，该玩家的任务记录被丢弃，但其 `battlePoints` 结算与同局其他玩家均不受影响
 - `/game/end` 重试：同一 taskId 调两次，`completedTasks` 不重复
 - 一个玩家数据异常不影响同局其他玩家结算
 - 掉线玩家：同一局里一个 `isDisconnected` 玩家带完整 `dailyTask`、一个正常玩家也带——只有正常玩家被记录，掉线玩家的文档不产生任何变化
@@ -1180,7 +1175,7 @@ dota(1~5) 与 hard(6~8) **合并标定，不分层**（见 3.5）：1~8 共用�
 
 与 5A.4（#1050 建议 game 先行）**相反**。Phase1 必须 API 先上线，中间会有一段旧 game 对新 API 的窗口期。
 
-**API 新 / game 旧是安全的**：四个新增字段都是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyTask` 与 `dailyTaskDayId` 同时存在才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyTasks` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
+**API 新 / game 旧是安全的**：新增的 `dailyTask` 字段是 `@IsOptional()`，不发送即通过校验；8.3 要求 `dailyTask` 存在且 `dailyTask.dayId` 非空才记录，旧客户端直接跳过整段逻辑。`/game/start` 多返回的 `dailyTasks` 被旧客户端忽略——按 5.4，客户端本来就必须容忍不认识的候选。窗口期会创建出 `completedTasks` 为空的文档，但按 8.2 当天无完成不写 history 条目，**不产生需要清理的脏数据**，game 上线后直接接着用。
 
 GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即可——窗口期玩家确实没有任务积分，0 语义正确，不需要为窗口期做任何特殊处理。
 
@@ -1188,7 +1183,7 @@ GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即�
 
 ## 13. 客户端需要同步的改动（game 仓库）
 
-**game `main` 上目前没有任何每日任务代码**——PR #2310 仍是 OPEN 未合并。因此下面的"保留 / 新增 / 删除"是**相对 #2310 而言**：保留 = 从 #2310 挑出来用，删除 = 不采纳。实际落地建议从 `main` 切新分支重做，而不是在 #2310 上改——要保留的部分（UI + 本地化）挑过来即可，见 13.5 的任务拆分。
+**game `develop` 上目前没有任何每日任务代码**——PR #2310 仍是 OPEN 未合并。因此下面的"保留 / 新增 / 删除"是**相对 #2310 而言**：保留 = 从 #2310 挑出来用，删除 = 不采纳。实际落地建议从 `develop` 切新分支重做，而不是在 #2310 上改——要保留的部分（UI + 本地化）挑过来即可，见 13.5 的任务拆分。
 
 ### 13.1 保留（从 #2310 挑出来用）
 
@@ -1198,13 +1193,13 @@ GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即�
 
 ### 13.2 新增
 
-- **模式门控**：按 3.5 判定本局是否启用（`difficulty` 落在 1~8 之外即禁用）；禁用时不展示候选、不判定、不计分、不上报
+- **模式门控**：按 3.5 判定本局是否启用（`GetMapName() === 'custom'` 即禁用）；禁用时不展示候选、不判定、不计分、不上报
 - **指标读取**：一个函数，按 `metric` 分发到对应的 `PlayerResource` 调用，局内展示与结算判定时各调一次
 - **达标判定**：用服务端下发的 `metric` / `target` / `heroName` 在局内判定，英雄不匹配的候选在 UI 上禁用
 - **计分**：达标后把 `rewardSeasonPoint` 计入本局 `battlePoints`（加在行为分倍率之后，见 5A.2A）
 - **掉线不结算**：构建 `playerDto` 时若 `isDisconnected` 为真，既不设 `dailyTask` 也不把奖励加进 `battlePoints`，哪怕退出前指标已达标（见 3.5）
 - **未知候选保护**：按 5.4，不认识的 `taskId` / `metric` 不得崩溃，不展示或标为不可完成，且不判定不上报
-- `game-end.ts`：`players[i]` 多发 `dailyTask` 对象（`taskId` / `star` / `seasonPoint` 必须齐全，缺一不可，否则整局结算会被 400；`stuns` / `roshanKills` 已随 #1050 上线），顶层多发 `dailyTaskDayId`
+- `game-end.ts`：`players[i]` 多发 `dailyTask` 对象（`dayId` / `taskId` / `star` / `seasonPoint` 必须齐全，缺一不可，否则整局结算会被 400；`stuns` / `roshanKills` 已随 #1050 上线）
 
 ### 13.3 不采纳：全部采集模块
 
@@ -1232,12 +1227,12 @@ GA4 的 `point_daily_task` 在窗口期恒为缺省，按 5A.2A 兜底为 0 即�
 
 ### 13.5 game 侧任务拆分
 
-从 `main` 切新分支，建议拆 3 个 PR：
+从 `develop` 切新分支，建议拆 3 个 PR：
 
 | # | 内容 | 依赖 |
 | --- | --- | --- |
 | G1 | vscripts 骨架：模式门控（3.5）、指标读取函数（5.1，`damage_taken` 的循环从 #2310 的 `metric-snapshot` 搬）、达标判定、候选本地状态 | API 的 `/game/start` 契约（7.1）已定，可立刻开工 |
-| G2 | `game-end.ts` 结算改造：计分顺序（5A.2A）、掉线不结算（3.5）、发 `dailyTask` 对象与 `dailyTaskDayId`（7.2） | G1 |
+| G2 | `game-end.ts` 结算改造：计分顺序（5A.2A）、掉线不结算（3.5）、发含 `dayId` 的 `dailyTask` 对象（7.2） | G1 |
 | G3 | Panorama UI + 三语本地化：候选卡按新 DTO 裁剪（去掉 `progress` / `unit` / 版本号）、星级徽章、历史面板显示 `taskId` + `star`、未知候选保护（5.4） | G1 |
 
 三个 PR 都要带上 10.1 的改名（`dailyChallenge` → `dailyTask`），显示文案保持「每日挑战」不变。
@@ -1294,7 +1289,7 @@ Phase2 还需要决定连续奖励在哪里发——客户端无法知道自己�
 **两个 PR 都保持开启作为参考，不在上面改动。**
 
 - **#1040（firebase）**：后端保留比例约 30%，其中大头还是任务池数据，实际等于重写；且它在贡献者的 fork 分支上，不适合在别人分支上做这种规模的重写。Phase1 从 `develop` 切新分支，工作拆分见 12 节
-- **#2310（game）**：采集模块整套不采纳（13.3），保留的只有 Panorama UI 与三语本地化，且都要按新 DTO 裁剪。从 `main` 切新分支重做并 cherry-pick 那两部分，工作拆分见 13.5
+- **#2310（game）**：采集模块整套不采纳（13.3），保留的只有 Panorama UI 与三语本地化，且都要按新 DTO 裁剪。从 `develop` 切新分支重做并 cherry-pick 那两部分，工作拆分见 13.5
 
 两个 PR 留着的价值是 Phase2/3 开工时能回来查 14.2 / 14.3 里的算法思路。
 
