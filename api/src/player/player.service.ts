@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
@@ -8,6 +9,8 @@ import { UpdatePlayerDto } from './dto/update-player.dto';
 import { UsePlayerMemberPointsDto } from './dto/use-player-member-points.dto';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
+
+const MAX_BATTLE_POINTS_PER_MATCH = 500;
 
 @Injectable()
 export class PlayerService {
@@ -45,12 +48,17 @@ export class PlayerService {
   async upsertGameEnd(
     steamId: number,
     isWinner: boolean,
-    seasonPoint: number,
+    battlePoints: number,
     isDisconnect: boolean,
     isParty: boolean,
   ) {
-    if (isNaN(seasonPoint)) {
-      seasonPoint = 0;
+    const settledPoints = this.normalizeBattlePoints(battlePoints);
+    if (settledPoints !== battlePoints) {
+      logger.warn('game/end: battlePoints out of range, normalizing', {
+        steamId,
+        battlePoints,
+        settledPoints,
+      });
     }
     const player = await this.getOrNewPlayerBySteamId(steamId);
 
@@ -59,7 +67,7 @@ export class PlayerService {
       player.winCount++;
     }
 
-    player.seasonPointTotal += seasonPoint;
+    player.seasonPointTotal += settledPoints;
 
     if (isDisconnect) {
       player.disconnectCount++;
@@ -73,6 +81,13 @@ export class PlayerService {
     }
 
     await this.playerRepository.update(player);
+  }
+
+  normalizeBattlePoints(battlePoints: number): number {
+    if (!Number.isFinite(battlePoints)) {
+      return 0;
+    }
+    return Math.min(MAX_BATTLE_POINTS_PER_MATCH, Math.max(0, battlePoints));
   }
 
   async findBySteamId(steamId: number): Promise<Player> {

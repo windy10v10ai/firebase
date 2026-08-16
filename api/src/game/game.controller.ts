@@ -14,6 +14,7 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
@@ -37,6 +38,7 @@ export class GameController {
     private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly dailyTaskService: DailyTaskService,
   ) {}
 
   @Public()
@@ -95,6 +97,11 @@ export class GameController {
       pointInfo,
     };
 
+    const dailyTasks = await this.dailyTaskService.getSnapshots(steamIds);
+    if (dailyTasks.length > 0) {
+      response.dailyTasks = dailyTasks;
+    }
+
     // 获取GA4配置信息
     const ga4Config = this.gameService.getGA4Config(serverType);
     if (ga4Config) {
@@ -116,15 +123,6 @@ export class GameController {
         if (player.steamId <= 0) {
           return undefined;
         }
-        const battlePoints = player.battlePoints;
-        if (battlePoints < 0 || battlePoints > 500) {
-          logger.warn('game/end: invalid battlePoints, skip upsert', {
-            steamId: player.steamId,
-            serverType,
-            battlePoints,
-          });
-          return undefined;
-        }
         return this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,
@@ -134,6 +132,8 @@ export class GameController {
         );
       }),
     );
+
+    await this.dailyTaskService.recordGameEnd(players);
 
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
