@@ -117,6 +117,11 @@ export class AnalyticsService {
             st: player.stuns,
             rk: player.roshanKills,
           }),
+          player_stats_basic: JSON.stringify({
+            g: player.totalGoldEarned,
+            k: player.kills,
+            a: player.assists,
+          }),
         });
 
         const userProperties: UserProperties = {};

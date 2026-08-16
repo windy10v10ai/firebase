@@ -20,13 +20,13 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_assists',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 60,
   },
   {
     id: 'general_last_hits',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.LAST_HITS,
-    target: 100,
+    target: 200,
   },
   {
     id: 'general_tower_kills',
@@ -44,13 +44,13 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_healing',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.HEALING,
-    target: 100_000,
+    target: 50_000,
   },
   {
     id: 'general_total_gold_earned',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.TOTAL_GOLD_EARNED,
-    target: 50_000,
+    target: 160_000,
   },
   {
     id: 'general_damage_taken',
@@ -172,7 +172,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_lion_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 100,
+    target: 300,
     heroName: 'npc_dota_hero_lion',
   },
   {
@@ -242,7 +242,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_zuus_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 550_000,
+    target: 900_000,
     heroName: 'npc_dota_hero_zuus',
   },
   {
@@ -410,7 +410,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_necrolyte_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HEALING,
-    target: 60_000,
+    target: 20_000,
     heroName: 'npc_dota_hero_necrolyte',
   },
   {
@@ -424,7 +424,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_windrunner_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 90,
+    target: 30,
     heroName: 'npc_dota_hero_windrunner',
   },
   {
@@ -445,7 +445,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_earthshaker_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 120,
+    target: 400,
     heroName: 'npc_dota_hero_earthshaker',
   },
   {
@@ -480,7 +480,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_abaddon_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HEALING,
-    target: 60_000,
+    target: 20_000,
     heroName: 'npc_dota_hero_abaddon',
   },
   {
@@ -970,7 +970,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_lich_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 350_000,
+    target: 600_000,
     heroName: 'npc_dota_hero_lich',
   },
   {
@@ -1069,13 +1069,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
     target: 550_000,
-    heroName: 'npc_dota_hero_medusa',
-  },
-  {
-    id: 'hero_medusa_2',
-    scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.DAMAGE_TAKEN,
-    target: 260_000,
     heroName: 'npc_dota_hero_medusa',
   },
   {
@@ -1180,7 +1173,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_nyx_assassin_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 100,
+    target: 200,
     heroName: 'npc_dota_hero_nyx_assassin',
   },
   {
@@ -1250,7 +1243,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_phantom_lancer_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 60,
+    target: 240,
     heroName: 'npc_dota_hero_phantom_lancer',
   },
   {
@@ -1369,7 +1362,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_skywrath_mage_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 350_000,
+    target: 800_000,
     heroName: 'npc_dota_hero_skywrath_mage',
   },
   {
@@ -1467,7 +1460,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_techies_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 400_000,
+    target: 600_000,
     heroName: 'npc_dota_hero_techies',
   },
   {
@@ -1537,7 +1530,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_tiny_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 80,
+    target: 40,
     heroName: 'npc_dota_hero_tiny',
   },
   {
@@ -1607,7 +1600,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_undying_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HEALING,
-    target: 50_000,
+    target: 5_000,
     heroName: 'npc_dota_hero_undying',
   },
   {
@@ -1691,7 +1684,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_winter_wyvern_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HEALING,
-    target: 50_000,
+    target: 10_000,
     heroName: 'npc_dota_hero_winter_wyvern',
   },
   {
