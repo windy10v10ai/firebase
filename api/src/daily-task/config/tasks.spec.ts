@@ -27,10 +27,10 @@ const groupHeroTasks = (): Map<string, TaskDefinition[]> => {
 
 describe('daily task configuration', () => {
   it('keeps the reviewed personal task pool', () => {
-    expect(DAILY_TASKS).toHaveLength(255);
+    expect(DAILY_TASKS).toHaveLength(261);
     expect(GENERAL_TASKS).toHaveLength(10);
-    expect(HERO_TASKS).toHaveLength(245);
-    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(255);
+    expect(HERO_TASKS).toHaveLength(251);
+    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(261);
   });
 
   it('uses every metric exactly once in the general pool', () => {
@@ -59,7 +59,7 @@ describe('daily task configuration', () => {
     }
   });
 
-  it('keeps general targets higher than hero targets for the same metric', () => {
+  it('keeps general targets higher except for the reviewed tower-kill exception', () => {
     for (const generalTask of GENERAL_TASKS) {
       const matchingHeroTasks = HERO_TASKS.filter((task) => task.metric === generalTask.metric);
       if (matchingHeroTasks.length === 0) {
@@ -67,25 +67,31 @@ describe('daily task configuration', () => {
       }
 
       const highestHeroTarget = Math.max(...matchingHeroTasks.map((task) => task.target));
+      if (generalTask.metric === TaskMetric.TOWER_KILLS) {
+        expect(generalTask.target).toBe(4);
+        expect(highestHeroTarget).toBe(5);
+        continue;
+      }
+
       expect(generalTask.target).toBeGreaterThan(highestHeroTarget);
     }
   });
 });
 
 describe('daily task hero pool', () => {
-  it('covers all heroes with one to three tasks each', () => {
+  it('covers all heroes with one or two tasks each', () => {
     const tasksByHero = groupHeroTasks();
-    const taskCountDistribution = { 1: 0, 2: 0, 3: 0 };
+    const taskCountDistribution = { 1: 0, 2: 0 };
 
     expect(tasksByHero.size).toBe(127);
 
     for (const tasks of tasksByHero.values()) {
       expect(tasks.length).toBeGreaterThanOrEqual(1);
-      expect(tasks.length).toBeLessThanOrEqual(3);
+      expect(tasks.length).toBeLessThanOrEqual(2);
       taskCountDistribution[tasks.length as keyof typeof taskCountDistribution] += 1;
     }
 
-    expect(taskCountDistribution).toEqual({ 1: 14, 2: 108, 3: 5 });
+    expect(taskCountDistribution).toEqual({ 1: 3, 2: 124 });
   });
 
   it('numbers task ids after their hero without gaps', () => {
@@ -112,16 +118,64 @@ describe('daily task hero pool', () => {
     );
 
     expect(metricCounts).toEqual({
-      [TaskMetric.KILLS]: 9,
-      [TaskMetric.ASSISTS]: 14,
+      [TaskMetric.KILLS]: 20,
+      [TaskMetric.ASSISTS]: 26,
       [TaskMetric.LAST_HITS]: 0,
-      [TaskMetric.TOWER_KILLS]: 7,
-      [TaskMetric.HERO_DAMAGE]: 102,
-      [TaskMetric.HEALING]: 34,
+      [TaskMetric.TOWER_KILLS]: 14,
+      [TaskMetric.HERO_DAMAGE]: 94,
+      [TaskMetric.HEALING]: 18,
       [TaskMetric.TOTAL_GOLD_EARNED]: 0,
-      [TaskMetric.DAMAGE_TAKEN]: 20,
-      [TaskMetric.STUN_DURATION]: 59,
+      [TaskMetric.DAMAGE_TAKEN]: 24,
+      [TaskMetric.STUN_DURATION]: 55,
       [TaskMetric.ROSHAN_KILLS]: 0,
+    });
+  });
+
+  it('keeps hero targets in the reviewed metric bands', () => {
+    const targetBands: Partial<Record<TaskMetric, readonly [number, number]>> = {
+      [TaskMetric.KILLS]: [32, 50],
+      [TaskMetric.ASSISTS]: [60, 100],
+      [TaskMetric.TOWER_KILLS]: [3, 5],
+      [TaskMetric.HERO_DAMAGE]: [300_000, 600_000],
+      [TaskMetric.HEALING]: [40_000, 80_000],
+      [TaskMetric.DAMAGE_TAKEN]: [180_000, 260_000],
+      [TaskMetric.STUN_DURATION]: [40, 120],
+    };
+
+    for (const task of HERO_TASKS) {
+      const targetBand = targetBands[task.metric];
+      expect(targetBand).toBeDefined();
+      expect(task.target).toBeGreaterThanOrEqual(targetBand?.[0] ?? 0);
+      expect(task.target).toBeLessThanOrEqual(targetBand?.[1] ?? 0);
+    }
+  });
+
+  it('keeps the manually reviewed hero-specific decisions', () => {
+    const tasksByHero = groupHeroTasks();
+    const selectMetricTargets = (heroName: string) =>
+      tasksByHero
+        .get(`npc_dota_hero_${heroName}`)
+        ?.map(({ metric, target }) => ({ metric, target }));
+
+    expect(selectMetricTargets('crystal_maiden')).toEqual([
+      { metric: TaskMetric.STUN_DURATION, target: 70 },
+      { metric: TaskMetric.ASSISTS, target: 80 },
+    ]);
+    expect(selectMetricTargets('dazzle')).toEqual([
+      { metric: TaskMetric.HEALING, target: 80_000 },
+      { metric: TaskMetric.ASSISTS, target: 80 },
+    ]);
+    expect(selectMetricTargets('lion')).toContainEqual({
+      metric: TaskMetric.STUN_DURATION,
+      target: 100,
+    });
+    expect(selectMetricTargets('shadow_shaman')).toEqual([
+      { metric: TaskMetric.TOWER_KILLS, target: 5 },
+      { metric: TaskMetric.STUN_DURATION, target: 100 },
+    ]);
+    expect(selectMetricTargets('zuus')).toContainEqual({
+      metric: TaskMetric.ASSISTS,
+      target: 100,
     });
   });
 });
@@ -167,5 +221,9 @@ describe('daily task numeric parameters', () => {
     const roshanTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.ROSHAN_KILLS);
     expect(roshanTask).toBeDefined();
     expect(STARS.map((star) => (roshanTask?.target ?? 0) + (star - 1))).toEqual([1, 2, 3]);
+
+    const towerTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.TOWER_KILLS);
+    expect(towerTask).toBeDefined();
+    expect(STARS.map((star) => (towerTask?.target ?? 0) + (star - 1))).toEqual([4, 5, 6]);
   });
 });
