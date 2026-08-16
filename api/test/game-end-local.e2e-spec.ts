@@ -169,7 +169,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player.seasonPointTotal).toBe(0);
   });
 
-  it('30 分钟内重复结算（不同 matchId）拒绝；满 30 分钟后再次结算成功', async () => {
+  it('20 分钟内重复结算（不同 matchId）拒绝；满 20 分钟后再次结算成功', async () => {
     const steamId = 105620005;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20 });
@@ -193,7 +193,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     let player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(200);
 
-    mockDate('2026-08-16T01:30:01.000Z');
+    mockDate('2026-08-16T01:20:01.000Z');
     await postAsLocalHost(
       app,
       createGameEndLocalPayload({
@@ -223,7 +223,7 @@ describe('POST /api/game/end/local (e2e)', () => {
   });
 
   it('当日累计超过 1000：整条拒绝，不部分发放', async () => {
-    // 单局 battlePoints 会被 clamp 到 500，所以要连续 3 局（每局都满足 30
+    // 单局 battlePoints 会被 clamp 到 500，所以要连续 3 局（每局都满足 20
     // 分钟冷却）才能让第 3 局撞上当日 1000 上限：500 + 500 = 1000（不拒绝），
     // 再 + 500 = 1500 > 1000（拒绝）。
     const steamId = 105620007;
@@ -238,7 +238,7 @@ describe('POST /api/game/end/local (e2e)', () => {
       }),
       '10.0.0.8',
     );
-    mockDate('2026-08-16T01:31:00.000Z');
+    mockDate('2026-08-16T01:21:00.000Z');
     await postAsLocalHost(
       app,
       createGameEndLocalPayload({
@@ -250,7 +250,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     let player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(1000);
 
-    mockDate('2026-08-16T02:02:00.000Z');
+    mockDate('2026-08-16T01:42:00.000Z');
     await postAsLocalHost(
       app,
       createGameEndLocalPayload({
@@ -264,7 +264,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player.seasonPointTotal).toBe(1000);
   });
 
-  it('同一 IP 30 分钟内两个不同 matchId：第二次整体被拒，不处理任何玩家', async () => {
+  it('同一 IP 20 分钟内两个不同 matchId：第二次整体被拒，不处理任何玩家', async () => {
     const steamId1 = 105620008;
     const steamId2 = 105620009;
     mockDate('2026-08-16T01:00:00.000Z');

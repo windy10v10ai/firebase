@@ -9,7 +9,7 @@ import { PlayerService } from '../player/player.service';
 
 import { LocalSettlementRateLimit } from './entities/local-settlement-rate-limit.entity';
 
-const COOLDOWN_MINUTES = 30;
+const COOLDOWN_MINUTES = 20;
 const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 const DAILY_POINT_CAP = 1000;
 const MIN_MATCH_COUNT = 10;
