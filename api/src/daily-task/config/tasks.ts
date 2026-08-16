@@ -15,12 +15,12 @@ export const STAR_TARGET_MULTIPLIERS = { 1: 1, 2: 1.5, 3: 2 } as const;
 export const SMALL_TARGET_THRESHOLD = 10;
 
 export const DAILY_TASKS: TaskDefinition[] = [
-  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 80 },
+  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 60 },
   {
     id: 'general_assists',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.ASSISTS,
-    target: 150,
+    target: 80,
   },
   {
     id: 'general_last_hits',
@@ -44,7 +44,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_healing',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.HEALING,
-    target: 300_000,
+    target: 100_000,
   },
   {
     id: 'general_total_gold_earned',
@@ -56,13 +56,13 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_damage_taken',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 1_000_000,
+    target: 200_000,
   },
   {
     id: 'general_stun_duration',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.STUN_DURATION,
-    target: 150,
+    target: 100,
   },
   {
     id: 'general_roshan_kills',
@@ -81,7 +81,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_crystal_maiden_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_crystal_maiden',
   },
   {
@@ -137,7 +137,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_dazzle_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_dazzle',
   },
   {
@@ -249,7 +249,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_zuus_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 100,
+    target: 80,
     heroName: 'npc_dota_hero_zuus',
   },
   {
@@ -333,7 +333,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_venomancer_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_venomancer',
   },
   {
@@ -459,7 +459,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_disruptor_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_disruptor',
   },
   {
@@ -473,7 +473,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_silencer_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_silencer',
   },
   {
@@ -515,7 +515,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_ancient_apparition_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_ancient_apparition',
   },
   {
@@ -557,7 +557,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_bane_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_bane',
   },
   {
@@ -585,7 +585,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_beastmaster_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_beastmaster',
   },
   {
@@ -725,7 +725,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_dark_willow_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_dark_willow',
   },
   {
@@ -809,7 +809,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_ember_spirit_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_ember_spirit',
   },
   {
@@ -851,7 +851,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_grimstroke_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_grimstroke',
   },
   {
@@ -893,7 +893,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_invoker_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_invoker',
   },
   {
@@ -907,7 +907,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_wisp_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 90,
+    target: 80,
     heroName: 'npc_dota_hero_wisp',
   },
   {
@@ -935,7 +935,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_keeper_of_the_light_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_keeper_of_the_light',
   },
   {
@@ -977,7 +977,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_lich_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_lich',
   },
   {
@@ -1047,7 +1047,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_magnataur_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_magnataur',
   },
   {
@@ -1089,7 +1089,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_meepo_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_meepo',
   },
   {
@@ -1215,7 +1215,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_oracle_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_oracle',
   },
   {
@@ -1341,7 +1341,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_rubick_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_rubick',
   },
   {
@@ -1355,14 +1355,14 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_sand_king_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_sand_king',
   },
   {
     id: 'hero_shadow_demon_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_shadow_demon',
   },
   {
@@ -1376,7 +1376,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_skywrath_mage_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_skywrath_mage',
   },
   {
@@ -1418,7 +1418,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_snapfire_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_snapfire',
   },
   {
@@ -1558,7 +1558,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_treant_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 70,
     heroName: 'npc_dota_hero_treant',
   },
   {
@@ -1586,7 +1586,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_tusk_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_tusk',
   },
   {

@@ -59,22 +59,21 @@ describe('daily task configuration', () => {
     }
   });
 
-  it('keeps general targets higher except for the reviewed tower-kill exception', () => {
-    for (const generalTask of GENERAL_TASKS) {
-      const matchingHeroTasks = HERO_TASKS.filter((task) => task.metric === generalTask.metric);
-      if (matchingHeroTasks.length === 0) {
-        continue;
-      }
+  it('keeps the reviewed general targets', () => {
+    const targets = Object.fromEntries(GENERAL_TASKS.map((task) => [task.metric, task.target]));
 
-      const highestHeroTarget = Math.max(...matchingHeroTasks.map((task) => task.target));
-      if (generalTask.metric === TaskMetric.TOWER_KILLS) {
-        expect(generalTask.target).toBe(4);
-        expect(highestHeroTarget).toBe(5);
-        continue;
-      }
-
-      expect(generalTask.target).toBeGreaterThan(highestHeroTarget);
-    }
+    expect(targets).toEqual({
+      [TaskMetric.KILLS]: 60,
+      [TaskMetric.ASSISTS]: 80,
+      [TaskMetric.LAST_HITS]: 100,
+      [TaskMetric.TOWER_KILLS]: 4,
+      [TaskMetric.HERO_DAMAGE]: 1_000_000,
+      [TaskMetric.HEALING]: 100_000,
+      [TaskMetric.TOTAL_GOLD_EARNED]: 50_000,
+      [TaskMetric.DAMAGE_TAKEN]: 200_000,
+      [TaskMetric.STUN_DURATION]: 100,
+      [TaskMetric.ROSHAN_KILLS]: 1,
+    });
   });
 });
 
@@ -134,7 +133,7 @@ describe('daily task hero pool', () => {
   it('keeps hero targets in the reviewed metric bands', () => {
     const targetBands: Partial<Record<TaskMetric, readonly [number, number]>> = {
       [TaskMetric.KILLS]: [32, 50],
-      [TaskMetric.ASSISTS]: [60, 100],
+      [TaskMetric.ASSISTS]: [60, 80],
       [TaskMetric.TOWER_KILLS]: [3, 5],
       [TaskMetric.HERO_DAMAGE]: [300_000, 600_000],
       [TaskMetric.HEALING]: [40_000, 80_000],
@@ -159,11 +158,11 @@ describe('daily task hero pool', () => {
 
     expect(selectMetricTargets('crystal_maiden')).toEqual([
       { metric: TaskMetric.STUN_DURATION, target: 70 },
-      { metric: TaskMetric.ASSISTS, target: 80 },
+      { metric: TaskMetric.ASSISTS, target: 70 },
     ]);
     expect(selectMetricTargets('dazzle')).toEqual([
       { metric: TaskMetric.HEALING, target: 80_000 },
-      { metric: TaskMetric.ASSISTS, target: 80 },
+      { metric: TaskMetric.ASSISTS, target: 70 },
     ]);
     expect(selectMetricTargets('lion')).toContainEqual({
       metric: TaskMetric.STUN_DURATION,
@@ -175,7 +174,7 @@ describe('daily task hero pool', () => {
     ]);
     expect(selectMetricTargets('zuus')).toContainEqual({
       metric: TaskMetric.ASSISTS,
-      target: 100,
+      target: 80,
     });
   });
 });
