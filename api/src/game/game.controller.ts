@@ -14,6 +14,7 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
@@ -26,6 +27,8 @@ import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
 
+const MAX_BATTLE_POINTS_PER_MATCH = 500;
+
 @ApiTags('Game')
 @Controller('game')
 export class GameController {
@@ -37,6 +40,7 @@ export class GameController {
     private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly dailyTaskService: DailyTaskService,
   ) {}
 
   @Public()
@@ -95,6 +99,11 @@ export class GameController {
       pointInfo,
     };
 
+    const dailyTasks = await this.dailyTaskService.getSnapshots(steamIds);
+    if (dailyTasks.length > 0) {
+      response.dailyTasks = dailyTasks;
+    }
+
     // 获取GA4配置信息
     const ga4Config = this.gameService.getGA4Config(serverType);
     if (ga4Config) {
@@ -116,24 +125,32 @@ export class GameController {
         if (player.steamId <= 0) {
           return undefined;
         }
-        const battlePoints = player.battlePoints;
-        if (battlePoints < 0 || battlePoints > 500) {
-          logger.warn('game/end: invalid battlePoints, skip upsert', {
+        const battlePoints = Number.isFinite(player.battlePoints) ? player.battlePoints : 0;
+        if (battlePoints > MAX_BATTLE_POINTS_PER_MATCH) {
+          logger.warn('game/end: battlePoints exceeds cap, truncating', {
             steamId: player.steamId,
             serverType,
             battlePoints,
           });
-          return undefined;
+        } else if (battlePoints < 0) {
+          logger.warn('game/end: negative battlePoints, clamping to zero', {
+            steamId: player.steamId,
+            serverType,
+            battlePoints,
+          });
         }
+        const settledPoints = Math.min(MAX_BATTLE_POINTS_PER_MATCH, Math.max(0, battlePoints));
         return this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,
-          player.battlePoints,
+          settledPoints,
           player.isDisconnected,
           isParty,
         );
       }),
     );
+
+    await this.dailyTaskService.recordGameEnd(gameEnd.dailyTaskDayId, players);
 
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),

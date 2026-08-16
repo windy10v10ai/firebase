@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { getUtcDayId } from '../util/date';
+
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { Player } from './entities/player.entity';
 
@@ -31,13 +33,13 @@ export class PlayerRankingService {
   }
 
   async getRankingToday(): Promise<PlayerRanking> {
-    const id = this.getDateString();
+    const id = getUtcDayId();
     return await this.playerRankingRepository.findById(id);
   }
 
   async calculateRanking(): Promise<PlayerRanking> {
     const playerRanking = new PlayerRanking();
-    playerRanking.id = this.getDateString();
+    playerRanking.id = getUtcDayId();
     playerRanking.rankScores = {
       top1000: 0,
       top2000: 0,
@@ -93,10 +95,5 @@ export class PlayerRankingService {
       .find();
 
     return players.length > 0 ? players[players.length - 1].seasonPointTotal : 0;
-  }
-
-  // 获取当前日期字符串
-  private getDateString() {
-    return new Date().toISOString().slice(0, 10).replace(/-/g, '');
   }
 }

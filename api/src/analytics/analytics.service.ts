@@ -100,6 +100,7 @@ export class AnalyticsService {
           hero_name: player.heroName,
           hero_name_cn: GetHeroNameChinese(player.heroName),
           points: player.battlePoints,
+          point_daily_task: player.dailyTask?.seasonPoint ?? 0,
 
           is_disconnect: player.isDisconnected,
           server_type: serverType,

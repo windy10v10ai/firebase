@@ -108,4 +108,26 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     expect(playerStats).not.toHaveProperty('st');
     expect(playerStats).not.toHaveProperty('rk');
   });
+
+  it('sends daily task points and defaults missing values to zero', async () => {
+    const service = new AnalyticsService(null);
+    const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
+
+    await service.gameEndPlayerBot(
+      buildGameEnd([
+        buildPlayer({ dailyTask: { taskId: 'general_kills', star: 2, seasonPoint: 80 } }),
+        buildPlayer({ steamId: 2 }),
+      ]),
+      SERVER_TYPE.TEST,
+    );
+
+    const firstEvent = sendEventSpy.mock.calls[0][1] as unknown as {
+      params: { point_daily_task: number };
+    };
+    const secondEvent = sendEventSpy.mock.calls[1][1] as unknown as {
+      params: { point_daily_task: number };
+    };
+    expect(firstEvent.params.point_daily_task).toBe(80);
+    expect(secondEvent.params.point_daily_task).toBe(0);
+  });
 });

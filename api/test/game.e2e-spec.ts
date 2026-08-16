@@ -613,8 +613,8 @@ describe('PlayerController (e2e)', () => {
       ['单人结算 90分', 100000102, 90, 90],
       ['单人结算 累加之前的积分', 100000102, 120, 210],
       ['单人结算 500分', 100000103, 500, 500],
-      ['单人结算 超过500分不记录', 100000104, 501, 0],
-      ['单人结算 低于0分不记录', 100000105, -1, 0],
+      ['单人结算 超过500分截断', 100000104, 501, 500],
+      ['单人结算 低于0分截断', 100000105, -1, 0],
     ])('%s', async (_title, steamId, inputPoints, expectedPoints) => {
       mockDate('2023-12-01T00:00:00.000Z');
       const result = await post(app, gameEndUrl, {
@@ -673,14 +673,8 @@ describe('PlayerController (e2e)', () => {
       expect(result.status).toEqual(201);
       // assert player
       const player = await getPlayer(app, steamId);
-      // 当 battlePoints 无效时（超过1000或低于0），玩家不会被创建或更新
-      if (player) {
-        expect(player.memberPointTotal).toEqual(0);
-        expect(player.seasonPointTotal).toEqual(expectedPoints);
-      } else {
-        // 玩家不存在，说明积分没有被记录（符合预期）
-        expect(expectedPoints).toEqual(0);
-      }
+      expect(player.memberPointTotal).toEqual(0);
+      expect(player.seasonPointTotal).toEqual(expectedPoints);
 
       // bot not record
       try {
@@ -793,9 +787,10 @@ describe('PlayerController (e2e)', () => {
       expect(player1.memberPointTotal).toEqual(0);
       expect(player1.seasonPointTotal).toEqual(points1);
 
-      // 玩家2负分未记录
+      // 玩家2负分截断为 0，但基础结算仍记录
       const player2 = await getPlayer(app, steamId2);
-      expect(player2).toBeNull();
+      expect(player2.seasonPointTotal).toEqual(0);
+      expect(player2.matchCount).toEqual(1);
 
       const player3 = await getPlayer(app, steamId3);
       expect(player3.memberPointTotal).toEqual(0);
