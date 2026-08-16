@@ -58,7 +58,7 @@
 | 4 | 明显推塔优势 | 高攻速、幻象或可靠右键输出 |
 | 5 | 强建筑技能、召唤物或极强分推 | 可以主动控制推塔节奏和最后一击 |
 
-通用 `tower_kills` 建议基础 target 为 4，小整数加法后为 4 / 5 / 6；英雄任务为 3 / 4 / 5。这是“通用 target 高于英雄专属 target”的例外：大多数英雄不擅长推塔，通用任务虽可选英雄更多，但未必能稳定抢到防御塔最后一击。强推塔英雄的基础 target 可以为 5，高于通用的 4。
+通用 `tower_kills` 建议基础 target 为 4，小整数加法后为 4 / 5 / 6；英雄任务为 3 / 4 / 5。大多数英雄不擅长推塔，通用任务虽可选英雄更多，但未必能稳定抢到防御塔最后一击。强推塔英雄的基础 target 可以为 5，高于通用的 4。
 
 ### 修改前 metric 分布与建议删除量
 
@@ -76,23 +76,23 @@
 
 | 英雄 | metric | 原因 | 建议替代 |
 |---|---|---|---|
-| 水晶室女（`crystal_maiden`） | `hero_damage` | 辅助和控制定位更适合依靠冰封禁制参与团战；已有 `stun_duration`，输出任务会诱导偏离主要职责 | `assists`（建议 80，替换 hero_damage） |
-| 戴泽（`dazzle`） | `hero_damage` | 辅助和治疗定位更适合通过暗影波、薄葬与团战支援参与击杀，输出不是主要职责 | `assists`（建议 80，替换 hero_damage） |
+| 水晶室女（`crystal_maiden`） | `hero_damage` | 辅助和控制定位更适合依靠冰封禁制参与团战；已有 `stun_duration`，输出任务会诱导偏离主要职责 | `assists`（建议 70，替换 hero_damage） |
+| 戴泽（`dazzle`） | `hero_damage` | 辅助和治疗定位更适合通过暗影波、薄葬与团战支援参与击杀，输出不是主要职责 | `assists`（建议 70，替换 hero_damage） |
 | 暗影萨满（`shadow_shaman`） | `hero_damage` | 核心价值是妖术与枷锁的连续控制，且已有推塔任务；控制比输出更能体现英雄定位 | `stun_duration`（建议 100，替换 hero_damage） |
 | 龙骑士（`dragon_knight`） | `hero_damage` | 当前有三个任务；保留 `damage_taken` 220,000（高护甲、前排与承伤定位）和 `stun_duration` 60（神龙摆尾最高约 2.4 秒、CD 最低约 10 秒） | 保留 `damage_taken` + `stun_duration` |
-| 干扰者（`disruptor`） | `hero_damage` | 辅助、控制、爆发、先手；主要职责不是持续输出，且有更贴合定位的替代指标 | `assists`（建议 80，替换 hero_damage） |
+| 干扰者（`disruptor`） | `hero_damage` | 辅助、控制、爆发、先手；主要职责不是持续输出，且有更贴合定位的替代指标 | `assists`（建议 70，替换 hero_damage） |
 | 敌法师（`antimage`） | `stun_duration` | 法力虚空只有极短打断，无法稳定累计控制时长 | `kills`（建议 40） |
 | 天穹守望者（`arc_warden`） | `stun_duration` | 基础技能只有减速、区域闪避与伤害，没有眩晕或缠绕 | `tower_kills`（建议 5） |
-| 祸乱之源（`bane`） | `healing` | 蚀脑只治疗自身且频率有限；即使计入也不适合作为主要定位任务 | `assists`（建议 80，同时替换 healing / damage_taken） |
-| 祸乱之源（`bane`） | `damage_taken` | 7.41 角色标签含 Durable，但实际打法仍偏后排控制与持续施法，主动承伤会与技能目标冲突 | `assists`（建议 80，同时替换 healing / damage_taken） |
-| 兽王（`beastmaster`） | `healing` | 实测确认斯洛姆战鼓的治疗不计入 `GetHealing()` | `assists`（建议 70） |
+| 祸乱之源（`bane`） | `healing` | 蚀脑只治疗自身且频率有限；即使计入也不适合作为主要定位任务 | `assists`（建议 70，同时替换 healing / damage_taken） |
+| 祸乱之源（`bane`） | `damage_taken` | 7.41 角色标签含 Durable，但实际打法仍偏后排控制与持续施法，主动承伤会与技能目标冲突 | `assists`（建议 70，同时替换 healing / damage_taken） |
+| 兽王（`beastmaster`） | `healing` | 实测确认斯洛姆战鼓的治疗不计入 `GetHealing()` | `assists`（建议 60） |
 | 血魔（`bloodseeker`） | `healing` | 实测确认食血动物的自身回复不计入 `GetHealing()` | `kills`（建议 40） |
 | 发条技师（`rattletrap`） | `healing` | 基础技能没有治疗或生命恢复效果 | — |
-| 天涯墨客（`grimstroke`） | `healing` | 基础技能没有治疗效果 | `assists`（建议 80） |
+| 天涯墨客（`grimstroke`） | `healing` | 基础技能没有治疗效果 | `assists`（建议 70） |
 | 哈斯卡（`huskar`） | `healing` | 狂战士之血提供生命恢复，不等同于主动治疗量 | `damage_taken`（建议 200,000） |
-| 祈求者（`invoker`） | `healing` | 冰元素和幽灵漫步提供自身生命恢复，不是稳定的英雄治疗任务 | `assists`（建议 70） |
-| 艾欧（`wisp`） | `hero_damage` | 辅助、机动、爆发；主要职责不是持续输出，且有更贴合定位的替代指标 | `assists`（建议 90） |
-| 巫妖（`lich`） | `healing` | 冰霜魔盾只治疗寒冰尖柱，不治疗英雄 | `assists`（建议 80） |
+| 祈求者（`invoker`） | `healing` | 冰元素和幽灵漫步提供自身生命恢复，不是稳定的英雄治疗任务 | `assists`（建议 60） |
+| 艾欧（`wisp`） | `hero_damage` | 辅助、机动、爆发；主要职责不是持续输出，且有更贴合定位的替代指标 | `assists`（建议 80） |
+| 巫妖（`lich`） | `healing` | 冰霜魔盾只治疗寒冰尖柱，不治疗英雄 | `assists`（建议 70） |
 | 狼人（`lycan`） | `stun_duration` | 基础技能没有眩晕或缠绕 | `tower_kills`（建议 5） |
 | 自然先知（`furion`） | `stun_duration` | 发芽用树木困人，不是引擎眩晕/缠绕状态 | `tower_kills`（建议 5） |
 | 暗夜魔王（`night_stalker`） | `healing` | 午夜盛宴只治疗自身，且依赖攻击/夜晚 | `damage_taken`（建议 200,000） |
@@ -100,13 +100,13 @@
 | 沙王（`sand_king`） | `hero_damage` | 先手、控制、辅助、爆发、机动；当前有三个任务，保留另外两个更具英雄特色的指标，按“最多两个 metric”删除输出 | — |
 | 暗影恶魔（`shadow_demon`） | `kills` | 虽有爆发与持续伤害，但实际定位偏辅助/先手，人头归属不稳定，不宜作为主任务 | 删除 `kills` 后保留现有 `assists`，无需新增 |
 | 斯拉克（`slark`） | `healing` | 暗影之舞等提供自身生命恢复，不是稳定的治疗量来源 | `kills`（建议 40） |
-| 电炎绝手（`snapfire`） | `healing` | 基础技能没有治疗效果 | `assists`（建议 80） |
+| 电炎绝手（`snapfire`） | `healing` | 基础技能没有治疗效果 | `assists`（建议 70） |
 | 圣堂刺客（`templar_assassin`） | `stun_duration` | 灵能陷阱只有减速，基础技能没有眩晕或缠绕 | `tower_kills`（建议 4） |
 | 恐怖利刃（`terrorblade`） | `healing` | 狂魔提供自身生命恢复，魂断交换生命百分比；统计口径不可靠 | `tower_kills`（建议 5） |
 | 伐木机（`shredder`） | `healing` | 活性护甲提供自身生命恢复，不是主动治疗 | `damage_taken`（建议 220,000） |
 | 修补匠（`tinker`） | `healing` | 当前基础技能没有英雄治疗；机械行军也不治疗友方英雄 | `stun_duration`（建议 60，再装填刷新控制道具） |
 | 死亡先知（`death_prophet`） | `healing` | 实测确认驱使恶灵的回流治疗不计入 `GetHealing()` | `tower_kills`（建议 5） |
-| 树精卫士（`treant`） | `hero_damage` | 辅助、先手、承伤、控制、机动；主要职责不是持续输出，且有更贴合定位的替代指标 | `assists`（建议 80，替换 hero_damage） |
+| 树精卫士（`treant`） | `hero_damage` | 辅助、先手、承伤、控制、机动；主要职责不是持续输出，且有更贴合定位的替代指标 | `assists`（建议 70，替换 hero_damage） |
 | 虚无之灵（`void_spirit`） | `stun_duration` | 残阴主要是牵引/嘲讽，没有稳定的眩晕或缠绕来源 | `kills`（建议 40） |
 | 獸（`primal_beast`） | `assists` | 已有 `stun_duration` 与 `damage_taken` 两个高匹配指标；为控制每英雄最多两任务，优先删除泛用的助攻指标 | — |
 
@@ -114,7 +114,7 @@
 
 | 英雄 | metric | 实测结果 | 最终建议 |
 |---|---|---|---|
-| 兽王（`beastmaster`） | `healing` | 斯洛姆战鼓治疗不计入 | 删除，改为 `assists` 70 |
+| 兽王（`beastmaster`） | `healing` | 斯洛姆战鼓治疗不计入 | 删除，改为 `assists` 60 |
 | 血魔（`bloodseeker`） | `healing` | 食血动物的自身回复不计入 | 删除，改为 `kills` 40 |
 | 死亡先知（`death_prophet`） | `healing` | 驱使恶灵的回流治疗不计入 | 删除，改为 `tower_kills` 5 |
 | 德鲁伊（`lone_druid`） | `stun_duration` | 熊灵造成的缠绕会计入 | 保留，target 40 |
@@ -126,7 +126,7 @@
 | 英雄 | 定位 | metric | 技能/定位依据 | 可完成性置信度 | 修改前 target | 建议 target | 处置 | 新增/替换建议 | 来源 |
 |---|---|---|---|---:|---:|---:|---|---|---|
 | 水晶室女<br>`crystal_maiden` | 辅助、控制、爆发 | `stun_duration` | 冰封禁制（时长最高约 3 秒，CD 最低约 6 秒） | 高 | 80 | 70 | 保留并调整 target | — | DOTA 7.41 |
-| 水晶室女<br>`crystal_maiden` | 辅助、控制、爆发 | `hero_damage` | 辅助和控制定位更适合依靠冰封禁制参与团战；已有 `stun_duration`，输出任务会诱导偏离主要职责 | 高 | 550,000 | — | 删除/替换 | `assists`（建议 80，替换 hero_damage） | DOTA 7.41 |
+| 水晶室女<br>`crystal_maiden` | 辅助、控制、爆发 | `hero_damage` | 辅助和控制定位更适合依靠冰封禁制参与团战；已有 `stun_duration`，输出任务会诱导偏离主要职责 | 高 | 550,000 | — | 删除/替换 | `assists`（建议 70，替换 hero_damage） | DOTA 7.41 |
 | 莉娜<br>`lina` | 辅助、核心、爆发、控制 | `hero_damage` | 辅助、核心、爆发、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 800,000 | 550,000 | 保留并调整 target | — | DOTA 7.41 |
 | 莉娜<br>`lina` | 辅助、核心、爆发、控制 | `stun_duration` | 光击阵（CD 最低约 7 秒） | 高 | 90 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 斧王<br>`axe` | 先手、承伤、控制、核心 | `damage_taken` | 先手、承伤、控制、核心；有明确 Durable 定位和前排能力 | 高 | 700,000 | 220,000 | 保留并调整 target | — | DOTA 7.41 |
@@ -134,7 +134,7 @@
 | 全能骑士<br>`omniknight` | 辅助、承伤、爆发 | `healing` | 洗礼可直接治疗友方英雄，单次最高约 300，冷却最低约 12 秒 | 高 | 100,000 | 80,000 | 保留并调整 target | — | DOTA 7.41 |
 | 全能骑士<br>`omniknight` | 辅助、承伤、爆发 | `damage_taken` | 辅助、承伤、爆发；有明确 Durable 定位和前排能力 | 高 | 550,000 | 180,000 | 保留并调整 target | — | DOTA 7.41 |
 | 戴泽<br>`dazzle` | 辅助、爆发、控制 | `healing` | 暗影波可同时治疗多个友方单位，冷却最低约 7 秒 | 高 | 120,000 | 80,000 | 保留并调整 target | — | DOTA 7.41 |
-| 戴泽<br>`dazzle` | 辅助、爆发、控制 | `hero_damage` | 辅助和治疗定位更适合通过暗影波、薄葬与团战支援参与击杀，输出不是主要职责 | 高 | 450,000 | — | 删除/替换 | `assists`（建议 80，替换 hero_damage） | DOTA 7.41 |
+| 戴泽<br>`dazzle` | 辅助、爆发、控制 | `hero_damage` | 辅助和治疗定位更适合通过暗影波、薄葬与团战支援参与击杀，输出不是主要职责 | 高 | 450,000 | — | 删除/替换 | `assists`（建议 70，替换 hero_damage） | DOTA 7.41 |
 | 巫医<br>`witch_doctor` | 辅助、爆发、控制 | `healing` | 巫毒疗法（治疗/恢复参数最高 50，CD 最低约 0 秒） | 高 | 100,000 | 60,000 | 保留并调整 target | — | DOTA 7.41 |
 | 巫医<br>`witch_doctor` | 辅助、爆发、控制 | `stun_duration` | 麻痹药剂（CD 最低约 14 秒） | 高 | 70 | 80 | 保留并调整 target | — | DOTA 7.41 |
 | 术士<br>`warlock` | 辅助、先手、控制 | `healing` | 暗言术（持续约 10 秒，CD 最低约 12 秒） | 高 | 80,000 | 50,000 | 保留并调整 target | — | DOTA 7.41 |
@@ -150,7 +150,7 @@
 | 狙击手<br>`sniper` | 核心、爆发 | `hero_damage` | 核心、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 800,000 | 600,000 | 保留并调整 target | — | DOTA 7.41 |
 | 狙击手<br>`sniper` | 核心、爆发 | `kills` | 核心、爆发；具备收割或爆发能力 | 高 | 50 | 40 | 保留并调整 target | — | DOTA 7.41 |
 | 宙斯<br>`zuus` | 爆发、核心 | `hero_damage` | 爆发、核心；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 750,000 | 550,000 | 保留并调整 target | — | DOTA 7.41 |
-| 宙斯<br>`zuus` | 爆发、核心 | `assists` | 雷神之怒可全图命中敌方英雄，配合范围技能很容易覆盖团战并累计助攻 | 高 | 120 | 100 | 保留并调整 target | — | DOTA 7.41 |
+| 宙斯<br>`zuus` | 爆发、核心 | `assists` | 雷神之怒可全图命中敌方英雄，配合范围技能很容易覆盖团战并累计助攻 | 高 | 120 | 80 | 保留并调整 target | — | DOTA 7.41 |
 | 帕吉<br>`pudge` | 控制、先手、承伤、爆发 | `hero_damage` | 控制、先手、承伤、爆发；输出多来自进场、控制或反伤过程，不是纯输出定位，因此保留时取最低档 | 高 | 250,000 | 300,000 | 保留并调整 target | — | DOTA 7.41 |
 | 帕吉<br>`pudge` | 控制、先手、承伤、爆发 | `damage_taken` | 控制、先手、承伤、爆发；有明确 Durable 定位和前排能力 | 高 | 750,000 | 220,000 | 保留并调整 target | — | DOTA 7.41 |
 | 钢背兽<br>`bristleback` | 核心、承伤、先手、爆发 | `damage_taken` | 核心、承伤、先手、爆发；有明确 Durable 定位和前排能力 | 高 | 850,000 | 260,000 | 保留并调整 target | — | DOTA 7.41 |
@@ -160,7 +160,7 @@
 | 半人马战行者<br>`centaur` | 承伤、先手、控制、爆发、机动 | `damage_taken` | 承伤、先手、控制、爆发、机动；有明确 Durable 定位和前排能力 | 高 | 800,000 | 240,000 | 保留并调整 target | — | DOTA 7.41 |
 | 半人马战行者<br>`centaur` | 承伤、先手、控制、爆发、机动 | `stun_duration` | 马蹄践踏（时长最高约 2.2 秒，CD 最低约 12 秒） | 高 | 90 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 冥界亚龙<br>`viper` | 核心、承伤、先手、控制 | `hero_damage` | 核心、承伤、先手、控制；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 600,000 | 480,000 | 保留并调整 target | `damage_taken`（建议 200,000） | DOTA 7.41 |
-| 剧毒术士<br>`venomancer` | 辅助、爆发、先手、推进、控制 | `hero_damage` | 辅助、爆发、先手、推进、控制；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | `assists`（建议 80） | DOTA 7.41 |
+| 剧毒术士<br>`venomancer` | 辅助、爆发、先手、推进、控制 | `hero_damage` | 辅助、爆发、先手、推进、控制；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | `assists`（建议 70） | DOTA 7.41 |
 | 谜团<br>`enigma` | 控制、先手、推进 | `hero_damage` | 控制、先手、推进；输出多来自进场、控制或反伤过程，不是纯输出定位，因此保留时取最低档 | 高 | 250,000 | 300,000 | 保留并调整 target | — | DOTA 7.41 |
 | 凤凰<br>`phoenix` | 辅助、爆发、先手、机动、控制 | `hero_damage` | 辅助、爆发、先手、机动、控制；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 600,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
 | 凤凰<br>`phoenix` | 辅助、爆发、先手、机动、控制 | `healing` | 烈日炙烤（CD 最低约 30 秒） | 高 | 80,000 | 60,000 | 保留并调整 target | — | DOTA 7.41 |
@@ -178,25 +178,25 @@
 | 昆卡<br>`kunkka` | 核心、辅助、控制、先手、承伤、爆发 | `damage_taken` | 核心、辅助、控制、先手、承伤、爆发；有明确 Durable 定位和前排能力 | 高 | 550,000 | 200,000 | 保留并调整 target | — | DOTA 7.41 |
 | 宇智波牛神<br>`earthshaker` | 辅助、先手、控制、爆发 | `stun_duration` | 沟壑（时长最高约 1.6 秒，CD 最低约 15 秒）；余震 | 高 | 130 | 120 | 保留并调整 target | — | DOTA 7.41 |
 | 宇智波牛神<br>`earthshaker` | 辅助、先手、控制、爆发 | `hero_damage` | 辅助、先手、控制、爆发；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 600,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
-| 干扰者<br>`disruptor` | 辅助、控制、爆发、先手 | `hero_damage` | 辅助、控制、爆发、先手；主要职责不是持续输出，且有更贴合定位的替代指标 | 高 | 500,000 | — | 删除/替换 | `assists`（建议 80，替换 hero_damage） | DOTA 7.41 |
-| 沉默术士<br>`silencer` | 核心、辅助、控制、先手、爆发 | `hero_damage` | 核心、辅助、控制、先手、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 450,000 | 500,000 | 保留并调整 target | `assists`（建议 70） | DOTA 7.41 |
+| 干扰者<br>`disruptor` | 辅助、控制、爆发、先手 | `hero_damage` | 辅助、控制、爆发、先手；主要职责不是持续输出，且有更贴合定位的替代指标 | 高 | 500,000 | — | 删除/替换 | `assists`（建议 70，替换 hero_damage） | DOTA 7.41 |
+| 沉默术士<br>`silencer` | 核心、辅助、控制、先手、爆发 | `hero_damage` | 核心、辅助、控制、先手、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 450,000 | 500,000 | 保留并调整 target | `assists`（建议 60） | DOTA 7.41 |
 | 亚巴顿<br>`abaddon` | 辅助、核心、承伤 | `healing` | 迷雾缠绕可直接治疗友方英雄，冷却最低约 5 秒 | 高 | 100,000 | 60,000 | 保留并调整 target | — | DOTA 7.41 |
 | 亚巴顿<br>`abaddon` | 辅助、核心、承伤 | `hero_damage` | 辅助、核心、承伤；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 550,000 | 480,000 | 保留并调整 target | — | DOTA 7.41 |
 | 炼金术士<br>`alchemist` | 核心、辅助、承伤、控制、先手、爆发 | `stun_duration` | 不稳定化合物（CD 最低约 17 秒） | 高 | 90 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 炼金术士<br>`alchemist` | 核心、辅助、承伤、控制、先手、爆发 | `hero_damage` | 核心、辅助、承伤、控制、先手、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 700,000 | 500,000 | 保留并调整 target | — | DOTA 7.41 |
 | 远古冰魄<br>`ancient_apparition` | 辅助、控制、爆发 | `stun_duration` | 寒霜之足（时长最高约 3 秒，CD 最低约 9 秒） | 高 | 90 | 60 | 保留并调整 target | — | DOTA 7.41 |
-| 远古冰魄<br>`ancient_apparition` | 辅助、控制、爆发 | `assists` | 辅助、控制、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
+| 远古冰魄<br>`ancient_apparition` | 辅助、控制、爆发 | `assists` | 辅助、控制、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 敌法师<br>`antimage` | 核心、机动、爆发 | `stun_duration` | 法力虚空只有极短打断，无法稳定累计控制时长 | 高 | 90 | — | 删除/替换 | `kills`（建议 40） | DOTA 7.41 |
 | 敌法师<br>`antimage` | 核心、机动、爆发 | `hero_damage` | 核心、机动、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `kills`（建议 40） | DOTA 7.41 |
 | 天穹守望者<br>`arc_warden` | 核心、机动、爆发 | `stun_duration` | 基础技能只有减速、区域闪避与伤害，没有眩晕或缠绕 | 高 | 90 | — | 删除/替换 | `tower_kills`（建议 5） | DOTA 7.41 |
 | 天穹守望者<br>`arc_warden` | 核心、机动、爆发 | `hero_damage` | 核心、机动、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 550,000 | 保留 | `tower_kills`（建议 5） | DOTA 7.41 |
-| 祸乱之源<br>`bane` | 辅助、控制、爆发、承伤 | `stun_duration` | 实测确认噩梦睡眠计入 stun；配合魔爪可稳定累计长时间控制 | 高 | 90 | 100 | 保留并调整 target | `assists`（建议 80，同时替换 healing / damage_taken） | 实测 + DOTA 7.41 |
-| 祸乱之源<br>`bane` | 辅助、控制、爆发、承伤 | `healing` | 蚀脑只治疗自身且频率有限；即使计入也不适合作为主要定位任务 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 80，同时替换 healing / damage_taken） | DOTA 7.41 |
-| 祸乱之源<br>`bane` | 辅助、控制、爆发、承伤 | `damage_taken` | 7.41 角色标签含 Durable，但实际打法仍偏后排控制与持续施法，主动承伤会与技能目标冲突 | 高 | 600,000 | — | 删除/替换 | `assists`（建议 80，同时替换 healing / damage_taken） | DOTA 7.41 |
+| 祸乱之源<br>`bane` | 辅助、控制、爆发、承伤 | `stun_duration` | 实测确认噩梦睡眠计入 stun；配合魔爪可稳定累计长时间控制 | 高 | 90 | 100 | 保留并调整 target | `assists`（建议 70，同时替换 healing / damage_taken） | 实测 + DOTA 7.41 |
+| 祸乱之源<br>`bane` | 辅助、控制、爆发、承伤 | `healing` | 蚀脑只治疗自身且频率有限；即使计入也不适合作为主要定位任务 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 70，同时替换 healing / damage_taken） | DOTA 7.41 |
+| 祸乱之源<br>`bane` | 辅助、控制、爆发、承伤 | `damage_taken` | 7.41 角色标签含 Durable，但实际打法仍偏后排控制与持续施法，主动承伤会与技能目标冲突 | 高 | 600,000 | — | 删除/替换 | `assists`（建议 70，同时替换 healing / damage_taken） | DOTA 7.41 |
 | 蝙蝠骑士<br>`batrider` | 先手、控制、机动 | `stun_duration` | 实测确认大招燃烧枷锁计入 stun；因冷却较长，target 取低档 | 高 | 90 | 40 | 保留并调整 target | — | 实测 + DOTA 7.41 |
 | 蝙蝠骑士<br>`batrider` | 先手、控制、机动 | `tower_kills` | 先天技能闷烧树脂会让攻击追加持续攻击伤害，实际具有推塔能力 | 高 | 20 | 3 | 保留并调整 target | — | 人工确认 + DOTA 7.41 |
-| 兽王<br>`beastmaster` | 先手、控制、承伤、爆发 | `stun_duration` | 召唤猛禽可缠绕目标，原始咆哮提供最高约 4 秒单体眩晕 | 高 | 90 | 60 | 保留并调整 target | `assists`（建议 70，替换 healing） | DOTA 7.41 |
-| 兽王<br>`beastmaster` | 先手、控制、承伤、爆发 | `healing` | 实测确认斯洛姆战鼓的治疗不计入 `GetHealing()` | 高 | 100,000 | — | 删除/替换 | `assists`（建议 70，替换 healing） | 实测 + DOTA 7.41 |
+| 兽王<br>`beastmaster` | 先手、控制、承伤、爆发 | `stun_duration` | 召唤猛禽可缠绕目标，原始咆哮提供最高约 4 秒单体眩晕 | 高 | 90 | 60 | 保留并调整 target | `assists`（建议 60，替换 healing） | DOTA 7.41 |
+| 兽王<br>`beastmaster` | 先手、控制、承伤、爆发 | `healing` | 实测确认斯洛姆战鼓的治疗不计入 `GetHealing()` | 高 | 100,000 | — | 删除/替换 | `assists`（建议 60，替换 healing） | 实测 + DOTA 7.41 |
 | 血魔<br>`bloodseeker` | 核心、控制、爆发、先手 | `healing` | 实测确认食血动物的自身回复不计入 `GetHealing()` | 高 | 100,000 | — | 删除/替换 | `kills`（建议 40，替换 healing） | 实测 + DOTA 7.41 |
 | 血魔<br>`bloodseeker` | 核心、控制、爆发、先手 | `hero_damage` | 核心、控制、爆发、先手；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 700,000 | 500,000 | 保留并调整 target | `kills`（建议 40，替换 healing） | DOTA 7.41 |
 | 赏金猎人<br>`bounty_hunter` | 机动、爆发 | `hero_damage` | 机动、爆发；可依靠范围或爆发技能稳定累计英雄伤害，target 取中档 | 高 | 550,000 | 400,000 | 保留并调整 target | — | DOTA 7.41 |
@@ -217,7 +217,7 @@
 | 执剑泰斗<br>`dark_seer` | 敏捷核心、机动、连续技控制 | `stun_duration` | 点（时长最高约 2 秒，CD 最低约 0.5 秒）；一剑之杀（时长最高约 0.5 秒，CD 最低约 25 秒） | 高 | 90 | 100 | 保留并调整 target | — | game 自定义技能 |
 | 执剑泰斗<br>`dark_seer` | 敏捷核心、机动、连续技控制 | `hero_damage` | 敏捷核心、机动、连续技控制；自定义技能组以连招、爆发或持续输出为主 | 高 | 700,000 | 500,000 | 保留并调整 target | — | game 自定义技能 |
 | 邪影芳灵<br>`dark_willow` | 辅助、爆发、控制、机动 | `hero_damage` | 辅助、爆发、控制、机动；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
-| 邪影芳灵<br>`dark_willow` | 辅助、爆发、控制、机动 | `assists` | 辅助、爆发、控制、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
+| 邪影芳灵<br>`dark_willow` | 辅助、爆发、控制、机动 | `assists` | 辅助、爆发、控制、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 死亡先知<br>`death_prophet` | 核心、推进、爆发、控制 | `healing` | 实测确认驱使恶灵的回流治疗不计入 `GetHealing()` | 高 | 100,000 | — | 删除/替换 | `tower_kills`（建议 5，替换 healing） | 实测 + DOTA 7.41 |
 | 死亡先知<br>`death_prophet` | 核心、推进、爆发、控制 | `hero_damage` | 核心、推进、爆发、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `tower_kills`（建议 5，替换 healing） | DOTA 7.41 |
 | 末日使者<br>`doom_bringer` | 核心、控制、先手、承伤、爆发 | `stun_duration` | 阎刃（CD 最低约 4 秒） | 高 | 90 | 50 | 保留并调整 target | — | DOTA 7.41 |
@@ -229,29 +229,29 @@
 | 上古巨神<br>`elder_titan` | 先手、控制、爆发、承伤 | `hero_damage` | 先手、控制、爆发、承伤；可依靠范围或爆发技能稳定累计英雄伤害，target 取中档 | 高 | 550,000 | 400,000 | 保留并调整 target | — | DOTA 7.41 |
 | 上古巨神<br>`elder_titan` | 先手、控制、爆发、承伤 | `damage_taken` | 先手、控制、爆发、承伤；有明确 Durable 定位和前排能力 | 高 | 600,000 | 200,000 | 保留并调整 target | — | DOTA 7.41 |
 | 灰烬之灵<br>`ember_spirit` | 核心、机动、爆发、控制、先手 | `hero_damage` | 核心、机动、爆发、控制、先手；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | — | DOTA 7.41 |
-| 灰烬之灵<br>`ember_spirit` | 核心、机动、爆发、控制、先手 | `assists` | 核心、机动、爆发、控制、先手；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
+| 灰烬之灵<br>`ember_spirit` | 核心、机动、爆发、控制、先手 | `assists` | 核心、机动、爆发、控制、先手；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 魅惑魔女<br>`enchantress` | 辅助、推进、承伤、控制 | `healing` | 自然之助（治疗/恢复参数最高 16，CD 最低约 35 秒） | 高 | 100,000 | 40,000 | 保留并调整 target | — | DOTA 7.41 |
 | 魅惑魔女<br>`enchantress` | 辅助、推进、承伤、控制 | `hero_damage` | 辅助、推进、承伤、控制；主要依靠范围技能和团战参与累计伤害，target 应取低档 | 高 | 700,000 | 320,000 | 保留并调整 target | — | DOTA 7.41 |
 | 虚空假面<br>`faceless_void` | 核心、先手、控制、机动、承伤 | `hero_damage` | 核心、先手、控制、机动、承伤；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | — | DOTA 7.41 |
 | 虚空假面<br>`faceless_void` | 核心、先手、控制、机动、承伤 | `damage_taken` | 近战核心且有 Durable 定位；时间漫游可回复近期所受伤害，适合反复进场承伤 | 高 | 600,000 | 220,000 | 保留并调整 target | — | DOTA 7.41 |
-| 天涯墨客<br>`grimstroke` | 辅助、爆发、控制、机动 | `stun_duration` | 墨涌（CD 最低约 18 秒） | 高 | 90 | 70 | 保留并调整 target | `assists`（建议 80） | DOTA 7.41 |
-| 天涯墨客<br>`grimstroke` | 辅助、爆发、控制、机动 | `healing` | 基础技能没有治疗效果 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 80） | DOTA 7.41 |
+| 天涯墨客<br>`grimstroke` | 辅助、爆发、控制、机动 | `stun_duration` | 墨涌（CD 最低约 18 秒） | 高 | 90 | 70 | 保留并调整 target | `assists`（建议 70） | DOTA 7.41 |
+| 天涯墨客<br>`grimstroke` | 辅助、爆发、控制、机动 | `healing` | 基础技能没有治疗效果 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 70） | DOTA 7.41 |
 | 矮人直升机<br>`gyrocopter` | 核心、爆发、控制 | `stun_duration` | 追踪导弹（时长最高约 2.5 秒，CD 最低约 11 秒） | 高 | 90 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 矮人直升机<br>`gyrocopter` | 核心、爆发、控制 | `hero_damage` | 核心、爆发、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 550,000 | 保留 | — | DOTA 7.41 |
 | 哈斯卡<br>`huskar` | 核心、承伤、先手 | `healing` | 狂战士之血提供生命恢复，不等同于主动治疗量 | 高 | 100,000 | — | 删除/替换 | `damage_taken`（建议 200,000） | DOTA 7.41 |
 | 哈斯卡<br>`huskar` | 核心、承伤、先手 | `hero_damage` | 核心、承伤、先手；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | `damage_taken`（建议 200,000） | DOTA 7.41 |
-| 祈求者<br>`invoker` | 核心、爆发、控制、机动、推进 | `healing` | 冰元素和幽灵漫步提供自身生命恢复，不是稳定的英雄治疗任务 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 70） | DOTA 7.41 |
-| 祈求者<br>`invoker` | 核心、爆发、控制、机动、推进 | `hero_damage` | 核心、爆发、控制、机动、推进；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `assists`（建议 70） | DOTA 7.41 |
-| 艾欧<br>`wisp` | 辅助、机动、爆发 | `healing` | 羁绊（CD 最低约 12 秒）；过载（持续约 8 秒，CD 最低约 16 秒）；衡势 | 高 | 100,000 | 80,000 | 保留并调整 target | `assists`（建议 90） | DOTA 7.41 |
-| 艾欧<br>`wisp` | 辅助、机动、爆发 | `hero_damage` | 辅助、机动、爆发；主要职责不是持续输出，且有更贴合定位的替代指标 | 高 | 550,000 | — | 删除/替换 | `assists`（建议 90） | DOTA 7.41 |
+| 祈求者<br>`invoker` | 核心、爆发、控制、机动、推进 | `healing` | 冰元素和幽灵漫步提供自身生命恢复，不是稳定的英雄治疗任务 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 60） | DOTA 7.41 |
+| 祈求者<br>`invoker` | 核心、爆发、控制、机动、推进 | `hero_damage` | 核心、爆发、控制、机动、推进；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `assists`（建议 60） | DOTA 7.41 |
+| 艾欧<br>`wisp` | 辅助、机动、爆发 | `healing` | 羁绊（CD 最低约 12 秒）；过载（持续约 8 秒，CD 最低约 16 秒）；衡势 | 高 | 100,000 | 80,000 | 保留并调整 target | `assists`（建议 80） | DOTA 7.41 |
+| 艾欧<br>`wisp` | 辅助、机动、爆发 | `hero_damage` | 辅助、机动、爆发；主要职责不是持续输出，且有更贴合定位的替代指标 | 高 | 550,000 | — | 删除/替换 | `assists`（建议 80） | DOTA 7.41 |
 | 杰奇洛<br>`jakiro` | 辅助、爆发、推进、控制 | `stun_duration` | 冰封路径（时长最高约 2 秒，CD 最低约 11 秒） | 高 | 90 | 80 | 保留并调整 target | — | DOTA 7.41 |
 | 杰奇洛<br>`jakiro` | 辅助、爆发、推进、控制 | `hero_damage` | 辅助、爆发、推进、控制；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
 | 光之守卫<br>`keeper_of_the_light` | 辅助、爆发、控制 | `healing` | 灵魂形态下的冲击波可治疗友方英雄，具备范围治疗潜力 | 高 | 100,000 | 60,000 | 保留并调整 target | — | DOTA 7.41 |
-| 光之守卫<br>`keeper_of_the_light` | 辅助、爆发、控制 | `assists` | 辅助、爆发、控制；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
+| 光之守卫<br>`keeper_of_the_light` | 辅助、爆发、控制 | `assists` | 辅助、爆发、控制；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 军团指挥官<br>`legion_commander` | 核心、控制、先手、承伤、爆发 | `hero_damage` | 核心、控制、先手、承伤、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `kills`（建议 40） | DOTA 7.41 |
 | 拉席克<br>`leshrac` | 核心、辅助、爆发、推进、控制 | `hero_damage` | 核心、辅助、爆发、推进、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `tower_kills`（建议 5） | DOTA 7.41 |
-| 巫妖<br>`lich` | 辅助、爆发 | `healing` | 冰霜魔盾只治疗寒冰尖柱，不治疗英雄 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 80） | DOTA 7.41 |
-| 巫妖<br>`lich` | 辅助、爆发 | `hero_damage` | 辅助、爆发；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | `assists`（建议 80） | DOTA 7.41 |
+| 巫妖<br>`lich` | 辅助、爆发 | `healing` | 冰霜魔盾只治疗寒冰尖柱，不治疗英雄 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 70） | DOTA 7.41 |
+| 巫妖<br>`lich` | 辅助、爆发 | `hero_damage` | 辅助、爆发；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | `assists`（建议 70） | DOTA 7.41 |
 | 噬魂鬼<br>`life_stealer` | 核心、承伤、机动、控制 | `hero_damage` | 核心、承伤、机动、控制；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | — | DOTA 7.41 |
 | 噬魂鬼<br>`life_stealer` | 核心、承伤、机动、控制 | `damage_taken` | 核心、承伤、机动、控制；有明确 Durable 定位和前排能力 | 高 | 600,000 | 200,000 | 保留并调整 target | — | DOTA 7.41 |
 | 德鲁伊<br>`lone_druid` | 核心、推进、承伤 | `stun_duration` | 实测确认熊灵造成的缠绕会归属德鲁伊并计入 stun | 高 | 90 | 40 | 保留并调整 target | — | 实测 + DOTA 7.41 |
@@ -261,13 +261,13 @@
 | 狼人<br>`lycan` | 核心、推进、承伤、机动 | `stun_duration` | 基础技能没有眩晕或缠绕 | 高 | 90 | — | 删除/替换 | `tower_kills`（建议 5） | DOTA 7.41 |
 | 狼人<br>`lycan` | 核心、推进、承伤、机动 | `hero_damage` | 核心、推进、承伤、机动；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | `tower_kills`（建议 5） | DOTA 7.41 |
 | 马格纳斯<br>`magnataur` | 先手、控制、爆发、机动 | `stun_duration` | 长角抛物（时长最高约 0.75 秒，CD 最低约 30 秒）；两极反转（CD 最低约 115 秒） | 高 | 90 | 80 | 保留并调整 target | — | DOTA 7.41 |
-| 马格纳斯<br>`magnataur` | 先手、控制、爆发、机动 | `assists` | 先手、控制、爆发、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
+| 马格纳斯<br>`magnataur` | 先手、控制、爆发、机动 | `assists` | 先手、控制、爆发、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 玛尔斯<br>`mars` | 核心、先手、控制、承伤 | `stun_duration` | 战神迅矛（时长最高约 2.2 秒，CD 最低约 11 秒） | 高 | 90 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 玛尔斯<br>`mars` | 核心、先手、控制、承伤 | `hero_damage` | 核心、先手、控制、承伤；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | — | DOTA 7.41 |
 | 美杜莎<br>`medusa` | 核心、控制、承伤 | `hero_damage` | 核心、控制、承伤；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 550,000 | 保留并调整 target | — | DOTA 7.41 |
 | 美杜莎<br>`medusa` | 核心、控制、承伤 | `damage_taken` | 核心、控制、承伤；有明确 Durable 定位和前排能力 | 高 | 600,000 | 260,000 | 保留并调整 target | — | DOTA 7.41 |
 | 初音未来<br>`meepo` | 敏捷核心、爆发、控制 | `stun_duration` | 初音飞踢（时长最高约 1.4 秒，CD 最低约 14 秒）；跳舞（时长最高约 1 秒，CD 最低约 60 秒）；Q版初音未来（CD 最低约 30 秒） | 高 | 90 | 70 | 保留并调整 target | — | game 自定义技能 |
-| 初音未来<br>`meepo` | 敏捷核心、爆发、控制 | `assists` | 敏捷核心、爆发、控制；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | game 自定义技能 |
+| 初音未来<br>`meepo` | 敏捷核心、爆发、控制 | `assists` | 敏捷核心、爆发、控制；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 60 | 保留并调整 target | — | game 自定义技能 |
 | 米拉娜<br>`mirana` | 核心、辅助、机动、爆发、控制 | `stun_duration` | 月神之箭（CD 最低约 16 秒） | 高 | 90 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 米拉娜<br>`mirana` | 核心、辅助、机动、爆发、控制 | `hero_damage` | 核心、辅助、机动、爆发、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | — | DOTA 7.41 |
 | 变体精灵<br>`morphling` | 核心、机动、承伤、爆发、控制 | `stun_duration` | 变体打击（CD 最低约 8 秒） | 高 | 90 | 60 | 保留并调整 target | — | DOTA 7.41 |
@@ -285,7 +285,7 @@
 | 食人魔魔法师<br>`ogre_magi` | 辅助、爆发、控制、承伤、先手 | `stun_duration` | 火焰爆轰（时长最高约 1.2 秒，CD 最低约 8 秒）；未精通的火焰爆轰（时长最高约 1.2 秒，CD 最低约 7 秒） | 高 | 90 | 90 | 保留 | — | DOTA 7.41 |
 | 食人魔魔法师<br>`ogre_magi` | 辅助、爆发、控制、承伤、先手 | `hero_damage` | 辅助、爆发、控制、承伤、先手；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
 | 神谕者<br>`oracle` | 辅助、爆发、控制、机动 | `healing` | 涤罪之焰（治疗/恢复参数最高 45，持续约 10 秒，CD 最低约 2.5 秒）；天命之雨（持续约 10 秒，CD 最低约 40 秒）；虚妄之诺（持续约 10 秒，CD 最低约 60 秒） | 高 | 100,000 | 80,000 | 保留并调整 target | — | DOTA 7.41 |
-| 神谕者<br>`oracle` | 辅助、爆发、控制、机动 | `assists` | 辅助、爆发、控制、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
+| 神谕者<br>`oracle` | 辅助、爆发、控制、机动 | `assists` | 辅助、爆发、控制、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 殁境神蚀者<br>`obsidian_destroyer` | 核心、爆发、控制 | `healing` | 基础技能没有生命治疗效果 | 高 | 100,000 | — | 删除/替换 | `kills`（建议 40） | DOTA 7.41 |
 | 殁境神蚀者<br>`obsidian_destroyer` | 核心、爆发、控制 | `hero_damage` | 核心、爆发、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `kills`（建议 40） | DOTA 7.41 |
 | 石鳞剑士<br>`pangolier` | 核心、爆发、控制、承伤、机动、先手 | `stun_duration` | 地雷滚滚（时长最高约 1.2 秒，CD 最低约 80 秒）；卷土重来（时长最高约 1.5 秒，CD 最低约 40 秒） | 高 | 90 | 120 | 保留并调整 target | — | DOTA 7.41 |
@@ -301,20 +301,20 @@
 | 力丸<br>`riki` | 核心、机动、控制 | `hero_damage` | 核心、机动、控制；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | — | DOTA 7.41 |
 | 力丸<br>`riki` | 核心、机动、控制 | `kills` | 核心、机动、控制；具备收割或爆发能力 | 高 | 46 | 36 | 保留并调整 target | — | DOTA 7.41 |
 | 拉比克<br>`rubick` | 辅助、控制、爆发 | `stun_duration` | 实测确认隔空取物的“举”计入 stun；基础估值不依赖窃取技能 | 高 | 90 | 60 | 保留并调整 target | — | 实测 + DOTA 7.41 |
-| 拉比克<br>`rubick` | 辅助、控制、爆发 | `assists` | 辅助、控制、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
+| 拉比克<br>`rubick` | 辅助、控制、爆发 | `assists` | 辅助、控制、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 沙王<br>`sand_king` | 先手、控制、辅助、爆发、机动 | `stun_duration` | 掘地穿刺（CD 最低约 11 秒） | 高 | 90 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 沙王<br>`sand_king` | 先手、控制、辅助、爆发、机动 | `hero_damage` | 先手、控制、辅助、爆发、机动；当前有三个任务，保留另外两个更具英雄特色的指标，按“最多两个 metric”删除输出 | 高 | 550,000 | — | 删除/替换 | — | DOTA 7.41 |
-| 沙王<br>`sand_king` | 先手、控制、辅助、爆发、机动 | `assists` | 先手、控制、辅助、爆发、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
-| 暗影恶魔<br>`shadow_demon` | 辅助、控制、先手、爆发 | `assists` | 辅助、控制、先手、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | 删除 `kills` 后保留现有 `assists`，无需新增 | DOTA 7.41 |
+| 沙王<br>`sand_king` | 先手、控制、辅助、爆发、机动 | `assists` | 先手、控制、辅助、爆发、机动；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
+| 暗影恶魔<br>`shadow_demon` | 辅助、控制、先手、爆发 | `assists` | 辅助、控制、先手、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | 删除 `kills` 后保留现有 `assists`，无需新增 | DOTA 7.41 |
 | 暗影恶魔<br>`shadow_demon` | 辅助、控制、先手、爆发 | `kills` | 虽有爆发与持续伤害，但实际定位偏辅助/先手，人头归属不稳定，不宜作为主任务 | 高 | 46 | — | 删除/替换 | 删除 `kills` 后保留现有 `assists`，无需新增 | DOTA 7.41 |
 | 天怒法师<br>`skywrath_mage` | 辅助、爆发、控制 | `hero_damage` | 辅助、爆发、控制；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
-| 天怒法师<br>`skywrath_mage` | 辅助、爆发、控制 | `assists` | 辅助、爆发、控制；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 80 | 保留并调整 target | — | DOTA 7.41 |
+| 天怒法师<br>`skywrath_mage` | 辅助、爆发、控制 | `assists` | 辅助、爆发、控制；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
 | 斯拉达<br>`slardar` | 核心、承伤、先手、控制、机动 | `stun_duration` | 鱼人碎击（时长最高约 0.8 秒，CD 最低约 7 秒） | 高 | 90 | 100 | 保留并调整 target | — | DOTA 7.41 |
 | 斯拉达<br>`slardar` | 核心、承伤、先手、控制、机动 | `damage_taken` | 核心、承伤、先手、控制、机动；有明确 Durable 定位和前排能力 | 高 | 600,000 | 200,000 | 保留并调整 target | — | DOTA 7.41 |
 | 斯拉克<br>`slark` | 核心、机动、控制、爆发 | `healing` | 暗影之舞等提供自身生命恢复，不是稳定的治疗量来源 | 高 | 100,000 | — | 删除/替换 | `kills`（建议 40） | DOTA 7.41 |
 | 斯拉克<br>`slark` | 核心、机动、控制、爆发 | `hero_damage` | 核心、机动、控制、爆发；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `kills`（建议 40） | DOTA 7.41 |
-| 电炎绝手<br>`snapfire` | 辅助、爆发、控制、机动 | `healing` | 基础技能没有治疗效果 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 80） | DOTA 7.41 |
-| 电炎绝手<br>`snapfire` | 辅助、爆发、控制、机动 | `hero_damage` | 辅助、爆发、控制、机动；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | `assists`（建议 80） | DOTA 7.41 |
+| 电炎绝手<br>`snapfire` | 辅助、爆发、控制、机动 | `healing` | 基础技能没有治疗效果 | 高 | 100,000 | — | 删除/替换 | `assists`（建议 70） | DOTA 7.41 |
+| 电炎绝手<br>`snapfire` | 辅助、爆发、控制、机动 | `hero_damage` | 辅助、爆发、控制、机动；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | `assists`（建议 70） | DOTA 7.41 |
 | 幽鬼<br>`spectre` | 核心、承伤、机动 | `hero_damage` | 核心、承伤、机动；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 480,000 | 保留并调整 target | — | DOTA 7.41 |
 | 幽鬼<br>`spectre` | 核心、承伤、机动 | `damage_taken` | 核心、承伤、机动；有明确 Durable 定位和前排能力 | 高 | 600,000 | 240,000 | 保留并调整 target | — | DOTA 7.41 |
 | 裂魂人<br>`spirit_breaker` | 核心、先手、控制、承伤、机动 | `stun_duration` | 巨力重击（时长最高约 1.5 秒，CD 最低约 1.2 秒）；神行太保 | 高 | 90 | 120 | 保留并调整 target | — | DOTA 7.41 |
@@ -332,12 +332,12 @@
 | 修补匠<br>`tinker` | 核心、爆发、推进 | `hero_damage` | 核心、爆发、推进；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | `stun_duration`（建议 60，再装填刷新控制道具） | DOTA 7.41 + 人工确认 |
 | 小小<br>`tiny` | 核心、爆发、推进、先手、承伤、控制 | `stun_duration` | 山崩（时长最高约 0.3 秒，CD 最低约 14 秒） | 高 | 90 | 80 | 保留并调整 target | — | DOTA 7.41 |
 | 小小<br>`tiny` | 核心、爆发、推进、先手、承伤、控制 | `hero_damage` | 核心、爆发、推进、先手、承伤、控制；兼具核心成长和技能爆发，能通过技能与普攻稳定累计英雄伤害 | 高 | 550,000 | 500,000 | 保留并调整 target | — | DOTA 7.41 |
-| 树精卫士<br>`treant` | 辅助、先手、承伤、控制、机动 | `healing` | 寄生种子（持续约 1.5 秒，CD 最低约 6 秒）；活体护甲（治疗/恢复参数最高 13，持续约 12 秒，CD 最低约 15 秒） | 高 | 100,000 | 60,000 | 保留并调整 target | `assists`（建议 80，替换 hero_damage） | DOTA 7.41 |
-| 树精卫士<br>`treant` | 辅助、先手、承伤、控制、机动 | `hero_damage` | 辅助、先手、承伤、控制、机动；主要职责不是持续输出，且有更贴合定位的替代指标 | 高 | 550,000 | — | 删除/替换 | `assists`（建议 80，替换 hero_damage） | DOTA 7.41 |
+| 树精卫士<br>`treant` | 辅助、先手、承伤、控制、机动 | `healing` | 寄生种子（持续约 1.5 秒，CD 最低约 6 秒）；活体护甲（治疗/恢复参数最高 13，持续约 12 秒，CD 最低约 15 秒） | 高 | 100,000 | 60,000 | 保留并调整 target | `assists`（建议 70，替换 hero_damage） | DOTA 7.41 |
+| 树精卫士<br>`treant` | 辅助、先手、承伤、控制、机动 | `hero_damage` | 辅助、先手、承伤、控制、机动；主要职责不是持续输出，且有更贴合定位的替代指标 | 高 | 550,000 | — | 删除/替换 | `assists`（建议 70，替换 hero_damage） | DOTA 7.41 |
 | 巨魔战将<br>`troll_warlord` | 核心、推进、控制、承伤 | `hero_damage` | 核心、推进、控制、承伤；核心定位可依靠装备成长与普攻持续累计英雄伤害 | 高 | 700,000 | 550,000 | 保留并调整 target | — | DOTA 7.41 |
 | 巨魔战将<br>`troll_warlord` | 核心、推进、控制、承伤 | `tower_kills` | 核心、推进、控制、承伤；拥有明确推进定位 | 高 | 3 | 5 | 保留并调整 target | — | DOTA 7.41 |
 | 巨牙海民<br>`tusk` | 先手、控制、爆发 | `stun_duration` | 雪球（时长最高约 1.2 秒，CD 最低约 15 秒）；海象飞踢（CD 最低约 12 秒） | 高 | 90 | 70 | 保留并调整 target | — | DOTA 7.41 |
-| 巨牙海民<br>`tusk` | 先手、控制、爆发 | `assists` | 先手、控制、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 70 | 保留并调整 target | — | DOTA 7.41 |
+| 巨牙海民<br>`tusk` | 先手、控制、爆发 | `assists` | 先手、控制、爆发；范围伤害、控制或支援能力可以稳定参与击杀 | 高 | 100 | 60 | 保留并调整 target | — | DOTA 7.41 |
 | 孽主<br>`abyssal_underlord` | 辅助、爆发、控制、承伤、机动 | `hero_damage` | 辅助、爆发、控制、承伤、机动；可依靠范围或爆发技能累计英雄伤害，但辅助定位的 target 应取低档 | 高 | 550,000 | 350,000 | 保留并调整 target | — | DOTA 7.41 |
 | 孽主<br>`abyssal_underlord` | 辅助、爆发、控制、承伤、机动 | `damage_taken` | 辅助、爆发、控制、承伤、机动；有明确 Durable 定位和前排能力 | 高 | 600,000 | 220,000 | 保留并调整 target | — | DOTA 7.41 |
 | 不朽尸王<br>`undying` | 辅助、承伤、控制、爆发 | `healing` | 噬魂（CD 最低约 6 秒） | 高 | 100,000 | 50,000 | 保留并调整 target | — | DOTA 7.41 |
@@ -375,27 +375,27 @@
 
 | 英雄 | 建议 |
 |---|---|
-| 水晶室女（`crystal_maiden`） | `assists`（建议 80，替换 hero_damage） |
-| 戴泽（`dazzle`） | `assists`（建议 80，替换 hero_damage） |
+| 水晶室女（`crystal_maiden`） | `assists`（建议 70，替换 hero_damage） |
+| 戴泽（`dazzle`） | `assists`（建议 70，替换 hero_damage） |
 | 暗影萨满（`shadow_shaman`） | `stun_duration`（建议 100，替换 hero_damage） |
 | 冥界亚龙（`viper`） | `damage_taken`（建议 200,000） |
-| 剧毒术士（`venomancer`） | `assists`（建议 80） |
+| 剧毒术士（`venomancer`） | `assists`（建议 70） |
 | 影魔（`nevermore`） | `kills`（建议 40） |
-| 干扰者（`disruptor`） | `assists`（建议 80，替换 hero_damage） |
-| 沉默术士（`silencer`） | `assists`（建议 70） |
+| 干扰者（`disruptor`） | `assists`（建议 70，替换 hero_damage） |
+| 沉默术士（`silencer`） | `assists`（建议 60） |
 | 敌法师（`antimage`） | `kills`（建议 40） |
 | 天穹守望者（`arc_warden`） | `tower_kills`（建议 5） |
-| 祸乱之源（`bane`） | `assists`（建议 80，同时替换 healing / damage_taken） |
-| 兽王（`beastmaster`） | `assists`（建议 70，替换 healing） |
+| 祸乱之源（`bane`） | `assists`（建议 70，同时替换 healing / damage_taken） |
+| 兽王（`beastmaster`） | `assists`（建议 60，替换 healing） |
 | 血魔（`bloodseeker`） | `kills`（建议 40，替换 healing） |
 | 死亡先知（`death_prophet`） | `tower_kills`（建议 5，替换 healing） |
-| 天涯墨客（`grimstroke`） | `assists`（建议 80） |
+| 天涯墨客（`grimstroke`） | `assists`（建议 70） |
 | 哈斯卡（`huskar`） | `damage_taken`（建议 200,000） |
-| 祈求者（`invoker`） | `assists`（建议 70） |
-| 艾欧（`wisp`） | `assists`（建议 90） |
+| 祈求者（`invoker`） | `assists`（建议 60） |
+| 艾欧（`wisp`） | `assists`（建议 80） |
 | 军团指挥官（`legion_commander`） | `kills`（建议 40） |
 | 拉席克（`leshrac`） | `tower_kills`（建议 5） |
-| 巫妖（`lich`） | `assists`（建议 80） |
+| 巫妖（`lich`） | `assists`（建议 70） |
 | 狼人（`lycan`） | `tower_kills`（建议 5） |
 | 自然先知（`furion`） | `tower_kills`（建议 5） |
 | 暗夜魔王（`night_stalker`） | `damage_taken`（建议 200,000） |
@@ -404,13 +404,13 @@
 | 雷泽（`razor`） | `damage_taken`（建议 200,000） |
 | 暗影恶魔（`shadow_demon`） | 删除 `kills` 后保留现有 `assists`，无需新增 |
 | 斯拉克（`slark`） | `kills`（建议 40） |
-| 电炎绝手（`snapfire`） | `assists`（建议 80） |
+| 电炎绝手（`snapfire`） | `assists`（建议 70） |
 | 风暴之灵（`storm_spirit`） | `kills`（建议 40） |
 | 圣堂刺客（`templar_assassin`） | `tower_kills`（建议 4） |
 | 恐怖利刃（`terrorblade`） | `tower_kills`（建议 5） |
 | 伐木机（`shredder`） | `damage_taken`（建议 220,000） |
 | 修补匠（`tinker`） | `stun_duration`（建议 60，再装填刷新控制道具） |
-| 树精卫士（`treant`） | `assists`（建议 80，替换 hero_damage） |
+| 树精卫士（`treant`） | `assists`（建议 70，替换 hero_damage） |
 | 熊战士（`ursa`） | `kills`（建议 40） |
 | 虚无之灵（`void_spirit`） | `kills`（建议 40，替换 stun_duration） |
 | 琼英碧灵（`muerta`） | `kills`（建议 40） |
@@ -424,7 +424,7 @@
 | `damage_taken` | 180,000～260,000 | 以约 200,000 为中心，按 Durable、先手频率和减伤/回复能力分档 |
 | `healing` | 40,000～80,000 | 按单次治疗、冷却、范围和是否可持续施放分档 |
 | `stun_duration` | 40～120 秒 | 按可计入的技能数量、控制时长、冷却、范围和重复命中能力分档 |
-| `assists` | 60～100 | 按辅助、范围伤害、先手和全图参战能力分档 |
+| `assists` | 60～80 | 按辅助、范围伤害、先手和全图参战能力分档；避免 3★ 达到 200 次助攻 |
 | `kills` | 32～50 | 按收割、爆发和核心定位分档 |
 | `tower_kills` | 3～5 | 按最后一击竞争而不是总建筑伤害分档；通用任务作为例外建议 4 |
 
@@ -442,7 +442,7 @@
 | `damage_taken` | 24 |
 | `stun_duration` | 55 |
 
-通用 `tower_kills` 已采用例外基础 target 4；其余通用任务继续保持高于相同 metric 的英雄任务。
+通用任务不再机械要求 target 高于所有同 metric 的英雄任务，而是按指标获取难度分别标定。当前基础 target 为：`kills` 60、`assists` 70、`last_hits` 100、`tower_kills` 4、`hero_damage` 1,000,000、`healing` 100,000、`total_gold_earned` 50,000、`damage_taken` 200,000、`stun_duration` 100、`roshan_kills` 1。
 
 ## 资料来源
 
