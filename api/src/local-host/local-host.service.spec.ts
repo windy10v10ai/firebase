@@ -5,26 +5,20 @@ import { LocalHostService } from './local-host.service';
 
 function createFakeRateLimitRepository() {
   const store = new Map<string, LocalRateLimit>();
-  const findById = jest.fn((id: string) => Promise.resolve(store.get(id) ?? null));
-  const update = jest.fn((doc: LocalRateLimit) => {
-    store.set(doc.id, doc);
-    return Promise.resolve(doc);
-  });
-  const create = jest.fn((doc: LocalRateLimit) => {
-    store.set(doc.id, doc);
-    return Promise.resolve(doc);
-  });
-  const transactionRepo = { findById, update, create };
-  const repository = {
-    findById,
-    update,
-    create,
-    runTransaction: jest.fn(
-      (executor: (tran: typeof transactionRepo) => Promise<unknown>): Promise<unknown> =>
-        executor(transactionRepo),
-    ),
+  return {
+    repository: {
+      findById: jest.fn((id: string) => Promise.resolve(store.get(id) ?? null)),
+      update: jest.fn((doc: LocalRateLimit) => {
+        store.set(doc.id, doc);
+        return Promise.resolve(doc);
+      }),
+      create: jest.fn((doc: LocalRateLimit) => {
+        store.set(doc.id, doc);
+        return Promise.resolve(doc);
+      }),
+    },
+    store,
   };
-  return { repository, store };
 }
 
 function createPlayerDto(overrides: Partial<GameEndPlayerDto> = {}): GameEndPlayerDto {
@@ -93,26 +87,17 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService();
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd, '1.2.3.4');
+    await service.settle(gameEnd);
 
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledWith(1, 200);
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
-  });
-
-  it('结算成功后在 player 维度文档记录来源 IP', async () => {
-    const { service, store } = createService();
-    const gameEnd = createGameEndDto();
-
-    await service.settle(gameEnd, '1.2.3.4');
-
-    expect(store.get('player:1')?.ip).toBe('1.2.3.4');
   });
 
   it('steamId <= 0 的玩家跳过，不加分', async () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ players: [createPlayerDto({ steamId: 0 })] });
 
-    await service.settle(gameEnd, '1.2.3.4');
+    await service.settle(gameEnd);
 
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
   });
@@ -121,7 +106,7 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService({ 1: undefined });
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd, '1.2.3.4');
+    await service.settle(gameEnd);
 
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
@@ -131,7 +116,7 @@ describe('LocalHostService', () => {
     const { service, playerService } = createService({ 1: { matchCount: 1 } });
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd, '1.2.3.4');
+    await service.settle(gameEnd);
 
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
   });
@@ -145,7 +130,7 @@ describe('LocalHostService', () => {
       players: [createPlayerDto({ steamId: 1 }), createPlayerDto({ steamId: 2 })],
     });
 
-    await service.settle(gameEnd, '1.2.3.4');
+    await service.settle(gameEnd);
 
     expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
@@ -154,8 +139,8 @@ describe('LocalHostService', () => {
   it('20 分钟内重复结算（不同 matchId）拒绝', async () => {
     const { service, playerService } = createService();
 
-    await service.settle(createGameEndDto({ matchId: 'match-1' }), '1.2.3.4');
-    await service.settle(createGameEndDto({ matchId: 'match-2' }), '5.6.7.8');
+    await service.settle(createGameEndDto({ matchId: 'match-1' }));
+    await service.settle(createGameEndDto({ matchId: 'match-2' }));
 
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
   });
@@ -164,8 +149,8 @@ describe('LocalHostService', () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ matchId: 'match-1' });
 
-    await service.settle(gameEnd, '1.2.3.4');
-    await service.settle(gameEnd, '1.2.3.4');
+    await service.settle(gameEnd);
+    await service.settle(gameEnd);
 
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
   });
@@ -179,58 +164,14 @@ describe('LocalHostService', () => {
         matchId: 'match-1',
         players: [createPlayerDto({ battlePoints: 800 })],
       }),
-      '1.2.3.4',
     );
     await service.settle(
       createGameEndDto({
         matchId: 'match-2',
         players: [createPlayerDto({ battlePoints: 800 })],
       }),
-      '9.9.9.9',
     );
 
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
-  });
-
-  it('同一 IP 20 分钟内两个不同 matchId：第二次整体被拒，不处理任何玩家', async () => {
-    const { service, playerService } = createService();
-
-    await service.settle(createGameEndDto({ matchId: 'match-1' }), '1.2.3.4');
-    await service.settle(
-      createGameEndDto({
-        matchId: 'match-2',
-        players: [createPlayerDto({ steamId: 2 })],
-      }),
-      '1.2.3.4',
-    );
-
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledWith(1, 200);
-  });
-
-  it('同一 IP 同一 matchId 重试：不受 IP 限流影响', async () => {
-    const { service, playerService } = createService();
-    const gameEnd = createGameEndDto({ matchId: 'match-1' });
-
-    await service.settle(gameEnd, '1.2.3.4');
-    await service.settle(gameEnd, '1.2.3.4');
-
-    // 两次都放行到玩家层（不会被 IP 限流拦在外面）；第二次命中同一 matchId 直接算失败，不重复加分。
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
-  });
-
-  it('拿不到真实 IP（unknown）时不做 IP 限流', async () => {
-    const { service, playerService } = createService();
-
-    await service.settle(createGameEndDto({ matchId: 'match-1' }), 'unknown');
-    await service.settle(
-      createGameEndDto({
-        matchId: 'match-2',
-        players: [createPlayerDto({ steamId: 2 })],
-      }),
-      'unknown',
-    );
-
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(2);
   });
 });

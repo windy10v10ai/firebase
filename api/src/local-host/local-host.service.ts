@@ -13,7 +13,6 @@ const COOLDOWN_MINUTES = 20;
 const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 const DAILY_POINT_CAP = 1000;
 const MIN_MATCH_COUNT = 1;
-const UNKNOWN_IP = 'unknown';
 
 // 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/dailyPointsSoFar
 // 是 commitPlayerSettlement 落盘要用的数据。不管 ok 是什么，两个字段都在，
@@ -25,14 +24,6 @@ interface PlayerCheck {
   reason?: string;
   current: LocalRateLimit | null;
   dailyPointsSoFar: number;
-}
-
-function playerRateLimitId(steamId: number): string {
-  return `player:${steamId}`;
-}
-
-function ipRateLimitId(ip: string): string {
-  return `ip:${ip}`;
 }
 
 function getUtcMidnight(date: Date): Date {
@@ -50,16 +41,7 @@ export class LocalHostService {
     private readonly dailyTaskService: DailyTaskService,
   ) {}
 
-  async settle(gameEnd: GameEndDto, clientIp: string): Promise<void> {
-    const ipAllowed = await this.checkAndTouchIpLimit(clientIp, gameEnd.matchId);
-    if (!ipAllowed) {
-      logger.warn('game/end/local: rejected by ip rate limit', {
-        ip: clientIp,
-        matchId: gameEnd.matchId,
-      });
-      return;
-    }
-
+  async settle(gameEnd: GameEndDto): Promise<void> {
     // 顺序检查每个合格玩家；只要有一个没通过（含同一 matchId 重试），整场
     // 比赛立刻拒绝，不写分、不记录每日任务——不单独跳过那一个玩家，也不用
     // 等其余玩家都检查完。
@@ -80,42 +62,10 @@ export class LocalHostService {
     }
 
     for (const check of checks) {
-      await this.commitPlayerSettlement(check, gameEnd, clientIp);
+      await this.commitPlayerSettlement(check, gameEnd);
     }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
-  }
-
-  private async checkAndTouchIpLimit(ip: string, matchId: string): Promise<boolean> {
-    if (ip === UNKNOWN_IP) {
-      // 拿不到真实客户端 IP 时不做限流，避免把不同来源的请求错误地合并限流。
-      return true;
-    }
-
-    const id = ipRateLimitId(ip);
-    const now = new Date();
-
-    return this.rateLimitRepository.runTransaction(async (transaction) => {
-      const current = await transaction.findById(id);
-      if (current && current.lastRequestMatchId !== matchId) {
-        const elapsedMs = now.getTime() - current.lastRequestAt.getTime();
-        if (elapsedMs < COOLDOWN_MS) {
-          return false;
-        }
-      }
-
-      const next: LocalRateLimit = {
-        id,
-        lastRequestAt: now,
-        lastRequestMatchId: matchId,
-      };
-      if (current) {
-        await transaction.update(next);
-      } else {
-        await transaction.create(next);
-      }
-      return true;
-    });
   }
 
   // 只读检查，不写任何数据：同一 matchId 重试直接算失败；否则依次检查玩家
@@ -123,7 +73,7 @@ export class LocalHostService {
   private async checkPlayerLimit(player: GameEndPlayerDto, matchId: string): Promise<PlayerCheck> {
     const steamId = player.steamId;
     const battlePoints = this.playerService.normalizeBattlePoints(player.battlePoints);
-    const current = await this.rateLimitRepository.findById(playerRateLimitId(steamId));
+    const current = await this.rateLimitRepository.findById(steamId.toString());
     const reject = (reason: string): PlayerCheck => ({
       steamId,
       battlePoints,
@@ -164,18 +114,13 @@ export class LocalHostService {
   }
 
   // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
-  private async commitPlayerSettlement(
-    check: PlayerCheck,
-    gameEnd: GameEndDto,
-    clientIp: string,
-  ): Promise<void> {
+  private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
     const next: LocalRateLimit = {
-      id: playerRateLimitId(check.steamId),
+      id: check.steamId.toString(),
       lastRequestAt: new Date(),
       lastRequestMatchId: gameEnd.matchId,
       dailyPointsDate: getUtcMidnight(new Date()),
       dailyPointsTotal: check.dailyPointsSoFar + check.battlePoints,
-      ip: clientIp,
     };
     if (check.current) {
       await this.rateLimitRepository.update(next);

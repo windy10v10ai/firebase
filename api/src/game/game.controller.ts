@@ -22,7 +22,6 @@ import { PlayerService } from '../player/player.service';
 import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { Public } from '../util/auth/public.decorator';
-import { getClientIp } from '../util/request-ip';
 import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
@@ -164,8 +163,7 @@ export class GameController {
       return this.gameService.getOK();
     }
 
-    const clientIp = getClientIp(req);
-    await this.localHostService.settle(gameEnd, clientIp);
+    await this.localHostService.settle(gameEnd);
     return this.gameService.getOK();
   }
 }

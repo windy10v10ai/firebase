@@ -62,12 +62,11 @@ function createGameEndLocalPayload(options: GameEndLocalPayloadOptions) {
   };
 }
 
-function postAsLocalHost(app: INestApplication, body: object, ip = '127.0.0.1'): request.Test {
+function postAsLocalHost(app: INestApplication, body: object): request.Test {
   return request(app.getHttpServer())
     .post(gameEndLocalUrl)
     .send(body)
-    .set('x-api-key', localApiKey)
-    .set('cf-connecting-ip', ip);
+    .set('x-api-key', localApiKey);
 }
 
 function postAsOfficialHost(app: INestApplication, body: object): request.Test {
@@ -103,7 +102,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000001',
         players: [{ steamId, battlePoints: 200 }],
       }),
-      '10.0.0.1',
     );
 
     expect(result.status).toBe(201);
@@ -142,7 +140,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000003',
         players: [{ steamId, battlePoints: 200 }],
       }),
-      '10.0.0.2',
     );
 
     expect(result.status).toBe(201);
@@ -161,7 +158,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000004',
         players: [{ steamId, battlePoints: 200 }],
       }),
-      '10.0.0.3',
     );
 
     expect(result.status).toBe(201);
@@ -180,7 +176,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000005',
         players: [{ steamId, battlePoints: 200 }],
       }),
-      '10.0.0.4',
     );
     await postAsLocalHost(
       app,
@@ -188,7 +183,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000006',
         players: [{ steamId, battlePoints: 200 }],
       }),
-      '10.0.0.5',
     );
     let player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(200);
@@ -200,7 +194,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000007',
         players: [{ steamId, battlePoints: 200 }],
       }),
-      '10.0.0.6',
     );
     player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(400);
@@ -215,8 +208,8 @@ describe('POST /api/game/end/local (e2e)', () => {
       players: [{ steamId, battlePoints: 200 }],
     });
 
-    await postAsLocalHost(app, payload, '10.0.0.7');
-    await postAsLocalHost(app, payload, '10.0.0.7');
+    await postAsLocalHost(app, payload);
+    await postAsLocalHost(app, payload);
 
     const player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(200);
@@ -238,7 +231,6 @@ describe('POST /api/game/end/local (e2e)', () => {
           { steamId: badSteamId, battlePoints: 200 },
         ],
       }),
-      '10.0.1.4',
     );
 
     expect(result.status).toBe(201);
@@ -261,7 +253,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000009',
         players: [{ steamId, battlePoints: 500 }],
       }),
-      '10.0.0.8',
     );
     mockDate('2026-08-16T01:21:00.000Z');
     await postAsLocalHost(
@@ -270,7 +261,6 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000010',
         players: [{ steamId, battlePoints: 500 }],
       }),
-      '10.0.0.9',
     );
     let player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(1000);
@@ -282,61 +272,10 @@ describe('POST /api/game/end/local (e2e)', () => {
         matchId: '9100000015',
         players: [{ steamId, battlePoints: 500 }],
       }),
-      '10.0.0.10',
     );
 
     player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(1000);
-  });
-
-  it('同一 IP 20 分钟内两个不同 matchId：第二次整体被拒，不处理任何玩家', async () => {
-    const steamId1 = 105620008;
-    const steamId2 = 105620009;
-    mockDate('2026-08-16T01:00:00.000Z');
-    await createPlayer(app, { steamId: steamId1, matchCount: 20 });
-    await createPlayer(app, { steamId: steamId2, matchCount: 20 });
-    const sameIp = '10.0.1.1';
-
-    await postAsLocalHost(
-      app,
-      createGameEndLocalPayload({
-        matchId: '9100000011',
-        players: [{ steamId: steamId1, battlePoints: 200 }],
-      }),
-      sameIp,
-    );
-    await postAsLocalHost(
-      app,
-      createGameEndLocalPayload({
-        matchId: '9100000012',
-        players: [{ steamId: steamId2, battlePoints: 200 }],
-      }),
-      sameIp,
-    );
-
-    const player1 = await getPlayer(app, steamId1);
-    const player2 = await getPlayer(app, steamId2);
-    expect(player1.seasonPointTotal).toBe(200);
-    expect(player2.seasonPointTotal).toBe(0);
-  });
-
-  it('同一 IP 同一 matchId 重试：不受 IP 限流影响', async () => {
-    const steamId = 105620010;
-    mockDate('2026-08-16T01:00:00.000Z');
-    await createPlayer(app, { steamId, matchCount: 20 });
-    const sameIp = '10.0.1.2';
-    const payload = createGameEndLocalPayload({
-      matchId: '9100000013',
-      players: [{ steamId, battlePoints: 200 }],
-    });
-
-    const first = await postAsLocalHost(app, payload, sameIp);
-    const second = await postAsLocalHost(app, payload, sameIp);
-
-    expect(first.status).toBe(201);
-    expect(second.status).toBe(201);
-    const player = await getPlayer(app, steamId);
-    expect(player.seasonPointTotal).toBe(200);
   });
 
   it('本地结算也会记录每日任务完成状态', async () => {
@@ -367,7 +306,6 @@ describe('POST /api/game/end/local (e2e)', () => {
           },
         ],
       }),
-      '10.0.1.3',
     );
 
     const nextStart = await get(app, gameStartUrl, { steamIds: [steamId], matchId: 9100000015 });
