@@ -7,10 +7,16 @@ function createRequest(headers: Record<string, string | undefined>, ip?: string)
 }
 
 describe('getClientIp', () => {
-  it('取 x-forwarded-for 的第一段', () => {
+  it('取 x-forwarded-for 的最后一段（GFE 追加、客户端改不了的那一跳）', () => {
     const req = createRequest({ 'x-forwarded-for': '1.2.3.4, 5.6.7.8' });
 
-    expect(getClientIp(req)).toBe('1.2.3.4');
+    expect(getClientIp(req)).toBe('5.6.7.8');
+  });
+
+  it('客户端自己伪造第一段也不影响结果，仍取最后一段', () => {
+    const req = createRequest({ 'x-forwarded-for': 'fake-spoofed-value, 5.6.7.8' });
+
+    expect(getClientIp(req)).toBe('5.6.7.8');
   });
 
   it('x-forwarded-for 只有一个地址时去掉多余空格', () => {
