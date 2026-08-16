@@ -410,7 +410,22 @@ player_stats: JSON.stringify({
 // {"hd":523456,"dt":412345,"he":123456,"lh":85,"tk":3,"st":45,"rk":1}  ≈ 68 字符
 ```
 
-`game_end_player` 变 **20 个参数**，留 5 个余量；值 68 字符，在 100 以内。BigQuery 侧用 `JSON_VALUE()` 解析。
+`game_end_player` 加入 `player_stats` 后变为 **20 个参数**；后续加入
+`point_daily_task` 后为 21 个。BigQuery 侧用 `JSON_VALUE()` 解析。
+
+#1057 标定时，为避免 `kills` / `assists` / `total_gold_earned` 必须通过
+`match_id + steam_id` 连接 `game_end_match.player_N`，再增加一个短 JSON 参数：
+
+```ts
+player_stats_basic: JSON.stringify({
+  g: player.totalGoldEarned,
+  k: player.kills,
+  a: player.assists,
+}),
+```
+
+不把这三项直接塞进现有 `player_stats`，避免高表现对局的 JSON 超过 GA4
+单参数 100 字符限制。增加后 `game_end_player` 共 **22 个参数**，仍留 3 个余量。
 
 ### 5A.2A 赛季积分的拆分维度
 

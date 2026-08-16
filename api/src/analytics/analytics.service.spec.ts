@@ -109,6 +109,31 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     expect(playerStats).not.toHaveProperty('rk');
   });
 
+  it('sends basic player stats for BigQuery target calibration', async () => {
+    const service = new AnalyticsService(null);
+    const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
+
+    await service.gameEndPlayerBot(
+      buildGameEnd([
+        buildPlayer({
+          totalGoldEarned: 81788,
+          kills: 8,
+          assists: 13,
+        }),
+      ]),
+      SERVER_TYPE.TEST,
+    );
+
+    const event = sendEventSpy.mock.calls[0][1] as unknown as {
+      params: { player_stats_basic: string };
+    };
+    expect(JSON.parse(event.params.player_stats_basic)).toEqual({
+      g: 81788,
+      k: 8,
+      a: 13,
+    });
+  });
+
   it('separates daily task points from base points', async () => {
     const service = new AnalyticsService(null);
     const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
