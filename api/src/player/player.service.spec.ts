@@ -50,6 +50,42 @@ describe('PlayerService', () => {
     });
   });
 
+  describe('addLocalSeasonPoints', () => {
+    it('只增加 seasonPointTotal，不动其它字段', async () => {
+      const { service, playerRepository } = createService({
+        matchCount: 20,
+        winCount: 5,
+        seasonPointTotal: 1_000,
+      });
+
+      await service.addLocalSeasonPoints(steamId, 300);
+
+      const savedPlayer = playerRepository.update.mock.calls[0][0];
+      expect(savedPlayer.seasonPointTotal).toBe(1_300);
+      expect(savedPlayer.matchCount).toBe(20);
+      expect(savedPlayer.winCount).toBe(5);
+    });
+
+    it('玩家不存在时直接返回，不调用 update', async () => {
+      const { service, playerRepository } = createService(null);
+
+      await service.addLocalSeasonPoints(steamId, 300);
+
+      expect(playerRepository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setMatchCount', () => {
+    it('设置 matchCount', async () => {
+      const { service, playerRepository } = createService({ matchCount: 0 });
+
+      await service.setMatchCount(steamId, 20);
+
+      const savedPlayer = playerRepository.update.mock.calls[0][0];
+      expect(savedPlayer.matchCount).toBe(20);
+    });
+  });
+
   describe('reduceUsedPoint', () => {
     it('扣减 usedSeasonPoint，不低于 0', async () => {
       const { service, playerRepository } = createService({

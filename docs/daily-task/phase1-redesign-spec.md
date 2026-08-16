@@ -73,7 +73,7 @@ Phase1 不为 Phase2/3 预留任何字段或接口位。接口不做版本管理
 
 早期设计是每个候选独立掷、权重 1:1:1，那样有 1/27 的概率三个候选全 3★、1/27 全 1★，合计约 7.4% 的轮次难度维度失效。
 
-全 1★ 无所谓，全 3★ 有实际问题：按 12.2 的标定计划 3★ 对应 P75，三个都是 P75 时这一轮明显偏难，而失败不消耗轮次，玩家会卡在当前轮、后面的轮次开不出来。撞在第 1 轮大约每月一次。
+全 1★ 无所谓，全 3★ 有实际问题：按 12.4 的标定计划 3★ 对应 P75，三个都是 P75 时这一轮明显偏难，而失败不消耗轮次，玩家会卡在当前轮、后面的轮次开不出来。撞在第 1 轮大约每月一次。
 
 固定分配之后：
 
@@ -410,7 +410,22 @@ player_stats: JSON.stringify({
 // {"hd":523456,"dt":412345,"he":123456,"lh":85,"tk":3,"st":45,"rk":1}  ≈ 68 字符
 ```
 
-`game_end_player` 变 **20 个参数**，留 5 个余量；值 68 字符，在 100 以内。BigQuery 侧用 `JSON_VALUE()` 解析。
+`game_end_player` 加入 `player_stats` 后变为 **20 个参数**；后续加入
+`point_daily_task` 后为 21 个。BigQuery 侧用 `JSON_VALUE()` 解析。
+
+#1057 标定时，为避免 `kills` / `assists` / `total_gold_earned` 必须通过
+`match_id + steam_id` 连接 `game_end_match.player_N`，再增加一个短 JSON 参数：
+
+```ts
+player_stats_basic: JSON.stringify({
+  g: player.totalGoldEarned,
+  k: player.kills,
+  a: player.assists,
+}),
+```
+
+不把这三项直接塞进现有 `player_stats`，避免高表现对局的 JSON 超过 GA4
+单参数 100 字符限制。增加后 `game_end_player` 共 **22 个参数**，仍留 3 个余量。
 
 ### 5A.2A 赛季积分的拆分维度
 
@@ -1199,6 +1214,353 @@ dota(1~5) 与 hard(6~8) **合并标定，不分层**（见 3.5）：1~8 共用�
 - **`stun_duration` 单位由毫秒改秒**：原任务池里 `general_stun_duration: 60000` 这类数值要先换算再标
 
 这一项是 Phase1 唯一等数据的工作，做完即可上线。
+
+#### 12.4.1 查询范围与清洗口径
+
+标定数据只取实际启用每日任务的生产对局，并统一使用以下过滤条件：
+
+- GA4 event 为 `game_end_player`（历史的 G/K/A 例外见 12.4.3）
+- `difficulty BETWEEN 1 AND 8`，dota 与 hard 合并
+- `server_type = 'WINDY'`，排除测试地图、localhost 和未知来源
+- `steam_id > 0`，只统计真人
+- `is_disconnect = 0`，排除掉线玩家
+- `matchId IS NOT NULL`；`game_end_player` 中参数名是 camelCase 的 `matchId`，BigQuery 中读取
+  `ep.value.int_value`，不能只读 `string_value`
+- 按 `event_date + match_id + steam_id` 去重，同一玩家同一局只保留最后一个 event
+- JSON 中不存在的指标保持 `NULL` 并排除，不得补成 `0`；真实上报的 `0` 保留
+
+不连接 `game_end_match`。七项指标本来就在同一条 `game_end_player` 中；连接不仅增加复杂度，
+还会受到 `game_end_match` 的 25 参数上限和 `player_N` 丢失影响。历史 G/K/A 只能使用
+`game_end_match` 时也应单独统计，不与七项指标 join。
+
+下面的查询同时输出总体分布和按英雄分布。通用任务使用 `scope = 'general'`，英雄任务使用
+`scope = 'hero' AND hero_name = ...`。日期结束值默认取昨天，避免查询仍在持续写入的当天表。
+
+```sql
+DECLARE start_suffix STRING DEFAULT '20260811';
+DECLARE end_suffix STRING DEFAULT FORMAT_DATE(
+  '%Y%m%d',
+  DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 1 DAY)
+);
+
+WITH extracted AS (
+  SELECT
+    event_date,
+    event_timestamp,
+    (SELECT ep.value.int_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'steam_id'
+     LIMIT 1) AS steam_id,
+    (SELECT ep.value.int_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'matchId'
+     LIMIT 1) AS match_id,
+    (SELECT ep.value.int_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'difficulty'
+     LIMIT 1) AS difficulty,
+    (SELECT ep.value.string_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'server_type'
+     LIMIT 1) AS server_type,
+    COALESCE((
+      SELECT ep.value.int_value
+      FROM UNNEST(event_params) AS ep
+      WHERE ep.key = 'is_disconnect'
+      LIMIT 1
+    ), 0) AS is_disconnect,
+    (SELECT ep.value.string_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'hero_name'
+     LIMIT 1) AS hero_name,
+    (SELECT ep.value.string_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'player_stats'
+     LIMIT 1) AS player_stats
+  FROM `windy10v10ai.analytics_311407566.events_*`
+  WHERE _TABLE_SUFFIX BETWEEN start_suffix AND end_suffix
+    AND event_name = 'game_end_player'
+),
+valid AS (
+  SELECT *
+  FROM extracted
+  WHERE steam_id > 0
+    AND match_id IS NOT NULL
+    AND difficulty BETWEEN 1 AND 8
+    AND server_type = 'WINDY'
+    AND is_disconnect = 0
+    AND player_stats IS NOT NULL
+),
+deduplicated AS (
+  SELECT *
+  FROM valid
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY event_date, match_id, steam_id
+    ORDER BY event_timestamp DESC
+  ) = 1
+),
+wide AS (
+  SELECT
+    hero_name,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.hd') AS FLOAT64) AS hero_damage,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.dt') AS FLOAT64) AS damage_taken,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.he') AS FLOAT64) AS healing,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.lh') AS FLOAT64) AS last_hits,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.tk') AS FLOAT64) AS tower_kills,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.st') AS FLOAT64) AS stun_duration,
+    SAFE_CAST(JSON_VALUE(player_stats, '$.rk') AS FLOAT64) AS roshan_kills
+  FROM deduplicated
+),
+metric_rows AS (
+  SELECT hero_name, metric, value
+  FROM wide
+  UNPIVOT EXCLUDE NULLS (value FOR metric IN (
+    hero_damage AS 'hero_damage',
+    damage_taken AS 'damage_taken',
+    healing AS 'healing',
+    last_hits AS 'last_hits',
+    tower_kills AS 'tower_kills',
+    stun_duration AS 'stun_duration',
+    roshan_kills AS 'roshan_kills'
+  ))
+),
+distributions AS (
+  SELECT 'general' AS scope, CAST(NULL AS STRING) AS hero_name, metric, value
+  FROM metric_rows
+  UNION ALL
+  SELECT 'hero' AS scope, hero_name, metric, value
+  FROM metric_rows
+)
+SELECT
+  scope,
+  hero_name,
+  metric,
+  COUNT(*) AS sample_count,
+  COUNTIF(value = 0) AS zero_count,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value = 0), COUNT(*)), 2) AS zero_rate_pct,
+  MIN(value) AS minimum_value,
+  ROUND(AVG(value), 2) AS average_value,
+  APPROX_QUANTILES(value, 100)[OFFSET(10)] AS p10,
+  APPROX_QUANTILES(value, 100)[OFFSET(20)] AS p20,
+  APPROX_QUANTILES(value, 100)[OFFSET(30)] AS p30,
+  APPROX_QUANTILES(value, 100)[OFFSET(50)] AS p50,
+  APPROX_QUANTILES(value, 100)[OFFSET(75)] AS p75,
+  APPROX_QUANTILES(value, 100)[OFFSET(90)] AS p90,
+  APPROX_QUANTILES(value, 100)[OFFSET(95)] AS p95,
+  MAX(value) AS maximum_value
+FROM distributions
+GROUP BY scope, hero_name, metric
+ORDER BY IF(scope = 'general', 0, 1), metric, sample_count DESC;
+```
+
+#### 12.4.2 P30 / P50 / P75 标定策略
+
+任务判定条件是 `value >= target`，所以分位数要按上尾概率理解：
+
+- **1★ 基准 target 靠近 P30**：约 70% 的对应样本能完成，保证有稳定的保底选择
+- **2★ 的 `1.5 × target` 靠近 P50**：约 50% 能完成
+- **3★ 的 `2 × target` 靠近 P75**：约 25% 能完成，有挑战但不是极少数对局才能完成
+
+P30/P50/P75 是方向，不是三个可以独立填写的 target。配置只保存 1★ 基准值，必须在候选值
+`T` 上同时检查 `T / 1.5T / 2T` 落在分布的什么位置；优先保证 1★ 不会卡轮，再让 2★、
+3★ 尽量接近 P50、P75。无法同时贴合时，不为了精确命中某个分位数引入难读的零碎数字，
+大数值基准应取接近分位数的整洁偶数档。
+
+使用分位数时还要遵守以下规则：
+
+1. **看中位数和分位数，不看平均值与最大值。** 超长局、异常局会显著拉高平均值和最大值，
+   但对 P30/P50/P75 的影响有限。
+2. **英雄任务按该英雄自己的分布标定。** 同一 metric 在不同英雄之间不能共用一个 target。
+3. **通用任务通常高于英雄任务。** 玩家看到候选后可以主动选擅长该指标的英雄，选择空间更大；
+   `tower_kills` 是已确认的例外，因为总共只有 11 座塔且归属容易被队友或小兵拿走。
+4. **大量零值的指标不能直接套总体 P30。** `assists`、`healing`、`roshan_kills`、
+   `tower_kills` 要同时看零值率、非零样本分布和适合该指标的英雄分布。P30 为 0 不代表
+   target 应设为 0。
+5. **小整数指标用精确达成率。** 对 `t / t+1 / t+2` 分别计算
+   `COUNTIF(value >= target) / COUNT(*)`；离散分布会让多个分位数相同，不能只看近似分位数。
+6. **先看样本量再改数值。** `sample_count >= 100` 才做常规调整；30～99 只修正明显不可达
+   或明显白送的 target；低于 30 保持现值并继续积累。该阈值按“英雄 + metric”判断，不按英雄
+   的总出场数判断。
+7. **先修过难，再修过易。** 完全无法完成会卡住轮次；略微偏简单只会让奖励更容易获得，
+   对体验的伤害较小。
+8. **分批修改。** 第一批只处理样本充分且偏离最大的少数项目，上线后观察实际完成情况，
+   再处理下一批，避免一次性改动整个任务池后无法判断是哪项调整造成变化。
+
+对于候选 target，还要补算真实达成率，而不是仅凭查询表中的两个相邻分位数线性推断：
+
+```sql
+SELECT
+  COUNT(*) AS sample_count,
+  COUNTIF(value >= @target_1_star) AS completed_1_star,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value >= @target_1_star), COUNT(*)), 2)
+    AS completion_rate_1_star_pct,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value >= @target_1_star * 1.5), COUNT(*)), 2)
+    AS completion_rate_2_star_pct,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value >= @target_1_star * 2), COUNT(*)), 2)
+    AS completion_rate_3_star_pct
+FROM metric_rows
+WHERE metric = @metric;
+```
+
+这里的 `@target_1_star` 和 `@metric` 是 BigQuery 查询参数；英雄任务还要过滤对应 `hero_name`。
+大数值任务的目标完成率约为 70% / 50% / 25%。小整数任务把三个表达式中的 target 替换为
+`T / T+1 / T+2`。
+
+对于 `tower_kills` 这类离散指标，“target 是 P 几”不是单个精确值：同一个整数可能占据一段
+分位区间。应直接统计 `< target`、`<= target` 和 `>= target`，同时得到分位区间和真实完成率：
+
+```sql
+WITH targets AS (
+  SELECT target
+  FROM UNNEST([4, 5, 6]) AS target
+)
+SELECT
+  target,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value < target), COUNT(*)), 2) AS percentile_lower_pct,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value <= target), COUNT(*)), 2) AS percentile_upper_pct,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value >= target), COUNT(*)), 2) AS completion_rate_pct
+FROM metric_rows
+CROSS JOIN targets
+WHERE metric = 'tower_kills'
+GROUP BY target
+ORDER BY target;
+```
+
+对于大量零值的指标，保留总体分布用于计算实际完成率，同时另外查询正值条件分布，判断
+“玩家确实产生该行为以后”的难度。以 `healing` 为例：
+
+```sql
+SELECT
+  COUNT(*) AS positive_sample_count,
+  MIN(value) AS minimum_positive_value,
+  APPROX_QUANTILES(value, 100)[OFFSET(30)] AS positive_p30,
+  APPROX_QUANTILES(value, 100)[OFFSET(50)] AS positive_p50,
+  APPROX_QUANTILES(value, 100)[OFFSET(75)] AS positive_p75,
+  APPROX_QUANTILES(value, 100)[OFFSET(90)] AS positive_p90,
+  MAX(value) AS maximum_value
+FROM metric_rows
+WHERE metric = 'healing'
+  AND value > 0;
+```
+
+正值条件分布不能替代总体完成率。比如 75% 对局治疗为 0，即使正值 P30 很低，所有零值对局
+仍然无法完成任何正 target；两组结果必须一起判断。英雄治疗任务还要追加对应
+`hero_name`，避免把没有治疗能力的英雄混入分布。
+
+#### 12.4.3 历史 G/K/A 的临时查询
+
+`player_stats_basic` 上线后的新数据应直接从 `game_end_player` 读取 `$.g` / `$.k` / `$.a`，
+并合并进 12.4.1 的 `wide` 和 `UNPIVOT`。上线前的历史数据只能从
+`game_end_match.player_N` 读取；这份数据受 GA4 每 event 25 参数上限影响，只用于初步判断，
+不作为英雄级 G/K/A 最终标定的唯一依据。
+
+历史查询仍然单独输出总体与按英雄分布，不与 `game_end_player` join：
+
+```sql
+DECLARE start_suffix STRING DEFAULT '20260811';
+DECLARE end_suffix STRING DEFAULT FORMAT_DATE(
+  '%Y%m%d',
+  DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 1 DAY)
+);
+
+WITH match_events AS (
+  SELECT
+    event_date,
+    event_timestamp,
+    COALESCE(
+      (SELECT ep.value.int_value
+       FROM UNNEST(event_params) AS ep
+       WHERE ep.key = 'match_id'
+       LIMIT 1),
+      SAFE_CAST((
+        SELECT ep.value.string_value
+        FROM UNNEST(event_params) AS ep
+        WHERE ep.key = 'match_id'
+        LIMIT 1
+      ) AS INT64)
+    ) AS match_id,
+    (SELECT ep.value.int_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'difficulty'
+     LIMIT 1) AS difficulty,
+    (SELECT ep.value.string_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'server_type'
+     LIMIT 1) AS server_type,
+    event_params
+  FROM `windy10v10ai.analytics_311407566.events_*`
+  WHERE _TABLE_SUFFIX BETWEEN start_suffix AND end_suffix
+    AND event_name = 'game_end_match'
+),
+player_rows AS (
+  SELECT
+    event_date,
+    event_timestamp,
+    match_id,
+    SAFE_CAST(JSON_VALUE(player_param.value.string_value, '$.si') AS INT64) AS steam_id,
+    SAFE_CAST(JSON_VALUE(player_param.value.string_value, '$.hi') AS INT64) AS hero_id,
+    COALESCE(
+      SAFE_CAST(JSON_VALUE(player_param.value.string_value, '$.dc') AS BOOL),
+      FALSE
+    ) AS is_disconnect,
+    SAFE_CAST(JSON_VALUE(player_param.value.string_value, '$.k') AS FLOAT64) AS kills,
+    SAFE_CAST(JSON_VALUE(player_param.value.string_value, '$.a') AS FLOAT64) AS assists,
+    SAFE_CAST(JSON_VALUE(player_param.value.string_value, '$.g') AS FLOAT64)
+      AS total_gold_earned
+  FROM match_events
+  CROSS JOIN UNNEST(event_params) AS player_param
+  WHERE match_id IS NOT NULL
+    AND difficulty BETWEEN 1 AND 8
+    AND server_type = 'WINDY'
+    AND REGEXP_CONTAINS(player_param.key, r'^player_[0-9]+$')
+),
+deduplicated AS (
+  SELECT *
+  FROM player_rows
+  WHERE steam_id > 0
+    AND NOT is_disconnect
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY event_date, match_id, steam_id
+    ORDER BY event_timestamp DESC
+  ) = 1
+),
+metric_rows AS (
+  SELECT hero_id, metric, value
+  FROM deduplicated
+  UNPIVOT EXCLUDE NULLS (value FOR metric IN (
+    kills AS 'kills',
+    assists AS 'assists',
+    total_gold_earned AS 'total_gold_earned'
+  ))
+),
+distributions AS (
+  SELECT 'general' AS scope, CAST(NULL AS INT64) AS hero_id, metric, value
+  FROM metric_rows
+  UNION ALL
+  SELECT 'hero' AS scope, hero_id, metric, value
+  FROM metric_rows
+)
+SELECT
+  scope,
+  hero_id,
+  metric,
+  COUNT(*) AS sample_count,
+  COUNTIF(value = 0) AS zero_count,
+  ROUND(100 * SAFE_DIVIDE(COUNTIF(value = 0), COUNT(*)), 2) AS zero_rate_pct,
+  MIN(value) AS minimum_value,
+  ROUND(AVG(value), 2) AS average_value,
+  APPROX_QUANTILES(value, 100)[OFFSET(10)] AS p10,
+  APPROX_QUANTILES(value, 100)[OFFSET(20)] AS p20,
+  APPROX_QUANTILES(value, 100)[OFFSET(30)] AS p30,
+  APPROX_QUANTILES(value, 100)[OFFSET(50)] AS p50,
+  APPROX_QUANTILES(value, 100)[OFFSET(75)] AS p75,
+  APPROX_QUANTILES(value, 100)[OFFSET(90)] AS p90,
+  APPROX_QUANTILES(value, 100)[OFFSET(95)] AS p95,
+  MAX(value) AS maximum_value
+FROM distributions
+GROUP BY scope, hero_id, metric
+ORDER BY IF(scope = 'general', 0, 1), metric, sample_count DESC;
+```
 
 ### 12.5 上线顺序：API 先，game 后
 

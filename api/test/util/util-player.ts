@@ -20,6 +20,7 @@ interface createPlayerParams {
   usedSeasonPoint?: number;
   usedMemberPoint?: number;
   conductPoint?: number;
+  matchCount?: number;
 }
 
 export async function createPlayer(
@@ -35,6 +36,9 @@ export async function createPlayer(
   });
   if (params.conductPoint !== undefined) {
     await playerService.setConductPoint(params.steamId, params.conductPoint);
+  }
+  if (params.matchCount !== undefined) {
+    await playerService.setMatchCount(params.steamId, params.matchCount);
   }
 }
 
