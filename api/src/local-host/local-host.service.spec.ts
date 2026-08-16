@@ -99,6 +99,15 @@ describe('LocalHostService', () => {
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
   });
 
+  it('结算成功后在 player 维度文档记录来源 IP', async () => {
+    const { service, store } = createService();
+    const gameEnd = createGameEndDto();
+
+    await service.settle(gameEnd, '1.2.3.4');
+
+    expect(store.get('player:1')?.ip).toBe('1.2.3.4');
+  });
+
   it('steamId <= 0 的玩家跳过，不加分', async () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ players: [createPlayerDto({ steamId: 0 })] });

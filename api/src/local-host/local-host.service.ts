@@ -80,7 +80,7 @@ export class LocalHostService {
     }
 
     for (const check of checks) {
-      await this.commitPlayerSettlement(check, gameEnd);
+      await this.commitPlayerSettlement(check, gameEnd, clientIp);
     }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
@@ -164,13 +164,18 @@ export class LocalHostService {
   }
 
   // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
-  private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
+  private async commitPlayerSettlement(
+    check: PlayerCheck,
+    gameEnd: GameEndDto,
+    clientIp: string,
+  ): Promise<void> {
     const next: LocalRateLimit = {
       id: playerRateLimitId(check.steamId),
       lastRequestAt: new Date(),
       lastRequestMatchId: gameEnd.matchId,
       dailyPointsDate: getUtcMidnight(new Date()),
       dailyPointsTotal: check.dailyPointsSoFar + check.battlePoints,
+      ip: clientIp,
     };
     if (check.current) {
       await this.rateLimitRepository.update(next);

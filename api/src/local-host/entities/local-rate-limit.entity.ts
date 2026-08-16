@@ -9,4 +9,6 @@ export class LocalRateLimit {
   // 仅 player 维度文档使用
   dailyPointsDate?: Date;
   dailyPointsTotal?: number;
+  // 仅 player 维度文档使用：记录最近一次结算来自哪个 IP，方便日后排查
+  ip?: string;
 }
