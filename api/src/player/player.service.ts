@@ -83,6 +83,24 @@ export class PlayerService {
     await this.playerRepository.update(player);
   }
 
+  // 本地主机受限结算专用：只加 seasonPointTotal，不动 matchCount/winCount/
+  // disconnectCount/conductPoint。玩家必须已存在，不自动创建。
+  async addLocalSeasonPoints(steamId: number, battlePoints: number): Promise<void> {
+    const player = await this.playerRepository.findById(steamId.toString());
+    if (!player) {
+      return;
+    }
+    player.seasonPointTotal += battlePoints;
+    await this.playerRepository.update(player);
+  }
+
+  // 仅供测试初始化使用，生产代码不应调用；matchCount 的正常变动走 upsertGameEnd。
+  async setMatchCount(steamId: number, value: number): Promise<void> {
+    const player = await this.getOrNewPlayerBySteamId(steamId);
+    player.matchCount = value;
+    await this.playerRepository.update(player);
+  }
+
   normalizeBattlePoints(battlePoints: number): number {
     if (!Number.isFinite(battlePoints)) {
       return 0;

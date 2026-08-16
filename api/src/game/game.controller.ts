@@ -15,12 +15,14 @@ import { logger } from 'firebase-functions';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
+import { LocalSettlementService } from '../local-settlement/local-settlement.service';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { Public } from '../util/auth/public.decorator';
+import { getClientIp } from '../util/request-ip';
 import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
@@ -39,6 +41,7 @@ export class GameController {
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly dailyTaskService: DailyTaskService,
+    private readonly localSettlementService: LocalSettlementService,
   ) {}
 
   @Public()
@@ -145,6 +148,24 @@ export class GameController {
         }),
       ),
     ]);
+    return this.gameService.getOK();
+  }
+
+  // 本地主机受限结算：只接受 LOCAL key，只加 seasonPointTotal + 记录每日任务，
+  // 不做正式结算的其余副作用（matchCount/winCount/conductPoint/GA4/终身统计等）。
+  @Public()
+  @ApiBody({ type: GameEndDto })
+  @Post('end/local')
+  async endLocal(@Body() gameEnd: GameEndDto, @Req() req: Request): Promise<string> {
+    const apiKey = req.headers['x-api-key'] as string;
+    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
+    if (serverType !== SERVER_TYPE.LOCAL) {
+      logger.warn('game/end/local: rejected, not a local server key', { serverType });
+      return this.gameService.getOK();
+    }
+
+    const clientIp = getClientIp(req);
+    await this.localSettlementService.settle(gameEnd, clientIp);
     return this.gameService.getOK();
   }
 }
