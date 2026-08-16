@@ -67,7 +67,7 @@ function postAsLocalHost(app: INestApplication, body: object, ip = '127.0.0.1'):
     .post(gameEndLocalUrl)
     .send(body)
     .set('x-api-key', localApiKey)
-    .set('x-forwarded-for', ip);
+    .set('cf-connecting-ip', ip);
 }
 
 function postAsOfficialHost(app: INestApplication, body: object): request.Test {
