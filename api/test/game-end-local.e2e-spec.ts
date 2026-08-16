@@ -150,10 +150,10 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player).toBeFalsy();
   });
 
-  it('matchCount <= 10：拒绝', async () => {
+  it('matchCount <= 1：拒绝', async () => {
     const steamId = 105620004;
     mockDate('2026-08-16T01:00:00.000Z');
-    await createPlayer(app, { steamId, matchCount: 10 });
+    await createPlayer(app, { steamId, matchCount: 1 });
 
     const result = await postAsLocalHost(
       app,
@@ -206,7 +206,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player.seasonPointTotal).toBe(400);
   });
 
-  it('同一 matchId 重试：幂等，不重复加分', async () => {
+  it('同一 matchId 重试：直接判定失败，不重复加分', async () => {
     const steamId = 105620006;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20 });
@@ -220,6 +220,31 @@ describe('POST /api/game/end/local (e2e)', () => {
 
     const player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(200);
+  });
+
+  it('多人比赛中只要有一人未通过检查，整场比赛都不结算、不记录每日任务', async () => {
+    const okSteamId = 105620012;
+    const badSteamId = 105620013; // matchCount 不够，会拖累整场比赛
+    mockDate('2026-08-16T01:00:00.000Z');
+    await createPlayer(app, { steamId: okSteamId, matchCount: 20 });
+    await createPlayer(app, { steamId: badSteamId, matchCount: 1 });
+
+    const result = await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000016',
+        players: [
+          { steamId: okSteamId, battlePoints: 200 },
+          { steamId: badSteamId, battlePoints: 200 },
+        ],
+      }),
+      '10.0.1.4',
+    );
+
+    expect(result.status).toBe(201);
+    // 即使 okSteamId 本身满足所有条件，也因为同一请求里 badSteamId 未通过而不结算。
+    const okPlayer = await getPlayer(app, okSteamId);
+    expect(okPlayer.seasonPointTotal).toBe(0);
   });
 
   it('当日累计超过 1000：整条拒绝，不部分发放', async () => {

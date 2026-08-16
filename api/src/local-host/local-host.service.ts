@@ -60,31 +60,28 @@ export class LocalHostService {
       return;
     }
 
+    // 顺序检查每个合格玩家；只要有一个没通过（含同一 matchId 重试），整场
+    // 比赛立刻拒绝，不写分、不记录每日任务——不单独跳过那一个玩家，也不用
+    // 等其余玩家都检查完。
     const qualifiedPlayers = gameEnd.players.filter((player) => player.steamId > 0);
-    const checks = await Promise.all(
-      qualifiedPlayers.map((player) => this.checkPlayerLimit(player, gameEnd.matchId)),
-    );
-
-    // 只要有一个玩家没通过检查（含同一 matchId 重试），整场比赛都不写分、
-    // 不记录每日任务——不单独跳过那一个玩家，避免部分发放/部分记录。
-    if (checks.some((check) => !check.ok)) {
-      for (const check of checks) {
-        if (!check.ok) {
-          logger.warn('game/end/local: rejected', {
-            steamId: check.steamId,
-            battlePoints: check.battlePoints,
-            reason: check.reason,
-          });
-        }
+    const checks: PlayerCheck[] = [];
+    for (const player of qualifiedPlayers) {
+      const check = await this.checkPlayerLimit(player, gameEnd.matchId);
+      if (!check.ok) {
+        logger.warn('game/end/local: rejected, no points or daily task recorded for this match', {
+          matchId: gameEnd.matchId,
+          steamId: check.steamId,
+          battlePoints: check.battlePoints,
+          reason: check.reason,
+        });
+        return;
       }
-      logger.warn('game/end/local: request rejected, no points or daily task recorded', {
-        matchId: gameEnd.matchId,
-      });
-      return;
+      checks.push(check);
     }
 
-    // 走到这里说明每个 check 都是 ok，可以放心提交。
-    await Promise.all(checks.map((check) => this.commitPlayerSettlement(check, gameEnd)));
+    for (const check of checks) {
+      await this.commitPlayerSettlement(check, gameEnd);
+    }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
   }
