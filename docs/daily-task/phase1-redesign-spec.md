@@ -61,9 +61,9 @@ Phase1 不为 Phase2/3 预留任何字段或接口位。接口不做版本管理
 
 | 星级 | 目标倍率 | 赛季积分 |
 | --- | --- | --- |
-| 1★ | 0.75 | 60 |
-| 2★ | 1.0 | 80 |
-| 3★ | 1.5 | 100 |
+| 1★ | 1.0 | 60 |
+| 2★ | 1.5 | 80 |
+| 3★ | 2.0 | 100 |
 
 **每轮的三个候选固定是 1★ / 2★ / 3★ 各一个**，只有"哪个候选拿到哪个星级"由 seed 随机（6 种排列）。
 
@@ -92,7 +92,7 @@ const SMALL_TARGET_THRESHOLD = 10;
 const scaled =
   task.target < SMALL_TARGET_THRESHOLD
     ? task.target + (star - 1)              // t / t+1 / t+2
-    : task.target * multipliers[star];      // 0.75 / 1.0 / 1.5
+    : task.target * multipliers[star];      // 1.0 / 1.5 / 2.0
 
 return Math.max(1, Math.round(scaled));
 ```
@@ -101,9 +101,9 @@ return Math.max(1, Math.round(scaled));
 | --- | ---: | --- |
 | `roshan_kills` | 1 | 1 / 2 / 3 |
 | `tower_kills` | 3 | 3 / 4 / 5 |
-| `kills` | 20 | 15 / 20 / 30 |
-| `stun_duration` | 45（秒） | 34 / 45 / 68 |
-| `hero_damage` | 500000 | 375000 / 500000 / 750000 |
+| `kills` | 20 | 20 / 30 / 40 |
+| `stun_duration` | 45（秒） | 45 / 68 / 90 |
+| `hero_damage` | 500000 | 500000 / 750000 / 1000000 |
 
 `stun_duration` 的 target 为整数秒、通常两位数，走乘法档。判定时与 `GetStuns()` 的浮点返回值直接比较，不取整。
 
@@ -535,7 +535,7 @@ export class PlayerDailyTask {   // → 集合名 PlayerDailyTasks
 
 export interface CompletedTask {
   taskId: string;
-  star: number;         // 1~3，用于历史面板还原目标与奖励
+  star: number;         // 1~3，响应时结合当前任务定义展开为完整 TaskCandidateDto
 }
 
 export interface DailyTaskHistoryEntry {
@@ -546,6 +546,8 @@ export interface DailyTaskHistoryEntry {
 ```
 
 五个业务字段。文档数固定等于玩家数，永不增长。
+
+Firestore 中的 `completedTasks` / `history[].tasks` 仍只保存 `{ taskId, star }`。`/game/start` 组装响应时按 `taskId` 查找当前任务定义，展开为含 `scope` / `metric` / `heroName` / `target` / `rewardSeasonPoint` 的完整 `TaskCandidateDto`；任务池中已不存在的旧 taskId 从响应数组过滤，但不影响独立保存的积分汇总。
 
 **写法对齐仓库现状**：仓库里 14 个 entity 全部使用裸 `@Collection()`，集合名由 fireorm 按 `pluralize.plural(类名)` 推导（`Player → Players`、`PlayerHeroAwakening → PlayerHeroAwakenings`）。`id` 上的 `@Exclude()` 与数组字段的 `= []` 默认值同样沿用 [player-hero-awakening.entity.ts](../../api/src/player-hero-awakening/entities/player-hero-awakening.entity.ts) 的写法。
 
@@ -602,8 +604,6 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
     {
       "steamId": 483215844,
       "dayId": "20260811",
-      "totalRounds": 3,
-      "currentRound": 2,
       "candidates": [
         {
           "taskId": "general_hero_damage",
@@ -632,16 +632,45 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
         }
       ],
       "completedTasks": [
-        { "taskId": "general_kills", "star": 1 }
+        {
+          "taskId": "general_kills",
+          "scope": "personal_general",
+          "metric": "kills",
+          "star": 1,
+          "target": 80,
+          "rewardSeasonPoint": 60
+        }
       ],
       "todaySeasonPoint": 60,
       "history": [
         {
           "dayId": "20260810",
           "tasks": [
-            { "taskId": "general_last_hits", "star": 3 },
-            { "taskId": "hero_lina_2", "star": 2 },
-            { "taskId": "general_healing", "star": 1 }
+            {
+              "taskId": "general_last_hits",
+              "scope": "personal_general",
+              "metric": "last_hits",
+              "star": 3,
+              "target": 200,
+              "rewardSeasonPoint": 100
+            },
+            {
+              "taskId": "hero_lina_2",
+              "scope": "personal_hero",
+              "metric": "stun_duration",
+              "heroName": "npc_dota_hero_lina",
+              "star": 2,
+              "target": 105,
+              "rewardSeasonPoint": 80
+            },
+            {
+              "taskId": "general_healing",
+              "scope": "personal_general",
+              "metric": "healing",
+              "star": 1,
+              "target": 300000,
+              "rewardSeasonPoint": 60
+            }
           ],
           "seasonPoint": 240
         }
@@ -651,7 +680,7 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
 }
 ```
 
-三轮全部完成时 `candidates` 为空数组（服务端直接短路，不调用生成器，见 8.2），`currentRound` 为 4。没有 `schemaVersion`、没有 `unit`、没有 `assignmentId`、没有 `progress`。
+三轮全部完成时 `candidates` 为空数组（服务端直接短路，不调用生成器，见 8.2）。`totalRounds` 是常量、`currentRound` 可由 `completedTasks.length + 1` 派生，客户端不需要，因此响应不下发这两个字段。没有 `schemaVersion`、没有 `unit`、没有 `assignmentId`、没有 `progress`。
 
 `dayId` 由客户端保存，`/game/end` 时原样回传。
 
@@ -693,7 +722,7 @@ export class DailyTaskResultDto {
 
 export class GameEndPlayerDto {
   // ... 现有字段不变，battlePoints 已含每日任务奖励
-  /** 未完成任务时整个对象不发送；发送则三个字段必须齐全 */
+  /** 未完成任务时整个对象不发送；发送则四个字段必须齐全 */
   @ApiProperty({ type: DailyTaskResultDto, required: false })
   @IsOptional()
   @ValidateNested()
@@ -983,7 +1012,7 @@ export interface TaskDefinition {
   id: string;
   scope: TaskScope;
   metric: TaskMetric;
-  /** 2★ 基准值；1★ / 3★ 由 3.3 的加法/乘法双档推导，不落库、不写进配置 */
+  /** 1★ 基准值；2★ / 3★ 由 3.3 的加法/乘法双档推导，不落库、不写进配置 */
   target: number;
   /** 仅 PERSONAL_HERO 有 */
   heroName?: string;
@@ -991,7 +1020,7 @@ export interface TaskDefinition {
 
 export const ROUNDS_PER_DAY = 3;
 export const STAR_REWARDS = { 1: 60, 2: 80, 3: 100 } as const;
-export const STAR_TARGET_MULTIPLIERS = { 1: 0.75, 2: 1, 3: 1.5 } as const;
+export const STAR_TARGET_MULTIPLIERS = { 1: 1, 2: 1.5, 3: 2 } as const;
 export const SMALL_TARGET_THRESHOLD = 10;
 
 export const DAILY_TASKS: TaskDefinition[] = [
@@ -1164,7 +1193,7 @@ dota(1~5) 与 hard(6~8) **合并标定，不分层**（见 3.5）：1~8 共用�
 12.2 交付的 `target` 是量级合理的占位值，不是标定过的。上线前用 12.1 积累的 BigQuery 数据统一调整一遍。
 
 - **口径变了**：原 `target` 按跨局累积标定（`general_hero_damage: 500000` 这类），现在是**单局达标**，必须按单局分布重标
-- **只标 2★ 基准值**：1★ / 3★ 由 3.3 的倍率或加法档推导，不单独标（例如 2★ = P50，1★ / 3★ 自然落在 P30 / P75 附近）
+- **只标 1★ 基准值**：2★ / 3★ 由 3.3 的倍率或加法档推导，不单独标；基础 target 按可稳定完成的较低分位设置，再用实际完成率校准三档难度
 - **样本范围**：`WHERE difficulty BETWEEN 1 AND 8`，dota 与 hard 合并（见 12.1）
 - **英雄任务按英雄切分**，通用任务用全体样本
 - **`stun_duration` 单位由毫秒改秒**：原任务池里 `general_stun_duration: 60000` 这类数值要先换算再标

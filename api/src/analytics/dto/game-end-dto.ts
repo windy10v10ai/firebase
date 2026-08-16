@@ -1,6 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 import { EventBaseDto } from './event-base-dto';
 
@@ -18,6 +29,29 @@ export class GameEndGameOptionsDto {
   /** 客户端下一版起发送；未传时不参与刷分判断 */
   @ApiProperty({ required: false })
   respawnTimePct?: number;
+}
+
+export class DailyTaskResultDto {
+  @ApiProperty()
+  @IsString()
+  @Matches(/^\d{8}$/)
+  dayId: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  taskId: string;
+
+  @ApiProperty()
+  @IsInt()
+  @Min(1)
+  @Max(3)
+  star: number;
+
+  @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  seasonPoint: number;
 }
 
 export class GameEndPlayerDto {
@@ -91,6 +125,12 @@ export class GameEndPlayerDto {
   @IsNumber()
   @Min(0)
   roshanKills?: number;
+
+  @ApiProperty({ type: DailyTaskResultDto, required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DailyTaskResultDto)
+  dailyTask?: DailyTaskResultDto;
 }
 
 export class GameEndDto extends EventBaseDto {

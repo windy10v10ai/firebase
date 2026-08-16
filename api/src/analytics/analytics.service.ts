@@ -86,6 +86,7 @@ export class AnalyticsService {
         const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
         // 机器人不纳入互动时间统计
         const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
+        const dailyTaskPoints = player.dailyTask?.seasonPoint ?? 0;
 
         const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
           steam_id: player.steamId,
@@ -99,7 +100,9 @@ export class AnalyticsService {
           team_id: player.teamId,
           hero_name: player.heroName,
           hero_name_cn: GetHeroNameChinese(player.heroName),
-          points: player.battlePoints,
+          // 包含行为分等奖励，不包含每日任务积分；每日任务积分单独统计
+          points: player.battlePoints - dailyTaskPoints,
+          point_daily_task: dailyTaskPoints,
 
           is_disconnect: player.isDisconnected,
           server_type: serverType,

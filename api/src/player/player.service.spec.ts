@@ -18,6 +18,38 @@ describe('PlayerService', () => {
     return { service, playerRepository };
   }
 
+  describe('normalizeBattlePoints', () => {
+    it.each([
+      { battlePoints: Number.NaN, expected: 0 },
+      { battlePoints: Number.POSITIVE_INFINITY, expected: 0 },
+      { battlePoints: -1, expected: 0 },
+      { battlePoints: 0, expected: 0 },
+      { battlePoints: 250, expected: 250 },
+      { battlePoints: 500, expected: 500 },
+      { battlePoints: 580, expected: 500 },
+    ])('normalizes $battlePoints to $expected', ({ battlePoints, expected }) => {
+      const { service } = createService(null);
+
+      expect(service.normalizeBattlePoints(battlePoints)).toBe(expected);
+    });
+  });
+
+  describe('upsertGameEnd', () => {
+    it('adds normalized battle points to the player', async () => {
+      const { service, playerRepository } = createService({
+        matchCount: 0,
+        winCount: 0,
+        disconnectCount: 0,
+        seasonPointTotal: 1_000,
+      });
+
+      await service.upsertGameEnd(steamId, false, 580, false, false);
+
+      const savedPlayer = playerRepository.update.mock.calls[0][0];
+      expect(savedPlayer.seasonPointTotal).toBe(1_500);
+    });
+  });
+
   describe('reduceUsedPoint', () => {
     it('扣减 usedSeasonPoint，不低于 0', async () => {
       const { service, playerRepository } = createService({
