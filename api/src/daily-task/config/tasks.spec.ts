@@ -27,10 +27,10 @@ const groupHeroTasks = (): Map<string, TaskDefinition[]> => {
 
 describe('daily task configuration', () => {
   it('keeps the reviewed personal task pool', () => {
-    expect(DAILY_TASKS).toHaveLength(260);
+    expect(DAILY_TASKS).toHaveLength(255);
     expect(GENERAL_TASKS).toHaveLength(10);
-    expect(HERO_TASKS).toHaveLength(250);
-    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(260);
+    expect(HERO_TASKS).toHaveLength(245);
+    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(255);
   });
 
   it('uses every metric exactly once in the general pool', () => {
@@ -90,7 +90,7 @@ describe('daily task hero pool', () => {
       taskCountDistribution[tasks.length as keyof typeof taskCountDistribution] += 1;
     }
 
-    expect(taskCountDistribution).toEqual({ 1: 4, 2: 123 });
+    expect(taskCountDistribution).toEqual({ 1: 9, 2: 118 });
   });
 
   it('numbers task ids after their hero without gaps', () => {
@@ -118,11 +118,11 @@ describe('daily task hero pool', () => {
 
     expect(metricCounts).toEqual({
       [TaskMetric.KILLS]: 20,
-      [TaskMetric.ASSISTS]: 26,
+      [TaskMetric.ASSISTS]: 24,
       [TaskMetric.LAST_HITS]: 0,
       [TaskMetric.TOWER_KILLS]: 14,
       [TaskMetric.HERO_DAMAGE]: 94,
-      [TaskMetric.HEALING]: 18,
+      [TaskMetric.HEALING]: 15,
       [TaskMetric.TOTAL_GOLD_EARNED]: 0,
       [TaskMetric.DAMAGE_TAKEN]: 23,
       [TaskMetric.STUN_DURATION]: 55,
@@ -136,7 +136,7 @@ describe('daily task hero pool', () => {
       [TaskMetric.ASSISTS]: [60, 80],
       [TaskMetric.TOWER_KILLS]: [3, 5],
       [TaskMetric.HERO_DAMAGE]: [300_000, 900_000],
-      [TaskMetric.HEALING]: [5_000, 80_000],
+      [TaskMetric.HEALING]: [10_000, 80_000],
       [TaskMetric.DAMAGE_TAKEN]: [180_000, 260_000],
       [TaskMetric.STUN_DURATION]: [30, 400],
     };

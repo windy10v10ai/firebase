@@ -218,13 +218,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
     heroName: 'npc_dota_hero_juggernaut',
   },
   {
-    id: 'hero_juggernaut_2',
-    scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.HEALING,
-    target: 60_000,
-    heroName: 'npc_dota_hero_juggernaut',
-  },
-  {
     id: 'hero_sniper_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
@@ -582,13 +575,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
     heroName: 'npc_dota_hero_beastmaster',
   },
   {
-    id: 'hero_beastmaster_2',
-    scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.ASSISTS,
-    target: 60,
-    heroName: 'npc_dota_hero_beastmaster',
-  },
-  {
     id: 'hero_bloodseeker_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
@@ -803,13 +789,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
     target: 500_000,
-    heroName: 'npc_dota_hero_ember_spirit',
-  },
-  {
-    id: 'hero_ember_spirit_2',
-    scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.ASSISTS,
-    target: 60,
     heroName: 'npc_dota_hero_ember_spirit',
   },
   {
@@ -1270,13 +1249,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
   {
     id: 'hero_pugna_1',
     scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.HEALING,
-    target: 60_000,
-    heroName: 'npc_dota_hero_pugna',
-  },
-  {
-    id: 'hero_pugna_2',
-    scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
     target: 400_000,
     heroName: 'npc_dota_hero_pugna',
@@ -1598,13 +1570,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
   },
   {
     id: 'hero_undying_1',
-    scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.HEALING,
-    target: 5_000,
-    heroName: 'npc_dota_hero_undying',
-  },
-  {
-    id: 'hero_undying_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
     target: 350_000,
