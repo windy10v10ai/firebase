@@ -27,8 +27,6 @@ import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
 import { GameService } from './game.service';
 
-const MAX_BATTLE_POINTS_PER_MATCH = 500;
-
 @ApiTags('Game')
 @Controller('game')
 export class GameController {
@@ -125,25 +123,10 @@ export class GameController {
         if (player.steamId <= 0) {
           return undefined;
         }
-        const battlePoints = Number.isFinite(player.battlePoints) ? player.battlePoints : 0;
-        if (battlePoints > MAX_BATTLE_POINTS_PER_MATCH) {
-          logger.warn('game/end: battlePoints exceeds cap, truncating', {
-            steamId: player.steamId,
-            serverType,
-            battlePoints,
-          });
-        } else if (battlePoints < 0) {
-          logger.warn('game/end: negative battlePoints, clamping to zero', {
-            steamId: player.steamId,
-            serverType,
-            battlePoints,
-          });
-        }
-        const settledPoints = Math.min(MAX_BATTLE_POINTS_PER_MATCH, Math.max(0, battlePoints));
         return this.playerService.upsertGameEnd(
           player.steamId,
           player.teamId == gameEnd.winnerTeamId,
-          settledPoints,
+          player.battlePoints,
           player.isDisconnected,
           isParty,
         );
