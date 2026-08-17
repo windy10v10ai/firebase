@@ -27,10 +27,10 @@ const groupHeroTasks = (): Map<string, TaskDefinition[]> => {
 
 describe('daily task configuration', () => {
   it('keeps the reviewed personal task pool', () => {
-    expect(DAILY_TASKS).toHaveLength(255);
+    expect(DAILY_TASKS).toHaveLength(253);
     expect(GENERAL_TASKS).toHaveLength(10);
-    expect(HERO_TASKS).toHaveLength(245);
-    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(255);
+    expect(HERO_TASKS).toHaveLength(243);
+    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(253);
   });
 
   it('uses every metric exactly once in the general pool', () => {
@@ -90,7 +90,7 @@ describe('daily task hero pool', () => {
       taskCountDistribution[tasks.length as keyof typeof taskCountDistribution] += 1;
     }
 
-    expect(taskCountDistribution).toEqual({ 1: 9, 2: 118 });
+    expect(taskCountDistribution).toEqual({ 1: 11, 2: 116 });
   });
 
   it('numbers task ids after their hero without gaps', () => {
@@ -118,7 +118,7 @@ describe('daily task hero pool', () => {
 
     expect(metricCounts).toEqual({
       [TaskMetric.KILLS]: 20,
-      [TaskMetric.ASSISTS]: 24,
+      [TaskMetric.ASSISTS]: 22,
       [TaskMetric.LAST_HITS]: 0,
       [TaskMetric.TOWER_KILLS]: 14,
       [TaskMetric.HERO_DAMAGE]: 94,
@@ -162,7 +162,7 @@ describe('daily task hero pool', () => {
     ]);
     expect(selectMetricTargets('dazzle')).toEqual([
       { metric: TaskMetric.HEALING, target: 80_000 },
-      { metric: TaskMetric.ASSISTS, target: 70 },
+      { metric: TaskMetric.ASSISTS, target: 60 },
     ]);
     expect(selectMetricTargets('lion')).toContainEqual({
       metric: TaskMetric.STUN_DURATION,
@@ -174,7 +174,7 @@ describe('daily task hero pool', () => {
     ]);
     expect(selectMetricTargets('zuus')).toContainEqual({
       metric: TaskMetric.ASSISTS,
-      target: 80,
+      target: 70,
     });
   });
 });
