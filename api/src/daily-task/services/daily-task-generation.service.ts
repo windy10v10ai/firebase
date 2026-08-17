@@ -9,9 +9,38 @@ import {
 } from '../config/tasks';
 import { TaskCandidateDto } from '../dto/daily-task-snapshot.dto';
 import { CompletedTask } from '../entities/player-daily-task.entity';
-import { TaskScope } from '../types/daily-task.types';
+import { TaskMetric, TaskScope } from '../types/daily-task.types';
 
 const STARS = [1, 2, 3] as const;
+const DEFAULT_GENERAL_TASK_WEIGHT = 2;
+const REDUCED_GENERAL_TASK_WEIGHT = 1;
+const REDUCED_GENERAL_TASK_METRICS = new Set([TaskMetric.ASSISTS, TaskMetric.HEALING]);
+
+export function getGeneralTaskWeight(task: TaskDefinition): number {
+  return REDUCED_GENERAL_TASK_METRICS.has(task.metric)
+    ? REDUCED_GENERAL_TASK_WEIGHT
+    : DEFAULT_GENERAL_TASK_WEIGHT;
+}
+
+export function pickGeneralTaskByWeight(
+  tasks: readonly TaskDefinition[],
+  selectedWeight: number,
+): TaskDefinition {
+  if (!Number.isInteger(selectedWeight) || selectedWeight < 0) {
+    throw new Error(`Invalid general task weight index: ${selectedWeight}`);
+  }
+
+  let remainingWeight = selectedWeight;
+  for (const task of tasks) {
+    const weight = getGeneralTaskWeight(task);
+    if (remainingWeight < weight) {
+      return task;
+    }
+    remainingWeight -= weight;
+  }
+
+  throw new Error(`General task weight index is out of range: ${selectedWeight}`);
+}
 
 @Injectable()
 export class DailyTaskGenerationService {
@@ -36,12 +65,12 @@ export class DailyTaskGenerationService {
     const generalPool = this.generalTasks.filter((task) => !completed.has(task.id));
     const heroPool = this.heroTasks.filter((task) => !completed.has(task.id));
 
-    const general = this.pick(generalPool, seed, 'general');
+    const general = this.pickGeneral(generalPool, seed, 'general');
     const hero = this.pick(heroPool, seed, 'hero');
     const useGeneralForThird = this.hash(`${seed}:third-scope`) % 2 === 0;
 
     const third = useGeneralForThird
-      ? this.pick(
+      ? this.pickGeneral(
           generalPool.filter((task) => task.id !== general.id),
           seed,
           'third-general',
@@ -89,6 +118,16 @@ export class DailyTaskGenerationService {
       throw new Error(`Daily task pool is empty for ${salt}`);
     }
     return tasks[this.hash(`${seed}:${salt}`) % tasks.length];
+  }
+
+  private pickGeneral(tasks: TaskDefinition[], seed: string, salt: string): TaskDefinition {
+    if (tasks.length === 0) {
+      throw new Error(`Daily task pool is empty for ${salt}`);
+    }
+
+    const totalWeight = tasks.reduce((sum, task) => sum + getGeneralTaskWeight(task), 0);
+    const selectedWeight = this.hash(`${seed}:${salt}`) % totalWeight;
+    return pickGeneralTaskByWeight(tasks, selectedWeight);
   }
 
   private shuffleStars(seed: string): (1 | 2 | 3)[] {
