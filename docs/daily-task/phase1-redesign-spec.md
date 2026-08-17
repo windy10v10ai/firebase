@@ -535,7 +535,7 @@ export class PlayerDailyTask {   // → 集合名 PlayerDailyTasks
 
 export interface CompletedTask {
   taskId: string;
-  star: number;         // 1~3，用于历史面板还原目标与奖励
+  star: number;         // 1~3，响应时结合当前任务定义展开为完整 TaskCandidateDto
 }
 
 export interface DailyTaskHistoryEntry {
@@ -546,6 +546,8 @@ export interface DailyTaskHistoryEntry {
 ```
 
 五个业务字段。文档数固定等于玩家数，永不增长。
+
+Firestore 中的 `completedTasks` / `history[].tasks` 仍只保存 `{ taskId, star }`。`/game/start` 组装响应时按 `taskId` 查找当前任务定义，展开为含 `scope` / `metric` / `heroName` / `target` / `rewardSeasonPoint` 的完整 `TaskCandidateDto`；任务池中已不存在的旧 taskId 从响应数组过滤，但不影响独立保存的积分汇总。
 
 **写法对齐仓库现状**：仓库里 14 个 entity 全部使用裸 `@Collection()`，集合名由 fireorm 按 `pluralize.plural(类名)` 推导（`Player → Players`、`PlayerHeroAwakening → PlayerHeroAwakenings`）。`id` 上的 `@Exclude()` 与数组字段的 `= []` 默认值同样沿用 [player-hero-awakening.entity.ts](../../api/src/player-hero-awakening/entities/player-hero-awakening.entity.ts) 的写法。
 
@@ -630,16 +632,45 @@ Phase1 **没有任何独立接口**，全部寄生在 `/game/start` 和 `/game/e
         }
       ],
       "completedTasks": [
-        { "taskId": "general_kills", "star": 1 }
+        {
+          "taskId": "general_kills",
+          "scope": "personal_general",
+          "metric": "kills",
+          "star": 1,
+          "target": 80,
+          "rewardSeasonPoint": 60
+        }
       ],
       "todaySeasonPoint": 60,
       "history": [
         {
           "dayId": "20260810",
           "tasks": [
-            { "taskId": "general_last_hits", "star": 3 },
-            { "taskId": "hero_lina_2", "star": 2 },
-            { "taskId": "general_healing", "star": 1 }
+            {
+              "taskId": "general_last_hits",
+              "scope": "personal_general",
+              "metric": "last_hits",
+              "star": 3,
+              "target": 200,
+              "rewardSeasonPoint": 100
+            },
+            {
+              "taskId": "hero_lina_2",
+              "scope": "personal_hero",
+              "metric": "stun_duration",
+              "heroName": "npc_dota_hero_lina",
+              "star": 2,
+              "target": 105,
+              "rewardSeasonPoint": 80
+            },
+            {
+              "taskId": "general_healing",
+              "scope": "personal_general",
+              "metric": "healing",
+              "star": 1,
+              "target": 300000,
+              "rewardSeasonPoint": 60
+            }
           ],
           "seasonPoint": 240
         }

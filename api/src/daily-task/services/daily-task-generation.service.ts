@@ -8,12 +8,15 @@ import {
   TaskDefinition,
 } from '../config/tasks';
 import { TaskCandidateDto } from '../dto/daily-task-snapshot.dto';
+import { CompletedTask } from '../entities/player-daily-task.entity';
 import { TaskScope } from '../types/daily-task.types';
 
 const STARS = [1, 2, 3] as const;
 
 @Injectable()
 export class DailyTaskGenerationService {
+  private readonly taskById = new Map(DAILY_TASKS.map((task) => [task.id, task]));
+
   private readonly generalTasks = DAILY_TASKS.filter(
     (task) => task.scope === TaskScope.PERSONAL_GENERAL,
   ).sort((left, right) => left.id.localeCompare(right.id));
@@ -59,6 +62,14 @@ export class DailyTaskGenerationService {
         ? task.target + (star - 1)
         : task.target * STAR_TARGET_MULTIPLIERS[star];
     return Math.max(1, Math.round(scaled));
+  }
+
+  resolveCompletedTask(task: CompletedTask): TaskCandidateDto | undefined {
+    const definition = this.taskById.get(task.taskId);
+    if (!definition || !STARS.includes(task.star as 1 | 2 | 3)) {
+      return undefined;
+    }
+    return this.toCandidate(definition, task.star as 1 | 2 | 3);
   }
 
   private toCandidate(task: TaskDefinition, star: 1 | 2 | 3): TaskCandidateDto {

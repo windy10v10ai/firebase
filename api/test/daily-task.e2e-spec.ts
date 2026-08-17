@@ -126,6 +126,7 @@ describe('Daily task Phase1 (e2e)', () => {
       const nextStart = await startGame(app, [steamId]);
       snapshot = findSnapshot(nextStart.body, steamId);
       expect(snapshot.completedTasks).toHaveLength(round + 1);
+      expect(snapshot.completedTasks[round]).toEqual(candidate);
       expect(snapshot.candidates.every((next) => !completedTaskIds.includes(next.taskId))).toBe(
         true,
       );
@@ -180,7 +181,7 @@ describe('Daily task Phase1 (e2e)', () => {
     expect(secondSnapshot.completedTasks).toEqual([]);
     expect(secondSnapshot.history[0]).toEqual({
       dayId: '20260816',
-      tasks: [{ taskId: candidate.taskId, star: candidate.star }],
+      tasks: [candidate],
       seasonPoint: candidate.rewardSeasonPoint,
     });
     expect(secondSnapshot.candidates).toHaveLength(3);

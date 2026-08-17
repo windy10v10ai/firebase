@@ -45,16 +45,20 @@ export class DailyTaskService {
       return { result: next, ...(shouldWrite ? { next } : {}) };
     });
 
-    const completedTasks = document.completedTasks.map((task) => ({ ...task }));
+    const storedCompletedTasks = document.completedTasks.map((task) => ({ ...task }));
     const candidates =
-      completedTasks.length >= ROUNDS_PER_DAY
+      storedCompletedTasks.length >= ROUNDS_PER_DAY
         ? []
         : this.generationService.generateCandidates(
             document.dayId,
             steamId,
-            completedTasks.length + 1,
-            completedTasks.map((task) => task.taskId),
+            storedCompletedTasks.length + 1,
+            storedCompletedTasks.map((task) => task.taskId),
           );
+
+    const completedTasks = storedCompletedTasks
+      .map((task) => this.generationService.resolveCompletedTask(task))
+      .filter((task): task is NonNullable<typeof task> => task !== undefined);
 
     return {
       steamId,
@@ -64,7 +68,9 @@ export class DailyTaskService {
       todaySeasonPoint: document.todaySeasonPoint,
       history: document.history.map((entry) => ({
         dayId: entry.dayId,
-        tasks: entry.tasks.map((task) => ({ ...task })),
+        tasks: entry.tasks
+          .map((task) => this.generationService.resolveCompletedTask(task))
+          .filter((task): task is NonNullable<typeof task> => task !== undefined),
         seasonPoint: entry.seasonPoint,
       })),
     };

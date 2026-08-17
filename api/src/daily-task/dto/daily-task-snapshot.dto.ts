@@ -19,18 +19,11 @@ export class TaskCandidateDto {
   rewardSeasonPoint: number;
 }
 
-export class CompletedTaskDto {
-  @ApiProperty()
-  taskId: string;
-  @ApiProperty()
-  star: number;
-}
-
 export class DailyTaskHistoryEntryDto {
   @ApiProperty()
   dayId: string;
-  @ApiProperty({ type: [CompletedTaskDto] })
-  tasks: CompletedTaskDto[];
+  @ApiProperty({ type: [TaskCandidateDto] })
+  tasks: TaskCandidateDto[];
   @ApiProperty()
   seasonPoint: number;
 }
@@ -42,8 +35,8 @@ export class DailyTaskSnapshotDto {
   dayId: string;
   @ApiProperty({ type: [TaskCandidateDto] })
   candidates: TaskCandidateDto[];
-  @ApiProperty({ type: [CompletedTaskDto] })
-  completedTasks: CompletedTaskDto[];
+  @ApiProperty({ type: [TaskCandidateDto] })
+  completedTasks: TaskCandidateDto[];
   @ApiProperty()
   todaySeasonPoint: number;
   @ApiProperty({ type: [DailyTaskHistoryEntryDto] })

@@ -1,6 +1,8 @@
 import { GameEndPlayerDto } from '../../analytics/dto/game-end-dto';
 import { ROUNDS_PER_DAY } from '../config/tasks';
+import { TaskCandidateDto } from '../dto/daily-task-snapshot.dto';
 import { PlayerDailyTask } from '../entities/player-daily-task.entity';
+import { TaskMetric, TaskScope } from '../types/daily-task.types';
 
 import { DailyTaskGenerationService } from './daily-task-generation.service';
 import { DailyTaskService } from './daily-task.service';
@@ -8,6 +10,17 @@ import { DailyTaskMutation, DailyTaskStore } from './daily-task.store';
 
 const STEAM_ID = 483215844;
 const TODAY = '20260816';
+
+function resolvedTask(taskId: string, star: number): TaskCandidateDto {
+  return {
+    taskId,
+    scope: TaskScope.PERSONAL_GENERAL,
+    metric: TaskMetric.KILLS,
+    star,
+    target: 80 * star,
+    rewardSeasonPoint: 40 + star * 20,
+  };
+}
 
 function createDocument(overrides: Partial<PlayerDailyTask> = {}): PlayerDailyTask {
   return {
@@ -59,6 +72,7 @@ describe('DailyTaskService', () => {
     } as unknown as jest.Mocked<DailyTaskStore>;
     generationService = {
       generateCandidates: jest.fn().mockReturnValue([]),
+      resolveCompletedTask: jest.fn((task) => resolvedTask(task.taskId, task.star)),
     } as unknown as jest.Mocked<DailyTaskGenerationService>;
     service = new DailyTaskService(store, generationService);
   });
@@ -131,7 +145,7 @@ describe('DailyTaskService', () => {
     expect(snapshot.history).toHaveLength(30);
     expect(snapshot.history[0]).toEqual({
       dayId: '20260815',
-      tasks: [{ taskId: 'general_kills', star: 2 }],
+      tasks: [resolvedTask('general_kills', 2)],
       seasonPoint: 80,
     });
     expect(snapshot.history[snapshot.history.length - 1]?.dayId).toBe('20260703');
@@ -143,6 +157,20 @@ describe('DailyTaskService', () => {
     const snapshot = await service.getSnapshot(STEAM_ID);
 
     expect(snapshot.history).toEqual([]);
+  });
+
+  it('omits unresolved tasks from the wire response without changing the stored round', async () => {
+    current = createDocument({
+      completedTasks: [{ taskId: 'removed_task', star: 1 }],
+    });
+    generationService.resolveCompletedTask.mockReturnValue(undefined);
+
+    const snapshot = await service.getSnapshot(STEAM_ID);
+
+    expect(snapshot.completedTasks).toEqual([]);
+    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 2, [
+      'removed_task',
+    ]);
   });
 
   it('records the client-reported star and season points', async () => {

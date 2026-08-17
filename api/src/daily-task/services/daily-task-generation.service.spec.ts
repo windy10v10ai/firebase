@@ -68,6 +68,23 @@ describe('DailyTaskGenerationService', () => {
     );
   });
 
+  it('resolves a stored completed task into the full wire candidate', () => {
+    expect(service.resolveCompletedTask({ taskId: 'hero_lina_1', star: 2 })).toEqual({
+      taskId: 'hero_lina_1',
+      scope: TaskScope.PERSONAL_HERO,
+      metric: TaskMetric.HERO_DAMAGE,
+      heroName: 'npc_dota_hero_lina',
+      star: 2,
+      target: 825_000,
+      rewardSeasonPoint: 80,
+    });
+  });
+
+  it('omits stored tasks that no longer resolve or have an invalid star', () => {
+    expect(service.resolveCompletedTask({ taskId: 'removed_task', star: 1 })).toBeUndefined();
+    expect(service.resolveCompletedTask({ taskId: 'general_kills', star: 4 })).toBeUndefined();
+  });
+
   it('uses additive targets below the threshold', () => {
     const task: TaskDefinition = {
       id: 'test_small',
