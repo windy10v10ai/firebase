@@ -956,7 +956,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_lich_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 40,
     heroName: 'npc_dota_hero_lich',
   },
   {

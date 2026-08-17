@@ -16,6 +16,32 @@ const DEFAULT_GENERAL_TASK_WEIGHT = 2;
 const REDUCED_GENERAL_TASK_WEIGHT = 1;
 const REDUCED_GENERAL_TASK_METRICS = new Set([TaskMetric.ASSISTS, TaskMetric.HEALING]);
 
+export function getGeneralTaskWeight(task: TaskDefinition): number {
+  return REDUCED_GENERAL_TASK_METRICS.has(task.metric)
+    ? REDUCED_GENERAL_TASK_WEIGHT
+    : DEFAULT_GENERAL_TASK_WEIGHT;
+}
+
+export function pickGeneralTaskByWeight(
+  tasks: readonly TaskDefinition[],
+  selectedWeight: number,
+): TaskDefinition {
+  if (!Number.isInteger(selectedWeight) || selectedWeight < 0) {
+    throw new Error(`Invalid general task weight index: ${selectedWeight}`);
+  }
+
+  let remainingWeight = selectedWeight;
+  for (const task of tasks) {
+    const weight = getGeneralTaskWeight(task);
+    if (remainingWeight < weight) {
+      return task;
+    }
+    remainingWeight -= weight;
+  }
+
+  throw new Error(`General task weight index is out of range: ${selectedWeight}`);
+}
+
 @Injectable()
 export class DailyTaskGenerationService {
   private readonly taskById = new Map(DAILY_TASKS.map((task) => [task.id, task]));
@@ -99,22 +125,9 @@ export class DailyTaskGenerationService {
       throw new Error(`Daily task pool is empty for ${salt}`);
     }
 
-    const getWeight = (task: TaskDefinition) =>
-      REDUCED_GENERAL_TASK_METRICS.has(task.metric)
-        ? REDUCED_GENERAL_TASK_WEIGHT
-        : DEFAULT_GENERAL_TASK_WEIGHT;
-    const totalWeight = tasks.reduce((sum, task) => sum + getWeight(task), 0);
-    let selectedWeight = this.hash(`${seed}:${salt}`) % totalWeight;
-
-    for (const task of tasks) {
-      const weight = getWeight(task);
-      if (selectedWeight < weight) {
-        return task;
-      }
-      selectedWeight -= weight;
-    }
-
-    throw new Error(`Failed to pick a daily task for ${salt}`);
+    const totalWeight = tasks.reduce((sum, task) => sum + getGeneralTaskWeight(task), 0);
+    const selectedWeight = this.hash(`${seed}:${salt}`) % totalWeight;
+    return pickGeneralTaskByWeight(tasks, selectedWeight);
   }
 
   private shuffleStars(seed: string): (1 | 2 | 3)[] {

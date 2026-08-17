@@ -1,7 +1,11 @@
 import { DAILY_TASKS, TaskDefinition } from '../config/tasks';
 import { TaskMetric, TaskScope } from '../types/daily-task.types';
 
-import { DailyTaskGenerationService } from './daily-task-generation.service';
+import {
+  DailyTaskGenerationService,
+  getGeneralTaskWeight,
+  pickGeneralTaskByWeight,
+} from './daily-task-generation.service';
 
 describe('DailyTaskGenerationService', () => {
   let service: DailyTaskGenerationService;
@@ -53,20 +57,45 @@ describe('DailyTaskGenerationService', () => {
     expect(starPermutations.size).toBe(6);
   });
 
-  it('gives general assist and healing tasks half the normal selection weight', () => {
-    const sampleCount = 5000;
-    let reducedMetricCount = 0;
+  it('selects general tasks across the fixed weight boundaries', () => {
+    const tasks: TaskDefinition[] = [
+      {
+        id: 'test_assists',
+        scope: TaskScope.PERSONAL_GENERAL,
+        metric: TaskMetric.ASSISTS,
+        target: 40,
+      },
+      {
+        id: 'test_kills',
+        scope: TaskScope.PERSONAL_GENERAL,
+        metric: TaskMetric.KILLS,
+        target: 60,
+      },
+      {
+        id: 'test_healing',
+        scope: TaskScope.PERSONAL_GENERAL,
+        metric: TaskMetric.HEALING,
+        target: 40_000,
+      },
+      {
+        id: 'test_damage',
+        scope: TaskScope.PERSONAL_GENERAL,
+        metric: TaskMetric.HERO_DAMAGE,
+        target: 1_000_000,
+      },
+    ];
 
-    for (let steamId = 1; steamId <= sampleCount; steamId++) {
-      const [general] = service.generateCandidates('20260816', steamId, 1, []);
-      if ([TaskMetric.ASSISTS, TaskMetric.HEALING].includes(general.metric)) {
-        reducedMetricCount++;
-      }
-    }
-
-    const reducedMetricRate = reducedMetricCount / sampleCount;
-    expect(reducedMetricRate).toBeGreaterThan(0.09);
-    expect(reducedMetricRate).toBeLessThan(0.13);
+    expect(tasks.map(getGeneralTaskWeight)).toEqual([1, 2, 1, 2]);
+    expect(
+      [0, 1, 2, 3, 4, 5].map((weightIndex) => pickGeneralTaskByWeight(tasks, weightIndex).id),
+    ).toEqual([
+      'test_assists',
+      'test_kills',
+      'test_kills',
+      'test_healing',
+      'test_damage',
+      'test_damage',
+    ]);
   });
 
   it('assigns each star exactly once per round', () => {
