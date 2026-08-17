@@ -100,6 +100,7 @@ export class AnalyticsService {
           team_id: player.teamId,
           hero_name: player.heroName,
           hero_name_cn: GetHeroNameChinese(player.heroName),
+          // 包含行为分等奖励，不包含每日任务积分；每日任务积分单独统计
           points: player.battlePoints - dailyTaskPoints,
           point_daily_task: dailyTaskPoints,
 
