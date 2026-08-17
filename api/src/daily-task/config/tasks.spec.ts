@@ -64,11 +64,11 @@ describe('daily task configuration', () => {
 
     expect(targets).toEqual({
       [TaskMetric.KILLS]: 60,
-      [TaskMetric.ASSISTS]: 60,
+      [TaskMetric.ASSISTS]: 40,
       [TaskMetric.LAST_HITS]: 200,
       [TaskMetric.TOWER_KILLS]: 4,
       [TaskMetric.HERO_DAMAGE]: 1_000_000,
-      [TaskMetric.HEALING]: 50_000,
+      [TaskMetric.HEALING]: 40_000,
       [TaskMetric.TOTAL_GOLD_EARNED]: 160_000,
       [TaskMetric.DAMAGE_TAKEN]: 200_000,
       [TaskMetric.STUN_DURATION]: 100,
@@ -133,7 +133,7 @@ describe('daily task hero pool', () => {
   it('keeps hero targets in the reviewed metric bands', () => {
     const targetBands: Partial<Record<TaskMetric, readonly [number, number]>> = {
       [TaskMetric.KILLS]: [32, 50],
-      [TaskMetric.ASSISTS]: [60, 80],
+      [TaskMetric.ASSISTS]: [30, 80],
       [TaskMetric.TOWER_KILLS]: [3, 5],
       [TaskMetric.HERO_DAMAGE]: [300_000, 900_000],
       [TaskMetric.HEALING]: [10_000, 80_000],
@@ -158,7 +158,7 @@ describe('daily task hero pool', () => {
 
     expect(selectMetricTargets('crystal_maiden')).toEqual([
       { metric: TaskMetric.STUN_DURATION, target: 70 },
-      { metric: TaskMetric.ASSISTS, target: 70 },
+      { metric: TaskMetric.ASSISTS, target: 30 },
     ]);
     expect(selectMetricTargets('dazzle')).toEqual([
       { metric: TaskMetric.HEALING, target: 80_000 },

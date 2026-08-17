@@ -20,7 +20,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_assists',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.ASSISTS,
-    target: 60,
+    target: 40,
   },
   {
     id: 'general_last_hits',
@@ -44,7 +44,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_healing',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.HEALING,
-    target: 50_000,
+    target: 40_000,
   },
   {
     id: 'general_total_gold_earned',
@@ -81,7 +81,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_crystal_maiden_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 30,
     heroName: 'npc_dota_hero_crystal_maiden',
   },
   {
@@ -144,7 +144,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_witch_doctor_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HEALING,
-    target: 60_000,
+    target: 30_000,
     heroName: 'npc_dota_hero_witch_doctor',
   },
   {
@@ -711,7 +711,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_dark_willow_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 30,
     heroName: 'npc_dota_hero_dark_willow',
   },
   {
@@ -886,7 +886,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_wisp_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 80,
+    target: 40,
     heroName: 'npc_dota_hero_wisp',
   },
   {
@@ -907,7 +907,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_keeper_of_the_light_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HEALING,
-    target: 60_000,
+    target: 30_000,
     heroName: 'npc_dota_hero_keeper_of_the_light',
   },
   {
