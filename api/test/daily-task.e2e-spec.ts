@@ -136,6 +136,48 @@ describe('Daily task Phase1 (e2e)', () => {
     expect(snapshot.completedTasks).toHaveLength(3);
   }, 20_000);
 
+  it('filters removed task ids from the response while preserving rounds and points', async () => {
+    const steamId = 105610009;
+    const dayId = '20260816';
+    mockDate('2026-08-16T10:00:00.000Z');
+    await getFirestore()
+      .collection('PlayerDailyTasks')
+      .doc(steamId.toString())
+      .set({
+        steamId,
+        dayId,
+        completedTasks: [
+          { taskId: 'general_kills', star: 1 },
+          { taskId: 'removed_task_1', star: 2 },
+          { taskId: 'removed_task_2', star: 3 },
+        ],
+        todaySeasonPoint: 240,
+        history: [],
+        updatedAt: new Date('2026-08-16T09:00:00.000Z'),
+      });
+
+    const result = await startGame(app, [steamId]);
+
+    expect(result.status).toBe(200);
+    const snapshot = findSnapshot(result.body, steamId);
+    expect(snapshot.completedTasks).toEqual([
+      {
+        taskId: 'general_kills',
+        scope: 'personal_general',
+        metric: 'kills',
+        star: 1,
+        target: 80,
+        rewardSeasonPoint: 60,
+      },
+    ]);
+    expect(snapshot.candidates).toEqual([]);
+    expect(snapshot.todaySeasonPoint).toBe(240);
+
+    const stored = await readDailyTask(steamId);
+    expect(stored?.completedTasks).toHaveLength(3);
+    expect(stored?.todaySeasonPoint).toBe(240);
+  });
+
   it('does not create a daily task document for an old client game/end', async () => {
     const steamId = 105610002;
     mockDate('2026-08-16T10:00:00.000Z');
