@@ -26,7 +26,7 @@ function createPlayer(overrides: Partial<GameEndPlayerDto> = {}): GameEndPlayerD
   return {
     steamId: STEAM_ID,
     isDisconnected: false,
-    dailyTask: { taskId: 'general_kills', star: 2, seasonPoint: 80 },
+    dailyTask: { dayId: TODAY, taskId: 'general_kills', star: 2, seasonPoint: 80 },
     ...overrides,
   } as GameEndPlayerDto;
 }
@@ -146,7 +146,7 @@ describe('DailyTaskService', () => {
   });
 
   it('records the client-reported star and season points', async () => {
-    await service.recordGameEnd(TODAY, [createPlayer()]);
+    await service.recordGameEnd([createPlayer()]);
 
     expect(written?.completedTasks).toEqual([{ taskId: 'general_kills', star: 2 }]);
     expect(written?.todaySeasonPoint).toBe(80);
@@ -158,14 +158,18 @@ describe('DailyTaskService', () => {
       todaySeasonPoint: 60,
     });
 
-    await service.recordGameEnd(TODAY, [createPlayer()]);
+    await service.recordGameEnd([createPlayer()]);
 
     expect(written).toBeUndefined();
     expect(current.todaySeasonPoint).toBe(60);
   });
 
   it('rejects mismatched days and completed days', async () => {
-    await service.recordGameEnd('20260815', [createPlayer()]);
+    await service.recordGameEnd([
+      createPlayer({
+        dailyTask: { dayId: '20260815', taskId: 'general_kills', star: 2, seasonPoint: 80 },
+      }),
+    ]);
     expect(written).toBeUndefined();
 
     current = createDocument({
@@ -174,22 +178,27 @@ describe('DailyTaskService', () => {
         star: 1,
       })),
     });
-    await service.recordGameEnd(TODAY, [
-      createPlayer({ dailyTask: { taskId: 'new', star: 1, seasonPoint: 60 } }),
+    await service.recordGameEnd([
+      createPlayer({ dailyTask: { dayId: TODAY, taskId: 'new', star: 1, seasonPoint: 60 } }),
     ]);
     expect(written).toBeUndefined();
   });
 
   it('skips disconnected players even when they report a task', async () => {
-    await service.recordGameEnd(TODAY, [createPlayer({ isDisconnected: true })]);
+    await service.recordGameEnd([createPlayer({ isDisconnected: true })]);
 
     expect(store.transact).not.toHaveBeenCalled();
   });
 
   it('skips incomplete task objects if DTO validation is bypassed', async () => {
-    await service.recordGameEnd(TODAY, [
+    await service.recordGameEnd([
       createPlayer({
-        dailyTask: { taskId: 'general_kills', star: undefined, seasonPoint: 80 },
+        dailyTask: {
+          dayId: undefined,
+          taskId: 'general_kills',
+          star: 2,
+          seasonPoint: 80,
+        },
       }),
     ]);
 
@@ -216,11 +225,11 @@ describe('DailyTaskService', () => {
       );
 
     await expect(
-      service.recordGameEnd(TODAY, [
+      service.recordGameEnd([
         createPlayer(),
         createPlayer({
           steamId: STEAM_ID + 1,
-          dailyTask: { taskId: 'second', star: 1, seasonPoint: 60 },
+          dailyTask: { dayId: TODAY, taskId: 'second', star: 1, seasonPoint: 60 },
         }),
       ]),
     ).resolves.toBeUndefined();

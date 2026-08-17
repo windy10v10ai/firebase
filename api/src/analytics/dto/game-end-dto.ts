@@ -34,6 +34,11 @@ export class GameEndGameOptionsDto {
 export class DailyTaskResultDto {
   @ApiProperty()
   @IsString()
+  @Matches(/^\d{8}$/)
+  dayId: string;
+
+  @ApiProperty()
+  @IsString()
   @IsNotEmpty()
   taskId: string;
 
@@ -144,10 +149,4 @@ export class GameEndDto extends EventBaseDto {
   players: GameEndPlayerDto[];
   @ApiProperty()
   countryCode?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @Matches(/^\d{8}$/)
-  dailyTaskDayId?: string;
 }

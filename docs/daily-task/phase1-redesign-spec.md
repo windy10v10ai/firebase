@@ -691,7 +691,7 @@ export class DailyTaskResultDto {
 
 export class GameEndPlayerDto {
   // ... 现有字段不变，battlePoints 已含每日任务奖励
-  /** 未完成任务时整个对象不发送；发送则三个字段必须齐全 */
+  /** 未完成任务时整个对象不发送；发送则四个字段必须齐全 */
   @ApiProperty({ type: DailyTaskResultDto, required: false })
   @IsOptional()
   @ValidateNested()

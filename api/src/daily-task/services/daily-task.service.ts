@@ -70,19 +70,21 @@ export class DailyTaskService {
     };
   }
 
-  async recordGameEnd(dayId: string | undefined, players: GameEndPlayerDto[]): Promise<void> {
-    if (!dayId) {
-      return;
-    }
-    await Promise.all(players.map((player) => this.recordPlayerSafely(dayId, player)));
+  async recordGameEnd(players: GameEndPlayerDto[]): Promise<void> {
+    await Promise.all(players.map((player) => this.recordPlayerSafely(player)));
   }
 
-  private async recordPlayerSafely(dayId: string, player: GameEndPlayerDto): Promise<void> {
+  private async recordPlayerSafely(player: GameEndPlayerDto): Promise<void> {
     if (player.steamId <= 0 || player.isDisconnected || !player.dailyTask) {
       return;
     }
-    const { taskId, star, seasonPoint } = player.dailyTask;
-    if (taskId === undefined || star === undefined || seasonPoint === undefined) {
+    const { dayId, taskId, star, seasonPoint } = player.dailyTask;
+    if (
+      dayId === undefined ||
+      taskId === undefined ||
+      star === undefined ||
+      seasonPoint === undefined
+    ) {
       logger.warn('game/end: incomplete daily task result', { steamId: player.steamId, dayId });
       return;
     }

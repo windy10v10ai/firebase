@@ -115,7 +115,9 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
 
     await service.gameEndPlayerBot(
       buildGameEnd([
-        buildPlayer({ dailyTask: { taskId: 'general_kills', star: 2, seasonPoint: 80 } }),
+        buildPlayer({
+          dailyTask: { dayId: '20260817', taskId: 'general_kills', star: 2, seasonPoint: 80 },
+        }),
         buildPlayer({ steamId: 2 }),
       ]),
       SERVER_TYPE.TEST,

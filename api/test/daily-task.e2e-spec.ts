@@ -15,7 +15,7 @@ function gameEndPlayer(
   options: {
     isDisconnected?: boolean;
     battlePoints?: number;
-    dailyTask?: { taskId: string; star: number; seasonPoint: number };
+    dailyTask?: { dayId: string; taskId: string; star: number; seasonPoint: number };
   } = {},
 ) {
   return {
@@ -39,7 +39,7 @@ function gameEndPlayer(
   };
 }
 
-function gameEndPayload(players: ReturnType<typeof gameEndPlayer>[], dailyTaskDayId?: string) {
+function gameEndPayload(players: ReturnType<typeof gameEndPlayer>[]) {
   return {
     matchId: '9000000001',
     version: 'v4.10',
@@ -55,7 +55,6 @@ function gameEndPayload(players: ReturnType<typeof gameEndPlayer>[], dailyTaskDa
       towerPowerPct: 100,
     },
     players,
-    ...(dailyTaskDayId ? { dailyTaskDayId } : {}),
   };
 }
 
@@ -110,19 +109,17 @@ describe('Daily task Phase1 (e2e)', () => {
       const end = await post(
         app,
         GAME_END_URL,
-        gameEndPayload(
-          [
-            gameEndPlayer(steamId, {
-              battlePoints: 100 + candidate.rewardSeasonPoint,
-              dailyTask: {
-                taskId: candidate.taskId,
-                star: candidate.star,
-                seasonPoint: candidate.rewardSeasonPoint,
-              },
-            }),
-          ],
-          snapshot.dayId,
-        ),
+        gameEndPayload([
+          gameEndPlayer(steamId, {
+            battlePoints: 100 + candidate.rewardSeasonPoint,
+            dailyTask: {
+              dayId: snapshot.dayId,
+              taskId: candidate.taskId,
+              star: candidate.star,
+              seasonPoint: candidate.rewardSeasonPoint,
+            },
+          }),
+        ]),
       );
       expect(end.status).toBe(201);
 
@@ -159,18 +156,16 @@ describe('Daily task Phase1 (e2e)', () => {
     await post(
       app,
       GAME_END_URL,
-      gameEndPayload(
-        [
-          gameEndPlayer(steamId, {
-            dailyTask: {
-              taskId: candidate.taskId,
-              star: candidate.star,
-              seasonPoint: candidate.rewardSeasonPoint,
-            },
-          }),
-        ],
-        firstSnapshot.dayId,
-      ),
+      gameEndPayload([
+        gameEndPlayer(steamId, {
+          dailyTask: {
+            dayId: firstSnapshot.dayId,
+            taskId: candidate.taskId,
+            star: candidate.star,
+            seasonPoint: candidate.rewardSeasonPoint,
+          },
+        }),
+      ]),
     );
 
     const beforeReset = await readDailyTask(steamId);
@@ -203,19 +198,17 @@ describe('Daily task Phase1 (e2e)', () => {
     const result = await post(
       app,
       GAME_END_URL,
-      gameEndPayload(
-        [
-          gameEndPlayer(steamId, {
-            battlePoints: 180,
-            dailyTask: {
-              taskId: candidate.taskId,
-              star: candidate.star,
-              seasonPoint: candidate.rewardSeasonPoint,
-            },
-          }),
-        ],
-        firstSnapshot.dayId,
-      ),
+      gameEndPayload([
+        gameEndPlayer(steamId, {
+          battlePoints: 180,
+          dailyTask: {
+            dayId: firstSnapshot.dayId,
+            taskId: candidate.taskId,
+            star: candidate.star,
+            seasonPoint: candidate.rewardSeasonPoint,
+          },
+        }),
+      ]),
     );
 
     expect(result.status).toBe(201);
@@ -229,18 +222,16 @@ describe('Daily task Phase1 (e2e)', () => {
     const started = await startGame(app, [steamId]);
     const snapshot = findSnapshot(started.body, steamId);
     const candidate = snapshot.candidates[0];
-    const payload = gameEndPayload(
-      [
-        gameEndPlayer(steamId, {
-          dailyTask: {
-            taskId: candidate.taskId,
-            star: candidate.star,
-            seasonPoint: candidate.rewardSeasonPoint,
-          },
-        }),
-      ],
-      snapshot.dayId,
-    );
+    const payload = gameEndPayload([
+      gameEndPlayer(steamId, {
+        dailyTask: {
+          dayId: snapshot.dayId,
+          taskId: candidate.taskId,
+          star: candidate.star,
+          seasonPoint: candidate.rewardSeasonPoint,
+        },
+      }),
+    ]);
 
     await post(app, GAME_END_URL, payload);
     await post(app, GAME_END_URL, payload);
@@ -263,26 +254,25 @@ describe('Daily task Phase1 (e2e)', () => {
     const result = await post(
       app,
       GAME_END_URL,
-      gameEndPayload(
-        [
-          gameEndPlayer(disconnectedId, {
-            isDisconnected: true,
-            dailyTask: {
-              taskId: disconnectedCandidate.taskId,
-              star: disconnectedCandidate.star,
-              seasonPoint: disconnectedCandidate.rewardSeasonPoint,
-            },
-          }),
-          gameEndPlayer(connectedId, {
-            dailyTask: {
-              taskId: connectedCandidate.taskId,
-              star: connectedCandidate.star,
-              seasonPoint: connectedCandidate.rewardSeasonPoint,
-            },
-          }),
-        ],
-        connectedSnapshot.dayId,
-      ),
+      gameEndPayload([
+        gameEndPlayer(disconnectedId, {
+          isDisconnected: true,
+          dailyTask: {
+            dayId: disconnectedSnapshot.dayId,
+            taskId: disconnectedCandidate.taskId,
+            star: disconnectedCandidate.star,
+            seasonPoint: disconnectedCandidate.rewardSeasonPoint,
+          },
+        }),
+        gameEndPlayer(connectedId, {
+          dailyTask: {
+            dayId: connectedSnapshot.dayId,
+            taskId: connectedCandidate.taskId,
+            star: connectedCandidate.star,
+            seasonPoint: connectedCandidate.rewardSeasonPoint,
+          },
+        }),
+      ]),
     );
 
     expect(result.status).toBe(201);

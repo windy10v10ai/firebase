@@ -150,7 +150,7 @@ export class GameController {
       }),
     );
 
-    await this.dailyTaskService.recordGameEnd(gameEnd.dailyTaskDayId, players);
+    await this.dailyTaskService.recordGameEnd(players);
 
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
