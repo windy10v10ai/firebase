@@ -9,9 +9,12 @@ import {
 } from '../config/tasks';
 import { TaskCandidateDto } from '../dto/daily-task-snapshot.dto';
 import { CompletedTask } from '../entities/player-daily-task.entity';
-import { TaskScope } from '../types/daily-task.types';
+import { TaskMetric, TaskScope } from '../types/daily-task.types';
 
 const STARS = [1, 2, 3] as const;
+const DEFAULT_GENERAL_TASK_WEIGHT = 2;
+const REDUCED_GENERAL_TASK_WEIGHT = 1;
+const REDUCED_GENERAL_TASK_METRICS = new Set([TaskMetric.ASSISTS, TaskMetric.HEALING]);
 
 @Injectable()
 export class DailyTaskGenerationService {
@@ -36,12 +39,12 @@ export class DailyTaskGenerationService {
     const generalPool = this.generalTasks.filter((task) => !completed.has(task.id));
     const heroPool = this.heroTasks.filter((task) => !completed.has(task.id));
 
-    const general = this.pick(generalPool, seed, 'general');
+    const general = this.pickGeneral(generalPool, seed, 'general');
     const hero = this.pick(heroPool, seed, 'hero');
     const useGeneralForThird = this.hash(`${seed}:third-scope`) % 2 === 0;
 
     const third = useGeneralForThird
-      ? this.pick(
+      ? this.pickGeneral(
           generalPool.filter((task) => task.id !== general.id),
           seed,
           'third-general',
@@ -89,6 +92,29 @@ export class DailyTaskGenerationService {
       throw new Error(`Daily task pool is empty for ${salt}`);
     }
     return tasks[this.hash(`${seed}:${salt}`) % tasks.length];
+  }
+
+  private pickGeneral(tasks: TaskDefinition[], seed: string, salt: string): TaskDefinition {
+    if (tasks.length === 0) {
+      throw new Error(`Daily task pool is empty for ${salt}`);
+    }
+
+    const getWeight = (task: TaskDefinition) =>
+      REDUCED_GENERAL_TASK_METRICS.has(task.metric)
+        ? REDUCED_GENERAL_TASK_WEIGHT
+        : DEFAULT_GENERAL_TASK_WEIGHT;
+    const totalWeight = tasks.reduce((sum, task) => sum + getWeight(task), 0);
+    let selectedWeight = this.hash(`${seed}:${salt}`) % totalWeight;
+
+    for (const task of tasks) {
+      const weight = getWeight(task);
+      if (selectedWeight < weight) {
+        return task;
+      }
+      selectedWeight -= weight;
+    }
+
+    throw new Error(`Failed to pick a daily task for ${salt}`);
   }
 
   private shuffleStars(seed: string): (1 | 2 | 3)[] {

@@ -53,6 +53,22 @@ describe('DailyTaskGenerationService', () => {
     expect(starPermutations.size).toBe(6);
   });
 
+  it('gives general assist and healing tasks half the normal selection weight', () => {
+    const sampleCount = 5000;
+    let reducedMetricCount = 0;
+
+    for (let steamId = 1; steamId <= sampleCount; steamId++) {
+      const [general] = service.generateCandidates('20260816', steamId, 1, []);
+      if ([TaskMetric.ASSISTS, TaskMetric.HEALING].includes(general.metric)) {
+        reducedMetricCount++;
+      }
+    }
+
+    const reducedMetricRate = reducedMetricCount / sampleCount;
+    expect(reducedMetricRate).toBeGreaterThan(0.09);
+    expect(reducedMetricRate).toBeLessThan(0.13);
+  });
+
   it('assigns each star exactly once per round', () => {
     const candidates = service.generateCandidates('20260816', 483215844, 1, []);
 
