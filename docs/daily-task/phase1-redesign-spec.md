@@ -1228,16 +1228,21 @@ dota(1~5) 与 hard(6~8) **合并标定，不分层**（见 3.5）：1~8 共用�
   `ep.value.int_value`，不能只读 `string_value`
 - 按 `event_date + match_id + steam_id` 去重，同一玩家同一局只保留最后一个 event
 - JSON 中不存在的指标保持 `NULL` 并排除，不得补成 `0`；真实上报的 `0` 保留
+- `player_stats_basic` 的 G/K/A 从 `20260817` 起稳定记录；统一分析十项指标时
+  `start_suffix` 不得早于 `20260817`
 
-不连接 `game_end_match`。七项指标本来就在同一条 `game_end_player` 中；连接不仅增加复杂度，
-还会受到 `game_end_match` 的 25 参数上限和 `player_N` 丢失影响。历史 G/K/A 只能使用
-`game_end_match` 时也应单独统计，不与七项指标 join。
+不连接 `game_end_match`。七项详细指标和新增的 G/K/A 都在同一条 `game_end_player` 中，分别
+来自 `player_stats` 和 `player_stats_basic`；连接不仅增加复杂度，还会受到 `game_end_match`
+的 25 参数上限和 `player_N` 丢失影响。从 `20260817` 起，后续每日任务标定只查询
+`game_end_player`，不再查询或连接 `game_end_match`。
 
-下面的查询同时输出总体分布和按英雄分布。通用任务使用 `scope = 'general'`，英雄任务使用
-`scope = 'hero' AND hero_name = ...`。日期结束值默认取昨天，避免查询仍在持续写入的当天表。
+下面的查询同时输出总体分布、排除零值后的正值分布和按英雄分布。通用任务使用
+`scope = 'general'`，英雄任务使用 `scope = 'hero' AND hero_name = ...`。`assists`、`healing`
+的 target 标定必须使用 `positive_p30` / `positive_p50` / `positive_p75`；总体样本只用于
+零值率和实际达成率。日期结束值默认取昨天，避免查询仍在持续写入的当天表。
 
 ```sql
-DECLARE start_suffix STRING DEFAULT '20260811';
+DECLARE start_suffix STRING DEFAULT '20260817';
 DECLARE end_suffix STRING DEFAULT FORMAT_DATE(
   '%Y%m%d',
   DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 1 DAY)
@@ -1276,7 +1281,11 @@ WITH extracted AS (
     (SELECT ep.value.string_value
      FROM UNNEST(event_params) AS ep
      WHERE ep.key = 'player_stats'
-     LIMIT 1) AS player_stats
+     LIMIT 1) AS player_stats,
+    (SELECT ep.value.string_value
+     FROM UNNEST(event_params) AS ep
+     WHERE ep.key = 'player_stats_basic'
+     LIMIT 1) AS player_stats_basic
   FROM `windy10v10ai.analytics_311407566.events_*`
   WHERE _TABLE_SUFFIX BETWEEN start_suffix AND end_suffix
     AND event_name = 'game_end_player'
@@ -1308,7 +1317,10 @@ wide AS (
     SAFE_CAST(JSON_VALUE(player_stats, '$.lh') AS FLOAT64) AS last_hits,
     SAFE_CAST(JSON_VALUE(player_stats, '$.tk') AS FLOAT64) AS tower_kills,
     SAFE_CAST(JSON_VALUE(player_stats, '$.st') AS FLOAT64) AS stun_duration,
-    SAFE_CAST(JSON_VALUE(player_stats, '$.rk') AS FLOAT64) AS roshan_kills
+    SAFE_CAST(JSON_VALUE(player_stats, '$.rk') AS FLOAT64) AS roshan_kills,
+    SAFE_CAST(JSON_VALUE(player_stats_basic, '$.g') AS FLOAT64) AS total_gold_earned,
+    SAFE_CAST(JSON_VALUE(player_stats_basic, '$.k') AS FLOAT64) AS kills,
+    SAFE_CAST(JSON_VALUE(player_stats_basic, '$.a') AS FLOAT64) AS assists
   FROM deduplicated
 ),
 metric_rows AS (
@@ -1321,7 +1333,10 @@ metric_rows AS (
     last_hits AS 'last_hits',
     tower_kills AS 'tower_kills',
     stun_duration AS 'stun_duration',
-    roshan_kills AS 'roshan_kills'
+    roshan_kills AS 'roshan_kills',
+    total_gold_earned AS 'total_gold_earned',
+    kills AS 'kills',
+    assists AS 'assists'
   ))
 ),
 distributions AS (
@@ -1330,26 +1345,60 @@ distributions AS (
   UNION ALL
   SELECT 'hero' AS scope, hero_name, metric, value
   FROM metric_rows
+  WHERE hero_name IS NOT NULL
+),
+aggregated AS (
+  SELECT
+    scope,
+    hero_name,
+    metric,
+    COUNT(*) AS sample_count,
+    COUNTIF(value = 0) AS zero_count,
+    ROUND(100 * SAFE_DIVIDE(COUNTIF(value = 0), COUNT(*)), 2) AS zero_rate_pct,
+    MIN(value) AS minimum_value,
+    ROUND(AVG(value), 2) AS average_value,
+    APPROX_QUANTILES(value, 100) AS quantiles,
+    MAX(value) AS maximum_value,
+    COUNTIF(value > 0) AS positive_sample_count,
+    MIN(IF(value > 0, value, NULL)) AS minimum_positive_value,
+    ROUND(AVG(IF(value > 0, value, NULL)), 2) AS positive_average_value,
+    APPROX_QUANTILES(
+      IF(value > 0, value, NULL),
+      100 IGNORE NULLS
+    ) AS positive_quantiles,
+    MAX(IF(value > 0, value, NULL)) AS maximum_positive_value
+  FROM distributions
+  GROUP BY scope, hero_name, metric
 )
 SELECT
   scope,
   hero_name,
   metric,
-  COUNT(*) AS sample_count,
-  COUNTIF(value = 0) AS zero_count,
-  ROUND(100 * SAFE_DIVIDE(COUNTIF(value = 0), COUNT(*)), 2) AS zero_rate_pct,
-  MIN(value) AS minimum_value,
-  ROUND(AVG(value), 2) AS average_value,
-  APPROX_QUANTILES(value, 100)[OFFSET(10)] AS p10,
-  APPROX_QUANTILES(value, 100)[OFFSET(20)] AS p20,
-  APPROX_QUANTILES(value, 100)[OFFSET(30)] AS p30,
-  APPROX_QUANTILES(value, 100)[OFFSET(50)] AS p50,
-  APPROX_QUANTILES(value, 100)[OFFSET(75)] AS p75,
-  APPROX_QUANTILES(value, 100)[OFFSET(90)] AS p90,
-  APPROX_QUANTILES(value, 100)[OFFSET(95)] AS p95,
-  MAX(value) AS maximum_value
-FROM distributions
-GROUP BY scope, hero_name, metric
+  sample_count,
+  zero_count,
+  zero_rate_pct,
+  minimum_value,
+  average_value,
+  quantiles[SAFE_OFFSET(10)] AS p10,
+  quantiles[SAFE_OFFSET(20)] AS p20,
+  quantiles[SAFE_OFFSET(30)] AS p30,
+  quantiles[SAFE_OFFSET(50)] AS p50,
+  quantiles[SAFE_OFFSET(75)] AS p75,
+  quantiles[SAFE_OFFSET(90)] AS p90,
+  quantiles[SAFE_OFFSET(95)] AS p95,
+  maximum_value,
+  positive_sample_count,
+  minimum_positive_value,
+  positive_average_value,
+  positive_quantiles[SAFE_OFFSET(10)] AS positive_p10,
+  positive_quantiles[SAFE_OFFSET(20)] AS positive_p20,
+  positive_quantiles[SAFE_OFFSET(30)] AS positive_p30,
+  positive_quantiles[SAFE_OFFSET(50)] AS positive_p50,
+  positive_quantiles[SAFE_OFFSET(75)] AS positive_p75,
+  positive_quantiles[SAFE_OFFSET(90)] AS positive_p90,
+  positive_quantiles[SAFE_OFFSET(95)] AS positive_p95,
+  maximum_positive_value
+FROM aggregated
 ORDER BY IF(scope = 'general', 0, 1), metric, sample_count DESC;
 ```
 
@@ -1373,9 +1422,11 @@ P30/P50/P75 是方向，不是三个可以独立填写的 target。配置只保�
 2. **英雄任务按该英雄自己的分布标定。** 同一 metric 在不同英雄之间不能共用一个 target。
 3. **通用任务通常高于英雄任务。** 玩家看到候选后可以主动选擅长该指标的英雄，选择空间更大；
    `tower_kills` 是已确认的例外，因为总共只有 11 座塔且归属容易被队友或小兵拿走。
-4. **大量零值的指标不能直接套总体 P30。** `assists`、`healing`、`roshan_kills`、
-   `tower_kills` 要同时看零值率、非零样本分布和适合该指标的英雄分布。P30 为 0 不代表
-   target 应设为 0。
+4. **`assists`、`healing` 的分位数必须排除零值。** 通用任务和英雄任务都使用
+   `value > 0` 后重新计算的 `positive_p30` / `positive_p50` / `positive_p75` 标定 target；
+   不能用总体分位数，也不能根据总体分位数和零值率近似换算。总体样本仍用于计算零值率和
+   实际达成率，避免忽略单机或没有产生对应行为的对局。`roshan_kills`、`tower_kills` 等大量
+   零值的小整数指标则直接看精确达成率，P30 为 0 不代表 target 应设为 0。
 5. **小整数指标用精确达成率。** 对 `t / t+1 / t+2` 分别计算
    `COUNTIF(value >= target) / COUNT(*)`；离散分布会让多个分位数相同，不能只看近似分位数。
 6. **先看样本量再改数值。** `sample_count >= 100` 才做常规调整；30～99 只修正明显不可达
@@ -1426,35 +1477,24 @@ GROUP BY target
 ORDER BY target;
 ```
 
-对于大量零值的指标，保留总体分布用于计算实际完成率，同时另外查询正值条件分布，判断
-“玩家确实产生该行为以后”的难度。以 `healing` 为例：
+上面的完整查询已经同时输出总体字段和 `positive_*` 字段。`assists`、`healing` 的 target
+只读取正值条件分布；其中 `scope = 'general'` 使用所有真人玩家的正值样本，`scope = 'hero'`
+按对应 `hero_id` 或 `hero_name` 的正值样本计算。正值条件分布不能替代总体完成率：比如 75%
+对局治疗为 0，即使正值 P30 很低，所有零值对局仍然无法完成任何正 target，因此调整时必须
+同时报告 `zero_rate_pct` 和三个星级在总体样本中的实际达成率。
 
-```sql
-SELECT
-  COUNT(*) AS positive_sample_count,
-  MIN(value) AS minimum_positive_value,
-  APPROX_QUANTILES(value, 100)[OFFSET(30)] AS positive_p30,
-  APPROX_QUANTILES(value, 100)[OFFSET(50)] AS positive_p50,
-  APPROX_QUANTILES(value, 100)[OFFSET(75)] AS positive_p75,
-  APPROX_QUANTILES(value, 100)[OFFSET(90)] AS positive_p90,
-  MAX(value) AS maximum_value
-FROM metric_rows
-WHERE metric = 'healing'
-  AND value > 0;
-```
+#### 12.4.3 历史 G/K/A 查询（仅用于回溯）
 
-正值条件分布不能替代总体完成率。比如 75% 对局治疗为 0，即使正值 P30 很低，所有零值对局
-仍然无法完成任何正 target；两组结果必须一起判断。英雄治疗任务还要追加对应
-`hero_name`，避免把没有治疗能力的英雄混入分布。
+`player_stats_basic` 从 `20260817` 起在 `game_end_player` 中记录 `$.g` / `$.k` / `$.a`，
+12.4.1 的查询已经将它们纳入 `wide` 和 `UNPIVOT`。从该日期起，所有新的每日任务标定都只用
+`game_end_player`，不再运行下面的 `game_end_match` 查询，也不把两类 event join 或合并。
 
-#### 12.4.3 历史 G/K/A 的临时查询
+下面的查询仅用于复现 `20260817` 以前的历史分析。上线前的历史 G/K/A 只能从
+`game_end_match.player_N` 读取；这份数据受 GA4 每 event 25 参数上限影响，不得作为后续英雄级
+G/K/A 标定依据。
 
-`player_stats_basic` 上线后的新数据应直接从 `game_end_player` 读取 `$.g` / `$.k` / `$.a`，
-并合并进 12.4.1 的 `wide` 和 `UNPIVOT`。上线前的历史数据只能从
-`game_end_match.player_N` 读取；这份数据受 GA4 每 event 25 参数上限影响，只用于初步判断，
-不作为英雄级 G/K/A 最终标定的唯一依据。
-
-历史查询仍然单独输出总体与按英雄分布，不与 `game_end_player` join：
+历史查询仍然单独输出总体、排除零值后的正值分布与按英雄分布，不与 `game_end_player`
+join。`assists` 的 target 必须使用 `positive_p30` / `positive_p50` / `positive_p75`：
 
 ```sql
 DECLARE start_suffix STRING DEFAULT '20260811';
@@ -1539,26 +1579,60 @@ distributions AS (
   UNION ALL
   SELECT 'hero' AS scope, hero_id, metric, value
   FROM metric_rows
+  WHERE hero_id IS NOT NULL
+),
+aggregated AS (
+  SELECT
+    scope,
+    hero_id,
+    metric,
+    COUNT(*) AS sample_count,
+    COUNTIF(value = 0) AS zero_count,
+    ROUND(100 * SAFE_DIVIDE(COUNTIF(value = 0), COUNT(*)), 2) AS zero_rate_pct,
+    MIN(value) AS minimum_value,
+    ROUND(AVG(value), 2) AS average_value,
+    APPROX_QUANTILES(value, 100) AS quantiles,
+    MAX(value) AS maximum_value,
+    COUNTIF(value > 0) AS positive_sample_count,
+    MIN(IF(value > 0, value, NULL)) AS minimum_positive_value,
+    ROUND(AVG(IF(value > 0, value, NULL)), 2) AS positive_average_value,
+    APPROX_QUANTILES(
+      IF(value > 0, value, NULL),
+      100 IGNORE NULLS
+    ) AS positive_quantiles,
+    MAX(IF(value > 0, value, NULL)) AS maximum_positive_value
+  FROM distributions
+  GROUP BY scope, hero_id, metric
 )
 SELECT
   scope,
   hero_id,
   metric,
-  COUNT(*) AS sample_count,
-  COUNTIF(value = 0) AS zero_count,
-  ROUND(100 * SAFE_DIVIDE(COUNTIF(value = 0), COUNT(*)), 2) AS zero_rate_pct,
-  MIN(value) AS minimum_value,
-  ROUND(AVG(value), 2) AS average_value,
-  APPROX_QUANTILES(value, 100)[OFFSET(10)] AS p10,
-  APPROX_QUANTILES(value, 100)[OFFSET(20)] AS p20,
-  APPROX_QUANTILES(value, 100)[OFFSET(30)] AS p30,
-  APPROX_QUANTILES(value, 100)[OFFSET(50)] AS p50,
-  APPROX_QUANTILES(value, 100)[OFFSET(75)] AS p75,
-  APPROX_QUANTILES(value, 100)[OFFSET(90)] AS p90,
-  APPROX_QUANTILES(value, 100)[OFFSET(95)] AS p95,
-  MAX(value) AS maximum_value
-FROM distributions
-GROUP BY scope, hero_id, metric
+  sample_count,
+  zero_count,
+  zero_rate_pct,
+  minimum_value,
+  average_value,
+  quantiles[SAFE_OFFSET(10)] AS p10,
+  quantiles[SAFE_OFFSET(20)] AS p20,
+  quantiles[SAFE_OFFSET(30)] AS p30,
+  quantiles[SAFE_OFFSET(50)] AS p50,
+  quantiles[SAFE_OFFSET(75)] AS p75,
+  quantiles[SAFE_OFFSET(90)] AS p90,
+  quantiles[SAFE_OFFSET(95)] AS p95,
+  maximum_value,
+  positive_sample_count,
+  minimum_positive_value,
+  positive_average_value,
+  positive_quantiles[SAFE_OFFSET(10)] AS positive_p10,
+  positive_quantiles[SAFE_OFFSET(20)] AS positive_p20,
+  positive_quantiles[SAFE_OFFSET(30)] AS positive_p30,
+  positive_quantiles[SAFE_OFFSET(50)] AS positive_p50,
+  positive_quantiles[SAFE_OFFSET(75)] AS positive_p75,
+  positive_quantiles[SAFE_OFFSET(90)] AS positive_p90,
+  positive_quantiles[SAFE_OFFSET(95)] AS positive_p95,
+  maximum_positive_value
+FROM aggregated
 ORDER BY IF(scope = 'general', 0, 1), metric, sample_count DESC;
 ```
 
