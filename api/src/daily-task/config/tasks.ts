@@ -1023,13 +1023,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
     heroName: 'npc_dota_hero_magnataur',
   },
   {
-    id: 'hero_magnataur_2',
-    scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.ASSISTS,
-    target: 60,
-    heroName: 'npc_dota_hero_magnataur',
-  },
-  {
     id: 'hero_mars_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,

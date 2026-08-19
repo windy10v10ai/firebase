@@ -27,10 +27,10 @@ const groupHeroTasks = (): Map<string, TaskDefinition[]> => {
 
 describe('daily task configuration', () => {
   it('keeps the reviewed personal task pool', () => {
-    expect(DAILY_TASKS).toHaveLength(253);
+    expect(DAILY_TASKS).toHaveLength(252);
     expect(GENERAL_TASKS).toHaveLength(10);
-    expect(HERO_TASKS).toHaveLength(243);
-    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(253);
+    expect(HERO_TASKS).toHaveLength(242);
+    expect(new Set(DAILY_TASKS.map((task) => task.id)).size).toBe(252);
   });
 
   it('uses every metric exactly once in the general pool', () => {
@@ -90,7 +90,7 @@ describe('daily task hero pool', () => {
       taskCountDistribution[tasks.length as keyof typeof taskCountDistribution] += 1;
     }
 
-    expect(taskCountDistribution).toEqual({ 1: 11, 2: 116 });
+    expect(taskCountDistribution).toEqual({ 1: 12, 2: 115 });
   });
 
   it('numbers task ids after their hero without gaps', () => {
@@ -118,7 +118,7 @@ describe('daily task hero pool', () => {
 
     expect(metricCounts).toEqual({
       [TaskMetric.KILLS]: 20,
-      [TaskMetric.ASSISTS]: 22,
+      [TaskMetric.ASSISTS]: 21,
       [TaskMetric.LAST_HITS]: 0,
       [TaskMetric.TOWER_KILLS]: 14,
       [TaskMetric.HERO_DAMAGE]: 94,
