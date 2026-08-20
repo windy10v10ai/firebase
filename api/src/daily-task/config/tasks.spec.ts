@@ -69,7 +69,7 @@ describe('daily task configuration', () => {
       [TaskMetric.TOWER_KILLS]: 4,
       [TaskMetric.HERO_DAMAGE]: 1_000_000,
       [TaskMetric.HEALING]: 40_000,
-      [TaskMetric.TOTAL_GOLD_EARNED]: 160_000,
+      [TaskMetric.TOTAL_GOLD_EARNED]: 240_000,
       [TaskMetric.DAMAGE_TAKEN]: 200_000,
       [TaskMetric.STUN_DURATION]: 100,
       [TaskMetric.ROSHAN_KILLS]: 1,
@@ -133,7 +133,7 @@ describe('daily task hero pool', () => {
   it('keeps hero targets in the reviewed metric bands', () => {
     const targetBands: Partial<Record<TaskMetric, readonly [number, number]>> = {
       [TaskMetric.KILLS]: [32, 50],
-      [TaskMetric.ASSISTS]: [30, 80],
+      [TaskMetric.ASSISTS]: [30, 60],
       [TaskMetric.TOWER_KILLS]: [3, 5],
       [TaskMetric.HERO_DAMAGE]: [300_000, 900_000],
       [TaskMetric.HEALING]: [10_000, 80_000],
@@ -162,7 +162,7 @@ describe('daily task hero pool', () => {
     ]);
     expect(selectMetricTargets('dazzle')).toEqual([
       { metric: TaskMetric.HEALING, target: 80_000 },
-      { metric: TaskMetric.ASSISTS, target: 60 },
+      { metric: TaskMetric.ASSISTS, target: 50 },
     ]);
     expect(selectMetricTargets('lion')).toContainEqual({
       metric: TaskMetric.STUN_DURATION,
@@ -174,7 +174,7 @@ describe('daily task hero pool', () => {
     ]);
     expect(selectMetricTargets('zuus')).toContainEqual({
       metric: TaskMetric.ASSISTS,
-      target: 70,
+      target: 60,
     });
   });
 });

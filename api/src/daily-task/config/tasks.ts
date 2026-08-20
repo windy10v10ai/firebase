@@ -50,7 +50,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_total_gold_earned',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.TOTAL_GOLD_EARNED,
-    target: 160_000,
+    target: 240_000,
   },
   {
     id: 'general_damage_taken',
@@ -137,7 +137,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_dazzle_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 60,
+    target: 50,
     heroName: 'npc_dota_hero_dazzle',
   },
   {
@@ -242,7 +242,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_zuus_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_zuus',
   },
   {
@@ -445,7 +445,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_disruptor_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_disruptor',
   },
   {
@@ -900,7 +900,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_keeper_of_the_light_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 60,
+    target: 50,
     heroName: 'npc_dota_hero_keeper_of_the_light',
   },
   {
@@ -1159,7 +1159,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_oracle_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_oracle',
   },
   {
@@ -1278,7 +1278,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_rubick_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.ASSISTS,
-    target: 70,
+    target: 60,
     heroName: 'npc_dota_hero_rubick',
   },
   {
