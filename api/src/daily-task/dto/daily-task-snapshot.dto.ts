@@ -39,6 +39,9 @@ export class DailyTaskSnapshotDto {
   completedTasks: TaskCandidateDto[];
   @ApiProperty()
   todaySeasonPoint: number;
+  /** 本轮剩余刷新次数 */
+  @ApiProperty()
+  refreshRemaining: number;
   @ApiProperty({ type: [DailyTaskHistoryEntryDto] })
   history: DailyTaskHistoryEntryDto[];
 }

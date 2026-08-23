@@ -16,6 +16,18 @@ export class DailyTaskStore {
     private readonly repository: BaseFirestoreRepository<PlayerDailyTask>,
   ) {}
 
+  async find(steamId: number): Promise<PlayerDailyTask | null> {
+    return this.repository.findById(steamId.toString());
+  }
+
+  async create(document: PlayerDailyTask): Promise<void> {
+    await this.repository.create(document);
+  }
+
+  async update(document: PlayerDailyTask): Promise<void> {
+    await this.repository.update(document);
+  }
+
   async transact<T>(
     steamId: number,
     mutate: (current: PlayerDailyTask | null) => DailyTaskMutation<T>,

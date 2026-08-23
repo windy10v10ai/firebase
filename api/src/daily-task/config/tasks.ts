@@ -10,6 +10,7 @@ export interface TaskDefinition {
 }
 
 export const ROUNDS_PER_DAY = 3;
+export const MAX_REFRESH_PER_ROUND = 1;
 export const STAR_REWARDS = { 1: 60, 2: 80, 3: 100 } as const;
 export const STAR_TARGET_MULTIPLIERS = { 1: 1, 2: 1.5, 3: 2 } as const;
 export const SMALL_TARGET_THRESHOLD = 10;

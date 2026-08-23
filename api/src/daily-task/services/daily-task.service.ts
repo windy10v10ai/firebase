@@ -3,7 +3,7 @@ import { logger } from 'firebase-functions';
 
 import { GameEndPlayerDto } from '../../analytics/dto/game-end-dto';
 import { getUtcDayId } from '../../util/date';
-import { ROUNDS_PER_DAY } from '../config/tasks';
+import { MAX_REFRESH_PER_ROUND, ROUNDS_PER_DAY } from '../config/tasks';
 import { DailyTaskSnapshotDto } from '../dto/daily-task-snapshot.dto';
 import { PlayerDailyTask } from '../entities/player-daily-task.entity';
 
@@ -45,35 +45,23 @@ export class DailyTaskService {
       return { result: next, ...(shouldWrite ? { next } : {}) };
     });
 
-    const storedCompletedTasks = document.completedTasks.map((task) => ({ ...task }));
-    const candidates =
-      storedCompletedTasks.length >= ROUNDS_PER_DAY
-        ? []
-        : this.generationService.generateCandidates(
-            document.dayId,
-            steamId,
-            storedCompletedTasks.length + 1,
-            storedCompletedTasks.map((task) => task.taskId),
-          );
+    return this.toSnapshot(steamId, document);
+  }
 
-    const completedTasks = storedCompletedTasks
-      .map((task) => this.generationService.resolveCompletedTask(task))
-      .filter((task): task is NonNullable<typeof task> => task !== undefined);
+  /** 消耗一次本轮刷新额度，重掷三个候选。额度上限为 1 时重试天然幂等，上调上限需要另加幂等键。 */
+  async refresh(steamId: number, requestDayId: string): Promise<DailyTaskSnapshotDto> {
+    const today = getUtcDayId();
+    const current = await this.store.find(steamId);
+    const normalized = current ? this.normalize(current) : this.createDocument(steamId, today);
+    const next = this.applyRefresh(normalized, requestDayId, today);
 
-    return {
-      steamId,
-      dayId: document.dayId,
-      candidates,
-      completedTasks,
-      todaySeasonPoint: document.todaySeasonPoint,
-      history: document.history.map((entry) => ({
-        dayId: entry.dayId,
-        tasks: entry.tasks
-          .map((task) => this.generationService.resolveCompletedTask(task))
-          .filter((task): task is NonNullable<typeof task> => task !== undefined),
-        seasonPoint: entry.seasonPoint,
-      })),
-    };
+    if (!current) {
+      await this.store.create(next);
+    } else if (next !== normalized) {
+      await this.store.update(next);
+    }
+
+    return this.toSnapshot(steamId, next);
   }
 
   async recordGameEnd(players: GameEndPlayerDto[]): Promise<void> {
@@ -126,6 +114,8 @@ export class DailyTaskService {
           ...document,
           completedTasks: [...document.completedTasks, { taskId, star }],
           todaySeasonPoint: document.todaySeasonPoint + seasonPoint,
+          // 进入下一轮，刷新额度重置
+          refreshCount: 0,
           updatedAt: new Date(),
         };
         return { result: undefined, next };
@@ -138,6 +128,61 @@ export class DailyTaskService {
     }
   }
 
+  private applyRefresh(
+    document: PlayerDailyTask,
+    requestDayId: string,
+    today: string,
+  ): PlayerDailyTask {
+    // 跨天先重置，玩家拿到新一天的完整额度
+    if (document.dayId !== today) {
+      return this.resetForNewDay(document, today);
+    }
+    // 客户端日期陈旧、当天打满、额度用尽都不消耗次数
+    if (
+      requestDayId !== today ||
+      document.completedTasks.length >= ROUNDS_PER_DAY ||
+      document.refreshCount >= MAX_REFRESH_PER_ROUND
+    ) {
+      return document;
+    }
+    return { ...document, refreshCount: document.refreshCount + 1, updatedAt: new Date() };
+  }
+
+  private toSnapshot(steamId: number, document: PlayerDailyTask): DailyTaskSnapshotDto {
+    const storedCompletedTasks = document.completedTasks.map((task) => ({ ...task }));
+    const allRoundsDone = storedCompletedTasks.length >= ROUNDS_PER_DAY;
+    const candidates = allRoundsDone
+      ? []
+      : this.generationService.generateCandidates(
+          document.dayId,
+          steamId,
+          storedCompletedTasks.length + 1,
+          document.refreshCount,
+          storedCompletedTasks.map((task) => task.taskId),
+        );
+
+    const completedTasks = storedCompletedTasks
+      .map((task) => this.generationService.resolveCompletedTask(task))
+      .filter((task): task is NonNullable<typeof task> => task !== undefined);
+
+    return {
+      steamId,
+      dayId: document.dayId,
+      candidates,
+      completedTasks,
+      todaySeasonPoint: document.todaySeasonPoint,
+      // 当天打满后没有可刷的候选
+      refreshRemaining: allRoundsDone ? 0 : MAX_REFRESH_PER_ROUND - document.refreshCount,
+      history: document.history.map((entry) => ({
+        dayId: entry.dayId,
+        tasks: entry.tasks
+          .map((task) => this.generationService.resolveCompletedTask(task))
+          .filter((task): task is NonNullable<typeof task> => task !== undefined),
+        seasonPoint: entry.seasonPoint,
+      })),
+    };
+  }
+
   private createDocument(steamId: number, dayId: string): PlayerDailyTask {
     return {
       id: steamId.toString(),
@@ -145,6 +190,7 @@ export class DailyTaskService {
       dayId,
       completedTasks: [],
       todaySeasonPoint: 0,
+      refreshCount: 0,
       history: [],
       updatedAt: new Date(),
     };
@@ -155,6 +201,7 @@ export class DailyTaskService {
       ...document,
       completedTasks: document.completedTasks ?? [],
       todaySeasonPoint: document.todaySeasonPoint ?? 0,
+      refreshCount: document.refreshCount ?? 0,
       history: document.history ?? [],
     };
   }
@@ -174,6 +221,7 @@ export class DailyTaskService {
       dayId,
       completedTasks: [],
       todaySeasonPoint: 0,
+      refreshCount: 0,
       history: history.slice(0, HISTORY_MAX_ENTRIES),
       updatedAt: new Date(),
     };
