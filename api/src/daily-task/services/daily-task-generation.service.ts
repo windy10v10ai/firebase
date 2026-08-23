@@ -58,9 +58,10 @@ export class DailyTaskGenerationService {
     dayId: string,
     steamId: number,
     round: number,
+    refreshCount: number,
     completedTaskIds: string[],
   ): TaskCandidateDto[] {
-    const seed = `${dayId}:${steamId}:${round}`;
+    const seed = `${dayId}:${steamId}:${round}:${refreshCount}`;
     const completed = new Set(completedTaskIds);
     const generalPool = this.generalTasks.filter((task) => !completed.has(task.id));
     const heroPool = this.heroTasks.filter((task) => !completed.has(task.id));
@@ -139,12 +140,28 @@ export class DailyTaskGenerationService {
     return stars;
   }
 
+  /**
+   * FNV-1a followed by the MurmurHash3 fmix32 finalizer.
+   *
+   * The finalizer is required, not cosmetic: the lowest bit of plain FNV-1a never
+   * participates in the hash. Both the offset basis and the prime are odd, so the
+   * multiply cannot change bit 0 — it stays the XOR of every input byte's low bit.
+   * Callers take `hash(...) % 2` for the third candidate's scope and for the first
+   * swap of the star shuffle, and without mixing those two decisions are linear in
+   * the seed: consecutive rounds always alternate, and bumping the refresh counter
+   * flips them every single time. See docs/daily-task/refresh-design.md section 4.
+   */
   private hash(value: string): number {
     let hash = 0x811c9dc5;
     for (let index = 0; index < value.length; index++) {
       hash ^= value.charCodeAt(index);
       hash = Math.imul(hash, 0x01000193);
     }
+    hash ^= hash >>> 16;
+    hash = Math.imul(hash, 0x85ebca6b);
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, 0xc2b2ae35);
+    hash ^= hash >>> 16;
     return hash >>> 0;
   }
 }

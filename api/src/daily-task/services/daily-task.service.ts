@@ -3,7 +3,7 @@ import { logger } from 'firebase-functions';
 
 import { GameEndPlayerDto } from '../../analytics/dto/game-end-dto';
 import { getUtcDayId } from '../../util/date';
-import { ROUNDS_PER_DAY } from '../config/tasks';
+import { MAX_REFRESH_PER_ROUND, ROUNDS_PER_DAY } from '../config/tasks';
 import { DailyTaskSnapshotDto } from '../dto/daily-task-snapshot.dto';
 import { PlayerDailyTask } from '../entities/player-daily-task.entity';
 
@@ -45,35 +45,26 @@ export class DailyTaskService {
       return { result: next, ...(shouldWrite ? { next } : {}) };
     });
 
-    const storedCompletedTasks = document.completedTasks.map((task) => ({ ...task }));
-    const candidates =
-      storedCompletedTasks.length >= ROUNDS_PER_DAY
-        ? []
-        : this.generationService.generateCandidates(
-            document.dayId,
-            steamId,
-            storedCompletedTasks.length + 1,
-            storedCompletedTasks.map((task) => task.taskId),
-          );
+    return this.toSnapshot(steamId, document);
+  }
 
-    const completedTasks = storedCompletedTasks
-      .map((task) => this.generationService.resolveCompletedTask(task))
-      .filter((task): task is NonNullable<typeof task> => task !== undefined);
+  /**
+   * Spends one refresh of the current round, which re-rolls all three candidates.
+   *
+   * Idempotent while MAX_REFRESH_PER_ROUND is 1: a retried request finds the quota
+   * already spent and returns the same candidates instead of rolling a third set.
+   * Raising the cap would require a real idempotency key.
+   */
+  async refresh(steamId: number, requestDayId: string): Promise<DailyTaskSnapshotDto> {
+    const today = getUtcDayId();
+    const document = await this.store.transact(steamId, (current) => {
+      const normalized = current ? this.normalize(current) : this.createDocument(steamId, today);
+      const next = this.applyRefresh(normalized, requestDayId, today);
+      const shouldWrite = !current || next !== normalized;
+      return { result: next, ...(shouldWrite ? { next } : {}) };
+    });
 
-    return {
-      steamId,
-      dayId: document.dayId,
-      candidates,
-      completedTasks,
-      todaySeasonPoint: document.todaySeasonPoint,
-      history: document.history.map((entry) => ({
-        dayId: entry.dayId,
-        tasks: entry.tasks
-          .map((task) => this.generationService.resolveCompletedTask(task))
-          .filter((task): task is NonNullable<typeof task> => task !== undefined),
-        seasonPoint: entry.seasonPoint,
-      })),
-    };
+    return this.toSnapshot(steamId, document);
   }
 
   async recordGameEnd(players: GameEndPlayerDto[]): Promise<void> {
@@ -126,6 +117,8 @@ export class DailyTaskService {
           ...document,
           completedTasks: [...document.completedTasks, { taskId, star }],
           todaySeasonPoint: document.todaySeasonPoint + seasonPoint,
+          // Entering the next round grants a fresh refresh quota.
+          refreshCount: 0,
           updatedAt: new Date(),
         };
         return { result: undefined, next };
@@ -138,6 +131,61 @@ export class DailyTaskService {
     }
   }
 
+  private applyRefresh(
+    document: PlayerDailyTask,
+    requestDayId: string,
+    today: string,
+  ): PlayerDailyTask {
+    // A stale document rolls over first; the player gets a fresh day and keeps the quota.
+    if (document.dayId !== today) {
+      return this.resetForNewDay(document, today);
+    }
+    // A stale client, a finished day, or a spent quota all return the current state untouched.
+    if (
+      requestDayId !== today ||
+      document.completedTasks.length >= ROUNDS_PER_DAY ||
+      document.refreshCount >= MAX_REFRESH_PER_ROUND
+    ) {
+      return document;
+    }
+    return { ...document, refreshCount: document.refreshCount + 1, updatedAt: new Date() };
+  }
+
+  private toSnapshot(steamId: number, document: PlayerDailyTask): DailyTaskSnapshotDto {
+    const storedCompletedTasks = document.completedTasks.map((task) => ({ ...task }));
+    const allRoundsDone = storedCompletedTasks.length >= ROUNDS_PER_DAY;
+    const candidates = allRoundsDone
+      ? []
+      : this.generationService.generateCandidates(
+          document.dayId,
+          steamId,
+          storedCompletedTasks.length + 1,
+          document.refreshCount,
+          storedCompletedTasks.map((task) => task.taskId),
+        );
+
+    const completedTasks = storedCompletedTasks
+      .map((task) => this.generationService.resolveCompletedTask(task))
+      .filter((task): task is NonNullable<typeof task> => task !== undefined);
+
+    return {
+      steamId,
+      dayId: document.dayId,
+      candidates,
+      completedTasks,
+      todaySeasonPoint: document.todaySeasonPoint,
+      // Nothing left to re-roll once the day is done, so the client sees no button.
+      refreshRemaining: allRoundsDone ? 0 : MAX_REFRESH_PER_ROUND - document.refreshCount,
+      history: document.history.map((entry) => ({
+        dayId: entry.dayId,
+        tasks: entry.tasks
+          .map((task) => this.generationService.resolveCompletedTask(task))
+          .filter((task): task is NonNullable<typeof task> => task !== undefined),
+        seasonPoint: entry.seasonPoint,
+      })),
+    };
+  }
+
   private createDocument(steamId: number, dayId: string): PlayerDailyTask {
     return {
       id: steamId.toString(),
@@ -145,6 +193,7 @@ export class DailyTaskService {
       dayId,
       completedTasks: [],
       todaySeasonPoint: 0,
+      refreshCount: 0,
       history: [],
       updatedAt: new Date(),
     };
@@ -155,6 +204,7 @@ export class DailyTaskService {
       ...document,
       completedTasks: document.completedTasks ?? [],
       todaySeasonPoint: document.todaySeasonPoint ?? 0,
+      refreshCount: document.refreshCount ?? 0,
       history: document.history ?? [],
     };
   }
@@ -174,6 +224,7 @@ export class DailyTaskService {
       dayId,
       completedTasks: [],
       todaySeasonPoint: 0,
+      refreshCount: 0,
       history: history.slice(0, HISTORY_MAX_ENTRIES),
       updatedAt: new Date(),
     };

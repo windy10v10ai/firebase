@@ -15,21 +15,49 @@ describe('DailyTaskGenerationService', () => {
   });
 
   it('returns identical candidates for identical inputs', () => {
-    const input: [string, number, number, string[]] = ['20260816', 483215844, 1, []];
+    const input: [string, number, number, number, string[]] = ['20260816', 483215844, 1, 0, []];
 
     expect(service.generateCandidates(...input)).toEqual(service.generateCandidates(...input));
   });
 
   it('changes candidates when the round changes', () => {
-    const first = service.generateCandidates('20260816', 483215844, 1, []);
-    const second = service.generateCandidates('20260816', 483215844, 2, []);
+    const first = service.generateCandidates('20260816', 483215844, 1, 0, []);
+    const second = service.generateCandidates('20260816', 483215844, 2, 0, []);
 
     expect(second).not.toEqual(first);
   });
 
+  it('changes candidates when the refresh counter changes', () => {
+    const first = service.generateCandidates('20260816', 483215844, 1, 0, []);
+    const second = service.generateCandidates('20260816', 483215844, 1, 1, []);
+
+    expect(second).not.toEqual(first);
+  });
+
+  it('varies the third candidate scope independently across rounds', () => {
+    // Guards the fmix32 finalizer in hash(). Plain FNV-1a leaves bit 0 outside the
+    // hash, so the third candidate's scope alternates between rounds by construction
+    // and only 2 of the 8 patterns can occur — '222' among them being impossible.
+    const patterns = new Set<string>();
+    for (let steamId = 1; steamId <= 300; steamId++) {
+      const pattern = [1, 2, 3]
+        .map(
+          (round) =>
+            service
+              .generateCandidates('20260816', steamId, round, 0, [])
+              .filter((candidate) => candidate.scope === TaskScope.PERSONAL_GENERAL).length,
+        )
+        .join('');
+      patterns.add(pattern);
+    }
+
+    expect(patterns.has('222')).toBe(true);
+    expect(patterns.size).toBe(8);
+  });
+
   it('always includes both scopes and three distinct task ids', () => {
     for (let steamId = 1; steamId <= 100; steamId++) {
-      const candidates = service.generateCandidates('20260816', steamId, 1, []);
+      const candidates = service.generateCandidates('20260816', steamId, 1, 0, []);
       const scopes = candidates.map((candidate) => candidate.scope);
 
       expect(scopes).toContain(TaskScope.PERSONAL_GENERAL);
@@ -48,7 +76,7 @@ describe('DailyTaskGenerationService', () => {
     const starPermutations = new Set<string>();
 
     for (let steamId = 1; steamId <= 1000; steamId++) {
-      const candidates = service.generateCandidates('20260816', steamId, 1, []);
+      const candidates = service.generateCandidates('20260816', steamId, 1, 0, []);
       scopeCompositions.add(candidates.map((candidate) => candidate.scope).join(','));
       starPermutations.add(candidates.map((candidate) => candidate.star).join(','));
     }
@@ -99,14 +127,14 @@ describe('DailyTaskGenerationService', () => {
   });
 
   it('assigns each star exactly once per round', () => {
-    const candidates = service.generateCandidates('20260816', 483215844, 1, []);
+    const candidates = service.generateCandidates('20260816', 483215844, 1, 0, []);
 
     expect(candidates.map((candidate) => candidate.star).sort()).toEqual([1, 2, 3]);
   });
 
   it('excludes every completed task id regardless of its previous star', () => {
     const completedTaskIds = DAILY_TASKS.slice(0, 8).map((task) => task.id);
-    const candidates = service.generateCandidates('20260816', 483215844, 2, completedTaskIds);
+    const candidates = service.generateCandidates('20260816', 483215844, 2, 0, completedTaskIds);
 
     expect(candidates.every((candidate) => !completedTaskIds.includes(candidate.taskId))).toBe(
       true,

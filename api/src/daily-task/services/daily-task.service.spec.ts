@@ -29,6 +29,7 @@ function createDocument(overrides: Partial<PlayerDailyTask> = {}): PlayerDailyTa
     dayId: TODAY,
     completedTasks: [],
     todaySeasonPoint: 0,
+    refreshCount: 0,
     history: [],
     updatedAt: new Date('2026-08-16T00:00:00.000Z'),
     ...overrides,
@@ -106,7 +107,7 @@ describe('DailyTaskService', () => {
 
     await service.getSnapshot(STEAM_ID);
 
-    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 2, [
+    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 2, 0, [
       'general_kills',
     ]);
   });
@@ -168,9 +169,83 @@ describe('DailyTaskService', () => {
     const snapshot = await service.getSnapshot(STEAM_ID);
 
     expect(snapshot.completedTasks).toEqual([]);
-    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 2, [
+    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 2, 0, [
       'removed_task',
     ]);
+  });
+
+  it('defaults a missing refresh count to zero for documents written before the field existed', async () => {
+    const { refreshCount: _unused, ...legacy } = createDocument();
+    current = legacy as PlayerDailyTask;
+
+    const snapshot = await service.getSnapshot(STEAM_ID);
+
+    expect(snapshot.refreshRemaining).toBe(1);
+    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 1, 0, []);
+  });
+
+  it('spends one refresh and re-rolls the candidates', async () => {
+    const snapshot = await service.refresh(STEAM_ID, TODAY);
+
+    expect(written?.refreshCount).toBe(1);
+    expect(snapshot.refreshRemaining).toBe(0);
+    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 1, 1, []);
+  });
+
+  it('returns the same candidates when the round quota is already spent', async () => {
+    current = createDocument({ refreshCount: 1 });
+
+    const snapshot = await service.refresh(STEAM_ID, TODAY);
+
+    expect(written).toBeUndefined();
+    expect(snapshot.refreshRemaining).toBe(0);
+    expect(generationService.generateCandidates).toHaveBeenCalledWith(TODAY, STEAM_ID, 1, 1, []);
+  });
+
+  it('does not spend a refresh for a stale client day', async () => {
+    const snapshot = await service.refresh(STEAM_ID, '20260815');
+
+    expect(written).toBeUndefined();
+    expect(snapshot.refreshRemaining).toBe(1);
+  });
+
+  it('does not spend a refresh once every round is done', async () => {
+    current = createDocument({
+      completedTasks: Array.from({ length: ROUNDS_PER_DAY }, (_, index) => ({
+        taskId: `task_${index}`,
+        star: 1,
+      })),
+    });
+
+    const snapshot = await service.refresh(STEAM_ID, TODAY);
+
+    expect(written).toBeUndefined();
+    expect(snapshot.candidates).toEqual([]);
+    expect(snapshot.refreshRemaining).toBe(0);
+  });
+
+  it('rolls a stale document into the new day instead of spending a refresh', async () => {
+    current = createDocument({
+      dayId: '20260815',
+      completedTasks: [{ taskId: 'general_kills', star: 2 }],
+      todaySeasonPoint: 80,
+      refreshCount: 1,
+    });
+
+    const snapshot = await service.refresh(STEAM_ID, '20260815');
+
+    expect(snapshot.dayId).toBe(TODAY);
+    expect(written?.refreshCount).toBe(0);
+    expect(snapshot.refreshRemaining).toBe(1);
+    expect(snapshot.history[0].dayId).toBe('20260815');
+  });
+
+  it('restores the refresh quota when a round is completed', async () => {
+    current = createDocument({ refreshCount: 1 });
+
+    await service.recordGameEnd([createPlayer()]);
+
+    expect(written?.refreshCount).toBe(0);
   });
 
   it('records the client-reported star and season points', async () => {
