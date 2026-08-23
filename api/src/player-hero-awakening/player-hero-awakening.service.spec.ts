@@ -55,23 +55,23 @@ describe('PlayerHeroAwakeningService', () => {
   }
 
   describe('awaken', () => {
-    it('使用赛季可用积分觉醒：扣减 usedSeasonPoint，写入 usedSeasonPoint=10000，不写 usedMemberPoint', async () => {
+    it('使用赛季可用积分觉醒：扣减 usedSeasonPoint，写入 usedSeasonPoint=8000，不写 usedMemberPoint', async () => {
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
         createService({ seasonPointTotal: 10000, usedSeasonPoint: 0 });
 
       await service.awaken(steamId, validHeroName, false);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 10000,
+        usedSeasonPoint: 8000,
       });
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
-        10000,
+        8000,
         false,
         'hero_awakening',
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
-      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 10000 }]);
+      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 8000 }]);
     });
 
     it('使用会员可用积分觉醒：扣减 usedMemberPoint=4000，不写 usedSeasonPoint', async () => {
@@ -96,7 +96,7 @@ describe('PlayerHeroAwakeningService', () => {
     it('赛季可用积分不足应报错，不扣分不写入', async () => {
       const { service, playerService, playerHeroAwakeningRepository } = createService({
         seasonPointTotal: 10000,
-        usedSeasonPoint: 1,
+        usedSeasonPoint: 2001,
       });
 
       await expect(service.awaken(steamId, validHeroName, false)).rejects.toThrow(
@@ -146,7 +146,7 @@ describe('PlayerHeroAwakeningService', () => {
       expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
     });
 
-    it('命中随机候选集 + 赛季积分：扣半价 5000，清空 randomCandidates', async () => {
+    it('命中随机候选集 + 赛季积分：扣优惠价 4000，清空 randomCandidates', async () => {
       const candidates = [validHeroName, 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
         createServiceWithRandomCandidates(
@@ -157,16 +157,16 @@ describe('PlayerHeroAwakeningService', () => {
       await service.awaken(steamId, validHeroName, false);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 5000,
+        usedSeasonPoint: 4000,
       });
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
-        5000,
+        4000,
         false,
         'hero_awakening_random',
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
-      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 5000 }]);
+      expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 4000 }]);
       expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);
     });
 
@@ -194,7 +194,7 @@ describe('PlayerHeroAwakeningService', () => {
       expect(FieldValue.delete().isEqual(savedDoc.randomCandidates)).toBe(true);
     });
 
-    it('未命中候选集：维持赛季全价 10000，候选集保留', async () => {
+    it('未命中候选集：维持赛季全价 8000，候选集保留', async () => {
       const candidates = ['npc_dota_hero_bane', 'npc_dota_hero_lina', 'npc_dota_hero_pudge'];
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
         createServiceWithRandomCandidates(
@@ -205,11 +205,11 @@ describe('PlayerHeroAwakeningService', () => {
       await service.awaken(steamId, validHeroName, false);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 10000,
+        usedSeasonPoint: 8000,
       });
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
-        10000,
+        8000,
         false,
         'hero_awakening',
       );
@@ -220,8 +220,8 @@ describe('PlayerHeroAwakeningService', () => {
 
   describe('resolveCost', () => {
     it.each([
-      [false, false, 10000],
-      [false, true, 5000],
+      [false, false, 8000],
+      [false, true, 4000],
       [true, false, 4000],
       [true, true, 2000],
     ])(
