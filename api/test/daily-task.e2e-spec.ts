@@ -9,6 +9,7 @@ import { getPlayer } from './util/util-player';
 
 const GAME_START_URL = '/api/game/start/';
 const GAME_END_URL = '/api/game/end';
+const REFRESH_URL = '/api/daily-task/refresh';
 
 function gameEndPlayer(
   steamId: number,
@@ -60,6 +61,10 @@ function gameEndPayload(players: ReturnType<typeof gameEndPlayer>[]) {
 
 async function startGame(app: INestApplication, steamIds: number[]) {
   return get(app, GAME_START_URL, { steamIds, matchId: 9000000001, version: 'v4.10' });
+}
+
+async function refreshDailyTask(app: INestApplication, steamId: number, dayId: string) {
+  return post(app, REFRESH_URL, { steamId, dayId });
 }
 
 async function readDailyTask(steamId: number): Promise<PlayerDailyTask | undefined> {
@@ -323,6 +328,112 @@ describe('Daily task Phase1 (e2e)', () => {
     expect((await readDailyTask(connectedId))?.completedTasks).toEqual([
       { taskId: connectedCandidate.taskId, star: connectedCandidate.star },
     ]);
+  });
+
+  it('re-rolls the candidates and recomputes the same set on the next start', async () => {
+    const steamId = 105610010;
+    mockDate('2026-08-16T10:00:00.000Z');
+
+    const started = await startGame(app, [steamId]);
+    const before = findSnapshot(started.body, steamId);
+    expect(before.refreshRemaining).toBe(1);
+
+    const refreshed = await refreshDailyTask(app, steamId, before.dayId);
+    expect(refreshed.status).toBe(201);
+    expect(refreshed.body.candidates).not.toEqual(before.candidates);
+    expect(refreshed.body.candidates).toHaveLength(3);
+    expect(refreshed.body.refreshRemaining).toBe(0);
+
+    // 候选不落库的前提：后续开局必须重算出与刷新时完全相同的一组
+    const restarted = await startGame(app, [steamId]);
+    const after = findSnapshot(restarted.body, steamId);
+    expect(after.candidates).toEqual(refreshed.body.candidates);
+    expect(after.refreshRemaining).toBe(0);
+  });
+
+  it('returns the same candidates when a refresh is retried', async () => {
+    const steamId = 105610011;
+    mockDate('2026-08-16T10:00:00.000Z');
+    const started = await startGame(app, [steamId]);
+    const dayId = findSnapshot(started.body, steamId).dayId;
+
+    const first = await refreshDailyTask(app, steamId, dayId);
+    const second = await refreshDailyTask(app, steamId, dayId);
+
+    expect(second.body.candidates).toEqual(first.body.candidates);
+    expect(second.body.refreshRemaining).toBe(0);
+    expect((await readDailyTask(steamId))?.refreshCount).toBe(1);
+  });
+
+  it('restores the refresh quota after a round is completed', async () => {
+    const steamId = 105610012;
+    mockDate('2026-08-16T10:00:00.000Z');
+    const started = await startGame(app, [steamId]);
+    const dayId = findSnapshot(started.body, steamId).dayId;
+    const refreshed = await refreshDailyTask(app, steamId, dayId);
+    const candidate = refreshed.body.candidates[0];
+
+    await post(
+      app,
+      GAME_END_URL,
+      gameEndPayload([
+        gameEndPlayer(steamId, {
+          dailyTask: {
+            dayId,
+            taskId: candidate.taskId,
+            star: candidate.star,
+            seasonPoint: candidate.rewardSeasonPoint,
+          },
+        }),
+      ]),
+    );
+
+    expect((await readDailyTask(steamId))?.refreshCount).toBe(0);
+    const nextStart = await startGame(app, [steamId]);
+    expect(findSnapshot(nextStart.body, steamId).refreshRemaining).toBe(1);
+  });
+
+  it('does not spend a refresh once every round is done', async () => {
+    const steamId = 105610013;
+    mockDate('2026-08-16T10:00:00.000Z');
+    await getFirestore()
+      .collection('PlayerDailyTasks')
+      .doc(steamId.toString())
+      .set({
+        steamId,
+        dayId: '20260816',
+        completedTasks: [
+          { taskId: 'general_kills', star: 1 },
+          { taskId: 'general_last_hits', star: 2 },
+          { taskId: 'general_tower_kills', star: 3 },
+        ],
+        todaySeasonPoint: 240,
+        refreshCount: 0,
+        history: [],
+        updatedAt: new Date('2026-08-16T09:00:00.000Z'),
+      });
+
+    const result = await refreshDailyTask(app, steamId, '20260816');
+
+    expect(result.body.candidates).toEqual([]);
+    expect(result.body.refreshRemaining).toBe(0);
+    expect((await readDailyTask(steamId))?.refreshCount).toBe(0);
+  });
+
+  it('rolls a stale client day over to the new day instead of spending a refresh', async () => {
+    const steamId = 105610014;
+    mockDate('2026-08-16T10:00:00.000Z');
+    const started = await startGame(app, [steamId]);
+    const staleDayId = findSnapshot(started.body, steamId).dayId;
+    await refreshDailyTask(app, steamId, staleDayId);
+    expect((await readDailyTask(steamId))?.refreshCount).toBe(1);
+
+    mockDate('2026-08-17T10:00:00.000Z');
+    const result = await refreshDailyTask(app, steamId, staleDayId);
+
+    expect(result.body.dayId).toBe('20260817');
+    expect(result.body.refreshRemaining).toBe(1);
+    expect((await readDailyTask(steamId))?.refreshCount).toBe(0);
   });
 
   it('caps battle points at 500 without dropping base settlement', async () => {

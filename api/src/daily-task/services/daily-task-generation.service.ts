@@ -12,6 +12,8 @@ import { CompletedTask } from '../entities/player-daily-task.entity';
 import { TaskMetric, TaskScope } from '../types/daily-task.types';
 
 const STARS = [1, 2, 3] as const;
+/** seed 由服务端拼接，实际长度不到 50；设上限是为了异常输入无法把哈希循环拖成 DoS。 */
+const SEED_MAX_LENGTH = 128;
 const DEFAULT_GENERAL_TASK_WEIGHT = 2;
 const REDUCED_GENERAL_TASK_WEIGHT = 1;
 const REDUCED_GENERAL_TASK_METRICS = new Set([TaskMetric.ASSISTS, TaskMetric.HEALING]);
@@ -58,9 +60,10 @@ export class DailyTaskGenerationService {
     dayId: string,
     steamId: number,
     round: number,
+    refreshCount: number,
     completedTaskIds: string[],
   ): TaskCandidateDto[] {
-    const seed = `${dayId}:${steamId}:${round}`;
+    const seed = `${dayId}:${steamId}:${round}:${refreshCount}`;
     const completed = new Set(completedTaskIds);
     const generalPool = this.generalTasks.filter((task) => !completed.has(task.id));
     const heroPool = this.heroTasks.filter((task) => !completed.has(task.id));
@@ -139,12 +142,19 @@ export class DailyTaskGenerationService {
     return stars;
   }
 
+  /** 尾部混合不可省略：FNV-1a 的最低位恒等于输入字节最低位的异或，取模 2 的两处判定会因此与 seed 线性相关。 */
   private hash(value: string): number {
     let hash = 0x811c9dc5;
-    for (let index = 0; index < value.length; index++) {
+    const length = Math.min(value.length, SEED_MAX_LENGTH);
+    for (let index = 0; index < length; index++) {
       hash ^= value.charCodeAt(index);
       hash = Math.imul(hash, 0x01000193);
     }
+    hash ^= hash >>> 16;
+    hash = Math.imul(hash, 0x85ebca6b);
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, 0xc2b2ae35);
+    hash ^= hash >>> 16;
     return hash >>> 0;
   }
 }
