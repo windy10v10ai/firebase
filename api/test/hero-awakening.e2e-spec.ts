@@ -93,7 +93,7 @@ describe('HeroAwakeningController (e2e)', () => {
   });
 
   describe(`${playerUrl}/:steamId/hero-awakening (Put) - 随机候选集半价认领`, () => {
-    it('命中候选集：扣赛季半价 5000，候选集被清空', async () => {
+    it('命中候选集：扣赛季优惠价 4000，候选集被清空', async () => {
       const testPlayer = 300500020;
       await createPlayer(app, { steamId: testPlayer, seasonPointTotal: 100000 });
       const candidates = ['npc_dota_hero_axe', 'npc_dota_hero_bane', 'npc_dota_hero_lina'];
@@ -102,7 +102,7 @@ describe('HeroAwakeningController (e2e)', () => {
       const response = await awakenHero(app, testPlayer, 'npc_dota_hero_axe', false);
 
       expect(response.status).toEqual(200);
-      expect(response.body.usedSeasonPoint).toEqual(5000);
+      expect(response.body.usedSeasonPoint).toEqual(4000);
       expect(response.body.awakenedHeroes).toEqual(
         expect.arrayContaining([{ heroName: 'npc_dota_hero_axe' }]),
       );
@@ -117,7 +117,7 @@ describe('HeroAwakeningController (e2e)', () => {
       expect(ensureResponse.body).toEqual({ candidates: newCandidates });
     });
 
-    it('未命中候选集：维持全价 10000，候选集不受影响', async () => {
+    it('未命中候选集：维持全价 8000，候选集不受影响', async () => {
       const testPlayer = 300500021;
       await createPlayer(app, { steamId: testPlayer, seasonPointTotal: 100000 });
       const candidates = ['npc_dota_hero_bane', 'npc_dota_hero_lina', 'npc_dota_hero_pudge'];
@@ -126,7 +126,7 @@ describe('HeroAwakeningController (e2e)', () => {
       const response = await awakenHero(app, testPlayer, 'npc_dota_hero_axe', false);
 
       expect(response.status).toEqual(200);
-      expect(response.body.usedSeasonPoint).toEqual(10000);
+      expect(response.body.usedSeasonPoint).toEqual(8000);
 
       // 候选集仍未消费：再次 ensure 应原样返回旧候选集
       const ensureResponse = await ensureRandomHeroAwakeningCandidates(app, testPlayer, [
@@ -144,13 +144,13 @@ describe('HeroAwakeningController (e2e)', () => {
       // 第一次命中候选集，半价认领并清空候选集
       const first = await awakenHero(app, testPlayer, 'npc_dota_hero_axe', false);
       expect(first.status).toEqual(200);
-      expect(first.body.usedSeasonPoint).toEqual(5000);
+      expect(first.body.usedSeasonPoint).toEqual(4000);
 
       // 并发场景下第二次认领同一英雄应 no-op 成功，不二次扣分
       const response = await awakenHero(app, testPlayer, 'npc_dota_hero_axe', false);
 
       expect(response.status).toEqual(200);
-      expect(response.body.usedSeasonPoint).toEqual(5000);
+      expect(response.body.usedSeasonPoint).toEqual(4000);
       expect(
         response.body.awakenedHeroes.filter(
           (h: { heroName: string }) => h.heroName === 'npc_dota_hero_axe',
