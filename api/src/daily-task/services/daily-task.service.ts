@@ -48,23 +48,20 @@ export class DailyTaskService {
     return this.toSnapshot(steamId, document);
   }
 
-  /**
-   * Spends one refresh of the current round, which re-rolls all three candidates.
-   *
-   * Idempotent while MAX_REFRESH_PER_ROUND is 1: a retried request finds the quota
-   * already spent and returns the same candidates instead of rolling a third set.
-   * Raising the cap would require a real idempotency key.
-   */
+  /** 消耗一次本轮刷新额度，重掷三个候选。额度上限为 1 时重试天然幂等，上调上限需要另加幂等键。 */
   async refresh(steamId: number, requestDayId: string): Promise<DailyTaskSnapshotDto> {
     const today = getUtcDayId();
-    const document = await this.store.transact(steamId, (current) => {
-      const normalized = current ? this.normalize(current) : this.createDocument(steamId, today);
-      const next = this.applyRefresh(normalized, requestDayId, today);
-      const shouldWrite = !current || next !== normalized;
-      return { result: next, ...(shouldWrite ? { next } : {}) };
-    });
+    const current = await this.store.find(steamId);
+    const normalized = current ? this.normalize(current) : this.createDocument(steamId, today);
+    const next = this.applyRefresh(normalized, requestDayId, today);
 
-    return this.toSnapshot(steamId, document);
+    if (!current) {
+      await this.store.create(next);
+    } else if (next !== normalized) {
+      await this.store.update(next);
+    }
+
+    return this.toSnapshot(steamId, next);
   }
 
   async recordGameEnd(players: GameEndPlayerDto[]): Promise<void> {
@@ -117,7 +114,7 @@ export class DailyTaskService {
           ...document,
           completedTasks: [...document.completedTasks, { taskId, star }],
           todaySeasonPoint: document.todaySeasonPoint + seasonPoint,
-          // Entering the next round grants a fresh refresh quota.
+          // 进入下一轮，刷新额度重置
           refreshCount: 0,
           updatedAt: new Date(),
         };
@@ -136,11 +133,11 @@ export class DailyTaskService {
     requestDayId: string,
     today: string,
   ): PlayerDailyTask {
-    // A stale document rolls over first; the player gets a fresh day and keeps the quota.
+    // 跨天先重置，玩家拿到新一天的完整额度
     if (document.dayId !== today) {
       return this.resetForNewDay(document, today);
     }
-    // A stale client, a finished day, or a spent quota all return the current state untouched.
+    // 客户端日期陈旧、当天打满、额度用尽都不消耗次数
     if (
       requestDayId !== today ||
       document.completedTasks.length >= ROUNDS_PER_DAY ||
@@ -174,7 +171,7 @@ export class DailyTaskService {
       candidates,
       completedTasks,
       todaySeasonPoint: document.todaySeasonPoint,
-      // Nothing left to re-roll once the day is done, so the client sees no button.
+      // 当天打满后没有可刷的候选
       refreshRemaining: allRoundsDone ? 0 : MAX_REFRESH_PER_ROUND - document.refreshCount,
       history: document.history.map((entry) => ({
         dayId: entry.dayId,

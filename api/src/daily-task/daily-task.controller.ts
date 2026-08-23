@@ -18,11 +18,7 @@ export class DailyTaskController {
     private readonly secretService: SecretService,
   ) {}
 
-  /**
-   * Marked @Public so the api key is checked here instead of by AuthGuard: the guard
-   * only accepts the production and test keys, while local hosts play daily tasks too.
-   * Same handling as /game/start.
-   */
+  /** 自行校验 api key：默认守卫不接受本地服务器的 key，而本地对局同样计入每日任务 */
   @Public()
   @ApiBody({ type: RefreshDailyTaskDto })
   @Post('refresh')

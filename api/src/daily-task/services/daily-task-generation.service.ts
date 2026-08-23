@@ -140,17 +140,7 @@ export class DailyTaskGenerationService {
     return stars;
   }
 
-  /**
-   * FNV-1a followed by the MurmurHash3 fmix32 finalizer.
-   *
-   * The finalizer is required, not cosmetic: the lowest bit of plain FNV-1a never
-   * participates in the hash. Both the offset basis and the prime are odd, so the
-   * multiply cannot change bit 0 — it stays the XOR of every input byte's low bit.
-   * Callers take `hash(...) % 2` for the third candidate's scope and for the first
-   * swap of the star shuffle, and without mixing those two decisions are linear in
-   * the seed: consecutive rounds always alternate, and bumping the refresh counter
-   * flips them every single time. See docs/daily-task/refresh-design.md section 4.
-   */
+  /** 尾部混合不可省略：FNV-1a 的最低位恒等于输入字节最低位的异或，取模 2 的两处判定会因此与 seed 线性相关。 */
   private hash(value: string): number {
     let hash = 0x811c9dc5;
     for (let index = 0; index < value.length; index++) {

@@ -35,9 +35,7 @@ describe('DailyTaskGenerationService', () => {
   });
 
   it('varies the third candidate scope independently across rounds', () => {
-    // Guards the fmix32 finalizer in hash(). Plain FNV-1a leaves bit 0 outside the
-    // hash, so the third candidate's scope alternates between rounds by construction
-    // and only 2 of the 8 patterns can occur — '222' among them being impossible.
+    // 守卫哈希的尾部混合：缺少它时第三个候选的类型会在轮次间交替，8 种模式只出现 2 种
     const patterns = new Set<string>();
     for (let steamId = 1; steamId <= 300; steamId++) {
       const pattern = [1, 2, 3]

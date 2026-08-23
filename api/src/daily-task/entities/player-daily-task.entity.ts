@@ -20,7 +20,7 @@ export class PlayerDailyTask {
   dayId: string;
   completedTasks: CompletedTask[] = [];
   todaySeasonPoint: number;
-  /** Refreshes already used in the current round. Reset on completion and on a new day. */
+  /** 本轮已用刷新次数，完成一轮与跨天时归零 */
   refreshCount: number = 0;
   history: DailyTaskHistoryEntry[] = [];
   updatedAt: Date;

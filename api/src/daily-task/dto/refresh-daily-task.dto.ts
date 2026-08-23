@@ -7,7 +7,7 @@ export class RefreshDailyTaskDto {
   @Min(1)
   steamId: number;
 
-  /** Task day held by the client, taken from the /game/start response. */
+  /** 客户端持有的任务日 */
   @ApiProperty()
   @IsString()
   @Matches(/^\d{8}$/)

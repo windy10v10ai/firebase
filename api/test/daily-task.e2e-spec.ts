@@ -344,8 +344,7 @@ describe('Daily task Phase1 (e2e)', () => {
     expect(refreshed.body.candidates).toHaveLength(3);
     expect(refreshed.body.refreshRemaining).toBe(0);
 
-    // The whole "candidates are never stored" design rests on this: a later start
-    // has to recompute exactly what the refresh returned.
+    // 候选不落库的前提：后续开局必须重算出与刷新时完全相同的一组
     const restarted = await startGame(app, [steamId]);
     const after = findSnapshot(restarted.body, steamId);
     expect(after.candidates).toEqual(refreshed.body.candidates);

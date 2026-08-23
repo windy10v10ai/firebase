@@ -70,6 +70,15 @@ describe('DailyTaskService', () => {
           return mutation.result;
         },
       ),
+      find: jest.fn(async () => current),
+      create: jest.fn(async (document: PlayerDailyTask) => {
+        written = document;
+        current = document;
+      }),
+      update: jest.fn(async (document: PlayerDailyTask) => {
+        written = document;
+        current = document;
+      }),
     } as unknown as jest.Mocked<DailyTaskStore>;
     generationService = {
       generateCandidates: jest.fn().mockReturnValue([]),
