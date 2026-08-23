@@ -69,6 +69,7 @@
 - API 通过 `FIRESTORE_EMULATOR_HOST` 连本地 emulator；忘记设这个变量会去连生产 Firestore 然后失败（无凭证）
 - Firestore emulator 需要 Java JRE
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
+- **新增顶层路由前缀必须登记到 `api/index.ts` 中 `client` 函数的路径白名单**（那个 `regex` 常量，形如 `^/api/(game|player|...).*`）。不在白名单里的请求在进入 NestJS 之前就被 403 `Invalid path` 拦掉，服务端只留一条 `Abnormal request on API Cloud Function! Path: ...`，controller、guard、e2e 全都看不到任何痕迹——e2e 直连 Nest，不经过这层，所以测试全绿也可能线上 403
 
 ## 分支命名
 
@@ -195,3 +196,4 @@ preset[dto.map] = undefined;
 3. `foo.service.ts` — 业务逻辑，`getOrGenerateDefault` 负责首次创建
 4. `player.module.ts` — `FireormModule.forFeature` 注册 entity，`providers`/`exports` 注册 service
 5. `player.controller.ts` — 添加路由，鉴权与现有接口一致
+6. 若新增的是**顶层路由前缀**（不在既有 `game`/`player`/`alipay` 等之下），同步更新 `api/index.ts` 的路径白名单（见「常见坑」）
