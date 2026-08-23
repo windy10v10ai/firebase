@@ -56,6 +56,7 @@ export class AdminController {
     return this.playerHeroAwakeningCompensationService.runCompensation();
   }
 
+  // TODO: 一次性迁移端点，随机觉醒上线执行完后删除
   @Post('/hero-awakening/season-point-price-adjustment')
   runHeroAwakeningSeasonPointPriceAdjustment() {
     return this.playerHeroAwakeningSeasonPointPriceAdjustmentService.runPriceAdjustment();

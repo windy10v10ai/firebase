@@ -12,7 +12,7 @@ import { PlayerHeroAwakeningService } from './player-hero-awakening.service';
 @Module({
   imports: [FireormModule.forFeature([PlayerHeroAwakening]), PlayerModule, AnalyticsModule],
   controllers: [],
-  // TODO: PlayerHeroAwakeningCompensationService 是一次性迁移，随机觉醒上线执行完后删除
+  // TODO: PlayerHeroAwakeningCompensationService, PlayerHeroAwakeningSeasonPointPriceAdjustmentService 是一次性迁移，随机觉醒上线执行完后删除
   providers: [
     PlayerHeroAwakeningService,
     PlayerHeroAwakeningCompensationService,
