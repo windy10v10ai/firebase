@@ -679,7 +679,7 @@ describe('PlayerInfoController (e2e)', () => {
       expect(playerDto.awakenedHeroes[0].heroName).toEqual(validHeroName);
       expect(playerDto.awakenedHeroes[0].usedSeasonPoint).toBeUndefined();
       expect(playerDto.awakenedHeroes[0].usedMemberPoint).toBeUndefined();
-      expect(playerDto.useableSeasonPoint).toEqual(0);
+      expect(playerDto.useableSeasonPoint).toEqual(2000);
     });
 
     it('使用会员积分觉醒成功，消耗 4000', async () => {
@@ -700,7 +700,7 @@ describe('PlayerInfoController (e2e)', () => {
         200000711,
         {
           useMemberPoint: false,
-          seasonPointTotal: 9999,
+          seasonPointTotal: 7999,
           memberPointTotal: 0,
           usedSeasonPoint: 0,
           usedMemberPoint: 0,
@@ -713,7 +713,7 @@ describe('PlayerInfoController (e2e)', () => {
           useMemberPoint: false,
           seasonPointTotal: 10000,
           memberPointTotal: 0,
-          usedSeasonPoint: 1,
+          usedSeasonPoint: 2001,
           usedMemberPoint: 0,
         },
       ],

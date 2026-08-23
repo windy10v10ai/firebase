@@ -11,8 +11,8 @@ import { PlayerService } from '../player/player.service';
 import { PlayerHeroAwakening } from './entities/player-hero-awakening.entity';
 import { HeroAwakeningItem } from './types/hero-awakening-item.types';
 
-const HERO_AWAKENING_SEASON_POINT_COST = 10000;
-const HERO_AWAKENING_SEASON_POINT_COST_RANDOM = 5000;
+const HERO_AWAKENING_SEASON_POINT_COST = 8000;
+const HERO_AWAKENING_SEASON_POINT_COST_RANDOM = 4000;
 const HERO_AWAKENING_MEMBER_POINT_COST = 4000;
 const HERO_AWAKENING_MEMBER_POINT_COST_RANDOM = 2000;
 const HERO_AWAKENING_REASON = 'hero_awakening';
