@@ -10,7 +10,7 @@ import { PlayerService } from '../player/player.service';
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 
 const COOLDOWN_MINUTES = 20;
-const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
+export const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 const DAILY_POINT_CAP = 1000;
 const MIN_MATCH_COUNT = 1;
 
@@ -48,7 +48,7 @@ export class LocalHostService {
     const qualifiedPlayers = gameEnd.players.filter((player) => player.steamId > 0);
     const checks: PlayerCheck[] = [];
     for (const player of qualifiedPlayers) {
-      const check = await this.checkPlayerLimit(player, gameEnd.matchId);
+      const check = await this.checkPlayerLimit(player);
       if (!check.ok) {
         logger.warn('game/end/local: rejected, no points or daily task recorded for this match', {
           matchId: gameEnd.matchId,
@@ -68,9 +68,10 @@ export class LocalHostService {
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
   }
 
-  // 只读检查，不写任何数据：同一 matchId 重试直接算失败；否则依次检查玩家
-  // 存在性/matchCount、冷却、当日上限。
-  private async checkPlayerLimit(player: GameEndPlayerDto, matchId: string): Promise<PlayerCheck> {
+  // 只读检查，不写任何数据：依次检查玩家存在性/matchCount、冷却、当日上限。
+  // 不比对 matchId 去重——控制台启动的对局引擎给的 matchId 恒为 "0"，会把
+  // 不同对局误判为重放；冷却窗口已经足够防止短时间内重复结算。
+  private async checkPlayerLimit(player: GameEndPlayerDto): Promise<PlayerCheck> {
     const steamId = player.steamId;
     const battlePoints = this.playerService.normalizeBattlePoints(player.battlePoints);
     const current = await this.rateLimitRepository.findById(steamId.toString());
@@ -82,10 +83,6 @@ export class LocalHostService {
       current,
       dailyPointsSoFar: 0,
     });
-
-    if (current?.lastRequestMatchId === matchId) {
-      return reject('duplicate matchId');
-    }
 
     const existingPlayer = await this.playerService.findBySteamId(steamId);
     if (!existingPlayer) {
