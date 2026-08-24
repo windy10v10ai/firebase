@@ -32,12 +32,13 @@ describe('会员签到补签 (e2e)', () => {
 
   it('连续每天登录：每天只有"当日"一条 pointInfo，没有补签条目', async () => {
     const steamId = 400000001;
-    mockDate('2026-08-01T00:00:00.000Z');
+    // 日期避开觉醒活动期间（2026-08-02 ~ 2026-08-09），避免活动积分干扰断言
+    mockDate('2026-07-01T00:00:00.000Z');
     await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
     // 购买当天登录，建立 lastDailyDate，避免购买当天本身被算作漏签
     await callGameStart(app, [steamId]);
 
-    mockDate('2026-08-02T00:00:00.000Z');
+    mockDate('2026-07-02T00:00:00.000Z');
     const result = await callGameStart(app, [steamId]);
     expect(result.status).toEqual(200);
     const memberPointInfos = result.body.pointInfo.filter((p) => p.steamId === steamId);
@@ -52,15 +53,16 @@ describe('会员签到补签 (e2e)', () => {
 
   it('漏签 3 天（一直是会员，未断档）：登录时补签 3 天，并把 lastDailyDate 推进到登录当天', async () => {
     const steamId = 400000002;
-    mockDate('2026-08-01T00:00:00.000Z');
+    // 日期避开觉醒活动期间（2026-08-02 ~ 2026-08-09），避免活动积分干扰断言
+    mockDate('2026-07-01T00:00:00.000Z');
     await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
 
     // 连续签到一天，建立 lastDailyDate
     const result1 = await callGameStart(app, [steamId]);
     expect(result1.status).toEqual(200);
 
-    // 漏签 3 天后才再次登录（8/2, 8/3, 8/4 没有上线，8/5 登录）
-    mockDate('2026-08-05T00:00:00.000Z');
+    // 漏签 3 天后才再次登录（7/2, 7/3, 7/4 没有上线，7/5 登录）
+    mockDate('2026-07-05T00:00:00.000Z');
     const result2 = await callGameStart(app, [steamId]);
     expect(result2.status).toEqual(200);
     const memberPointInfos = result2.body.pointInfo.filter((p) => p.steamId === steamId);
@@ -77,7 +79,7 @@ describe('会员签到补签 (e2e)', () => {
     expect(memberPointInfos).toHaveLength(2);
 
     const member = await membersRepository.findById(steamId.toString());
-    expect(member.lastDailyDate).toEqual(new Date('2026-08-05T00:00:00.000Z'));
+    expect(member.lastDailyDate).toEqual(new Date('2026-07-05T00:00:00.000Z'));
   });
 
   it('长期未登录，漏签天数超过封顶：补签响应封顶 x7天，不超发', async () => {

@@ -4,6 +4,7 @@ import { logger } from 'firebase-functions';
 export enum SERVER_TYPE {
   WINDY = 'WINDY',
   TEST = 'TEST',
+  ANIME = 'ANIME',
   LOCAL = 'LOCAL',
   UNKNOWN = 'UNKNOWN',
 }
@@ -13,6 +14,7 @@ export enum SECRET {
   AFDIAN_API_TOKEN = 'AFDIAN_API_TOKEN',
   SERVER_APIKEY = 'SERVER_APIKEY',
   SERVER_APIKEY_TEST = 'SERVER_APIKEY_TEST',
+  SERVER_APIKEY_ANIME = 'SERVER_APIKEY_ANIME',
   LOCAL_APIKEY = 'LOCAL_APIKEY',
   GA4_API_SECRET = 'GA4_API_SECRET',
   KOFI_VERIFICATION_TOKEN = 'KOFI_VERIFICATION_TOKEN',
@@ -40,6 +42,10 @@ export class SecretService {
     const testKey = this.getSecretValue(SECRET.SERVER_APIKEY_TEST);
     if (apiKey === testKey) {
       return SERVER_TYPE.TEST;
+    }
+    const animeKey = this.getSecretValue(SECRET.SERVER_APIKEY_ANIME);
+    if (apiKey === animeKey) {
+      return SERVER_TYPE.ANIME;
     }
     const localKey = this.getSecretValue(SECRET.LOCAL_APIKEY);
     if (apiKey === localKey) {
