@@ -88,8 +88,8 @@ export class GameService {
 
     const now = new Date();
 
-    // 仅windy主机参与活动
-    if (serverType !== SERVER_TYPE.WINDY) {
+    // 未知来源的服务器不参与活动
+    if (serverType === SERVER_TYPE.UNKNOWN) {
       return pointInfoDtos;
     }
 
@@ -122,18 +122,20 @@ export class GameService {
    * @returns GA4配置信息，如果不符合条件则返回undefined
    */
   getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
-    // WINDY、TEST服务器返回GA4配置信息
-    if (serverType === SERVER_TYPE.WINDY || serverType === SERVER_TYPE.TEST) {
-      const measurementId = process.env.GA_MEASUREMENT_ID;
-      const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
+    // 非官方服务器不发送GA4配置信息
+    if (serverType === SERVER_TYPE.LOCAL || serverType === SERVER_TYPE.UNKNOWN) {
+      return undefined;
+    }
 
-      if (measurementId && apiSecret) {
-        return {
-          measurementId,
-          apiSecret,
-          serverType,
-        };
-      }
+    const measurementId = process.env.GA_MEASUREMENT_ID;
+    const apiSecret = this.secretService.getSecretValue(SECRET.GA4_API_SECRET);
+
+    if (measurementId && apiSecret) {
+      return {
+        measurementId,
+        apiSecret,
+        serverType,
+      };
     }
 
     return undefined;

@@ -8,6 +8,7 @@ describe('SecretService', () => {
       ...originalEnv,
       [SECRET.SERVER_APIKEY]: 'windy-key',
       [SECRET.SERVER_APIKEY_TEST]: 'test-key',
+      [SECRET.SERVER_APIKEY_ANIME]: 'anime-key',
       [SECRET.LOCAL_APIKEY]: 'local-key',
     };
   });
@@ -27,6 +28,12 @@ describe('SecretService', () => {
       const service = new SecretService();
 
       expect(service.getServerTypeByApiKey('test-key')).toBe(SERVER_TYPE.TEST);
+    });
+
+    it('should return ANIME for the anime server key', () => {
+      const service = new SecretService();
+
+      expect(service.getServerTypeByApiKey('anime-key')).toBe(SERVER_TYPE.ANIME);
     });
 
     it('should return LOCAL for the local api key', () => {
