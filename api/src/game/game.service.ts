@@ -122,7 +122,7 @@ export class GameService {
    * @returns GA4配置信息，如果不符合条件则返回undefined
    */
   getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
-    // 本地开发和未知来源的服务器不下发GA4配置
+    // 非官方服务器不发送GA4配置信息
     if (serverType === SERVER_TYPE.LOCAL || serverType === SERVER_TYPE.UNKNOWN) {
       return undefined;
     }

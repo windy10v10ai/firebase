@@ -32,7 +32,7 @@ describe('会员签到补签 (e2e)', () => {
 
   it('连续每天登录：每天只有"当日"一条 pointInfo，没有补签条目', async () => {
     const steamId = 400000001;
-    // 日期避开觉醒活动期间（2026-08-02 ~ 2026-08-09），避免活动积分干扰断言
+    // 日期避开活动期间
     mockDate('2026-07-01T00:00:00.000Z');
     await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
     // 购买当天登录，建立 lastDailyDate，避免购买当天本身被算作漏签
@@ -53,7 +53,7 @@ describe('会员签到补签 (e2e)', () => {
 
   it('漏签 3 天（一直是会员，未断档）：登录时补签 3 天，并把 lastDailyDate 推进到登录当天', async () => {
     const steamId = 400000002;
-    // 日期避开觉醒活动期间（2026-08-02 ~ 2026-08-09），避免活动积分干扰断言
+    // 日期避开活动期间
     mockDate('2026-07-01T00:00:00.000Z');
     await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
 
