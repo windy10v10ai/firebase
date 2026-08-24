@@ -1,7 +1,7 @@
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
-import { LocalHostService } from './local-host.service';
+import { COOLDOWN_MS, LocalHostService } from './local-host.service';
 
 function createFakeRateLimitRepository() {
   const store = new Map<string, LocalRateLimit>();
@@ -145,14 +145,19 @@ describe('LocalHostService', () => {
     expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
   });
 
-  it('同一 matchId 重试直接算失败，不重复加分', async () => {
-    const { service, playerService } = createService();
-    const gameEnd = createGameEndDto({ matchId: 'match-1' });
+  it('控制台启动的对局 matchId 均为 "0"，过了冷却窗口后不应被当成重复而拒绝', async () => {
+    jest.useFakeTimers();
+    try {
+      const { service, playerService } = createService();
 
-    await service.settle(gameEnd);
-    await service.settle(gameEnd);
+      await service.settle(createGameEndDto({ matchId: '0' }));
+      jest.advanceTimersByTime(COOLDOWN_MS + 1);
+      await service.settle(createGameEndDto({ matchId: '0' }));
 
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
+      expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('当日累计超过 1000 时整条拒绝，不部分发放', async () => {
