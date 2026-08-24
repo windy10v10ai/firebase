@@ -111,6 +111,17 @@ describe('GameService', () => {
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
 
+    it('should return GA4 config for ANIME server', () => {
+      const result = service.getGA4Config(SERVER_TYPE.ANIME);
+
+      expect(result).toEqual({
+        measurementId: mockMeasurementId,
+        apiSecret: mockApiSecret,
+        serverType: SERVER_TYPE.ANIME,
+      });
+      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
+    });
+
     it('should return undefined for LOCAL server', () => {
       const result = service.getGA4Config(SERVER_TYPE.LOCAL);
 
@@ -173,10 +184,31 @@ describe('GameService', () => {
       ]);
     });
 
-    it('非windy主机 活动期间内 不应发放', async () => {
+    it('test主机 活动期间内 未领取 应发放觉醒活动积分', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-08-03T00:00:00.000Z'));
+      eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
+
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        memberPointTotal: 2000,
+      });
+      expect(result).toEqual([
+        {
+          steamId,
+          title: {
+            cn: '觉醒活动奖励',
+            en: 'Awaken Event Reward',
+          },
+          memberPoint: 2000,
+        },
+      ]);
+    });
+
+    it('未知来源主机 活动期间内 不应发放', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-03T00:00:00.000Z'));
+
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.UNKNOWN);
 
       expect(eventRewardsService.getRewardResults).not.toHaveBeenCalled();
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();

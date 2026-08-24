@@ -3,7 +3,15 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, getTestApiKey, initTest, mockDate, post, restoreDate } from './util/util-http';
+import {
+  get,
+  getAnimeApiKey,
+  getTestApiKey,
+  initTest,
+  mockDate,
+  post,
+  restoreDate,
+} from './util/util-http';
 import {
   addPlayerProperty,
   awakenHero,
@@ -33,6 +41,21 @@ function callGameStart(app: INestApplication, steamIds: number[]): request.Test 
 // 使用 windy 主机 API key 发起游戏开始请求
 function callGameStartAsWindyHost(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = process.env.SERVER_APIKEY ?? 'Invalid_NotOnDedicatedServer';
+  const countryCode = 'CN';
+  const headers = {
+    'x-api-key': apiKey,
+    'x-country-code': countryCode,
+  };
+
+  return request(app.getHttpServer())
+    .get(gameStartUrl)
+    .query({ steamIds, matchId: 1 })
+    .set(headers);
+}
+
+// 使用 anime 主机 API key 发起游戏开始请求
+function callGameStartAsAnimeHost(app: INestApplication, steamIds: number[]): request.Test {
+  const apiKey = getAnimeApiKey();
   const countryCode = 'CN';
   const headers = {
     'x-api-key': apiKey,
@@ -583,7 +606,7 @@ describe('PlayerController (e2e)', () => {
         expect(player.memberPointTotal).toEqual(0);
       });
 
-      it('非windy主机 活动期间内 不获得活动积分', async () => {
+      it('test主机 活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000904;
         // 活动期间内
         mockDate('2026-08-03T00:00:00.000Z');
@@ -591,18 +614,59 @@ describe('PlayerController (e2e)', () => {
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
 
-        // 不应该获得活动积分
+        // 验证获得了活动积分
         const pointInfo = result.body.pointInfo;
         const eventReward = pointInfo.find(
           (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
             p.steamId === steamId && p.memberPoint,
         );
-        expect(eventReward).toBeUndefined();
+        expect(eventReward).toBeDefined();
+        expect(eventReward.memberPoint).toEqual(2000);
 
-        // 玩家积分为0
+        // 验证玩家积分
         const player = await getPlayer(app, steamId);
+        expect(player.memberPointTotal).toEqual(2000);
         expect(player.seasonPointTotal).toEqual(0);
-        expect(player.memberPointTotal).toEqual(0);
+      });
+
+      it('anime主机 活动期间内首次登录 获得活动积分', async () => {
+        const steamId = 100000906;
+        // 活动期间内
+        mockDate('2026-08-03T00:00:00.000Z');
+
+        const result = await callGameStartAsAnimeHost(app, [steamId]);
+        expect(result.status).toEqual(200);
+
+        // 验证获得了活动积分
+        const pointInfo = result.body.pointInfo;
+        const eventReward = pointInfo.find(
+          (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
+            p.steamId === steamId && p.memberPoint,
+        );
+        expect(eventReward).toBeDefined();
+        expect(eventReward.memberPoint).toEqual(2000);
+
+        // 验证玩家积分
+        const player = await getPlayer(app, steamId);
+        expect(player.memberPointTotal).toEqual(2000);
+        expect(player.seasonPointTotal).toEqual(0);
+
+        // 验证鉴权放行且下发GA4配置
+        expect(result.body.ga4Config).toBeDefined();
+        expect(result.body.ga4Config.serverType).toEqual('ANIME');
+      });
+
+      it('未知来源主机 活动期间内 不获得活动积分', async () => {
+        const steamId = 100000905;
+        // 活动期间内
+        mockDate('2026-08-03T00:00:00.000Z');
+
+        // 未知来源提前返回，不会创建玩家记录，因此只校验响应体
+        const result = await request(app.getHttpServer())
+          .get(gameStartUrl)
+          .query({ steamIds: [steamId], matchId: 1 });
+        expect(result.status).toEqual(200);
+        expect(result.body.pointInfo).toEqual([]);
       });
     });
   });

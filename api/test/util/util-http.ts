@@ -21,6 +21,12 @@ export function getTestApiKey(): string {
   );
 }
 
+export function getAnimeApiKey(): string {
+  return (
+    process.env.SERVER_APIKEY_ANIME ?? process.env.SERVER_APIKEY ?? 'Invalid_NotOnDedicatedServer'
+  );
+}
+
 export function get(app: INestApplication, url: string, query: object = {}): request.Test {
   const headers = {
     'x-api-key': getTestApiKey(),
