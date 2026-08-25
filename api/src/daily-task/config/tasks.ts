@@ -173,7 +173,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_lion_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 300,
+    target: 200,
     heroName: 'npc_dota_hero_lion',
   },
   {
@@ -432,7 +432,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_earthshaker_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 400,
+    target: 260,
     heroName: 'npc_dota_hero_earthshaker',
   },
   {
@@ -1125,7 +1125,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_nyx_assassin_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 200,
+    target: 150,
     heroName: 'npc_dota_hero_nyx_assassin',
   },
   {
@@ -1195,7 +1195,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_phantom_lancer_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.STUN_DURATION,
-    target: 240,
+    target: 180,
     heroName: 'npc_dota_hero_phantom_lancer',
   },
   {
