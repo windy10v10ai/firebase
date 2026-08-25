@@ -166,7 +166,7 @@ describe('daily task hero pool', () => {
     ]);
     expect(selectMetricTargets('lion')).toContainEqual({
       metric: TaskMetric.STUN_DURATION,
-      target: 300,
+      target: 200,
     });
     expect(selectMetricTargets('shadow_shaman')).toEqual([
       { metric: TaskMetric.TOWER_KILLS, target: 5 },
