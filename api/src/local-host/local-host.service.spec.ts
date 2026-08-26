@@ -160,23 +160,32 @@ describe('LocalHostService', () => {
     }
   });
 
-  it('当日累计超过 1000 时整条拒绝，不部分发放', async () => {
-    const { service, playerService } = createService();
+  it('当日累计超过 2000 时整条拒绝，不部分发放', async () => {
+    jest.useFakeTimers();
+    try {
+      const { service, playerService } = createService();
 
-    // 800 + 500 (clamp 后) = 1300 > 1000，第二次应被拒绝
-    await service.settle(
-      createGameEndDto({
-        matchId: 'match-1',
-        players: [createPlayerDto({ battlePoints: 800 })],
-      }),
-    );
-    await service.settle(
-      createGameEndDto({
-        matchId: 'match-2',
-        players: [createPlayerDto({ battlePoints: 800 })],
-      }),
-    );
+      // 单局 battlePoints 会被 clamp 到 500，连续 4 局刚好打到 2000 上限
+      // （均不拒绝），第 5 局再 + 500 = 2500 > 2000，应被拒绝。
+      for (let i = 0; i < 4; i++) {
+        await service.settle(
+          createGameEndDto({
+            matchId: `match-${i}`,
+            players: [createPlayerDto({ battlePoints: 800 })],
+          }),
+        );
+        jest.advanceTimersByTime(COOLDOWN_MS + 1);
+      }
+      await service.settle(
+        createGameEndDto({
+          matchId: 'match-4',
+          players: [createPlayerDto({ battlePoints: 800 })],
+        }),
+      );
 
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
+      expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(4);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
