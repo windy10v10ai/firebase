@@ -239,10 +239,9 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(okPlayer.seasonPointTotal).toBe(0);
   });
 
-  it('当日累计超过 1000：整条拒绝，不部分发放', async () => {
-    // 单局 battlePoints 会被 clamp 到 500，所以要连续 3 局（每局都满足 20
-    // 分钟冷却）才能让第 3 局撞上当日 1000 上限：500 + 500 = 1000（不拒绝），
-    // 再 + 500 = 1500 > 1000（拒绝）。
+  it('当日累计超过 2000：整条拒绝，不部分发放', async () => {
+    // 单局 battlePoints 会被 clamp 到 500，所以要连续 4 局（每局都满足 20
+    // 分钟冷却）才能让累计打到当日 2000 上限，第 5 局再 + 500 = 2500 > 2000（拒绝）。
     const steamId = 105620007;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20 });
@@ -262,20 +261,36 @@ describe('POST /api/game/end/local (e2e)', () => {
         players: [{ steamId, battlePoints: 500 }],
       }),
     );
-    let player = await getPlayer(app, steamId);
-    expect(player.seasonPointTotal).toBe(1000);
-
     mockDate('2026-08-16T01:42:00.000Z');
     await postAsLocalHost(
       app,
       createGameEndLocalPayload({
-        matchId: '9100000015',
+        matchId: '9100000011',
+        players: [{ steamId, battlePoints: 500 }],
+      }),
+    );
+    mockDate('2026-08-16T02:03:00.000Z');
+    await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000012',
+        players: [{ steamId, battlePoints: 500 }],
+      }),
+    );
+    let player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(2000);
+
+    mockDate('2026-08-16T02:24:00.000Z');
+    await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000013',
         players: [{ steamId, battlePoints: 500 }],
       }),
     );
 
     player = await getPlayer(app, steamId);
-    expect(player.seasonPointTotal).toBe(1000);
+    expect(player.seasonPointTotal).toBe(2000);
   });
 
   it('本地结算也会记录每日任务完成状态', async () => {
