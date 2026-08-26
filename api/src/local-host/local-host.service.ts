@@ -11,7 +11,7 @@ import { LocalRateLimit } from './entities/local-rate-limit.entity';
 
 const COOLDOWN_MINUTES = 10;
 export const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
-const DAILY_POINT_CAP = 1000;
+const DAILY_POINT_CAP = 2000;
 const MIN_MATCH_COUNT = 1;
 
 // 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/dailyPointsSoFar
