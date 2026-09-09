@@ -122,11 +122,15 @@ describe('GameService', () => {
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
 
-    it('should return undefined for LOCAL server', () => {
+    it('should return GA4 config for LOCAL server', () => {
       const result = service.getGA4Config(SERVER_TYPE.LOCAL);
 
-      expect(result).toBeUndefined();
-      expect(secretService.getSecretValue).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        measurementId: mockMeasurementId,
+        apiSecret: mockApiSecret,
+        serverType: SERVER_TYPE.LOCAL,
+      });
+      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
 
     it('should return undefined for UNKNOWN server', () => {
