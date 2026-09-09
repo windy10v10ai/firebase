@@ -12,7 +12,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { logger } from 'firebase-functions/v2';
 
 import { LocalHostService } from '../local-host/local-host.service';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
@@ -74,16 +73,7 @@ export class PlayerInfoController {
 
     // 扣分失败会先抛出，所以记账放在成功之后，失败不占额度
     if (isLocal) {
-      try {
-        await this.localHostService.recordMemberPointUsage(
-          dto.steamId,
-          dto.memberPoint,
-          dto.reason,
-        );
-      } catch (error) {
-        // 积分已经扣除并落盘，记账只是限额统计，失败不该让客户端以为整次消耗失败而重试，导致重复扣分
-        logger.warn('local: record member point usage failed', { steamId: dto.steamId, error });
-      }
+      await this.localHostService.recordMemberPointUsage(dto.steamId, dto.memberPoint, dto.reason);
     }
 
     return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
