@@ -115,12 +115,8 @@ export class LocalHostService {
     const today = getUtcMidnight(new Date());
     const current = await this.rateLimitRepository.findById(steamId.toString());
     const counters = getDailyCounters(current, today);
-    await this.saveRateLimit(steamId, current, {
-      dailyDate: today,
-      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
-      dailyUsedMemberPoint: counters.usedMemberPoint + memberPoint,
-      dailyCreatedOrderCount: counters.createdOrderCount,
-    });
+    counters.usedMemberPoint += memberPoint;
+    await this.saveDailyCounters(steamId, current, today, counters);
 
     logger.info('local: member point used', { steamId, memberPoint, reason });
   }
@@ -141,12 +137,8 @@ export class LocalHostService {
     const today = getUtcMidnight(new Date());
     const current = await this.rateLimitRepository.findById(steamId.toString());
     const counters = getDailyCounters(current, today);
-    await this.saveRateLimit(steamId, current, {
-      dailyDate: today,
-      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
-      dailyUsedMemberPoint: counters.usedMemberPoint,
-      dailyCreatedOrderCount: counters.createdOrderCount + 1,
-    });
+    counters.createdOrderCount += 1;
+    await this.saveDailyCounters(steamId, current, today, counters);
   }
 
   /** 支付成功后清零当日下单次数，让付过钱的玩家可以继续购买。 */
@@ -158,12 +150,8 @@ export class LocalHostService {
 
     const today = getUtcMidnight(new Date());
     const counters = getDailyCounters(current, today);
-    await this.saveRateLimit(steamId, current, {
-      dailyDate: today,
-      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
-      dailyUsedMemberPoint: counters.usedMemberPoint,
-      dailyCreatedOrderCount: 0,
-    });
+    counters.createdOrderCount = 0;
+    await this.saveDailyCounters(steamId, current, today, counters);
   }
 
   // 只读检查，不写任何数据：依次检查玩家存在性/matchCount、冷却、当日上限。
@@ -209,12 +197,23 @@ export class LocalHostService {
     return { steamId, battlePoints, ok: true, current, counters, today };
   }
 
-  private async saveRateLimit(
+  // 唯一的写入口，要求调用方交出完整的三个计数：只更新其中一个再把 dailyDate 推到
+  // 今天，会让另外两个昨天的值变成今天的
+  private async saveDailyCounters(
     steamId: number,
     current: LocalRateLimit | null,
-    patch: Partial<LocalRateLimit>,
+    today: Date,
+    counters: DailyCounters,
+    extra: Partial<LocalRateLimit> = {},
   ): Promise<void> {
-    const next = { ...(current ?? { id: steamId.toString() }), ...patch } as LocalRateLimit;
+    const next = {
+      ...(current ?? { id: steamId.toString() }),
+      ...extra,
+      dailyDate: today,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint,
+      dailyCreatedOrderCount: counters.createdOrderCount,
+    } as LocalRateLimit;
     if (current) {
       await this.rateLimitRepository.update(next);
     } else {
@@ -224,13 +223,11 @@ export class LocalHostService {
 
   // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
   private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
-    await this.saveRateLimit(check.steamId, check.current, {
+    const counters = { ...check.counters };
+    counters.earnedSeasonPoint += check.battlePoints;
+    await this.saveDailyCounters(check.steamId, check.current, check.today, counters, {
       lastRequestAt: new Date(),
       lastRequestMatchId: gameEnd.matchId,
-      dailyDate: check.today,
-      dailyEarnedSeasonPoint: check.counters.earnedSeasonPoint + check.battlePoints,
-      dailyUsedMemberPoint: check.counters.usedMemberPoint,
-      dailyCreatedOrderCount: check.counters.createdOrderCount,
     });
 
     await this.playerService.addLocalSeasonPoints(check.steamId, check.battlePoints);
