@@ -27,6 +27,10 @@ export function getAnimeApiKey(): string {
   );
 }
 
+export function getLocalApiKey(): string {
+  return process.env.LOCAL_APIKEY ?? 'local-apikey';
+}
+
 export function get(app: INestApplication, url: string, query: object = {}): request.Test {
   const headers = {
     'x-api-key': getTestApiKey(),

@@ -20,6 +20,7 @@ import { EnsureRandomCandidatesDto } from '../player-hero-awakening/dto/ensure-r
 import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero-awakening.service';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
+import { AllowLocal } from '../util/auth/allow-local.decorator';
 
 import { PlayerInfoInclude } from './assemblers/player-dto.assembler';
 import { PlayerInfoDto } from './dto/player-info.dto';
@@ -35,6 +36,7 @@ export class PlayerInfoController {
     private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
   ) {}
 
+  @AllowLocal()
   @Get(':steamId/info')
   @ApiOperation({ summary: 'Get player info with optional includes' })
   @ApiQuery({

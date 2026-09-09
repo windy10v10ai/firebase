@@ -152,14 +152,13 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
-    it('未携带 API key 时返回不含有效数据', async () => {
+    it('未携带 API key 时返回 401', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const result = await request(app.getHttpServer())
         .get(gameStartUrl)
         .query({ steamIds: [100000000], matchId });
 
-      expect(result.status).toEqual(200);
-      expect(result.body.pointInfo).toEqual([]);
+      expect(result.status).toEqual(401);
     });
 
     describe('单人开始', () => {
@@ -656,17 +655,15 @@ describe('PlayerController (e2e)', () => {
         expect(result.body.ga4Config.serverType).toEqual('ANIME');
       });
 
-      it('未知来源主机 活动期间内 不获得活动积分', async () => {
+      it('未知来源主机 活动期间内 返回 401', async () => {
         const steamId = 100000905;
         // 活动期间内
         mockDate('2026-08-03T00:00:00.000Z');
 
-        // 未知来源提前返回，不会创建玩家记录，因此只校验响应体
         const result = await request(app.getHttpServer())
           .get(gameStartUrl)
           .query({ steamIds: [steamId], matchId: 1 });
-        expect(result.status).toEqual(200);
-        expect(result.body.pointInfo).toEqual([]);
+        expect(result.status).toEqual(401);
       });
     });
   });
