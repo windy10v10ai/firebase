@@ -322,7 +322,7 @@ describe('本地 key 放行名单 (e2e)', () => {
       const res = await request(app.getHttpServer())
         .put(`/api/player/${STEAM_ID}/setting`)
         .set('x-api-key', localKey)
-        .send({ isShowNetTable: true });
+        .send({ isRememberAbilityKey: true, activeAbilityKey: 'Q' });
       expect(res.status).not.toBe(401);
     });
 
@@ -330,7 +330,7 @@ describe('本地 key 放行名单 (e2e)', () => {
       const res = await request(app.getHttpServer())
         .put(`/api/player/${STEAM_ID}/game-preset`)
         .set('x-api-key', localKey)
-        .send({ map: 'test_map', preset: { difficulty: 5 } });
+        .send({ map: 'dota', remember: true, difficulty: 3 });
       expect(res.status).not.toBe(401);
     });
   });
@@ -412,7 +412,7 @@ import { AllowLocal } from '../util/auth/allow-local.decorator';
   async updatePlayerGamePreset(
 ```
 
-`api/src/player-info/player-info.controller.ts`：`getPlayerInfo` 加 `@AllowLocal()`，同样加 import。
+`api/src/player-info/player-info.controller.ts`：`getPlayerInfo` 加 `@AllowLocal()`，同样加 import。Task 4 还会再改这个文件，那时 `AllowLocal` 的 import 已经存在，不要重复添加。
 
 - [ ] **Step 5: 改造开局与结算接口**
 
