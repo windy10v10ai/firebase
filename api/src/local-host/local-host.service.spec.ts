@@ -221,6 +221,48 @@ describe('LocalHostService', () => {
     }
   });
 
+  it('多人结算中途跨过 UTC 零点，写回的 dailyDate 与 counters 仍是 check 那天的', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2026-09-02T23:59:00.000Z'));
+      const { service, store, playerService } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: new Date('2026-09-02T00:00:00.000Z'),
+        dailyEarnedSeasonPoint: 100,
+        dailyUsedMemberPoint: 0,
+        dailyCreatedOrderCount: 0,
+      });
+
+      // 第二个玩家的 check 完成时，把时钟推过 UTC 零点，模拟「先查完所有玩家
+      // 再统一写回」这段时间跨天：第一个玩家的 commit 此时应该仍然沿用它
+      // check 时算出的那一天，而不是写回那一刻的新日期
+      let findBySteamIdCallCount = 0;
+      playerService.findBySteamId.mockImplementation(() => {
+        findBySteamIdCallCount += 1;
+        if (findBySteamIdCallCount === 2) {
+          jest.setSystemTime(new Date('2026-09-03T00:00:30.000Z'));
+        }
+        return Promise.resolve({ matchCount: 20 });
+      });
+
+      const gameEnd = createGameEndDto({
+        players: [
+          createPlayerDto({ steamId: 1, battlePoints: 200 }),
+          createPlayerDto({ steamId: 2, battlePoints: 150 }),
+        ],
+      });
+
+      await service.settle(gameEnd);
+
+      const saved = store.get('1');
+      expect(saved?.dailyDate).toEqual(new Date('2026-09-02T00:00:00.000Z'));
+      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   describe('会员积分限额', () => {
     it('单笔超过 50 拒绝', async () => {
       const { service } = createService();

@@ -27,6 +27,7 @@ interface PlayerCheck {
   reason?: string;
   current: LocalRateLimit | null;
   counters: DailyCounters;
+  today: Date;
 }
 
 function getUtcMidnight(date: Date): Date {
@@ -124,6 +125,7 @@ export class LocalHostService {
     logger.info('local: member point used', { steamId, memberPoint, reason });
   }
 
+  // 检查和记账是两次分开的读写，中间有空隙，并发下最多多放一次，不值得为此上事务
   /** 本地来源创建支付宝订单前的次数检查，超限抛 400。 */
   async assertOrderWithinLimit(steamId: number): Promise<void> {
     const current = await this.rateLimitRepository.findById(steamId.toString());
@@ -171,12 +173,17 @@ export class LocalHostService {
     const steamId = player.steamId;
     const battlePoints = this.playerService.normalizeBattlePoints(player.battlePoints);
     const current = await this.rateLimitRepository.findById(steamId.toString());
+    // 多人对局是先查完所有玩家再统一写回，两步之间可能跨过 UTC 零点；
+    // today 在这里定死并透传给 commitPlayerSettlement，避免写回时日期已经翻页，
+    // 却带着查询时算出的旧一天的计数
+    const today = getUtcMidnight(new Date());
     const reject = (reason: string): PlayerCheck => ({
       steamId,
       battlePoints,
       ok: false,
       reason,
       current,
+      today,
       counters: { earnedSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 },
     });
 
@@ -194,12 +201,12 @@ export class LocalHostService {
       }
     }
 
-    const counters = getDailyCounters(current, getUtcMidnight(new Date()));
+    const counters = getDailyCounters(current, today);
     if (counters.earnedSeasonPoint + battlePoints > DAILY_POINT_CAP) {
       return reject('daily cap exceeded');
     }
 
-    return { steamId, battlePoints, ok: true, current, counters };
+    return { steamId, battlePoints, ok: true, current, counters, today };
   }
 
   private async saveRateLimit(
@@ -217,11 +224,10 @@ export class LocalHostService {
 
   // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
   private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
-    const today = getUtcMidnight(new Date());
     await this.saveRateLimit(check.steamId, check.current, {
       lastRequestAt: new Date(),
       lastRequestMatchId: gameEnd.matchId,
-      dailyDate: today,
+      dailyDate: check.today,
       dailyEarnedSeasonPoint: check.counters.earnedSeasonPoint + check.battlePoints,
       dailyUsedMemberPoint: check.counters.usedMemberPoint,
       dailyCreatedOrderCount: check.counters.createdOrderCount,

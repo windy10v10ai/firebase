@@ -34,11 +34,20 @@ export class AlipayController {
       await this.localHostService.assertOrderWithinLimit(dto.steamId);
     }
 
-    logger.info('Alipay create order', { steamId: dto.steamId, productCode: dto.productCode });
+    logger.info('Alipay create order', {
+      steamId: dto.steamId,
+      productCode: dto.productCode,
+      serverType,
+    });
     const response = await this.alipayService.createOrder(dto);
 
     if (isLocal) {
-      await this.localHostService.recordOrder(dto.steamId);
+      try {
+        await this.localHostService.recordOrder(dto.steamId);
+      } catch (error) {
+        // 二维码已经生成返回给客户端，记账失败只是漏计一次下单次数，抛出会把已经创建好的订单丢给客户端一个 500
+        logger.warn('local: record alipay order failed', { steamId: dto.steamId, error });
+      }
     }
 
     return response;
