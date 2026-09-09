@@ -48,7 +48,7 @@ Dota 2 官方自定义游戏服务器故障，玩家只能用本地主机开局�
 - `@AllowLocal()`：方法级，声明本路由额外接受本地 key
 - `@CurrentServerType()`：参数装饰器，handler 需要区分来源时注入解析结果，不再自己读 header
 
-`@Public()` 保留，只用于三个 webhook（支付宝 / 爱发电 / Ko-fi）——它们不带 key，靠签名或 token 验证。
+`@Public()` 保留，用于三个 webhook（支付宝 / 爱发电 / Ko-fi）——它们不带 key，靠签名或 token 验证。`AdminController`（类级）和 `AppController` 也标了 `@Public()`：`AdminController` 靠 `api/index.ts` 的路径白名单（`^/api/(game|afdian|analytics|player|kofi|alipay|daily-task).*`）挡在 `client` function 之外，只走独立部署、有 IAM 保护的 `admin` function；`AppController` 是根路径的健康检查，无敏感操作。
 
 守卫顺带从三次 `getSecretValue` 比对收敛成一次解析，以后新增服务器类型不用再改守卫。
 
@@ -103,6 +103,8 @@ e2e 里显式断言「本地 key 打这五条接口必须 401」，挂错装饰�
 查单接口不限流：它是前端 2 秒一次的轮询，客户端已经做了并发抑制。
 
 未支付订单数不单独统计。每日 10 次的计数只增不减，堆积的未支付订单必然已经计入，效果等价且不需要额外的 Firestore 复合索引。
+
+限流按请求体里的 steamId 计数，但 steamId 不可信。泄露的本地 key 可以拿别人的 steamId 把对方当天的下单额度刷满，让对方没法从本地主机下单。这是按 steamId 维度限流的固有代价，阶段 1 接受。
 
 模块依赖：`AlipayModule` 与 `PlayerInfoModule` 引入 `LocalHostModule`。`LocalHostModule` 只依赖 `PlayerModule` 和 `DailyTaskModule`，不构成循环。
 

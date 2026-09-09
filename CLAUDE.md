@@ -44,12 +44,19 @@
 | `web/` | Next.js 前端 |
 | `extensions/` | Firebase BigQuery export 配置 |
 
-## 设计文档
+## 设计文档与实施计划
 
-设计文档写到 `docs/design/<主题>/<阶段>.md`，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+两类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+
+| 类型 | 路径 | 进 git |
+|---|---|---|
+| 设计文档（brainstorming 产出的 spec） | `docs/design/<主题>/<阶段>.md` | 是 |
+| 实施计划（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已覆盖 `docs/superpowers/` |
 
 - `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`
 - `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
+
+实施计划不进 git：它随代码合入即失效，留在仓库里会与现行设计混淆，且体量大、不适合放进 PR 供人 review。
 
 ## 本地开发
 
