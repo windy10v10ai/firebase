@@ -128,11 +128,11 @@ e2e 里显式断言「本地 key 打这五条接口必须 401」，挂错装饰�
 | 字段 | 用途 |
 |---|---|
 | `dailyDate` | 三个当日计数共用的日期（UTC 零点），由 `dailyPointsDate` 改名而来 |
-| `dailySeasonPointTotal` | 当日已结算勇士积分，由 `dailyPointsTotal` 改名而来 |
-| `dailyMemberPointTotal` | 当日已消耗会员积分 |
-| `dailyOrderCount` | 当日已下单次数 |
+| `dailyEarnedSeasonPoint` | 当日已结算获得的勇士积分，由 `dailyPointsTotal` 改名而来 |
+| `dailyUsedMemberPoint` | 当日已消耗的会员积分 |
+| `dailyCreatedOrderCount` | 当日已创建的支付宝订单数 |
 
-`dailyPointsTotal` 一并改名，是因为文档里从此有两种积分，`points` 指哪一种不再自明。
+三个计数的字段名各自带上动作：一个是进账、一个是消耗、一个是创建次数。同一个文档里同时存在两种积分，只写 `points` / `total` 看不出方向，也看不出是哪一种积分。`dailyUsedMemberPoint` 与 `Player` 的终身字段 `usedMemberPoint` 命名一致，`daily` 前缀区分统计口径。
 
 **日期不匹配时三个计数一起归零**，再累加本次那一个——共用日期的代价就在这里：只更新自己那个计数并把日期改成今天，会让另外两个昨天的计数被当成今天的。写回计数统一走一个「取今日视角的计数」的读取入口，避免各写各的。
 

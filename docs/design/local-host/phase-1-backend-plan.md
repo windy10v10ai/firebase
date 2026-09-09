@@ -539,8 +539,8 @@ EOF
 
 **Interfaces:**
 - Produces:
-  - `LocalRateLimit` 字段：`dailyDate?: Date`、`dailySeasonPointTotal?: number`、`dailyMemberPointTotal?: number`、`dailyOrderCount?: number`，`lastRequestAt` / `lastRequestMatchId` 改为可选
-  - `LocalHostService` 内部：`interface DailyCounters { seasonPointTotal: number; memberPointTotal: number; orderCount: number }`、模块级 `getDailyCounters(current, today)`、私有 `saveRateLimit(steamId, current, patch)` —— Task 4 / 5 直接复用
+  - `LocalRateLimit` 字段：`dailyDate?: Date`、`dailyEarnedSeasonPoint?: number`、`dailyUsedMemberPoint?: number`、`dailyCreatedOrderCount?: number`，`lastRequestAt` / `lastRequestMatchId` 改为可选
+  - `LocalHostService` 内部：`interface DailyCounters { earnedSeasonPoint: number; usedMemberPoint: number; createdOrderCount: number }`、模块级 `getDailyCounters(current, today)`、私有 `saveRateLimit(steamId, current, patch)` —— Task 4 / 5 直接复用
 
 - [ ] **Step 1: 写失败的跨日归零测试**
 
@@ -555,24 +555,24 @@ EOF
       store.set('1', {
         id: '1',
         dailyDate: new Date('2026-09-01T00:00:00.000Z'),
-        dailySeasonPointTotal: 1900,
-        dailyMemberPointTotal: 900,
-        dailyOrderCount: 9,
+        dailyEarnedSeasonPoint: 1900,
+        dailyUsedMemberPoint: 900,
+        dailyCreatedOrderCount: 9,
       });
 
       await service.settle(createGameEndDto());
 
       const saved = store.get('1');
-      expect(saved?.dailySeasonPointTotal).toBe(200);
-      expect(saved?.dailyMemberPointTotal).toBe(0);
-      expect(saved?.dailyOrderCount).toBe(0);
+      expect(saved?.dailyEarnedSeasonPoint).toBe(200);
+      expect(saved?.dailyUsedMemberPoint).toBe(0);
+      expect(saved?.dailyCreatedOrderCount).toBe(0);
     } finally {
       jest.useRealTimers();
     }
   });
 ```
 
-同时把文件中已有的 `dailyPointsDate` 全部改名为 `dailyDate`、`dailyPointsTotal` 改名为 `dailySeasonPointTotal`。
+同时把文件中已有的 `dailyPointsDate` 全部改名为 `dailyDate`、`dailyPointsTotal` 改名为 `dailyEarnedSeasonPoint`。
 
 - [ ] **Step 2: 跑测试确认失败**
 
@@ -595,9 +595,9 @@ export class LocalRateLimit {
   lastRequestMatchId?: string;
   // 以下三个计数共用 dailyDate，日期对不上时一起归零
   dailyDate?: Date;
-  dailySeasonPointTotal?: number;
-  dailyMemberPointTotal?: number;
-  dailyOrderCount?: number;
+  dailyEarnedSeasonPoint?: number;
+  dailyUsedMemberPoint?: number;
+  dailyCreatedOrderCount?: number;
 }
 ```
 
@@ -609,26 +609,26 @@ export class LocalRateLimit {
 
 ```ts
 interface DailyCounters {
-  seasonPointTotal: number;
-  memberPointTotal: number;
-  orderCount: number;
+  earnedSeasonPoint: number;
+  usedMemberPoint: number;
+  createdOrderCount: number;
 }
 
 // 三个计数共用 dailyDate，日期对不上时必须一起归零：只更新其中一个并把日期
 // 改成今天，会把另外两个昨天的数字算进今天
 function getDailyCounters(current: LocalRateLimit | null, today: Date): DailyCounters {
   if (!current?.dailyDate || current.dailyDate.getTime() !== today.getTime()) {
-    return { seasonPointTotal: 0, memberPointTotal: 0, orderCount: 0 };
+    return { earnedSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 };
   }
   return {
-    seasonPointTotal: current.dailySeasonPointTotal ?? 0,
-    memberPointTotal: current.dailyMemberPointTotal ?? 0,
-    orderCount: current.dailyOrderCount ?? 0,
+    earnedSeasonPoint: current.dailyEarnedSeasonPoint ?? 0,
+    usedMemberPoint: current.dailyUsedMemberPoint ?? 0,
+    createdOrderCount: current.dailyCreatedOrderCount ?? 0,
   };
 }
 ```
 
-`checkPlayerLimit` 中，`reject` 的返回值把 `dailyPointsSoFar: 0` 换成 `counters: { seasonPointTotal: 0, memberPointTotal: 0, orderCount: 0 }`；冷却判断加上字段存在性守卫；当日上限判断改成读 `counters`：
+`checkPlayerLimit` 中，`reject` 的返回值把 `dailyPointsSoFar: 0` 换成 `counters: { earnedSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 }`；冷却判断加上字段存在性守卫；当日上限判断改成读 `counters`：
 
 ```ts
     if (current?.lastRequestAt) {
@@ -639,7 +639,7 @@ function getDailyCounters(current: LocalRateLimit | null, today: Date): DailyCou
     }
 
     const counters = getDailyCounters(current, getUtcMidnight(new Date()));
-    if (counters.seasonPointTotal + battlePoints > DAILY_POINT_CAP) {
+    if (counters.earnedSeasonPoint + battlePoints > DAILY_POINT_CAP) {
       return reject('daily cap exceeded');
     }
 
@@ -668,9 +668,9 @@ function getDailyCounters(current: LocalRateLimit | null, today: Date): DailyCou
       lastRequestAt: new Date(),
       lastRequestMatchId: gameEnd.matchId,
       dailyDate: today,
-      dailySeasonPointTotal: check.counters.seasonPointTotal + check.battlePoints,
-      dailyMemberPointTotal: check.counters.memberPointTotal,
-      dailyOrderCount: check.counters.orderCount,
+      dailyEarnedSeasonPoint: check.counters.earnedSeasonPoint + check.battlePoints,
+      dailyUsedMemberPoint: check.counters.usedMemberPoint,
+      dailyCreatedOrderCount: check.counters.createdOrderCount,
     });
 
     await this.playerService.addLocalSeasonPoints(check.steamId, check.battlePoints);
@@ -753,7 +753,7 @@ EOF
       store.set('1', {
         id: '1',
         dailyDate: getUtcMidnightForTest(),
-        dailyMemberPointTotal: 980,
+        dailyUsedMemberPoint: 980,
       });
 
       await expect(service.assertMemberPointWithinLimit(1, 50)).rejects.toThrow(
@@ -766,17 +766,17 @@ EOF
       store.set('1', {
         id: '1',
         dailyDate: getUtcMidnightForTest(),
-        dailySeasonPointTotal: 300,
-        dailyMemberPointTotal: 100,
-        dailyOrderCount: 2,
+        dailyEarnedSeasonPoint: 300,
+        dailyUsedMemberPoint: 100,
+        dailyCreatedOrderCount: 2,
       });
 
       await service.recordMemberPointUsage(1, 20, 'lottery');
 
       const saved = store.get('1');
-      expect(saved?.dailyMemberPointTotal).toBe(120);
-      expect(saved?.dailySeasonPointTotal).toBe(300);
-      expect(saved?.dailyOrderCount).toBe(2);
+      expect(saved?.dailyUsedMemberPoint).toBe(120);
+      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+      expect(saved?.dailyCreatedOrderCount).toBe(2);
     });
   });
 ```
@@ -819,7 +819,7 @@ const LOCAL_MEMBER_POINT_DAILY_CAP = 1000;
 
     const current = await this.rateLimitRepository.findById(steamId.toString());
     const counters = getDailyCounters(current, getUtcMidnight(new Date()));
-    if (counters.memberPointTotal + memberPoint > LOCAL_MEMBER_POINT_DAILY_CAP) {
+    if (counters.usedMemberPoint + memberPoint > LOCAL_MEMBER_POINT_DAILY_CAP) {
       logger.warn('local: member point rejected', { steamId, memberPoint, reason: 'daily cap' });
       throw new BadRequestException();
     }
@@ -832,9 +832,9 @@ const LOCAL_MEMBER_POINT_DAILY_CAP = 1000;
     const counters = getDailyCounters(current, today);
     await this.saveRateLimit(steamId, current, {
       dailyDate: today,
-      dailySeasonPointTotal: counters.seasonPointTotal,
-      dailyMemberPointTotal: counters.memberPointTotal + memberPoint,
-      dailyOrderCount: counters.orderCount,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint + memberPoint,
+      dailyCreatedOrderCount: counters.createdOrderCount,
     });
 
     logger.info('local: member point used', { steamId, memberPoint, reason });
@@ -1025,14 +1025,14 @@ EOF
   describe('支付宝下单限流', () => {
     it('当日第 11 次下单被拒', async () => {
       const { service, store } = createService();
-      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyOrderCount: 10 });
+      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyCreatedOrderCount: 10 });
 
       await expect(service.assertOrderWithinLimit(1)).rejects.toThrow(BadRequestException);
     });
 
     it('当日第 10 次下单通过', async () => {
       const { service, store } = createService();
-      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyOrderCount: 9 });
+      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyCreatedOrderCount: 9 });
 
       await expect(service.assertOrderWithinLimit(1)).resolves.toBeUndefined();
     });
@@ -1042,7 +1042,7 @@ EOF
 
       await service.recordOrder(1);
 
-      expect(store.get('1')?.dailyOrderCount).toBe(1);
+      expect(store.get('1')?.dailyCreatedOrderCount).toBe(1);
     });
 
     it('支付成功清零下单次数，不动积分计数', async () => {
@@ -1050,15 +1050,15 @@ EOF
       store.set('1', {
         id: '1',
         dailyDate: getUtcMidnightForTest(),
-        dailyMemberPointTotal: 100,
-        dailyOrderCount: 10,
+        dailyUsedMemberPoint: 100,
+        dailyCreatedOrderCount: 10,
       });
 
       await service.resetOrderCount(1);
 
       const saved = store.get('1');
-      expect(saved?.dailyOrderCount).toBe(0);
-      expect(saved?.dailyMemberPointTotal).toBe(100);
+      expect(saved?.dailyCreatedOrderCount).toBe(0);
+      expect(saved?.dailyUsedMemberPoint).toBe(100);
     });
 
     it('没有限流记录时清零是空操作', async () => {
@@ -1091,7 +1091,7 @@ const LOCAL_DAILY_ORDER_CAP = 10;
   async assertOrderWithinLimit(steamId: number): Promise<void> {
     const current = await this.rateLimitRepository.findById(steamId.toString());
     const counters = getDailyCounters(current, getUtcMidnight(new Date()));
-    if (counters.orderCount >= LOCAL_DAILY_ORDER_CAP) {
+    if (counters.createdOrderCount >= LOCAL_DAILY_ORDER_CAP) {
       logger.warn('local: alipay order rejected', { steamId, reason: 'daily order cap' });
       throw new BadRequestException();
     }
@@ -1104,9 +1104,9 @@ const LOCAL_DAILY_ORDER_CAP = 10;
     const counters = getDailyCounters(current, today);
     await this.saveRateLimit(steamId, current, {
       dailyDate: today,
-      dailySeasonPointTotal: counters.seasonPointTotal,
-      dailyMemberPointTotal: counters.memberPointTotal,
-      dailyOrderCount: counters.orderCount + 1,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint,
+      dailyCreatedOrderCount: counters.createdOrderCount + 1,
     });
   }
 
@@ -1121,9 +1121,9 @@ const LOCAL_DAILY_ORDER_CAP = 10;
     const counters = getDailyCounters(current, today);
     await this.saveRateLimit(steamId, current, {
       dailyDate: today,
-      dailySeasonPointTotal: counters.seasonPointTotal,
-      dailyMemberPointTotal: counters.memberPointTotal,
-      dailyOrderCount: 0,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint,
+      dailyCreatedOrderCount: 0,
     });
   }
 ```
