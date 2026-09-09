@@ -235,8 +235,8 @@ describe('LocalHostService', () => {
       });
 
       // 第二个玩家的 check 完成时，把时钟推过 UTC 零点，模拟「先查完所有玩家
-      // 再统一写回」这段时间跨天：第一个玩家的 commit 此时应该仍然沿用它
-      // check 时算出的那一天，而不是写回那一刻的新日期
+      // 再统一写回」这段时间跨天：第一个玩家的 commit 应写 check 时算出的
+      // 那一天，而不是写回那一刻的新日期
       let findBySteamIdCallCount = 0;
       playerService.findBySteamId.mockImplementation(() => {
         findBySteamIdCallCount += 1;

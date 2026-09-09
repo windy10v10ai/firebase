@@ -168,7 +168,11 @@ export class AlipayService {
     } catch (error) {
       // 订单已经写成 SUCCESS，清零失败只是漏了一次限额重置，抛出会让 webhook 返回失败，
       // 支付宝重推命中幂等分支直接返回 success，后面的购买埋点反而永久丢失
-      logger.warn('[Alipay] 清零本地下单次数失败', { outTradeNo: order.outTradeNo, error });
+      logger.warn('[Alipay] 清零本地下单次数失败', {
+        outTradeNo: order.outTradeNo,
+        steamId: order.steamId,
+        error,
+      });
     }
 
     await this.analyticsPurchaseService.alipayPurchase(order);

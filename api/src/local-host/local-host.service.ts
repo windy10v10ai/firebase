@@ -174,7 +174,7 @@ export class LocalHostService {
     const battlePoints = this.playerService.normalizeBattlePoints(player.battlePoints);
     const current = await this.rateLimitRepository.findById(steamId.toString());
     // 多人对局是先查完所有玩家再统一写回，两步之间可能跨过 UTC 零点；
-    // today 在这里定死并透传给 commitPlayerSettlement，避免写回时日期已经翻页，
+    // today 由 check 算定并透传给 commit，避免写回时日期已经翻页，
     // 却带着查询时算出的旧一天的计数
     const today = getUtcMidnight(new Date());
     const reject = (reason: string): PlayerCheck => ({
