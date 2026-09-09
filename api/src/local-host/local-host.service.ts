@@ -14,7 +14,7 @@ export const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 const DAILY_POINT_CAP = 2000;
 const MIN_MATCH_COUNT = 1;
 
-// 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/dailyPointsSoFar
+// 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/counters
 // 是 commitPlayerSettlement 落盘要用的数据。不管 ok 是什么，两个字段都在，
 // 不需要用类型系统去区分两种形状。
 interface PlayerCheck {
@@ -23,13 +23,32 @@ interface PlayerCheck {
   ok: boolean;
   reason?: string;
   current: LocalRateLimit | null;
-  dailyPointsSoFar: number;
+  counters: DailyCounters;
 }
 
 function getUtcMidnight(date: Date): Date {
   const truncated = new Date(date);
   truncated.setUTCHours(0, 0, 0, 0);
   return truncated;
+}
+
+interface DailyCounters {
+  earnedSeasonPoint: number;
+  usedMemberPoint: number;
+  createdOrderCount: number;
+}
+
+// 三个计数共用 dailyDate，日期对不上时必须一起归零：只更新其中一个并把日期
+// 改成今天，会把另外两个昨天的数字算进今天
+function getDailyCounters(current: LocalRateLimit | null, today: Date): DailyCounters {
+  if (!current?.dailyDate || current.dailyDate.getTime() !== today.getTime()) {
+    return { earnedSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 };
+  }
+  return {
+    earnedSeasonPoint: current.dailyEarnedSeasonPoint ?? 0,
+    usedMemberPoint: current.dailyUsedMemberPoint ?? 0,
+    createdOrderCount: current.dailyCreatedOrderCount ?? 0,
+  };
 }
 
 @Injectable()
@@ -81,7 +100,7 @@ export class LocalHostService {
       ok: false,
       reason,
       current,
-      dailyPointsSoFar: 0,
+      counters: { earnedSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 },
     });
 
     const existingPlayer = await this.playerService.findBySteamId(steamId);
@@ -91,39 +110,45 @@ export class LocalHostService {
     if (existingPlayer.matchCount <= MIN_MATCH_COUNT) {
       return reject('matchCount too low');
     }
-    if (current) {
+    if (current?.lastRequestAt) {
       const elapsedMs = Date.now() - current.lastRequestAt.getTime();
       if (elapsedMs < COOLDOWN_MS) {
         return reject('cooldown');
       }
     }
 
-    const today = getUtcMidnight(new Date());
-    const dailyPointsSoFar =
-      current?.dailyPointsDate && current.dailyPointsDate.getTime() === today.getTime()
-        ? (current.dailyPointsTotal ?? 0)
-        : 0;
-    if (dailyPointsSoFar + battlePoints > DAILY_POINT_CAP) {
+    const counters = getDailyCounters(current, getUtcMidnight(new Date()));
+    if (counters.earnedSeasonPoint + battlePoints > DAILY_POINT_CAP) {
       return reject('daily cap exceeded');
     }
 
-    return { steamId, battlePoints, ok: true, current, dailyPointsSoFar };
+    return { steamId, battlePoints, ok: true, current, counters };
   }
 
-  // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
-  private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
-    const next: LocalRateLimit = {
-      id: check.steamId.toString(),
-      lastRequestAt: new Date(),
-      lastRequestMatchId: gameEnd.matchId,
-      dailyPointsDate: getUtcMidnight(new Date()),
-      dailyPointsTotal: check.dailyPointsSoFar + check.battlePoints,
-    };
-    if (check.current) {
+  private async saveRateLimit(
+    steamId: number,
+    current: LocalRateLimit | null,
+    patch: Partial<LocalRateLimit>,
+  ): Promise<void> {
+    const next = { ...(current ?? { id: steamId.toString() }), ...patch } as LocalRateLimit;
+    if (current) {
       await this.rateLimitRepository.update(next);
     } else {
       await this.rateLimitRepository.create(next);
     }
+  }
+
+  // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
+  private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
+    const today = getUtcMidnight(new Date());
+    await this.saveRateLimit(check.steamId, check.current, {
+      lastRequestAt: new Date(),
+      lastRequestMatchId: gameEnd.matchId,
+      dailyDate: today,
+      dailyEarnedSeasonPoint: check.counters.earnedSeasonPoint + check.battlePoints,
+      dailyUsedMemberPoint: check.counters.usedMemberPoint,
+      dailyCreatedOrderCount: check.counters.createdOrderCount,
+    });
 
     await this.playerService.addLocalSeasonPoints(check.steamId, check.battlePoints);
     logger.info('game/end/local: settled', {

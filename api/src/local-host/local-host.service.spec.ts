@@ -188,4 +188,28 @@ describe('LocalHostService', () => {
       jest.useRealTimers();
     }
   });
+
+  it('跨日结算时三个当日计数一起归零', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2026-09-02T03:00:00.000Z'));
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: new Date('2026-09-01T00:00:00.000Z'),
+        dailyEarnedSeasonPoint: 1900,
+        dailyUsedMemberPoint: 900,
+        dailyCreatedOrderCount: 9,
+      });
+
+      await service.settle(createGameEndDto());
+
+      const saved = store.get('1');
+      expect(saved?.dailyEarnedSeasonPoint).toBe(200);
+      expect(saved?.dailyUsedMemberPoint).toBe(0);
+      expect(saved?.dailyCreatedOrderCount).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
