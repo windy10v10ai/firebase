@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { FireormModule } from 'nestjs-fireorm';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { LocalHostModule } from '../local-host/local-host.module';
 import { MembersModule } from '../members/members.module';
 import { PlayerModule } from '../player/player.module';
 import { SecretModule } from '../util/secret/secret.module';
@@ -18,6 +19,7 @@ import { AlipayOrder } from './entities/alipay-order.entity';
     MembersModule,
     PlayerModule,
     AnalyticsModule,
+    LocalHostModule,
   ],
   controllers: [AlipayController],
   providers: [AlipayService, AlipayApiService],

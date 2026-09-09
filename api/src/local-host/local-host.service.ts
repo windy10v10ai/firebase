@@ -15,6 +15,7 @@ const DAILY_POINT_CAP = 2000;
 const MIN_MATCH_COUNT = 1;
 const LOCAL_MEMBER_POINT_SINGLE_CAP = 50;
 const LOCAL_MEMBER_POINT_DAILY_CAP = 1000;
+const LOCAL_DAILY_ORDER_CAP = 10;
 
 // 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/counters
 // 是 commitPlayerSettlement 落盘要用的数据。不管 ok 是什么，两个字段都在，
@@ -121,6 +122,46 @@ export class LocalHostService {
     });
 
     logger.info('local: member point used', { steamId, memberPoint, reason });
+  }
+
+  /** 本地来源创建支付宝订单前的次数检查，超限抛 400。 */
+  async assertOrderWithinLimit(steamId: number): Promise<void> {
+    const current = await this.rateLimitRepository.findById(steamId.toString());
+    const counters = getDailyCounters(current, getUtcMidnight(new Date()));
+    if (counters.createdOrderCount >= LOCAL_DAILY_ORDER_CAP) {
+      logger.warn('local: alipay order rejected', { steamId, reason: 'daily order cap' });
+      throw new BadRequestException();
+    }
+  }
+
+  /** 本地来源创建支付宝订单成功后累加当日次数。 */
+  async recordOrder(steamId: number): Promise<void> {
+    const today = getUtcMidnight(new Date());
+    const current = await this.rateLimitRepository.findById(steamId.toString());
+    const counters = getDailyCounters(current, today);
+    await this.saveRateLimit(steamId, current, {
+      dailyDate: today,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint,
+      dailyCreatedOrderCount: counters.createdOrderCount + 1,
+    });
+  }
+
+  /** 支付成功后清零当日下单次数，让付过钱的玩家可以继续购买。 */
+  async resetOrderCount(steamId: number): Promise<void> {
+    const current = await this.rateLimitRepository.findById(steamId.toString());
+    if (!current) {
+      return;
+    }
+
+    const today = getUtcMidnight(new Date());
+    const counters = getDailyCounters(current, today);
+    await this.saveRateLimit(steamId, current, {
+      dailyDate: today,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint,
+      dailyCreatedOrderCount: 0,
+    });
   }
 
   // 只读检查，不写任何数据：依次检查玩家存在性/matchCount、冷却、当日上限。

@@ -267,4 +267,52 @@ describe('LocalHostService', () => {
       expect(saved?.dailyCreatedOrderCount).toBe(2);
     });
   });
+
+  describe('支付宝下单限流', () => {
+    it('当日第 11 次下单被拒', async () => {
+      const { service, store } = createService();
+      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyCreatedOrderCount: 10 });
+
+      await expect(service.assertOrderWithinLimit(1)).rejects.toThrow(BadRequestException);
+    });
+
+    it('当日第 10 次下单通过', async () => {
+      const { service, store } = createService();
+      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyCreatedOrderCount: 9 });
+
+      await expect(service.assertOrderWithinLimit(1)).resolves.toBeUndefined();
+    });
+
+    it('记账累加下单次数', async () => {
+      const { service, store } = createService();
+
+      await service.recordOrder(1);
+
+      expect(store.get('1')?.dailyCreatedOrderCount).toBe(1);
+    });
+
+    it('支付成功清零下单次数，不动积分计数', async () => {
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: getUtcMidnightForTest(),
+        dailyUsedMemberPoint: 100,
+        dailyCreatedOrderCount: 10,
+      });
+
+      await service.resetOrderCount(1);
+
+      const saved = store.get('1');
+      expect(saved?.dailyCreatedOrderCount).toBe(0);
+      expect(saved?.dailyUsedMemberPoint).toBe(100);
+    });
+
+    it('没有限流记录时清零是空操作', async () => {
+      const { service, store } = createService();
+
+      await service.resetOrderCount(1);
+
+      expect(store.get('1')).toBeUndefined();
+    });
+  });
 });
