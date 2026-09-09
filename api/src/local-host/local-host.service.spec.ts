@@ -1,7 +1,15 @@
+import { BadRequestException } from '@nestjs/common';
+
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 import { COOLDOWN_MS, LocalHostService } from './local-host.service';
+
+function getUtcMidnightForTest(): Date {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return today;
+}
 
 function createFakeRateLimitRepository() {
   const store = new Map<string, LocalRateLimit>();
@@ -211,5 +219,52 @@ describe('LocalHostService', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  describe('会员积分限额', () => {
+    it('单笔超过 50 拒绝', async () => {
+      const { service } = createService();
+
+      await expect(service.assertMemberPointWithinLimit(1, 51)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('单笔等于 50 通过', async () => {
+      const { service } = createService();
+
+      await expect(service.assertMemberPointWithinLimit(1, 50)).resolves.toBeUndefined();
+    });
+
+    it('当日累计超过 1000 拒绝', async () => {
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: getUtcMidnightForTest(),
+        dailyUsedMemberPoint: 980,
+      });
+
+      await expect(service.assertMemberPointWithinLimit(1, 50)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('记账累加当日消耗，不动其他计数', async () => {
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: getUtcMidnightForTest(),
+        dailyEarnedSeasonPoint: 300,
+        dailyUsedMemberPoint: 100,
+        dailyCreatedOrderCount: 2,
+      });
+
+      await service.recordMemberPointUsage(1, 20, 'lottery');
+
+      const saved = store.get('1');
+      expect(saved?.dailyUsedMemberPoint).toBe(120);
+      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+      expect(saved?.dailyCreatedOrderCount).toBe(2);
+    });
   });
 });

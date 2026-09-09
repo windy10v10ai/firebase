@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
@@ -13,6 +13,8 @@ const COOLDOWN_MINUTES = 10;
 export const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 const DAILY_POINT_CAP = 2000;
 const MIN_MATCH_COUNT = 1;
+const LOCAL_MEMBER_POINT_SINGLE_CAP = 50;
+const LOCAL_MEMBER_POINT_DAILY_CAP = 1000;
 
 // 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/counters
 // 是 commitPlayerSettlement 落盘要用的数据。不管 ok 是什么，两个字段都在，
@@ -85,6 +87,40 @@ export class LocalHostService {
     }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
+  }
+
+  /** 本地来源消耗会员积分前的限额检查，超限抛 400。 */
+  async assertMemberPointWithinLimit(steamId: number, memberPoint: number): Promise<void> {
+    if (memberPoint > LOCAL_MEMBER_POINT_SINGLE_CAP) {
+      logger.warn('local: member point rejected', { steamId, memberPoint, reason: 'single cap' });
+      throw new BadRequestException();
+    }
+
+    const current = await this.rateLimitRepository.findById(steamId.toString());
+    const counters = getDailyCounters(current, getUtcMidnight(new Date()));
+    if (counters.usedMemberPoint + memberPoint > LOCAL_MEMBER_POINT_DAILY_CAP) {
+      logger.warn('local: member point rejected', { steamId, memberPoint, reason: 'daily cap' });
+      throw new BadRequestException();
+    }
+  }
+
+  /** 本地来源消耗会员积分成功后累加当日计数。 */
+  async recordMemberPointUsage(
+    steamId: number,
+    memberPoint: number,
+    reason: string,
+  ): Promise<void> {
+    const today = getUtcMidnight(new Date());
+    const current = await this.rateLimitRepository.findById(steamId.toString());
+    const counters = getDailyCounters(current, today);
+    await this.saveRateLimit(steamId, current, {
+      dailyDate: today,
+      dailyEarnedSeasonPoint: counters.earnedSeasonPoint,
+      dailyUsedMemberPoint: counters.usedMemberPoint + memberPoint,
+      dailyCreatedOrderCount: counters.createdOrderCount,
+    });
+
+    logger.info('local: member point used', { steamId, memberPoint, reason });
   }
 
   // 只读检查，不写任何数据：依次检查玩家存在性/matchCount、冷却、当日上限。
