@@ -44,6 +44,13 @@
 | `web/` | Next.js 前端 |
 | `extensions/` | Firebase BigQuery export 配置 |
 
+## 设计文档
+
+设计文档写到 `docs/design/<主题>/<阶段>.md`，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+
+- `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`
+- `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
+
 ## 本地开发
 
 1. **Firestore emulator**（必须先启动）：`firebase emulators:start --only firestore --project windy10v10ai`
@@ -85,7 +92,7 @@ feature/<issue-id>-<short-kebab-summary>
 
 非 issue 驱动的改动可使用 `fix/...`、`chore/...`、`docs/...` 前缀，命名规则同上。
 
-**不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/superpowers/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
+**不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/design/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
 
 ## 推送到 develop 的流程
 

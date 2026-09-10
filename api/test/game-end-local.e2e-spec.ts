@@ -1,12 +1,19 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { get, getTestApiKey, initTest, mockDate, restoreDate } from './util/util-http';
+import {
+  get,
+  getLocalApiKey,
+  getTestApiKey,
+  initTest,
+  mockDate,
+  restoreDate,
+} from './util/util-http';
 import { createPlayer, getPlayer } from './util/util-player';
 
 const gameEndLocalUrl = '/api/game/end/local';
 const gameStartUrl = '/api/game/start/';
-const localApiKey = process.env.LOCAL_APIKEY ?? 'local-apikey';
+const localApiKey = getLocalApiKey();
 
 interface GameEndLocalPlayerOptions {
   steamId: number;
