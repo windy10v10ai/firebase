@@ -50,26 +50,43 @@ describe('PlayerService', () => {
     });
   });
 
-  describe('addLocalSeasonPoints', () => {
-    it('只增加 seasonPointTotal，不动其它字段', async () => {
+  describe('upsertLocalGameEnd', () => {
+    it('累加对局数、胜场与积分，不动行为分', async () => {
       const { service, playerRepository } = createService({
         matchCount: 20,
         winCount: 5,
         seasonPointTotal: 1_000,
+        conductPoint: 80,
       });
 
-      await service.addLocalSeasonPoints(steamId, 300);
+      await service.upsertLocalGameEnd(steamId, true, 300, false);
 
       const savedPlayer = playerRepository.update.mock.calls[0][0];
       expect(savedPlayer.seasonPointTotal).toBe(1_300);
-      expect(savedPlayer.matchCount).toBe(20);
+      expect(savedPlayer.matchCount).toBe(21);
+      expect(savedPlayer.winCount).toBe(6);
+      expect(savedPlayer.conductPoint).toBe(80);
+    });
+
+    it('落败且掉线时只累加对局数与掉线数', async () => {
+      const { service, playerRepository } = createService({
+        matchCount: 20,
+        winCount: 5,
+        disconnectCount: 1,
+      });
+
+      await service.upsertLocalGameEnd(steamId, false, 0, true);
+
+      const savedPlayer = playerRepository.update.mock.calls[0][0];
+      expect(savedPlayer.matchCount).toBe(21);
       expect(savedPlayer.winCount).toBe(5);
+      expect(savedPlayer.disconnectCount).toBe(2);
     });
 
     it('玩家不存在时直接返回，不调用 update', async () => {
       const { service, playerRepository } = createService(null);
 
-      await service.addLocalSeasonPoints(steamId, 300);
+      await service.upsertLocalGameEnd(steamId, true, 300, false);
 
       expect(playerRepository.update).not.toHaveBeenCalled();
     });

@@ -1,6 +1,5 @@
 import { Body, Controller, Get, ParseArrayPipe, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
@@ -131,20 +130,12 @@ export class GameController {
     return this.gameService.getOK();
   }
 
-  // 本地主机受限结算：只接受 LOCAL key，只加 seasonPointTotal + 记录每日任务，
-  // 不做正式结算的其余副作用（matchCount/winCount/conductPoint/GA4/终身统计等）。
+  // 本地主机受限结算：带限额与冷却，且不计算行为分。官方来源不会走这条路，
+  // 真走了也只是拿到更严格的结算，没有损失，所以不额外区分来源。
   @AllowLocal()
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
-  async endLocal(
-    @Body() gameEnd: GameEndDto,
-    @CurrentServerType() serverType: SERVER_TYPE,
-  ): Promise<string> {
-    if (serverType !== SERVER_TYPE.LOCAL) {
-      logger.warn('game/end/local: rejected, not a local server key', { serverType });
-      return this.gameService.getOK();
-    }
-
+  async endLocal(@Body() gameEnd: GameEndDto): Promise<string> {
     await this.localHostService.settle(gameEnd);
     return this.gameService.getOK();
   }

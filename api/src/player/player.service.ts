@@ -60,7 +60,12 @@ export class PlayerService {
         settledPoints,
       });
     }
-    const player = await this.getOrNewPlayerBySteamId(steamId);
+    // 结算不创建玩家：开局接口已经创建过，查不到说明这次结算没有对应的开局
+    const player = await this.playerRepository.findById(steamId.toString());
+    if (!player) {
+      logger.warn('game/end: player not found, skip settlement', { steamId });
+      return;
+    }
 
     player.matchCount++;
     if (isWinner) {
@@ -83,14 +88,29 @@ export class PlayerService {
     await this.playerRepository.update(player);
   }
 
-  // 本地主机受限结算专用：只加 seasonPointTotal，不动 matchCount/winCount/
-  // disconnectCount/conductPoint。玩家必须已存在，不自动创建。
-  async addLocalSeasonPoints(steamId: number, battlePoints: number): Promise<void> {
+  // 本地主机受限结算专用：不算行为分——那是唯一一个被冒用会害到别人的字段。
+  // 其余与正式结算一致。玩家必须已存在，不自动创建。
+  async upsertLocalGameEnd(
+    steamId: number,
+    isWinner: boolean,
+    battlePoints: number,
+    isDisconnect: boolean,
+  ): Promise<void> {
     const player = await this.playerRepository.findById(steamId.toString());
     if (!player) {
+      logger.warn('game/end/local: player not found, skip settlement', { steamId });
       return;
     }
+
+    player.matchCount++;
+    if (isWinner) {
+      player.winCount++;
+    }
     player.seasonPointTotal += battlePoints;
+    if (isDisconnect) {
+      player.disconnectCount++;
+    }
+
     await this.playerRepository.update(player);
   }
 

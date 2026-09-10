@@ -668,6 +668,15 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('/api/game/end (Post) 游戏结算', () => {
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    beforeAll(async () => {
+      for (const steamId of [
+        100000101, 100000102, 100000103, 100000104, 100000105, 100000111, 100000112, 100000113,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it.each([
       ['单人结算 0分', 100000101, 0, 0],
       ['单人结算 90分', 100000102, 90, 90],
@@ -888,6 +897,16 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('/api/game/end (Post) 行为分', () => {
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    beforeAll(async () => {
+      for (const steamId of [
+        100002001, 100002011, 100002012, 100002021, 100002022, 100002023, 100002024, 100002025,
+        100002026,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it('单人局不计算行为分', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100002001;

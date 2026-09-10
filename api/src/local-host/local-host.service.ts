@@ -3,16 +3,18 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
+import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 
 const COOLDOWN_MINUTES = 5;
 export const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 const DAILY_POINT_CAP = 2000;
-const MIN_MATCH_COUNT = 1;
 const LOCAL_MEMBER_POINT_SINGLE_CAP = 50;
 const LOCAL_MEMBER_POINT_DAILY_CAP = 1000;
 const LOCAL_DAILY_ORDER_CAP = 10;
@@ -21,6 +23,7 @@ const LOCAL_DAILY_ORDER_CAP = 10;
 // 是 commitPlayerSettlement 落盘要用的数据。不管 ok 是什么，两个字段都在，
 // 不需要用类型系统去区分两种形状。
 interface PlayerCheck {
+  player: GameEndPlayerDto;
   steamId: number;
   battlePoints: number;
   ok: boolean;
@@ -62,6 +65,8 @@ export class LocalHostService {
     private readonly rateLimitRepository: BaseFirestoreRepository<LocalRateLimit>,
     private readonly playerService: PlayerService,
     private readonly dailyTaskService: DailyTaskService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async settle(gameEnd: GameEndDto): Promise<void> {
@@ -89,6 +94,17 @@ export class LocalHostService {
     }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
+
+    await Promise.all([
+      this.analyticsService.gameEndMatch(gameEnd, SERVER_TYPE.LOCAL),
+      this.analyticsService.gameEndPlayerBot(gameEnd, SERVER_TYPE.LOCAL),
+      ...gameEnd.players.map((player) =>
+        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
+          matchId: gameEnd.matchId,
+          gameOptions: gameEnd.gameOptions,
+        }),
+      ),
+    ]);
   }
 
   /** 本地来源消耗会员积分前的限额检查，超限抛 400。 */
@@ -166,6 +182,7 @@ export class LocalHostService {
     // 却带着查询时算出的旧一天的计数
     const today = getUtcMidnight(new Date());
     const reject = (reason: string): PlayerCheck => ({
+      player,
       steamId,
       battlePoints,
       ok: false,
@@ -175,12 +192,10 @@ export class LocalHostService {
       counters: { earnedSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 },
     });
 
+    // 唯一的准入条件是玩家已由开局接口创建；伪造的 steamId 走不到开局，也就结算不了
     const existingPlayer = await this.playerService.findBySteamId(steamId);
     if (!existingPlayer) {
       return reject('player not found');
-    }
-    if (existingPlayer.matchCount <= MIN_MATCH_COUNT) {
-      return reject('matchCount too low');
     }
     if (current?.lastRequestAt) {
       const elapsedMs = Date.now() - current.lastRequestAt.getTime();
@@ -194,7 +209,7 @@ export class LocalHostService {
       return reject('daily cap exceeded');
     }
 
-    return { steamId, battlePoints, ok: true, current, counters, today };
+    return { player, steamId, battlePoints, ok: true, current, counters, today };
   }
 
   // 唯一的写入口，要求调用方交出完整的三个计数：只更新其中一个再把 dailyDate 推到
@@ -230,7 +245,12 @@ export class LocalHostService {
       lastRequestMatchId: gameEnd.matchId,
     });
 
-    await this.playerService.addLocalSeasonPoints(check.steamId, check.battlePoints);
+    await this.playerService.upsertLocalGameEnd(
+      check.steamId,
+      check.player.teamId === gameEnd.winnerTeamId,
+      check.battlePoints,
+      check.player.isDisconnected,
+    );
     logger.info('game/end/local: settled', {
       matchId: gameEnd.matchId,
       steamId: check.steamId,

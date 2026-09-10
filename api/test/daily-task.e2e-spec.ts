@@ -5,7 +5,7 @@ import { DailyTaskSnapshotDto } from '../src/daily-task/dto/daily-task-snapshot.
 import { PlayerDailyTask } from '../src/daily-task/entities/player-daily-task.entity';
 
 import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
-import { getPlayer } from './util/util-player';
+import { createPlayer, getPlayer } from './util/util-player';
 
 const GAME_START_URL = '/api/game/start/';
 const GAME_END_URL = '/api/game/end';
@@ -439,6 +439,8 @@ describe('Daily task Phase1 (e2e)', () => {
   it('caps battle points at 500 without dropping base settlement', async () => {
     const steamId = 105610008;
     mockDate('2026-08-16T10:00:00.000Z');
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    await createPlayer(app, { steamId });
 
     const result = await post(
       app,

@@ -78,17 +78,33 @@ describe('LocalHostService', () => {
       findBySteamId: jest.fn((steamId: number) =>
         Promise.resolve(steamId in existingPlayers ? existingPlayers[steamId] : { matchCount: 20 }),
       ),
-      addLocalSeasonPoints: jest.fn().mockResolvedValue(undefined),
+      upsertLocalGameEnd: jest.fn().mockResolvedValue(undefined),
     };
     const dailyTaskService = {
       recordGameEnd: jest.fn().mockResolvedValue(undefined),
+    };
+    const playerStatsLifetimeService = {
+      accumulate: jest.fn().mockResolvedValue(undefined),
+    };
+    const analyticsService = {
+      gameEndMatch: jest.fn().mockResolvedValue(undefined),
+      gameEndPlayerBot: jest.fn().mockResolvedValue(undefined),
     };
     const service = new LocalHostService(
       repository as never,
       playerService as never,
       dailyTaskService as never,
+      playerStatsLifetimeService as never,
+      analyticsService as never,
     );
-    return { service, store, playerService, dailyTaskService };
+    return {
+      service,
+      store,
+      playerService,
+      dailyTaskService,
+      playerStatsLifetimeService,
+      analyticsService,
+    };
   }
 
   it('合法请求：加分、记录每日任务', async () => {
@@ -97,7 +113,7 @@ describe('LocalHostService', () => {
 
     await service.settle(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledWith(1, 200);
+    expect(playerService.upsertLocalGameEnd).toHaveBeenCalledWith(1, true, 200, false);
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
   });
 
@@ -107,7 +123,7 @@ describe('LocalHostService', () => {
 
     await service.settle(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
   });
 
   it('玩家不存在时拒绝，不加分，也不记录每日任务', async () => {
@@ -116,23 +132,13 @@ describe('LocalHostService', () => {
 
     await service.settle(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
-  });
-
-  it('matchCount <= 1 时拒绝', async () => {
-    const { service, playerService } = createService({ 1: { matchCount: 1 } });
-    const gameEnd = createGameEndDto();
-
-    await service.settle(gameEnd);
-
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
   });
 
   it('多人比赛中只要有一人未通过检查，整场比赛都不结算、不记录每日任务', async () => {
     const { service, playerService, dailyTaskService } = createService({
-      1: { matchCount: 20 },
-      2: { matchCount: 1 }, // 这个玩家不满足 matchCount 门槛
+      2: undefined, // 这个玩家不存在
     });
     const gameEnd = createGameEndDto({
       players: [createPlayerDto({ steamId: 1 }), createPlayerDto({ steamId: 2 })],
@@ -140,7 +146,7 @@ describe('LocalHostService', () => {
 
     await service.settle(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
   });
 
@@ -150,7 +156,7 @@ describe('LocalHostService', () => {
     await service.settle(createGameEndDto({ matchId: 'match-1' }));
     await service.settle(createGameEndDto({ matchId: 'match-2' }));
 
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
+    expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(1);
   });
 
   it('控制台启动的对局 matchId 均为 "0"，过了冷却窗口后不应被当成重复而拒绝', async () => {
@@ -162,7 +168,7 @@ describe('LocalHostService', () => {
       jest.advanceTimersByTime(COOLDOWN_MS + 1);
       await service.settle(createGameEndDto({ matchId: '0' }));
 
-      expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(2);
+      expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(2);
     } finally {
       jest.useRealTimers();
     }
@@ -191,7 +197,7 @@ describe('LocalHostService', () => {
         }),
       );
 
-      expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(4);
+      expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(4);
     } finally {
       jest.useRealTimers();
     }
