@@ -17,7 +17,7 @@ const LOCAL_MEMBER_POINT_DAILY_CAP = 1000;
 const LOCAL_DAILY_ORDER_CAP = 10;
 
 // 检查结果：ok=false 时 reason 说明原因；ok=true 时 current/counters
-// 是 commitPlayerSettlement 落盘要用的数据。不管 ok 是什么，两个字段都在，
+// 是 savePlayerGameEnd 落盘要用的数据。不管 ok 是什么，两个字段都在，
 // 不需要用类型系统去区分两种形状。
 interface PlayerCheck {
   player: GameEndPlayerDto;
@@ -64,8 +64,8 @@ export class LocalHostService {
     private readonly dailyTaskService: DailyTaskService,
   ) {}
 
-  /** 本地对局结算，返回这场比赛是否计入。 */
-  async settle(gameEnd: GameEndDto): Promise<boolean> {
+  /** 记录本地对局，返回这场比赛是否计入。 */
+  async recordGameEnd(gameEnd: GameEndDto): Promise<boolean> {
     // 顺序检查每个合格玩家；只要有一个没通过（含同一 matchId 重试），整场
     // 比赛立刻拒绝，不写分、不记录每日任务——不单独跳过那一个玩家，也不用
     // 等其余玩家都检查完。
@@ -86,7 +86,7 @@ export class LocalHostService {
     }
 
     for (const check of checks) {
-      await this.commitPlayerSettlement(check, gameEnd);
+      await this.savePlayerGameEnd(check, gameEnd);
     }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
@@ -222,8 +222,8 @@ export class LocalHostService {
     }
   }
 
-  // 写入 rate-limit 文档 + 加分，只在 checkPlayerLimit 返回 ok 时调用。
-  private async commitPlayerSettlement(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
+  // 写入限流文档 + 加分与战绩，只在 checkPlayerLimit 返回 ok 时调用。
+  private async savePlayerGameEnd(check: PlayerCheck, gameEnd: GameEndDto): Promise<void> {
     const counters = { ...check.counters };
     counters.earnedSeasonPoint += check.battlePoints;
     await this.saveDailyCounters(check.steamId, check.current, check.today, counters, {
@@ -237,7 +237,7 @@ export class LocalHostService {
       check.battlePoints,
       check.player.isDisconnected,
     );
-    logger.info('game/end/local: settled', {
+    logger.info('game/end/local: recorded', {
       matchId: gameEnd.matchId,
       steamId: check.steamId,
       battlePoints: check.battlePoints,

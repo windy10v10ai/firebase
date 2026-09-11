@@ -95,7 +95,7 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService();
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
     expect(playerService.upsertLocalGameEnd).toHaveBeenCalledWith(1, true, 200, false);
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
@@ -105,7 +105,7 @@ describe('LocalHostService', () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ players: [createPlayerDto({ steamId: 0 })] });
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
     expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
   });
@@ -114,7 +114,7 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService({ 1: undefined });
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
     expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
@@ -128,7 +128,7 @@ describe('LocalHostService', () => {
       players: [createPlayerDto({ steamId: 1 }), createPlayerDto({ steamId: 2 })],
     });
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
     expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
@@ -137,8 +137,8 @@ describe('LocalHostService', () => {
   it('20 分钟内重复结算（不同 matchId）拒绝', async () => {
     const { service, playerService } = createService();
 
-    await service.settle(createGameEndDto({ matchId: 'match-1' }));
-    await service.settle(createGameEndDto({ matchId: 'match-2' }));
+    await service.recordGameEnd(createGameEndDto({ matchId: 'match-1' }));
+    await service.recordGameEnd(createGameEndDto({ matchId: 'match-2' }));
 
     expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(1);
   });
@@ -148,9 +148,9 @@ describe('LocalHostService', () => {
     try {
       const { service, playerService } = createService();
 
-      await service.settle(createGameEndDto({ matchId: '0' }));
+      await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
       jest.advanceTimersByTime(COOLDOWN_MS + 1);
-      await service.settle(createGameEndDto({ matchId: '0' }));
+      await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
 
       expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(2);
     } finally {
@@ -166,7 +166,7 @@ describe('LocalHostService', () => {
       // 单局 battlePoints 会被 clamp 到 500，连续 4 局刚好打到 2000 上限
       // （均不拒绝），第 5 局再 + 500 = 2500 > 2000，应被拒绝。
       for (let i = 0; i < 4; i++) {
-        await service.settle(
+        await service.recordGameEnd(
           createGameEndDto({
             matchId: `match-${i}`,
             players: [createPlayerDto({ battlePoints: 800 })],
@@ -174,7 +174,7 @@ describe('LocalHostService', () => {
         );
         jest.advanceTimersByTime(COOLDOWN_MS + 1);
       }
-      await service.settle(
+      await service.recordGameEnd(
         createGameEndDto({
           matchId: 'match-4',
           players: [createPlayerDto({ battlePoints: 800 })],
@@ -200,7 +200,7 @@ describe('LocalHostService', () => {
         dailyCreatedOrderCount: 9,
       });
 
-      await service.settle(createGameEndDto());
+      await service.recordGameEnd(createGameEndDto());
 
       const saved = store.get('1');
       expect(saved?.dailyEarnedSeasonPoint).toBe(200);
@@ -243,7 +243,7 @@ describe('LocalHostService', () => {
         ],
       });
 
-      await service.settle(gameEnd);
+      await service.recordGameEnd(gameEnd);
 
       const saved = store.get('1');
       expect(saved?.dailyDate).toEqual(new Date('2026-09-02T00:00:00.000Z'));

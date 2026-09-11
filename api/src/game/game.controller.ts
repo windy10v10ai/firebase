@@ -141,8 +141,8 @@ export class GameController {
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
   async endLocal(@Body() gameEnd: GameEndDto): Promise<string> {
-    const settled = await this.localHostService.settle(gameEnd);
-    if (settled) {
+    const recorded = await this.localHostService.recordGameEnd(gameEnd);
+    if (recorded) {
       await this.recordMatchStats(gameEnd, SERVER_TYPE.LOCAL);
     }
     return this.gameService.getOK();
