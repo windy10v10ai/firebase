@@ -1,7 +1,9 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
-    "disclosure": "商业披露"
+    "disclosure": "商业披露",
+    "switchLanguage": "切换语言",
+    "menu": "菜单"
   },
   "home": {
     "title": "DOTA2 10v10 AI 自定义地图",
