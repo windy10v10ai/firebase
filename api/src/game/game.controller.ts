@@ -6,7 +6,6 @@ import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
-import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
@@ -24,7 +23,6 @@ export class GameController {
     private readonly membersService: MembersService,
     private readonly analyticsService: AnalyticsService,
     private readonly playerInfoService: PlayerInfoService,
-    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly dailyTaskService: DailyTaskService,
     private readonly localHostService: LocalHostService,
   ) {}
@@ -97,22 +95,8 @@ export class GameController {
     @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<string> {
     await this.gameService.recordGameEnd(gameEnd);
-    await this.recordMatchStats(gameEnd, serverType);
+    await this.gameService.recordMatchStats(gameEnd, serverType);
     return this.gameService.getOK();
-  }
-
-  // 统计上报与结算规则无关，正式结算与本地结算共用
-  private async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
-    await Promise.all([
-      this.analyticsService.gameEndMatch(gameEnd, serverType),
-      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-      ...gameEnd.players.map((player) =>
-        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
-          matchId: gameEnd.matchId,
-          gameOptions: gameEnd.gameOptions,
-        }),
-      ),
-    ]);
   }
 
   // 本地主机受限结算：带限额与冷却，且不计算行为分。官方来源不会走这条路，
@@ -126,7 +110,7 @@ export class GameController {
   ): Promise<string> {
     const recorded = await this.localHostService.recordGameEnd(gameEnd);
     if (recorded) {
-      await this.recordMatchStats(gameEnd, serverType);
+      await this.gameService.recordMatchStats(gameEnd, serverType);
     }
     return this.gameService.getOK();
   }

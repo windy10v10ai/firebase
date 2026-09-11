@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
+import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
+import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
@@ -16,6 +18,8 @@ export class GameService {
   constructor(
     private readonly playerService: PlayerService,
     private readonly dailyTaskService: DailyTaskService,
+    private readonly analyticsService: AnalyticsService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
@@ -40,6 +44,20 @@ export class GameService {
     );
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
+  }
+
+  /** 上报对局统计，与结算规则无关，正式结算与本地结算共用。 */
+  async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
+    await Promise.all([
+      this.analyticsService.gameEndMatch(gameEnd, serverType),
+      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+      ...gameEnd.players.map((player) =>
+        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
+          matchId: gameEnd.matchId,
+          gameOptions: gameEnd.gameOptions,
+        }),
+      ),
+    ]);
   }
 
   getOK(): string {
