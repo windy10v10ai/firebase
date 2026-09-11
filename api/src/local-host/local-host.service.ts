@@ -3,12 +3,9 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
-import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
-import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 
@@ -65,11 +62,10 @@ export class LocalHostService {
     private readonly rateLimitRepository: BaseFirestoreRepository<LocalRateLimit>,
     private readonly playerService: PlayerService,
     private readonly dailyTaskService: DailyTaskService,
-    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
-    private readonly analyticsService: AnalyticsService,
   ) {}
 
-  async settle(gameEnd: GameEndDto): Promise<void> {
+  /** 本地对局结算，返回这场比赛是否计入。 */
+  async settle(gameEnd: GameEndDto): Promise<boolean> {
     // 顺序检查每个合格玩家；只要有一个没通过（含同一 matchId 重试），整场
     // 比赛立刻拒绝，不写分、不记录每日任务——不单独跳过那一个玩家，也不用
     // 等其余玩家都检查完。
@@ -84,7 +80,7 @@ export class LocalHostService {
           battlePoints: check.battlePoints,
           reason: check.reason,
         });
-        return;
+        return false;
       }
       checks.push(check);
     }
@@ -94,17 +90,7 @@ export class LocalHostService {
     }
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
-
-    await Promise.all([
-      this.analyticsService.gameEndMatch(gameEnd, SERVER_TYPE.LOCAL),
-      this.analyticsService.gameEndPlayerBot(gameEnd, SERVER_TYPE.LOCAL),
-      ...gameEnd.players.map((player) =>
-        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
-          matchId: gameEnd.matchId,
-          gameOptions: gameEnd.gameOptions,
-        }),
-      ),
-    ]);
+    return true;
   }
 
   /** 本地来源消耗会员积分前的限额检查，超限抛 400。 */

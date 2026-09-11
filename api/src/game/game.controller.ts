@@ -117,17 +117,22 @@ export class GameController {
 
     await this.dailyTaskService.recordGameEnd(players);
 
+    await this.recordMatchStats(gameEnd, serverType);
+    return this.gameService.getOK();
+  }
+
+  // 统计上报与结算规则无关，正式结算与本地结算共用
+  private async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
       this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-      ...players.map((p) =>
-        this.playerStatsLifetimeService.accumulate(p.steamId, p, {
+      ...gameEnd.players.map((player) =>
+        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
           matchId: gameEnd.matchId,
           gameOptions: gameEnd.gameOptions,
         }),
       ),
     ]);
-    return this.gameService.getOK();
   }
 
   // 本地主机受限结算：带限额与冷却，且不计算行为分。官方来源不会走这条路，
@@ -136,7 +141,10 @@ export class GameController {
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
   async endLocal(@Body() gameEnd: GameEndDto): Promise<string> {
-    await this.localHostService.settle(gameEnd);
+    const settled = await this.localHostService.settle(gameEnd);
+    if (settled) {
+      await this.recordMatchStats(gameEnd, SERVER_TYPE.LOCAL);
+    }
     return this.gameService.getOK();
   }
 }

@@ -83,28 +83,12 @@ describe('LocalHostService', () => {
     const dailyTaskService = {
       recordGameEnd: jest.fn().mockResolvedValue(undefined),
     };
-    const playerStatsLifetimeService = {
-      accumulate: jest.fn().mockResolvedValue(undefined),
-    };
-    const analyticsService = {
-      gameEndMatch: jest.fn().mockResolvedValue(undefined),
-      gameEndPlayerBot: jest.fn().mockResolvedValue(undefined),
-    };
     const service = new LocalHostService(
       repository as never,
       playerService as never,
       dailyTaskService as never,
-      playerStatsLifetimeService as never,
-      analyticsService as never,
     );
-    return {
-      service,
-      store,
-      playerService,
-      dailyTaskService,
-      playerStatsLifetimeService,
-      analyticsService,
-    };
+    return { service, store, playerService, dailyTaskService };
   }
 
   it('合法请求：加分、记录每日任务', async () => {
