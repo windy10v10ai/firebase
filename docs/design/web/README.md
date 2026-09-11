@@ -114,7 +114,7 @@ Steam 只支持 OpenID 2.0，Firebase 没有内置提供商，也不能当通用
 |------|------|------|--------|
 | 0 API 访问路径 | 验证浏览器直连 API（CORS、预检、白名单、本地开发）与 Next 转发的差异，定下方案 | 两种方式都在线上跑通一次公开接口，写下决定 | [phase-0-api-access.md](phase-0-api-access.md) |
 | 1 新框架迁移 | Tailwind 4 + 设计 token + 基础组件 + 新布局；重写首页、披露、两个激活页；清掉脚手架残留；`apiFetch` | 线上四个页面正常，antd 已移除 | `phase-1-migration.md` |
-| 2 Steam 登录 | 后端 `auth` 模块、guard 支持 ID Token、`@AllowWeb()`；网站 Firebase SDK、登录 / 回调、`AuthProvider`、头部登录按钮；激活页自动填 ID；「我的」页面（`GET /player/:id/info` 加 `@AllowWeb`） | 登录后激活页自动填 ID，「我的」页面能看到会员和属性 | `phase-2-steam-login.md` |
+| 2 Steam 登录 | 后端 `auth` 模块、guard 支持 ID Token、`@AllowWeb()`；网站 Firebase SDK、登录 / 回调、`AuthProvider`、头部登录按钮；激活页自动填 ID；「我的」页面（`GET /player/:id/info` 加 `@AllowWeb`） | 登录后激活页自动填 ID，「我的」页面能看到会员和属性 | `phase-2-steam-login.md`；登录入口交互见 [phase-2-login-entry.md](phase-2-login-entry.md) |
 | 3a 属性面板 | 查看、加点、洗点 | 接口加 `@AllowWeb` 与归属校验；e2e 覆盖「用别人 steamId 调被拒」 | `phase-3a-property.md` |
 | 3b 觉醒 | 已觉醒列表、解锁、随机 | 同上 | `phase-3b-awakening.md` |
 | 4 游戏联动 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 网站操作后回游戏刷新能看到结果 | `phase-4-game-sync.md` |
