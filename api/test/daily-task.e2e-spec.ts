@@ -234,7 +234,7 @@ describe('Daily task Phase1 (e2e)', () => {
     expect(secondSnapshot.candidates).toHaveLength(3);
   });
 
-  it('drops stale-day records without blocking base settlement', async () => {
+  it('drops stale-day records without blocking base points', async () => {
     const steamId = 105610004;
     mockDate('2026-08-16T10:00:00.000Z');
     const firstStart = await startGame(app, [steamId]);
@@ -436,7 +436,7 @@ describe('Daily task Phase1 (e2e)', () => {
     expect((await readDailyTask(steamId))?.refreshCount).toBe(0);
   });
 
-  it('caps battle points at 500 without dropping base settlement', async () => {
+  it('caps battle points at 500 without dropping base points', async () => {
     const steamId = 105610008;
     mockDate('2026-08-16T10:00:00.000Z');
     // 结算不再自动创建玩家，正式流程里玩家由开局接口创建

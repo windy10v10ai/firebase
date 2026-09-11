@@ -52,18 +52,18 @@ export class PlayerService {
     isDisconnect: boolean,
     isParty: boolean,
   ) {
-    const settledPoints = this.normalizeBattlePoints(battlePoints);
-    if (settledPoints !== battlePoints) {
+    const normalizedPoints = this.normalizeBattlePoints(battlePoints);
+    if (normalizedPoints !== battlePoints) {
       logger.warn('game/end: battlePoints out of range, normalizing', {
         steamId,
         battlePoints,
-        settledPoints,
+        normalizedPoints,
       });
     }
     // 结算不创建玩家：开局接口已经创建过，查不到说明这次结算没有对应的开局
     const player = await this.playerRepository.findById(steamId.toString());
     if (!player) {
-      logger.warn('game/end: player not found, skip settlement', { steamId });
+      logger.warn('game/end: player not found, skip', { steamId });
       return;
     }
 
@@ -72,7 +72,7 @@ export class PlayerService {
       player.winCount++;
     }
 
-    player.seasonPointTotal += settledPoints;
+    player.seasonPointTotal += normalizedPoints;
 
     if (isDisconnect) {
       player.disconnectCount++;
@@ -98,7 +98,7 @@ export class PlayerService {
   ): Promise<void> {
     const player = await this.playerRepository.findById(steamId.toString());
     if (!player) {
-      logger.warn('game/end/local: player not found, skip settlement', { steamId });
+      logger.warn('game/end/local: player not found, skip', { steamId });
       return;
     }
 
