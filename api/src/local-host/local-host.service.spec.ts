@@ -78,7 +78,7 @@ describe('LocalHostService', () => {
       findBySteamId: jest.fn((steamId: number) =>
         Promise.resolve(steamId in existingPlayers ? existingPlayers[steamId] : { matchCount: 20 }),
       ),
-      addLocalSeasonPoints: jest.fn().mockResolvedValue(undefined),
+      upsertGameEnd: jest.fn().mockResolvedValue(undefined),
     };
     const dailyTaskService = {
       recordGameEnd: jest.fn().mockResolvedValue(undefined),
@@ -95,9 +95,9 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService();
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledWith(1, 200);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1, true, 200, false, false);
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
   });
 
@@ -105,52 +105,42 @@ describe('LocalHostService', () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ players: [createPlayerDto({ steamId: 0 })] });
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
   });
 
   it('玩家不存在时拒绝，不加分，也不记录每日任务', async () => {
     const { service, playerService, dailyTaskService } = createService({ 1: undefined });
     const gameEnd = createGameEndDto();
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
-  });
-
-  it('matchCount <= 1 时拒绝', async () => {
-    const { service, playerService } = createService({ 1: { matchCount: 1 } });
-    const gameEnd = createGameEndDto();
-
-    await service.settle(gameEnd);
-
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
   });
 
   it('多人比赛中只要有一人未通过检查，整场比赛都不结算、不记录每日任务', async () => {
     const { service, playerService, dailyTaskService } = createService({
-      1: { matchCount: 20 },
-      2: { matchCount: 1 }, // 这个玩家不满足 matchCount 门槛
+      2: undefined, // 这个玩家不存在
     });
     const gameEnd = createGameEndDto({
       players: [createPlayerDto({ steamId: 1 }), createPlayerDto({ steamId: 2 })],
     });
 
-    await service.settle(gameEnd);
+    await service.recordGameEnd(gameEnd);
 
-    expect(playerService.addLocalSeasonPoints).not.toHaveBeenCalled();
+    expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
   });
 
   it('20 分钟内重复结算（不同 matchId）拒绝', async () => {
     const { service, playerService } = createService();
 
-    await service.settle(createGameEndDto({ matchId: 'match-1' }));
-    await service.settle(createGameEndDto({ matchId: 'match-2' }));
+    await service.recordGameEnd(createGameEndDto({ matchId: 'match-1' }));
+    await service.recordGameEnd(createGameEndDto({ matchId: 'match-2' }));
 
-    expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(1);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
 
   it('控制台启动的对局 matchId 均为 "0"，过了冷却窗口后不应被当成重复而拒绝', async () => {
@@ -158,11 +148,11 @@ describe('LocalHostService', () => {
     try {
       const { service, playerService } = createService();
 
-      await service.settle(createGameEndDto({ matchId: '0' }));
+      await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
       jest.advanceTimersByTime(COOLDOWN_MS + 1);
-      await service.settle(createGameEndDto({ matchId: '0' }));
+      await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
 
-      expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(2);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(2);
     } finally {
       jest.useRealTimers();
     }
@@ -176,7 +166,7 @@ describe('LocalHostService', () => {
       // 单局 battlePoints 会被 clamp 到 500，连续 4 局刚好打到 2000 上限
       // （均不拒绝），第 5 局再 + 500 = 2500 > 2000，应被拒绝。
       for (let i = 0; i < 4; i++) {
-        await service.settle(
+        await service.recordGameEnd(
           createGameEndDto({
             matchId: `match-${i}`,
             players: [createPlayerDto({ battlePoints: 800 })],
@@ -184,14 +174,14 @@ describe('LocalHostService', () => {
         );
         jest.advanceTimersByTime(COOLDOWN_MS + 1);
       }
-      await service.settle(
+      await service.recordGameEnd(
         createGameEndDto({
           matchId: 'match-4',
           players: [createPlayerDto({ battlePoints: 800 })],
         }),
       );
 
-      expect(playerService.addLocalSeasonPoints).toHaveBeenCalledTimes(4);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(4);
     } finally {
       jest.useRealTimers();
     }
@@ -210,7 +200,7 @@ describe('LocalHostService', () => {
         dailyCreatedOrderCount: 9,
       });
 
-      await service.settle(createGameEndDto());
+      await service.recordGameEnd(createGameEndDto());
 
       const saved = store.get('1');
       expect(saved?.dailyEarnedSeasonPoint).toBe(200);
@@ -253,7 +243,7 @@ describe('LocalHostService', () => {
         ],
       });
 
-      await service.settle(gameEnd);
+      await service.recordGameEnd(gameEnd);
 
       const saved = store.get('1');
       expect(saved?.dailyDate).toEqual(new Date('2026-09-02T00:00:00.000Z'));

@@ -9,7 +9,7 @@ import {
   mockDate,
   restoreDate,
 } from './util/util-http';
-import { createPlayer, getPlayer } from './util/util-player';
+import { createPlayer, getPlayer, getPlayerStatsLifetime } from './util/util-player';
 
 const gameEndLocalUrl = '/api/game/end/local';
 const gameStartUrl = '/api/game/start/';
@@ -98,7 +98,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     await app.close();
   });
 
-  it('合法本地结算：只加 seasonPointTotal，不改 matchCount/winCount/conductPoint', async () => {
+  it('合法本地结算：累加积分与战绩，不动行为分', async () => {
     const steamId = 105620001;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20, conductPoint: 95 });
@@ -114,12 +114,15 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(result.status).toBe(201);
     const player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(200);
-    expect(player.matchCount).toBe(20);
-    expect(player.winCount).toBe(0);
+    expect(player.matchCount).toBe(21);
+    expect(player.winCount).toBe(1);
     expect(player.conductPoint).toBe(95);
+
+    const statsLifetime = await getPlayerStatsLifetime(app, steamId);
+    expect(statsLifetime?.kills).toBe(5);
   });
 
-  it('非 LOCAL key（正式测试 key）：拒绝，不写分', async () => {
+  it('官方 key 也能走本地结算：拿到的是更严格的那套，没有损失', async () => {
     const steamId = 105620002;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20 });
@@ -134,7 +137,7 @@ describe('POST /api/game/end/local (e2e)', () => {
 
     expect(result.status).toBe(201);
     const player = await getPlayer(app, steamId);
-    expect(player.seasonPointTotal).toBe(0);
+    expect(player.seasonPointTotal).toBe(200);
   });
 
   it('玩家不存在：拒绝，不自动建号', async () => {
@@ -154,10 +157,10 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player).toBeFalsy();
   });
 
-  it('matchCount <= 1：拒绝', async () => {
+  it('刚建号的新玩家：第一局就能结算', async () => {
     const steamId = 105620004;
     mockDate('2026-08-16T01:00:00.000Z');
-    await createPlayer(app, { steamId, matchCount: 1 });
+    await createPlayer(app, { steamId });
 
     const result = await postAsLocalHost(
       app,
@@ -169,7 +172,8 @@ describe('POST /api/game/end/local (e2e)', () => {
 
     expect(result.status).toBe(201);
     const player = await getPlayer(app, steamId);
-    expect(player.seasonPointTotal).toBe(0);
+    expect(player.seasonPointTotal).toBe(200);
+    expect(player.matchCount).toBe(1);
   });
 
   it('20 分钟内重复结算（不同 matchId）拒绝；满 20 分钟后再次结算成功', async () => {
@@ -224,10 +228,9 @@ describe('POST /api/game/end/local (e2e)', () => {
 
   it('多人比赛中只要有一人未通过检查，整场比赛都不结算、不记录每日任务', async () => {
     const okSteamId = 105620012;
-    const badSteamId = 105620013; // matchCount 不够，会拖累整场比赛
+    const badSteamId = 105620013; // 没有建号，会拖累整场比赛
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId: okSteamId, matchCount: 20 });
-    await createPlayer(app, { steamId: badSteamId, matchCount: 1 });
 
     const result = await postAsLocalHost(
       app,

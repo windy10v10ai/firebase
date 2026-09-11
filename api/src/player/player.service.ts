@@ -50,47 +50,41 @@ export class PlayerService {
     isWinner: boolean,
     battlePoints: number,
     isDisconnect: boolean,
-    isParty: boolean,
-  ) {
-    const settledPoints = this.normalizeBattlePoints(battlePoints);
-    if (settledPoints !== battlePoints) {
+    calculateConductPoint: boolean,
+  ): Promise<void> {
+    const normalizedPoints = this.normalizeBattlePoints(battlePoints);
+    if (normalizedPoints !== battlePoints) {
       logger.warn('game/end: battlePoints out of range, normalizing', {
         steamId,
         battlePoints,
-        settledPoints,
+        normalizedPoints,
       });
     }
-    const player = await this.getOrNewPlayerBySteamId(steamId);
+    // 结算不创建玩家：开局接口已经创建过，查不到说明这次结算没有对应的开局
+    const player = await this.playerRepository.findById(steamId.toString());
+    if (!player) {
+      logger.warn('game/end: player not found, skip', { steamId });
+      return;
+    }
 
     player.matchCount++;
     if (isWinner) {
       player.winCount++;
     }
 
-    player.seasonPointTotal += settledPoints;
+    player.seasonPointTotal += normalizedPoints;
 
     if (isDisconnect) {
       player.disconnectCount++;
     }
-    // 行为分计算：只有组队时才计算
-    if (isParty) {
+    // 行为分被冒用会害到别人，只有可信来源才计算
+    if (calculateConductPoint) {
       player.conductPoint = this.playerConductService.calculateGameEndConductPoint(
         player.conductPoint ?? 100,
         isDisconnect,
       );
     }
 
-    await this.playerRepository.update(player);
-  }
-
-  // 本地主机受限结算专用：只加 seasonPointTotal，不动 matchCount/winCount/
-  // disconnectCount/conductPoint。玩家必须已存在，不自动创建。
-  async addLocalSeasonPoints(steamId: number, battlePoints: number): Promise<void> {
-    const player = await this.playerRepository.findById(steamId.toString());
-    if (!player) {
-      return;
-    }
-    player.seasonPointTotal += battlePoints;
     await this.playerRepository.update(player);
   }
 

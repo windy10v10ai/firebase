@@ -1,9 +1,11 @@
 import { Test } from '@nestjs/testing';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { MembersService } from '../members/members.service';
 import { PlayerSettingService } from '../player/player-setting.service';
+import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
@@ -30,6 +32,10 @@ describe('GameService', () => {
           },
         },
         {
+          provide: DailyTaskService,
+          useValue: { recordGameEnd: jest.fn() },
+        },
+        {
           provide: MembersService,
           useValue: {},
         },
@@ -47,6 +53,10 @@ describe('GameService', () => {
         {
           provide: AnalyticsService,
           useValue: {},
+        },
+        {
+          provide: PlayerStatsLifetimeService,
+          useValue: { accumulate: jest.fn() },
         },
         {
           provide: PlayerSettingService,
