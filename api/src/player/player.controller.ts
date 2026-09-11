@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { AllowLocal } from '../util/auth/allow-local.decorator';
+
 import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
@@ -24,6 +26,7 @@ export class PlayerController {
     private readonly playerGamePresetService: PlayerGamePresetService,
   ) {}
 
+  @AllowLocal()
   @Get('/ranking')
   @ApiOperation({ summary: 'Get player rankings' })
   getRanking(): Promise<PlayerRanking> {
@@ -43,6 +46,7 @@ export class PlayerController {
     return await this.playerSettingService.getPlayerSettingOrGenerateDefault(id);
   }
 
+  @AllowLocal()
   @Put(':id/setting')
   @ApiOperation({ summary: 'Update player setting' })
   async updatePlayerSetting(
@@ -52,6 +56,8 @@ export class PlayerController {
     return await this.playerSettingService.update(id, updatePlayerSettingDto);
   }
 
+  // game-preset 对应游戏内的「游戏选项」
+  @AllowLocal()
   @Put(':id/game-preset')
   @ApiOperation({ summary: 'Save or clear a per-map game preset' })
   async updatePlayerGamePreset(

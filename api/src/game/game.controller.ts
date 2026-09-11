@@ -1,28 +1,15 @@
-import {
-  Body,
-  Controller,
-  Get,
-  ParseArrayPipe,
-  ParseIntPipe,
-  Post,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Get, ParseArrayPipe, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
-import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
-import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
-import { PlayerService } from '../player/player.service';
-import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
-import { Public } from '../util/auth/public.decorator';
-import { SERVER_TYPE, SecretService } from '../util/secret/secret.service';
+import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { CurrentServerType } from '../util/auth/server-type.decorator';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
@@ -34,33 +21,21 @@ export class GameController {
   constructor(
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
-    private readonly playerService: PlayerService,
     private readonly analyticsService: AnalyticsService,
-    private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
-    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly dailyTaskService: DailyTaskService,
     private readonly localHostService: LocalHostService,
   ) {}
 
-  @Public()
+  @AllowLocal()
   @Get('start')
   async start(
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))
     steamIds: number[],
     @Query('matchId', new ParseIntPipe()) matchId: number,
     @Query('version') version: string,
-    @Req() req: Request,
+    @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<GameStart> {
-    const apiKey = req.headers['x-api-key'] as string;
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    if (serverType === SERVER_TYPE.UNKNOWN) {
-      logger.warn('game/start: unknown server type', { apiKey });
-      return {
-        players: [{} as PlayerInfoDto],
-        pointInfo: [],
-      };
-    }
     steamIds = this.gameService.validateSteamIds(steamIds);
 
     const pointInfo: PointInfoDto[] = [];
@@ -115,55 +90,28 @@ export class GameController {
 
   @ApiBody({ type: GameEndDto })
   @Post('end')
-  async end(@Body() gameEnd: GameEndDto, @Req() req: Request): Promise<string> {
-    const apiKey = req.headers['x-api-key'] as string;
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    const players = gameEnd.players;
-    const isParty = players.filter((p) => p.steamId > 0).length >= 2;
-    await Promise.all(
-      players.map((player) => {
-        if (player.steamId <= 0) {
-          return undefined;
-        }
-        return this.playerService.upsertGameEnd(
-          player.steamId,
-          player.teamId == gameEnd.winnerTeamId,
-          player.battlePoints,
-          player.isDisconnected,
-          isParty,
-        );
-      }),
-    );
-
-    await this.dailyTaskService.recordGameEnd(players);
-
-    await Promise.all([
-      this.analyticsService.gameEndMatch(gameEnd, serverType),
-      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-      ...players.map((p) =>
-        this.playerStatsLifetimeService.accumulate(p.steamId, p, {
-          matchId: gameEnd.matchId,
-          gameOptions: gameEnd.gameOptions,
-        }),
-      ),
-    ]);
+  async end(
+    @Body() gameEnd: GameEndDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
+  ): Promise<string> {
+    await this.gameService.recordGameEnd(gameEnd);
+    await this.gameService.recordMatchStats(gameEnd, serverType);
     return this.gameService.getOK();
   }
 
-  // 本地主机受限结算：只接受 LOCAL key，只加 seasonPointTotal + 记录每日任务，
-  // 不做正式结算的其余副作用（matchCount/winCount/conductPoint/GA4/终身统计等）。
-  @Public()
+  // 本地主机受限结算：带限额与冷却，且不计算行为分。官方来源不会走这条路，
+  // 真走了也只是拿到更严格的结算，没有损失，所以不额外区分来源。
+  @AllowLocal()
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
-  async endLocal(@Body() gameEnd: GameEndDto, @Req() req: Request): Promise<string> {
-    const apiKey = req.headers['x-api-key'] as string;
-    const serverType = this.secretService.getServerTypeByApiKey(apiKey);
-    if (serverType !== SERVER_TYPE.LOCAL) {
-      logger.warn('game/end/local: rejected, not a local server key', { serverType });
-      return this.gameService.getOK();
+  async endLocal(
+    @Body() gameEnd: GameEndDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
+  ): Promise<string> {
+    const recorded = await this.localHostService.recordGameEnd(gameEnd);
+    if (recorded) {
+      await this.gameService.recordMatchStats(gameEnd, serverType);
     }
-
-    await this.localHostService.settle(gameEnd);
     return this.gameService.getOK();
   }
 }

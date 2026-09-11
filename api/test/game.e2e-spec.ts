@@ -152,14 +152,13 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
-    it('未携带 API key 时返回不含有效数据', async () => {
+    it('未携带 API key 时返回 401', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const result = await request(app.getHttpServer())
         .get(gameStartUrl)
         .query({ steamIds: [100000000], matchId });
 
-      expect(result.status).toEqual(200);
-      expect(result.body.pointInfo).toEqual([]);
+      expect(result.status).toEqual(401);
     });
 
     describe('单人开始', () => {
@@ -656,22 +655,28 @@ describe('PlayerController (e2e)', () => {
         expect(result.body.ga4Config.serverType).toEqual('ANIME');
       });
 
-      it('未知来源主机 活动期间内 不获得活动积分', async () => {
+      it('未知来源主机 返回 401', async () => {
         const steamId = 100000905;
-        // 活动期间内
-        mockDate('2026-08-03T00:00:00.000Z');
 
-        // 未知来源提前返回，不会创建玩家记录，因此只校验响应体
         const result = await request(app.getHttpServer())
           .get(gameStartUrl)
-          .query({ steamIds: [steamId], matchId: 1 });
-        expect(result.status).toEqual(200);
-        expect(result.body.pointInfo).toEqual([]);
+          .query({ steamIds: [steamId], matchId: 1 })
+          .set('x-api-key', 'unknown-key');
+        expect(result.status).toEqual(401);
       });
     });
   });
 
   describe('/api/game/end (Post) 游戏结算', () => {
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    beforeAll(async () => {
+      for (const steamId of [
+        100000101, 100000102, 100000103, 100000104, 100000105, 100000111, 100000112, 100000113,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it.each([
       ['单人结算 0分', 100000101, 0, 0],
       ['单人结算 90分', 100000102, 90, 90],
@@ -892,6 +897,16 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('/api/game/end (Post) 行为分', () => {
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    beforeAll(async () => {
+      for (const steamId of [
+        100002001, 100002011, 100002012, 100002021, 100002022, 100002023, 100002024, 100002025,
+        100002026,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it('单人局不计算行为分', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100002001;

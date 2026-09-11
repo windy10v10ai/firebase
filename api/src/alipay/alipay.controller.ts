@@ -2,7 +2,11 @@ import { Body, Controller, Get, Header, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions/v2';
 
+import { LocalHostService } from '../local-host/local-host.service';
+import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { Public } from '../util/auth/public.decorator';
+import { CurrentServerType } from '../util/auth/server-type.decorator';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { AlipayService } from './alipay.service';
 import { AlipayNotifyDto } from './dto/alipay-notify.dto';
@@ -14,14 +18,37 @@ import { QueryAlipayOrderDto } from './dto/query-alipay-order.dto';
 @ApiTags('Alipay')
 @Controller('alipay')
 export class AlipayController {
-  constructor(private readonly alipayService: AlipayService) {}
+  constructor(
+    private readonly alipayService: AlipayService,
+    private readonly localHostService: LocalHostService,
+  ) {}
 
+  @AllowLocal()
   @Post('/order/create')
-  async createOrder(@Body() dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
-    logger.info('Alipay create order', { steamId: dto.steamId, productCode: dto.productCode });
-    return this.alipayService.createOrder(dto);
+  async createOrder(
+    @Body() dto: CreateAlipayOrderDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
+  ): Promise<CreateAlipayOrderResponseDto> {
+    const isLocal = serverType === SERVER_TYPE.LOCAL;
+    if (isLocal) {
+      await this.localHostService.assertOrderWithinLimit(dto.steamId);
+    }
+
+    logger.info('Alipay create order', {
+      steamId: dto.steamId,
+      productCode: dto.productCode,
+      serverType,
+    });
+    const response = await this.alipayService.createOrder(dto);
+
+    if (isLocal) {
+      await this.localHostService.recordOrder(dto.steamId);
+    }
+
+    return response;
   }
 
+  @AllowLocal()
   @Get('/order/query')
   async queryOrder(@Query() dto: QueryAlipayOrderDto): Promise<QueryAlipayOrderResponseDto> {
     return this.alipayService.getOrderStatus(dto.outTradeNo);

@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
+import { AnalyticsService } from '../analytics/analytics.service';
+import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
+import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
@@ -13,10 +17,48 @@ import { PointInfoDto } from './dto/point-info.dto';
 export class GameService {
   constructor(
     private readonly playerService: PlayerService,
+    private readonly dailyTaskService: DailyTaskService,
+    private readonly analyticsService: AnalyticsService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
   ) {}
+
+  /** 正式结算：累加每个玩家的战绩与积分，并记录每日任务。 */
+  async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
+    const players = gameEnd.players.filter((player) => player.steamId > 0);
+    // 行为分只在组队局计算
+    const isParty = players.length >= 2;
+
+    await Promise.all(
+      players.map((player) =>
+        this.playerService.upsertGameEnd(
+          player.steamId,
+          player.teamId === gameEnd.winnerTeamId,
+          player.battlePoints,
+          player.isDisconnected,
+          isParty,
+        ),
+      ),
+    );
+
+    await this.dailyTaskService.recordGameEnd(gameEnd.players);
+  }
+
+  /** 上报对局统计，与结算规则无关，正式结算与本地结算共用。 */
+  async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
+    await Promise.all([
+      this.analyticsService.gameEndMatch(gameEnd, serverType),
+      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+      ...gameEnd.players.map((player) =>
+        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
+          matchId: gameEnd.matchId,
+          gameOptions: gameEnd.gameOptions,
+        }),
+      ),
+    ]);
+  }
 
   getOK(): string {
     return 'OK';
@@ -122,8 +164,8 @@ export class GameService {
    * @returns GA4配置信息，如果不符合条件则返回undefined
    */
   getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
-    // 非官方服务器不发送GA4配置信息
-    if (serverType === SERVER_TYPE.LOCAL || serverType === SERVER_TYPE.UNKNOWN) {
+    // 来源不明的服务器不参与GA4统计
+    if (serverType === SERVER_TYPE.UNKNOWN) {
       return undefined;
     }
 

@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from 'nestjs-fireorm';
 
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
+import { LocalHostService } from '../local-host/local-host.service';
 import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
@@ -30,6 +31,7 @@ describe('AlipayService', () => {
   let membersService: jest.Mocked<MembersService>;
   let playerService: jest.Mocked<PlayerService>;
   let analyticsPurchaseService: jest.Mocked<AnalyticsPurchaseService>;
+  let localHostService: jest.Mocked<LocalHostService>;
 
   beforeEach(async () => {
     repo = {
@@ -64,6 +66,10 @@ describe('AlipayService', () => {
           provide: AnalyticsPurchaseService,
           useValue: { alipayPurchase: jest.fn().mockResolvedValue(undefined) },
         },
+        {
+          provide: LocalHostService,
+          useValue: { resetOrderCount: jest.fn().mockResolvedValue(undefined) },
+        },
       ],
     }).compile();
 
@@ -72,6 +78,7 @@ describe('AlipayService', () => {
     membersService = moduleRef.get(MembersService);
     playerService = moduleRef.get(PlayerService);
     analyticsPurchaseService = moduleRef.get(AnalyticsPurchaseService);
+    localHostService = moduleRef.get(LocalHostService);
   });
 
   describe('calculatePrice', () => {
@@ -322,6 +329,7 @@ describe('AlipayService', () => {
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
       expect(analyticsPurchaseService.alipayPurchase).not.toHaveBeenCalled();
       expect(repo.update).not.toHaveBeenCalled();
+      expect(localHostService.resetOrderCount).not.toHaveBeenCalled();
     });
 
     it('trade_status 非 TRADE_SUCCESS/TRADE_FINISHED：返回 failure', async () => {
@@ -444,6 +452,15 @@ describe('AlipayService', () => {
       const ev = analyticsPurchaseService.alipayPurchase.mock.calls[0][0];
       expect(ev.status).toBe(AlipayTradeStatus.SUCCESS);
       expect(ev.outTradeNo).toBe('ali-123-1-x');
+    });
+
+    it('成功后清零本地下单次数，让付过钱的玩家可以继续购买', async () => {
+      const order = buildOrder();
+      repo.findById.mockResolvedValueOnce(order);
+
+      await service.handleWebhook(buildNotify());
+
+      expect(localHostService.resetOrderCount).toHaveBeenCalledWith(order.steamId);
     });
 
     it('TRADE_FINISHED 也按成功处理（部分商户场景）', async () => {
