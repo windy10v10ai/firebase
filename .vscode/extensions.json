@@ -5,7 +5,6 @@
     "eamodio.gitlens",
     "orta.vscode-jest",
     "github.vscode-github-actions",
-    "gruntfuggly.todo-tree",
     "esbenp.prettier-vscode"
   ]
 }
