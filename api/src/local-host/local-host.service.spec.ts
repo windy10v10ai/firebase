@@ -1,7 +1,15 @@
+import { BadRequestException } from '@nestjs/common';
+
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 import { COOLDOWN_MS, LocalHostService } from './local-host.service';
+
+function getUtcMidnightForTest(): Date {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return today;
+}
 
 function createFakeRateLimitRepository() {
   const store = new Map<string, LocalRateLimit>();
@@ -187,5 +195,166 @@ describe('LocalHostService', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('跨日结算时三个当日计数一起归零', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2026-09-02T03:00:00.000Z'));
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: new Date('2026-09-01T00:00:00.000Z'),
+        dailyEarnedSeasonPoint: 1900,
+        dailyUsedMemberPoint: 900,
+        dailyCreatedOrderCount: 9,
+      });
+
+      await service.settle(createGameEndDto());
+
+      const saved = store.get('1');
+      expect(saved?.dailyEarnedSeasonPoint).toBe(200);
+      expect(saved?.dailyUsedMemberPoint).toBe(0);
+      expect(saved?.dailyCreatedOrderCount).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('多人结算中途跨过 UTC 零点，写回的 dailyDate 与 counters 仍是 check 那天的', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2026-09-02T23:59:00.000Z'));
+      const { service, store, playerService } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: new Date('2026-09-02T00:00:00.000Z'),
+        dailyEarnedSeasonPoint: 100,
+        dailyUsedMemberPoint: 0,
+        dailyCreatedOrderCount: 0,
+      });
+
+      // 第二个玩家的 check 完成时，把时钟推过 UTC 零点，模拟「先查完所有玩家
+      // 再统一写回」这段时间跨天：第一个玩家的 commit 应写 check 时算出的
+      // 那一天，而不是写回那一刻的新日期
+      let findBySteamIdCallCount = 0;
+      playerService.findBySteamId.mockImplementation(() => {
+        findBySteamIdCallCount += 1;
+        if (findBySteamIdCallCount === 2) {
+          jest.setSystemTime(new Date('2026-09-03T00:00:30.000Z'));
+        }
+        return Promise.resolve({ matchCount: 20 });
+      });
+
+      const gameEnd = createGameEndDto({
+        players: [
+          createPlayerDto({ steamId: 1, battlePoints: 200 }),
+          createPlayerDto({ steamId: 2, battlePoints: 150 }),
+        ],
+      });
+
+      await service.settle(gameEnd);
+
+      const saved = store.get('1');
+      expect(saved?.dailyDate).toEqual(new Date('2026-09-02T00:00:00.000Z'));
+      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  describe('会员积分限额', () => {
+    it('单笔超过 50 拒绝', async () => {
+      const { service } = createService();
+
+      await expect(service.assertMemberPointWithinLimit(1, 51)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('单笔等于 50 通过', async () => {
+      const { service } = createService();
+
+      await expect(service.assertMemberPointWithinLimit(1, 50)).resolves.toBeUndefined();
+    });
+
+    it('当日累计超过 1000 拒绝', async () => {
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: getUtcMidnightForTest(),
+        dailyUsedMemberPoint: 980,
+      });
+
+      await expect(service.assertMemberPointWithinLimit(1, 50)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('记账累加当日消耗，不动其他计数', async () => {
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: getUtcMidnightForTest(),
+        dailyEarnedSeasonPoint: 300,
+        dailyUsedMemberPoint: 100,
+        dailyCreatedOrderCount: 2,
+      });
+
+      await service.recordMemberPointUsage(1, 20, 'lottery');
+
+      const saved = store.get('1');
+      expect(saved?.dailyUsedMemberPoint).toBe(120);
+      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+      expect(saved?.dailyCreatedOrderCount).toBe(2);
+    });
+  });
+
+  describe('支付宝下单限流', () => {
+    it('当日第 11 次下单被拒', async () => {
+      const { service, store } = createService();
+      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyCreatedOrderCount: 10 });
+
+      await expect(service.assertOrderWithinLimit(1)).rejects.toThrow(BadRequestException);
+    });
+
+    it('当日第 10 次下单通过', async () => {
+      const { service, store } = createService();
+      store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyCreatedOrderCount: 9 });
+
+      await expect(service.assertOrderWithinLimit(1)).resolves.toBeUndefined();
+    });
+
+    it('记账累加下单次数', async () => {
+      const { service, store } = createService();
+
+      await service.recordOrder(1);
+
+      expect(store.get('1')?.dailyCreatedOrderCount).toBe(1);
+    });
+
+    it('支付成功清零下单次数，不动积分计数', async () => {
+      const { service, store } = createService();
+      store.set('1', {
+        id: '1',
+        dailyDate: getUtcMidnightForTest(),
+        dailyUsedMemberPoint: 100,
+        dailyCreatedOrderCount: 10,
+      });
+
+      await service.resetOrderCount(1);
+
+      const saved = store.get('1');
+      expect(saved?.dailyCreatedOrderCount).toBe(0);
+      expect(saved?.dailyUsedMemberPoint).toBe(100);
+    });
+
+    it('没有限流记录时清零是空操作', async () => {
+      const { service, store } = createService();
+
+      await service.resetOrderCount(1);
+
+      expect(store.get('1')).toBeUndefined();
+    });
   });
 });

@@ -9,7 +9,7 @@
 以下保持英文：
 
 - 代码标识符、提交信息
-- PR 标题与正文（见「推送到 develop 的流程」）
+- PR 标题（PR 正文用默认回复语言，见「推送到 develop 的流程」）
 - 技术术语、API 名称、类名、函数名等标识符，引用时保持原样
 
 **代码注释用中文**，写法见「注释规约」。
@@ -33,7 +33,7 @@
 
 以下各有自己的规约，冲突时以各自规约为准：
 
-- 代码注释（中文，见「注释规约」）、提交信息与 PR 标题正文（英文）
+- 代码注释（中文，见「注释规约」）、提交信息与 PR 标题（英文）；PR 正文用默认回复语言，写法遵循上方「回复风格」
 - CLAUDE.md / AGENTS.md 这类规则文档：首要读者是模型，**准确优先于通俗**，该写全的字段名、API 名、路径要写全，不为了好懂而模糊化
 
 ## 项目结构
@@ -44,12 +44,19 @@
 | `web/` | Next.js 前端 |
 | `extensions/` | Firebase BigQuery export 配置 |
 
-## 设计文档
+## 设计文档与实施计划
 
-设计文档写到 `docs/design/<主题>/<阶段>.md`，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+两类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+
+| 类型 | 路径 | 进 git |
+|---|---|---|
+| 设计文档（brainstorming 产出的 spec） | `docs/design/<主题>/<阶段>.md` | 是 |
+| 实施计划（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已覆盖 `docs/superpowers/` |
 
 - `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`
 - `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
+
+实施计划不进 git：它随代码合入即失效，留在仓库里会与现行设计混淆，且体量大、不适合放进 PR 供人 review。
 
 ## 本地开发
 
@@ -100,7 +107,7 @@ feature/<issue-id>-<short-kebab-summary>
 
 1. 实现完成后先跑完整校验（unit + lint + e2e，见上方「测试」一节），全部通过才能推送
 2. `git push -u origin <branch-name>`
-3. `gh pr create`，base 为 `develop`；PR body 用 `## Summary` + `## Test plan`（勾选已跑过的校验项），不需要审批的小改动也走这个流程；标题用英文
+3. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。标题用英文；正文用默认回复语言，写法遵循「回复风格」一节，至少包含改动说明与测试清单两部分（勾选已跑过的校验项）
 4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
 5. 不再依赖 `.github/workflows/create_develop_pr.yml` 自动建 PR（已废弃删除）——push 后必须显式执行第 3 步
 
@@ -133,6 +140,8 @@ feature/<issue-id>-<short-kebab-summary>
 
 - 遵循 KISS、DRY、YAGNI：优先选择直接、易读且满足当前需求的实现，避免为低概率场景引入不必要的抽象、复杂性或基础设施。
 - 仅在确有复用价值时提取公共逻辑；不要为了假设的未来需求提前设计。
+- **改动范围保持最小**：用最简单的机制满足当前需求，不顺手重构、不扩大 diff。
+- 「最小」指的是复杂度，不是字符数。为省几个字段而让多处代码必须遵守同一条隐式约定，是把复杂度从数据挪到了逻辑里，不算简化。
 
 ### 常量（无状态、编译期确定的字面量）
 

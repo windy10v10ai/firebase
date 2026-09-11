@@ -5,6 +5,8 @@ import { getLocalApiKey, initTest, mockDate, restoreDate } from './util/util-htt
 import { createPlayer } from './util/util-player';
 
 const STEAM_ID = 310010001;
+const GAME_START_STEAM_ID = 310010002;
+const DAILY_TASK_STEAM_ID = 310010003;
 
 describe('本地 key 放行名单 (e2e)', () => {
   let app: INestApplication;
@@ -32,14 +34,14 @@ describe('本地 key 放行名单 (e2e)', () => {
         .get('/api/player/ranking')
         .set('x-api-key', localKey);
       restoreDate();
-      expect(res.status).not.toBe(401);
+      expect(res.status).toBe(200);
     });
 
     it('GET /api/player/:steamId/info', async () => {
       const res = await request(app.getHttpServer())
         .get(`/api/player/${STEAM_ID}/info`)
         .set('x-api-key', localKey);
-      expect(res.status).not.toBe(401);
+      expect(res.status).toBe(200);
     });
 
     it('PUT /api/player/:id/setting', async () => {
@@ -47,7 +49,7 @@ describe('本地 key 放行名单 (e2e)', () => {
         .put(`/api/player/${STEAM_ID}/setting`)
         .set('x-api-key', localKey)
         .send({ isRememberAbilityKey: true, activeAbilityKey: 'Q' });
-      expect(res.status).not.toBe(401);
+      expect(res.status).toBe(200);
     });
 
     it('PUT /api/player/:id/game-preset', async () => {
@@ -55,7 +57,24 @@ describe('本地 key 放行名单 (e2e)', () => {
         .put(`/api/player/${STEAM_ID}/game-preset`)
         .set('x-api-key', localKey)
         .send({ map: 'dota', remember: true, difficulty: 3 });
-      expect(res.status).not.toBe(401);
+      expect(res.status).toBe(200);
+    });
+
+    it('GET /api/game/start', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/game/start')
+        .query({ steamIds: `${GAME_START_STEAM_ID}`, matchId: 1, version: 'v4.05' })
+        .set('x-api-key', localKey);
+      expect(res.status).toBe(200);
+      expect(res.body.ga4Config.serverType).toBe('LOCAL');
+    });
+
+    it('POST /api/daily-task/refresh', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/daily-task/refresh')
+        .set('x-api-key', localKey)
+        .send({ steamId: DAILY_TASK_STEAM_ID, dayId: '20260909' });
+      expect(res.status).toBe(201);
     });
   });
 

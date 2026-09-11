@@ -655,14 +655,13 @@ describe('PlayerController (e2e)', () => {
         expect(result.body.ga4Config.serverType).toEqual('ANIME');
       });
 
-      it('未知来源主机 活动期间内 返回 401', async () => {
+      it('未知来源主机 返回 401', async () => {
         const steamId = 100000905;
-        // 活动期间内
-        mockDate('2026-08-03T00:00:00.000Z');
 
         const result = await request(app.getHttpServer())
           .get(gameStartUrl)
-          .query({ steamIds: [steamId], matchId: 1 });
+          .query({ steamIds: [steamId], matchId: 1 })
+          .set('x-api-key', 'unknown-key');
         expect(result.status).toEqual(401);
       });
     });

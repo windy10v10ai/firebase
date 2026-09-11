@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
+import { LocalHostService } from '../local-host/local-host.service';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
 import { AwakenHeroDto } from '../player-hero-awakening/dto/awaken-hero.dto';
@@ -21,6 +22,8 @@ import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { CurrentServerType } from '../util/auth/server-type.decorator';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { PlayerInfoInclude } from './assemblers/player-dto.assembler';
 import { PlayerInfoDto } from './dto/player-info.dto';
@@ -34,6 +37,7 @@ export class PlayerInfoController {
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly playerService: PlayerService,
     private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
+    private readonly localHostService: LocalHostService,
   ) {}
 
   @AllowLocal()
@@ -53,10 +57,25 @@ export class PlayerInfoController {
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, include);
   }
 
+  @AllowLocal()
   @Post('/member-points/use')
   @ApiOperation({ summary: 'Use available member points' })
-  async useMemberPoint(@Body() dto: UsePlayerMemberPointsDto): Promise<PlayerInfoDto> {
+  async useMemberPoint(
+    @Body() dto: UsePlayerMemberPointsDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
+  ): Promise<PlayerInfoDto> {
+    const isLocal = serverType === SERVER_TYPE.LOCAL;
+    if (isLocal) {
+      await this.localHostService.assertMemberPointWithinLimit(dto.steamId, dto.memberPoint);
+    }
+
     await this.playerService.useMemberPoint(dto);
+
+    // 扣分失败会先抛出，所以记账放在成功之后，失败不占额度
+    if (isLocal) {
+      await this.localHostService.recordMemberPointUsage(dto.steamId, dto.memberPoint, dto.reason);
+    }
+
     return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
   }
 
