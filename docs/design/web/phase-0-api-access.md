@@ -120,13 +120,13 @@
 
 ## 6. 测试清单
 
-- [ ] e2e：`OPTIONS` 带白名单内 `Origin` 返回 204 且带 `Access-Control-Allow-Origin` / `Allow-Headers` 含 `authorization`
-- [ ] e2e：白名单外 `Origin` 不返回 `Access-Control-Allow-Origin`
-- [ ] e2e：未带 key 的 `GET` 返回 401 时仍带 CORS 头
-- [ ] 本地 5.1 全部步骤
-- [ ] 本地 5.2 全部步骤
+- [x] e2e：`OPTIONS` 带白名单内 `Origin` 返回 204 且带 `Access-Control-Allow-Origin` / `Allow-Headers` 含 `authorization`
+- [x] e2e：白名单外 `Origin` 不返回 `Access-Control-Allow-Origin`
+- [x] e2e：未带 key 的 `GET` 返回 401 时仍带 CORS 头
+- [x] e2e：不带 `Origin` 的请求不受影响
+- [x] 本地 5.1 全部步骤（验收接口按「结论」一节修正）
 - [ ] dev 环境 5.3 全部步骤
-- [ ] `cd api && npm run lint && npm run test && npm run test:e2e`
+- [x] `cd api && npm run lint && npm run test && npm run test:e2e`
 
 ## 7. 本批次要拍板的点
 
@@ -149,4 +149,31 @@
 
 ## 结论
 
-待验证后填写：选定方案、延迟数据、发现的问题。
+**采用方案 A：浏览器直连 API。** 本地验证通过，dev 环境待部署后复验。
+
+### 定案
+
+- API 在 `AppGlobalSettings` 里开 CORS。白名单四项：`https://windy10v10ai.com`、`https://prod--windy10v10ai.asia-east1.hosted.app`、`https://dev--windy10v10ai.asia-east1.hosted.app`、`http://localhost:3000`；允许头 `Authorization`、`Content-Type`；预检缓存 24 小时。
+- 网站删掉 `/api/afdian`、`/api/kofi`、`/api/[...path]` 三个 route 与 `firebase-functions` 依赖，激活表单直接调 API。
+- `API_DOMAIN` 改名 `NEXT_PUBLIC_API_DOMAIN`。两个 App Hosting 后端共用 `web/.env` 的同一个值——API 只有一个线上环境，不需要分别配置。
+- `www.windy10v10ai.com` 不进白名单：它 302 跳到不带 www 的域名，浏览器最终停在后者。
+
+### 本地验证结果（2026-09-11）
+
+页面在 `localhost:3000`，API 为本分支的 Nest：
+
+- `GET /api/player/ranking` 带 `Authorization`：先 `OPTIONS` 204 再 `GET` 401，浏览器能读到 JSON 错误体。
+- `POST /api/afdian/order/active`：先 `OPTIONS` 204 再 `POST` 201，拿到 `{"result":false}`。
+- `GET /api/`：简单请求，无预检，200。
+- 预检响应带 `Access-Control-Max-Age: 86400` 与 `Vary: Origin`；白名单外的来源拿不到 `Access-Control-Allow-Origin`；不带 `Origin` 的请求（游戏客户端）行为不变。
+
+### 两处与原计划不符
+
+1. **`GET /api` 在线上到不了。** Hosting rewrite 是 `^/api/.*`，函数白名单是 `^/api/(game|afdian|...)`，裸 `/api` 两个都不匹配，经 hosting 链路实测 404。验收接口改用 `GET /api/player/ranking` 与 `POST /api/afdian/order/active`。
+2. **emulator 会伪造 CORS 头。** functions emulator 对所有请求套了一层 `cors({ origin: true })`，预检由它直接答，任何 `Origin` 都放行。所以经 `localhost:5000` 的本地链路只能验通路，验不了白名单；白名单以 e2e（直接跑 Nest）和 dev 环境为准。
+
+### 待 dev 环境验证
+
+- 预检响应经 Cloudflare 与 Hosting 是否按 `Vary: Origin` 分源缓存：用两个不同 `Origin` 连发 `curl -X OPTIONS`。
+- App Hosting 构建期注入 `NEXT_PUBLIC_API_DOMAIN` 是否正确：dev 站点的激活表单能提交即通过。
+- 延迟对比：dev 站点（直连）与正式站点（本次发布前仍是转发）各发 20 次同一个公开 `GET`，记录中位 TTFB。
