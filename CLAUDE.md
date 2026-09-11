@@ -173,3 +173,16 @@ feature/<issue-id>-<short-kebab-summary>
 3. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。标题用英文；正文用中文，写法遵循「回复风格」，至少包含改动说明与测试清单两部分（勾选已跑过的校验项）
 4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
 5. 没有自动建 PR 的 workflow，push 之后必须显式执行第 3 步
+
+### 合并方式
+
+合并由用户执行，未明确要求不要代劳。要执行时按 PR 的去向选方式，不要用 `gh pr merge` 的交互式选择：
+
+| PR | 方式 | 命令 |
+|---|---|---|
+| `feature` / `fix` / `chore` / `docs` → `develop` | squash | `gh pr merge <编号> --squash` |
+| `develop` → `main`（Release PR） | merge commit | `gh pr merge <编号> --merge` |
+
+feature 分支的中间提交对 `develop` 的历史没有价值，压成一条。`develop` → `main` 是两条长期分支对齐，保留每条提交，`main` 的历史才与 `develop` 一一对应。
+
+仓库设置里 rebase 已关闭，不是可选项。
