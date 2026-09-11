@@ -77,6 +77,15 @@
 - **E2E**：`cd api && npm run test:e2e`（自带 `firebase emulators:exec`，跑前要确认 8080 没被占用）
 - **Lint**：`cd api && npm run lint`、`cd web && npm run lint`
 
+## 浏览器验证
+
+改动会影响网站页面行为时（不限于 `web/`，API 的 CORS、鉴权、响应格式同样算），**最终验证必须在浏览器里实际操作页面**。`curl`、控制台 `fetch`、unit、e2e 都只是中间步骤，不能替代这一步。
+
+- 工具：一律先用 Claude 桌面版内置浏览器（`mcp__Claude_Browser__*`），它已经带上 Chrome 的登录态；只有它做不到的场景才换 Chrome 扩展（`mcp__claude-in-chrome__*`）
+- 操作真实页面：点按钮、填表单、提交，再从 network 面板确认请求方法、状态码、响应体，并确认 console 没有报错
+- 被验证的服务必须由**本分支**启动。端口被占用时先确认归属（可能是其他会话的旧代码），不要直接接着用，也不要直接 kill
+- 把做了什么操作、看到什么请求与响应写进 PR 正文的测试清单
+
 ## 常见坑
 
 - `firestore-backup/` 不在仓库里，是从 GCP `gsutil` 拉的；没有它时不要带 `--import` 启动 emulator

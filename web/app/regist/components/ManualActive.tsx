@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useTranslations } from 'next-intl';
 import React, { useState, useEffect } from 'react';
 
+import { afdianActiveUrl, kofiActiveUrl } from '@/config/constant';
+
 import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
 import { PlatformType } from '../../types/platform';
 
@@ -59,12 +61,7 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
   };
 
   const requestActive = async () => {
-    var requestUrl = '';
-    if (props.activeType === 'afdian') {
-      requestUrl = '/api/afdian';
-    } else if (props.activeType === 'kofi') {
-      requestUrl = '/api/kofi';
-    }
+    const requestUrl = props.activeType === 'afdian' ? afdianActiveUrl : kofiActiveUrl;
 
     await axios
       .post(requestUrl, {
