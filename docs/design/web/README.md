@@ -109,16 +109,16 @@ Steam 只支持 OpenID 2.0，Firebase 没有内置提供商，也不能当通用
 
 ## 7. 分批计划
 
-| 批次 | 内容 | 验收 | 子文档 |
-|------|------|------|--------|
-| 0 API 访问路径 | 验证浏览器直连 API（CORS、预检、白名单、本地开发）与 Next 转发的差异，定下方案 | 两种方式都在线上跑通一次公开接口，写下决定 | [phase-0-api-access.md](phase-0-api-access.md) |
-| 1 新框架迁移 | 清残留与移动端布局修复、Next 16、Tailwind 4 + 设计 token + 基础组件、去 antd + `apiFetch`、React 19，拆成 1a–1e 五次上线 | 线上四个页面正常，手机能完成激活，antd 已移除 | [phase-1-migration.md](phase-1-migration.md) |
-| 2 Steam 登录 | 后端 `auth` 模块、guard 支持 ID Token、`@AllowWeb()`；网站 Firebase SDK、登录 / 回调、`AuthProvider`、头部登录按钮；激活页自动填 ID；「我的」页面（`GET /player/:id/info` 加 `@AllowWeb`） | 登录后激活页自动填 ID，「我的」页面能看到会员和属性 | `phase-2-steam-login.md`；登录入口交互见 [phase-2-login-entry.md](phase-2-login-entry.md) |
-| 3a 属性面板 | 查看、加点、洗点 | 接口加 `@AllowWeb` 与归属校验；e2e 覆盖「用别人 steamId 调被拒」 | `phase-3a-property.md` |
-| 3b 觉醒 | 已觉醒列表、解锁、随机 | 同上 | `phase-3b-awakening.md` |
-| 4 游戏联动 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 网站操作后回游戏刷新能看到结果 | `phase-4-game-sync.md` |
-| 5 GA4 | 网站接入 GA4 | 线上能看到页面访问事件 | `phase-5-ga4.md` |
-| 6 会员 | 积分、到期时间、支付宝二维码购买 | 同 3a | `phase-6-membership.md` |
+| 批次 | 跟踪 issue | 内容 | 验收 | 子文档 |
+|------|------|------|------|--------|
+| 0 API 访问路径 | 已完成（PR #1114） | 验证浏览器直连 API（CORS、预检、白名单、本地开发）与 Next 转发的差异，定下方案 | 两种方式都在线上跑通一次公开接口，写下决定 | [phase-0-api-access.md](phase-0-api-access.md) |
+| 1 新框架迁移 | #1117 | 清残留与移动端布局修复、Next 16、Tailwind 4 + 设计 token + 基础组件、去 antd + `apiFetch`、React 19，拆成 1a–1e 五次上线 | 线上四个页面正常，手机能完成激活，antd 已移除 | [phase-1-migration.md](phase-1-migration.md) |
+| 2 Steam 登录 | #1118 | 后端 `auth` 模块、guard 支持 ID Token、`@AllowWeb()`；网站 Firebase SDK、登录 / 回调、`AuthProvider`、头部登录按钮；激活页自动填 ID；「我的」页面（`GET /player/:id/info` 加 `@AllowWeb`） | 登录后激活页自动填 ID，「我的」页面能看到会员和属性 | `phase-2-steam-login.md`；登录入口交互见 [phase-2-login-entry.md](phase-2-login-entry.md) |
+| 3a 属性面板 | #1119 | 查看、加点、洗点 | 接口加 `@AllowWeb` 与归属校验；e2e 覆盖「用别人 steamId 调被拒」 | `phase-3a-property.md` |
+| 3b 觉醒 | #1120 | 已觉醒列表、解锁、随机 | 同上 | `phase-3b-awakening.md` |
+| 4 游戏联动 | #1121 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 网站操作后回游戏刷新能看到结果 | `phase-4-game-sync.md` |
+| 5 GA4 | #1122 | 网站接入 GA4 | 线上能看到页面访问事件 | `phase-5-ga4.md` |
+| 6 会员 | #1123 | 积分、到期时间、支付宝二维码购买 | 同 3a | `phase-6-membership.md` |
 
 批次 0、1、2 顺序执行。3a、3b 互相独立，3a 先做，它直接对应加点被禁的痛点。4 要等 3a、3b 上线。5、6 不急，按序排在后面。
 
