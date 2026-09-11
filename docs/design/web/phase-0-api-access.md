@@ -125,7 +125,7 @@
 - [x] e2e：未带 key 的 `GET` 返回 401 时仍带 CORS 头
 - [x] e2e：不带 `Origin` 的请求不受影响
 - [x] 本地 5.1 全部步骤（验收接口按「结论」一节修正）
-- [ ] dev 环境 5.3 全部步骤
+- [x] dev 环境 5.3 全部步骤
 - [x] `cd api && npm run lint && npm run test && npm run test:e2e`
 
 ## 7. 本批次要拍板的点
@@ -172,8 +172,16 @@
 1. **`GET /api` 在线上到不了。** Hosting rewrite 是 `^/api/.*`，函数白名单是 `^/api/(game|afdian|...)`，裸 `/api` 两个都不匹配，经 hosting 链路实测 404。验收接口改用 `GET /api/player/ranking` 与 `POST /api/afdian/order/active`。
 2. **emulator 会伪造 CORS 头。** functions emulator 对所有请求套了一层 `cors({ origin: true })`，预检由它直接答，任何 `Origin` 都放行。所以经 `localhost:5000` 的本地链路只能验通路，验不了白名单；白名单以 e2e（直接跑 Nest）和 dev 环境为准。
 
-### 待 dev 环境验证
+### dev 环境验证结果（2026-09-11）
 
-- 预检响应经 Cloudflare 与 Hosting 是否按 `Vary: Origin` 分源缓存：用两个不同 `Origin` 连发 `curl -X OPTIONS`。
-- App Hosting 构建期注入 `NEXT_PUBLIC_API_DOMAIN` 是否正确：dev 站点的激活表单能提交即通过。
-- 延迟对比：dev 站点（直连）与正式站点（本次发布前仍是转发）各发 20 次同一个公开 `GET`，记录中位 TTFB。
+API 先单独部署到生产（`firebase deploy --only functions`），网站随 develop 合并自动 rollout 到 dev 后端，两者就位后验证：
+
+- **预检没有被 CDN 串源缓存。** 交替用 dev 域名、正式域名、白名单外域名连发 `curl -X OPTIONS`，`Access-Control-Allow-Origin` 每次都跟着当次 `Origin` 走，白名单外拿不到该头；响应带 `Vary: Origin`，Cloudflare 标 `cf-cache-status: DYNAMIC`。
+- **构建期注入正确。** dev 站点激活页的 JS chunk 里是 `https://api.windy10v10ai.com`；旧的转发路由返回 404，确认已从产物中移除。
+- **直连比转发快一倍。** 同一个公开 `GET` 各发 15 次，中位 TTFB：直连 0.167 秒，经网站转发 0.341 秒（转发路径最慢一次 0.755 秒）。测量点在开发者本机，不代表玩家所在地区，但两条路径条件相同。
+
+浏览器实操（dev 站点，两个激活页各提交一次）：页面显示的是接口返回的业务失败文案，而非异常信息——请求失败时代码会把异常信息原样显示，据此可区分网络失败与业务失败。页面内发起的请求另行确认：`POST` 得到 `201 {"result":false}`，带无效 token 的 `GET` 得到 `401` 且错误体可读，console 无 CORS 报错。
+
+### 发布
+
+生产网站随 develop → main 的 Release PR 一起切换到直连；API 已先行部署，发布时不再变更。
