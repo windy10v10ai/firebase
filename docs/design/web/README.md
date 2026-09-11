@@ -33,7 +33,7 @@ Firestore
 - **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染，服务端不碰用户数据。
 - **NestJS API** 是唯一的数据入口。游戏客户端和网站调同一套接口，差别只在鉴权方式。
 - **Firebase Auth** 只用来签发和续期 ID Token，网站不直接读写 Firestore。
-- **浏览器到 API 的路径**待批次 0 验证：直连（需要 API 开 CORS）或保留 Next 转发。
+- **浏览器直连 API**（批次 0 定案）：API 开 CORS 白名单，Next 服务端不再转发。
 
 ## 3. 鉴权设计
 
@@ -99,14 +99,13 @@ Steam 只支持 OpenID 2.0，Firebase 没有内置提供商，也不能当通用
 - 不做「记录」页：后端没有积分流水，只有当日限额计数；要做得新建集合并在每处积分变动加写入，价值不够。
 - 会员页排最后：本地主机已能购买会员，网站只是第二入口。
 
-## 6. 待验证
+## 6. 浏览器到 API 的路径
 
-**浏览器直连 API 还是保留 Next 转发**，批次 0 验证后决定，利弊分析与验证步骤见 [phase-0-api-access.md](phase-0-api-access.md)。
+**直连**，批次 0 已验证定案，取舍与验证记录见 [phase-0-api-access.md](phase-0-api-access.md)。
 
-| 方案 | 代价 | 好处 |
-|------|------|------|
-| 直连 | API 开 CORS，每个带 Authorization 的请求多一次预检（浏览器会缓存） | 少一跳；Next 服务端零动态逻辑；本地开发直接指 localhost:3001 |
-| 保留转发 | 多一跳；Next 保留 route 文件和 `firebase-functions` 依赖 | 同源无 CORS；将来要加服务端秘密时有地方放 |
+- API 的 CORS 白名单收正式域名、prod / dev 两个 App Hosting 域名和 `http://localhost:3000`，预检缓存 24 小时。
+- 网站不再有任何 API 转发路由，域名由 `NEXT_PUBLIC_API_DOMAIN` 在构建期注入。
+- 本地开发把它指向 `http://localhost:3001` 就能跳过 emulator。
 
 ## 7. 分批计划
 
