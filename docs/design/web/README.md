@@ -101,7 +101,7 @@ Steam 只支持 OpenID 2.0，Firebase 没有内置提供商，也不能当通用
 
 ## 6. 待验证
 
-**浏览器直连 API 还是保留 Next 转发**，批次 0 验证后决定。
+**浏览器直连 API 还是保留 Next 转发**，批次 0 验证后决定，利弊分析与验证步骤见 [phase-0-api-access.md](phase-0-api-access.md)。
 
 | 方案 | 代价 | 好处 |
 |------|------|------|
@@ -112,7 +112,7 @@ Steam 只支持 OpenID 2.0，Firebase 没有内置提供商，也不能当通用
 
 | 批次 | 内容 | 验收 | 子文档 |
 |------|------|------|--------|
-| 0 API 访问路径 | 验证浏览器直连 API（CORS、预检、白名单、本地开发）与 Next 转发的差异，定下方案 | 两种方式都在线上跑通一次公开接口，写下决定 | `phase-0-api-access.md` |
+| 0 API 访问路径 | 验证浏览器直连 API（CORS、预检、白名单、本地开发）与 Next 转发的差异，定下方案 | 两种方式都在线上跑通一次公开接口，写下决定 | [phase-0-api-access.md](phase-0-api-access.md) |
 | 1 新框架迁移 | Tailwind 4 + 设计 token + 基础组件 + 新布局；重写首页、披露、两个激活页；清掉脚手架残留；`apiFetch` | 线上四个页面正常，antd 已移除 | `phase-1-migration.md` |
 | 2 Steam 登录 | 后端 `auth` 模块、guard 支持 ID Token、`@AllowWeb()`；网站 Firebase SDK、登录 / 回调、`AuthProvider`、头部登录按钮；激活页自动填 ID；「我的」页面（`GET /player/:id/info` 加 `@AllowWeb`） | 登录后激活页自动填 ID，「我的」页面能看到会员和属性 | `phase-2-steam-login.md` |
 | 3a 属性面板 | 查看、加点、洗点 | 接口加 `@AllowWeb` 与归属校验；e2e 覆盖「用别人 steamId 调被拒」 | `phase-3a-property.md` |
