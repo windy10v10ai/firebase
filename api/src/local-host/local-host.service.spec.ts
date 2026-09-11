@@ -78,7 +78,7 @@ describe('LocalHostService', () => {
       findBySteamId: jest.fn((steamId: number) =>
         Promise.resolve(steamId in existingPlayers ? existingPlayers[steamId] : { matchCount: 20 }),
       ),
-      upsertLocalGameEnd: jest.fn().mockResolvedValue(undefined),
+      upsertGameEnd: jest.fn().mockResolvedValue(undefined),
     };
     const dailyTaskService = {
       recordGameEnd: jest.fn().mockResolvedValue(undefined),
@@ -97,7 +97,7 @@ describe('LocalHostService', () => {
 
     await service.recordGameEnd(gameEnd);
 
-    expect(playerService.upsertLocalGameEnd).toHaveBeenCalledWith(1, true, 200, false);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1, true, 200, false, false);
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
   });
 
@@ -107,7 +107,7 @@ describe('LocalHostService', () => {
 
     await service.recordGameEnd(gameEnd);
 
-    expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
+    expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
   });
 
   it('玩家不存在时拒绝，不加分，也不记录每日任务', async () => {
@@ -116,7 +116,7 @@ describe('LocalHostService', () => {
 
     await service.recordGameEnd(gameEnd);
 
-    expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
+    expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
   });
 
@@ -130,7 +130,7 @@ describe('LocalHostService', () => {
 
     await service.recordGameEnd(gameEnd);
 
-    expect(playerService.upsertLocalGameEnd).not.toHaveBeenCalled();
+    expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
   });
 
@@ -140,7 +140,7 @@ describe('LocalHostService', () => {
     await service.recordGameEnd(createGameEndDto({ matchId: 'match-1' }));
     await service.recordGameEnd(createGameEndDto({ matchId: 'match-2' }));
 
-    expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(1);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
 
   it('控制台启动的对局 matchId 均为 "0"，过了冷却窗口后不应被当成重复而拒绝', async () => {
@@ -152,7 +152,7 @@ describe('LocalHostService', () => {
       jest.advanceTimersByTime(COOLDOWN_MS + 1);
       await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
 
-      expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(2);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(2);
     } finally {
       jest.useRealTimers();
     }
@@ -181,7 +181,7 @@ describe('LocalHostService', () => {
         }),
       );
 
-      expect(playerService.upsertLocalGameEnd).toHaveBeenCalledTimes(4);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(4);
     } finally {
       jest.useRealTimers();
     }

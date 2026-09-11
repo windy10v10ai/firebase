@@ -50,7 +50,7 @@ describe('PlayerService', () => {
     });
   });
 
-  describe('upsertLocalGameEnd', () => {
+  describe('upsertGameEnd - 不计算行为分时', () => {
     it('累加对局数、胜场与积分，不动行为分', async () => {
       const { service, playerRepository } = createService({
         matchCount: 20,
@@ -59,7 +59,7 @@ describe('PlayerService', () => {
         conductPoint: 80,
       });
 
-      await service.upsertLocalGameEnd(steamId, true, 300, false);
+      await service.upsertGameEnd(steamId, true, 300, false, false);
 
       const savedPlayer = playerRepository.update.mock.calls[0][0];
       expect(savedPlayer.seasonPointTotal).toBe(1_300);
@@ -75,7 +75,7 @@ describe('PlayerService', () => {
         disconnectCount: 1,
       });
 
-      await service.upsertLocalGameEnd(steamId, false, 0, true);
+      await service.upsertGameEnd(steamId, false, 0, true, false);
 
       const savedPlayer = playerRepository.update.mock.calls[0][0];
       expect(savedPlayer.matchCount).toBe(21);
@@ -86,7 +86,7 @@ describe('PlayerService', () => {
     it('玩家不存在时直接返回，不调用 update', async () => {
       const { service, playerRepository } = createService(null);
 
-      await service.upsertLocalGameEnd(steamId, true, 300, false);
+      await service.upsertGameEnd(steamId, true, 300, false, false);
 
       expect(playerRepository.update).not.toHaveBeenCalled();
     });

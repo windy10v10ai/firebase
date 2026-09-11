@@ -50,8 +50,8 @@ export class PlayerService {
     isWinner: boolean,
     battlePoints: number,
     isDisconnect: boolean,
-    isParty: boolean,
-  ) {
+    calculateConductPoint: boolean,
+  ): Promise<void> {
     const normalizedPoints = this.normalizeBattlePoints(battlePoints);
     if (normalizedPoints !== battlePoints) {
       logger.warn('game/end: battlePoints out of range, normalizing', {
@@ -77,38 +77,12 @@ export class PlayerService {
     if (isDisconnect) {
       player.disconnectCount++;
     }
-    // 行为分计算：只有组队时才计算
-    if (isParty) {
+    // 行为分被冒用会害到别人，只有可信来源才计算
+    if (calculateConductPoint) {
       player.conductPoint = this.playerConductService.calculateGameEndConductPoint(
         player.conductPoint ?? 100,
         isDisconnect,
       );
-    }
-
-    await this.playerRepository.update(player);
-  }
-
-  // 本地主机受限结算专用：不算行为分——那是唯一一个被冒用会害到别人的字段。
-  // 其余与正式结算一致。玩家必须已存在，不自动创建。
-  async upsertLocalGameEnd(
-    steamId: number,
-    isWinner: boolean,
-    battlePoints: number,
-    isDisconnect: boolean,
-  ): Promise<void> {
-    const player = await this.playerRepository.findById(steamId.toString());
-    if (!player) {
-      logger.warn('game/end/local: player not found, skip', { steamId });
-      return;
-    }
-
-    player.matchCount++;
-    if (isWinner) {
-      player.winCount++;
-    }
-    player.seasonPointTotal += battlePoints;
-    if (isDisconnect) {
-      player.disconnectCount++;
     }
 
     await this.playerRepository.update(player);

@@ -66,28 +66,25 @@ export class LocalHostService {
 
   /** 记录本地对局，返回这场比赛是否计入。 */
   async recordGameEnd(gameEnd: GameEndDto): Promise<boolean> {
-    // 顺序检查每个合格玩家；只要有一个没通过（含同一 matchId 重试），整场
-    // 比赛立刻拒绝，不写分、不记录每日任务——不单独跳过那一个玩家，也不用
-    // 等其余玩家都检查完。
+    // 每个玩家要读限流记录和玩家档案各一次，10 人局顺序检查就是 20 次往返
     const qualifiedPlayers = gameEnd.players.filter((player) => player.steamId > 0);
-    const checks: PlayerCheck[] = [];
-    for (const player of qualifiedPlayers) {
-      const check = await this.checkPlayerLimit(player);
-      if (!check.ok) {
-        logger.warn('game/end/local: rejected, no points or daily task recorded for this match', {
-          matchId: gameEnd.matchId,
-          steamId: check.steamId,
-          battlePoints: check.battlePoints,
-          reason: check.reason,
-        });
-        return false;
-      }
-      checks.push(check);
+    const checks = await Promise.all(
+      qualifiedPlayers.map((player) => this.checkPlayerLimit(player)),
+    );
+
+    // 一份报文里只要有一个玩家可疑，整份报文都不可信，所以整场拒绝而不是跳过他一个
+    const rejected = checks.find((check) => !check.ok);
+    if (rejected) {
+      logger.warn('game/end/local: rejected, no points or daily task recorded for this match', {
+        matchId: gameEnd.matchId,
+        steamId: rejected.steamId,
+        battlePoints: rejected.battlePoints,
+        reason: rejected.reason,
+      });
+      return false;
     }
 
-    for (const check of checks) {
-      await this.savePlayerGameEnd(check, gameEnd);
-    }
+    await Promise.all(checks.map((check) => this.savePlayerGameEnd(check, gameEnd)));
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
     return true;
@@ -231,11 +228,12 @@ export class LocalHostService {
       lastRequestMatchId: gameEnd.matchId,
     });
 
-    await this.playerService.upsertLocalGameEnd(
+    await this.playerService.upsertGameEnd(
       check.steamId,
       check.player.teamId === gameEnd.winnerTeamId,
       check.battlePoints,
       check.player.isDisconnected,
+      false,
     );
     logger.info('game/end/local: recorded', {
       matchId: gameEnd.matchId,

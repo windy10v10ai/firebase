@@ -7,7 +7,6 @@ import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
-import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
@@ -23,7 +22,6 @@ export class GameController {
   constructor(
     private readonly gameService: GameService,
     private readonly membersService: MembersService,
-    private readonly playerService: PlayerService,
     private readonly analyticsService: AnalyticsService,
     private readonly playerInfoService: PlayerInfoService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
@@ -98,25 +96,7 @@ export class GameController {
     @Body() gameEnd: GameEndDto,
     @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<string> {
-    const players = gameEnd.players;
-    const isParty = players.filter((p) => p.steamId > 0).length >= 2;
-    await Promise.all(
-      players.map((player) => {
-        if (player.steamId <= 0) {
-          return undefined;
-        }
-        return this.playerService.upsertGameEnd(
-          player.steamId,
-          player.teamId == gameEnd.winnerTeamId,
-          player.battlePoints,
-          player.isDisconnected,
-          isParty,
-        );
-      }),
-    );
-
-    await this.dailyTaskService.recordGameEnd(players);
-
+    await this.gameService.recordGameEnd(gameEnd);
     await this.recordMatchStats(gameEnd, serverType);
     return this.gameService.getOK();
   }
@@ -140,10 +120,13 @@ export class GameController {
   @AllowLocal()
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
-  async endLocal(@Body() gameEnd: GameEndDto): Promise<string> {
+  async endLocal(
+    @Body() gameEnd: GameEndDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
+  ): Promise<string> {
     const recorded = await this.localHostService.recordGameEnd(gameEnd);
     if (recorded) {
-      await this.recordMatchStats(gameEnd, SERVER_TYPE.LOCAL);
+      await this.recordMatchStats(gameEnd, serverType);
     }
     return this.gameService.getOK();
   }

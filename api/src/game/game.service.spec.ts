@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { MembersService } from '../members/members.service';
 import { PlayerSettingService } from '../player/player-setting.service';
@@ -28,6 +29,10 @@ describe('GameService', () => {
             updateLastMatchTime: jest.fn(),
             upsertAddPoint: jest.fn(),
           },
+        },
+        {
+          provide: DailyTaskService,
+          useValue: { recordGameEnd: jest.fn() },
         },
         {
           provide: MembersService,
