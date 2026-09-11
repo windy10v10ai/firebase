@@ -13,6 +13,25 @@ NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用�
 - **E2E**：`cd api && npm run test:e2e`（自带 `firebase emulators:exec`，跑前要确认 8080 没被占用）
 - **Lint**：`cd api && npm run lint`
 
+## 测试数据构造
+
+**优先调 API 造数据，不要手写 Firestore 文档。**
+
+手写文档的数据形状不经任何校验：字段名拼错、缺字段、类型不符都不会报错，测试通过也不能说明被测代码正确。走 API 时形状由生产代码产生，entity 变更后无需同步修改构造逻辑，并且顺带覆盖了上游链路。
+
+本地凭据在 `api/.env.local` 里，TEST 服务器的 key 是 `apikey`。造一个「已下单但没激活的会员」需要两步，都有现成接口：
+
+```bash
+# 建玩家（结算、激活等接口都要求玩家已存在）
+curl -H "x-api-key: apikey" "http://localhost:3001/api/game/start?steamIds=<id>&matchId=1&version=test"
+# 造一张未激活订单：webhook 的 remark 不放 Dota2 ID，订单会存下来但激活失败
+curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H "Content-Type: application/json" -d '{...}'
+```
+
+**请求体里的业务字段必须取真实值。** 爱发电订单的 `plan_id` 若填一个不存在的值，`getOrderType` 会归入 `OrderType.others`，激活返回 false，而接口仍返回 201，只有日志能看出差别。枚举值取自源码，不要自造。
+
+只有 API 无法构造的状态才直接写 emulator：已过期的会员、线上遗留的旧格式字段、脏数据。此时需在 PR 中说明绕过 API 的原因。
+
 ## 常见坑
 
 - `firestore-backup/` 不在仓库里，是从 GCP `gsutil` 拉的；没有它时不要带 `--import` 启动 emulator
