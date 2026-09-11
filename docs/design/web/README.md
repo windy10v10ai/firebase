@@ -101,7 +101,7 @@ Steam 只支持 OpenID 2.0，Firebase 没有内置提供商，也不能当通用
 
 ## 6. 浏览器到 API 的路径
 
-**直连**，批次 0 已验证定案，取舍与验证记录见 [phase-0-api-access.md](phase-0-api-access.md)。
+**直连**，批次 0 已定案，细节见 [phase-0-api-access.md](phase-0-api-access.md)。
 
 - API 的 CORS 白名单收正式域名、prod / dev 两个 App Hosting 域名和 `http://localhost:3000`，预检缓存 24 小时。
 - 网站不再有任何 API 转发路由，域名由 `NEXT_PUBLIC_API_DOMAIN` 在构建期注入。

@@ -6,7 +6,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 `cd web && npm run dev`
 
-浏览器直连 API，域名由 `NEXT_PUBLIC_API_DOMAIN` 在构建期注入（批次 0 定案，见 `docs/design/web/phase-0-api-access.md`）：
+浏览器直连 API，域名由 `NEXT_PUBLIC_API_DOMAIN` 在构建期注入：
 
 - `web/.env` 进 git，值是生产域名 `https://api.windy10v10ai.com`
 - `web/.env.local` 不进 git，本地开发指向本机 API：`NEXT_PUBLIC_API_DOMAIN=http://localhost:3001`
@@ -17,7 +17,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 `cd web && npm run lint && npx tsc --noEmit && npm run build`
 
-本目录没有测试框架（四个静态页面加一个表单），校验靠上面三条加下面的浏览器实测。
+本目录没有测试框架，校验靠上面三条加下面的浏览器实测。
 
 ## 浏览器验证
 

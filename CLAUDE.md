@@ -172,4 +172,4 @@ feature/<issue-id>-<short-kebab-summary>
 2. `git push -u origin <branch-name>`
 3. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。标题用英文；正文用中文，写法遵循「回复风格」，至少包含改动说明与测试清单两部分（勾选已跑过的校验项）
 4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
-5. 不再依赖 `.github/workflows/create_develop_pr.yml` 自动建 PR（已废弃删除）——push 后必须显式执行第 3 步
+5. 没有自动建 PR 的 workflow，push 之后必须显式执行第 3 步
