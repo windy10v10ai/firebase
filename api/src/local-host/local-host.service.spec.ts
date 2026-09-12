@@ -158,14 +158,14 @@ describe('LocalHostService', () => {
     }
   });
 
-  it('当日累计超过 2000 时整条拒绝，不部分发放', async () => {
+  it('当日累计超过 5000 时整条拒绝，不部分发放', async () => {
     jest.useFakeTimers();
     try {
       const { service, playerService } = createService();
 
-      // 单局 battlePoints 会被 clamp 到 500，连续 4 局刚好打到 2000 上限
-      // （均不拒绝），第 5 局再 + 500 = 2500 > 2000，应被拒绝。
-      for (let i = 0; i < 4; i++) {
+      // 单局 battlePoints 会被 clamp 到 500，连续 10 局刚好打到 5000 上限
+      // （均不拒绝），第 11 局再 + 500 = 5500 > 5000，应被拒绝。
+      for (let i = 0; i < 10; i++) {
         await service.recordGameEnd(
           createGameEndDto({
             matchId: `match-${i}`,
@@ -176,12 +176,12 @@ describe('LocalHostService', () => {
       }
       await service.recordGameEnd(
         createGameEndDto({
-          matchId: 'match-4',
+          matchId: 'match-10',
           players: [createPlayerDto({ battlePoints: 800 })],
         }),
       );
 
-      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(4);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(10);
     } finally {
       jest.useRealTimers();
     }
@@ -268,12 +268,12 @@ describe('LocalHostService', () => {
       await expect(service.assertMemberPointWithinLimit(1, 50)).resolves.toBeUndefined();
     });
 
-    it('当日累计超过 1000 拒绝', async () => {
+    it('当日累计超过 2000 拒绝', async () => {
       const { service, store } = createService();
       store.set('1', {
         id: '1',
         dailyDate: getUtcMidnightForTest(),
-        dailyUsedMemberPoint: 980,
+        dailyUsedMemberPoint: 1980,
       });
 
       await expect(service.assertMemberPointWithinLimit(1, 50)).rejects.toThrow(

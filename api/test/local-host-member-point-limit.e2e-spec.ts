@@ -35,9 +35,9 @@ describe('本地 key 会员积分限额 (e2e)', () => {
     expect(res.status).toBe(400);
   });
 
-  it('当日累计到 1000 后再消耗被拒', async () => {
+  it('当日累计到 2000 后再消耗被拒', async () => {
     const steamId = STEAM_IDS.DAILY_CAP;
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       const ok = await request(app.getHttpServer())
         .post(useUrl)
         .set('x-api-key', localKey)
