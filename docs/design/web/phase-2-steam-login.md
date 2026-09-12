@@ -55,7 +55,7 @@
 | **2a** 登录接口 | API | `auth` 模块，`POST /api/auth/steam/verify`：核对签名与回调域名、换算 ID、签发 Custom Token | 无 | 已完成 #1144 |
 | **2b** 网站来源鉴权 | API | guard 认 ID Token，新增来源类型 `WEB` 与 `@AllowWeb()`，校验路由里的 `:steamId` 等于 token 的 uid | 无 | PR #1149 |
 | **2c** 开第一个接口 | API | `GET /player/:steamId/info` 挂 `@AllowWeb()` | 2b | PR #1149 |
-| **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 批次 1d、2a | 未开始 |
+| **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 批次 1d、2a | PR #1150 |
 | **2e** 门禁与「我的」页 | web | 受登录保护的路由组与未登录面板、「我的」页面 | 2c、2d | 未开始 |
 | **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 1d、2d | 未开始 |
 
@@ -85,6 +85,8 @@
 | `apiFetch` | 批次 1d 已建。这里只加一件事：有登录态就带上 `Authorization` 头 |
 | 路由组门禁 | 需要登录的页面放进同一个路由组，由组的 layout 统一判断，页面本身不写登录判断 |
 | 页面 | 只管展示，从 context 拿身份，从 hook 拿数据 |
+
+登录态 context 与 `apiFetch` 已实现，做法见 [auth.tsx](../../../web/app/lib/auth.tsx)、[api.ts](../../../web/app/lib/api.ts)。跳转链接的拼法和回调页见 [steam-login.ts](../../../web/app/lib/steam-login.ts)、[callback/page.tsx](../../../web/app/login/callback/page.tsx)。路由组门禁与「我的」页面留到 2e。
 
 门禁为什么放在路由组的 layout、未登录时为什么原地显示面板而不跳登录页、登录后怎么回到原来的页面——[phase-2-login-entry.md](phase-2-login-entry.md) 已经定完，实现时照着做。
 

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { EXTERNAL_LINKS } from '@/config/links';
 
+import AuthStatus from './AuthStatus';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
@@ -59,6 +60,7 @@ export default function Header() {
                 </a>
               ))}
             </div>
+            <AuthStatus />
             <LanguageSwitcher />
             <button
               type="button"
