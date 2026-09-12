@@ -51,27 +51,39 @@
     "items": {
       "legalName": {
         "title": "法定名称",
-        "content": ["Windy（个人）"]
+        "content": [
+          "Windy（个人）"
+        ]
       },
       "address": {
         "title": "地址",
-        "content": ["收到请求后会及时提供，请通过下方邮箱联系"]
+        "content": [
+          "收到请求后会及时提供，请通过下方邮箱联系"
+        ]
       },
       "phone": {
         "title": "电话号码",
-        "content": ["收到请求后会及时提供，请通过下方邮箱联系"]
+        "content": [
+          "收到请求后会及时提供，请通过下方邮箱联系"
+        ]
       },
       "email": {
         "title": "邮箱地址",
-        "content": ["windy10v10ai@gmail.com"]
+        "content": [
+          "windy10v10ai@gmail.com"
+        ]
       },
       "operator": {
         "title": "运营主管",
-        "content": ["Windy"]
+        "content": [
+          "Windy"
+        ]
       },
       "otherFees": {
         "title": "其他费用",
-        "content": ["支付手续费：根据支付方式收取相应费用"]
+        "content": [
+          "支付手续费：根据支付方式收取相应费用"
+        ]
       },
       "refundPolicy": {
         "title": "退换货政策",
@@ -86,7 +98,9 @@
       },
       "serviceTime": {
         "title": "服务提供时间",
-        "content": ["订阅支付成功后即可立即使用会员服务"]
+        "content": [
+          "订阅支付成功后即可立即使用会员服务"
+        ]
       },
       "paymentMethods": {
         "title": "接受的支付方式",
@@ -107,7 +121,9 @@
       },
       "price": {
         "title": "价格",
-        "content": ["10v10AI 会员订阅：CN¥29.8/月 或 US$4/月"]
+        "content": [
+          "10v10AI 会员订阅：CN¥29.8/月 或 US$4/月"
+        ]
       }
     }
   },
@@ -150,5 +166,14 @@
         "btnText": "重新输入"
       }
     }
+  },
+  "auth": {
+    "login": "通过 Steam 登录",
+    "loginTooltip": "跳转到 Steam 官方页面登录，网站只获取你的 Steam ID",
+    "loggedInAs": "ID {uid}",
+    "signOut": "退出",
+    "callbackLoading": "正在登录",
+    "callbackError": "登录校验失败，请重试",
+    "retry": "重试"
   }
 }

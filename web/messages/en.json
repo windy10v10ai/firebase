@@ -51,7 +51,9 @@
     "items": {
       "legalName": {
         "title": "Legal Name",
-        "content": ["Windy (Individual)"]
+        "content": [
+          "Windy (Individual)"
+        ]
       },
       "address": {
         "title": "Address",
@@ -67,15 +69,21 @@
       },
       "email": {
         "title": "Email Address",
-        "content": ["windy10v10ai@gmail.com"]
+        "content": [
+          "windy10v10ai@gmail.com"
+        ]
       },
       "operator": {
         "title": "Head of Operator",
-        "content": ["Windy"]
+        "content": [
+          "Windy"
+        ]
       },
       "otherFees": {
         "title": "Additional Fees",
-        "content": ["Payment processing fee: Fees will be charged according to the payment method"]
+        "content": [
+          "Payment processing fee: Fees will be charged according to the payment method"
+        ]
       },
       "refundPolicy": {
         "title": "Exchanges and returns policy",
@@ -113,7 +121,9 @@
       },
       "price": {
         "title": "Price",
-        "content": ["10v10AI Membership Subscription: CN¥29.8/month or US$4/month"]
+        "content": [
+          "10v10AI Membership Subscription: CN¥29.8/month or US$4/month"
+        ]
       }
     }
   },
@@ -156,5 +166,14 @@
         "btnText": "Try Again"
       }
     }
+  },
+  "auth": {
+    "login": "Sign in with Steam",
+    "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
+    "loggedInAs": "ID {uid}",
+    "signOut": "Sign out",
+    "callbackLoading": "Signing in…",
+    "callbackError": "Sign-in verification failed. Please try again.",
+    "retry": "Retry"
   }
 }

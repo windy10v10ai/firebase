@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server';
 
 import Footer from './components/Footer';
 import Header from './components/Header';
+import { AuthProvider } from './lib/auth';
 
 import './globals.css';
 
@@ -27,11 +28,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale}>
       <body className={`${inter.className} min-h-screen bg-surface`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <div className="relative z-10 flex flex-col min-h-screen">
-            <Header />
-            <main className="container mx-auto px-4 py-8 flex-1">{children}</main>
-            <Footer />
-          </div>
+          <AuthProvider>
+            <div className="relative z-10 flex flex-col min-h-screen">
+              <Header />
+              <main className="container mx-auto px-4 py-8 flex-1">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>
