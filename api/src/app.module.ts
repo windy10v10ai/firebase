@@ -17,7 +17,6 @@ import { MembersModule } from './members/members.module';
 import { PlayerModule } from './player/player.module';
 import { PlayerInfoModule } from './player-info/player-info.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
-import { TaskModule } from './task/task.module';
 import { AuthGuard } from './util/auth/auth.guard';
 import { SecretModule } from './util/secret/secret.module';
 
@@ -50,7 +49,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     EventRewardsModule,
     AnalyticsModule,
     SecretModule,
-    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],

@@ -5,8 +5,6 @@ import { AfdianService } from '../afdian/afdian.service';
 import { ActiveAfdianOrderDto } from '../afdian/dto/active-afdian-order.dto';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
 import { MembersService } from '../members/members.service';
-import { PlayerHeroAwakeningCompensationService } from '../player-hero-awakening/player-hero-awakening-compensation.service';
-import { PlayerHeroAwakeningSeasonPointPriceAdjustmentService } from '../player-hero-awakening/player-hero-awakening-season-point-price-adjustment.service';
 import { PlayerPropertyResetService } from '../player-property/player-property-reset.service';
 import { Public } from '../util/auth/public.decorator';
 
@@ -20,8 +18,6 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly afdianService: AfdianService,
     private readonly membersService: MembersService,
-    private readonly playerHeroAwakeningCompensationService: PlayerHeroAwakeningCompensationService,
-    private readonly playerHeroAwakeningSeasonPointPriceAdjustmentService: PlayerHeroAwakeningSeasonPointPriceAdjustmentService,
     private readonly playerPropertyResetService: PlayerPropertyResetService,
   ) {}
 
@@ -35,7 +31,7 @@ export class AdminController {
     return this.afdianService.findFailed();
   }
 
-  @Post('/afdian/order/ative')
+  @Post('/afdian/order/active')
   activeOrder(@Body() dto: ActiveAfdianOrderDto) {
     return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
   }
@@ -48,18 +44,6 @@ export class AdminController {
   @Get('/kofi/order/null-email')
   findKofiOrdersWithNullEmail() {
     return this.adminService.findKofiOrdersWithNullEmail();
-  }
-
-  // TODO: 一次性迁移端点，随机觉醒上线执行完后删除
-  @Post('/hero-awakening/compensation')
-  runHeroAwakeningCompensation() {
-    return this.playerHeroAwakeningCompensationService.runCompensation();
-  }
-
-  // TODO: 一次性迁移端点，随机觉醒上线执行完后删除
-  @Post('/hero-awakening/season-point-price-adjustment')
-  runHeroAwakeningSeasonPointPriceAdjustment() {
-    return this.playerHeroAwakeningSeasonPointPriceAdjustmentService.runPriceAdjustment();
   }
 
   // 批量重置所有 usedLevel 与 PlayerProperty 不一致的玩家属性加点，供后续需要重置属性时复用
