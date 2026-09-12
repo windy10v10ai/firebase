@@ -122,7 +122,7 @@ Steam 侧不需要申请任何 key。拿昵称头像才需要 Steam Web API key�
 | 会话形式 | **不用 session cookie** | cookie 是给服务端渲染准备的，用户页面全部客户端渲染 |
 | 网站专用 API key | **不加** | ID Token 由 Google 签名，已经能证明「本项目的登录用户」，再加一把 key 只是多一个要保管的秘密 |
 | 昵称与头像 | **本批次不做** | 要 Steam Web API key，且头部显示 ID 就够用 |
-| e2e 怎么验 ID Token | **实现 2b 时定** | 仓库现在没配 Auth 模拟器。加模拟器签真 token 更真实，打桩 `verifyIdToken` 更省事，看实际成本选 |
+| e2e 怎么验 ID Token | **用 Firebase Auth 模拟器** | `firebase.json` 已加上，token 的签发与验签都走真实路径。只有 Steam 那次外部核对需要打桩 |
 | 数据层 | **实现 2e 时定** | 本批次只有一个读接口，缓存和失效的需求要到批次 3 才真正出现 |
 
 ## 8. 不在本批次
