@@ -40,7 +40,13 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
-    <header ref={headerRef} className="card-container relative shadow-lg border-b border-line">
+    // 显式 z-index 让 header 在层叠上下文里高于 z-0/auto 层级，否则页面内容中带
+    // backdrop-filter 的卡片（card-container）会各自成一个新的层叠上下文，
+    // 按文档顺序排在 header 之后，把汉堡菜单盖住
+    <header
+      ref={headerRef}
+      className="card-container relative z-20 shadow-lg border-b border-line"
+    >
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center gap-3">
           <Link href="/" className="text-xl font-bold text-heading link-hover">
