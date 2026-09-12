@@ -39,6 +39,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - Firestore emulator 需要 Java JRE
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
 - **新增顶层路由前缀必须登记到 `api/index.ts` 中 `client` 函数的路径白名单**（那个 `regex` 常量，形如 `^/api/(game|player|...).*`）。不在白名单里的请求在进入 NestJS 之前就被 403 `Invalid path` 拦掉，服务端只留一条 `Abnormal request on API Cloud Function! Path: ...`，controller、guard、e2e 全都看不到任何痕迹——e2e 直连 Nest，不经过这层，所以测试全绿也可能线上 403
+- **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/design/web/README.md](../docs/design/web/README.md) 第 3 节
 - 改了 CORS、鉴权、响应格式这类会影响网站页面行为的东西，最终验证要在浏览器里实际操作页面，做法见 [web/CLAUDE.md](../web/CLAUDE.md) 的「浏览器验证」
 
 ## 命名与文件名

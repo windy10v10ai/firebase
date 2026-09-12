@@ -50,14 +50,14 @@
 
 ## 3. 六步与依赖
 
-| 步 | 侧 | 做什么 | 依赖 |
-|---|---|---|---|
-| **2a** 登录接口 | API | `auth` 模块，`POST /api/auth/steam/verify`：核对签名与回调域名、换算 ID、签发 Custom Token | 无 |
-| **2b** 网站来源鉴权 | API | guard 认 ID Token，新增来源类型 `WEB` 与 `@AllowWeb()`，校验路由里的 `:steamId` 等于 token 的 uid | 无 |
-| **2c** 开第一个接口 | API | `GET /player/:steamId/info` 挂 `@AllowWeb()` | 2b |
-| **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 批次 1d、2a |
-| **2e** 门禁与「我的」页 | web | 受登录保护的路由组与未登录面板、「我的」页面 | 2c、2d |
-| **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 1d、2d |
+| 步 | 侧 | 做什么 | 依赖 | 状态 |
+|---|---|---|---|---|
+| **2a** 登录接口 | API | `auth` 模块，`POST /api/auth/steam/verify`：核对签名与回调域名、换算 ID、签发 Custom Token | 无 | 已完成 #1144 |
+| **2b** 网站来源鉴权 | API | guard 认 ID Token，新增来源类型 `WEB` 与 `@AllowWeb()`，校验路由里的 `:steamId` 等于 token 的 uid | 无 | PR #1149 |
+| **2c** 开第一个接口 | API | `GET /player/:steamId/info` 挂 `@AllowWeb()` | 2b | PR #1149 |
+| **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 批次 1d、2a | 未开始 |
+| **2e** 门禁与「我的」页 | web | 受登录保护的路由组与未登录面板、「我的」页面 | 2c、2d | 未开始 |
+| **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 1d、2d | 未开始 |
 
 **上线粒度**：2a 一个 PR；2b 与 2c 合一个 PR（2b 单独上线没有任何路由能证明它是对的）；2d 一个；2e 一个，2f 视情况搭 2e 的车。
 
@@ -67,26 +67,11 @@
 
 ## 4. API 侧架构
 
-### auth 模块
+2a、2b、2c 已实现，做法见 [auth.controller.ts](../../../api/src/auth/auth.controller.ts)、[auth.guard.ts](../../../api/src/util/auth/auth.guard.ts)、PR #1144、#1149。这里只留没写进代码的决策：
 
-新增一个模块，只负责把 Steam 的回调参数换成 Custom Token，不碰玩家数据。接口挂 `@Public()`——调用它的人本来就还没有身份。
-
-它要做三件事：向 Steam 核对签名、确认回调域名是自家的、用 firebase-admin 签发 token。核对失败一律返回 401，不区分是签名不对还是域名不对，避免给探测者提供线索。
-
-Steam 侧不需要申请任何 key。拿昵称头像才需要 Steam Web API key，本批次不做。
-
-### guard 扩展
-
-[auth.guard.ts](../../../api/src/util/auth/auth.guard.ts) 现在只认 `x-api-key`。加一条分支：请求带 `Authorization: Bearer` 就验 ID Token，来源判定为新的 `SERVER_TYPE.WEB`，uid 记进 request。走 key 的路径行为完全不变。
-
-两个配套的东西：
-
-- `@AllowWeb()`，与现有的 `@AllowLocal()` 同一思路——默认不放行，只有显式声明的路由接受网站来源。
-- 归属校验。`WEB` 来源的请求，路由参数里的 `:steamId` 必须等于 token 的 uid，由 guard 统一拦。放在 guard 而不是每个 controller 里，是因为这条规则一旦有一处漏写就是越权。
-
-**这一步会动到所有接口**：`verifyIdToken` 是异步的，`canActivate` 要改成返回 Promise，现有的 guard 单元测试跟着改成 async。单独一个 PR，出问题回滚的粒度清楚。
-
-### 开放范围
+- 归属校验（路由里的 `:steamId` 必须等于 token 的 uid）放在 guard 统一拦，不放各个 controller——这条规则一旦有一处漏写就是越权
+- 新接口要接受网站来源，必须显式挂 `@AllowWeb()`，默认不放行；忘挂的后果是网站带 `Authorization` 头的请求一律 401（已记入 [api/CLAUDE.md](../../../api/CLAUDE.md) 常见坑，日常开发查那份，不用回这里）
+- Steam 侧不需要申请任何 key；拿昵称头像才需要 Steam Web API key，不在本批次
 
 本批次只开 `GET /player/:steamId/info` 一个接口。属性、觉醒那几个写接口等批次 3，那时每开一个都要配一条「用别人的 steamId 调被拒」的 e2e。
 
@@ -136,10 +121,10 @@ Steam 侧不需要申请任何 key。拿昵称头像才需要 Steam Web API key�
 
 API：
 
-- [ ] 2a：正常回调、签名被改、回调域名不对，三条路径各一个用例
-- [ ] 2b：带合法 token 放行、token 过期或伪造被拒、未挂 `@AllowWeb()` 的路由拒绝网站来源、走 `x-api-key` 的既有用例全部不受影响
-- [ ] 2c：拿 A 的 token 请求 B 的数据被拒
-- [ ] 2a 用真实 Steam 握手手动验一次
+- [x] 2a：正常回调、签名被改、回调域名不对，三条路径各一个用例
+- [x] 2b：带合法 token 放行、token 过期或伪造被拒、未挂 `@AllowWeb()` 的路由拒绝网站来源、走 `x-api-key` 的既有用例全部不受影响
+- [x] 2c：拿 A 的 token 请求 B 的数据被拒
+- [x] 2a 用真实 Steam 握手手动验一次
 
 网站：
 
