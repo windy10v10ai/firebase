@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 
 import { afdianActiveUrl, kofiActiveUrl } from '@/config/constant';
 
-import { submmitBtnDisableStyle, manualActiveContentStyle } from '../../style/CSSProperties';
+import { submmitBtnDisableStyle } from '../../style/CSSProperties';
 import { PlatformType } from '../../types/platform';
 
 import ActiveResult from './ActiveResult';
@@ -100,7 +100,7 @@ const ManualActive: React.FC<ManualActiveProps> = (props) => {
   return (
     <>
       {isLoading ? <Spin fullscreen size="large" /> : null}
-      <div className="space-y-8" style={manualActiveContentStyle}>
+      <div className="mx-auto w-full max-w-2xl space-y-8">
         {!requestCommited ? (
           <>
             <h1 className="title-primary mb-6">
