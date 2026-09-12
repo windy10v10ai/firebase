@@ -9,7 +9,7 @@
   },
   "home": {
     "title": "DOTA2 10v10 AI Custom Map",
-    "steamWorkshop": {
+    "workshop": {
       "title": "Steam Workshop",
       "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates."
     },
@@ -26,6 +26,11 @@
       ],
       "subscribe": "Subscribe Now",
       "subscribeLink": "https://afdian.com/a/windy10v10ai"
+    },
+    "manualActive": {
+      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
+      "afdian": "Afdian",
+      "kofi": "Ko-fi"
     },
     "github": {
       "title": "GitHub",
