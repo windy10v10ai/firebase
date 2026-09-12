@@ -55,7 +55,7 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex = '^/api/(game|afdian|analytics|player|kofi|alipay|daily-task).*';
+    const regex = '^/api/(game|afdian|analytics|player|kofi|alipay|daily-task|hello).*';
     callServerWithRegex(regex, req, res);
   },
 );
@@ -77,6 +77,8 @@ async function callServerWithRegex(
 // function need authenticated
 export const admin = onRequest(
   {
+    // 管理接口在应用层是 @Public 的，拦截全靠这里；v2 的默认值是允许匿名调用
+    invoker: 'private',
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
