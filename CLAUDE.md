@@ -164,6 +164,12 @@ feature/<issue-id>-<short-kebab-summary>
 
 **不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/design/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
 
+**本地没有其他进行中的改动时，直接在当前 checkout 上切分支修改**，不需要建 worktree。只有本地已有未提交的改动或另一个分支正在进行时，才用 worktree 隔离，避免互相污染。
+
+### 一个仓库多个会话
+
+多个会话共用同一份本地仓库时，各会话通常用 `git worktree add` 而非切换主检出的分支来隔离工作，避免互相覆盖对方的工作区。
+
 ### 推送到 develop
 
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
@@ -220,7 +226,7 @@ feature 分支的中间提交对 `develop` 的历史没有价值，压成一条�
 
 ### 合并后清理
 
-PR 合并后立刻清理该分支对应的本地 worktree，不用等提醒：
+PR 合并后立刻清理该分支，不用等提醒。分支在 worktree 里：
 
 ```
 git worktree remove <path> --force
@@ -228,4 +234,12 @@ git branch -D <branch-name>
 git worktree prune
 ```
 
-多个会话共用同一仓库时，各会话通常用 `git worktree add` 而非切换主检出的分支来隔离工作，遗留的 worktree 和分支会越积越多，所以这一步是收尾的默认动作而非可选项。
+分支直接切在主 checkout 上（未建 worktree）：
+
+```
+git checkout develop
+git pull
+git branch -D <branch-name>
+```
+
+不清理的话，遗留的 worktree 和分支会越积越多，所以这一步是收尾的默认动作而非可选项。
