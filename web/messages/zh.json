@@ -136,7 +136,8 @@
       }
     },
     "submitButton": {
-      "buttonText": "激活会员"
+      "buttonText": "激活会员",
+      "loadingText": "正在激活会员"
     },
     "avticeResult": {
       "success": {

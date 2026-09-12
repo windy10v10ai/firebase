@@ -37,14 +37,14 @@ export default function Home() {
           note={t('home.membership.note')}
         />
 
-        <p className="text-gray-400 text-sm text-center">
+        <p className="text-muted text-sm text-center">
           {t('home.manualActive.prompt')}
           {MANUAL_ACTIVE_LINKS.map((link, index) => (
             <React.Fragment key={link.href}>
               {index > 0 ? <span className="mx-1">/</span> : ' '}
               <Link
                 href={link.href}
-                className="inline-block py-1 text-blue-400 hover:text-blue-300"
+                className="inline-block py-1 text-accent hover:text-accent-hover"
               >
                 {t(link.labelKey)}
               </Link>

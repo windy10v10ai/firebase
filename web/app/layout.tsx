@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
-      <body className={`${inter.className} min-h-screen bg-gray-900`}>
+      <body className={`${inter.className} min-h-screen bg-surface`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <div className="relative z-10 flex flex-col min-h-screen">
             <Header />

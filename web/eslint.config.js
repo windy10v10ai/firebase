@@ -1,16 +1,17 @@
-const { FlatCompat } = require('@eslint/eslintrc');
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  resolvePluginsRelativeTo: __dirname,
-});
+const nextCoreWebVitals = require('eslint-config-next/core-web-vitals');
+const unusedImports = require('eslint-plugin-unused-imports');
 
 module.exports = [
-  ...compat.config({
-    extends: ['next/core-web-vitals'],
-    plugins: ['import', 'unused-imports'],
+  ...nextCoreWebVitals,
+  {
+    files: ['**/*.ts', '**/*.tsx'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  {
+    plugins: { 'unused-imports': unusedImports },
+    rules: {
       'unused-imports/no-unused-imports': 'warn',
       'unused-imports/no-unused-vars': [
         'warn',
@@ -27,5 +28,5 @@ module.exports = [
         },
       ],
     },
-  }),
+  },
 ];

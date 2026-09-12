@@ -10,6 +10,7 @@ import { AlipayModule } from './alipay/alipay.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
 import { KofiModule } from './kofi/kofi.module';
@@ -48,6 +49,7 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     AdminModule,
     EventRewardsModule,
     AnalyticsModule,
+    AuthModule,
     SecretModule,
   ],
   controllers: [AppController],

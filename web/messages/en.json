@@ -142,7 +142,8 @@
       }
     },
     "submitButton": {
-      "buttonText": "Activate Membership"
+      "buttonText": "Activate Membership",
+      "loadingText": "Activating membership"
     },
     "avticeResult": {
       "success": {

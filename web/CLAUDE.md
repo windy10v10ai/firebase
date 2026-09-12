@@ -61,7 +61,17 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 改了页面外观，PR 正文里要放前后对比图。
 
-**截图用无头 Chrome，页面用生产构建起**（`npm run build && npm start`）——dev server 左下角的开发指示器会入镜：
+**只要 PR 碰到页面，就放图，不管前后有没有差异。** 不要用测量数据代替截图——哈希、坐标、计算色都是写 PR 的人自己算的，review 的人既无法复核，也看不出页面长什么样。截图是他们唯一能用眼睛直接判断的证据。测量数据是补充，不是替代。
+
+「这个 PR 本来就不打算改外观」尤其不是免拍的理由：升级依赖、换构建器、改公共组件都可能带出非预期的差异，那种情况最需要留图。
+
+**拍哪些**：每个被这个 PR 碰到的页面，各至少一档窄屏（320 或 375）和一档桌面宽度（1280）。
+
+**前后没有差异时**：无头 Chrome 用同一组参数拍出来的图，页面没变就是逐字节相同的 PNG。`md5 -q` 比一下，相同就只贴一份图，把 md5 写进正文说明另一份一样——这比自算的哈希更有说服力，因为读者可以自己重拍一张对。
+
+### 截图
+
+**用无头 Chrome，页面用生产构建起**（`npm run build && npm start`）——dev server 左下角的开发指示器会入镜：
 
 ```bash
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
@@ -75,21 +85,40 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - `--virtual-time-budget=5000`：激活表单在 React 副作用跑完前渲染的是 `null`，截早了拍到空白页
 - `--hide-scrollbars`：否则窄屏图里多一条滚动条
 
-「改动前」直接拍线上 `https://windy10v10ai.com`，无需切分支重建。前后两张须使用同一组 `--window-size`。
+前后两张须使用同一组 `--window-size`，并且同一条命令、同一个 Chrome profile——无头 Chrome 的 `Accept-Language` 与浏览器里的不同，会拍出另一种语言的页面，只要前后一致就不影响对比。
 
-**图片放 `assets` 孤儿分支**，不进 `develop` 的源码树：
+### 「改动前」怎么来
+
+**基线是本 PR 的 base 分支，通常是 `develop`，不是线上。** 线上 `windy10v10ai.com` 跑的是 `main`，只有当 `develop` 与 `main` 确实没有页面差异时才能直接拍线上省事。拿不准就本地起基线，不要默认拍线上。
+
+本地起基线不用切分支，把 base 分支的 `web/` 解到临时目录单独构建，与本分支的服务同时跑在两个端口：
 
 ```bash
-git worktree add --detach <临时目录>/wt-assets
-cd <临时目录>/wt-assets && git checkout assets
-mkdir -p pr/<PR 编号> && cp <图片> pr/<PR 编号>/
-git add -A && git commit -m "Add screenshots for PR #<PR 编号>" && git push
+git archive develop web | tar x -C <临时目录>
+cd <临时目录>/web && npm ci && npm run build && npx next start -p 3100
 ```
+
+正文里要注明基线是哪个分支、怎么起的。
+
+### 图片存放
+
+**放 `assets` 孤儿分支**，不进 `develop` 的源码树。路径里要有 PR 编号，所以顺序是**先建 PR 拿到编号，再补图，再 `gh pr edit` 更新正文**：
+
+```bash
+git worktree add --detach <临时目录>/wt-assets origin/assets
+cd <临时目录>/wt-assets && git checkout -B assets origin/assets
+mkdir -p pr/<PR 编号> && cp <图片> pr/<PR 编号>/
+git add -A && git commit -m "Add screenshots for PR #<PR 编号>" && git push origin assets
+```
+
+用完 `git worktree remove <临时目录>/wt-assets --force` 清掉。
 
 正文按 raw 链接引用，仓库是公开的，Markdown 可直接渲染：
 
 ```
 https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<名字>.png
 ```
+
+推完先 `curl -o /dev/null -w '%{http_code}'` 逐个确认返回 200 再写进正文，链接拼错在 PR 里只会显示成裂图。
 
 前后对比用两列表格并排放置。图片用 `<img src="..." width="320">` 控制宽度，`![]()` 语法无法限制尺寸。

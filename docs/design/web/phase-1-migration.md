@@ -1,6 +1,8 @@
 # 批次 1：新框架迁移
 
 > 上级文档：[网站总体设计](README.md) 第 7 节批次 1。进度跟踪：windy10v10ai/firebase#1117。本文定这一批做什么、拆成几步、每步怎么验收。登录与鉴权是批次 2 的事，本文不涉及。
+>
+> 已完成的批次只保留结论，做法与实测数据去 PR 里看。
 
 ## 一句话结论
 
@@ -8,63 +10,12 @@
 
 ## 1. 为什么现在做
 
-### 1.1 移动端已经坏了，不只是不好看
+四个理由，前两个已经由批次 1a 解决：
 
-激活页的内容容器用绝对定位居中（`app/style/CSSProperties.ts` 的 `manualActiveContentStyle`）：
-
-```
-position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
-```
-
-包含块是 `app/layout.tsx` 里那个 `relative z-10` 的 div，宽度等于视口。加上 `left: 50%` 之后，绝对定位元素能用的宽度只剩一半，收缩到这个宽度为止。于是屏幕越窄，表单越窄。
-
-在线上 windy10v10ai.com 实测：
-
-| 视口 | 内容宽度 | 页面能滚动 | 提交按钮 |
-|------|------|------|------|
-| 375 × 812 | 187px | 否 | 勉强露出，输入框提示被截成「请输入您的Dot...」 |
-| 320 × 700 | 160px | 否 | **被页脚盖住**（按钮顶边 y=578，页脚顶边 y=546） |
-
-320 宽下点击按钮所在位置，`elementFromPoint` 返回的是页脚链接；实际点下去浏览器去开 Steam Workshop。**小屏手机上没办法完成会员激活。**
-
-两个连带问题同源：元素脱离文档流后，`scrollHeight` 等于视口高度，内容超出屏幕也没法往下翻；页面标题在 320 宽下还会压到头部上。
-
-桌面端看不出来，因为 1280 的一半是 640px，超过表单 600px 的上限。
-
-### 1.2 头部在窄屏挤爆
-
-头部四个元素（首页 / 商业披露 / English / 中文）硬排一行，没有任何断点处理。375 宽实测：logo 右边界 154px，「商业披露」左边界 154px，**间距为 0**，两块字直接贴在一起；「中文」按钮被压成竖排两行。
-
-批次 2 还要往头部加登录按钮和账号 ID，现在不解决，那时更挤。
-
-### 1.3 脚手架残留还挂在线上
-
-以下四条路径线上都返回 200：
-
-| 路径 | 是什么 | 问题 |
-|------|------|------|
-| `/ssr` | Next 脚手架示例页 | **每次请求都在服务端 fetch 一次 admin 函数**，白白产生函数调用 |
-| `/ssg` | 同上 | 无意义 |
-| `/api/hello` | 同上，返回 `{"name":"John Doe"}` | 无意义 |
-| `/products` | 亮色主题的假商品列表（「所有商品」「上一页/下一页」） | 与站点风格完全不搭，且内容是假的 |
-
-对应文件是 `pages/`（整个目录）、`app/products/`、`styles/`（`pages/` 里的页面引它）。
-
-### 1.4 antd 与后续方向冲突
-
-总体设计第 4 节已定去掉 antd。实际用量比想象中小，只有两个文件：
-
-- `app/regist/components/ManualActive.tsx`：Form、Input、Button、Spin + 3 个图标
-- `app/regist/components/ActiveResult.tsx`：Button、Result + 2 个图标
-
-代价却不小：激活页加载 263 KB JS，其中单个 chunk 就 145 KB。
-
-### 1.5 顺带要收拾的
-
-- 布局靠 `app/style/CSSProperties.ts` 里的内联 style 对象，不是 Tailwind
-- `globals.css` 只有 6 个 `@apply` 组件类，颜色硬编码 gray / blue，没有 token 概念
-- 组件里直接 `axios.post`，错误处理散在 `.catch` 里，没有统一的 `apiFetch`
-- `eslint-config-next` 停在 15.0.2，与 `next` 15.5.21 不齐
+- **移动端不能用**。激活页用绝对定位居中，屏幕越窄表单越窄，320 宽下提交按钮被页脚盖住，小屏手机没办法完成会员激活
+- **头部在窄屏挤爆**。四个元素硬排一行没有断点，375 宽下两块字直接贴在一起
+- **antd 与后续方向冲突**。总体设计第 4 节已定去掉。它只在激活页的两个文件里用了五个组件，代价却是这个页面要加载 263 KB JS，其中单个 chunk 就 145 KB
+- **样式没有底座**。布局靠内联 style 对象，`globals.css` 的组件类里颜色硬编码 gray / blue，没有 token 概念，换皮时要逐处找
 
 ## 2. 拆批原则
 
@@ -76,86 +27,50 @@ position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
 ## 3. 五个批次
 
-| 批次 | 做什么 | 依赖变化 | 验收 |
+| 批次 | 做什么 | 依赖变化 | 状态 |
 |------|------|------|------|
-| **1a** 清理与布局 | 删脚手架残留；激活页去掉绝对定位居中；头部改成 logo + 语言单按钮 + 汉堡菜单 | 无 | 320px 屏能走完激活；四条残留路径 404 |
-| **1b** 框架升级 | Next 15 → 16；lint 改直接调 eslint，CI 跟着改；next-intl、eslint-config-next 对齐 | Next 16 | 四个页面表现与升级前一致 |
-| **1c** 样式底座 | Tailwind 3 → 4；设计 token；基础组件；首页与披露页换过去 | Tailwind 4 | 视觉与之前基本一致 |
-| **1d** 去 antd | 重写激活表单与结果页；`apiFetch` | 删 antd、@ant-design/icons、axios | 激活功能正常，JS 体积下降 |
-| **1e** React 升级 | React 18 → 19 | React 19 | 零页面改动，四页面正常 |
+| **1a** 清理与布局 | 删脚手架残留；激活页去掉绝对定位居中；头部改成 logo + 语言单按钮 + 汉堡菜单 | 无 | 已完成 #1125 |
+| **1b** 框架升级 | Next 15 → 16；lint 改直接调 eslint | Next 16 | 已完成 #1137 |
+| **1c** 样式底座 | Tailwind 3 → 4；设计 token | Tailwind 4 | 已完成 #1138 #1141 |
+| **1d** 去 antd | 重写激活表单与结果页；`apiFetch`；图标换 lucide | 删 antd、@ant-design/icons、axios；加 lucide-react | 未开始 |
+| **1e** React 升级 | React 18 → 19 | React 19 | 未开始 |
 
-### 3.1 批次 1a：清理与布局修复
+### 3.1 批次 1a：清理与布局修复（已完成 #1125）
 
-**删除**：`pages/`（含 `pages/api/hello.ts`、`ssr.tsx`、`ssg.tsx`）、`app/products/`、`styles/`。
+删掉 `pages/`、`app/products/`、`styles/`，App Router 成为唯一路由。激活页容器改回文档流居中。头部两个语言按钮合并成一个切换按钮，导航链接收进汉堡菜单，宽屏保持横排。
 
-`pages/` 和 `app/` 两套路由并存本身也是隐患，删掉后只剩 App Router 一套。
+### 3.2 批次 1b：Next 16（已完成 #1137）
 
-**激活页布局**：容器改回文档流，`mx-auto` 加宽度上限居中，纵向留常规间距。删掉 `manualActiveContentStyle`。页面长了自然能滚，不会再被页脚盖住。
+`next lint` 在 Next 16 里被删了，`package.json` 与 CI 的 lint 步骤改成直接调 eslint CLI，`eslint.config.js` 去掉 `FlatCompat`。Turbopack 成为默认构建器。React 留在 18，antd 不动，不碰任何页面代码。
 
-顺带把 `bodyDivStyle`、`bodyMainStyle` 两个内联 style 换成 Tailwind 的 `flex flex-col min-h-screen` 和 `flex-1`，`CSSProperties.ts` 只剩提交按钮禁用态的颜色，留给 1d 一起删。
+### 3.3 批次 1c：Tailwind 4 与设计 token
 
-**头部**：
+按规矩二拆成两个 PR：先纯升级，再动页面。
 
-- 两个语言按钮合并成一个切换按钮，显示当前语言，点击切到另一个
-- 导航链接收进汉堡菜单。现在只有「商业披露」一条，但后面会加，先把容器做出来
-- 宽屏保持现在的横排，不出汉堡
+**1c-1 纯升级**（#1138）：PostCSS 插件换成 `@tailwindcss/postcss`，`@tailwind` 三条指令换成 `@import "tailwindcss"`，删 `tailwind.config.js`、`autoprefixer` 和没人用的 `@tailwindcss/typography`。页面逻辑不动，只修掉 v4 重写 `space-*` 带出的两处回归。
 
-用 Tailwind 3 的断点写，1c 再把颜色换成 token。
+**1c-2 设计 token**（#1141）：用 CSS 变量定义一组，值引用 Tailwind 现有色板，不写死色值，前后渲染完全一致：
 
-**验收**：
+| token | 角色 | 当前取值 |
+|------|------|------|
+| `surface` / `panel` | 页面底色 / 面板与浮层底色 | gray-900 / gray-800 |
+| `line` | 边框与分隔线 | gray-700 |
+| `control` / `control-hover` | 按钮底色与悬停态 | gray-700 / gray-600 |
+| `heading` / `content` / `muted` | 标题 / 正文 / 次要文字 | 白 / gray-200 / gray-400 |
+| `accent` / `accent-hover` | 强调文字与链接 | blue-400 / blue-300 |
+| `accent-solid` / `accent-solid-hover` | 实心强调按钮 | blue-500 / blue-600 |
 
-- 320 × 700 下能完整填表并成功提交（不是「按钮露出来了」，是真点到并拿到响应）
-- 375 宽下头部四块元素互不接触，无竖排折行
-- `/ssr`、`/ssg`、`/api/hello`、`/products` 线上返回 404
-- 桌面端四个页面与改动前一致
+`line` 和 `control` 当前同值但角色不同，不合并——重设计时边框和按钮底必然要分开走。
 
-### 3.2 批次 1b：Next 16
+**`globals.css` 里的 `@apply` 类保留，不删。** 它们是现在唯一把颜色收敛好的地方，删掉等于把颜色散回 JSX，与收敛 token 的目标相反。只把定义里的硬编码颜色换成 token。真正要收拾的是 JSX 里散着的硬编码颜色类。
 
-**`next lint` 在 Next 16 里被删了。** 对比两个版本的发布包：15.5.21 里有 `dist/cli/next-lint.js` 和整个 `lib/eslint/` 目录，16.3.4 里都没有。影响两处：
+例外是 `.text-content`：`--color-content` 这个 token 会自动生成同名的 `text-content` 工具类，两者重名且同值，所以那条 `@apply` 规则可以直接删掉，引用它的 JSX 一个字不用改。
 
-- `web/package.json` 的 `lint` / `lint:fix` 脚本
-- `.github/workflows/ci.yml` 的「Lint Check (Web)」步骤
-
-改成直接调 eslint CLI。`eslint.config.js` 现在用 `FlatCompat` 包 `next/core-web-vitals`，这层不用动。
-
-其余：Node 要求 ≥ 20.9，仓库 `.nvmrc` 是 22.13.0，够；Turbopack 在 16 里变成默认构建器，`dev` 脚本里的 `--turbopack` 可以去掉。
-
-React 留在 18，antd 不动。**这一批不碰任何页面代码。**
-
-**验收**：四个页面与升级前一致，构建产物尺寸没有异常膨胀，CI 全绿。
-
-### 3.3 批次 1c：Tailwind 4 与组件底座
-
-**升级**：PostCSS 插件换成 `@tailwindcss/postcss`；配置从 `tailwind.config.js` 迁到 CSS 里的 `@theme`；`@tailwind` 三条指令换成 `@import "tailwindcss"`。
-
-Tailwind 4 改了几个默认值（边框默认色、ring 宽度、preflight 细节），升级后要逐页对照，这也是把它单独放一批的原因。
-
-**设计 token**：用 CSS 变量定义一组，值取现在页面上已经在用的颜色，不改观感：
-
-| token | 用途 |
-|------|------|
-| 背景、面板背景、面板边框 | 现在的 `bg-gray-900` / `bg-gray-800/70` / `border-gray-700` |
-| 正文、次要文字、标题 | 现在的 `text-gray-200` / `text-gray-400` / 白 |
-| 强调色、强调色悬停 | 现在的 `blue-400` / `blue-500` |
-| 危险色 | 表单校验错误用 |
+**基础组件推迟到 1d。** 原计划的 `Button` / `Input` / `Field` / `Spinner` 全是表单才用的，1c 不动激活页的话零调用方，等 1d 有真实需求再按需要建。6 个 `@apply` 类里只有 `card-container` 有结构，其余是单属性别名，做成 React 组件只会更难用。
 
 按游戏界面风格换配色是后面单独一批的事，那时只改这些变量的值。
 
-**基础组件**（`app/components/ui/`）：
-
-| 组件 | 用途 |
-|------|------|
-| `Button` | 主 / 次 / 禁用三态 |
-| `Input` | 带前置图标位、字数显示 |
-| `Field` | 包 label、必填星号、错误文案、帮助链接 |
-| `Panel` | 现在 `card-container` 那套面板 |
-| `Spinner` | 全屏加载遮罩 |
-
-图标不引库，需要的几个直接内联 SVG——总共不超过六个。
-
-**改页面**：首页和披露页换到新组件，同时删掉 `globals.css` 里的 `@apply` 类。激活页留到 1d，因为它要连表单一起重写。
-
-**验收**：四个页面与 1b 后逐页对照，除已知的 Tailwind 4 默认值差异外无变化。
+**验收**：1c-2 是纯改名，四个页面与 1c-1 后的几何与计算色逐元素对照必须完全相同。看起来没变，才说明角色映射没搞错；这时候顺手调色，出了问题就分不清是映射错了还是新色本来如此。
 
 ### 3.4 批次 1d：去 antd
 
@@ -173,7 +88,9 @@ Tailwind 4 改了几个默认值（边框默认色、ring 宽度、preflight 细
 
 结果页现在靠「有 `errorMsg` 就显示原始错误，否则显示 i18n 失败文案」区分网络失败和业务失败（见 `ActiveResult.tsx`）。这个区分在浏览器验证时有用，重写时保留。
 
-**删依赖**：`antd`、`@ant-design/icons`、`axios`，以及 `app/style/CSSProperties.ts` 整个文件。
+**图标引 `lucide-react`**。共享运行时约 3 KB 只付一次，单个图标 260–1100 字节，批次 1 要用的八个加起来 gzip 后 2–3 KB。它的图标用 `stroke="currentColor"`，Tailwind 文字颜色类直接生效，不用给图标单独配色。
+
+**删依赖**：`antd`、`@ant-design/icons`、`axios`，以及 `app/style/CSSProperties.ts` 整个文件。删掉 antd 后，1c-1 记录的激活页间距差异（antd 运行时注入的样式不带 CSS layer，压过所有 Tailwind 工具类）自然消失。
 
 **验收**：两个激活页的成功与失败路径都在浏览器里实测；JS 体积对比 1c 有明显下降。
 
@@ -191,10 +108,11 @@ Tailwind 4 改了几个默认值（边框默认色、ring 宽度、preflight 细
 |------|------|------|
 | 数据层 | **不引入 TanStack Query** | 总体设计提它是为批次 3 的属性面板（加点后属性和积分一起刷新）准备的。批次 1 全站只有一个 POST，没有缓存和失效需求 |
 | 表单库 | **不引入 react-hook-form / zod** | 全站一个表单，三条规则，自建几十行够用 |
-| 图标库 | **不引入** | 需要的图标不超过六个，内联 SVG |
+| 图标库 | **引入 lucide-react** | 批次 2 加登录、批次 3 加养成页面后图标数量会远超十个，手抄 SVG 不划算。按需引入，每个图标几百字节 |
+| 基础组件 | **等有调用方再建** | 1c 不动激活页，表单类组件在 1c 里零调用方 |
 | 测试框架 | **不引入** | `web/` 现在零测试。四个静态页面加一个表单，浏览器实测比搭一套 runner 划算。校验规则抽成纯函数，边界值在浏览器里逐个试 |
 | 视觉风格 | **这一批不换皮** | 换皮和换底座混在一起，线上出问题分不清是重构坏了还是设计就长这样 |
-| 窄屏头部 | 语言按钮合一 + 汉堡菜单 | 语言合一省掉一半宽度；汉堡是为后面会加的页面留的容器 |
+| 浏览器门槛 | **接受 Tailwind 4 的要求** | Tailwind 4 要 Safari 16.4+ / Chrome 111+ / Firefox 128+。用户从游戏内跳转到自己的浏览器打开网站，不经过 Dota2 内置的 CEF，够不够新不构成风险 |
 
 ## 5. 不在本批次
 
@@ -217,10 +135,6 @@ Tailwind 4 改了几个默认值（边框默认色、ring 宽度、preflight 细
 - [ ] 窄屏头部：语言切换生效，汉堡菜单能打开并跳转到商业披露
 - [ ] 桌面宽度下四个页面与上一批对照无变化
 - [ ] console 无报错，network 面板确认请求方法、状态码、响应体
-
-1a 额外：
-
-- [ ] `/ssr`、`/ssg`、`/api/hello`、`/products` 线上返回 404
 
 1d 额外：
 

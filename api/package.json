@@ -10,8 +10,8 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\"",
-    "start": "export FIRESTORE_EMULATOR_HOST='localhost:8080' && nest start --watch",
-    "start:debug": "export FIRESTORE_EMULATOR_HOST='localhost:8080' && nest start --debug --watch",
+    "start": "export FIRESTORE_EMULATOR_HOST='localhost:8080' FIREBASE_AUTH_EMULATOR_HOST='localhost:9099' && nest start --watch",
+    "start:debug": "export FIRESTORE_EMULATOR_HOST='localhost:8080' FIREBASE_AUTH_EMULATOR_HOST='localhost:9099' && nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -19,7 +19,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "firebase emulators:exec --only firestore \"jest --config ./test/jest-e2e.json\" --project windy10v10ai"
+    "test:e2e": "firebase emulators:exec --only firestore,auth \"jest --config ./test/jest-e2e.json\" --project windy10v10ai"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.27",
