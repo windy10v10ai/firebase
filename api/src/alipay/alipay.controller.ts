@@ -4,6 +4,7 @@ import { logger } from 'firebase-functions/v2';
 
 import { LocalHostService } from '../local-host/local-host.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { Public } from '../util/auth/public.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
@@ -28,10 +29,11 @@ export class AlipayController {
   async createOrder(
     @Body() dto: CreateAlipayOrderDto,
     @CurrentServerType() serverType: SERVER_TYPE,
+    @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<CreateAlipayOrderResponseDto> {
     const isLocal = serverType === SERVER_TYPE.LOCAL;
     if (isLocal) {
-      await this.localHostService.assertOrderWithinLimit(dto.steamId);
+      await this.localHostService.assertOrderWithinLimit(dto.steamId, origin);
     }
 
     logger.info('Alipay create order', {
@@ -42,7 +44,7 @@ export class AlipayController {
     const response = await this.alipayService.createOrder(dto);
 
     if (isLocal) {
-      await this.localHostService.recordOrder(dto.steamId);
+      await this.localHostService.recordOrder(dto.steamId, origin);
     }
 
     return response;

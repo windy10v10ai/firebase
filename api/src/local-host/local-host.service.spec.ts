@@ -158,14 +158,14 @@ describe('LocalHostService', () => {
     }
   });
 
-  it('当日累计超过 2000 时整条拒绝，不部分发放', async () => {
+  it('当日累计超过 5000 时整条拒绝，不部分发放', async () => {
     jest.useFakeTimers();
     try {
       const { service, playerService } = createService();
 
-      // 单局 battlePoints 会被 clamp 到 500，连续 4 局刚好打到 2000 上限
-      // （均不拒绝），第 5 局再 + 500 = 2500 > 2000，应被拒绝。
-      for (let i = 0; i < 4; i++) {
+      // 单局 battlePoints 会被 clamp 到 500，连续 10 局刚好打到 5000 上限
+      // （均不拒绝），第 11 局再 + 500 = 5500 > 5000，应被拒绝。
+      for (let i = 0; i < 10; i++) {
         await service.recordGameEnd(
           createGameEndDto({
             matchId: `match-${i}`,
@@ -176,12 +176,12 @@ describe('LocalHostService', () => {
       }
       await service.recordGameEnd(
         createGameEndDto({
-          matchId: 'match-4',
+          matchId: 'match-10',
           players: [createPlayerDto({ battlePoints: 800 })],
         }),
       );
 
-      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(4);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(10);
     } finally {
       jest.useRealTimers();
     }
@@ -195,7 +195,7 @@ describe('LocalHostService', () => {
       store.set('1', {
         id: '1',
         dailyDate: new Date('2026-09-01T00:00:00.000Z'),
-        dailyEarnedSeasonPoint: 1900,
+        dailyGameEndSeasonPoint: 1900,
         dailyUsedMemberPoint: 900,
         dailyCreatedOrderCount: 9,
       });
@@ -203,7 +203,7 @@ describe('LocalHostService', () => {
       await service.recordGameEnd(createGameEndDto());
 
       const saved = store.get('1');
-      expect(saved?.dailyEarnedSeasonPoint).toBe(200);
+      expect(saved?.dailyGameEndSeasonPoint).toBe(200);
       expect(saved?.dailyUsedMemberPoint).toBe(0);
       expect(saved?.dailyCreatedOrderCount).toBe(0);
     } finally {
@@ -219,7 +219,7 @@ describe('LocalHostService', () => {
       store.set('1', {
         id: '1',
         dailyDate: new Date('2026-09-02T00:00:00.000Z'),
-        dailyEarnedSeasonPoint: 100,
+        dailyGameEndSeasonPoint: 100,
         dailyUsedMemberPoint: 0,
         dailyCreatedOrderCount: 0,
       });
@@ -247,7 +247,7 @@ describe('LocalHostService', () => {
 
       const saved = store.get('1');
       expect(saved?.dailyDate).toEqual(new Date('2026-09-02T00:00:00.000Z'));
-      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+      expect(saved?.dailyGameEndSeasonPoint).toBe(300);
     } finally {
       jest.useRealTimers();
     }
@@ -268,12 +268,12 @@ describe('LocalHostService', () => {
       await expect(service.assertMemberPointWithinLimit(1, 50)).resolves.toBeUndefined();
     });
 
-    it('当日累计超过 1000 拒绝', async () => {
+    it('当日累计超过 2000 拒绝', async () => {
       const { service, store } = createService();
       store.set('1', {
         id: '1',
         dailyDate: getUtcMidnightForTest(),
-        dailyUsedMemberPoint: 980,
+        dailyUsedMemberPoint: 1980,
       });
 
       await expect(service.assertMemberPointWithinLimit(1, 50)).rejects.toThrow(
@@ -286,7 +286,7 @@ describe('LocalHostService', () => {
       store.set('1', {
         id: '1',
         dailyDate: getUtcMidnightForTest(),
-        dailyEarnedSeasonPoint: 300,
+        dailyGameEndSeasonPoint: 300,
         dailyUsedMemberPoint: 100,
         dailyCreatedOrderCount: 2,
       });
@@ -295,8 +295,89 @@ describe('LocalHostService', () => {
 
       const saved = store.get('1');
       expect(saved?.dailyUsedMemberPoint).toBe(120);
-      expect(saved?.dailyEarnedSeasonPoint).toBe(300);
+      expect(saved?.dailyGameEndSeasonPoint).toBe(300);
       expect(saved?.dailyCreatedOrderCount).toBe(2);
+    });
+  });
+
+  describe('来源 IP 记录', () => {
+    const origin = { ip: '203.0.113.5', country: 'JP' };
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    function createIpActivity(count: number, lastAt: number) {
+      return Array.from({ length: count }, (_, index) => ({
+        ip: `198.51.100.${index}`,
+        country: 'JP',
+        gameEndCount: 1,
+        gameEndSeasonPoint: 0,
+        usedMemberPoint: 0,
+        createdOrderCount: 0,
+        firstAt: lastAt,
+        lastAt,
+      }));
+    }
+
+    it('结算累加次数与勇士积分，并记下国家', async () => {
+      const { service, store } = createService();
+
+      await service.recordGameEnd(createGameEndDto(), origin);
+
+      expect(store.get('1')?.ipActivity).toEqual([
+        expect.objectContaining({
+          ip: '203.0.113.5',
+          country: 'JP',
+          gameEndCount: 1,
+          gameEndSeasonPoint: 200,
+          usedMemberPoint: 0,
+          createdOrderCount: 0,
+        }),
+      ]);
+    });
+
+    it('同一来源的消耗累加到同一条，不新增条目', async () => {
+      const { service, store } = createService();
+
+      await service.recordGameEnd(createGameEndDto(), origin);
+      await service.recordMemberPointUsage(1, 20, 'lottery', origin);
+
+      const activity = store.get('1')?.ipActivity;
+      expect(activity).toHaveLength(1);
+      expect(activity?.[0]).toEqual(
+        expect.objectContaining({ gameEndCount: 1, usedMemberPoint: 20 }),
+      );
+    });
+
+    it('取不到来源地址时不记录', async () => {
+      const { service, store } = createService();
+
+      await service.recordMemberPointUsage(1, 20, 'lottery');
+
+      expect(store.get('1')?.ipActivity).toBeUndefined();
+    });
+
+    it('写满后让出最久没更新的位置', async () => {
+      const { service, store } = createService();
+      const entries = createIpActivity(30, Date.now());
+      entries[7] = { ...entries[7], ip: '198.51.100.99', lastAt: Date.now() - 31 * dayMs };
+      store.set('1', { id: '1', ipActivity: entries });
+
+      await service.recordMemberPointUsage(1, 20, 'lottery', origin);
+
+      const activity = store.get('1')?.ipActivity;
+      expect(activity).toHaveLength(30);
+      expect(activity?.some((entry) => entry.ip === '198.51.100.99')).toBe(false);
+      expect(activity?.find((entry) => entry.ip === '203.0.113.5')?.usedMemberPoint).toBe(20);
+    });
+
+    it('写满且全是近期来源时并进 other，金额不丢', async () => {
+      const { service, store } = createService();
+      store.set('1', { id: '1', ipActivity: createIpActivity(30, Date.now()) });
+
+      await service.recordMemberPointUsage(1, 20, 'lottery', origin);
+
+      const activity = store.get('1')?.ipActivity;
+      expect(activity?.some((entry) => entry.ip === '203.0.113.5')).toBe(false);
+      expect(activity?.find((entry) => entry.ip === 'other')?.usedMemberPoint).toBe(20);
     });
   });
 
