@@ -11,7 +11,7 @@ description: web/ 改动涉及页面行为时，用 Playwright 驱动无头 Chro
 
 1. 生产构建起服务：`cd web && npm run build && npm start`（不要用 dev server，左下角开发指示器会入镜）
 2. 在 `web/.browser-verify/`（已被 `.gitignore` 排除，跑完不用清理）下写一次性驱动脚本，`require('../scripts/browser-verify')` 引入公共部分
-3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过：375/768/1280，涉及窄屏布局加测 320，改动涉及没有宽度上限的元素加测 1920
+3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过：375/768/1280
 4. 真实交互用 `page.click()` / `page.fill()`，不要 `eval el.value = ...`——React 受控输入的 `onChange` 不会被后者触发
 5. 每档用 `page.screenshot()` 存到 `web/.browser-verify/screenshots/`，后续贴 PR 时按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」一节操作
 6. 每档检查 `withPage` 返回的 console 错误数组，非空就是回归

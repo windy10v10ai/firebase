@@ -57,9 +57,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 每档确认三件事：无横向滚动、无元素超出视口、头部元素互不接触。用 `resize_window` 切宽度，用 `javascript_tool` 量 `document.documentElement.scrollWidth > innerWidth` 与元素的 `getBoundingClientRect()`，不要只靠肉眼看截图。
 
-**更宽的分辨率不用单独跑。** `container` 在 1536 封顶，1280 以上只增加两侧留白，不会让任何元素被迫收缩，布局风险随宽度单调下降。例外是没有宽度上限的元素——它们会一直跟着屏幕变宽，新增这类元素时补测一次 1920。
-
-**改动涉及窄屏布局时加测 320**，这是最窄的在用机型，问题在这里最先暴露。
+**更宽的分辨率不用单独跑。** `container` 在 1536 封顶，1280 以上只增加两侧留白，不会让任何元素被迫收缩，布局风险随宽度单调下降。
 
 ## PR 截图
 

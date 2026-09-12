@@ -1,11 +1,9 @@
 const { chromium } = require('playwright-core');
 
 const VIEWPORTS = {
-  320: { width: 320, height: 800 },
   375: { width: 375, height: 800 },
   768: { width: 768, height: 900 },
   1280: { width: 1280, height: 900 },
-  1920: { width: 1920, height: 1000 },
 };
 
 // 复用系统 Chrome，跨平台不用摸索可执行文件路径
