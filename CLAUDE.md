@@ -40,6 +40,19 @@
 
 **例外**：CLAUDE.md / AGENTS.md 这类规则文档的首要读者是模型，**准确优先于通俗**，该写全的字段名、API 名、路径要写全，不为了好懂而模糊化。
 
+### 用语
+
+面向玩家的文案用「勇士」这套说法，代码和数据库字段保留历史上的 `season`。两边不一致是有意的：改字段名要动 Firestore 的历史数据和游戏客户端，不值得。
+
+| 概念 | 中文文案 | 英文文案 | API 字段 |
+|---|---|---|---|
+| 勇士积分 | 勇士积分（可用 / 累计） | Battle Points (usable / total) | `seasonPointTotal`、`useableSeasonPoint` |
+| 勇士等级 | 勇士等级 | Battle Level | `seasonLevel` |
+| 会员积分 | 会员积分（可用 / 累计） | Member Points (usable / total) | `memberPointTotal`、`useableMemberPoint` |
+| 会员等级 | 会员等级 | Member Level | `memberLevel` |
+
+「赛季」是旧说法，新写的界面文案、设计文档一律不再用。`web/` 新建的 i18n key 与变量名用 `battle`，只有直接照抄 API 响应的类型定义保留 `season`——转换就发生在这一层。
+
 ### 注释规约
 
 只写**为什么这样做**，不写**这行代码做了什么**——读者能从代码本身读懂的，不要再用注释复述一遍。一条注释如果只是对代码的复述，宁可不写：字段名、数值、分支行为都会随代码演进，注释里的副本不会跟着更新，两者一旦不一致，读者反而无法判断谁是真相源。
