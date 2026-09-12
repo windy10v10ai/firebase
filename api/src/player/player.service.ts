@@ -186,39 +186,6 @@ export class PlayerService {
     await this.playerRepository.update(player);
   }
 
-  // TODO: 临时统计接口，用完删除
-  async getConductPointStats(): Promise<{
-    totalPlayers: number;
-    buckets: { range: string; count: number; percentage: string }[];
-  }> {
-    const aprilStart = new Date('2026-04-01T00:00:00.000Z');
-    const allPlayers = await this.playerRepository
-      .whereGreaterOrEqualThan('lastMatchTime', aprilStart)
-      .find();
-
-    const total = allPlayers.length;
-    const bucketDefs = [
-      { label: '110~120', min: 110, max: 120 },
-      { label: '100~109', min: 100, max: 109 },
-      { label: '80~99', min: 80, max: 99 },
-      { label: '60~79', min: 60, max: 79 },
-      { label: '0~59', min: 0, max: 59 },
-    ];
-
-    const buckets = bucketDefs.map(({ label, min, max }) => {
-      const count = allPlayers.filter(
-        (p) => (p.conductPoint ?? 100) >= min && (p.conductPoint ?? 100) <= max,
-      ).length;
-      return {
-        range: label,
-        count,
-        percentage: total > 0 ? ((count / total) * 100).toFixed(1) + '%' : '0%',
-      };
-    });
-
-    return { totalPlayers: total, buckets };
-  }
-
   private generateNewPlayerEntity(steamId: number): Player {
     return {
       id: steamId.toString(),

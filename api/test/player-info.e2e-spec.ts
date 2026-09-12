@@ -1,6 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 
+import { MemberLevel } from '../src/members/entities/members.entity';
+
 import { del, get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
+import { addMember } from './util/util-member';
 import { addPlayerProperty, awakenHero, createPlayer, getPlayerDto } from './util/util-player';
 
 const getPlayerInfoUrl = '/api/player';
@@ -70,7 +73,7 @@ describe('PlayerInfoController (e2e)', () => {
       const steamId = 200000602;
       mockDate('2023-12-01T00:00:00.000Z');
       await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 0 });
-      await post(app, '/api/members/', { steamId, month: 1, level: 'NORMAL' });
+      await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
       const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`, { include: 'member' });
 
