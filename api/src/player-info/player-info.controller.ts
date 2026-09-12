@@ -22,6 +22,7 @@ import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { AllowWeb } from '../util/auth/allow-web.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
@@ -41,6 +42,7 @@ export class PlayerInfoController {
   ) {}
 
   @AllowLocal()
+  @AllowWeb()
   @Get(':steamId/info')
   @ApiOperation({ summary: 'Get player info with optional includes' })
   @ApiQuery({
