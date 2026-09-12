@@ -1,65 +1,40 @@
-import { InfoCircleOutlined, SmileOutlined } from '@ant-design/icons';
-import { Button, Result } from 'antd';
+import { CircleCheckBig, TriangleAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import React, { useCallback, useEffect } from 'react';
+
+import Button from '@/app/components/ui/button';
+
+import type { PlatformType } from '../../types/platform';
 
 interface ActiveResultProps {
-  activeType: string;
-  result: boolean;
+  activeType: PlatformType;
   errorMsg?: string;
-  setRequestCommited: (commited: boolean) => void;
+  onRetry: () => void;
+  result: boolean;
 }
 
-const ActiveResult: React.FC<ActiveResultProps> = (props) => {
+const ActiveResult = ({ activeType, errorMsg, onRetry, result }: ActiveResultProps) => {
   const t = useTranslations('manualActive');
   const router = useRouter();
-  const [message, setMessage] = React.useState<string>('');
-  const [btnText, setBtnText] = React.useState<string>('');
-
-  const getResultMessage = useCallback(() => {
-    if (props.result) {
-      setMessage(t('avticeResult.success.message'));
-      setBtnText(t('avticeResult.success.btnText'));
-    } else {
-      if (props.result === false && props.errorMsg) {
-        setMessage(props.errorMsg);
-      } else {
-        setMessage(
-          props.activeType === 'afdian'
-            ? t('avticeResult.error.afdianMessage')
-            : t('avticeResult.error.kofiMessage'),
-        );
-      }
-      setBtnText(t('avticeResult.error.btnText'));
-    }
-  }, [props.activeType, props.errorMsg, props.result, t]);
-
-  const handleClick = () => {
-    if (props.result) {
-      // 成功时返回首页
-      router.push('/');
-    } else {
-      // 失败时返回输入页面
-      props.setRequestCommited(false);
-    }
-  };
-
-  useEffect(() => {
-    getResultMessage();
-  }, [getResultMessage]);
+  const message = result
+    ? t('avticeResult.success.message')
+    : errorMsg ||
+      (activeType === 'afdian'
+        ? t('avticeResult.error.afdianMessage')
+        : t('avticeResult.error.kofiMessage'));
 
   return (
-    <Result
-      status={props.result ? 'success' : 'warning'}
-      icon={props.result ? <SmileOutlined /> : <InfoCircleOutlined />}
-      title={<div style={{ color: 'white', whiteSpace: 'pre-line' }}>{message}</div>}
-      extra={
-        <Button type="primary" onClick={handleClick}>
-          {btnText}
-        </Button>
-      }
-    />
+    <section className="card-container flex flex-col items-center gap-6 p-6 text-center sm:p-10">
+      {result ? (
+        <CircleCheckBig aria-hidden="true" className="size-16 text-green-400" strokeWidth={1.5} />
+      ) : (
+        <TriangleAlert aria-hidden="true" className="size-16 text-amber-400" strokeWidth={1.5} />
+      )}
+      <p className="whitespace-pre-line text-lg leading-8 text-content">{message}</p>
+      <Button onClick={result ? () => router.push('/') : onRetry}>
+        {result ? t('avticeResult.success.btnText') : t('avticeResult.error.btnText')}
+      </Button>
+    </section>
   );
 };
 

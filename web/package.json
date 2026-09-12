@@ -10,9 +10,8 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "antd": "^5.24.6",
-    "axios": "^1.18.0",
     "eslint-config-next": "16.3.5",
+    "lucide-react": "^1.45.0",
     "next": "16.3.5",
     "next-intl": "^4.14.4",
     "react": "18.3.1",

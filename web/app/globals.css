@@ -16,6 +16,8 @@
   --color-accent-hover: var(--color-blue-300);
   --color-accent-solid: var(--color-blue-500);
   --color-accent-solid-hover: var(--color-blue-600);
+
+  --color-danger: var(--color-red-400);
 }
 
 @layer components {
