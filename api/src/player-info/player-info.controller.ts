@@ -22,6 +22,7 @@ import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
@@ -63,17 +64,27 @@ export class PlayerInfoController {
   async useMemberPoint(
     @Body() dto: UsePlayerMemberPointsDto,
     @CurrentServerType() serverType: SERVER_TYPE,
+    @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<PlayerInfoDto> {
     const isLocal = serverType === SERVER_TYPE.LOCAL;
     if (isLocal) {
-      await this.localHostService.assertMemberPointWithinLimit(dto.steamId, dto.memberPoint);
+      await this.localHostService.assertMemberPointWithinLimit(
+        dto.steamId,
+        dto.memberPoint,
+        origin,
+      );
     }
 
     await this.playerService.useMemberPoint(dto);
 
     // 扣分失败会先抛出，所以记账放在成功之后，失败不占额度
     if (isLocal) {
-      await this.localHostService.recordMemberPointUsage(dto.steamId, dto.memberPoint, dto.reason);
+      await this.localHostService.recordMemberPointUsage(
+        dto.steamId,
+        dto.memberPoint,
+        dto.reason,
+        origin,
+      );
     }
 
     return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);

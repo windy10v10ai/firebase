@@ -1,5 +1,9 @@
 import { INestApplication } from '@nestjs/common';
+import { BaseFirestoreRepository } from 'fireorm';
+import { getRepositoryToken } from 'nestjs-fireorm';
 import request from 'supertest';
+
+import { LocalRateLimit } from '../src/local-host/entities/local-rate-limit.entity';
 
 import {
   get,
@@ -339,5 +343,34 @@ describe('POST /api/game/end/local (e2e)', () => {
     );
     expect(nextSnapshot.completedTasks).toHaveLength(1);
     expect(nextSnapshot.completedTasks[0].taskId).toBe(candidate.taskId);
+  });
+  it('记录边缘透传的来源地址与国家', async () => {
+    const steamId = 105620020;
+    await createPlayer(app, { steamId, matchCount: 20 });
+
+    await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000020',
+        players: [{ steamId, battlePoints: 200 }],
+      }),
+    )
+      .set('cf-connecting-ip', '2400:4050:1234:5600:a1b2:c3d4:e5f6:7890')
+      .set('cf-ipcountry', 'JP')
+      .expect(201);
+
+    const repository = app.get<BaseFirestoreRepository<LocalRateLimit>>(
+      getRepositoryToken(LocalRateLimit),
+    );
+    const saved = await repository.findById(steamId.toString());
+    expect(saved?.ipActivity).toEqual([
+      expect.objectContaining({
+        ip: '2400:4050:1234:5600::',
+        country: 'JP',
+        gameEndCount: 1,
+        gameEndSeasonPoint: 200,
+        usedMemberPoint: 0,
+      }),
+    ]);
   });
 });
