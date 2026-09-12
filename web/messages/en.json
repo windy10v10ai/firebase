@@ -1,6 +1,8 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
+    "workshop": "Steam Workshop",
+    "github": "GitHub",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
