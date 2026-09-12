@@ -148,7 +148,8 @@
         "title": "Dota2 Friend ID",
         "placeholder": "Please enter your Dota2 friend ID",
         "help": "Please enter a valid Dota2 friend ID, format: numbers only, up to 10 digits",
-        "helpLink": "How to find your Dota2 friend ID?"
+        "helpLink": "How to find your Dota2 friend ID?",
+        "steamAutoFill": "Fill in with Steam sign-in"
       },
       "afdianOrderId": {
         "title": "Afdian Order No",
@@ -178,6 +179,54 @@
       }
     }
   },
+  "profile": {
+    "loading": "Loading player data",
+    "private": {
+      "title": "This player's profile is not public",
+      "description": "For now you can only view your own profile."
+    },
+    "noRecord": {
+      "title": "No record for this player",
+      "description": "Data shows up after your first finished game."
+    },
+    "failed": {
+      "title": "Failed to load",
+      "description": "Please refresh the page and try again."
+    },
+    "identity": {
+      "heading": "ID {id}",
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "battlePoint": "Usable Battle Points",
+      "memberPoint": "Usable Member Points"
+    },
+    "stats": {
+      "title": "Stats",
+      "games": "Games",
+      "winRate": "Win Rate",
+      "conduct": "Conduct Score",
+      "conductNet": "Commends minus Reports",
+      "kills": "Kills",
+      "deaths": "Deaths",
+      "assists": "Assists",
+      "lastHits": "Last Hits",
+      "totalGoldEarned": "Gold Earned",
+      "heroDamage": "Hero Damage",
+      "damageTaken": "Damage Taken",
+      "healing": "Healing",
+      "towerKills": "Tower Kills"
+    },
+    "member": {
+      "title": "Membership",
+      "premium": "Premium Member",
+      "normal": "Member",
+      "expired": "Expired",
+      "none": "Not a member",
+      "expireDate": "Valid until {date}",
+      "expiredDate": "Expired on {date}",
+      "subscribe": "Subscribe"
+    }
+  },
   "auth": {
     "login": "Sign in with Steam",
     "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
@@ -185,6 +234,14 @@
     "signOut": "Sign out",
     "callbackLoading": "Signing in…",
     "callbackError": "Sign-in verification failed. Please try again.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "checkingLogin": "Checking sign-in status",
+    "profileTooltip": "View your profile",
+    "panel": {
+      "title": "Steam sign-in required",
+      "why": "This page reads and changes your Windy10v10AI game data, so we need to confirm it belongs to you.",
+      "scope": "We only get your Steam ID, the same number as your Dota2 ID.",
+      "safety": "The button below takes you to steamcommunity.com. Your password is entered on Steam, never on this site. If you are already signed in to Steam, one click brings you back."
+    }
   }
 }

@@ -7,9 +7,18 @@ import { buildSteamLoginUrl } from '@/app/lib/steam-login';
 
 import SteamIcon from './SteamIcon';
 
-// 只在 AuthStatus 判定为未登录后才会挂载，这时早已过了服务端渲染阶段，
+interface SteamLoginButtonProps {
+  size?: 'default' | 'large';
+}
+
+const SIZE_CLASS = {
+  default: 'min-h-11 gap-2 px-3',
+  large: 'min-h-14 gap-3 px-6 text-lg',
+};
+
+// 只在判定为未登录后才会挂载，这时早已过了服务端渲染阶段，
 // window.location.origin 一定可用，不用担心跳转链接为空
-export default function SteamLoginButton() {
+export default function SteamLoginButton({ size = 'default' }: SteamLoginButtonProps) {
   const t = useTranslations('auth');
   const pathname = usePathname();
   const href = buildSteamLoginUrl(pathname);
@@ -19,10 +28,10 @@ export default function SteamLoginButton() {
       href={href}
       title={t('loginTooltip')}
       aria-label={t('login')}
-      className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-md bg-control px-3 text-content transition-colors hover:bg-control-hover"
+      className={`inline-flex items-center whitespace-nowrap rounded-md bg-control text-content transition-colors hover:bg-control-hover ${SIZE_CLASS[size]}`}
     >
-      <SteamIcon className="size-5 shrink-0" />
-      <span className="hidden md:inline">{t('login')}</span>
+      <SteamIcon className={size === 'large' ? 'size-6 shrink-0' : 'size-5 shrink-0'} />
+      <span className={size === 'large' ? '' : 'hidden md:inline'}>{t('login')}</span>
     </a>
   );
 }

@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -78,10 +84,12 @@ export class AuthGuard implements CanActivate {
     }
     request.serverType = SERVER_TYPE.WEB;
 
-    // uid 就是 32 位账号 ID，与路由里的 :steamId 一致才算操作自己的账号
+    // uid 就是 32 位账号 ID，与路由里的 :steamId 一致才算操作自己的账号。
+    // 身份本身有效，只是无权访问这个账号，所以是 403 不是 401——网站靠这个区分
+    // 「需要登录」和「这个人的资料看不了」
     const routeSteamId = request.params.steamId;
     if (routeSteamId !== undefined && routeSteamId !== uid) {
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
 
     return true;

@@ -2,7 +2,7 @@
 
 > 上级文档：[网站总体设计](README.md) 的「鉴权设计」与「页面与菜单」。进度跟踪：windy10v10ai/firebase#1118。登录按钮放哪、未登录页面长什么样，见 [phase-2-login-entry.md](phase-2-login-entry.md)，本文不重复。
 >
-> 2a–2d 已上线，只留仍然有效的决定；剩下 2e、2f。
+> 全部已上线，只留仍然有效的决定。
 
 ## 一句话结论
 
@@ -53,8 +53,8 @@
 | **2b** 网站来源鉴权 | API | guard 认 ID Token，新增来源类型 `WEB` 与 `@AllowWeb()`，校验路由里的 `:steamId` 等于 token 的 uid | 已完成 #1149 |
 | **2c** 开第一个接口 | API | `GET /player/:steamId/info` 挂 `@AllowWeb()` | 已完成 #1149 |
 | **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 已完成 #1150 |
-| **2e** 门禁与个人主页 | web | `/my/*` 入口页与未登录面板、`/profile/<steamId>` 个人主页、头部菜单按登录态拼链接 | 未开始 |
-| **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 未开始 |
+| **2e** 门禁与个人主页 | web | `/my/*` 入口页与未登录面板、`/profile/<steamId>` 个人主页、头部 ID 按钮进主页 | 已完成 #1158 |
+| **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 已完成 #1158 |
 
 2e 与 2f 合一个 PR：2f 只有一个链接加一次填值，单独走一轮流程不划算。
 
@@ -63,6 +63,7 @@
 做法见 [auth.controller.ts](../../../api/src/auth/auth.controller.ts)、[auth.guard.ts](../../../api/src/util/auth/auth.guard.ts)。这里只留没写进代码的决策：
 
 - 归属校验（路由里的 `:steamId` 必须等于 token 的 uid）放在 guard 统一拦，不放各个 controller——这条规则一旦有一处漏写就是越权
+- 归属校验不通过返回 **403**，token 无效才是 401。网站靠这两个码区分「需要登录」和「这个人的资料看不了」
 - 新接口要接受网站来源，必须显式挂 `@AllowWeb()`，默认不放行；忘挂的后果是网站带 `Authorization` 头的请求一律 401（已记入 [api/CLAUDE.md](../../../api/CLAUDE.md) 常见坑，日常开发查那份）
 - Steam 侧不需要申请任何 key；拿昵称头像才需要 Steam Web API key，单独排一批
 
@@ -76,8 +77,8 @@
 |---|---|---|
 | 登录态 context | 包住 Firebase SDK 的登录状态订阅，对外给出加载中 / 未登录 / 已登录三种状态 | [auth.tsx](../../../web/app/lib/auth.tsx) |
 | `apiFetch` | 有登录态就带上 `Authorization` 头 | [api.ts](../../../web/app/lib/api.ts) |
-| 门禁 | 未登录的处理集中在 `/my/*` 一处；`/profile/<id>/*` 不判断登录，由接口决定看不看得到 | 2e 做 |
-| 页面 | 只管展示，按 URL 里的 steamId 取数据，不从登录态取 uid | 2e 做 `/profile/<steamId>` |
+| 门禁 | 未登录的处理集中在 `/my/*` 一处；`/profile/<id>/*` 不判断登录，由接口决定看不看得到 | [my/[[...path]]/page.tsx](../../../web/app/my/%5B%5B...path%5D%5D/page.tsx) |
+| 页面 | 只管展示，按 URL 里的 steamId 取数据，不从登录态取 uid | [profile/[steamId]/page.tsx](../../../web/app/profile/%5BsteamId%5D/page.tsx) |
 
 跳转链接的拼法和回调页见 [steam-login.ts](../../../web/app/lib/steam-login.ts)、[callback/page.tsx](../../../web/app/login/callback/page.tsx)。
 

@@ -148,7 +148,8 @@
         "title": "Dota2好友ID",
         "placeholder": "请输入您的Dota2好友ID",
         "help": "请输入正确的Dota2好友ID，格式为10位以下纯数字",
-        "helpLink": "如何找到您的Dota2好友ID？"
+        "helpLink": "如何找到您的Dota2好友ID？",
+        "steamAutoFill": "用 Steam 登录自动填入"
       },
       "afdianOrderId": {
         "title": "爱发电订单号",
@@ -178,6 +179,54 @@
       }
     }
   },
+  "profile": {
+    "loading": "正在读取玩家数据",
+    "private": {
+      "title": "这位玩家的资料未公开",
+      "description": "目前只能查看自己的资料。"
+    },
+    "noRecord": {
+      "title": "没有这位玩家的记录",
+      "description": "打完一局游戏后就会有数据了。"
+    },
+    "failed": {
+      "title": "读取失败",
+      "description": "请稍后刷新页面重试。"
+    },
+    "identity": {
+      "heading": "ID {id}",
+      "battleLevel": "勇士等级",
+      "memberLevel": "会员等级",
+      "battlePoint": "可用勇士积分",
+      "memberPoint": "可用会员积分"
+    },
+    "stats": {
+      "title": "战绩",
+      "games": "游戏场次",
+      "winRate": "胜率",
+      "conduct": "行为分",
+      "conductNet": "点赞举报净值",
+      "kills": "击杀",
+      "deaths": "死亡",
+      "assists": "助攻",
+      "lastHits": "补刀",
+      "totalGoldEarned": "金钱",
+      "heroDamage": "英雄伤害",
+      "damageTaken": "承受伤害",
+      "healing": "治疗",
+      "towerKills": "推塔数"
+    },
+    "member": {
+      "title": "会员状态",
+      "premium": "高级会员",
+      "normal": "普通会员",
+      "expired": "已过期",
+      "none": "未开通会员",
+      "expireDate": "有效期至：{date}",
+      "expiredDate": "已于 {date} 到期",
+      "subscribe": "前往订阅"
+    }
+  },
   "auth": {
     "login": "通过 Steam 登录",
     "loginTooltip": "跳转到 Steam 官方页面登录，网站只获取你的 Steam ID",
@@ -185,6 +234,14 @@
     "signOut": "退出",
     "callbackLoading": "正在登录",
     "callbackError": "登录校验失败，请重试",
-    "retry": "重试"
+    "retry": "重试",
+    "checkingLogin": "正在确认登录状态",
+    "profileTooltip": "查看个人主页",
+    "panel": {
+      "title": "需要 Steam 登录",
+      "why": "这个页面要读取和修改你在 Windy10v10AI 的游戏数据，先确认你是本人。",
+      "scope": "只获取你的 Steam ID，就是你的 Dota2 ID。",
+      "safety": "点下面的按钮跳到 steamcommunity.com 登录，密码输在 Steam 官网，本站拿不到。已经登录 Steam 的话点一下就回来了。"
+    }
   }
 }
