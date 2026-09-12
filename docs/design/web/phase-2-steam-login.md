@@ -15,7 +15,7 @@
 验收：
 
 - 登录后头部显示自己的 ID，刷新页面仍是登录态
-- 个人主页能看到自己的会员状态与战绩
+- 个人主页能看到自己的会员状态与战绩，地址里带自己的 steamId
 - 拿 A 的登录态去请求 B 的数据，被 API 拒绝
 - 激活页在登录后自动填入 Dota2 ID，未登录仍可手填
 
@@ -53,7 +53,7 @@
 | **2b** 网站来源鉴权 | API | guard 认 ID Token，新增来源类型 `WEB` 与 `@AllowWeb()`，校验路由里的 `:steamId` 等于 token 的 uid | 已完成 #1149 |
 | **2c** 开第一个接口 | API | `GET /player/:steamId/info` 挂 `@AllowWeb()` | 已完成 #1149 |
 | **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 已完成 #1150 |
-| **2e** 门禁与个人主页 | web | 受登录保护的路由组 `app/(player)/` 与未登录面板、`/profile` 页面、头部菜单加入口 | 未开始 |
+| **2e** 门禁与个人主页 | web | `/my/*` 入口页与未登录面板、`/profile/<steamId>` 个人主页、头部菜单按登录态拼链接 | 未开始 |
 | **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 未开始 |
 
 2e 与 2f 合一个 PR：2f 只有一个链接加一次填值，单独走一轮流程不划算。
@@ -76,12 +76,12 @@
 |---|---|---|
 | 登录态 context | 包住 Firebase SDK 的登录状态订阅，对外给出加载中 / 未登录 / 已登录三种状态 | [auth.tsx](../../../web/app/lib/auth.tsx) |
 | `apiFetch` | 有登录态就带上 `Authorization` 头 | [api.ts](../../../web/app/lib/api.ts) |
-| 路由组门禁 | 需要登录的页面放进 `app/(player)/`，由组的 layout 统一判断三态，页面本身不写登录判断 | 2e 做 |
-| 页面 | 只管展示，从 context 拿身份，从 hook 拿数据 | 2e 做 `/profile` |
+| 门禁 | 未登录的处理集中在 `/my/*` 一处；`/profile/<id>/*` 不判断登录，由接口决定看不看得到 | 2e 做 |
+| 页面 | 只管展示，按 URL 里的 steamId 取数据，不从登录态取 uid | 2e 做 `/profile/<steamId>` |
 
 跳转链接的拼法和回调页见 [steam-login.ts](../../../web/app/lib/steam-login.ts)、[callback/page.tsx](../../../web/app/login/callback/page.tsx)。
 
-个人主页放哪些区块、菜单怎么排，见总体设计的「页面与菜单」。门禁为什么放在路由组的 layout、未登录时为什么原地显示面板而不跳登录页、登录后怎么回到原来的页面，见 [phase-2-login-entry.md](phase-2-login-entry.md)。
+个人主页放哪些区块、菜单怎么排、路径为什么带 steamId，见总体设计的「页面与菜单」。门禁为什么集中在 `/my/*`、未登录时为什么原地显示面板而不跳登录页、登录后怎么回到原来的页面，见 [phase-2-login-entry.md](phase-2-login-entry.md)。
 
 登录态由 Firebase SDK 自己持久化和续期，网站不存 token，也不写 cookie。这也意味着服务端看不见登录态，门禁只能在浏览器里做，Next 的 middleware 帮不上忙。
 
