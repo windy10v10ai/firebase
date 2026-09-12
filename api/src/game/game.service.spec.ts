@@ -176,51 +176,51 @@ describe('GameService', () => {
       jest.clearAllMocks();
     });
 
-    it('windy主机 活动期间内 未领取 应发放觉醒活动积分', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-08-03T00:00:00.000Z'));
+    it('windy主机 活动期间内 未领取 应发放故障补偿积分', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-09-13T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        memberPointTotal: 2000,
+        seasonPointTotal: 5000,
       });
       expect(eventRewardsService.setReward).toHaveBeenCalledWith(steamId);
       expect(result).toEqual([
         {
           steamId,
           title: {
-            cn: '觉醒活动奖励',
-            en: 'Awaken Event Reward',
+            cn: '服务器故障补偿',
+            en: 'Server Outage Compensation',
           },
-          memberPoint: 2000,
+          seasonPoint: 5000,
         },
       ]);
     });
 
-    it('test主机 活动期间内 未领取 应发放觉醒活动积分', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-08-03T00:00:00.000Z'));
+    it('test主机 活动期间内 未领取 应发放故障补偿积分', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-09-13T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        memberPointTotal: 2000,
+        seasonPointTotal: 5000,
       });
       expect(result).toEqual([
         {
           steamId,
           title: {
-            cn: '觉醒活动奖励',
-            en: 'Awaken Event Reward',
+            cn: '服务器故障补偿',
+            en: 'Server Outage Compensation',
           },
-          memberPoint: 2000,
+          seasonPoint: 5000,
         },
       ]);
     });
 
     it('未知来源主机 活动期间内 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-08-03T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-09-13T00:00:00.000Z'));
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.UNKNOWN);
 
@@ -230,7 +230,7 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间外 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-09-20T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
@@ -240,9 +240,9 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间内 已领取 不应重复发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-08-03T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-09-13T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([
-        { steamId, result: { id: steamId.toString(), steamId, awaken20260802: true } },
+        { steamId, result: { id: steamId.toString(), steamId, compensation20260912: true } },
       ]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
