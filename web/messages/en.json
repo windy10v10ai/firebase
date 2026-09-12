@@ -91,7 +91,13 @@
       },
       "paymentMethods": {
         "title": "Accepted Payment Methods",
-        "content": ["Alipay", "WeChat Pay", "Stripe", "PayPal"]
+        "content": [
+          "Alipay",
+          "WeChat Pay",
+          "Stripe",
+          "PayPal",
+          "Note: available payment methods and settlement currency vary by payment platform"
+        ]
       },
       "paymentCycle": {
         "title": "Payment period",
@@ -102,9 +108,7 @@
       },
       "price": {
         "title": "Price",
-        "content": [
-          "10v10AI Membership Subscription: CNY 29.8/month or USD 4/month, depending on the payment method"
-        ]
+        "content": ["10v10AI Membership Subscription: CN¥29.8/month or US$4/month"]
       }
     }
   },

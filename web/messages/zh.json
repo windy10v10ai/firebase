@@ -85,7 +85,13 @@
       },
       "paymentMethods": {
         "title": "接受的支付方式",
-        "content": ["支付宝", "微信支付", "Stripe", "PayPal"]
+        "content": [
+          "支付宝",
+          "微信支付",
+          "Stripe",
+          "PayPal",
+          "备注：可用的支付方式与结算货币因支付平台而异"
+        ]
       },
       "paymentCycle": {
         "title": "付款周期",
@@ -96,7 +102,7 @@
       },
       "price": {
         "title": "价格",
-        "content": ["10v10AI 会员订阅：29.8 元人民币/月，或 4 美元/月，具体金额取决于支付方式"]
+        "content": ["10v10AI 会员订阅：CN¥29.8/月 或 US$4/月"]
       }
     }
   },
