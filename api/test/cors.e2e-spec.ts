@@ -52,7 +52,7 @@ describe('CORS (e2e)', () => {
 
   it('不带 Origin 的请求（游戏客户端）不受影响', () => {
     return request(app.getHttpServer())
-      .get('/api/')
+      .get('/api/hello')
       .expect(200)
       .expect((res) => {
         expect(res.headers['access-control-allow-origin']).toBeUndefined();
