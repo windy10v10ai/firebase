@@ -1,250 +1,216 @@
 'use client';
-import { IdcardOutlined, AccountBookOutlined, MailOutlined } from '@ant-design/icons';
-import { Form, Input, Button, Spin } from 'antd';
-import axios from 'axios';
+
+import { Hash, Mail, ReceiptText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import React, { useState, useEffect } from 'react';
+import { type FormEvent, useState } from 'react';
 
-import { afdianActiveUrl, kofiActiveUrl } from '@/config/constant';
-
-import { submmitBtnDisableStyle } from '../../style/CSSProperties';
-import { PlatformType } from '../../types/platform';
+import Button from '@/app/components/ui/button';
+import Field from '@/app/components/ui/field';
+import Input from '@/app/components/ui/input';
+import Spinner from '@/app/components/ui/spinner';
+import { apiFetch } from '@/app/lib/api';
 
 import ActiveResult from './ActiveResult';
+import {
+  type ManualActiveFormValues,
+  validateManualActiveForm,
+} from './manual-active-validation';
+
+import type { PlatformType } from '../../types/platform';
 
 interface ManualActiveProps {
   activeType: PlatformType;
 }
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 6 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 14 },
-  },
+interface ActivationResponse {
+  result: boolean;
+}
+
+interface ActivationResult {
+  errorMessage?: string;
+  success: boolean;
+}
+
+type TouchedFields = Partial<Record<keyof ManualActiveFormValues, true>>;
+
+const ACTIVE_PATHS: Record<PlatformType, string> = {
+  afdian: '/api/afdian/order/active',
+  kofi: '/api/kofi/order/active',
 };
 
-const ManualActive: React.FC<ManualActiveProps> = (props) => {
+const STEAM_ID_HELP_URLS: Record<PlatformType, string> = {
+  afdian: 'https://afdian.com/p/bfba558c5d9311ed836152540025c377',
+  kofi: 'https://ko-fi.com/post/Membership-Z8Z01CDJLU',
+};
+
+const INITIAL_VALUES: ManualActiveFormValues = {
+  platformOrderKey: '',
+  steamId: '',
+};
+
+const ManualActive = ({ activeType }: ManualActiveProps) => {
   const t = useTranslations('manualActive');
-  const [steamId, setSteamId] = useState('');
-  // Afdian: 订单号 ko-fi: 邮箱
-  const [platformOrderKey, setPlatformOrderKey] = useState('');
-  const [submitButtonEnable, setSubmitButtonEnable] = useState<boolean>(false);
-  const [requestCommited, setRequestCommited] = useState<boolean>(false);
-  const [activeStatus, setActiveStatus] = useState<boolean>(false);
-  const [activeErrmsg, setActiveErrmsg] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [mounted, setMounted] = useState(false);
+  const [values, setValues] = useState(INITIAL_VALUES);
+  const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
+  const [activationResult, setActivationResult] = useState<ActivationResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [form] = Form.useForm();
-  const values = Form.useWatch([], form);
+  const errors = validateManualActiveForm(values, activeType);
+  const formValid = Object.keys(errors).length === 0;
+  const platformField = activeType === 'afdian' ? 'afdianOrderId' : 'kofiMailAddress';
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      form
-        .validateFields({ validateOnly: true })
-        .then(() => setSubmitButtonEnable(true))
-        .catch(() => setSubmitButtonEnable(false));
-    }
-  }, [form, values, mounted]);
-
-  const setActiveResult = (success: boolean) => {
-    setActiveStatus(success);
-    setRequestCommited(true);
+  const updateField = (field: keyof ManualActiveFormValues, value: string) => {
+    setValues((currentValues) => ({ ...currentValues, [field]: value }));
+    setTouchedFields((currentFields) => ({ ...currentFields, [field]: true }));
   };
 
-  const requestActive = async () => {
-    const requestUrl = props.activeType === 'afdian' ? afdianActiveUrl : kofiActiveUrl;
-
-    await axios
-      .post(requestUrl, {
-        steamId: Number(steamId),
-        ...(props.activeType === 'afdian'
-          ? { outTradeNo: platformOrderKey }
-          : { email: platformOrderKey }),
-      })
-      .then((response) => {
-        if (response.data.result) {
-          setActiveResult(true);
-        } else {
-          setActiveResult(false);
-        }
-      })
-      .catch((e) => {
-        // API调用失败
-        setActiveErrmsg(e.message);
-        setActiveResult(false);
-      })
-      .finally(() => {
-        // 关闭loading
-        setIsLoading(false);
-      });
-  };
-
-  const onFinish = () => {
+  const requestActivation = async () => {
     setIsLoading(true);
-    requestActive();
+
+    try {
+      const response = await apiFetch<ActivationResponse>(ACTIVE_PATHS[activeType], {
+        method: 'POST',
+        body: JSON.stringify({
+          steamId: Number(values.steamId),
+          ...(activeType === 'afdian'
+            ? { outTradeNo: values.platformOrderKey }
+            : { email: values.platformOrderKey }),
+        }),
+      });
+
+      setActivationResult({ success: response.result });
+    } catch (error) {
+      setActivationResult({
+        errorMessage: error instanceof Error ? error.message : String(error),
+        success: false,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (!mounted) {
-    return null;
-  }
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setTouchedFields({ platformOrderKey: true, steamId: true });
+
+    if (!formValid || isLoading) {
+      return;
+    }
+
+    void requestActivation();
+  };
+
+  const helpLinkClass = 'text-accent transition-colors hover:text-accent-hover';
+  const steamIdError =
+    touchedFields.steamId && errors.steamId ? t('input.steamId.help') : undefined;
+  const platformOrderKeyError =
+    touchedFields.platformOrderKey && errors.platformOrderKey
+      ? t(`input.${platformField}.help`)
+      : undefined;
 
   return (
-    <>
-      {isLoading ? <Spin fullscreen size="large" /> : null}
-      <div className="mx-auto w-full max-w-2xl space-y-8">
-        {!requestCommited ? (
-          <>
-            <h1 className="title-primary mb-6">
-              {props.activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
+    <div className="mx-auto w-full max-w-2xl">
+      {isLoading ? <Spinner label={t('submitButton.loadingText')} /> : null}
+
+      {activationResult ? (
+        <ActiveResult
+          activeType={activeType}
+          result={activationResult.success}
+          errorMsg={activationResult.errorMessage}
+          onRetry={() => setActivationResult(null)}
+        />
+      ) : (
+        <section className="space-y-8">
+          <div className="space-y-3">
+            <h1 className="title-primary">
+              {activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
             </h1>
-            <p className="text-content mb-8">
-              {props.activeType === 'afdian' ? t('afdianDescription') : t('kofiDescription')}
+            <p className="text-content">
+              {activeType === 'afdian' ? t('afdianDescription') : t('kofiDescription')}
             </p>
+          </div>
 
-            <Form form={form} {...formItemLayout} style={{ maxWidth: 600 }} onFinish={onFinish}>
-              <Form.Item
-                label={<label style={{ color: 'white' }}>{t('input.steamId.title')}</label>}
-                name={'steamId'}
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                    message: t('input.steamId.help'),
-                    type: 'string',
-                    max: 10,
-                    pattern: /^[0-9]+$/,
-                  },
-                ]}
-                extra={
-                  <div className="text-sm text-gray-400 mt-2">
-                    <a
-                      href={
-                        props.activeType === 'afdian'
-                          ? 'https://afdian.com/p/bfba558c5d9311ed836152540025c377'
-                          : 'https://ko-fi.com/post/Membership-Z8Z01CDJLU'
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      {t('input.steamId.helpLink')}
-                    </a>
-                  </div>
+          <form noValidate onSubmit={handleSubmit} className="card-container space-y-6 p-5 sm:p-8">
+            <Field
+              required
+              htmlFor="inputSteamId"
+              label={t('input.steamId.title')}
+              messageId="inputSteamIdMessage"
+              error={steamIdError}
+              help={
+                <a
+                  href={STEAM_ID_HELP_URLS[activeType]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={helpLinkClass}
+                >
+                  {t('input.steamId.helpLink')}
+                </a>
+              }
+            >
+              <Input
+                showCount
+                id="inputSteamId"
+                name="steamId"
+                value={values.steamId}
+                icon={<Hash className="size-5" />}
+                invalid={Boolean(steamIdError)}
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder={t('input.steamId.placeholder')}
+                aria-describedby="inputSteamIdMessage"
+                onChange={(event) => updateField('steamId', event.target.value)}
+              />
+            </Field>
+
+            <Field
+              required
+              htmlFor={activeType === 'afdian' ? 'inputAfdianOrderId' : 'inputKofiMailAddress'}
+              label={t(`input.${platformField}.title`)}
+              messageId="platformOrderKeyMessage"
+              error={platformOrderKeyError}
+              help={
+                activeType === 'afdian' ? (
+                  <a
+                    href="https://afdian.com/dashboard/order"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={helpLinkClass}
+                  >
+                    {t('input.afdianOrderId.helpLink')}
+                  </a>
+                ) : undefined
+              }
+            >
+              <Input
+                showCount
+                id={activeType === 'afdian' ? 'inputAfdianOrderId' : 'inputKofiMailAddress'}
+                name={activeType === 'afdian' ? 'afdianOrderId' : 'kofiMailAddress'}
+                value={values.platformOrderKey}
+                icon={
+                  activeType === 'afdian' ? (
+                    <ReceiptText className="size-5" />
+                  ) : (
+                    <Mail className="size-5" />
+                  )
                 }
-                className="mb-8"
-              >
-                <Input
-                  value={steamId}
-                  onChange={(e) => setSteamId(e.target.value)}
-                  placeholder={t('input.steamId.placeholder')}
-                  prefix={<IdcardOutlined />}
-                  id="inputSteamId"
-                  allowClear
-                  showCount
-                />
-              </Form.Item>
+                invalid={Boolean(platformOrderKeyError)}
+                inputMode={activeType === 'afdian' ? 'numeric' : 'email'}
+                autoComplete={activeType === 'afdian' ? 'off' : 'email'}
+                spellCheck={false}
+                placeholder={t(`input.${platformField}.placeholder`)}
+                aria-describedby="platformOrderKeyMessage"
+                onChange={(event) => updateField('platformOrderKey', event.target.value)}
+              />
+            </Field>
 
-              {props.activeType === 'afdian' ? (
-                <Form.Item
-                  label={<label style={{ color: 'white' }}>{t('input.afdianOrderId.title')}</label>}
-                  name="afdianOrderId"
-                  hasFeedback
-                  rules={[
-                    {
-                      required: true,
-                      message: t('input.afdianOrderId.help'),
-                      type: 'string',
-                      min: 24,
-                      max: 30,
-                      pattern: /^[0-9]+$/,
-                    },
-                  ]}
-                  extra={
-                    <div className="text-sm text-gray-400 mt-2">
-                      <a
-                        href="https://afdian.com/dashboard/order"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300"
-                      >
-                        {t('input.afdianOrderId.helpLink')}
-                      </a>
-                    </div>
-                  }
-                  className="mb-8"
-                >
-                  <Input
-                    value={platformOrderKey}
-                    onChange={(e) => setPlatformOrderKey(e.target.value)}
-                    placeholder={t('input.afdianOrderId.placeholder')}
-                    prefix={<AccountBookOutlined />}
-                    id={'inputAfdianOrderId'}
-                    allowClear
-                    showCount
-                  />
-                </Form.Item>
-              ) : (
-                <Form.Item
-                  label={
-                    <label style={{ color: 'white' }}>{t('input.kofiMailAddress.title')}</label>
-                  }
-                  name="kofiMailAddress"
-                  hasFeedback
-                  rules={[
-                    {
-                      required: true,
-                      message: t('input.kofiMailAddress.help'),
-                      type: 'string',
-                      min: 6,
-                      max: 64,
-                      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                    },
-                  ]}
-                  className="mb-8"
-                >
-                  <Input
-                    value={platformOrderKey}
-                    onChange={(e) => setPlatformOrderKey(e.target.value)}
-                    placeholder={t('input.kofiMailAddress.placeholder')}
-                    prefix={<MailOutlined />}
-                    id={'inputKofiMailAddress'}
-                    allowClear
-                    showCount
-                  />
-                </Form.Item>
-              )}
-
-              <Form.Item label={null}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  disabled={!submitButtonEnable}
-                  style={{ ...(!submitButtonEnable ? submmitBtnDisableStyle : {}) }}
-                >
-                  {t('submitButton.buttonText')}
-                </Button>
-              </Form.Item>
-            </Form>
-          </>
-        ) : (
-          <ActiveResult
-            activeType={props.activeType}
-            result={activeStatus}
-            errorMsg={activeErrmsg}
-            setRequestCommited={setRequestCommited}
-          />
-        )}
-      </div>
-    </>
+            <Button type="submit" disabled={!formValid || isLoading} className="w-full sm:w-auto">
+              {t('submitButton.buttonText')}
+            </Button>
+          </form>
+        </section>
+      )}
+    </div>
   );
 };
 

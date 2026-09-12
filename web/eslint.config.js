@@ -12,8 +12,6 @@ module.exports = [
   {
     plugins: { 'unused-imports': unusedImports },
     rules: {
-      // 激活页两个组件用副作用做挂载守卫，重写掉这个写法之前只提示不阻断
-      'react-hooks/set-state-in-effect': 'warn',
       'unused-imports/no-unused-imports': 'warn',
       'unused-imports/no-unused-vars': [
         'warn',
