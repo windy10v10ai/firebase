@@ -239,8 +239,8 @@
     "profileTooltip": "查看个人主页",
     "panel": {
       "title": "需要 Steam 登录",
-      "why": "这个页面要读取和修改你的账号数据，先确认你是账号本人。",
-      "scope": "只获取你的 Steam ID（就是 Dota2 ID），不读昵称、头像和游戏列表。",
+      "why": "这个页面要读取和修改你在 Windy10v10AI 的游戏数据，先确认你是本人。",
+      "scope": "只获取你的 Steam ID，就是你的 Dota2 ID。",
       "safety": "点下面的按钮跳到 steamcommunity.com 登录，密码输在 Steam 官网，本站拿不到。已经登录 Steam 的话点一下就回来了。"
     }
   }

@@ -239,8 +239,8 @@
     "profileTooltip": "View your profile",
     "panel": {
       "title": "Steam sign-in required",
-      "why": "This page reads and changes your account data, so we need to confirm the account is yours.",
-      "scope": "We only get your Steam ID (the same number as your Dota2 ID) — no nickname, avatar, or game list.",
+      "why": "This page reads and changes your Windy10v10AI game data, so we need to confirm it belongs to you.",
+      "scope": "We only get your Steam ID, the same number as your Dota2 ID.",
       "safety": "The button below takes you to steamcommunity.com. Your password is entered on Steam, never on this site. If you are already signed in to Steam, one click brings you back."
     }
   }
