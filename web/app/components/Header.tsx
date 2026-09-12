@@ -59,6 +59,9 @@ export default function Header() {
                   {t(link.labelKey)}
                 </a>
               ))}
+              <Link href="/membership" className="text-content link-hover whitespace-nowrap">
+                {t('membership')}
+              </Link>
             </div>
             <AuthStatus />
             <LanguageSwitcher />
@@ -106,6 +109,13 @@ export default function Header() {
                 {t(link.labelKey)}
               </a>
             ))}
+            <Link
+              href="/membership"
+              onClick={() => setMenuOpen(false)}
+              className="block py-2 text-content link-hover"
+            >
+              {t('membership')}
+            </Link>
           </div>
         ) : null}
       </nav>

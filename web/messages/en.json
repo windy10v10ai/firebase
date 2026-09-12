@@ -3,6 +3,7 @@
     "home": "Windy10v10ai",
     "workshop": "Steam Workshop",
     "github": "GitHub",
+    "membership": "Membership",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -13,25 +14,6 @@
       "title": "Steam Workshop",
       "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates."
     },
-    "membership": {
-      "title": "Membership Subscription",
-      "description": "⭐Membership grants the following benefits:",
-      "note": "❗Remember to leave your Dota2 friend ID in the message to automatically activate your membership.",
-      "benefits": [
-        "Receive 1000 membership points for each monthly subscription",
-        "Gain 100 membership points for playing every day",
-        "Get one extra reroll in Ability Draft",
-        "Respawn time reduced to 5 seconds, and buyback cooldown reduced to 2 minutes",
-        "Enjoy a special Membership BUFF in-game"
-      ],
-      "subscribe": "Subscribe Now",
-      "subscribeLink": "https://afdian.com/a/windy10v10ai"
-    },
-    "manualActive": {
-      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
-      "afdian": "Afdian",
-      "kofi": "Ko-fi"
-    },
     "github": {
       "title": "GitHub",
       "description": "View project source code, changelog, and contribute to the project"
@@ -39,6 +21,35 @@
     "about": {
       "title": "About Project",
       "description": "This is a DOTA2 custom map project that brings you a new 10v10 AI battle experience.\nYou can subscribe to membership to unlock more features and enjoy better gaming experience.\nWe will continue to optimize and update, your support is our motivation to keep improving."
+    }
+  },
+  "membership": {
+    "title": "10v10AI Premium Membership",
+    "description": "⭐Subscribe to get the following benefits (please leave your Dota2 friend ID in the message to auto-activate)",
+    "benefits": [
+      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for your first login each day",
+      "🎯 Skill draft upgraded to a pick-1-of-8, with the 2 extra skills more likely to be advanced abilities",
+      "🪙 Unlocks the in-game 99999 gold cap",
+      "🎁 One free reroll for treasure chest item drops",
+      "⚔️ Exclusive membership BUFF: +10 attack, +5% spell amplification, +300 HP, +200 MP",
+      "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
+      "🎮 One free reroll each for the starting active and passive skill draft"
+    ],
+    "note": "😊Membership takes effect automatically starting from your next game",
+    "afdian": {
+      "title": "Afdian",
+      "price": "CN¥29.8/month",
+      "subscribe": "Subscribe on Afdian"
+    },
+    "kofi": {
+      "title": "Ko-fi",
+      "price": "US$4/month",
+      "subscribe": "Subscribe on Ko-fi"
+    },
+    "manualActive": {
+      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
+      "afdian": "Afdian",
+      "kofi": "Ko-fi"
     }
   },
   "footer": {

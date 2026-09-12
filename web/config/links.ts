@@ -6,3 +6,6 @@ export const EXTERNAL_LINKS = [
   },
   { href: 'https://github.com/windy10v10ai/game', labelKey: 'github' },
 ];
+
+export const MEMBERSHIP_AFDIAN_LINK = 'https://afdian.com/a/windy10v10ai';
+export const MEMBERSHIP_KOFI_LINK = 'https://ko-fi.com/post/Membership-Z8Z01CDJLU';

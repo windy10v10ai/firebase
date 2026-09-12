@@ -3,6 +3,7 @@
     "home": "Windy10v10ai",
     "workshop": "Steam 创意工坊",
     "github": "GitHub",
+    "membership": "会员订阅",
     "disclosure": "商业披露",
     "switchLanguage": "切换语言",
     "menu": "菜单"
@@ -13,25 +14,6 @@
       "title": "Steam 创意工坊",
       "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力"
     },
-    "membership": {
-      "title": "会员订阅",
-      "description": "⭐订阅会员可以获得如下福利：",
-      "note": "❗订阅时，需要留言Dota2好友ID以自动激活会员",
-      "benefits": [
-        "每月订阅可获得1000会员积分",
-        "每日首次登陆可获得100会员积分",
-        "技能抽选可获得1次额外刷新机会",
-        "复活时间减少5秒，买活CD降低至2分钟",
-        "会员专属BUFF"
-      ],
-      "subscribe": "立即订阅",
-      "subscribeLink": "https://afdian.com/a/windy10v10ai"
-    },
-    "manualActive": {
-      "prompt": "购买会员时忘记留言Dota2好友ID，没有自动激活？手动激活：",
-      "afdian": "爱发电",
-      "kofi": "Ko-fi"
-    },
     "github": {
       "title": "GitHub",
       "description": "查看项目源代码和更新日志，并参与贡献"
@@ -39,6 +21,35 @@
     "about": {
       "title": "关于项目",
       "description": "这是一个DOTA2自定义地图项目，为您带来全新的10v10AI对战体验。\n您可以订阅会员，解锁更多功能，享受更好的游戏体验。\n我们会持续优化和更新，您的支持是我们不断进步的动力。"
+    }
+  },
+  "membership": {
+    "title": "10v10AI 会员订阅",
+    "description": "⭐订阅会员可以获得以下福利（赞助时，请留言 Dota2好友ID 以自动激活）",
+    "benefits": [
+      "💎 会员积分：立即获得 1000 会员积分/订阅月数，每日首次登陆赠送 100 会员积分",
+      "🎯 开局抽选技能升级为 8选1，新增的 2 个技能中有更高概率出现高级技能",
+      "🪙 解锁游戏内99999的金钱上限",
+      "🎁 藏宝箱抽选的物品可刷新一次",
+      "⚔️ 会员专属BUFF：+10攻击力 5%技能增强 +300HP +200MP",
+      "🛡️ 复活时间减少5秒，买活CD缩短至2分钟",
+      "🎮 开局抽选的 主动/被动技能 各可刷新一次"
+    ],
+    "note": "😊会员将在新的一局游戏中自动生效",
+    "afdian": {
+      "title": "爱发电",
+      "price": "￥29.8/月",
+      "subscribe": "前往爱发电订阅"
+    },
+    "kofi": {
+      "title": "Ko-fi",
+      "price": "$4/月",
+      "subscribe": "前往 Ko-fi 订阅"
+    },
+    "manualActive": {
+      "prompt": "购买会员时忘记留言Dota2好友ID，没有自动激活？手动激活：",
+      "afdian": "爱发电",
+      "kofi": "Ko-fi"
     }
   },
   "footer": {
