@@ -2,7 +2,7 @@
 
 > 上级文档：[网站总体设计](README.md) 的「页面与菜单」。本文只定一件事：**玩家在网站上从哪里、怎样进入 Steam 登录**。鉴权链路见 [phase-2-steam-login.md](phase-2-steam-login.md)。
 >
-> 头部按钮与回调页已上线，剩下门禁 layout 与登录面板。
+> 已全部上线。
 
 ## 一句话结论
 
@@ -82,10 +82,10 @@
 
 | 组件 | 用途 | 状态 |
 |------|------|------|
-| `SteamLoginButton` | 封装跳转逻辑与 Steam 图标；头部、面板、激活页共用，面板要用大号 | 已有，待加尺寸 |
+| `SteamLoginButton` | 封装跳转逻辑与 Steam 图标；头部与面板共用，面板用大号 | 已有 |
 | `AuthStatus` | 头部按三态显示登录按钮或 ID + 退出 | 已有 |
-| `LoginPanel` | 未登录整页面板：标题、说明、大按钮 | 2e 做 |
-| `my/[[...path]]/page.tsx` | 按三态渲染骨架、`LoginPanel` 或跳到 `/profile/<uid>/...` | 2e 做 |
+| `LoginPanel` | 未登录整页面板：标题、说明、大按钮 | 已有 |
+| `my/[[...path]]/page.tsx` | 按三态渲染骨架、`LoginPanel` 或跳到 `/profile/<uid>/...` | 已有 |
 
 ## 7. 验收
 
