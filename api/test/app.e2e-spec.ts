@@ -10,9 +10,9 @@ describe('AppController (e2e)', () => {
     app = await initTest();
   });
 
-  it('/api/ (GET)', () => {
+  it('/api/hello (GET)', () => {
     return request(app.getHttpServer())
-      .get('/api/')
+      .get('/api/hello')
       .expect(200)
       .expect((s) => expect(s.text).toContain('local'));
   });
