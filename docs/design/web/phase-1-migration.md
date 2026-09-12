@@ -31,7 +31,7 @@
 |------|------|------|------|
 | **1a** 清理与布局 | 删脚手架残留；激活页去掉绝对定位居中；头部改成 logo + 语言单按钮 + 汉堡菜单 | 无 | 已完成 #1125 |
 | **1b** 框架升级 | Next 15 → 16；lint 改直接调 eslint | Next 16 | 已完成 #1137 |
-| **1c** 样式底座 | Tailwind 3 → 4；设计 token | Tailwind 4 | 1c-1 见 #1138 |
+| **1c** 样式底座 | Tailwind 3 → 4；设计 token | Tailwind 4 | 已完成 #1138 #1141 |
 | **1d** 去 antd | 重写激活表单与结果页；`apiFetch`；图标换 lucide | 删 antd、@ant-design/icons、axios；加 lucide-react | 未开始 |
 | **1e** React 升级 | React 18 → 19 | React 19 | 未开始 |
 
@@ -49,22 +49,28 @@
 
 **1c-1 纯升级**（#1138）：PostCSS 插件换成 `@tailwindcss/postcss`，`@tailwind` 三条指令换成 `@import "tailwindcss"`，删 `tailwind.config.js`、`autoprefixer` 和没人用的 `@tailwindcss/typography`。页面逻辑不动，只修掉 v4 重写 `space-*` 带出的两处回归。
 
-**1c-2 设计 token**：用 CSS 变量定义一组，值取现在页面上已经在用的颜色：
+**1c-2 设计 token**（#1141）：用 CSS 变量定义一组，值引用 Tailwind 现有色板，不写死色值，前后渲染完全一致：
 
-| token | 用途 |
-|------|------|
-| 背景、面板背景、面板边框 | 现在的 `bg-gray-900` / `bg-gray-800/70` / `border-gray-700` |
-| 正文、次要文字、标题 | 现在的 `text-gray-200` / `text-gray-400` / 白 |
-| 强调色、强调色悬停 | 现在的 `blue-400` / `blue-500` |
-| 危险色 | 表单校验错误用 |
+| token | 角色 | 当前取值 |
+|------|------|------|
+| `surface` / `panel` | 页面底色 / 面板与浮层底色 | gray-900 / gray-800 |
+| `line` | 边框与分隔线 | gray-700 |
+| `control` / `control-hover` | 按钮底色与悬停态 | gray-700 / gray-600 |
+| `heading` / `content` / `muted` | 标题 / 正文 / 次要文字 | 白 / gray-200 / gray-400 |
+| `accent` / `accent-hover` | 强调文字与链接 | blue-400 / blue-300 |
+| `accent-solid` / `accent-solid-hover` | 实心强调按钮 | blue-500 / blue-600 |
 
-**`globals.css` 里那 6 个 `@apply` 类保留，不删。** 它们是现在唯一把颜色收敛好的地方——25 处引用集中在 6 个定义上。删掉等于把颜色散回 JSX，与收敛 token 的目标相反。只把定义里的硬编码颜色换成 token，JSX 一个字不动。真正要收拾的是 JSX 里散着的 40 处硬编码颜色类。
+`line` 和 `control` 当前同值但角色不同，不合并——重设计时边框和按钮底必然要分开走。
+
+**`globals.css` 里的 `@apply` 类保留，不删。** 它们是现在唯一把颜色收敛好的地方，删掉等于把颜色散回 JSX，与收敛 token 的目标相反。只把定义里的硬编码颜色换成 token。真正要收拾的是 JSX 里散着的硬编码颜色类。
+
+例外是 `.text-content`：`--color-content` 这个 token 会自动生成同名的 `text-content` 工具类，两者重名且同值，所以那条 `@apply` 规则可以直接删掉，引用它的 JSX 一个字不用改。
 
 **基础组件推迟到 1d。** 原计划的 `Button` / `Input` / `Field` / `Spinner` 全是表单才用的，1c 不动激活页的话零调用方，等 1d 有真实需求再按需要建。6 个 `@apply` 类里只有 `card-container` 有结构，其余是单属性别名，做成 React 组件只会更难用。
 
 按游戏界面风格换配色是后面单独一批的事，那时只改这些变量的值。
 
-**验收**：四个页面与 1b 后逐页对照，除已知的 Tailwind 4 默认值差异外无变化。
+**验收**：1c-2 是纯改名，四个页面与 1c-1 后的几何与计算色逐元素对照必须完全相同。看起来没变，才说明角色映射没搞错；这时候顺手调色，出了问题就分不清是映射错了还是新色本来如此。
 
 ### 3.4 批次 1d：去 antd
 
