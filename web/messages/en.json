@@ -9,7 +9,7 @@
   },
   "home": {
     "title": "DOTA2 10v10 AI Custom Map",
-    "steamWorkshop": {
+    "workshop": {
       "title": "Steam Workshop",
       "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates."
     },
@@ -27,6 +27,11 @@
       "subscribe": "Subscribe Now",
       "subscribeLink": "https://afdian.com/a/windy10v10ai"
     },
+    "manualActive": {
+      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
+      "afdian": "Afdian",
+      "kofi": "Ko-fi"
+    },
     "github": {
       "title": "GitHub",
       "description": "View project source code, changelog, and contribute to the project"
@@ -42,7 +47,7 @@
   "disclosure": {
     "title": "Business Disclosure",
     "description": "According to the requirements of the Specified Commercial Transactions Act, we hereby disclose the following business information.",
-    "lastUpdate": "Last updated: March 26, 2025",
+    "lastUpdate": "Last updated: September 12, 2026",
     "items": {
       "legalName": {
         "title": "Legal Name",
@@ -50,11 +55,15 @@
       },
       "address": {
         "title": "Address",
-        "content": ["Will be disclosed upon request"]
+        "content": [
+          "Provided without delay upon request, please contact us at the email address below"
+        ]
       },
       "phone": {
         "title": "Phone Number",
-        "content": ["Will be disclosed upon request"]
+        "content": [
+          "Provided without delay upon request, please contact us at the email address below"
+        ]
       },
       "email": {
         "title": "Email Address",
@@ -87,17 +96,24 @@
       },
       "paymentMethods": {
         "title": "Accepted Payment Methods",
-        "content": ["Alipay", "WeChat Pay", "Credit Card"]
+        "content": [
+          "Alipay",
+          "WeChat Pay",
+          "Stripe",
+          "PayPal",
+          "Note: available payment methods and settlement currency vary by payment platform"
+        ]
       },
       "paymentCycle": {
         "title": "Payment period",
         "content": [
-          "Alipay, WeChat Pay, and credit card payments are instant, membership service will be activated immediately after successful payment"
+          "All four payment methods are processed instantly, and membership is activated as soon as the payment succeeds",
+          "With the monthly auto-renewing plan, the fee is charged automatically every month and can be cancelled at any time"
         ]
       },
       "price": {
         "title": "Price",
-        "content": ["10v10AI Membership Subscription: ¥30/month"]
+        "content": ["10v10AI Membership Subscription: CN¥29.8/month or US$4/month"]
       }
     }
   },

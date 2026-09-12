@@ -9,7 +9,7 @@
   },
   "home": {
     "title": "DOTA2 10v10 AI 自定义地图",
-    "steamWorkshop": {
+    "workshop": {
       "title": "Steam 创意工坊",
       "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力"
     },
@@ -27,6 +27,11 @@
       "subscribe": "立即订阅",
       "subscribeLink": "https://afdian.com/a/windy10v10ai"
     },
+    "manualActive": {
+      "prompt": "购买会员时忘记留言Dota2好友ID，没有自动激活？手动激活：",
+      "afdian": "爱发电",
+      "kofi": "Ko-fi"
+    },
     "github": {
       "title": "GitHub",
       "description": "查看项目源代码和更新日志，并参与贡献"
@@ -42,7 +47,7 @@
   "disclosure": {
     "title": "商业披露",
     "description": "根据《特定商业交易法》要求，我们在此披露以下商业信息。",
-    "lastUpdate": "最后更新日期：2025年3月26日",
+    "lastUpdate": "最后更新日期：2026年9月12日",
     "items": {
       "legalName": {
         "title": "法定名称",
@@ -50,11 +55,11 @@
       },
       "address": {
         "title": "地址",
-        "content": ["如有需要，我们会立即披露"]
+        "content": ["收到请求后会及时提供，请通过下方邮箱联系"]
       },
       "phone": {
         "title": "电话号码",
-        "content": ["如有需要，我们会立即披露"]
+        "content": ["收到请求后会及时提供，请通过下方邮箱联系"]
       },
       "email": {
         "title": "邮箱地址",
@@ -85,15 +90,24 @@
       },
       "paymentMethods": {
         "title": "接受的支付方式",
-        "content": ["支付宝", "微信支付", "信用卡支付"]
+        "content": [
+          "支付宝",
+          "微信支付",
+          "Stripe",
+          "PayPal",
+          "备注：可用的支付方式与结算货币因支付平台而异"
+        ]
       },
       "paymentCycle": {
         "title": "付款周期",
-        "content": ["支付宝，微信和信用卡支付均为即时到账，会员服务将在支付成功后立即生效"]
+        "content": [
+          "四种支付方式均为即时到账，会员服务在支付成功后立即生效",
+          "选择连续包月订阅时，此后每月自动扣费，可随时取消"
+        ]
       },
       "price": {
         "title": "价格",
-        "content": ["10v10AI 会员订阅：¥30/月"]
+        "content": ["10v10AI 会员订阅：CN¥29.8/月 或 US$4/月"]
       }
     }
   },
