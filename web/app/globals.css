@@ -1,27 +1,41 @@
 @import 'tailwindcss';
 
+/* 值照搬现有配色，换成游戏界面风格时只改这里 */
+@theme {
+  --color-surface: var(--color-gray-900);
+  --color-panel: var(--color-gray-800);
+  --color-line: var(--color-gray-700);
+  --color-control: var(--color-gray-700);
+  --color-control-hover: var(--color-gray-600);
+
+  --color-heading: var(--color-white);
+  --color-content: var(--color-gray-200);
+  --color-muted: var(--color-gray-400);
+
+  --color-accent: var(--color-blue-400);
+  --color-accent-hover: var(--color-blue-300);
+  --color-accent-solid: var(--color-blue-500);
+  --color-accent-solid-hover: var(--color-blue-600);
+}
+
 @layer components {
   .title-primary {
-    @apply text-3xl font-bold text-white;
+    @apply text-3xl font-bold text-heading;
   }
-  
+
   .title-secondary {
-    @apply text-2xl font-bold text-blue-400;
+    @apply text-2xl font-bold text-accent;
   }
-  
-  .text-content {
-    @apply text-gray-200;
-  }
-  
+
   .card-container {
-    @apply bg-gray-800/70 backdrop-blur-sm rounded-lg border border-gray-700;
+    @apply bg-panel/70 backdrop-blur-sm rounded-lg border border-line;
   }
-  
+
   .card-hover {
-    @apply hover:border-blue-500 transition-all transform hover:-translate-y-1;
+    @apply hover:border-accent-solid transition-all transform hover:-translate-y-1;
   }
-  
+
   .link-hover {
-    @apply hover:text-blue-400 transition-colors;
+    @apply hover:text-accent transition-colors;
   }
-} 
+}

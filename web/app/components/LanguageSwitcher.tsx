@@ -26,12 +26,12 @@ export default function LanguageSwitcher() {
       onClick={toggleLocale}
       aria-label={t('switchLanguage')}
       title={t('switchLanguage')}
-      className="flex items-center rounded bg-gray-700 px-2 py-1 hover:bg-gray-600"
+      className="flex items-center rounded bg-control px-2 py-1 hover:bg-control-hover"
     >
       {LOCALE_MARKS.map(({ locale: markLocale, mark }, index) => (
         <span key={markLocale} className="flex items-center">
           {index > 0 ? <span className="mx-1 text-gray-500">/</span> : null}
-          <span className={markLocale === locale ? 'text-white' : 'text-gray-400'}>{mark}</span>
+          <span className={markLocale === locale ? 'text-heading' : 'text-muted'}>{mark}</span>
         </span>
       ))}
     </button>

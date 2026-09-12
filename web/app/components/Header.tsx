@@ -39,10 +39,10 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
-    <header ref={headerRef} className="card-container relative shadow-lg border-b border-gray-700">
+    <header ref={headerRef} className="card-container relative shadow-lg border-b border-line">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center gap-3">
-          <Link href="/" className="text-xl font-bold text-white link-hover">
+          <Link href="/" className="text-xl font-bold text-heading link-hover">
             {t('home')}
           </Link>
           <div className="flex items-center gap-4">
@@ -66,7 +66,7 @@ export default function Header() {
               aria-label={t('menu')}
               aria-expanded={menuOpen}
               aria-controls="header-menu"
-              className="md:hidden rounded bg-gray-700 p-1 text-gray-200 hover:bg-gray-600"
+              className="md:hidden rounded bg-control p-1 text-content hover:bg-control-hover"
             >
               <svg
                 className="h-5 w-5"
@@ -90,7 +90,7 @@ export default function Header() {
           // 背景用不透明色，浮层下方是正文，半透明会让两层文字叠在一起
           <div
             id="header-menu"
-            className="md:hidden absolute inset-x-0 top-full z-20 border-b border-gray-700 bg-gray-800 px-4 py-2 shadow-lg"
+            className="md:hidden absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 shadow-lg"
           >
             {EXTERNAL_LINKS.map((link) => (
               <a
