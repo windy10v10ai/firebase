@@ -1,9 +1,10 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, NotFoundException } from '@nestjs/common';
 import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest } from './util/util-http';
+import { initTest } from './util/util-http';
+import { findMember } from './util/util-member';
 import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
 
 describe('MemberController (e2e)', () => {
@@ -195,8 +196,7 @@ describe('MemberController (e2e)', () => {
           em: '[Error] 未能正确获取Dota2 ID',
         });
 
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(404);
+        await expect(findMember(app, memberId)).rejects.toThrow(NotFoundException);
       });
 
       it('爱发电Webhook开通会员成功 未留言ID 用相同爱发电ID之前留存的steamID激活', async () => {
@@ -265,8 +265,7 @@ describe('MemberController (e2e)', () => {
           em: '[Error] 未能正确获取Dota2 ID',
         });
 
-        const responseAfter = await get(app, `/api/members/${memberId}`);
-        expect(responseAfter.status).toEqual(404);
+        await expect(findMember(app, memberId)).rejects.toThrow(NotFoundException);
       });
 
       it('爱发电Webhook开通会员失败 玩家不存在 用相同爱发电ID之前留存的steamID激活', async () => {

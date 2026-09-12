@@ -12,6 +12,7 @@ import {
   post,
   restoreDate,
 } from './util/util-http';
+import { addMember } from './util/util-member';
 import {
   addPlayerProperty,
   awakenHero,
@@ -22,7 +23,6 @@ import {
 
 const gameStartUrl = '/api/game/start/';
 const gameEndUrl = '/api/game/end';
-const memberPostUrl = '/api/members/';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = getTestApiKey();
@@ -199,11 +199,7 @@ describe('PlayerController (e2e)', () => {
         ['高级会员 新玩家 当日首次', 100000012, MemberLevel.PREMIUM],
       ])('%s', async (title, steamId, level) => {
         mockDate('2023-12-01T00:00:00.000Z');
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level,
-        });
+        await addMember(app, steamId, 1, level);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -280,11 +276,7 @@ describe('PlayerController (e2e)', () => {
         ],
       ])('%s', async (title, dateMember, steamId, date1, point1, date2, point2, level) => {
         mockDate(dateMember);
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level,
-        });
+        await addMember(app, steamId, 1, level);
 
         mockDate(date1);
         const result = await get(app, gameStartUrl, {
@@ -313,16 +305,8 @@ describe('PlayerController (e2e)', () => {
     describe('多人开始', () => {
       it('普通玩家 会员 混合', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
-        await post(app, memberPostUrl, {
-          steamId: 100000032,
-          month: 1,
-          level: MemberLevel.NORMAL,
-        });
-        await post(app, memberPostUrl, {
-          steamId: 100000033,
-          month: 1,
-          level: MemberLevel.PREMIUM,
-        });
+        await addMember(app, 100000032, 1, MemberLevel.NORMAL);
+        await addMember(app, 100000033, 1, MemberLevel.PREMIUM);
 
         const steamIds = [100000030, 100000031, 100000032, 100000033];
 
@@ -349,11 +333,7 @@ describe('PlayerController (e2e)', () => {
         mockDate('2023-12-01T00:00:00.000Z');
 
         // 创建会员
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.NORMAL,
-        });
+        await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -374,11 +354,7 @@ describe('PlayerController (e2e)', () => {
         const steamId = 100000705;
         mockDate('2023-12-01T00:00:00.000Z');
 
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.PREMIUM,
-        });
+        await addMember(app, steamId, 1, MemberLevel.PREMIUM);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -453,11 +429,7 @@ describe('PlayerController (e2e)', () => {
         mockDate('2023-12-01T00:00:00.000Z');
 
         // 创建会员
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.NORMAL,
-        });
+        await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -475,11 +447,7 @@ describe('PlayerController (e2e)', () => {
         const steamId = 100000704;
         mockDate('2023-12-01T00:00:00.000Z');
 
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.PREMIUM,
-        });
+        await addMember(app, steamId, 1, MemberLevel.PREMIUM);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);

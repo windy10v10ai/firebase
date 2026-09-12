@@ -3,10 +3,10 @@ import { BaseFirestoreRepository } from 'fireorm';
 
 import { Member, MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
+import { get, initTest, mockDate, restoreDate } from './util/util-http';
+import { addMember } from './util/util-member';
 
 const gameStartUrl = '/api/game/start/';
-const memberPostUrl = '/api/members/';
 const matchId = 1;
 
 function callGameStart(app: INestApplication, steamIds: number[]) {
@@ -34,7 +34,7 @@ describe('会员签到补签 (e2e)', () => {
     const steamId = 400000001;
     // 日期避开活动期间
     mockDate('2026-07-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
     // 购买当天登录，建立 lastDailyDate，避免购买当天本身被算作漏签
     await callGameStart(app, [steamId]);
 
@@ -55,7 +55,7 @@ describe('会员签到补签 (e2e)', () => {
     const steamId = 400000002;
     // 日期避开活动期间
     mockDate('2026-07-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
     // 连续签到一天，建立 lastDailyDate
     const result1 = await callGameStart(app, [steamId]);
@@ -85,7 +85,7 @@ describe('会员签到补签 (e2e)', () => {
   it('长期未登录，漏签天数超过封顶：补签响应封顶 x7天，不超发', async () => {
     const steamId = 400000003;
     mockDate('2026-07-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 3, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 3, MemberLevel.NORMAL);
 
     const result1 = await callGameStart(app, [steamId]);
     expect(result1.status).toEqual(200);
@@ -109,7 +109,7 @@ describe('会员签到补签 (e2e)', () => {
   it('断档过期后重新购买，本周期第一次登录：不补断档前的漏签，且续费没有清空 lastDailyDate（回归 bug）', async () => {
     const steamId = 400000004;
     mockDate('2026-06-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
     // 签到一次后不再登录，直到会员过期
     const beforeExpire = await callGameStart(app, [steamId]);
@@ -119,7 +119,7 @@ describe('会员签到补签 (e2e)', () => {
 
     // 会员完全过期很久之后才重新购买
     mockDate('2026-08-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
     // 回归 bug：重新购买不应清空原有的 lastDailyDate 字段
     const memberAfterRepurchase = await membersRepository.findById(steamId.toString());
@@ -138,12 +138,12 @@ describe('会员签到补签 (e2e)', () => {
   it('断档过期后重新购买，隔几天才登录：只补重新购买之后的天数', async () => {
     const steamId = 400000005;
     mockDate('2026-06-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
     await callGameStart(app, [steamId]);
 
     // 完全过期后重新购买
     mockDate('2026-08-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
     // 重新购买后又漏签 4 天才登录
     mockDate('2026-08-05T00:00:00.000Z');
@@ -164,17 +164,13 @@ describe('会员签到补签 (e2e)', () => {
   it('续费/升级（会员本身仍有效未过期）：周期不重置，续费前的漏签在续费后登录仍能补签', async () => {
     const steamId = 400000006;
     mockDate('2026-08-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
     await callGameStart(app, [steamId]);
 
     // 会员仍然有效时续费升级为高级会员
     mockDate('2026-08-03T00:00:00.000Z');
-    const upgradeResult = await post(app, memberPostUrl, {
-      steamId,
-      month: 1,
-      level: MemberLevel.PREMIUM,
-    });
-    expect(upgradeResult.status).toEqual(201);
+    const upgradeResult = await addMember(app, steamId, 1, MemberLevel.PREMIUM);
+    expect(upgradeResult.level).toEqual(MemberLevel.PREMIUM);
 
     const memberAfterUpgrade = await membersRepository.findById(steamId.toString());
     expect(memberAfterUpgrade.periodStartDate).toEqual(new Date('2026-08-01T00:00:00.000Z'));
@@ -198,7 +194,7 @@ describe('会员签到补签 (e2e)', () => {
   it('完全过期（超过 1 天宽限）后才登录：不补签，也不发任何会员积分', async () => {
     const steamId = 400000007;
     mockDate('2026-06-01T00:00:00.000Z');
-    await post(app, memberPostUrl, { steamId, month: 1, level: MemberLevel.NORMAL });
+    await addMember(app, steamId, 1, MemberLevel.NORMAL);
     await callGameStart(app, [steamId]);
 
     // 会员完全过期很久之后才登录，且没有重新购买
