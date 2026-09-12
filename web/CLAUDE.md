@@ -37,9 +37,9 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 改动会影响网站页面行为时，**最终验证必须在浏览器里实际操作页面**。`curl`、控制台 `fetch`、unit、e2e 都只是中间步骤，不能替代这一步。API 的 CORS、鉴权、响应格式改动同样适用——那些改动本来就是为网站做的。
 
-- 工具：一律先用 Claude 桌面版内置浏览器（`mcp__Claude_Browser__*`），它已经带上 Chrome 的登录态；只有它做不到的场景才换 Chrome 扩展（`mcp__claude-in-chrome__*`）
-- 打开外部站点（非 `localhost`）用 `preview_start` 并传 `url`，它会新开一个 tab；`navigate` 直接跳外部域名会返回 denied。进入站点后，同源内的跳转用 `navigate` 正常
-- 内置浏览器的 network 面板可能不记录跨域 XHR。拿不到请求记录时，改用页面内 `javascript_tool` 发同样的请求读状态码与响应体，并确认 console 没有 CORS 报错
+- 工具：用 Playwright 驱动无头 Chrome，做法见 [.claude/skills/web-browser-verify/SKILL.md](../.claude/skills/web-browser-verify/SKILL.md)，不依赖运行环境是否为 Claude Desktop。仅当当前会话确实运行在 Claude Desktop 里、且要测的场景需要真实登录态时，可改用内置浏览器（`mcp__Claude_Browser__*`）省一步登录；`mcp__claude-in-chrome__*` 留作前两者都不可用时的兜底
+- 使用 Claude 桌面版内置浏览器时：打开外部站点（非 `localhost`）用 `preview_start` 并传 `url`，它会新开一个 tab；`navigate` 直接跳外部域名会返回 denied。进入站点后，同源内的跳转用 `navigate` 正常
+- 使用 Claude 桌面版内置浏览器时：它的 network 面板可能不记录跨域 XHR。拿不到请求记录时，改用页面内 `javascript_tool` 发同样的请求读状态码与响应体，并确认 console 没有 CORS 报错（Playwright 路径用 `page.on('response')` 直接拿跨域响应，不受此限制）
 - 操作真实页面：点按钮、填表单、提交，再从 network 面板确认请求方法、状态码、响应体，并确认 console 没有报错
 - 布局有改动时按下一节的三档宽度逐页验证，不要只看桌面宽度
 - 被验证的服务必须由**本分支**启动。端口被占用时先确认归属（可能是其他会话的旧代码），不要直接接着用，也不要直接 kill
@@ -57,9 +57,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 每档确认三件事：无横向滚动、无元素超出视口、头部元素互不接触。用 `resize_window` 切宽度，用 `javascript_tool` 量 `document.documentElement.scrollWidth > innerWidth` 与元素的 `getBoundingClientRect()`，不要只靠肉眼看截图。
 
-**更宽的分辨率不用单独跑。** `container` 在 1536 封顶，1280 以上只增加两侧留白，不会让任何元素被迫收缩，布局风险随宽度单调下降。例外是没有宽度上限的元素——它们会一直跟着屏幕变宽，新增这类元素时补测一次 1920。
-
-**改动涉及窄屏布局时加测 320**，这是最窄的在用机型，问题在这里最先暴露。
+**更宽的分辨率不用单独跑。** `container` 在 1536 封顶，1280 以上只增加两侧留白，不会让任何元素被迫收缩，布局风险随宽度单调下降。
 
 ## PR 截图
 
