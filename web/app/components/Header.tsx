@@ -45,8 +45,8 @@ export default function Header() {
           <Link href="/" className="text-xl font-bold text-white link-hover">
             {t('home')}
           </Link>
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-4">
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               {EXTERNAL_LINKS.map((link) => (
                 <a
                   key={link.href}

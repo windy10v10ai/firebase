@@ -59,14 +59,14 @@ export default function DisclosurePage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="title-primary mb-6">{t('title')}</h1>
-      <p className="text-content mb-8">
+      <h1 className="title-primary">{t('title')}</h1>
+      <p className="text-content">
         {t('description')}
       </p>
       
       <DataTable items={disclosureItems} />
 
-      <p className="text-content text-sm mt-8">
+      <p className="text-content text-sm">
         {t('lastUpdate')}
       </p>
     </div>
