@@ -6,12 +6,22 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 `cd web && npm run dev`
 
-浏览器直连 API，域名由 `NEXT_PUBLIC_API_DOMAIN` 在构建期注入：
+浏览器直连 API，域名由 `NEXT_PUBLIC_API_DOMAIN` 在构建期注入。三个环境变量文件按 Next 的固定语义分工：
 
-- `web/.env` 进 git，值是生产域名 `https://api.windy10v10ai.com`
-- `web/.env.local` 不进 git，本地开发指向本机 API：`NEXT_PUBLIC_API_DOMAIN=http://localhost:3001`
+| 文件 | Next 何时读取 | 进 git | 内容 |
+|---|---|---|---|
+| `.env` | 所有环境，优先级最低 | 是 | 兜底值，生产域名 `https://api.windy10v10ai.com` |
+| `.env.development` | 仅 `next dev` | 是 | 本机 API `http://localhost:3001` |
+| `.env.local` | 除 test 外所有环境，覆盖前两者 | 否 | 仅供个人临时覆盖（ngrok、拿本地页面打生产接口排查） |
 
-变量名必须带 `NEXT_PUBLIC_` 前缀，否则不会注入客户端包，会静默回退到 `.env` 里的生产域名——本地页面打的是生产接口，界面上看不出来。
+本地开发不需要任何手工配置，`.env.development` 已经指向本机 API。
+
+两条约束：
+
+- **变量名必须带 `NEXT_PUBLIC_` 前缀**，否则不会注入客户端包，会静默回退到 `.env` 的生产域名——本地页面打的是生产接口，界面上看不出来。`config/constant.ts` 在 dev 下会把实际域名打到控制台，启动后扫一眼
+- **`.env.local` 不能进 git**。它在 `next build` 时同样生效，一旦提交，App Hosting 的生产构建会被本地值覆盖。需要共享的本地配置写进 `.env.development`
+
+网站不放密钥：浏览器拿得到的值按定义都是公开的（Firebase Web SDK 配置、GA4 measurement ID 皆然）。真需要服务端密钥时走 App Hosting 的 secret 绑定，不进文件。
 
 ## 校验
 

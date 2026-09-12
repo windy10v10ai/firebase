@@ -1,7 +1,11 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
-    "disclosure": "Business Disclosure"
+    "workshop": "Steam Workshop",
+    "github": "GitHub",
+    "disclosure": "Business Disclosure",
+    "switchLanguage": "Switch language",
+    "menu": "Menu"
   },
   "home": {
     "title": "DOTA2 10v10 AI Custom Map",
