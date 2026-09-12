@@ -53,8 +53,8 @@
 | **2b** 网站来源鉴权 | API | guard 认 ID Token，新增来源类型 `WEB` 与 `@AllowWeb()`，校验路由里的 `:steamId` 等于 token 的 uid | 已完成 #1149 |
 | **2c** 开第一个接口 | API | `GET /player/:steamId/info` 挂 `@AllowWeb()` | 已完成 #1149 |
 | **2d** 登录跑通 | web | Firebase JS SDK、登录态 context、头部登录按钮、回调页、请求带 token | 已完成 #1150 |
-| **2e** 门禁与个人主页 | web | `/my/*` 入口页与未登录面板、`/profile/<steamId>` 个人主页、头部 ID 按钮进主页 | 已完成 |
-| **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 已完成 |
+| **2e** 门禁与个人主页 | web | `/my/*` 入口页与未登录面板、`/profile/<steamId>` 个人主页、头部 ID 按钮进主页 | 已完成 #1158 |
+| **2f** 激活页自动填 ID | web | 登录后把 uid 填进 Dota2 ID 字段 | 已完成 #1158 |
 
 2e 与 2f 合一个 PR：2f 只有一个链接加一次填值，单独走一轮流程不划算。
 
