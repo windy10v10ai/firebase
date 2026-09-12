@@ -3,7 +3,7 @@
 import { signInWithCustomToken } from 'firebase/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 import Button from '@/app/components/ui/button';
 import Spinner from '@/app/components/ui/spinner';
@@ -24,8 +24,15 @@ function LoginCallbackContent() {
   const nextParam = searchParams.get('next');
   const next = isSafeNextPath(nextParam) ? nextParam : '/';
 
+  // openid 参数在 Steam 那边一次性有效，StrictMode 下的重复挂载不能重新发起请求，
+  // 否则第二次核对必然被 Steam 判定为无效签名
+  const hasRunRef = useRef(false);
+
   useEffect(() => {
-    let cancelled = false;
+    if (hasRunRef.current) {
+      return;
+    }
+    hasRunRef.current = true;
 
     (async () => {
       try {
@@ -35,20 +42,12 @@ function LoginCallbackContent() {
           body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
         });
         await signInWithCustomToken(auth, customToken);
-        if (!cancelled) {
-          router.replace(next);
-        }
+        router.replace(next);
       } catch {
-        if (!cancelled) {
-          setError(true);
-        }
+        setError(true);
       }
     })();
-
-    return () => {
-      cancelled = true;
-    };
-    // 只在挂载时核对一次，openid 参数是一次性的，next/searchParams 变化不用重跑
+    // 只在挂载时核对一次，next/searchParams 变化不用重跑
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
