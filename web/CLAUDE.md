@@ -37,6 +37,59 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - 打开外部站点（非 `localhost`）用 `preview_start` 并传 `url`，它会新开一个 tab；`navigate` 直接跳外部域名会返回 denied。进入站点后，同源内的跳转用 `navigate` 正常
 - 内置浏览器的 network 面板可能不记录跨域 XHR。拿不到请求记录时，改用页面内 `javascript_tool` 发同样的请求读状态码与响应体，并确认 console 没有 CORS 报错
 - 操作真实页面：点按钮、填表单、提交，再从 network 面板确认请求方法、状态码、响应体，并确认 console 没有报错
-- 移动端用 `resize_window` 切到窄屏验证，不要只看桌面宽度
+- 布局有改动时按下一节的三档宽度逐页验证，不要只看桌面宽度
 - 被验证的服务必须由**本分支**启动。端口被占用时先确认归属（可能是其他会话的旧代码），不要直接接着用，也不要直接 kill
 - 把做了什么操作、看到什么请求与响应写进 PR 正文的测试清单
+
+## 验证宽度
+
+页面布局有改动时，按这三档逐页验证：
+
+| 宽度 | 代表 | 重点看 |
+|---|---|---|
+| 375 | 手机主流机型 | 头部元素是否接触或折行；表单能否完整填写并提交 |
+| 768 | 平板竖屏，也是头部由汉堡切回横排后最挤的一档 | 横排头部放不放得下；表单 label 与输入框的分栏有没有被挤压 |
+| 1280 | PC | 内容区居中与留白是否正常；与改动前是否一致 |
+
+每档确认三件事：无横向滚动、无元素超出视口、头部元素互不接触。用 `resize_window` 切宽度，用 `javascript_tool` 量 `document.documentElement.scrollWidth > innerWidth` 与元素的 `getBoundingClientRect()`，不要只靠肉眼看截图。
+
+**更宽的分辨率不用单独跑。** `container` 在 1536 封顶，1280 以上只增加两侧留白，不会让任何元素被迫收缩，布局风险随宽度单调下降。例外是没有宽度上限的元素——它们会一直跟着屏幕变宽，新增这类元素时补测一次 1920。
+
+**改动涉及窄屏布局时加测 320**，这是最窄的在用机型，问题在这里最先暴露。
+
+## PR 截图
+
+改了页面外观，PR 正文里要放前后对比图。
+
+**截图用无头 Chrome，页面用生产构建起**（`npm run build && npm start`）——dev server 左下角的开发指示器会入镜：
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless=old --disable-gpu --hide-scrollbars --virtual-time-budget=5000 \
+  --window-size=320,700 --screenshot=out.png http://localhost:3000/regist/afdian
+```
+
+三个参数缺一不可：
+
+- `--headless=old`：`--headless=new` 不按 `--window-size` 设布局视口，出来的图右侧内容被切掉
+- `--virtual-time-budget=5000`：激活表单在 React 副作用跑完前渲染的是 `null`，截早了拍到空白页
+- `--hide-scrollbars`：否则窄屏图里多一条滚动条
+
+「改动前」直接拍线上 `https://windy10v10ai.com`，无需切分支重建。前后两张须使用同一组 `--window-size`。
+
+**图片放 `assets` 孤儿分支**，不进 `develop` 的源码树：
+
+```bash
+git worktree add --detach <临时目录>/wt-assets
+cd <临时目录>/wt-assets && git checkout assets
+mkdir -p pr/<PR 编号> && cp <图片> pr/<PR 编号>/
+git add -A && git commit -m "Add screenshots for PR #<PR 编号>" && git push
+```
+
+正文按 raw 链接引用，仓库是公开的，Markdown 可直接渲染：
+
+```
+https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<名字>.png
+```
+
+前后对比用两列表格并排放置。图片用 `<img src="..." width="320">` 控制宽度，`![]()` 语法无法限制尺寸。
