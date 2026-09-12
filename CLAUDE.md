@@ -217,3 +217,15 @@ feature/<issue-id>-<short-kebab-summary>
 feature 分支的中间提交对 `develop` 的历史没有价值，压成一条。`develop` → `main` 是两条长期分支对齐，保留每条提交，`main` 的历史才与 `develop` 一一对应。
 
 仓库设置里 rebase 已关闭，不是可选项。
+
+### 合并后清理
+
+PR 合并后立刻清理该分支对应的本地 worktree，不用等提醒：
+
+```
+git worktree remove <path> --force
+git branch -D <branch-name>
+git worktree prune
+```
+
+多个会话共用同一仓库时，各会话通常用 `git worktree add` 而非切换主检出的分支来隔离工作，遗留的 worktree 和分支会越积越多，所以这一步是收尾的默认动作而非可选项。
