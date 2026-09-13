@@ -109,7 +109,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
     void requestActivation();
   };
 
-  const helpLinkClass = 'text-accent transition-colors hover:text-accent-hover';
+  const helpLinkClass = 'link-inline';
   const steamIdError =
     touchedFields.steamId && errors.steamId ? t('input.steamId.help') : undefined;
   const platformOrderKeyError =
@@ -131,7 +131,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
       ) : (
         <section className="space-y-8">
           <div className="space-y-3">
-            <h1 className="title-primary">
+            <h1 className="title-primary text-member-strong">
               {activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
             </h1>
             <p className="text-content">
@@ -147,7 +147,8 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               messageId="inputSteamIdMessage"
               error={steamIdError}
               help={
-                <>
+                // 窄屏一行放不下两条，各占一行；整条链接不从中间断开
+                <span className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                   <a
                     href={STEAM_ID_HELP_URLS[activeType]}
                     target="_blank"
@@ -158,13 +159,15 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
                   </a>
                   {auth.status === 'unauthenticated' ? (
                     <>
-                      <span className="mx-2">/</span>
+                      <span aria-hidden="true" className="hidden text-muted sm:inline">
+                        /
+                      </span>
                       <a href={buildSteamLoginUrl(pathname)} className={helpLinkClass}>
                         {t('input.steamId.steamAutoFill')}
                       </a>
                     </>
                   ) : null}
-                </>
+                </span>
               }
             >
               <Input
@@ -223,7 +226,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               />
             </Field>
 
-            <Button type="submit" disabled={!formValid || isLoading} className="w-full sm:w-auto">
+            <Button type="submit" variant="member" disabled={!formValid || isLoading} className="w-full sm:w-auto">
               {t('submitButton.buttonText')}
             </Button>
           </form>

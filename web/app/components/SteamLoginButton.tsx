@@ -29,7 +29,7 @@ export default function SteamLoginButton({ size = 'default' }: SteamLoginButtonP
       href={href}
       title={t('loginTooltip')}
       aria-label={t('login')}
-      className={`inline-flex items-center whitespace-nowrap rounded-md bg-control text-content transition-colors hover:bg-control-hover ${SIZE_CLASS[size]}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover ${SIZE_CLASS[size]}`}
     >
       <SteamIcon className={size === 'large' ? 'size-6 shrink-0' : 'size-5 shrink-0'} />
       <span>{size === 'large' ? t('login') : t('loginShort')}</span>

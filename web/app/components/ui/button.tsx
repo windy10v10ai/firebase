@@ -1,12 +1,31 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-type ButtonProps = ComponentPropsWithoutRef<'button'>;
+type ButtonVariant = 'season' | 'member' | 'secondary';
 
-const Button = ({ className = '', type = 'button', ...props }: ButtonProps) => {
+const BASE_CLASS =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed';
+
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  season: 'btn-season',
+  member: 'btn-member',
+  secondary:
+    'inline-flex min-h-11 md:min-h-10 items-center justify-center rounded-[7px] border border-line px-5 text-sm font-extrabold text-content transition-colors hover:bg-panel-soft disabled:text-[#5d5d66]',
+};
+
+interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
+  variant?: ButtonVariant;
+}
+
+const Button = ({
+  className = '',
+  type = 'button',
+  variant = 'season',
+  ...props
+}: ButtonProps) => {
   return (
     <button
       type={type}
-      className={`inline-flex min-h-11 items-center justify-center rounded-md bg-accent-solid px-5 py-2.5 font-medium text-heading transition-colors hover:bg-accent-solid-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      className={`${VARIANT_CLASS[variant]} ${BASE_CLASS} ${className}`}
       {...props}
     />
   );

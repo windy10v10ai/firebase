@@ -20,7 +20,7 @@ const Input = ({
 
   return (
     <div
-      className={`flex min-h-11 items-center rounded-md border bg-surface/70 text-content transition-shadow focus-within:ring-2 ${borderClass}`}
+      className={`flex min-h-11 items-center rounded-md border bg-panel-soft text-content transition-shadow focus-within:ring-2 ${borderClass}`}
     >
       <span aria-hidden="true" className="ml-3 shrink-0 text-muted">
         {icon}

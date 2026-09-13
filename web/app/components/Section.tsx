@@ -3,12 +3,19 @@ interface SectionProps {
   children: React.ReactNode;
   className?: string;
   containerClassName?: string;
+  titleClassName?: string;
 }
 
-export default function Section({ title, children, className = '', containerClassName = '' }: SectionProps) {
+export default function Section({
+  title,
+  children,
+  className = '',
+  containerClassName = '',
+  titleClassName = '',
+}: SectionProps) {
   return (
     <section className={`card-container p-8 ${className}`}>
-      {title && <h2 className="title-secondary mb-6 text-center">{title}</h2>}
+      {title && <h2 className={`title-secondary mb-6 text-center ${titleClassName}`}>{title}</h2>}
       <div className={`max-w-3xl mx-auto ${containerClassName}`}>
         {children}
       </div>
