@@ -123,4 +123,6 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 
 推完先 `curl -o /dev/null -w '%{http_code}'` 逐个确认返回 200 再写进正文，链接拼错在 PR 里只会显示成裂图。
 
+**重拍的图要换一条路径，不要覆盖旧文件**（`pr/<PR 编号>/v2/` 之类）。GitHub 的图片代理按 URL 缓存，同一条链接推了新内容，PR 里仍然显示旧图，看起来像没改。
+
 前后对比用两列表格并排放置。图片用 `<img src="..." width="320">` 控制宽度，`![]()` 语法无法限制尺寸。

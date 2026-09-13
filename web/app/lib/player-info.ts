@@ -36,6 +36,17 @@ export interface PlayerInfo {
   statsLifetime?: StatsLifetime;
 }
 
+/** 会员状态对应的文案 key：没有记录、已过期、高级、普通 */
+export function memberStatusKey(member?: MemberInfo): string {
+  if (!member) {
+    return 'none';
+  }
+  if (!member.enable) {
+    return 'expired';
+  }
+  return member.level >= MEMBER_LEVEL_PREMIUM ? 'premium' : 'normal';
+}
+
 /** 取个人主页要的全部数据，按 URL 里的 id 请求，不从登录态取 uid */
 export function fetchPlayerInfo(steamId: string) {
   return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member,statsLifetime`);
