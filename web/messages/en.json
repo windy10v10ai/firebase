@@ -43,7 +43,7 @@
     "sample": {
       "signIn": "Daily check-in",
       "vision": "Bonus vision",
-      "cooldown": "Cooldown",
+      "cooldown": "Cooldown reduction",
       "moveSpeed": "Move speed",
       "awakened": "Awakened heroes",
       "level": "Lv {n}"

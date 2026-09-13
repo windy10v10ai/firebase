@@ -43,7 +43,7 @@
     "sample": {
       "signIn": "每日签到",
       "vision": "额外视野",
-      "cooldown": "冷却时间",
+      "cooldown": "冷却缩短",
       "moveSpeed": "移动速度",
       "awakened": "已觉醒英雄",
       "level": "{n} 级"

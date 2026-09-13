@@ -31,7 +31,11 @@ function Level({ level }: { level: number }) {
 
 /**
  * 登录引导块的背景：一屏「登录后能看到什么」的示意。
- * 数值写死，不请求接口；属性三项的取值与游戏内逐级取值一致。
+ * 数值写死，不请求接口；属性两项的取值与游戏内逐级取值一致。
+ *
+ * 露出来的六格按「看到它会不会想知道自己的是多少」挑：场次胜率不用解释就看得懂，
+ * 勇士等级与行为分是账号成长的身份，属性两项把积分能换来什么说成具体效果。
+ * 会员、签到与另外几项另有去处，退到被压住的两列当背景。
  */
 export default function SampleDataPanel() {
   const t = useTranslations('home.sample');
@@ -53,16 +57,16 @@ export default function SampleDataPanel() {
           <Value className="text-member">860</Value>
         </Tile>
       </div>
+      <Tile label={tStats('games')}>
+        <Value className="text-heading">1,284</Value>
+      </Tile>
       <Tile label={tIdentity('battleLevel')}>
         <Value className="text-season">42</Value>
       </Tile>
-      <Tile label={tIdentity('battlePoint')}>
-        <Value className="text-season">1,240</Value>
-      </Tile>
 
       <div className={COVERED}>
-        <Tile label={tStats('games')}>
-          <Value className="text-heading">1,284</Value>
+        <Tile label={tIdentity('battlePoint')}>
+          <Value className="text-season">1,240</Value>
         </Tile>
       </div>
       <div className={COVERED}>
@@ -90,37 +94,37 @@ export default function SampleDataPanel() {
         </Tile>
       </div>
       <div className={COVERED}>
-        <Tile label={t('cooldown')}>
-          <Value className="text-heading">
-            −12%
-            <Level level={3} />
-          </Value>
+        <Tile label={t('signIn')}>
+          <div className="mt-2 flex gap-1">
+            {Array.from({ length: SIGN_IN_DAYS }, (_, index) =>
+              index < SIGN_IN_DONE ? (
+                <span
+                  key={index}
+                  className="flex size-[22px] items-center justify-center rounded-[5px] border border-member-border bg-member-soft"
+                >
+                  <Check className="size-3 text-member-strong" strokeWidth={3} />
+                </span>
+              ) : (
+                <span
+                  key={index}
+                  className="size-[22px] rounded-[5px] border border-line bg-panel-soft"
+                />
+              ),
+            )}
+          </div>
         </Tile>
       </div>
-      <Tile label={t('moveSpeed')}>
+      <Tile label={t('cooldown')}>
         <Value className="text-heading">
-          +50
-          <Level level={2} />
+          16%
+          <Level level={4} />
         </Value>
       </Tile>
-      <Tile label={t('signIn')}>
-        <div className="mt-2 flex gap-1">
-          {Array.from({ length: SIGN_IN_DAYS }, (_, index) =>
-            index < SIGN_IN_DONE ? (
-              <span
-                key={index}
-                className="flex size-[22px] items-center justify-center rounded-[5px] border border-member-border bg-member-soft"
-              >
-                <Check className="size-3 text-member-strong" strokeWidth={3} />
-              </span>
-            ) : (
-              <span
-                key={index}
-                className="size-[22px] rounded-[5px] border border-line bg-panel-soft"
-              />
-            ),
-          )}
-        </div>
+      <Tile label={t('moveSpeed')}>
+        <Value className="text-heading">
+          +150
+          <Level level={6} />
+        </Value>
       </Tile>
     </div>
   );
