@@ -24,7 +24,7 @@ const ActiveResult = ({ activeType, errorMsg, onRetry, result }: ActiveResultPro
         : t('avticeResult.error.kofiMessage'));
 
   return (
-    <section className="card-container flex flex-col items-center gap-6 p-6 text-center sm:p-10">
+    <section className="card-container card-pad flex flex-col items-center gap-6 text-center">
       {result ? (
         <CircleCheckBig aria-hidden="true" className="size-16 text-success" strokeWidth={1.5} />
       ) : (

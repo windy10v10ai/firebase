@@ -19,7 +19,7 @@ export default function MemberCard({ member }: { member?: MemberInfo }) {
   const t = useTranslations('profile.member');
 
   return (
-    <section className="card-container space-y-4 p-4 sm:p-6 lg:p-8">
+    <section className="card-container card-pad space-y-4">
       <h2 className="title-secondary text-member-strong">{t('title')}</h2>
       <p className="text-lg text-content">{t(statusKey(member))}</p>
       {member ? (

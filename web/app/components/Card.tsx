@@ -11,7 +11,7 @@ export default function Card({ title, description, href, className = '' }: CardP
       href={href}
       target="_blank" 
       rel="noopener noreferrer"
-      className={`block p-6 card-container card-hover ${className}`}
+      className={`block card-container card-pad card-hover ${className}`}
     >
       <h2 className="title-secondary mb-2">{title}</h2>
       <p className="text-content">{description}</p>

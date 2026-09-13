@@ -40,7 +40,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
   const status = memberStatusKey(member);
 
   return (
-    <section className="card-container space-y-5 p-4 sm:p-6 lg:p-8">
+    <section className="card-container card-pad space-y-5">
       <div className="flex items-center gap-4">
         <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-line bg-panel-soft">
           <UserRound className="size-7 text-muted" strokeWidth={1.7} aria-hidden="true" />
