@@ -58,7 +58,8 @@ export default function PlayerSummary({ uid }: { uid: string }) {
 
   return (
     <section className="card-container card-pad space-y-5">
-      <div className="flex items-center gap-4">
+      {/* 整行都能点：窄屏把链接文字收成箭头，ID 才放得进一行 */}
+      <Link href={playerPagePath(uid)} className="group flex items-center gap-4">
         <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-line bg-panel-soft">
           <UserRound className="size-7 text-muted" strokeWidth={1.7} aria-hidden="true" />
         </span>
@@ -66,32 +67,25 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           <p className="text-2xl font-bold text-heading sm:text-[26px]">
             {t('heading', { id: uid })}
           </p>
-          {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个 */}
-          {/* 两行始终占位且不折行，会员信息晚到也不撑高身份行；没开通过留空，「未开通会员」既没信息也没去处 */}
+          {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个；没开通过留空，「未开通会员」既没信息也没去处 */}
+          {/* 两行始终占位且不折行，会员信息晚到也不撑高身份行；加载中同样只留白，非会员本来就空着，放骨架会预告不存在的内容 */}
           <p className="flex flex-col sm:flex-row sm:items-center sm:gap-x-2">
             {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
             <span
               className={`min-h-6 truncate ${member?.enable ? 'font-medium text-member-strong' : 'text-muted'}`}
             >
-              {pending ? <Skeleton /> : member ? t(`member.${status}`) : null}
+              {member ? t(`member.${status}`) : null}
             </span>
             <span className="min-h-5 truncate text-sm text-muted">
-              {pending ? (
-                <Skeleton chars={10} />
-              ) : member ? (
-                t('member.expireDate', { date: member.expireDateString })
-              ) : null}
+              {member ? t('member.expireDate', { date: member.expireDateString }) : null}
             </span>
           </p>
         </div>
-        <Link
-          href={playerPagePath(uid)}
-          className="link-inline inline-flex items-center gap-1 text-sm whitespace-nowrap"
-        >
-          {t('profileLink')}
+        <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap text-link transition-colors group-hover:text-link-hover">
+          <span className="hidden sm:inline">{t('profileLink')}</span>
           <ChevronRight className="size-4" aria-hidden="true" />
-        </Link>
-      </div>
+        </span>
+      </Link>
 
       <dl className="grid gap-x-8 sm:grid-cols-2" aria-busy={pending}>
         <StatRow

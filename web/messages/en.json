@@ -5,7 +5,7 @@
     "profile": "Profile",
     "profileFull": "Profile",
     "property": "Attributes",
-    "propertyFull": "Attribute Points",
+    "propertyFull": "Attributes",
     "awaken": "Awaken",
     "awakenFull": "Hero Awakening",
     "wiki": "Skills & Items",
@@ -89,7 +89,7 @@
         "description": "Preview and refresh your daily tasks"
       },
       "wiki": {
-        "title": "Abilities & Items",
+        "title": "Skills & Items",
         "description": "The abilities and items in the opening draft"
       }
     }

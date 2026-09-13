@@ -26,16 +26,16 @@ export default function AuthStatus() {
         aria-label={t('profileTooltip')}
         className="flex items-center gap-1.5 link-hover"
       >
-        {/* 窄屏放不下 10 位 ID，退回图标；ID 本身在个人主页上显示 */}
+        {/* 手机与平板放不下 ID，退回图标；ID 本身在个人主页上显示 */}
         <UserRound className="size-5 shrink-0" aria-hidden="true" />
-        <span className="hidden md:inline">{t('loggedInAs', { uid: auth.uid })}</span>
+        <span className="hidden lg:inline">{t('loggedInAs', { uid: auth.uid })}</span>
       </Link>
       <button
         type="button"
         onClick={() => auth.signOut()}
         title={t('signOut')}
         aria-label={t('signOut')}
-        className="hidden md:block link-hover"
+        className="hidden lg:block link-hover"
       >
         <LogOut className="size-4" aria-hidden="true" />
       </button>

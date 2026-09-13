@@ -193,14 +193,14 @@ export default function Header() {
             })}
             {auth.status === 'authenticated' ? (
               <>
-                <div className="my-1 h-px bg-line md:hidden" aria-hidden="true" />
+                <div className="my-1 h-px bg-line lg:hidden" aria-hidden="true" />
                 <button
                   type="button"
                   onClick={() => {
                     setMenuOpen(false);
                     auth.signOut();
                   }}
-                  className="nav-menu-item flex md:hidden w-full justify-between"
+                  className="nav-menu-item flex lg:hidden w-full justify-between"
                 >
                   <span>{tAuth('signOut')}</span>
                   <LogOut className="size-4 shrink-0" aria-hidden="true" />
