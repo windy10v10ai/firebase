@@ -99,15 +99,6 @@
 | 设计文档（brainstorming 产出的 spec） | `docs/design/<主题>/<阶段>.md` | 是 |
 | 实施计划（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已覆盖 `docs/superpowers/` |
 
-### 文档同步
-
-实现涉及既有设计、页面行为、接口契约或批次状态时，必须在同一个 PR 更新对应的 `docs/design/` 文档：
-
-- 设计结论以已合入或待合入的代码为准，发现不符立即修正；不要把旧方案同时保留成两套真相。
-- 批次完成后，将状态改为「已完成」并删除实施步骤、设计比较、已勾完的测试清单等过程内容，只保留仍约束后续工作的结论和待办。
-- PR 正文说明文档更新范围；没有文档变更时，说明不需要更新的原因。
-
-
 - `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`
 - `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
 
