@@ -202,7 +202,7 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 |---|---|
 | 卡片 | `--color-panel` 底 + 1px `--color-line` 描边 + 10px 圆角 + 18px/20px 内边距；去掉现在的 `backdrop-blur` 和 hover 位移 |
 | 嵌入块 | `--color-panel-soft` 底 + 7px 圆角；属于某套货币时左边加 2px 对应色条 |
-| 进度条 | 高 6px、圆角 3px，槽 `--color-panel-soft`，填充用货币色的 strong 档 |
+| 进度条 | 高 6px、圆角 3px，槽 `--color-panel-soft`，填充用货币色的 strong 档；属性卡进度条逐级取色，例外记录见 [phase-3a-property-page.md](phase-3a-property-page.md) |
 | 数据行 | 标签 `--color-muted` 左对齐，数值右对齐；概览数值使用粗体 |
 
 ### 内边距随宽度收放
