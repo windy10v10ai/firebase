@@ -20,7 +20,7 @@ export default function MemberCard({ member }: { member?: MemberInfo }) {
 
   return (
     <section className="card-container space-y-4 p-6 sm:p-8">
-      <h2 className="title-secondary">{t('title')}</h2>
+      <h2 className="title-secondary text-member-strong">{t('title')}</h2>
       <p className="text-lg text-content">{t(statusKey(member))}</p>
       {member ? (
         <p className="text-muted">
@@ -29,7 +29,7 @@ export default function MemberCard({ member }: { member?: MemberInfo }) {
       ) : null}
       <Link
         href="/membership"
-        className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent-solid px-5 font-medium text-heading transition-colors hover:bg-accent-solid-hover"
+        className="btn-member"
       >
         {t('subscribe')}
       </Link>

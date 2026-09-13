@@ -23,7 +23,7 @@ export default function AuthStatus() {
 
   return (
     // ID 与退出合并进同一条 36px 背景，不再是两种高度的控件，见 phase-2g-header-layout.md
-    <div className="flex h-9 items-center gap-2 whitespace-nowrap rounded-md bg-control px-2.5 text-content">
+    <div className="flex h-9 items-center gap-2 whitespace-nowrap rounded-md border border-line bg-control px-2.5 text-content">
       <Link
         href={playerPagePath(auth.uid)}
         title={t('profileTooltip')}

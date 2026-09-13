@@ -223,7 +223,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               />
             </Field>
 
-            <Button type="submit" disabled={!formValid || isLoading} className="w-full sm:w-auto">
+            <Button type="submit" variant="member" disabled={!formValid || isLoading} className="w-full sm:w-auto">
               {t('submitButton.buttonText')}
             </Button>
           </form>

@@ -1,23 +1,45 @@
 @import 'tailwindcss';
 
-/* 值照搬现有配色，换成游戏界面风格时只改这里 */
+/* 取值与游戏内界面对齐，见 docs/design/web/phase-7-visual-style.md */
 @theme {
-  --color-surface: var(--color-gray-900);
-  --color-panel: var(--color-gray-800);
-  --color-line: var(--color-gray-700);
-  --color-control: var(--color-gray-700);
-  --color-control-hover: var(--color-gray-600);
+  --color-surface: #09090b;
+  --color-panel: #0f0f11;
+  --color-panel-soft: #17171a;
+  --color-line: #27272a;
+  --color-control: #17171a;
+  --color-control-hover: #1f1f23;
 
-  --color-heading: var(--color-white);
-  --color-content: var(--color-gray-200);
-  --color-muted: var(--color-gray-400);
+  --color-heading: #fafafa;
+  --color-content: #d4d4d8;
+  --color-muted: #8b8b93;
 
-  --color-accent: var(--color-blue-400);
-  --color-accent-hover: var(--color-blue-300);
-  --color-accent-solid: var(--color-blue-500);
-  --color-accent-solid-hover: var(--color-blue-600);
+  /* 强调色只用来分辨两套货币：勇士一律紫、会员一律金，其余灰白 */
+  --color-season: #a874ea;
+  --color-season-strong: #9b5de0;
+  --color-season-soft: rgba(155, 93, 224, 0.12);
+  --color-season-border: rgba(155, 93, 224, 0.4);
 
-  --color-danger: var(--color-red-400);
+  --color-member: #e0caa5;
+  --color-member-strong: #daa520;
+  --color-member-soft: rgba(218, 165, 32, 0.11);
+  --color-member-border: rgba(218, 165, 32, 0.4);
+
+  /* accent 系列指向勇士紫，写了 text-accent 的组件不用改 */
+  --color-accent: #a874ea;
+  --color-accent-hover: #bda0f0;
+  --color-accent-solid: #4f48b2;
+  --color-accent-solid-hover: #5f57c8;
+
+  --color-success: #7fd47f;
+  --color-warning: #f5a623;
+  --color-danger: #e87d7d;
+}
+
+@layer base {
+  body {
+    /* 积分与战绩的数字要等宽，否则数值一变列就跳 */
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 @layer components {
@@ -26,18 +48,103 @@
   }
 
   .title-secondary {
-    @apply text-2xl font-bold text-accent;
+    @apply text-2xl font-bold text-heading;
   }
 
   .card-container {
-    @apply bg-panel/70 backdrop-blur-sm rounded-lg border border-line;
+    @apply rounded-[10px] border border-line bg-panel;
   }
 
   .card-hover {
-    @apply hover:border-accent-solid transition-all transform hover:-translate-y-1;
+    @apply transition-colors hover:border-season-border;
   }
 
   .link-hover {
-    @apply hover:text-accent transition-colors;
+    @apply transition-colors hover:text-accent;
+  }
+
+  /* 渐变进不了 @theme，照搬游戏内 buttons.less 的取值 */
+  .btn-member,
+  .btn-season {
+    @apply inline-flex min-h-11 items-center justify-center rounded-[7px] border px-5 text-sm font-extrabold text-white transition-[filter] md:min-h-10;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.53);
+  }
+
+  .btn-member {
+    border-color: #daa520;
+    background-image: linear-gradient(90deg, #ca9b3c, #a87820);
+  }
+
+  .btn-season {
+    border-color: #7a6fd0;
+    background-image: linear-gradient(90deg, #4f48b2, #0f033a);
+  }
+
+  .btn-member:hover,
+  .btn-season:hover {
+    filter: brightness(1.12);
+  }
+
+  .btn-member:active,
+  .btn-season:active {
+    filter: brightness(0.9);
+  }
+
+  /* 金底只降透明度仍看得清字，紫底会糊，所以禁用态换成灰底灰字 */
+  .btn-member:disabled,
+  .btn-season:disabled {
+    @apply cursor-not-allowed border-line bg-panel-soft bg-none text-[#5d5d66];
+    filter: none;
+    text-shadow: none;
+  }
+
+  /* 横排导航项是 link-hover 的例外：悬停只提亮不变紫，紫留给当前页的下条 */
+  .nav-top {
+    @apply relative whitespace-nowrap text-content transition-colors duration-150 ease-out hover:text-heading;
+  }
+
+  .nav-top::after {
+    content: '';
+    @apply pointer-events-none absolute inset-x-0 -bottom-1.5 h-0.5 rounded-full bg-season-strong opacity-0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.15s ease-out,
+      transform 0.15s ease-out;
+  }
+
+  .nav-top:hover::after {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+
+  /* 当前页 = 常驻的悬停态，悬停时不再变化 */
+  .nav-top[aria-current='page'] {
+    @apply text-heading;
+  }
+
+  .nav-top[aria-current='page']::after {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .nav-menu-item {
+    @apply relative -mx-2 flex items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading;
+  }
+
+  .nav-menu-item[aria-current='page'] {
+    @apply bg-panel-soft text-heading;
+  }
+
+  .nav-menu-item[aria-current='page']::before {
+    content: '';
+    @apply absolute inset-y-1 left-0 w-0.5 rounded-full bg-season-strong;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
   }
 }

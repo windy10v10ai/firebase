@@ -9,7 +9,7 @@ export default async function Footer() {
   const t = await getTranslations('navigation');
 
   return (
-    <footer className="card-container border-t border-line">
+    <footer className="border-t border-line bg-panel">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center space-y-4">
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">

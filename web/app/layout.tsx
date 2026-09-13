@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google';
+import { Noto_Sans_SC } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 
@@ -10,7 +10,14 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 
-const inter = Inter({ subsets: ['latin'] });
+// 中文子集拆成上百个 unicode-range 分片，preload 会往每页塞上百个 <link>，
+// 交给浏览器按页面实际用到的字形去取
+const notoSansSC = Noto_Sans_SC({
+  weight: ['400', '500', '700'],
+  display: 'swap',
+  preload: false,
+  fallback: ['system-ui', 'sans-serif'],
+});
 
 export const metadata: Metadata = {
   title: 'Windy10v10AI',
@@ -26,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
-      <body className={`${inter.className} min-h-screen bg-surface`}>
+      <body className={`${notoSansSC.className} min-h-screen bg-surface`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AuthProvider>
             <div className="relative z-10 flex flex-col min-h-screen">

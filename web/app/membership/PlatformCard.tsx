@@ -14,7 +14,7 @@ export default function PlatformCard({ title, price, subscribeText, href }: Plat
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block bg-accent-solid hover:bg-accent-solid-hover text-heading font-semibold px-8 py-3 rounded-lg transition-colors duration-200 transform hover:scale-105"
+        className="btn-member px-8"
       >
         {subscribeText}
       </a>
