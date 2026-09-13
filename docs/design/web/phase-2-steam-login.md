@@ -1,6 +1,6 @@
 # 批次 2：Steam 登录
 
-> 上级文档：[网站总体设计](README.md) 的「鉴权设计」与「页面与菜单」。进度跟踪：windy10v10ai/firebase#1118。登录按钮放哪、未登录页面长什么样，见 [phase-2-login-entry.md](phase-2-login-entry.md)，本文不重复。
+> 上级文档：[网站架构](../../web/README.md) 的「鉴权设计」与「页面与菜单」。进度跟踪：windy10v10ai/firebase#1118。登录按钮放哪、未登录页面长什么样，见 [phase-2-login-entry.md](phase-2-login-entry.md)，本文不重复。
 >
 > 全部已上线，只留仍然有效的决定。
 
@@ -75,7 +75,7 @@
 
 跳转链接的拼法和回调页见 [steam-login.ts](../../../web/app/lib/steam-login.ts)、[callback/page.tsx](../../../web/app/login/callback/page.tsx)。
 
-个人主页放哪些区块、菜单怎么排、路径为什么带 steamId，见总体设计的「页面与菜单」。门禁为什么集中在 `/my/*`、未登录时为什么原地显示面板而不跳登录页、登录后怎么回到原来的页面，见 [phase-2-login-entry.md](phase-2-login-entry.md)。
+个人主页放哪些区块、菜单怎么排、路径为什么带 steamId，见[网站架构](../../web/README.md)的「页面与菜单」。门禁为什么集中在 `/my/*`、未登录时为什么原地显示面板而不跳登录页、登录后怎么回到原来的页面，见 [phase-2-login-entry.md](phase-2-login-entry.md)。
 
 登录态由 Firebase SDK 自己持久化和续期，网站不存 token，也不写 cookie。这也意味着服务端看不见登录态，门禁只能在浏览器里做，Next 的 middleware 帮不上忙。
 
