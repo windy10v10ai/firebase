@@ -1,6 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+
+import { playerPagePath } from '@/app/lib/player-path';
 
 import type { PlayerInfo } from '@/app/lib/player-info';
 
@@ -70,11 +73,11 @@ function CurrencyBlock({
   );
 }
 
-export default function LevelCard({ info }: { info: PlayerInfo }) {
+export default function LevelCard({ info, steamId }: { info: PlayerInfo; steamId: string }) {
   const t = useTranslations('profile.identity');
 
   return (
-    <section className="card-container space-y-6 p-6 sm:p-8">
+    <section className="card-container space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="grid gap-6 @container sm:grid-cols-2">
         <CurrencyBlock
           tone="season"
@@ -97,13 +100,16 @@ export default function LevelCard({ info }: { info: PlayerInfo }) {
           usablePoint={info.useableMemberPoint}
         />
       </div>
-      <div className="flex items-center justify-between border-t border-line pt-4">
+      <Link
+        href={playerPagePath(steamId, 'property')}
+        className="flex items-center justify-between border-t border-line pt-4 link-hover"
+      >
         <div>
           <div className="text-content">{t('attributePoints')}</div>
           <div className="text-sm text-muted">{t('attributePointsHint')}</div>
         </div>
         <span className="text-2xl font-bold tabular-nums text-heading">{info.useableLevel}</span>
-      </div>
+      </Link>
     </section>
   );
 }

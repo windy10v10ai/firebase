@@ -11,7 +11,7 @@ export default function WorkshopCard() {
   const t = useTranslations('home.workshop');
 
   return (
-    <section className="card-container flex flex-col gap-4 p-6">
+    <section className="card-container flex flex-col gap-4 p-4 sm:p-6">
       <div className="space-y-2">
         <h2 className="title-secondary">{t('title')}</h2>
         <p className="text-content">{t('description')}</p>

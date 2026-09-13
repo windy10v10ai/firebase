@@ -11,6 +11,8 @@ import { PlayerPropertyItemDto } from './dto/player-property-item.dto';
 import { PlayerProperty } from './entities/player-property.entity';
 
 const RESET_PROPERTY_MEMBER_POINT_COST = 1000;
+// 定价与等级脱钩：按等级浮动时，等级越高洗一次越贵，高等级玩家反而不敢调整加点
+const RESET_PROPERTY_SEASON_POINT_COST = 2000;
 const RESET_PROPERTY_REASON = 'reset_property';
 
 @Injectable()
@@ -133,10 +135,8 @@ export class PlayerPropertyService {
       await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
       await this.analyticsService.playerUsePoint(steamId, cost, true, RESET_PROPERTY_REASON);
     } else {
-      const seasonPointTotal = player.seasonPointTotal ?? 0;
-      const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(seasonPointTotal);
-      const cost = PlayerLevelHelper.getSeasonNextLevelPoint(seasonLevel);
-      const useableSeasonPoint = seasonPointTotal - (player.usedSeasonPoint ?? 0);
+      const cost = RESET_PROPERTY_SEASON_POINT_COST;
+      const useableSeasonPoint = (player.seasonPointTotal ?? 0) - (player.usedSeasonPoint ?? 0);
       if (useableSeasonPoint < cost) {
         throw new BadRequestException();
       }
