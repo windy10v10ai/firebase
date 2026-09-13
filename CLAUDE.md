@@ -90,19 +90,20 @@
 | `web/` | Next.js 前端 | [web/CLAUDE.md](web/CLAUDE.md) |
 | `extensions/` | Firebase BigQuery export 配置 | — |
 
-### 设计文档与实施计划
+### 文档目录
 
-两类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+三类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。选址判断与批次完成后怎么瘦身，详见 [design-docs](.claude/skills/design-docs/SKILL.md) 技能。
 
 | 类型 | 路径 | 进 git |
 |---|---|---|
-| 设计文档（brainstorming 产出的 spec） | `docs/design/<主题>/<阶段>.md` | 是 |
+| 框架性文档（某模块长期有效的架构、鉴权、技术选型） | `docs/<模块>/README.md`，如 `docs/web/README.md` | 是 |
+| 设计文档（brainstorming 产出的 spec，某次批次/功能的具体设计） | `docs/design/<主题>/<阶段>.md` | 是 |
 | 实施计划（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已覆盖 `docs/superpowers/` |
 
-- `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`
+- `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`sql-migration`
 - `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
 
-实施计划不进 git：它随代码合入即失效，留在仓库里会与现行设计混淆，且体量大、不适合放进 PR 供人 review。
+框架性文档只在决策变更时更新，不因批次完成而增删；设计文档批次完成后要瘦身，只留仍然有效的决定与约束。实施计划不进 git：它随代码合入即失效，留在仓库里会与现行设计混淆，且体量大、不适合放进 PR 供人 review。
 
 ### 本地开发
 

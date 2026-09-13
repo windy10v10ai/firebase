@@ -8,36 +8,51 @@ interface DataTableProps {
   className?: string;
 }
 
+function ItemContent({ content }: { content: string[] }) {
+  return (
+    <div className="space-y-2">
+      {content.map((text) => (
+        <p key={text} className="text-content">
+          {text}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export default function DataTable({ items, className = '' }: DataTableProps) {
   return (
-    <div className={`
-      w-full border border-line rounded-lg overflow-hidden bg-surface
-      ${className}
-    `}>
-      <table className="w-full">
+    <div className={`w-full overflow-hidden rounded-[10px] border border-line bg-panel ${className}`}>
+      <table className="hidden w-full sm:table">
         <tbody>
           {items.map((item, index) => (
-            <tr 
-              key={index}
-              className={`
-                border-b border-line last:border-b-0
-                ${index % 2 === 0 ? 'bg-panel/50' : 'bg-surface'}
-              `}
+            <tr
+              key={item.title}
+              className={`border-b border-line last:border-b-0 ${
+                index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'
+              }`}
             >
-              <td className="py-4 px-6 w-1/3">
-                <div className="font-medium text-content">{item.title}</div>
+              <td className="w-1/3 px-6 py-4 align-top">
+                <div className="font-medium text-heading">{item.title}</div>
               </td>
-              <td className="py-4 px-6 w-2/3">
-                <div className="space-y-2">
-                  {item.content.map((text, i) => (
-                    <p key={i} className="text-gray-300">{text}</p>
-                  ))}
-                </div>
+              <td className="w-2/3 px-6 py-4">
+                <ItemContent content={item.content} />
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <dl className="divide-y divide-line sm:hidden">
+        {items.map((item, index) => (
+          <div key={item.title} className={index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'}>
+            <dt className="px-4 pt-4 font-medium text-heading">{item.title}</dt>
+            <dd className="px-4 pb-4 pt-2">
+              <ItemContent content={item.content} />
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
-} 
+}
