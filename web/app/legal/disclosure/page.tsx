@@ -58,15 +58,13 @@ export default function DisclosurePage() {
   ];
 
   return (
-    <section className="card-container mx-auto max-w-4xl space-y-6 p-6 sm:p-8">
-      <div className="space-y-2">
-        <h1 className="title-primary">{t('title')}</h1>
-        <p className="text-content">{t('description')}</p>
-      </div>
+    <div className="space-y-8">
+      <h1 className="title-primary">{t('title')}</h1>
+      <p className="text-content">{t('description')}</p>
 
       <DataTable items={disclosureItems} />
 
       <p className="text-muted text-sm">{t('lastUpdate')}</p>
-    </section>
+    </div>
   );
 }
