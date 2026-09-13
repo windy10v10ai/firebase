@@ -1,6 +1,7 @@
 'use client';
 
 import { Hash, Mail, ReceiptText } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type FormEvent, useState } from 'react';
 
@@ -9,6 +10,8 @@ import Field from '@/app/components/ui/field';
 import Input from '@/app/components/ui/input';
 import Spinner from '@/app/components/ui/spinner';
 import { apiFetch } from '@/app/lib/api';
+import { useAuth } from '@/app/lib/auth';
+import { buildSteamLoginUrl } from '@/app/lib/steam-login';
 
 import ActiveResult from './ActiveResult';
 import {
@@ -50,12 +53,18 @@ const INITIAL_VALUES: ManualActiveFormValues = {
 
 const ManualActive = ({ activeType }: ManualActiveProps) => {
   const t = useTranslations('manualActive');
+  const auth = useAuth();
+  const pathname = usePathname();
   const [values, setValues] = useState(INITIAL_VALUES);
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
   const [activationResult, setActivationResult] = useState<ActivationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const errors = validateManualActiveForm(values, activeType);
+  const uid = auth.status === 'authenticated' ? auth.uid : null;
+  // 登录后 Dota2 ID 就是 uid，玩家自己动过输入框才以输入框为准
+  const formValues = uid && !touchedFields.steamId ? { ...values, steamId: uid } : values;
+
+  const errors = validateManualActiveForm(formValues, activeType);
   const formValid = Object.keys(errors).length === 0;
   const platformField = activeType === 'afdian' ? 'afdianOrderId' : 'kofiMailAddress';
 
@@ -71,10 +80,10 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
       const response = await apiFetch<ActivationResponse>(ACTIVE_PATHS[activeType], {
         method: 'POST',
         body: JSON.stringify({
-          steamId: Number(values.steamId),
+          steamId: Number(formValues.steamId),
           ...(activeType === 'afdian'
-            ? { outTradeNo: values.platformOrderKey }
-            : { email: values.platformOrderKey }),
+            ? { outTradeNo: formValues.platformOrderKey }
+            : { email: formValues.platformOrderKey }),
         }),
       });
 
@@ -100,7 +109,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
     void requestActivation();
   };
 
-  const helpLinkClass = 'text-accent transition-colors hover:text-accent-hover';
+  const helpLinkClass = 'link-inline';
   const steamIdError =
     touchedFields.steamId && errors.steamId ? t('input.steamId.help') : undefined;
   const platformOrderKeyError =
@@ -122,7 +131,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
       ) : (
         <section className="space-y-8">
           <div className="space-y-3">
-            <h1 className="title-primary">
+            <h1 className="title-primary text-member-strong">
               {activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
             </h1>
             <p className="text-content">
@@ -138,21 +147,34 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               messageId="inputSteamIdMessage"
               error={steamIdError}
               help={
-                <a
-                  href={STEAM_ID_HELP_URLS[activeType]}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={helpLinkClass}
-                >
-                  {t('input.steamId.helpLink')}
-                </a>
+                // 窄屏一行放不下两条，各占一行；整条链接不从中间断开
+                <span className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                  <a
+                    href={STEAM_ID_HELP_URLS[activeType]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={helpLinkClass}
+                  >
+                    {t('input.steamId.helpLink')}
+                  </a>
+                  {auth.status === 'unauthenticated' ? (
+                    <>
+                      <span aria-hidden="true" className="hidden text-muted sm:inline">
+                        /
+                      </span>
+                      <a href={buildSteamLoginUrl(pathname)} className={helpLinkClass}>
+                        {t('input.steamId.steamAutoFill')}
+                      </a>
+                    </>
+                  ) : null}
+                </span>
               }
             >
               <Input
                 showCount
                 id="inputSteamId"
                 name="steamId"
-                value={values.steamId}
+                value={formValues.steamId}
                 icon={<Hash className="size-5" />}
                 invalid={Boolean(steamIdError)}
                 inputMode="numeric"
@@ -186,7 +208,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
                 showCount
                 id={activeType === 'afdian' ? 'inputAfdianOrderId' : 'inputKofiMailAddress'}
                 name={activeType === 'afdian' ? 'afdianOrderId' : 'kofiMailAddress'}
-                value={values.platformOrderKey}
+                value={formValues.platformOrderKey}
                 icon={
                   activeType === 'afdian' ? (
                     <ReceiptText className="size-5" />
@@ -204,7 +226,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               />
             </Field>
 
-            <Button type="submit" disabled={!formValid || isLoading} className="w-full sm:w-auto">
+            <Button type="submit" variant="member" disabled={!formValid || isLoading} className="w-full sm:w-auto">
               {t('submitButton.buttonText')}
             </Button>
           </form>

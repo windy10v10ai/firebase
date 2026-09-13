@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 一次性浏览器验证脚本与截图，见 .claude/skills/web-browser-verify
+/.browser-verify/

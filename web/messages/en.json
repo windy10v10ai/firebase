@@ -1,8 +1,17 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
+    "homeShort": "10v10AI",
+    "property": "Property",
+    "propertyFull": "Property Points",
+    "awaken": "Awaken",
+    "awakenFull": "Hero Awaken",
+    "wiki": "Skills & Items",
+    "wikiFull": "Skills & Items",
     "workshop": "Steam Workshop",
     "github": "GitHub",
+    "membershipShort": "Member",
+    "membership": "Membership",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -11,34 +20,105 @@
     "title": "DOTA2 10v10 AI Custom Map",
     "workshop": {
       "title": "Steam Workshop",
-      "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates."
-    },
-    "membership": {
-      "title": "Membership Subscription",
-      "description": "⭐Membership grants the following benefits:",
-      "note": "❗Remember to leave your Dota2 friend ID in the message to automatically activate your membership.",
-      "benefits": [
-        "Receive 1000 membership points for each monthly subscription",
-        "Gain 100 membership points for playing every day",
-        "Get one extra reroll in Ability Draft",
-        "Respawn time reduced to 5 seconds, and buyback cooldown reduced to 2 minutes",
-        "Enjoy a special Membership BUFF in-game"
-      ],
-      "subscribe": "Subscribe Now",
-      "subscribeLink": "https://afdian.com/a/windy10v10ai"
-    },
-    "manualActive": {
-      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
-      "afdian": "Afdian",
-      "kofi": "Ko-fi"
+      "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates.",
+      "subscribe": "Get the map"
     },
     "github": {
       "title": "GitHub",
       "description": "View project source code, changelog, and contribute to the project"
     },
-    "about": {
-      "title": "About Project",
-      "description": "This is a DOTA2 custom map project that brings you a new 10v10 AI battle experience.\nYou can subscribe to membership to unlock more features and enjoy better gaming experience.\nWe will continue to optimize and update, your support is our motivation to keep improving."
+    "intro": {
+      "title": "Sign in to check your own data anytime",
+      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and spend attribute points on your heroes — without launching the game.",
+      "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
+      "upcoming": [
+        "More statistics",
+        "Daily tasks",
+        "Daily check-in",
+        "Ability and item draft list"
+      ]
+    },
+    "summary": {
+      "profileLink": "Profile",
+      "heading": "ID {id}",
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "battlePoint": "Usable Battle Points",
+      "memberPoint": "Usable Member Points",
+      "member": {
+        "premium": "Premium member",
+        "normal": "Member",
+        "expireDate": "Valid until {date}",
+        "expiredDate": "Membership expired on {date}"
+      }
+    },
+    "sample": {
+      "games": "Games",
+      "winRate": "Win Rate",
+      "conduct": "Conduct Score",
+      "signIn": "Daily check-in",
+      "vision": "Bonus vision",
+      "cooldown": "Cooldown reduction",
+      "moveSpeed": "Move speed",
+      "awakened": "Awakened heroes",
+      "level": "Lv {n}"
+    },
+    "pages": {
+      "title": "Main pages",
+      "soon": "Coming soon",
+      "profile": {
+        "title": "Profile",
+        "description": "Match record, Battle and Member levels, usable points"
+      },
+      "property": {
+        "title": "Attributes",
+        "description": "View attributes, spend and reset points"
+      },
+      "awaken": {
+        "title": "Hero Awakening",
+        "description": "Awakened heroes, unlock and randomise"
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Member benefits, Afdian and Ko-fi subscriptions"
+      },
+      "dailyTask": {
+        "title": "Daily Tasks",
+        "description": "Preview and refresh your daily tasks"
+      },
+      "wiki": {
+        "title": "Abilities & Items",
+        "description": "The abilities and items in the opening draft"
+      }
+    }
+  },
+  "membership": {
+    "title": "10v10AI Premium Membership",
+    "description": "⭐Subscribe to get the following benefits (please leave your Dota2 friend ID in the message to auto-activate)",
+    "benefits": [
+      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for your first login each day",
+      "🎯 Skill draft upgraded to a pick-1-of-8, with the 2 extra skills more likely to be advanced abilities",
+      "🪙 Unlocks the in-game 99999 gold cap",
+      "🎁 One free reroll for treasure chest item drops",
+      "⚔️ Exclusive membership BUFF: +10 attack, +5% spell amplification, +300 HP, +200 MP",
+      "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
+      "🎮 One free reroll each for the starting active and passive skill draft"
+    ],
+    "note": "😊Membership takes effect automatically starting from your next game",
+    "afdian": {
+      "title": "Afdian",
+      "price": "CN¥29.8/month",
+      "subscribe": "Subscribe on Afdian"
+    },
+    "kofi": {
+      "title": "Ko-fi",
+      "price": "US$4/month",
+      "subscribe": "Subscribe on Ko-fi"
+    },
+    "manualActive": {
+      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
+      "afdian": "Afdian",
+      "kofi": "Ko-fi"
     }
   },
   "footer": {
@@ -51,7 +131,9 @@
     "items": {
       "legalName": {
         "title": "Legal Name",
-        "content": ["Windy (Individual)"]
+        "content": [
+          "Windy (Individual)"
+        ]
       },
       "address": {
         "title": "Address",
@@ -67,15 +149,21 @@
       },
       "email": {
         "title": "Email Address",
-        "content": ["windy10v10ai@gmail.com"]
+        "content": [
+          "windy10v10ai@gmail.com"
+        ]
       },
       "operator": {
         "title": "Head of Operator",
-        "content": ["Windy"]
+        "content": [
+          "Windy"
+        ]
       },
       "otherFees": {
         "title": "Additional Fees",
-        "content": ["Payment processing fee: Fees will be charged according to the payment method"]
+        "content": [
+          "Payment processing fee: Fees will be charged according to the payment method"
+        ]
       },
       "refundPolicy": {
         "title": "Exchanges and returns policy",
@@ -113,7 +201,9 @@
       },
       "price": {
         "title": "Price",
-        "content": ["10v10AI Membership Subscription: CN¥29.8/month or US$4/month"]
+        "content": [
+          "10v10AI Membership Subscription: CN¥29.8/month or US$4/month"
+        ]
       }
     }
   },
@@ -127,7 +217,8 @@
         "title": "Dota2 Friend ID",
         "placeholder": "Please enter your Dota2 friend ID",
         "help": "Please enter a valid Dota2 friend ID, format: numbers only, up to 10 digits",
-        "helpLink": "How to find your Dota2 friend ID?"
+        "helpLink": "How to find your Dota2 friend ID?",
+        "steamAutoFill": "Fill in with Steam sign-in"
       },
       "afdianOrderId": {
         "title": "Afdian Order No",
@@ -155,6 +246,86 @@
         "kofiMessage": "No unactivated orders found.\nIf you have successfully subscribed, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.\nIf it still does not take effect, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
         "btnText": "Try Again"
       }
+    }
+  },
+  "profile": {
+    "loading": "Loading player data",
+    "private": {
+      "title": "This player's profile is not public",
+      "description": "For now you can only view your own profile."
+    },
+    "noRecord": {
+      "title": "No record for this player",
+      "description": "Data shows up after your first finished game."
+    },
+    "failed": {
+      "title": "Failed to load",
+      "description": "Please refresh the page and try again."
+    },
+    "identity": {
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "conductNet": "Commends minus Reports",
+      "cumulative": "Total {total}",
+      "remainingToLevel": "{amount} to level {level}",
+      "usablePoints": "Usable Points",
+      "attributePoints": "Usable Attribute Points",
+      "attributePointsHint": "See the property page for rules"
+    },
+    "stats": {
+      "title": "Stats",
+      "games": "Games",
+      "winRate": "Win Rate",
+      "conduct": "Conduct Score",
+      "lifetime": "Career Stats",
+      "kills": "Kills",
+      "deaths": "Deaths",
+      "assists": "Assists",
+      "lastHits": "Last Hits",
+      "totalGoldEarned": "Gold Earned",
+      "heroDamage": "Hero Damage",
+      "damageTaken": "Damage Taken",
+      "healing": "Healing",
+      "towerKills": "Tower Kills"
+    },
+    "member": {
+      "title": "Membership",
+      "premium": "Premium Member",
+      "normal": "Member",
+      "expired": "Expired",
+      "none": "Not a member",
+      "expireDate": "Valid until {date}",
+      "expiredDate": "Expired on {date}",
+      "subscribe": "Subscribe"
+    },
+    "entries": {
+      "property": {
+        "title": "Property Points",
+        "description": "Spend points on permanent attributes",
+        "badge": "Usable {count} points"
+      },
+      "awaken": {
+        "title": "Hero Awaken",
+        "description": "Unlock heroes' awakening talents"
+      }
+    }
+  },
+  "auth": {
+    "login": "Sign in with Steam",
+    "loginShort": "Sign in",
+    "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
+    "loggedInAs": "ID {uid}",
+    "signOut": "Sign out",
+    "callbackLoading": "Signing in…",
+    "callbackError": "Sign-in verification failed. Please try again.",
+    "retry": "Retry",
+    "checkingLogin": "Checking sign-in status",
+    "profileTooltip": "View your profile",
+    "panel": {
+      "title": "Steam sign-in required",
+      "why": "This page reads and changes your Windy10v10AI game data, so we need to confirm it belongs to you.",
+      "scope": "We only get your Steam ID, the same number as your Dota2 ID.",
+      "safety": "The button below takes you to steamcommunity.com. Your password is entered on Steam, never on this site. If you are already signed in to Steam, one click brings you back."
     }
   }
 }

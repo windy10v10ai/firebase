@@ -1,8 +1,17 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
+    "homeShort": "10v10AI",
+    "property": "属性",
+    "propertyFull": "属性加点",
+    "awaken": "觉醒",
+    "awakenFull": "英雄觉醒",
+    "wiki": "技能物品",
+    "wikiFull": "技能与物品",
     "workshop": "Steam 创意工坊",
     "github": "GitHub",
+    "membershipShort": "会员",
+    "membership": "会员订阅",
     "disclosure": "商业披露",
     "switchLanguage": "切换语言",
     "menu": "菜单"
@@ -11,34 +20,105 @@
     "title": "DOTA2 10v10 AI 自定义地图",
     "workshop": {
       "title": "Steam 创意工坊",
-      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力"
-    },
-    "membership": {
-      "title": "会员订阅",
-      "description": "⭐订阅会员可以获得如下福利：",
-      "note": "❗订阅时，需要留言Dota2好友ID以自动激活会员",
-      "benefits": [
-        "每月订阅可获得1000会员积分",
-        "每日首次登陆可获得100会员积分",
-        "技能抽选可获得1次额外刷新机会",
-        "复活时间减少5秒，买活CD降低至2分钟",
-        "会员专属BUFF"
-      ],
-      "subscribe": "立即订阅",
-      "subscribeLink": "https://afdian.com/a/windy10v10ai"
-    },
-    "manualActive": {
-      "prompt": "购买会员时忘记留言Dota2好友ID，没有自动激活？手动激活：",
-      "afdian": "爱发电",
-      "kofi": "Ko-fi"
+      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力",
+      "subscribe": "获得地图"
     },
     "github": {
       "title": "GitHub",
       "description": "查看项目源代码和更新日志，并参与贡献"
     },
-    "about": {
-      "title": "关于项目",
-      "description": "这是一个DOTA2自定义地图项目，为您带来全新的10v10AI对战体验。\n您可以订阅会员，解锁更多功能，享受更好的游戏体验。\n我们会持续优化和更新，您的支持是我们不断进步的动力。"
+    "intro": {
+      "title": "登录后，随时查看自己的数据",
+      "description": "用 Steam 登录，就能在网站上看战绩、勇士与会员积分，直接给英雄属性加点、洗点，不用进游戏。",
+      "privacy": "密码输在 Steam 官网，本站只拿到你的 Steam ID",
+      "upcoming": [
+        "更多数据统计",
+        "每日任务",
+        "签到",
+        "技能与物品抽选一览"
+      ]
+    },
+    "summary": {
+      "profileLink": "个人主页",
+      "heading": "ID {id}",
+      "battleLevel": "勇士等级",
+      "memberLevel": "会员等级",
+      "battlePoint": "可用勇士积分",
+      "memberPoint": "可用会员积分",
+      "member": {
+        "premium": "高级会员",
+        "normal": "普通会员",
+        "expireDate": "有效期至：{date}",
+        "expiredDate": "会员已于 {date} 到期"
+      }
+    },
+    "sample": {
+      "games": "游戏场次",
+      "winRate": "胜率",
+      "conduct": "行为分",
+      "signIn": "每日签到",
+      "vision": "额外视野",
+      "cooldown": "冷却缩短",
+      "moveSpeed": "移动速度",
+      "awakened": "已觉醒英雄",
+      "level": "{n} 级"
+    },
+    "pages": {
+      "title": "主要页面",
+      "soon": "即将上线",
+      "profile": {
+        "title": "个人主页",
+        "description": "战绩、勇士与会员等级、可用积分"
+      },
+      "property": {
+        "title": "属性加点",
+        "description": "查看属性、加点与洗点"
+      },
+      "awaken": {
+        "title": "英雄觉醒",
+        "description": "已觉醒英雄、解锁与随机"
+      },
+      "membership": {
+        "title": "会员订阅",
+        "description": "会员福利、爱发电与 Ko-fi 订阅入口"
+      },
+      "dailyTask": {
+        "title": "每日任务",
+        "description": "预览与刷新每日任务"
+      },
+      "wiki": {
+        "title": "技能与物品",
+        "description": "开局抽选的技能与物品一览"
+      }
+    }
+  },
+  "membership": {
+    "title": "10v10AI 会员订阅",
+    "description": "⭐订阅会员可以获得以下福利（赞助时，请留言 Dota2好友ID 以自动激活）",
+    "benefits": [
+      "💎 会员积分：立即获得 1000 会员积分/订阅月数，每日首次登陆赠送 100 会员积分",
+      "🎯 开局抽选技能升级为 8选1，新增的 2 个技能中有更高概率出现高级技能",
+      "🪙 解锁游戏内99999的金钱上限",
+      "🎁 藏宝箱抽选的物品可刷新一次",
+      "⚔️ 会员专属BUFF：+10攻击力 5%技能增强 +300HP +200MP",
+      "🛡️ 复活时间减少5秒，买活CD缩短至2分钟",
+      "🎮 开局抽选的 主动/被动技能 各可刷新一次"
+    ],
+    "note": "😊会员将在新的一局游戏中自动生效",
+    "afdian": {
+      "title": "爱发电",
+      "price": "￥29.8/月",
+      "subscribe": "前往爱发电订阅"
+    },
+    "kofi": {
+      "title": "Ko-fi",
+      "price": "$4/月",
+      "subscribe": "前往 Ko-fi 订阅"
+    },
+    "manualActive": {
+      "prompt": "购买会员时忘记留言Dota2好友ID，没有自动激活？手动激活：",
+      "afdian": "爱发电",
+      "kofi": "Ko-fi"
     }
   },
   "footer": {
@@ -51,27 +131,39 @@
     "items": {
       "legalName": {
         "title": "法定名称",
-        "content": ["Windy（个人）"]
+        "content": [
+          "Windy（个人）"
+        ]
       },
       "address": {
         "title": "地址",
-        "content": ["收到请求后会及时提供，请通过下方邮箱联系"]
+        "content": [
+          "收到请求后会及时提供，请通过下方邮箱联系"
+        ]
       },
       "phone": {
         "title": "电话号码",
-        "content": ["收到请求后会及时提供，请通过下方邮箱联系"]
+        "content": [
+          "收到请求后会及时提供，请通过下方邮箱联系"
+        ]
       },
       "email": {
         "title": "邮箱地址",
-        "content": ["windy10v10ai@gmail.com"]
+        "content": [
+          "windy10v10ai@gmail.com"
+        ]
       },
       "operator": {
         "title": "运营主管",
-        "content": ["Windy"]
+        "content": [
+          "Windy"
+        ]
       },
       "otherFees": {
         "title": "其他费用",
-        "content": ["支付手续费：根据支付方式收取相应费用"]
+        "content": [
+          "支付手续费：根据支付方式收取相应费用"
+        ]
       },
       "refundPolicy": {
         "title": "退换货政策",
@@ -86,7 +178,9 @@
       },
       "serviceTime": {
         "title": "服务提供时间",
-        "content": ["订阅支付成功后即可立即使用会员服务"]
+        "content": [
+          "订阅支付成功后即可立即使用会员服务"
+        ]
       },
       "paymentMethods": {
         "title": "接受的支付方式",
@@ -107,7 +201,9 @@
       },
       "price": {
         "title": "价格",
-        "content": ["10v10AI 会员订阅：CN¥29.8/月 或 US$4/月"]
+        "content": [
+          "10v10AI 会员订阅：CN¥29.8/月 或 US$4/月"
+        ]
       }
     }
   },
@@ -121,7 +217,8 @@
         "title": "Dota2好友ID",
         "placeholder": "请输入您的Dota2好友ID",
         "help": "请输入正确的Dota2好友ID，格式为10位以下纯数字",
-        "helpLink": "如何找到您的Dota2好友ID？"
+        "helpLink": "如何找到您的Dota2好友ID？",
+        "steamAutoFill": "用 Steam 登录自动填入"
       },
       "afdianOrderId": {
         "title": "爱发电订单号",
@@ -149,6 +246,86 @@
         "kofiMessage": "没有找到未激活的订单。\n如果您已成功订阅，可在「个人中心 → 会员」页面点击「刷新会员状态和积分」，立刻生效。\n如仍未生效，请检查您的Dota2好友ID和Ko-fi邮箱地址是否正确，或联系人工处理。",
         "btnText": "重新输入"
       }
+    }
+  },
+  "profile": {
+    "loading": "正在读取玩家数据",
+    "private": {
+      "title": "这位玩家的资料未公开",
+      "description": "目前只能查看自己的资料。"
+    },
+    "noRecord": {
+      "title": "没有这位玩家的记录",
+      "description": "打完一局游戏后就会有数据了。"
+    },
+    "failed": {
+      "title": "读取失败",
+      "description": "请稍后刷新页面重试。"
+    },
+    "identity": {
+      "battleLevel": "勇士等级",
+      "memberLevel": "会员等级",
+      "conductNet": "点赞举报净值",
+      "cumulative": "累计 {total}",
+      "remainingToLevel": "距 {level} 级还差 {amount}",
+      "usablePoints": "可用积分",
+      "attributePoints": "可用属性点",
+      "attributePointsHint": "加点规则见属性页"
+    },
+    "stats": {
+      "title": "战绩",
+      "games": "游戏场次",
+      "winRate": "胜率",
+      "conduct": "行为分",
+      "lifetime": "生涯数据",
+      "kills": "击杀",
+      "deaths": "死亡",
+      "assists": "助攻",
+      "lastHits": "补刀",
+      "totalGoldEarned": "金钱",
+      "heroDamage": "英雄伤害",
+      "damageTaken": "承受伤害",
+      "healing": "治疗",
+      "towerKills": "推塔数"
+    },
+    "member": {
+      "title": "会员状态",
+      "premium": "高级会员",
+      "normal": "普通会员",
+      "expired": "已过期",
+      "none": "未开通会员",
+      "expireDate": "有效期至：{date}",
+      "expiredDate": "已于 {date} 到期",
+      "subscribe": "前往订阅"
+    },
+    "entries": {
+      "property": {
+        "title": "属性加点",
+        "description": "用属性点提升永久属性",
+        "badge": "可用属性点 {count}"
+      },
+      "awaken": {
+        "title": "英雄觉醒",
+        "description": "解锁英雄的觉醒天赋"
+      }
+    }
+  },
+  "auth": {
+    "login": "通过 Steam 登录",
+    "loginShort": "登录",
+    "loginTooltip": "跳转到 Steam 官方页面登录，网站只获取你的 Steam ID",
+    "loggedInAs": "ID {uid}",
+    "signOut": "退出",
+    "callbackLoading": "正在登录",
+    "callbackError": "登录校验失败，请重试",
+    "retry": "重试",
+    "checkingLogin": "正在确认登录状态",
+    "profileTooltip": "查看个人主页",
+    "panel": {
+      "title": "需要 Steam 登录",
+      "why": "这个页面要读取和修改你在 Windy10v10AI 的游戏数据，先确认你是本人。",
+      "scope": "只获取你的 Steam ID，就是你的 Dota2 ID。",
+      "safety": "点下面的按钮跳到 steamcommunity.com 登录，密码输在 Steam 官网，本站拿不到。已经登录 Steam 的话点一下就回来了。"
     }
   }
 }

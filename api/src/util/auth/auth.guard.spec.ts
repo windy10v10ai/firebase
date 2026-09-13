@@ -1,4 +1,4 @@
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -110,12 +110,12 @@ describe('AuthGuard', () => {
       await expect(guard.canActivate(context)).resolves.toBe(true);
     });
 
-    it('token 里的 uid 与路由 steamId 不一致，抛 401', async () => {
+    it('token 里的 uid 与路由 steamId 不一致，抛 403', async () => {
       mockVerify({ uid: '136407523' });
       const guard = createGuard({ [ALLOW_WEB_KEY]: true });
       const { context } = createContext({ bearerToken: 'valid-token', steamId: '999999999' });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
     });
 
     it('未挂 AllowWeb 的路由拒绝网站来源', async () => {

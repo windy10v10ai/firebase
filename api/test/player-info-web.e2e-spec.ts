@@ -32,13 +32,13 @@ describe('PlayerInfoController 网站来源 (e2e)', () => {
     expect(response.body.id).toBe(`${steamId}`);
   });
 
-  it('拿 A 的 token 请求 B 的数据，被拒绝', async () => {
+  it('拿 A 的 token 请求 B 的数据，返回 403', async () => {
     const steamIdA = 200000802;
     const steamIdB = 200000803;
     await createPlayer(app, { steamId: steamIdB, seasonPointTotal: 100 });
     const idTokenA = await createIdTokenForSteamId(steamIdA);
 
-    await getWithBearer(app, infoUrl(steamIdB), idTokenA).expect(401);
+    await getWithBearer(app, infoUrl(steamIdB), idTokenA).expect(403);
   });
 
   it('token 无效，返回 401', async () => {
