@@ -11,7 +11,7 @@ description: web/ 改动涉及页面行为时，用 Playwright 驱动无头 Chro
 
 1. 生产构建起服务：`cd web && npm run build && npm start`（不要用 dev server，左下角开发指示器会入镜）
 2. 在 `web/.browser-verify/`（已被 `.gitignore` 排除，跑完不用清理）下写一次性驱动脚本，`require('../scripts/browser-verify')` 引入公共部分
-3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过：375/768/1280
+3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过，档位以那一节为准
 4. 真实交互用 `page.click()` / `page.fill()`，不要 `eval el.value = ...`——React 受控输入的 `onChange` 不会被后者触发
 5. 每档用 `page.screenshot()` 存到 `web/.browser-verify/screenshots/`，后续贴 PR 时按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」一节操作
 6. 每档检查 `withPage` 返回的 console 错误数组，非空就是回归。**`MISSING_MESSAGE` 要当回归看**——i18n key 缺失不会让页面崩，只会渲染成空白或 key 本身，肉眼扫截图看不出来，只有 console 里有
@@ -35,7 +35,7 @@ const BASE_URL = 'http://localhost:3000';
 (async () => {
   const browser = await launchChrome();
 
-  for (const name of ['375', '768', '1280']) {
+  for (const name of Object.keys(VIEWPORTS)) { // 档位见 web/CLAUDE.md 的「验证宽度」
     const errors = await withPage(browser, VIEWPORTS[name], async (page) => {
       await page.goto(BASE_URL, { waitUntil: 'networkidle' });
       await page.screenshot({ path: path.join(__dirname, 'screenshots', `home-${name}.png`) });
@@ -59,6 +59,6 @@ const BASE_URL = 'http://localhost:3000';
 })();
 ```
 
-## Claude Desktop 环境下的可选捷径
+## 例外：非 Playwright 路径
 
-如果当前会话运行在 Claude Desktop 里，且要测的场景依赖真实登录态，可以改用内置浏览器（`mcp__Claude_Browser__*`）省一步登录，用法见 [web/CLAUDE.md](../../../web/CLAUDE.md)。其他情况——包括 CLI、VSCode 插件、CI——一律走上面的 Playwright 路径，它不依赖运行环境。
+仅当当前会话跑在 Claude Desktop 里、且场景依赖真实登录态时，可以换用内置浏览器省一步登录；具体做法与更多限制见 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「浏览器验证」。其他情况一律走上面的 Playwright 路径，它不依赖运行环境。
