@@ -20,7 +20,8 @@
     "title": "DOTA2 10v10 AI 自定义地图",
     "workshop": {
       "title": "Steam 创意工坊",
-      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力"
+      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力",
+      "subscribe": "在 Steam 创意工坊订阅"
     },
     "github": {
       "title": "GitHub",
