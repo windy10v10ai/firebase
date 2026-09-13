@@ -248,18 +248,21 @@
       "description": "Please refresh the page and try again."
     },
     "identity": {
-      "heading": "ID {id}",
       "battleLevel": "Battle Level",
       "memberLevel": "Member Level",
-      "battlePoint": "Usable Battle Points",
-      "memberPoint": "Usable Member Points"
+      "conductNet": "Commends minus Reports",
+      "cumulative": "Total {total}",
+      "remainingToLevel": "{amount} to level {level}",
+      "usablePoints": "Usable Points",
+      "attributePoints": "Usable Attribute Points",
+      "attributePointsHint": "See the property page for rules"
     },
     "stats": {
       "title": "Stats",
       "games": "Games",
       "winRate": "Win Rate",
       "conduct": "Conduct Score",
-      "conductNet": "Commends minus Reports",
+      "lifetime": "Career Stats",
       "kills": "Kills",
       "deaths": "Deaths",
       "assists": "Assists",
@@ -279,6 +282,17 @@
       "expireDate": "Valid until {date}",
       "expiredDate": "Expired on {date}",
       "subscribe": "Subscribe"
+    },
+    "entries": {
+      "property": {
+        "title": "Property Points",
+        "description": "Spend points on permanent attributes",
+        "badge": "Usable {count} points"
+      },
+      "awaken": {
+        "title": "Hero Awaken",
+        "description": "Unlock heroes' awakening talents"
+      }
     }
   },
   "auth": {

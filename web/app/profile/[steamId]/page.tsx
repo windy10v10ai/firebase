@@ -1,5 +1,6 @@
 'use client';
 
+import { CirclePlus, Sparkles } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -11,8 +12,10 @@ import { ApiError } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 
-import IdentityCard from './IdentityCard';
+import FeatureEntryCard from './FeatureEntryCard';
+import LevelCard from './LevelCard';
 import MemberCard from './MemberCard';
+import PlayerCard from './PlayerCard';
 import StatsCard from './StatsCard';
 
 // 带上请求时用的 steamId，换一个玩家时旧结果立刻失效，不用先手动置回加载中
@@ -81,10 +84,36 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <IdentityCard info={loaded.info} />
-      <StatsCard info={loaded.info} />
-      <MemberCard member={loaded.info.member} />
+    <div className="grid gap-6 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start">
+      {/* 窄屏走 DOM 顺序单列；宽屏用显式网格坐标拆成左右两栏 */}
+      <div className="lg:col-start-1 lg:row-start-1">
+        <PlayerCard info={loaded.info} />
+      </div>
+      <div className="lg:col-start-2 lg:row-start-1">
+        <LevelCard info={loaded.info} />
+      </div>
+      <div className="lg:col-start-2 lg:row-start-2">
+        <FeatureEntryCard
+          Icon={CirclePlus}
+          title={t('entries.property.title')}
+          description={t('entries.property.description')}
+          badge={t('entries.property.badge', { count: loaded.info.useableLevel })}
+        />
+      </div>
+      <div className="lg:col-start-2 lg:row-start-3">
+        <FeatureEntryCard
+          Icon={Sparkles}
+          title={t('entries.awaken.title')}
+          description={t('entries.awaken.description')}
+        />
+      </div>
+      <div className="lg:col-start-2 lg:row-start-4">
+        <StatsCard info={loaded.info} />
+      </div>
+      {/* 跨 3 行接到战绩卡底部，让空档落在整块左栏末尾，不夹在两张入口卡中间 */}
+      <div className="lg:col-start-1 lg:row-start-2 lg:row-end-5">
+        <MemberCard member={loaded.info.member} />
+      </div>
     </div>
   );
 }

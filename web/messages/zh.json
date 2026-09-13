@@ -248,18 +248,21 @@
       "description": "请稍后刷新页面重试。"
     },
     "identity": {
-      "heading": "ID {id}",
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
-      "battlePoint": "可用勇士积分",
-      "memberPoint": "可用会员积分"
+      "conductNet": "点赞举报净值",
+      "cumulative": "累计 {total}",
+      "remainingToLevel": "距 {level} 级还差 {amount}",
+      "usablePoints": "可用积分",
+      "attributePoints": "可用属性点",
+      "attributePointsHint": "加点规则见属性页"
     },
     "stats": {
       "title": "战绩",
       "games": "游戏场次",
       "winRate": "胜率",
       "conduct": "行为分",
-      "conductNet": "点赞举报净值",
+      "lifetime": "生涯数据",
       "kills": "击杀",
       "deaths": "死亡",
       "assists": "助攻",
@@ -279,6 +282,17 @@
       "expireDate": "有效期至：{date}",
       "expiredDate": "已于 {date} 到期",
       "subscribe": "前往订阅"
+    },
+    "entries": {
+      "property": {
+        "title": "属性加点",
+        "description": "用属性点提升永久属性",
+        "badge": "可用属性点 {count}"
+      },
+      "awaken": {
+        "title": "英雄觉醒",
+        "description": "解锁英雄的觉醒天赋"
+      }
     }
   },
   "auth": {
