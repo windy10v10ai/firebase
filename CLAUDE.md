@@ -197,7 +197,11 @@ feature/<issue-id>-<short-kebab-summary>
 
 ### 一个仓库多个会话
 
-多个会话共用同一份本地仓库时，各会话通常用 `git worktree add` 而非切换主检出的分支来隔离工作，避免互相覆盖对方的工作区。
+多个会话共用同一份本地仓库时，各会话用 `git worktree add` 而非切换主检出的分支来隔离工作，避免互相覆盖对方的工作区。
+
+**主检出当前在哪个分支，不由自己决定。**动手前先看 `git branch --show-current`：不是自己要的分支就不要 `git checkout` 切过去，另一个会话可能正在那上面干活。要操作别的分支，`git worktree add` 到 scratchpad 里去。
+
+**只提交自己负责的文件。**`git commit` 前先 `git status`，确认没把别人的改动一起带进来。
 
 ### 推送到 develop
 
