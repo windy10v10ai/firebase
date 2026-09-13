@@ -17,7 +17,7 @@ interface PointsCardProps {
 }
 
 const BOX_CLASS =
-  'flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control px-3 py-3 sm:px-4 sm:py-3.5';
+  'flex flex-1 items-baseline justify-between gap-3 box-pad rounded-lg border border-line bg-control';
 
 export default function PointsCard({
   steamId,
@@ -31,7 +31,7 @@ export default function PointsCard({
   const profileHref = playerPagePath(steamId);
 
   return (
-    <section className="card-container flex flex-col gap-4 p-4 sm:p-6 lg:px-8">
+    <section className="card-container card-pad flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <h2 className="title-secondary">{t('title')}</h2>
         <button

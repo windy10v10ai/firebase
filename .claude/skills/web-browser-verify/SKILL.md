@@ -71,7 +71,33 @@ await page.addStyleTag({ content: 'nextjs-portal { display: none !important; }' 
 拿登录态的做法——**只替换 Steam 换 token 这一次请求**，之后所有接口都打真后端、真写 Firestore：
 
 1. 起 Firestore + Auth 模拟器与 API（见根目录 [CLAUDE.md](../../../CLAUDE.md) 的「本地开发」）
-2. 用 firebase-admin 往模拟器里塞一个测试玩家，并给同一个 id 签一个 custom token。**脚本要放在 `api/` 下**：`firebase-admin/app` 这类 subpath export 在脚本位于别处、又用绝对路径执行时解析不到
+2. 用 firebase-admin 往模拟器里塞一个测试玩家，并给同一个 id 签一个 custom token。**必须在 `api/` 目录下执行**：`firebase-admin/app` 这类 subpath export 只能从 `api/node_modules` 解析，脚本放在别处、又用绝对路径执行时解析不到。用 `node -e` 直接跑，不落文件，也就不用记得删；token 写到 scratchpad：
+
+   ```bash
+   cd api && TOKEN_FILE=<scratchpad>/token.txt node -e "
+   const { initializeApp } = require('firebase-admin/app');
+   const { getFirestore } = require('firebase-admin/firestore');
+   const { getAuth } = require('firebase-admin/auth');
+   process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+   process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+   const S = '900000001';
+   (async () => {
+     const app = initializeApp({ projectId: 'windy10v10ai' });
+     const db = getFirestore(app);
+     await db.collection('Players').doc(S).set({
+       id: S, matchCount: 862, winCount: 471, disconnectCount: 3,
+       conductPoint: 10000, commendCount: 128, reportCount: 4, lastMatchTime: new Date(),
+       seasonPointTotal: 39200, usedSeasonPoint: 0,
+       memberPointTotal: 16900, usedMemberPoint: 0, usedLevel: 0,
+     });
+     await db.collection('PlayerProperty').doc(S).delete().catch(() => {});
+     require('fs').writeFileSync(process.env.TOKEN_FILE, await getAuth(app).createCustomToken(S));
+     process.exit(0);
+   })();
+   "
+   ```
+
+   `Players` 的字段以 `api/` 里的 entity 为准，新增了页面直接读的字段就补进来。要测会员态再往 `Members` 塞一条
 3. Playwright 里拦掉换 token 的那一次请求，塞进上一步的 custom token：
 
    ```js
@@ -88,9 +114,27 @@ await page.addStyleTag({ content: 'nextjs-portal { display: none !important; }' 
 
 4. 之后正常点按钮、填表单，用 `page.waitForResponse()` 确认请求方法与状态码，跑完直接查模拟器里的 Firestore 文档复核写入结果
 
-三个坑：
+做前后对比时，基线与本分支的 dev server 要同时跑在 3000 以外的端口，而 API 的 CORS 白名单只有 `http://localhost:3000`。在 Playwright 里代发 API 请求并补上跨域头，请求仍然打真后端：
+
+```js
+await page.route('http://localhost:3001/**', async (route) => {
+  const response = await route.fetch();
+  await route.fulfill({
+    response,
+    headers: {
+      ...response.headers(),
+      'access-control-allow-origin': new URL(BASE_URL).origin,
+      'access-control-allow-headers': 'authorization,content-type',
+      'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+    },
+  });
+});
+```
+
+四个坑：
 
 - **测试玩家的字段要塞全**。页面会直接读 `matchCount.toLocaleString()` 这类字段，少一个就白屏，而报错只在 console 里
+- **`next dev` 会往 `web/CLAUDE.md` 末尾追加 `<!-- BEGIN:nextjs-agent-rules -->` 一段**。提交前检查，只删这一段，不要 `git checkout --` 整个文件
 - **登录态和未登录态都要过**。头部在两种状态下不是同一套元素，只测登录态会漏掉未登录才出现的布局问题
 - **横排导航在窄屏是 `hidden md:flex`**，元素还在 DOM 里。按文案取元素时会命中不可见的那一个，定位要限定到具体区域
 

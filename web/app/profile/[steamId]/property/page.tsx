@@ -167,7 +167,7 @@ export default function PropertyPage() {
       />
 
       {failedAction ? (
-        <p role="alert" className="card-container border-danger/40 p-4 text-sm text-danger">
+        <p role="alert" className="card-container card-pad-sm border-danger/40 text-sm text-danger">
           {t(`error.${failedAction}`)}
         </p>
       ) : null}

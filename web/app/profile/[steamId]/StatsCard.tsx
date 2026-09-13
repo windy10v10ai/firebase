@@ -30,11 +30,11 @@ export default function StatsCard({ info }: { info: PlayerInfo }) {
   ];
 
   return (
-    <section className="card-container @container space-y-6 p-4 sm:p-6 lg:p-8">
+    <section className="card-container card-pad @container space-y-6">
       <h2 className="title-secondary">{t('title')}</h2>
       <dl className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
         {overview.map(({ label, value }) => (
-          <div key={label} className="rounded-[10px] border border-line bg-panel-soft px-3 py-3 sm:px-4">
+          <div key={label} className="box-pad rounded-[10px] border border-line bg-panel-soft">
             <dt className="text-sm text-muted">{label}</dt>
             <dd className="mt-1 text-2xl font-bold tabular-nums text-heading">{value}</dd>
           </div>

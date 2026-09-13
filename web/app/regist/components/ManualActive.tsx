@@ -138,7 +138,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
             </p>
           </div>
 
-          <form noValidate onSubmit={handleSubmit} className="card-container space-y-6 p-5 sm:p-8">
+          <form noValidate onSubmit={handleSubmit} className="card-container card-pad space-y-6">
             <Field
               required
               htmlFor="inputSteamId"

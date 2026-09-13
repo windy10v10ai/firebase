@@ -63,6 +63,24 @@
     @apply rounded-[10px] border border-line bg-panel;
   }
 
+  /*
+   * 内边距按宽度收放，见 docs/design/web/phase-7-visual-style.md。
+   * 页面外壳、卡片、嵌入块三层在窄屏会叠加，各自写死会把 375 的正文挤掉近三成。
+   */
+  .card-pad {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  /* 网格里成排出现的条目卡，比整块区域卡再小一档 */
+  .card-pad-sm {
+    @apply p-3 sm:p-4;
+  }
+
+  /* 卡片内部的嵌入块，外面已有卡片那一层留白，只留最小一档 */
+  .box-pad {
+    @apply px-3 py-3 sm:px-4 sm:py-3.5;
+  }
+
   .card-hover {
     @apply transition-colors hover:border-season-border;
   }

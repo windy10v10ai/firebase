@@ -87,7 +87,7 @@ export default function PropertyCard({
   });
 
   return (
-    <div className="card-container flex flex-col gap-3 p-3 sm:p-4">
+    <div className="card-container card-pad-sm flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-panel-soft text-muted">
           <def.Icon className="size-5" />
