@@ -26,9 +26,55 @@
       "title": "GitHub",
       "description": "查看项目源代码和更新日志，并参与贡献"
     },
-    "about": {
-      "title": "关于项目",
-      "description": "这是一个DOTA2自定义地图项目，为您带来全新的10v10AI对战体验。\n我们会持续优化和更新，您的支持是我们不断进步的动力。"
+    "intro": {
+      "title": "登录后，随时查看自己的数据",
+      "description": "用 Steam 登录，就能在网站上看战绩、勇士与会员积分，直接给英雄属性加点、洗点，不用进游戏。",
+      "privacy": "密码输在 Steam 官网，本站只拿到你的 Steam ID",
+      "upcoming": [
+        "更多数据统计",
+        "每日任务",
+        "签到",
+        "技能与物品抽选一览"
+      ]
+    },
+    "summary": {
+      "profileLink": "个人主页"
+    },
+    "sample": {
+      "signIn": "每日签到",
+      "vision": "额外视野",
+      "cooldown": "冷却时间",
+      "moveSpeed": "移动速度",
+      "awakened": "已觉醒英雄",
+      "level": "{n} 级"
+    },
+    "pages": {
+      "title": "主要页面",
+      "soon": "即将上线",
+      "profile": {
+        "title": "个人主页",
+        "description": "战绩、勇士与会员等级、可用积分"
+      },
+      "property": {
+        "title": "属性加点",
+        "description": "查看属性、加点与洗点"
+      },
+      "awaken": {
+        "title": "英雄觉醒",
+        "description": "已觉醒英雄、解锁与随机"
+      },
+      "membership": {
+        "title": "会员订阅",
+        "description": "会员福利、爱发电与 Ko-fi 订阅入口"
+      },
+      "dailyTask": {
+        "title": "每日任务",
+        "description": "预览与刷新每日任务"
+      },
+      "wiki": {
+        "title": "技能与物品",
+        "description": "开局抽选的技能与物品一览"
+      }
     }
   },
   "membership": {

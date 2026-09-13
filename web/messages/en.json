@@ -26,9 +26,55 @@
       "title": "GitHub",
       "description": "View project source code, changelog, and contribute to the project"
     },
-    "about": {
-      "title": "About Project",
-      "description": "This is a DOTA2 custom map project that brings you a new 10v10 AI battle experience.\nWe will continue to optimize and update, your support is our motivation to keep improving."
+    "intro": {
+      "title": "Sign in to check your own data anytime",
+      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and spend attribute points on your heroes — without launching the game.",
+      "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
+      "upcoming": [
+        "More statistics",
+        "Daily tasks",
+        "Daily check-in",
+        "Ability and item draft list"
+      ]
+    },
+    "summary": {
+      "profileLink": "Profile"
+    },
+    "sample": {
+      "signIn": "Daily check-in",
+      "vision": "Bonus vision",
+      "cooldown": "Cooldown",
+      "moveSpeed": "Move speed",
+      "awakened": "Awakened heroes",
+      "level": "Lv {n}"
+    },
+    "pages": {
+      "title": "Main pages",
+      "soon": "Coming soon",
+      "profile": {
+        "title": "Profile",
+        "description": "Match record, Battle and Member levels, usable points"
+      },
+      "property": {
+        "title": "Attributes",
+        "description": "View attributes, spend and reset points"
+      },
+      "awaken": {
+        "title": "Hero Awakening",
+        "description": "Awakened heroes, unlock and randomise"
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Member benefits, Afdian and Ko-fi subscriptions"
+      },
+      "dailyTask": {
+        "title": "Daily Tasks",
+        "description": "Preview and refresh your daily tasks"
+      },
+      "wiki": {
+        "title": "Abilities & Items",
+        "description": "The abilities and items in the opening draft"
+      }
     }
   },
   "membership": {
