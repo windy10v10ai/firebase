@@ -65,7 +65,11 @@ export default function Header() {
     (item): item is typeof item & { href: string } => item.href !== null,
   );
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
-  const isCurrent = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isCurrent = (href: string) =>
+    pathname === href ||
+    pathname.startsWith(`${href}/`) ||
+    // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址都算停在这一项上
+    (href.startsWith('/my/') && pathname.endsWith(href.slice('/my'.length)));
 
   return (
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单

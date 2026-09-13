@@ -92,29 +92,42 @@ describe('PlayerPropertyService', () => {
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
     });
 
-    it('使用赛季可用积分重置：扣减 usedSeasonPoint，不改变 seasonPointTotal', async () => {
+    it('使用赛季可用积分重置：扣减固定的 2000 usedSeasonPoint，不改变 seasonPointTotal', async () => {
       const { service, playerService, analyticsService } = createService({
-        seasonPointTotal: 200,
+        seasonPointTotal: 5000,
         usedSeasonPoint: 0,
       });
 
       await service.reset(steamId, false);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 200,
+        usedSeasonPoint: 2000,
       });
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
-        200,
+        2000,
         false,
         'reset_property',
       );
     });
 
+    it('使用赛季积分重置：消耗不随勇士等级变化', async () => {
+      const { service, playerService } = createService({
+        seasonPointTotal: 500000,
+        usedSeasonPoint: 0,
+      });
+
+      await service.reset(steamId, false);
+
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
+        usedSeasonPoint: 2000,
+      });
+    });
+
     it('使用赛季积分重置：总积分充足但可用积分不足应报错', async () => {
       const { service, playerService } = createService({
-        seasonPointTotal: 200,
-        usedSeasonPoint: 1,
+        seasonPointTotal: 5000,
+        usedSeasonPoint: 3001,
       });
 
       await expect(service.reset(steamId, false)).rejects.toThrow(BadRequestException);

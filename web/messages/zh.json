@@ -72,7 +72,7 @@
       },
       "property": {
         "title": "属性加点",
-        "description": "查看属性、加点与洗点"
+        "description": "查看属性、加点与初始化"
       },
       "awaken": {
         "title": "英雄觉醒",
@@ -308,6 +308,107 @@
         "title": "英雄觉醒",
         "description": "解锁英雄的觉醒天赋"
       }
+    }
+  },
+  "property": {
+    "loading": "正在读取属性",
+    "private": {
+      "title": "这份资料看不了",
+      "description": "属性加点只有本人登录后才能查看和修改。"
+    },
+    "noRecord": {
+      "title": "没有这个玩家的记录",
+      "description": "确认一下 ID 有没有抄错，或者先进游戏打一局。"
+    },
+    "failed": {
+      "title": "读取失败",
+      "description": "刷新一下再试，还不行就过一会儿再来。"
+    },
+    "title": "属性加点",
+    "intro": "用属性点增强英雄。加点永久保留，每一局都带着。",
+    "points": {
+      "title": "属性点",
+      "usable": "可用 / 总数",
+      "battleLevel": "勇士等级",
+      "memberLevel": "会员等级",
+      "formula": "总属性点 = 勇士等级 + 会员等级，两种等级每升 1 级各给 1 点，只升不降。点等级看明细。",
+      "reset": "初始化"
+    },
+    "group": {
+      "instant": {
+        "title": "英雄 1 级起生效",
+        "hint": "不看英雄等级，进游戏就是全部数值 · {count} 条"
+      },
+      "scaling": {
+        "title": "随英雄升级解锁",
+        "hint": "英雄每 2 级解锁 1 级，英雄 1 级时这些属性还没有数值 · {count} 条"
+      },
+      "skill": {
+        "title": "额外技能点",
+        "hint": "解锁比别的属性慢一倍：英雄每 4 级才到手 1 个 · {count} 条"
+      }
+    },
+    "card": {
+      "level": "{level}/{max} 级",
+      "levelChange": "{from} → {to}/{max} 级",
+      "perCell": "每级 {value}",
+      "perCellCost": "消耗 {cost} 点",
+      "skillValue": "{value} 个",
+      "full": "满级",
+      "owned": "已获取",
+      "notOwned": "未获取",
+      "scalingBadge": "随英雄升级",
+      "skillBadge": "英雄每 4 级 1 个",
+      "effectNote": "加到 {level} 级，英雄 {heroLevel} 级时全部生效",
+      "effectEmpty": "加点之后这里会写出需要的英雄等级",
+      "cellTip": "第 {cell} 级 · 英雄 {heroLevel} 级起生效",
+      "upgrade": "升级",
+      "upgradeTo": "升至 {level} 级",
+      "unlock": "使用 {cost} 点属性点升级",
+      "maxed": "已满级",
+      "decrease": "少加一级",
+      "increase": "多加一级"
+    },
+    "reset": {
+      "title": "初始化属性点",
+      "description": "清空全部加点，属性点全额退回，可以重新分配。扣的是可用积分，累计积分与等级都不变，属性点总数也一点不少。",
+      "useBattle": "消耗 {cost} 可用勇士积分",
+      "battleShort": "可用勇士积分 {have}，还差 {need}。",
+      "useMember": "消耗 {cost} 可用会员积分",
+      "memberShort": "可用会员积分 {have}，还差 {need}。",
+      "cancel": "取消"
+    },
+    "error": {
+      "upgrade": "加点没成功，可用属性点可能已经被别处用掉了。页面已经刷新成最新状态，再试一次。",
+      "reset": "初始化没成功，可用积分可能不够了。页面已经刷新成最新状态。"
+    },
+    "names": {
+      "property_cooldown_percentage": "冷却缩短",
+      "property_movespeed_bonus_constant": "移动速度",
+      "property_bonus_vision": "额外视野",
+      "property_aoe_bonus_constant_stacking": "作用范围",
+      "property_health_regen_percentage": "最大生命回复",
+      "property_mana_regen_total_percentage": "最大魔法回复",
+      "property_ignore_movespeed_limit": "无视移速上限",
+      "property_cannot_miss": "克敌机先",
+      "property_flying": "飞行状态",
+      "property_slow_immune": "减速免疫",
+      "property_cast_range_bonus_stacking": "施法距离",
+      "property_spell_amplify_percentage": "技能增强",
+      "property_status_resistance_stacking": "状态抗性",
+      "property_evasion_constant": "闪避",
+      "property_magical_resistance_bonus": "魔法抗性",
+      "property_incoming_damage_percentage": "伤害减免",
+      "property_attack_range_bonus": "攻击距离（仅远程英雄）",
+      "property_physical_armor_bonus": "物理护甲",
+      "property_preattack_bonus_damage": "攻击力",
+      "property_attackspeed_bonus_constant": "攻击速度",
+      "property_stats_strength_bonus": "力量",
+      "property_stats_agility_bonus": "敏捷",
+      "property_stats_intellect_bonus": "智力",
+      "property_lifesteal": "攻击吸血",
+      "property_spell_lifesteal": "技能吸血",
+      "property_skill_points_bonus": "额外技能点"
     }
   },
   "auth": {

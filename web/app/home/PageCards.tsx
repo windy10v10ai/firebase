@@ -31,8 +31,10 @@ export default function PageCards() {
   const auth = useAuth();
 
   // 页面没实现的一律不给 href，卡片就停在「即将上线」的样子上
+  const uid = auth.status === 'authenticated' ? auth.uid : null;
   const hrefOf: Record<string, string | null> = {
-    profile: playerPagePath(auth.status === 'authenticated' ? auth.uid : null),
+    profile: playerPagePath(uid),
+    property: playerPagePath(uid, 'property'),
     membership: '/membership',
   };
 

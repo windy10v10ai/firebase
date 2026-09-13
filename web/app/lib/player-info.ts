@@ -21,6 +21,11 @@ export interface StatsLifetime {
   totalGoldEarned: number;
 }
 
+export interface PropertyItem {
+  name: string;
+  level: number;
+}
+
 export interface PlayerInfo {
   id: string;
   matchCount: number;
@@ -42,7 +47,12 @@ export interface PlayerInfo {
   useableLevel: number;
   member?: MemberInfo;
   statsLifetime?: StatsLifetime;
+  properties?: PropertyItem[];
 }
+
+/** 初始化属性点的价码，与 api 的 player-property.service.ts 保持一致 */
+export const RESET_PROPERTY_SEASON_POINT_COST = 2000;
+export const RESET_PROPERTY_MEMBER_POINT_COST = 1000;
 
 /** 会员状态对应的文案 key：没有记录、已过期、高级、普通 */
 export function memberStatusKey(member?: MemberInfo): string {
@@ -58,4 +68,24 @@ export function memberStatusKey(member?: MemberInfo): string {
 /** 取个人主页要的全部数据，按 URL 里的 id 请求，不从登录态取 uid */
 export function fetchPlayerInfo(steamId: string) {
   return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member,statsLifetime`);
+}
+
+/** 属性页要的数据，等级与可用积分本来就在响应里，一次请求够了 */
+export function fetchPlayerProperties(steamId: string) {
+  return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=property`);
+}
+
+/** level 是升到的目标等级，不是增量 */
+export function upgradeProperty(steamId: string, name: string, level: number) {
+  return apiFetch<PlayerInfo>(`/api/player/${steamId}/property`, {
+    method: 'PUT',
+    body: JSON.stringify({ name, level }),
+  });
+}
+
+export function resetProperties(steamId: string, useMemberPoint: boolean) {
+  return apiFetch<PlayerInfo>(
+    `/api/player/${steamId}/property?useMemberPoint=${useMemberPoint}`,
+    { method: 'DELETE' },
+  );
 }

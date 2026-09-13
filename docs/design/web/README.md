@@ -50,7 +50,7 @@ Firestore
 | `/` | 首页 | 否 | 头部品牌名 | 已上线 | 批次 8a |
 | `/membership` | 会员介绍与订阅 | 否 | 头部菜单「会员订阅」 | 已上线 | 批次 8c |
 | `/profile/<steamId>` | 个人主页 | 是 | 头部的 ID 控件 | 已上线 | 批次 8b |
-| `/profile/<steamId>/property` | 属性加点 | 是 | 头部菜单「属性加点」 | **未实现**，菜单项当前隐藏 | 批次 3a |
+| `/profile/<steamId>/property` | 属性加点 | 是 | 头部菜单「属性加点」、首页卡片 | 已实现 | 批次 3a |
 | `/profile/<steamId>/awaken` | 英雄觉醒 | 是 | 头部菜单「英雄觉醒」 | **未实现**，菜单项当前隐藏 | 批次 3b |
 | `/wiki/abilities`、`/wiki/items` | 技能与物品（开局抽选一览） | 否 | 头部菜单「技能与物品」 | **未实现**，菜单项当前隐藏 | 未排期 |
 | `/my/*` | 玩家页面的未登录入口，登录后跳 `/profile/<自己的 id>/*` | — | 菜单在未登录时指向这里 | 已上线 | — |
@@ -146,11 +146,11 @@ Firestore
 | 3ab-api 开放属性与觉醒接口 | #1163 | 给已有的加点、洗点、觉醒、随机四个接口挂 `@AllowWeb()` | 已完成 |
 | 2g 顶部布局 | #1161 | 头部结构重做：站内外分组、两端同一套菜单、控件尺寸统一，见 [phase-2g-header-layout.md](phase-2g-header-layout.md) | 已完成 |
 | 7 视觉风格 | #1165 | 改 token 取值、字体，打磨基础组件，见 [phase-7-visual-style.md](phase-7-visual-style.md) | 已完成 |
-| 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、洗点 | 未开始 |
+| 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、初始化，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机 | 未开始 |
 | 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 未开始 |
-| 8a 首页 | 待建 | 删「关于项目」，加登录引导与主要页面导航两块 | 进行中 |
-| 8b 个人主页 | 待建 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 未开始 |
+| 8a 首页 | #1168 | 删「关于项目」，加登录引导与主要页面导航两块，见 [phase-8a-home-page.md](phase-8a-home-page.md) | 已完成 |
+| 8b 个人主页 | #1167 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 已完成 |
 | 8c 会员页与商业披露 | 待建 | 会员页排版，披露页换设计 token，共用组件收尾 | 未开始 |
 | 9 Steam 昵称头像 | 待建 | 申请 Steam Web API key、后端加接口与缓存、网站显示昵称头像 | 未开始 |
 | 5 GA4 | #1122 | 网站接入 GA4 | 未开始 |

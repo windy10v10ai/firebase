@@ -310,6 +310,107 @@
       }
     }
   },
+  "property": {
+    "loading": "Loading attributes",
+    "private": {
+      "title": "This profile is not visible",
+      "description": "Attributes can only be viewed and changed by the account owner."
+    },
+    "noRecord": {
+      "title": "No record for this player",
+      "description": "Check the ID, or play a game first."
+    },
+    "failed": {
+      "title": "Could not load",
+      "description": "Refresh and try again, or come back in a little while."
+    },
+    "title": "Attributes",
+    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game.",
+    "points": {
+      "title": "Attribute points",
+      "usable": "Usable / total",
+      "battleLevel": "Battle level",
+      "memberLevel": "Member level",
+      "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down. Tap a level for details.",
+      "reset": "Reset"
+    },
+    "group": {
+      "instant": {
+        "title": "Active from hero level 1",
+        "hint": "No hero level needed — the full value applies as soon as the game starts · {count} attributes"
+      },
+      "scaling": {
+        "title": "Unlocks as your hero levels",
+        "hint": "One level unlocks every 2 hero levels, so these do nothing at hero level 1 · {count} attributes"
+      },
+      "skill": {
+        "title": "Bonus skill points",
+        "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels · {count} attribute"
+      }
+    },
+    "card": {
+      "level": "Level {level}/{max}",
+      "levelChange": "Level {from} → {to}/{max}",
+      "perCell": "{value} per level",
+      "perCellCost": "{cost} points each",
+      "skillValue": "{value}",
+      "full": "Maxed",
+      "owned": "Owned",
+      "notOwned": "Not owned",
+      "scalingBadge": "Scales with hero level",
+      "skillBadge": "1 per 4 hero levels",
+      "effectNote": "At level {level}, fully active once your hero reaches level {heroLevel}",
+      "effectEmpty": "Add a level and this will tell you the hero level it needs",
+      "cellTip": "Level {cell} · active from hero level {heroLevel}",
+      "upgrade": "Upgrade",
+      "upgradeTo": "Upgrade to {level}",
+      "unlock": "Upgrade for {cost} points",
+      "maxed": "Maxed out",
+      "decrease": "One level fewer",
+      "increase": "One level more"
+    },
+    "reset": {
+      "title": "Reset attribute points",
+      "description": "Clears every level you have added and refunds all attribute points so you can spend them again. Only usable points are charged — total points, lifetime points and your levels stay exactly as they are.",
+      "useBattle": "Spend {cost} usable battle points",
+      "battleShort": "You have {have} usable battle points, {need} short.",
+      "useMember": "Spend {cost} usable member points",
+      "memberShort": "You have {have} usable member points, {need} short.",
+      "cancel": "Cancel"
+    },
+    "error": {
+      "upgrade": "The upgrade did not go through — the points may already have been spent elsewhere. The page now shows the latest state; try again.",
+      "reset": "The reset did not go through, probably for want of usable points. The page now shows the latest state."
+    },
+    "names": {
+      "property_cooldown_percentage": "Cooldown reduction",
+      "property_movespeed_bonus_constant": "Movement speed",
+      "property_bonus_vision": "Bonus vision",
+      "property_aoe_bonus_constant_stacking": "Area of effect",
+      "property_health_regen_percentage": "Max health regen",
+      "property_mana_regen_total_percentage": "Max mana regen",
+      "property_ignore_movespeed_limit": "Unlimited movement speed",
+      "property_cannot_miss": "True strike",
+      "property_flying": "Flying status",
+      "property_slow_immune": "Slow immunity",
+      "property_cast_range_bonus_stacking": "Cast range",
+      "property_spell_amplify_percentage": "Spell damage",
+      "property_status_resistance_stacking": "Status resistance",
+      "property_evasion_constant": "Evasion",
+      "property_magical_resistance_bonus": "Magic resistance",
+      "property_incoming_damage_percentage": "Damage reduction",
+      "property_attack_range_bonus": "Attack range (ranged only)",
+      "property_physical_armor_bonus": "Physical armor",
+      "property_preattack_bonus_damage": "Attack damage",
+      "property_attackspeed_bonus_constant": "Attack speed",
+      "property_stats_strength_bonus": "Strength",
+      "property_stats_agility_bonus": "Agility",
+      "property_stats_intellect_bonus": "Intelligence",
+      "property_lifesteal": "Lifesteal",
+      "property_spell_lifesteal": "Spell lifesteal",
+      "property_skill_points_bonus": "Bonus skill points"
+    }
+  },
   "auth": {
     "login": "Sign in with Steam",
     "loginShort": "Sign in",
