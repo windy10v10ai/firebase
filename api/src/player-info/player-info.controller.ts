@@ -81,6 +81,7 @@ export class PlayerInfoController {
     return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
   }
 
+  @AllowWeb()
   @Put(':steamId/property')
   @ApiOperation({ summary: 'Upgrade player property' })
   async upgradePlayerProperty(
@@ -91,6 +92,7 @@ export class PlayerInfoController {
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
   }
 
+  @AllowWeb()
   @Delete(':steamId/property')
   @ApiOperation({ summary: 'Reset player properties' })
   async resetPlayerProperty(
@@ -101,6 +103,7 @@ export class PlayerInfoController {
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
   }
 
+  @AllowWeb()
   @Put(':steamId/hero-awakening')
   @ApiOperation({ summary: 'Awaken a hero, spending season or member points' })
   async awakenHero(
@@ -111,6 +114,7 @@ export class PlayerInfoController {
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['heroAwakening']);
   }
 
+  @AllowWeb()
   @Put(':steamId/hero-awakening/random')
   @ApiOperation({ summary: 'Ensure random hero awakening candidates exist (idempotent, free)' })
   async ensureRandomHeroAwakeningCandidates(
