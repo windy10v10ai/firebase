@@ -29,9 +29,17 @@ export interface PlayerInfo {
   commendCount: number;
   reportCount: number;
   seasonLevel: number;
+  seasonPointTotal: number;
+  seasonCurrrentLevelPoint: number;
+  seasonNextLevelPoint: number;
   useableSeasonPoint: number;
   memberLevel: number;
+  memberPointTotal: number;
+  memberCurrentLevelPoint: number;
+  memberNextLevelPoint: number;
   useableMemberPoint: number;
+  totalLevel: number;
+  useableLevel: number;
   member?: MemberInfo;
   statsLifetime?: StatsLifetime;
 }

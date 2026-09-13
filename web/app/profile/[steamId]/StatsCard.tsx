@@ -27,13 +27,12 @@ export default function StatsCard({ info }: { info: PlayerInfo }) {
     { label: t('games'), value: info.matchCount.toLocaleString() },
     { label: t('winRate'), value: `${winRate}%` },
     { label: t('conduct'), value: String(info.conductPoint) },
-    { label: t('conductNet'), value: String(info.commendCount - info.reportCount) },
   ];
 
   return (
     <section className="card-container @container space-y-6 p-6 sm:p-8">
       <h2 className="title-secondary">{t('title')}</h2>
-      <dl className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
+      <dl className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
         {overview.map(({ label, value }) => (
           <div key={label} className="rounded-[10px] border border-line bg-panel-soft px-4 py-3">
             <dt className="text-sm text-muted">{label}</dt>
