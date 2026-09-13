@@ -1,8 +1,16 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
+    "homeShort": "10v10AI",
+    "property": "属性",
+    "propertyFull": "属性加点",
+    "awaken": "觉醒",
+    "awakenFull": "英雄觉醒",
+    "wiki": "技能物品",
+    "wikiFull": "技能与物品",
     "workshop": "Steam 创意工坊",
     "github": "GitHub",
+    "membershipShort": "会员",
     "membership": "会员订阅",
     "disclosure": "商业披露",
     "switchLanguage": "切换语言",
@@ -229,6 +237,7 @@
   },
   "auth": {
     "login": "通过 Steam 登录",
+    "loginShort": "登录",
     "loginTooltip": "跳转到 Steam 官方页面登录，网站只获取你的 Steam ID",
     "loggedInAs": "ID {uid}",
     "signOut": "退出",

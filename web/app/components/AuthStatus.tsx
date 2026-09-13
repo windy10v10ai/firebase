@@ -22,12 +22,13 @@ export default function AuthStatus() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    // ID 与退出合并进同一条 36px 背景，不再是两种高度的控件，见 phase-2g-header-layout.md
+    <div className="flex h-9 items-center gap-2 whitespace-nowrap rounded-md bg-control px-2.5 text-content">
       <Link
         href={playerPagePath(auth.uid)}
         title={t('profileTooltip')}
         aria-label={t('profileTooltip')}
-        className="inline-flex items-center gap-2 whitespace-nowrap text-content link-hover"
+        className="flex items-center gap-1.5 link-hover"
       >
         {/* 窄屏放不下 10 位 ID，退回图标；ID 本身在个人主页上显示 */}
         <UserRound className="size-5 shrink-0" aria-hidden="true" />
@@ -38,7 +39,7 @@ export default function AuthStatus() {
         onClick={() => auth.signOut()}
         title={t('signOut')}
         aria-label={t('signOut')}
-        className="rounded bg-control p-1.5 text-content hover:bg-control-hover"
+        className="hidden md:block link-hover"
       >
         <LogOut className="size-4" aria-hidden="true" />
       </button>

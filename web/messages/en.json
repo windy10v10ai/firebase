@@ -1,8 +1,16 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
+    "homeShort": "10v10AI",
+    "property": "Property",
+    "propertyFull": "Property Points",
+    "awaken": "Awaken",
+    "awakenFull": "Hero Awaken",
+    "wiki": "Skills & Items",
+    "wikiFull": "Skills & Items",
     "workshop": "Steam Workshop",
     "github": "GitHub",
+    "membershipShort": "Member",
     "membership": "Membership",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
@@ -229,6 +237,7 @@
   },
   "auth": {
     "login": "Sign in with Steam",
+    "loginShort": "Sign in",
     "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
     "loggedInAs": "ID {uid}",
     "signOut": "Sign out",

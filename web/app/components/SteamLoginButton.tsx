@@ -12,7 +12,8 @@ interface SteamLoginButtonProps {
 }
 
 const SIZE_CLASS = {
-  default: 'min-h-11 gap-2 px-3',
+  // 36px 高，与登录后的账号控件统一，见 phase-2g-header-layout.md
+  default: 'h-9 gap-1.5 px-2.5',
   large: 'min-h-14 gap-3 px-6 text-lg',
 };
 
@@ -31,7 +32,7 @@ export default function SteamLoginButton({ size = 'default' }: SteamLoginButtonP
       className={`inline-flex items-center whitespace-nowrap rounded-md bg-control text-content transition-colors hover:bg-control-hover ${SIZE_CLASS[size]}`}
     >
       <SteamIcon className={size === 'large' ? 'size-6 shrink-0' : 'size-5 shrink-0'} />
-      <span className={size === 'large' ? '' : 'hidden md:inline'}>{t('login')}</span>
+      <span>{size === 'large' ? t('login') : t('loginShort')}</span>
     </a>
   );
 }
