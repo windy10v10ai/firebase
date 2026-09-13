@@ -13,7 +13,7 @@
 Firestore 在分析场景的劣势：
 - 读次数计费，分析查询线性放大
 - 无服务端 GROUP BY，必须拉到内存聚合
-  → [api/src/player/player.service.ts:113-142](../../api/src/player/player.service.ts#L113-L142) `getConductPointStats()` 已经在干这件事，自带 `// TODO: 临时统计接口` 注释
+  → [api/src/player/player.service.ts:113-142](../../../api/src/player/player.service.ts#L113-L142) `getConductPointStats()` 已经在干这件事，自带 `// TODO: 临时统计接口` 注释
 
 **项目背景**：
 - 个人开发项目，10k MAU
@@ -45,7 +45,7 @@ Firestore 在分析场景的劣势：
 ### 现有架构保持不变
 
 - Firestore 继续作为 Player / Member / 支付订单等聚合主数据存储
-- BigQuery export ([extensions/firestore-bigquery-export-*.env](../../extensions/firestore-bigquery-export-players.env)) 不动
+- BigQuery export ([extensions/firestore-bigquery-export-*.env](../../../extensions/firestore-bigquery-export-players.env)) 不动
 - 未来 ML / 数据加工时再考虑把 Cloud SQL 数据导入 BigQuery
 
 ---
@@ -168,7 +168,7 @@ Cloud Run / Cloud Run Functions **Request-based billing**（你账单显示的�
 | Cloud Run → Firestore | 30-80ms / 次 |
 | Cloud Run → Cloud SQL（同 region）| 2-15ms / 次 |
 
-**当前代码的关键问题**：`game/start` 等接口存在**串行 await Firestore** 模式（见 [api/src/game/game.controller.ts:54-56](../../api/src/game/game.controller.ts#L54-L56)）：
+**当前代码的关键问题**：`game/start` 等接口存在**串行 await Firestore** 模式（见 [api/src/game/game.controller.ts:54-56](../../../api/src/game/game.controller.ts#L54-L56)）：
 
 ```ts
 // 串行：10 个玩家 → 10 × 80ms = 800ms
@@ -205,7 +205,7 @@ INSERT INTO player (...) VALUES (...),(...),(...) ON DUPLICATE KEY UPDATE ...;
 
 #### ③ 配置层面：Cloud Run vCPU / 内存设置
 
-[Firebase Functions v2 onRequest 配置](../../api/index.ts#L48-L60)：
+[Firebase Functions v2 onRequest 配置](../../../api/index.ts#L48-L60)：
 
 | 配置 | 当前 | 说明 |
 |---|---|---|
@@ -258,7 +258,7 @@ BigQuery 冷查询 1-3s，同步调用会让单请求 CPU 计费**翻 20 倍**�
 ## 关键文件引用
 
 后续实施时定位用：
-- 临时全表内存聚合接口：[api/src/player/player.service.ts:113-142](../../api/src/player/player.service.ts#L113-L142)
-- 战绩入口 game/end（未来 GameRecord 写入点）：[api/src/game/game.controller.ts:99-130](../../api/src/game/game.controller.ts#L99-L130)
-- 现有 BigQuery export 配置：[extensions/firestore-bigquery-export-players.env](../../extensions/firestore-bigquery-export-players.env)、[extensions/firestore-bigquery-export-members.env](../../extensions/firestore-bigquery-export-members.env)
-- NestJS Fireorm 现有抽象：[api/src/app.module.ts:33-41](../../api/src/app.module.ts#L33-L41)
+- 临时全表内存聚合接口：[api/src/player/player.service.ts:113-142](../../../api/src/player/player.service.ts#L113-L142)
+- 战绩入口 game/end（未来 GameRecord 写入点）：[api/src/game/game.controller.ts:99-130](../../../api/src/game/game.controller.ts#L99-L130)
+- 现有 BigQuery export 配置：[extensions/firestore-bigquery-export-players.env](../../../extensions/firestore-bigquery-export-players.env)、[extensions/firestore-bigquery-export-members.env](../../../extensions/firestore-bigquery-export-members.env)
+- NestJS Fireorm 现有抽象：[api/src/app.module.ts:33-41](../../../api/src/app.module.ts#L33-L41)
