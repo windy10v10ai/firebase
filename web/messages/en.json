@@ -39,7 +39,20 @@
       ]
     },
     "summary": {
-      "profileLink": "Profile"
+      "profileLink": "Profile",
+      "heading": "ID {id}",
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "battlePoint": "Usable Battle Points",
+      "memberPoint": "Usable Member Points",
+      "member": {
+        "premium": "Premium member",
+        "normal": "Member",
+        "expired": "Membership expired",
+        "none": "No membership",
+        "expireDate": "Valid until {date}",
+        "expiredDate": "Expired on {date}"
+      }
     },
     "sample": {
       "signIn": "Daily check-in",
