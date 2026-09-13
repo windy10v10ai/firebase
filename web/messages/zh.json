@@ -413,6 +413,67 @@
       "property_skill_points_bonus": "额外技能点"
     }
   },
+  "awaken": {
+    "title": "英雄觉醒",
+    "intro": "用勇士积分或会员积分永久解锁英雄的觉醒技能，解锁后每局自动生效。",
+    "loading": "正在读取觉醒记录",
+    "unlock": "觉醒",
+    "unlocked": "已觉醒",
+    "freeTrial": "限免",
+    "iconMissing": "缺图",
+    "rules": {
+      "title": "永久觉醒",
+      "colon": "：",
+      "directLabel": "指定英雄",
+      "direct": "消耗 <b>8000</b> <season>可用勇士积分</season>，或 <b>4000</b> <member>可用会员积分</member>，永久觉醒指定英雄。",
+      "randomLabel": "随机抽选",
+      "random": "积分减半，消耗 <b>4000</b> <season>可用勇士积分</season>，或 <b>2000</b> <member>可用会员积分</member>，从随机 3 个候选英雄中选 1 个觉醒。",
+      "note": "消耗的只是可用积分：可用积分会减少，但累计积分只增不减，勇士 / 会员等级与属性点不受影响。永久觉醒不可撤销，技能即使随版本更新增强、削弱甚至重做，英雄的觉醒状态依然生效。"
+    },
+    "stats": {
+      "awakened": "已觉醒",
+      "battlePoint": "可用勇士积分",
+      "memberPoint": "可用会员积分"
+    },
+    "dialog": {
+      "question": "选择消耗的积分，永久觉醒该英雄？",
+      "halfPrice": "随机抽选消耗积分减半。",
+      "permanent": "永久觉醒不可撤销。",
+      "alreadyUnlocked": "已觉醒，每局自动生效",
+      "useBattle": "{cost} 可用勇士积分",
+      "useMember": "{cost} 可用会员积分",
+      "battleShort": "勇士积分 {have}，还差 {need}",
+      "memberShort": "会员积分 {have}，还差 {need}",
+      "close": "关闭"
+    },
+    "random": {
+      "title": "随机觉醒",
+      "halfPrice": "消耗积分减半",
+      "threePick": "随机 3 选 1",
+      "draw": "抽选",
+      "select": "选择",
+      "poolShort": "可觉醒英雄不足 3 个",
+      "candidatesTitle": "选择一个英雄永久觉醒（积分减半）",
+      "candidatesDesc": "消耗 4000 可用勇士积分，或 2000 可用会员积分。从随机 3 个候选英雄中选 1 个永久觉醒。",
+      "close": "关闭"
+    },
+    "error": {
+      "unlock": "觉醒失败，积分未扣除。请稍后再试。",
+      "random": "抽选失败，未消耗积分。请稍后再试。"
+    },
+    "private": {
+      "title": "资料未公开",
+      "description": "这位玩家的觉醒记录只有本人能看。"
+    },
+    "noRecord": {
+      "title": "暂无记录",
+      "description": "这个 Steam ID 还没有进过游戏，先打一局再来。"
+    },
+    "failed": {
+      "title": "读取失败",
+      "description": "暂时拿不到觉醒记录，请稍后再试。"
+    }
+  },
   "auth": {
     "login": "通过 Steam 登录",
     "loginShort": "登录",

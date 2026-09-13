@@ -107,6 +107,7 @@ export default function ProfilePage() {
           Icon={Sparkles}
           title={t('entries.awaken.title')}
           description={t('entries.awaken.description')}
+          href={playerPagePath(steamId, 'awaken')}
         />
       </div>
       <div className="lg:col-start-2 lg:row-start-4">

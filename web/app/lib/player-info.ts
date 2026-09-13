@@ -21,6 +21,10 @@ export interface StatsLifetime {
   totalGoldEarned: number;
 }
 
+export interface AwakenedHero {
+  heroName: string;
+}
+
 export interface PropertyItem {
   name: string;
   level: number;
@@ -48,6 +52,7 @@ export interface PlayerInfo {
   member?: MemberInfo;
   statsLifetime?: StatsLifetime;
   properties?: PropertyItem[];
+  awakenedHeroes?: AwakenedHero[];
 }
 
 /** 重置属性的价码，与 api 的 player-property.service.ts 保持一致 */
