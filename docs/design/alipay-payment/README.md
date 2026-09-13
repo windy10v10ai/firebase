@@ -322,7 +322,7 @@ npx qrcode "<上一步返回的 qrCode 字符串>"
 共 **5 步**，Step 1–2 已完成。Step 1–3 全程沙箱，Step 4 上线，Step 5 上线后补充用户自助补单。
 
 ### ✅ Step 1 — 文档落地（已完成）
-- 方案另存到 `docs/alipay-payment.md`
+- 方案另存到 `docs/design/alipay-payment/README.md`
 
 ### ✅ Step 2 — Alipay 模块骨架 + 创建二维码接口（已完成）
 - `api/package.json` 加 `alipay-sdk` 依赖；`npm install`

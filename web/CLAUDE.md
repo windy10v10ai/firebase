@@ -25,7 +25,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## API 鉴权
 
-网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/design/web/README.md](../docs/design/web/README.md) 第 3 节。
+网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
 
 ## 校验
 
@@ -67,7 +67,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 「这个 PR 本来就不打算改外观」尤其不是免拍的理由：升级依赖、换构建器、改公共组件都可能带出非预期的差异，那种情况最需要留图。
 
-**拍哪些**：每个被这个 PR 碰到的页面，各至少一档窄屏（320 或 375）和一档桌面宽度（1280）。
+**拍哪些**：每个被这个 PR 碰到的页面，各拍一次「验证宽度」里的 375 与 1280。
 
 **前后没有差异时**：无头 Chrome 用同一组参数拍出来的图，页面没变就是逐字节相同的 PNG。`md5 -q` 比一下，相同就只贴一份图，把 md5 写进正文说明另一份一样——这比自算的哈希更有说服力，因为读者可以自己重拍一张对。
 
@@ -78,7 +78,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 ```bash
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   --headless=old --disable-gpu --hide-scrollbars --virtual-time-budget=5000 \
-  --window-size=320,700 --screenshot=out.png http://localhost:3000/regist/afdian
+  --window-size=375,700 --screenshot=out.png http://localhost:3000/regist/afdian
 ```
 
 三个参数缺一不可：
@@ -127,7 +127,7 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 
 前后对比按宽度分两种排法：
 
-- **窄屏（320 / 375）两列并排**，`<img width="320">`。窄图并排刚好，一眼能比
+- **窄屏（375）两列并排**，`<img width="320">`。窄图并排刚好，一眼能比
 - **桌面宽度（1280）上下排列**，各占一行，`<img width="760">` 或更宽。并排后每张只剩 460px，桌面版的间距、字号、对齐全看不清，比不出所以然
 
 图片用 `<img src="..." width="...">` 控制宽度，`![]()` 语法无法限制尺寸。

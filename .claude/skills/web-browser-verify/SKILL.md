@@ -9,13 +9,14 @@ description: web/ 改动涉及页面行为时，用 Playwright 驱动无头 Chro
 
 ## 步骤
 
-1. 生产构建起服务：`cd web && npm run build && npm start`（不要用 dev server，左下角开发指示器会入镜）
+1. 生产构建起服务：`cd web && npm run build && npm start`（不要用 dev server，左下角开发指示器会入镜）。**要登录态的页面是例外**，见下面「验证要登录的页面」
 2. 在 `web/.browser-verify/`（已被 `.gitignore` 排除，跑完不用清理）下写一次性驱动脚本，`require('../scripts/browser-verify')` 引入公共部分
-3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过：375/768/1280
+3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过，档位以那一节为准
 4. 真实交互用 `page.click()` / `page.fill()`，不要 `eval el.value = ...`——React 受控输入的 `onChange` 不会被后者触发
 5. 每档用 `page.screenshot()` 存到 `web/.browser-verify/screenshots/`，后续贴 PR 时按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」一节操作
 6. 每档检查 `withPage` 返回的 console 错误数组，非空就是回归。**`MISSING_MESSAGE` 要当回归看**——i18n key 缺失不会让页面崩，只会渲染成空白或 key 本身，肉眼扫截图看不出来，只有 console 里有
-7. **改动碰到界面文案时，中英文各过一遍**，不要只看默认语言。语言取自 `NEXT_LOCALE` cookie，没有就按 `Accept-Language` 判，见 [web/i18n/request.ts](../../../web/i18n/request.ts)：
+7. 量到横向溢出时，把越界的元素也一并列出来（遍历 `getBoundingClientRect().right > innerWidth`），光有 `scrollWidth` 定位不到是谁撑的。**`opacity-0`、`visibility:hidden` 的元素照样占布局**，藏起来的浮层一样会把页面撑宽
+8. **改动碰到界面文案时，中英文各过一遍**，不要只看默认语言。语言取自 `NEXT_LOCALE` cookie，没有就按 `Accept-Language` 判，见 [web/i18n/request.ts](../../../web/i18n/request.ts)：
 
    ```js
    const context = await browser.newContext({ viewport, locale: 'zh-CN' }); // 或 'en-US'
@@ -35,7 +36,7 @@ const BASE_URL = 'http://localhost:3000';
 (async () => {
   const browser = await launchChrome();
 
-  for (const name of ['375', '768', '1280']) {
+  for (const name of Object.keys(VIEWPORTS)) { // 档位见 web/CLAUDE.md 的「验证宽度」
     const errors = await withPage(browser, VIEWPORTS[name], async (page) => {
       await page.goto(BASE_URL, { waitUntil: 'networkidle' });
       await page.screenshot({ path: path.join(__dirname, 'screenshots', `home-${name}.png`) });
@@ -59,6 +60,40 @@ const BASE_URL = 'http://localhost:3000';
 })();
 ```
 
-## Claude Desktop 环境下的可选捷径
+## 验证要登录的页面
 
-如果当前会话运行在 Claude Desktop 里，且要测的场景依赖真实登录态，可以改用内置浏览器（`mcp__Claude_Browser__*`）省一步登录，用法见 [web/CLAUDE.md](../../../web/CLAUDE.md)。其他情况——包括 CLI、VSCode 插件、CI——一律走上面的 Playwright 路径，它不依赖运行环境。
+**这类页面只能用 dev server。** [web/config/firebase.ts](../../../web/config/firebase.ts) 只在 `NODE_ENV === 'development'` 时连 Auth 模拟器，`npm start` 起的生产构建拿不到模拟器签的 token，登不进去。改用 `npm run dev`，并注入 CSS 挡掉左下角的开发指示器，截图才干净：
+
+```js
+await page.addStyleTag({ content: 'nextjs-portal { display: none !important; }' });
+```
+
+拿登录态的做法——**只替换 Steam 换 token 这一次请求**，之后所有接口都打真后端、真写 Firestore：
+
+1. 起 Firestore + Auth 模拟器与 API（见根目录 [CLAUDE.md](../../../CLAUDE.md) 的「本地开发」）
+2. 用 firebase-admin 往模拟器里塞一个测试玩家，并给同一个 id 签一个 custom token。**脚本要放在 `api/` 下**：`firebase-admin/app` 这类 subpath export 在脚本位于别处、又用绝对路径执行时解析不到
+3. Playwright 里拦掉换 token 的那一次请求，塞进上一步的 custom token：
+
+   ```js
+   await page.route('**/api/auth/steam/verify', (route) =>
+     route.fulfill({
+       status: 201,
+       contentType: 'application/json',
+       body: JSON.stringify({ customToken: TOKEN }),
+     }),
+   );
+   await page.goto(`${BASE_URL}/login/callback?next=${encodeURIComponent(target)}`, { waitUntil: 'networkidle' });
+   await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15000 });
+   ```
+
+4. 之后正常点按钮、填表单，用 `page.waitForResponse()` 确认请求方法与状态码，跑完直接查模拟器里的 Firestore 文档复核写入结果
+
+三个坑：
+
+- **测试玩家的字段要塞全**。页面会直接读 `matchCount.toLocaleString()` 这类字段，少一个就白屏，而报错只在 console 里
+- **登录态和未登录态都要过**。头部在两种状态下不是同一套元素，只测登录态会漏掉未登录才出现的布局问题
+- **横排导航在窄屏是 `hidden md:flex`**，元素还在 DOM 里。按文案取元素时会命中不可见的那一个，定位要限定到具体区域
+
+## 例外：非 Playwright 路径
+
+仅当当前会话跑在 Claude Desktop 里、且场景依赖真实登录态时，可以换用内置浏览器省一步登录；具体做法与更多限制见 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「浏览器验证」。其他情况一律走上面的 Playwright 路径，它不依赖运行环境。

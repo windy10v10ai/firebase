@@ -31,7 +31,7 @@ export default function LanguageSwitcher() {
     >
       {LOCALE_MARKS.map(({ locale: markLocale, mark }, index) => (
         <span key={markLocale} className="flex items-center">
-          {index > 0 ? <span className="mx-1 text-gray-500">/</span> : null}
+          {index > 0 ? <span className="mx-1 text-muted">/</span> : null}
           <span className={markLocale === locale ? 'text-heading' : 'text-muted'}>{mark}</span>
         </span>
       ))}
