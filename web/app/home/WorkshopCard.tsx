@@ -20,8 +20,7 @@ export default function WorkshopCard() {
         href={WORKSHOP_HREF}
         target="_blank"
         rel="noopener noreferrer"
-        // 窄屏整条通栏，宽屏缩到内容宽：卡片放不下时半宽不满的按钮像没做完
-        className={`${STEAM_BUTTON_CLASS} ${STEAM_BUTTON_SIZE_CLASS.large} w-full justify-center sm:w-auto sm:self-start`}
+        className={`${STEAM_BUTTON_CLASS} ${STEAM_BUTTON_SIZE_CLASS.large} self-start`}
       >
         <SteamIcon className="size-6 shrink-0" />
         <span>{t('subscribe')}</span>
