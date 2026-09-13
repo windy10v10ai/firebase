@@ -13,6 +13,8 @@ NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用�
 - **E2E**：`cd api && npm run test:e2e`（自带 `firebase emulators:exec`，跑前要确认 8080 没被占用）
 - **Lint**：`cd api && npm run lint`
 
+**改了价格、上限这类业务常量，两套都要跑。** `npm run test` 不包含 e2e，单测全绿不代表 e2e 也绿——e2e 里的种子玩家常按旧数值给积分，改价后会因为「积分不够」而失败，而这只有跑 e2e 才看得见。
+
 ## 测试数据构造
 
 **优先调 API 造数据，不要手写 Firestore 文档。**
