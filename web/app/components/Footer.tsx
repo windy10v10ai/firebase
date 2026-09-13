@@ -28,8 +28,12 @@ export default async function Footer() {
               {t('disclosure')}
             </Link>
           </div>
-          <p className="text-content">
-            © {COPYRIGHT_START_YEAR}–{new Date().getFullYear()} Windy10v10ai. All rights reserved.
+          {/* 窄屏放不下一行，折行点固定在句子之间，不让 All rights reserved. 被拆开 */}
+          <p className="text-center text-sm text-muted">
+            <span className="whitespace-nowrap">
+              © {COPYRIGHT_START_YEAR}–{new Date().getFullYear()} Windy10v10ai.
+            </span>{' '}
+            <span className="whitespace-nowrap">All rights reserved.</span>
           </p>
         </div>
       </div>

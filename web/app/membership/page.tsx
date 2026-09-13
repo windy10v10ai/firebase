@@ -10,10 +10,33 @@ import Section from '../components/Section';
 
 import PlatformCard from './PlatformCard';
 
+// emoji 的字形画得比排版宽度宽，紧跟其后的汉字会被压住，所以让 emoji 单独占一列
+const LEADING_EMOJI = /^(\p{Extended_Pictographic}\uFE0F?)\s*/u;
+
+function splitLeadingEmoji(text: string): [string | null, string] {
+  const matched = text.match(LEADING_EMOJI);
+  return matched ? [matched[1]!, text.slice(matched[0].length)] : [null, text];
+}
+
 const MANUAL_ACTIVE_LINKS = [
   { href: '/regist/afdian', labelKey: 'membership.manualActive.afdian' },
   { href: '/regist/kofi', labelKey: 'membership.manualActive.kofi' },
 ];
+
+function EmojiLead({ text }: { text: string }) {
+  const [emoji, rest] = splitLeadingEmoji(text);
+  if (!emoji) {
+    return <>{text}</>;
+  }
+  return (
+    <>
+      <span aria-hidden="true" className="mr-1.5">
+        {emoji}
+      </span>
+      {rest}
+    </>
+  );
+}
 
 export default function MembershipPage() {
   const t = useTranslations();
@@ -22,17 +45,27 @@ export default function MembershipPage() {
     <div className="space-y-8">
       <Section title={t('membership.title')}>
         <div className="space-y-6">
-          <p className="text-content text-lg text-center">{t('membership.description')}</p>
+          <p className="text-content text-lg text-center">
+            <EmojiLead text={t('membership.description')} />
+          </p>
 
           <ul className="space-y-3">
-            {t.raw('membership.benefits').map((benefit: string, index: number) => (
-              <li key={index} className="flex items-start text-content">
-                <span>{benefit}</span>
-              </li>
-            ))}
+            {t.raw('membership.benefits').map((benefit: string, index: number) => {
+              const [emoji, rest] = splitLeadingEmoji(benefit);
+              return (
+                <li key={index} className="flex items-start gap-2 text-content">
+                  <span aria-hidden="true" className="w-6 shrink-0 text-center">
+                    {emoji}
+                  </span>
+                  <span className="flex-1">{rest}</span>
+                </li>
+              );
+            })}
           </ul>
 
-          <p className="text-muted text-sm text-center">{t('membership.note')}</p>
+          <p className="text-muted text-sm text-center">
+            <EmojiLead text={t('membership.note')} />
+          </p>
         </div>
       </Section>
 

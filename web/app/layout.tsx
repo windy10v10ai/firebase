@@ -16,7 +16,15 @@ const notoSansSC = Noto_Sans_SC({
   weight: ['400', '500', '700'],
   display: 'swap',
   preload: false,
-  fallback: ['system-ui', 'sans-serif'],
+  // 不点名 emoji 字体时，emoji 会落到最后兜底的那一份，字形画得比排版宽度宽，
+  // 紧跟其后的汉字被压住
+  fallback: [
+    'system-ui',
+    'sans-serif',
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Noto Color Emoji',
+  ],
 });
 
 export const metadata: Metadata = {
