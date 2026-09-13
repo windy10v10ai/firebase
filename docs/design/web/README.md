@@ -18,7 +18,7 @@
 | 7 视觉风格 | #1165 | 改 token 取值、字体，打磨基础组件，见 [phase-7-visual-style.md](phase-7-visual-style.md) | 已完成 |
 | 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、重置，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3a-2 宽屏与属性卡 | 无 | 全站外框 1280 封顶；属性页三列，属性卡进度条逐级取色、升级按钮分档，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
-| 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机 | 未开始 |
+| 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机，外加从 game 同步觉醒数据的脚本与 skill，见 [phase-3b-awaken-page.md](phase-3b-awaken-page.md) | 设计完成 |
 | 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 未开始 |
 | 8a 首页 | #1168 | 登录引导与主要页面导航 | 已完成 |
 | 8b 个人主页 | #1167 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 已完成 |

@@ -1,0 +1,261 @@
+# 批次 3b：英雄觉醒页
+
+对应 issue #1120。路由 `/profile/<steamId>/awaken`，未登录的落点是 `/my/awaken`。
+
+各状态的设计稿：<https://claude.ai/code/artifact/9eea6409-23a1-4e79-a288-154f6d4b2fc2>（需要登录 claude.ai 且在组织内才打得开，规格以本文为准）。
+
+本批次包含两件事：**觉醒页**，以及**把 game 的觉醒数据同步进网站的脚本与 skill**。脚本是页面的必需品——网站的数据文件得有人生成——所以不拆批次。
+
+## 1. 游戏里的规则
+
+网站照搬，价格和数量都不能猜。来源是 game 的 `player-hero-awakening.service.ts` 与 `awaken-config.ts`。
+
+**38 个可觉醒英雄**，其中 7 个在限时免费体验名单里。**顺序有意义**：新上线的排最前。
+
+| 付法 | 勇士积分 | 会员积分 |
+|------|------|------|
+| 指定英雄 | 8000 | 4000 |
+| 随机抽选命中候选 | 4000 | 2000 |
+
+三条由后端保证、网站要顺着的性质：
+
+- **半价是派生的**，不是网站声明的。`PUT /player-info/:steamId/hero-awakening` 里 API 自己判断 `heroName` 是否命中已存的候选集，命中就收半价。网站只管发英雄名。
+- **随机抽选幂等且免费**。`PUT .../hero-awakening/random` 第一次把候选名单写进 Firestore，之后再调只回已存的那份。认领成功后后端清空候选。
+- **已觉醒的英雄重复请求是 no-op**，不扣分。
+
+**觉醒永久生效、不可撤销**，技能日后增强削弱重做都不影响已觉醒状态。这句必须出现在解锁前的确认里。
+
+## 2. 数据从 game 仓库生成
+
+`web/config/awaken.ts`（或同名 JSON）是页面唯一的数据来源：38 条英雄、技能名、图标文件名、中英文标题与完整描述、限免标记、顺序。由同步脚本从 game 仓库生成，**不手工维护**。
+
+### 全量重生成，不做增量检测
+
+实测把 139 个输入文件、7.6MB 文本全部读一遍重新生成只要 **70ms**，产物 28KB。增量检测省下的时间不值得为它承担漏同步的风险。
+
+增量不可靠的理由是具体的：game 有一次提交 `ef091e9f2 Tweak awaken balance values for Undying, Phoenix, KotL, Lich, Sniper and Drow Ranger`，只改了 KV 里的 `AbilityValues`，一个字的本地化文本都没动。但 **18/38 的描述里带 `%占位符%`**，数值一变，玩家看到的文字就变。按「本地化文件有没有改」判断要不要同步，这次会被整个漏掉。同类的隐形改动还有 `AbilityTextureName` 换图标、原版技能被 override 覆盖、`docs/reference/` 升版本。要靠 git 历史决定同步什么，就得把每一条能影响产物的路径枚举全，漏一条就是静默错误。
+
+**git 历史用来解释，不用来决定。** 产物头部记 game 的 commit SHA 与分支，下次同步时 `git log <旧SHA>..HEAD -- <输入路径>` 给出人能读的变更说明，写进 PR 正文。它回答「为什么变了」，产物 diff 回答「变了什么」。
+
+### 占位符要在生成时换成真实数值
+
+描述里的 `%radius%`、`%cooldown_reduction%` 是游戏运行时才从 KV 替换的。网站直接印出来就是「获得%attack_range_tooltip%攻击距离」。
+
+取值来源按优先级：`npc_abilities_custom_awaken.txt` → `npc_abilities_custom.txt` → `npc_abilities_custom_lottery.txt` → `npc_abilities_override.txt` → `docs/reference/<版本>/npc_abilities.txt` → `docs/reference/<版本>/heroes/*.txt`。**最后那一项不能省**：炸弹人的 `%attack_range_tooltip%` 只在 `npc_dota_hero_techies.txt` 里，少了它就有一个占位符解析不出来。
+
+`<版本>` 取 `docs/reference/` 下最新的数字目录，不写死。
+
+### 英雄名与文案全部取自 game，零运行时外部依赖
+
+- 官方英雄名：`docs/reference/<版本>/abilities_schinese.txt` / `abilities_english.txt`，key 是 `npc_dota_hero_x:n`，38 个中英文全覆盖
+- game 的改名叠在上面：`addon_*.txt` 里有 14 条，觉醒名单命中 2 条——撼地者叫宇智波牛神、工程师叫茶神（英文 hechahecha）。**跟游戏走**，玩家在两边看到的是同一个名字
+- 技能标题与描述：`addon_schinese.txt` / `addon_english.txt` 的 `DOTA_Tooltip_ability_<技能名>` 与 `_Description`
+- 界面文案：game 的 `awaken_*` 一整套中英俄都现成，原样复用
+
+**`_SummaryDescription` 只有 5/38 个技能有**，所以卡片不能依赖摘要，详情一律用完整描述。
+
+### 七项自检
+
+脚本任一项不过就停下报错，不生成半成品：
+
+| # | 检查 | 拦住什么 |
+|---|---|---|
+| 1 | 条目数 ≥ 30 | 正则失效导致静默生成空表 |
+| 2 | `AWAKEN_ABILITIES` 英雄集合 == `ABILITY_REPLACEMENTS` 去重 | game 自己漏同步 |
+| 3 | `freeTrial` 标记 == `FREE_TRIAL_HEROES` | 限免名单漏同步 |
+| 4 | 每个技能中英各有标题与 `_Description` | 新觉醒只写了中文 |
+| 5 | 所有 `%占位符%` 都取到值 | 数值 key 改名、技能挪了文件 |
+| 6 | 每个英雄中英名都有 | Dota 版本目录升级后 key 变了 |
+| 7 | 每个图标都有本地文件 | 新觉醒的图还没取 |
+
+第 2 项最关键：**它拿两个不同文件、两套不同正则互相印证**。game 的 `awaken-config.ts` 注释本来就在提醒「增删觉醒英雄后记得同步 AwakenTab.tsx」，这项检查把那条提醒变成了会失败的断言。第 1 项的绝对下限保证正则同时失效时不会「两边都空所以通过」。
+
+限免标记以 `FREE_TRIAL_HEROES` 为准，不取 `AwakenTab.tsx` 里那份手抄的 `freeTrial`——那份会漂，它只用来做第 3 项交叉校验。
+
+## 3. 图片
+
+### 英雄立绘
+
+取 Dota 官方的**透明背景全身渲染图**（`videos/dota_react/heroes/renders/<hero>.png`，1440×1440 RGBA），四步处理成 290×380 的 WebP：
+
+1. 按 alpha 阈值 **20** 裁掉透明留白。阈值决定成败：用 1 会把巫妖周身的光晕算进边界框，人物因此缩得很小；用 45 以上会吃掉凤凰的火、寒冬飞龙的翼这些实体特效
+2. 按**高度**拉满到 386px（框高 380），不是按最长边——按最长边会让宽胖英雄被压矮、缩在底部被按钮挡住
+3. 横向居中裁边。超宽的裁切**封顶 1.35 倍**，再宽就整体缩小，不腰斩（帕吉 1.64 倍就走这条）
+4. 贴在深紫渐变底上
+
+**纵向两种对齐**：人物够高的贴顶，多出的腿脚压在按钮区后面；不够高的（帕吉、小小、斯拉克）贴底站地上——否则就是头顶天、脚悬空。
+
+38 张共 478KB，比用脸部裁切图（`heroes/crops`，730KB）还小，而且看得全、底色统一。
+
+**取景中心默认居中，偏了的在 override 表里点名。** 试过按 alpha 重心自动找头部，两种算法都是修好一个带坏一个——Dota 立绘里道具的体量和英雄本身相当，兽王头顶的鹰、斯温的剑、光之守卫的旗、军团指挥官的战旗，算法分不清哪个是人。默认居中行为可预测，出问题一眼知道改哪里。表里目前只有斯温一条（大剑举在左上角，居中会把他本人挤出右边）。
+
+### 技能图标
+
+`AbilityTextureName` 指向的多数是 DOTA2 自带的技能图标名，从官方 CDN 取（`images/dota_react/abilities/<name>.png`）。38 个的分布：
+
+| 情况 | 数量 |
+|------|------|
+| `AbilityTextureName` 直接命中 CDN | 30 |
+| 走饰品路径，去掉路径取同名 | 4 |
+| 自制图标，取自 game 仓库 `resource/flash3/images/spellicons/` | 3 |
+| 取不到，留占位 | 1 |
+
+后两类的明细见第 11 节。
+
+### 自托管，文件名带内容 hash
+
+图片下载后转 WebP 存进 `web/public/dota/`，**文件名带内容 hash**（`earthshaker.3f9a1c.webp`），配 `Cache-Control: public, max-age=31536000, immutable`。
+
+为什么不是「版本目录 + immutable」：那要靠人记得把 `v1` 改成 `v2`，而且改一张图会让全部图片一起失效重下。hash 由同步脚本在转 WebP 时顺手算出来写进产物清单，**没有任何需要人记住的步骤**。生成后把 `public/dota/` 里不在清单中的文件删掉，孤儿不积累。
+
+不加 hash 也能跑，但有个坑：App Hosting 给静态资源的 ETag 是**弱 ETag，且实际只由文件大小决定**（`W/"192e-49773873e8"`，前半是大小的十六进制，后半是被钉死的 1980 构建时间戳，所有文件一样）。把一张图换成字节数恰好相同的另一张，ETag 不变，浏览器和 CDN 会一直发 304，新图永远出不来。hash 进文件名让内容一变 URL 必变，根本不依赖 ETag 判断新旧。
+
+**缓存头只能配在 `next.config.ts` 的 `headers()`。** `firebase.json` 里那个 `hosting` 块是经典 Firebase Hosting，`"public": "public"` 指的是仓库根目录的 `public/`（只有 404.html 和 index.html，作用是把 `/api/*` 重写到 Cloud Function），管不到 `web/`。`web/public/` 走的是 App Hosting（响应头里 `x-fah-adapter: nextjs-*`），默认给 `max-age=14400`。前面还有一层 Cloudflare，实际是三层缓存：浏览器 ← Cloudflare ← App Hosting CDN ← Cloud Run。
+
+图片标签用原生 `<img>` 带显式 `width`/`height` + `loading="lazy"` + `decoding="async"`，不上 `next/image`——本地静态文件已经是目标尺寸，过一道优化器只是白付 CPU。
+
+## 4. 界面上的决定
+
+**只讲永久觉醒，不讲觉醒石。** 游戏内那一页顶部是两栏，左栏讲觉醒石（开箱掉落、仅本局生效）。网站砍掉左栏：觉醒石是局内玩法，网站买不到，摆在购买页上只会让人问「在哪买」。
+
+**卡片是立绘铺满的方块，不是条目卡。** 结构照搬游戏：立绘作背景、上下各一层压暗渐变、英雄名压在顶部、技能图标与按钮在底部。列数按屏幕给：手机 2 列、640 起 3 列、768 起 4 列、1024 起 6 列、1280 起 8 列，单卡宽度在 145–170px 之间浮动。
+
+这**不适用** [docs/web/README.md](../../web/README.md) 里「单卡保持 350–410px」那条——那条针对的是装内容的条目卡（属性卡、平台卡）。觉醒卡是图墙里的方块，38 个按 350px 排要滚十几屏。
+
+**整张卡是点击热区**，点任意位置都开详情弹窗；卡里的「觉醒」按钮只是视觉提示。游戏内那个按钮只有 22px 高，触屏上按不准；把整张卡（最窄 145×190）当热区就没有这个问题，也不用为了凑 44px 触控目标把卡片撑大。
+
+**三种状态沿用游戏的颜色语法**：未解锁紫色描边、已觉醒金色描边加光晕并把按钮换成金色徽标、限免右上角绿色角标。三色互不冲突，玩家两边认得出。
+
+**金色只留给会员积分，这是对游戏的一处有意偏离。** 游戏用 `#FFD24A` 给「指定英雄」「随机抽选」这两个标签上色，但网站的规矩是紫色=勇士、金色=会员（见 [phase-7-visual-style.md](phase-7-visual-style.md)），再加一档金会串味。这两个标签改用白色加粗。
+
+**详情和付费是同一个弹窗。** 原生 `<dialog>`，和 3a 洗点弹窗同一套（白拿焦点陷阱和 Esc 关闭）。内容是大技能图标、英雄名、技能标题、完整描述，然后两个付费按钮。「看清楚买的是什么」和「选哪种积分付」本来就是一件事，拆两步只是多一次点击。游戏靠鼠标悬停 tooltip 看描述，触屏没有悬停，这个弹窗是必需的。
+
+积分不够时按钮置灰并写明还差多少，不是点了才报错。已觉醒的英雄点开只看详情，没有付费按钮。
+
+## 5. 随机抽选
+
+时序和游戏逐步对应：
+
+1. 本地从「可觉醒池 − 已觉醒」随机取 3 个
+2. `PUT .../hero-awakening/random`，body 带这 3 个
+3. **渲染接口返回的那一份，不是本地摇的那一份**
+4. 选 1 个进详情弹窗（半价）
+5. 认领成功后后端清空候选
+
+第 3 步是整件事的关键。账号里已有未认领的候选时接口原样返回旧值，这正是游戏与网站共存的机制：玩家在游戏里摇完没认领，来网站点抽选会拿到同样的 3 个。game 的注释写得很直白——「必须用 API 返回的候选」。
+
+**接口没有 GET，唯一入口是那个幂等的 PUT**，所以页面加载时查不到「你还有一组待认领的候选」，只能等玩家点了抽选才知道。这不是缺陷，而且 **game 的文案本来就没承诺「每次都是新的」**（随机卡只写「消耗积分减半 / 随机 3 选 1」）。原样复用 game 文案就绕开了这个坑，不要自己写「重新抽取」之类的话。
+
+**候选层的滚动动画照搬游戏**：点开即老虎机式轮播，减速，拿到响应后定格。它不是装饰——轮播天然盖住了请求延迟。
+
+剩余可觉醒不足 3 个时按钮置灰，提示复用 game 的 `awaken_random_tooltip_insufficient_pool`。
+
+随机卡固定在网格第一位，金色描边配紫色渐变底，和英雄卡区分。卡面用三张英雄头像扇形叠放加问号表示「随机 3 选 1」；这三张取 `AWAKEN_ABILITIES` 最前面的 3 个（即最新上线的 3 个觉醒），随同步脚本自动更新——写死三个英雄迟早过期。
+
+## 6. 技能描述的富文本渲染
+
+描述文本一个字都不改写。文本里只有三种标记：`<font color>`（184 处）、`<br>`（49 处）、`<b>`（40 处）。
+
+**写一个约 40 行的白名单解析器，把这三种标记解析成 React 节点。** 不用 `dangerouslySetInnerHTML` 加消毒：消毒是堵已知的洞，白名单解析是只放行已知的东西，后者没有注入面。
+
+颜色原样保留，包括觉醒技能标题的 `#d000ff`——19px 粗体在深底上对比度 3.6:1，过 AA 大号文本门槛。
+
+## 7. 交互与数据
+
+一次 `GET /player/<id>/info?include=heroAwakening` 就够，已觉醒列表和两种可用积分都在同一个响应里。解锁 `PUT` 返回新的完整 `PlayerInfo`，直接替换状态，不缓存、不做乐观更新。
+
+**同一时刻只允许一个请求在飞**，失败时给提示并重新拉一次数据。
+
+看别人的觉醒页会被 guard 挡成 403。页面按接口状态码分流（401 登录面板，403 / 404 各一条说明），自己不判断登录。
+
+后端接口本批次不改，两个都已挂 `@AllowWeb()`（批次 3ab-api，#1163）。
+
+## 8. 同步 skill
+
+`.claude/skills/awaken-sync/SKILL.md`，放本仓库——它干的是「把 game 的改动搬进 web」。流程：
+
+1. 确认 game 仓库干净且已拉到最新，记下 `HEAD`
+2. 跑 `npm run awaken:sync`（纯离线，70ms，含七项自检）
+3. 自检不过就停下，把失败项报给人，不要猜着改
+4. 产物 `git diff` 为空就结束，不开 PR
+5. 有 diff 且缺图时跑 `npm run awaken:images` 取图
+6. `git log <旧SHA>..HEAD` 生成变更说明
+7. 切分支、提交、开 PR，正文贴变更说明与产物 diff 摘要
+
+**取数和取图拆成两个命令。** 这样第 2 步可以在 CI 里跑：纯离线、无网络、70ms 的一致性断言。CI 挂了就说明有人忘了同步，比指望人记得可靠。
+
+觉醒 KV 近一年改了 42 次，约每周一次。**每周跑一次的 GitHub Action 留到以后再加**，内容就是上面这套，有 diff 才开 PR。本批次只做脚本和 skill。
+
+## 9. 依赖批次 10（#1176）
+
+批次 10 会改动这一页依赖的两处，**先等它合进 develop**：
+
+- **`PageSkeleton` 会被删掉。** 加载态改成「结构直出 + 骨架块」：标题、说明卡、统计行、网格骨架立刻画出来，只把统计数字和卡片内容换成 `animate-pulse` 骨架块，数据到了原地替换。失败态（401 / 403 / 404）不变，仍整块替换
+- **各页面「等登录态恢复再发请求」的判断会被删掉**，下沉到 `apiFetch` 内部 `await authStateReady()`。3b 不要再写这段逻辑
+
+## 10. 页面与组件
+
+| 路径 | 说明 |
+|------|------|
+| `web/app/profile/[steamId]/awaken/page.tsx` | 页面壳、数据拉取、错误分流 |
+| `web/app/profile/[steamId]/awaken/AwakenCard.tsx` | 英雄卡，五种状态 |
+| `web/app/profile/[steamId]/awaken/RandomCard.tsx` | 随机卡，三种状态 |
+| `web/app/profile/[steamId]/awaken/AwakenDialog.tsx` | 详情 + 付费弹窗 |
+| `web/app/profile/[steamId]/awaken/CandidatesDialog.tsx` | 随机候选层，含滚动动画 |
+| `web/app/components/GameText.tsx` | game 本地化文本的白名单渲染，日后其他页面也能用 |
+| `web/config/awaken.ts` | 同步脚本的产物，不手工改 |
+| `web/public/dota/` | 立绘与技能图标，同步脚本的产物 |
+| `scripts/awaken-sync.mjs` / `scripts/awaken-images.mjs` | 同步脚本 |
+
+三处接线：`FeatureEntryCard` 传 `href`、`config/nav.ts` 的 `awaken.href` 填上、`/my/awaken` 自动转。i18n key 已有 `navigation.awaken` / `awakenFull`、`profile.entries.awaken`。
+
+## 11. 批次 3 收尾：5 个技能图标
+
+这 5 个等导出游戏原始资源才能真正修好，**放在批次 3 最后处理**，不单开 issue：
+
+| 英雄 | `AbilityTextureName` | 现在怎么办 |
+|------|------|------|
+| 光之守卫 | `keeper_of_the_light/kotl_ti7_immortal/keeper_of_the_light_illuminate_alt` | 去掉饰品路径取同名，CDN 有 |
+| 莉娜 | `lina/lina_ti6_immortal/lina_laguna_blade` | 同上 |
+| 巫医 | `witch_doctor/ribbitar_icon/witch_doctor_death_ward` | 同上 |
+| 死灵法师 | `necrolyte/apostle_of_decay_icons/necrolyte_heartstopper_aura` | 同上 |
+| 钢背兽 | `bristleback/bb_2022_immortal_ability_icon/bb_2022_immortal_bristleback` | **纯饰品名，没有同名原版，留占位** |
+
+前 4 个网站显示的是原版图，游戏里显示的是饰品版，两边对不上。
+
+**换资源不需要排期。** 文件名带内容 hash，流程是把 PNG 丢进 `web/public/dota/`、跑一次同步脚本，hash 变了、清单跟着变、旧文件被清掉，**改不到任何页面代码**。3b 只要保证「换图不用改代码」这个性质成立就够了。
+
+## 12. 待拍板
+
+**卡片上要不要写技能名。** 游戏的卡片只有图标，技能名靠鼠标悬停 tooltip。网站一半流量是手机，触屏没有悬停。
+
+- 甲：照 game，只放图标，卡面干净，桌面端补悬停提示
+- 乙：图标下加一行技能名，扫一眼就知道每个英雄觉醒的是哪个技能，代价是卡面多一行、长技能名要缩字号
+
+设计稿「卡片状态」那一板有两版对照。实现按乙起，review 时再定。
+
+## 13. 验收标准
+
+- 38 个英雄与随机卡在 375 / 768 / 1280 三档都排得下，无横向滚动
+- 已觉醒、限免、积分不足三种状态与游戏内一致
+- 解锁成功后卡片就地变成已觉醒，可用积分同步减少，不整页刷新
+- 游戏里摇好未认领的候选，在网站点抽选后出现的是同一组 3 个
+- 中英文两套文案完整，没有缺 key
+- 同步脚本七项自检全绿；把 `AWAKEN_ABILITIES` 删掉一条能让第 2 项报错
+
+## 14. 测试清单
+
+- `cd web && npm run lint && npx tsc --noEmit && npm run build`
+- 同步脚本：正常生成一次；人为破坏输入，确认七项自检各自报错
+- 浏览器实测（做法见 [web/CLAUDE.md](../../../web/CLAUDE.md)）：三档宽度逐页验证；实际点一次解锁、一次随机抽选，确认请求方法、状态码、响应体与 console 无报错
+- 上线后实测响应头，确认 `next.config.ts` 的 `headers()` 盖过了 App Hosting 给 `public/` 的 `max-age=14400` 默认值
+- 中英文各拍一组截图
+
+## 15. 不做什么
+
+- **不做搜索、筛选、排序。** game 就是一个平铺网格，38 个不算多；3a 也是同样口径。只在标题旁给一行「已觉醒 N / 38」
+- **不做已觉醒 / 未觉醒分组。** 会打乱 game 的顺序，而顺序是有意义的（新的在前）
+- **不做批量解锁。** 一次一个，失败范围最小
+- **不显示每个英雄花了多少积分。** 接口有 `usedSeasonPoint`，但玩家不关心历史单价
+- **不缓存、不做乐观更新。** 接口返回的就是新状态，直接用
+- **不在网站做觉醒石相关的任何东西。** 那是局内玩法
