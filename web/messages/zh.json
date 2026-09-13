@@ -48,10 +48,8 @@
       "member": {
         "premium": "高级会员",
         "normal": "普通会员",
-        "expired": "会员已过期",
-        "none": "未开通会员",
         "expireDate": "有效期至：{date}",
-        "expiredDate": "已于 {date} 到期"
+        "expiredDate": "会员已于 {date} 到期"
       }
     },
     "sample": {

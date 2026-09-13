@@ -38,7 +38,6 @@ export default function PlayerSummary({ uid }: { uid: string }) {
 
   const member = info?.member;
   const status = memberStatusKey(member);
-  const active = status === 'premium' || status === 'normal';
 
   return (
     <section className="card-container space-y-5 p-6 sm:p-8">
@@ -50,20 +49,20 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           <p className="text-2xl font-bold text-heading sm:text-[26px]">
             {t('heading', { id: uid })}
           </p>
-          {info ? (
-            // 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个
+          {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个 */}
+          {member?.enable ? (
             <p className="flex flex-wrap items-baseline gap-x-2">
-              {/* 金色代表会员有效，过期和未开通照样上金会让人以为还在生效 */}
-              <span className={active ? 'font-medium text-member-strong' : 'text-muted'}>
-                {t(`member.${status}`)}
+              {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
+              <span className="font-medium text-member-strong">{t(`member.${status}`)}</span>
+              <span className="text-sm text-muted">
+                {t('member.expireDate', { date: member.expireDateString })}
               </span>
-              {member ? (
-                <span className="text-sm text-muted">
-                  {t(member.enable ? 'member.expireDate' : 'member.expiredDate', {
-                    date: member.expireDateString,
-                  })}
-                </span>
-              ) : null}
+            </p>
+          ) : null}
+          {/* 没开通过不说话：一行「未开通会员」既没信息也没去处 */}
+          {member && !member.enable ? (
+            <p className="text-sm text-muted">
+              {t('member.expiredDate', { date: member.expireDateString })}
             </p>
           ) : null}
         </div>

@@ -48,10 +48,8 @@
       "member": {
         "premium": "Premium member",
         "normal": "Member",
-        "expired": "Membership expired",
-        "none": "No membership",
         "expireDate": "Valid until {date}",
-        "expiredDate": "Expired on {date}"
+        "expiredDate": "Membership expired on {date}"
       }
     },
     "sample": {
