@@ -1,6 +1,6 @@
 # 批次 8c：会员页与商业披露
 
-> 已完成：#PR_NUMBER。总体规划见 [README.md](README.md)。
+> 已完成：[#1170](https://github.com/windy10v10ai/firebase/pull/1170)。总体规划见 [README.md](README.md)。
 
 ## 一句话结论
 
