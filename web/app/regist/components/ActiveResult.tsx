@@ -26,9 +26,9 @@ const ActiveResult = ({ activeType, errorMsg, onRetry, result }: ActiveResultPro
   return (
     <section className="card-container flex flex-col items-center gap-6 p-6 text-center sm:p-10">
       {result ? (
-        <CircleCheckBig aria-hidden="true" className="size-16 text-green-400" strokeWidth={1.5} />
+        <CircleCheckBig aria-hidden="true" className="size-16 text-success" strokeWidth={1.5} />
       ) : (
-        <TriangleAlert aria-hidden="true" className="size-16 text-amber-400" strokeWidth={1.5} />
+        <TriangleAlert aria-hidden="true" className="size-16 text-warning" strokeWidth={1.5} />
       )}
       <p className="whitespace-pre-line text-lg leading-8 text-content">{message}</p>
       <Button onClick={result ? () => router.push('/') : onRetry}>

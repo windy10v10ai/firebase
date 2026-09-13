@@ -3,5 +3,20 @@
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "context7@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Review this completed edit: $ARGUMENTS. If it changes shipped behavior, a design decision, or user-facing copy, inspect the current git diff and the relevant documentation. Do not edit files. Block completion only when a relevant design or instruction document is stale or missing; identify the exact document and correction needed. Allow purely mechanical edits and documentation-only changes.",
+            "timeout": 120,
+            "statusMessage": "Checking documentation consistency"
+          }
+        ]
+      }
+    ]
   }
 }

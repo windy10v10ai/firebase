@@ -84,7 +84,7 @@ export default function MembershipPage() {
           subscribeText={t('membership.afdian.subscribe')}
           href={MEMBERSHIP_AFDIAN_LINK}
           titleClassName="text-afdian"
-          buttonClassName="btn-afdian"
+          buttonClassName="btn-season"
         />
         <PlatformCard
           title={t('membership.kofi.title')}
@@ -92,7 +92,7 @@ export default function MembershipPage() {
           subscribeText={t('membership.kofi.subscribe')}
           href={MEMBERSHIP_KOFI_LINK}
           titleClassName="text-kofi"
-          buttonClassName="btn-kofi"
+          buttonClassName="btn-season"
         />
       </div>
 
