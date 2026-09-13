@@ -110,7 +110,8 @@ export default function ProfilePage() {
       <div className="lg:col-start-2 lg:row-start-4">
         <StatsCard info={loaded.info} />
       </div>
-      <div className="lg:col-start-1 lg:row-start-2">
+      {/* 跨 3 行接到战绩卡底部，让空档落在整块左栏末尾，不夹在两张入口卡中间 */}
+      <div className="lg:col-start-1 lg:row-start-2 lg:row-end-5">
         <MemberCard member={loaded.info.member} />
       </div>
     </div>
