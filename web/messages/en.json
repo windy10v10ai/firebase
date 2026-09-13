@@ -21,7 +21,7 @@
     "workshop": {
       "title": "Steam Workshop",
       "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates.",
-      "subscribe": "Get the map for free"
+      "subscribe": "Get the map"
     },
     "github": {
       "title": "GitHub",
@@ -55,6 +55,9 @@
       }
     },
     "sample": {
+      "games": "Games",
+      "winRate": "Win Rate",
+      "conduct": "Conduct Score",
       "signIn": "Daily check-in",
       "vision": "Bonus vision",
       "cooldown": "Cooldown reduction",

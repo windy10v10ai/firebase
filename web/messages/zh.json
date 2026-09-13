@@ -21,7 +21,7 @@
     "workshop": {
       "title": "Steam 创意工坊",
       "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力",
-      "subscribe": "免费获取地图"
+      "subscribe": "获得地图"
     },
     "github": {
       "title": "GitHub",
@@ -55,6 +55,9 @@
       }
     },
     "sample": {
+      "games": "游戏场次",
+      "winRate": "胜率",
+      "conduct": "行为分",
       "signIn": "每日签到",
       "vision": "额外视野",
       "cooldown": "冷却缩短",

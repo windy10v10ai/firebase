@@ -16,7 +16,6 @@ const OTHER_LINKS = EXTERNAL_LINKS.filter((link) => link.labelKey !== 'workshop'
 export default function Home() {
   const t = useTranslations();
   const auth = useAuth();
-  const signedIn = auth.status === 'authenticated';
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -24,13 +23,11 @@ export default function Home() {
         <h1 className="title-primary">{t('home.title')}</h1>
       </section>
 
-      {/* 没登录的人多半还没玩过，先给订阅入口；登录过的已经在玩，这块退到后面 */}
-      {signedIn ? <PlayerSummary uid={auth.uid} /> : <WorkshopCard />}
-      {signedIn ? null : <LoginBanner />}
+      {auth.status === 'authenticated' ? <PlayerSummary uid={auth.uid} /> : <LoginBanner />}
+
+      <WorkshopCard />
 
       <PageCards />
-
-      {signedIn ? <WorkshopCard /> : null}
 
       <section className="space-y-6">
         {OTHER_LINKS.map((link) => (
