@@ -226,7 +226,7 @@ feature/<issue-id>-<short-kebab-summary>
 
 ### 合并方式
 
-合并由用户执行，未明确要求不要代劳。要执行时按 PR 的去向选方式，不要用 `gh pr merge` 的交互式选择：
+**用户给出合并指令时直接执行，不用再确认一次**；没有指令则不要主动合并。按 PR 的去向选方式，不要用 `gh pr merge` 的交互式选择：
 
 | PR | 方式 | 命令 |
 |---|---|---|
@@ -236,6 +236,8 @@ feature/<issue-id>-<short-kebab-summary>
 feature 分支的中间提交对 `develop` 的历史没有价值，压成一条。`develop` → `main` 是两条长期分支对齐，保留每条提交，`main` 的历史才与 `develop` 一一对应。
 
 仓库设置里 rebase 已关闭，不是可选项。
+
+**CI 还没跑完时加 `--auto`**，让 GitHub 在检查通过后自己合，别用 `--admin` 绕过分支保护。分支保护要求检查通过，此时直接 `gh pr merge` 会被拒绝并提示 `the base branch policy prohibits the merge`——那是还有检查在跑，不是权限不够。
 
 ### 合并后清理
 
