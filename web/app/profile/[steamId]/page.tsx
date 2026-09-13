@@ -9,7 +9,6 @@ import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import PageSkeleton from '@/app/components/PageSkeleton';
 import { ApiError } from '@/app/lib/api';
-import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 
@@ -32,18 +31,11 @@ const FAILURE_KEY: Record<number, string> = {
 export default function ProfilePage() {
   const t = useTranslations('profile');
   const { steamId } = useParams<{ steamId: string }>();
-  const auth = useAuth();
   const [result, setResult] = useState<LoadResult | null>(null);
 
-  const authResolved = auth.status !== 'loading';
   const loaded = result?.steamId === steamId ? result : null;
 
   useEffect(() => {
-    // 登录态还在恢复时请求发不出 token，会拿到一个不代表真实结果的 401
-    if (!authResolved) {
-      return;
-    }
-
     let cancelled = false;
 
     fetchPlayerInfo(steamId)
@@ -65,7 +57,7 @@ export default function ProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [authResolved, steamId]);
+  }, [steamId]);
 
   if (!loaded) {
     return <PageSkeleton label={t('loading')} />;

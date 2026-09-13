@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 
 import SteamLoginButton from '@/app/components/SteamLoginButton';
-import { useAuth } from '@/app/lib/auth';
 
 import SampleDataPanel from './SampleDataPanel';
 
@@ -14,7 +13,6 @@ const WIDE_STOPS =
 
 export default function LoginBanner() {
   const t = useTranslations('home.intro');
-  const auth = useAuth();
 
   return (
     <section className="card-container relative overflow-hidden">
@@ -34,12 +32,7 @@ export default function LoginBanner() {
         <h2 className="title-secondary">{t('title')}</h2>
         <p className="text-content">{t('description')}</p>
         <div className="flex flex-col items-start gap-2">
-          {/* 登录链接要读 window.location 拼回调地址，服务端渲染不到，先占住高度 */}
-          {auth.status === 'unauthenticated' ? (
-            <SteamLoginButton size="large" />
-          ) : (
-            <span className="min-h-14" aria-hidden="true" />
-          )}
+          <SteamLoginButton size="large" />
           <p className="text-sm text-muted">{t('privacy')}</p>
         </div>
         <div className="flex flex-wrap gap-2">

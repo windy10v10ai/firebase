@@ -1,10 +1,12 @@
 import { Noto_Sans_SC } from 'next/font/google';
+import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 
 import Footer from './components/Footer';
 import Header from './components/Header';
 import { AuthProvider } from './lib/auth';
+import { PLAYER_UID_COOKIE, parsePlayerUid } from './lib/auth-hint';
 
 import './globals.css';
 
@@ -35,15 +37,27 @@ export const metadata: Metadata = {
   },
 };
 
+// 同一份构建挂在多个域名下，Steam 回调地址要跟着玩家实际访问的域名走
+async function requestOrigin(): Promise<string> {
+  const headerList = await headers();
+  const host = (headerList.get('x-forwarded-host') ?? headerList.get('host') ?? '').split(',')[0].trim();
+  const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+  const proto =
+    headerList.get('x-forwarded-proto')?.split(',')[0].trim() ?? (isLocal ? 'http' : 'https');
+  return `${proto}://${host}`;
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   const messages = (await import(`../messages/${locale}.json`)).default;
+  const initialUid = parsePlayerUid((await cookies()).get(PLAYER_UID_COOKIE)?.value);
+  const siteOrigin = await requestOrigin();
 
   return (
     <html lang={locale}>
       <body className={`${notoSansSC.className} min-h-screen bg-surface`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <AuthProvider>
+          <AuthProvider initialUid={initialUid} siteOrigin={siteOrigin}>
             <div className="relative z-10 flex flex-col min-h-screen">
               <Header />
               <main className="container mx-auto px-3 py-6 sm:px-4 sm:py-8 flex-1">{children}</main>

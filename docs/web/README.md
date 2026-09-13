@@ -19,7 +19,7 @@ NestJS API（Cloud Functions，AuthGuard 验 ID Token 或 API key）
 Firestore
 ```
 
-- **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染，服务端不碰用户数据。
+- **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染。服务端只读一个 uid 提示 cookie 决定首屏渲染哪套形态，不碰用户数据，见第 4 节「加载态」。
 - **NestJS API** 是唯一的数据入口。游戏客户端和网站调同一套接口，差别只在鉴权方式。
 - **Firebase Auth** 只用来签发和续期 ID Token，网站不直接读写 Firestore。
 - **浏览器直连 API**，API 开 CORS 白名单，网站服务端不做转发。细节见 [phase-0-api-access.md](../design/web/phase-0-api-access.md)。
@@ -31,7 +31,8 @@ Firestore
 - 玩家在 Steam 的 OpenID 页登录，后端二次核对签名后签发 Firebase Custom Token，浏览器换成 ID Token，之后每次调 API 带在 `Authorization: Bearer` 头里。
 - **uid 就是 32 位账号 ID**，与 Firestore 玩家文档 ID 一致，所有归属校验都比这一个值。
 - API 侧新增来源类型 `WEB` 与 `@AllowWeb()`，只有显式声明的路由接受网站来源；路由里的 `:steamId` 必须等于 token 的 uid，由 guard 统一拦。
-- 不用 session cookie，也不加网站专用 API key。登录态在 Firebase SDK 手里，服务端看不见，所以门禁只能做在浏览器里。
+- 不用 session cookie，也不加网站专用 API key。登录凭据只在 Firebase SDK 手里，门禁只能做在浏览器里。
+- 另有一个 `player-uid` 提示 cookie，只供服务端决定首屏形态。**它不是凭据**：uid 本来就公开出现在地址里，API 只认 ID Token；任何鉴权、跳转、归属判断都不得依据它。
 
 ## 3. 页面与菜单
 
@@ -72,7 +73,7 @@ Firestore
 
 未登录时菜单里的「属性」「觉醒」拼不出 id，链接需要一个落点。`/my/property` 就是这个落点：未登录在这里显示登录面板，登录后跳到 `/profile/<自己的 id>/property`。它同时兜住直接访问和书签。
 
-跳转只能在浏览器里做。Steam 的 `/my/*` 是服务端跳转，它有会话 cookie；我们的登录态在 Firebase SDK 手里，服务端看不见。所以从 `/my/` 进会多一次渲染。
+跳转只能在浏览器里做。Steam 的 `/my/*` 是服务端跳转，它有会话 cookie；我们的服务端只有提示 cookie、没有凭据，不能据此跳转。所以从 `/my/` 进会多一次渲染。
 
 ### 菜单
 
@@ -105,7 +106,7 @@ Firestore
 | 组件 | 自建 Button、Input、Field、Spinner、Card 等一小套 | 已建，按需求继续加 |
 | 字体 | Noto Sans SC | 已完成；不加载额外标题字体 |
 | 数据层 | 不引缓存库，页面自己用 `useState` 存一次响应 | 属性页已按这个做法落地。加点、重置的响应体就是新的完整 `PlayerInfo`，直接替换页面状态即可，没有需要失效的缓存；真出现跨页共享数据再引 TanStack Query |
-| 登录状态 | `AuthProvider` 包住 Firebase SDK 的 `onAuthStateChanged` | 已完成 |
+| 登录状态 | `AuthProvider` 包住 Firebase SDK 的 `onAuthStateChanged`，初始值来自服务端读到的 `player-uid` cookie；只有已登录 / 未登录两态，没有加载中 | 批次 10 落地 |
 | API 调用 | `apiFetch` 负责拼域名、带 token、转错误；每个资源一个取数函数 | 已完成。属性页没有建 hook——一个页面一次取数，包一层 hook 只是多一层间接 |
 
 ### 渲染方式
@@ -117,11 +118,24 @@ Firestore
 | wiki 的技能、物品一览 | 构建时静态生成 | 公开、要被搜索，数据随版本更新时重新构建 |
 | 排行榜（如果上网站） | ISR | 公开但会变，唯一适合 ISR 的场景 |
 
+### 加载态
+
+目标是页面一出现就是最终结构，之后只有数值在变，布局不动。首屏打开和站内跳转都适用：首屏要等登录态和数据，跳转时登录态已知（`AuthProvider` 在根 layout，跳转不会重置），只等数据。设计过程见 [phase-10-first-paint.md](../design/web/phase-10-first-paint.md)。
+
+- **形状由服务端定。** 渲染登录引导还是玩家内容，由根 layout 读 `player-uid` cookie 决定；Firebase 恢复完成后只做校正。cookie 由 `onAuthStateChanged` 统一写入和删除，缺失按未登录处理
+- **请求自己等登录态。** `apiFetch` 取 token 前等 Firebase SDK 就绪，页面不写「登录态恢复后再发请求」的判断
+- **加载中渲染真实布局，数值位置放骨架块。** 不写替换整页的占位：那是第二套布局，必须手工与真实页面保持同尺寸，改一处就会跳
+- **异步内容的尺寸由容器定，不由内容定。** 骨架块高度等于文字行高；图片（如将来的 Steam 头像）放进固定尺寸的容器，没到或失败时显示兜底图标
+- **失败态可以整块替换。** 401 换成登录面板、403 / 404 换成说明，这是用户预期内的切换，不算抖动
+- **不加路由级 `loading.tsx`。** 它在跳转时显示的是整页 fallback，等于第二套布局，与上面的原则冲突；页面自己在数据位置放骨架块
+
 ## 5. 已定决策
 
 - 网站不直接访问数据库，所有操作走 API。
 - 用户身份：Steam OpenID + Firebase Custom Token，API 验 ID Token，不加网站专用 key；Custom Token 由 NestJS 后端签发。
 - 用户页面客户端渲染，不做 SSR；未登录的处理集中在 `/my/*` 一处，玩家页面自己不写登录判断。
+- 首屏登录形态靠 `player-uid` 提示 cookie 在服务端决定，不引服务端会话，也不用 Firebase 的 `browserCookiePersistence`：服务端只需知道渲染哪套形状，不需要凭据。
+- 玩家数据暂不做浏览器缓存。HTTP 缓存与「操作后立刻看到新值」冲突；应用层先显示旧值再刷新的做法另见 #1175。
 - 属性、觉醒各自独立页面，网站不做游戏内那种 tab 弹窗。
 - 玩家数据的页面路径带 steamId（`/profile/<steamId>/...`），公开资料页放 `/wiki/` 下。现阶段只能自己看自己，页面仍然按 URL 里的 id 取数据，为以后开放观看留路。
 - 个人主页先只显示 ID。昵称和头像要 Steam Web API key，单独排一批，排在功能之后。

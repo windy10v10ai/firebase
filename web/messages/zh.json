@@ -422,7 +422,6 @@
     "callbackLoading": "正在登录",
     "callbackError": "登录校验失败，请重试",
     "retry": "重试",
-    "checkingLogin": "正在确认登录状态",
     "profileTooltip": "查看个人主页",
     "panel": {
       "title": "需要 Steam 登录",

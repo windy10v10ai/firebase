@@ -13,10 +13,6 @@ export default function AuthStatus() {
   const t = useTranslations('auth');
   const auth = useAuth();
 
-  if (auth.status === 'loading') {
-    return null;
-  }
-
   if (auth.status === 'unauthenticated') {
     return <SteamLoginButton />;
   }

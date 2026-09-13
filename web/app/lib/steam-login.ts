@@ -1,8 +1,7 @@
 const STEAM_OPENID_ENDPOINT = 'https://steamcommunity.com/openid/login';
 
 /** 拼 Steam OpenID 跳转链接，回调地址里带上当前页面，登录完跳回来 */
-export function buildSteamLoginUrl(currentPath: string): string {
-  const origin = window.location.origin;
+export function buildSteamLoginUrl(origin: string, currentPath: string): string {
   const returnTo = `${origin}/login/callback?next=${encodeURIComponent(currentPath)}`;
 
   const params = new URLSearchParams({

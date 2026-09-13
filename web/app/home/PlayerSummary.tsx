@@ -5,14 +5,23 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import Skeleton from '@/app/components/ui/skeleton';
 import { fetchPlayerInfo, memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 
-function StatRow({ label, value, className }: { label: string; value: string; className: string }) {
+function StatRow({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string | null;
+  className: string;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-line py-2">
       <dt className="text-sm text-muted">{label}</dt>
-      <dd className={`font-medium ${className}`}>{value}</dd>
+      <dd className={`font-medium ${className}`}>{value ?? <Skeleton />}</dd>
     </div>
   );
 }
@@ -20,8 +29,9 @@ function StatRow({ label, value, className }: { label: string; value: string; cl
 export default function PlayerSummary({ uid }: { uid: string }) {
   const t = useTranslations('home.summary');
   const [info, setInfo] = useState<PlayerInfo | null>(null);
+  const [failed, setFailed] = useState(false);
 
-  // 首页不为这次请求挡着渲染：数值到了再补上，失败就只留身份行
+  // 网格始终占位，失败时数值显示为横线，卡片高度不随请求结果变化
   useEffect(() => {
     let cancelled = false;
     fetchPlayerInfo(uid)
@@ -30,7 +40,11 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           setInfo(loaded);
         }
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!cancelled) {
+          setFailed(true);
+        }
+      });
     return () => {
       cancelled = true;
     };
@@ -38,6 +52,8 @@ export default function PlayerSummary({ uid }: { uid: string }) {
 
   const member = info?.member;
   const status = memberStatusKey(member);
+  const valueOf = (read: (loaded: PlayerInfo) => number) =>
+    info ? read(info).toLocaleString() : failed ? '—' : null;
 
   return (
     <section className="card-container space-y-5 p-4 sm:p-6 lg:p-8">
@@ -75,30 +91,28 @@ export default function PlayerSummary({ uid }: { uid: string }) {
         </Link>
       </div>
 
-      {info ? (
-        <dl className="grid gap-x-8 sm:grid-cols-2">
-          <StatRow
-            label={t('battleLevel')}
-            value={String(info.seasonLevel)}
-            className="text-season"
-          />
-          <StatRow
-            label={t('memberLevel')}
-            value={String(info.memberLevel)}
-            className="text-member"
-          />
-          <StatRow
-            label={t('battlePoint')}
-            value={info.useableSeasonPoint.toLocaleString()}
-            className="text-season"
-          />
-          <StatRow
-            label={t('memberPoint')}
-            value={info.useableMemberPoint.toLocaleString()}
-            className="text-member"
-          />
-        </dl>
-      ) : null}
+      <dl className="grid gap-x-8 sm:grid-cols-2" aria-busy={!info && !failed}>
+        <StatRow
+          label={t('battleLevel')}
+          value={valueOf((loaded) => loaded.seasonLevel)}
+          className="text-season"
+        />
+        <StatRow
+          label={t('memberLevel')}
+          value={valueOf((loaded) => loaded.memberLevel)}
+          className="text-member"
+        />
+        <StatRow
+          label={t('battlePoint')}
+          value={valueOf((loaded) => loaded.useableSeasonPoint)}
+          className="text-season"
+        />
+        <StatRow
+          label={t('memberPoint')}
+          value={valueOf((loaded) => loaded.useableMemberPoint)}
+          className="text-member"
+        />
+      </dl>
     </section>
   );
 }

@@ -422,7 +422,6 @@
     "callbackLoading": "Signing in…",
     "callbackError": "Sign-in verification failed. Please try again.",
     "retry": "Retry",
-    "checkingLogin": "Checking sign-in status",
     "profileTooltip": "View your profile",
     "panel": {
       "title": "Steam sign-in required",

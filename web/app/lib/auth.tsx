@@ -1,30 +1,61 @@
 'use client';
 
-import { onAuthStateChanged, signOut as firebaseSignOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import { auth } from '@/config/firebase';
 
-type AuthState =
-  | { status: 'loading' }
-  | { status: 'unauthenticated' }
-  | { status: 'authenticated'; uid: string };
+import { PLAYER_UID_COOKIE, PLAYER_UID_COOKIE_MAX_AGE_SECONDS } from './auth-hint';
+import { buildSteamLoginUrl } from './steam-login';
 
-type AuthContextValue = AuthState & { signOut: () => Promise<void> };
+type AuthState = { status: 'unauthenticated' } | { status: 'authenticated'; uid: string };
+
+type AuthContextValue = AuthState & {
+  signOut: () => Promise<void>;
+  /** Steam 登录链接，登录完跳回 currentPath */
+  loginUrl: (currentPath: string) => string;
+};
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function toState(user: User | null): AuthState {
-  return user ? { status: 'authenticated', uid: user.uid } : { status: 'unauthenticated' };
+function toState(uid: string | null): AuthState {
+  return uid ? { status: 'authenticated', uid } : { status: 'unauthenticated' };
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ status: 'loading' });
+function writeUidHint(uid: string | null) {
+  const maxAge = uid ? PLAYER_UID_COOKIE_MAX_AGE_SECONDS : 0;
+  document.cookie = `${PLAYER_UID_COOKIE}=${uid ?? ''}; path=/; samesite=lax; max-age=${maxAge}`;
+}
 
-  useEffect(() => onAuthStateChanged(auth, (user) => setState(toState(user))), []);
+interface AuthProviderProps {
+  initialUid: string | null;
+  siteOrigin: string;
+  children: ReactNode;
+}
+
+/** 首屏按服务端读到的提示 cookie 渲染，Firebase 恢复出结论后以它为准 */
+export function AuthProvider({ initialUid, siteOrigin, children }: AuthProviderProps) {
+  const [state, setState] = useState(() => toState(initialUid));
+
+  useEffect(
+    () =>
+      // 登录、退出、token 失效、其他标签页退出都会走到这里，提示 cookie 只在这一处维护
+      onAuthStateChanged(auth, (user) => {
+        const uid = user?.uid ?? null;
+        writeUidHint(uid);
+        setState(toState(uid));
+      }),
+    [],
+  );
 
   return (
-    <AuthContext.Provider value={{ ...state, signOut: () => firebaseSignOut(auth) }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        signOut: () => firebaseSignOut(auth),
+        loginUrl: (currentPath) => buildSteamLoginUrl(siteOrigin, currentPath),
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
