@@ -81,7 +81,7 @@ export default function Header() {
   return (
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
     <header ref={headerRef} className="relative z-20 border-b border-line bg-surface">
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="mx-auto max-w-7xl px-4 py-4">
         <div className="flex justify-between items-center gap-3">
           <Link href="/" className="text-xl font-bold text-heading link-hover whitespace-nowrap">
             {/* 窄屏一律收短：写全名在 375 放不下右侧控件，见 phase-2g-header-layout.md */}

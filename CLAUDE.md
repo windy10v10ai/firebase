@@ -92,7 +92,9 @@
 
 ### 文档目录
 
-三类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。选址判断与批次完成后怎么瘦身，详见 [design-docs](.claude/skills/design-docs/SKILL.md) 技能。
+三类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+
+**写或改 `docs/` 下任何文档之前，先用 Skill 工具加载 [design-docs](.claude/skills/design-docs/SKILL.md) 技能**，按它判断内容该进哪一类，不凭印象定路径。向用户承诺「会写进哪份文档」之前同样先加载。批次完成后怎么瘦身也见该技能。
 
 | 类型 | 路径 | 进 git |
 |---|---|---|
@@ -102,6 +104,8 @@
 
 - `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`sql-migration`
 - `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
+
+**长期有效的内容随改动同步，不等用户提醒。**一次设计或实现如果新增或改变了某模块长期有效的决定（架构、鉴权、技术选型、全站通用的布局与视觉约定），在同一个 PR 里更新对应的 `docs/<模块>/README.md`；只写进批次设计文档不算完成，批次文档会被瘦身，长期决定留在那里会跟着消失。
 
 框架性文档只在决策变更时更新，不因批次完成而增删；设计文档批次完成后要瘦身，只留仍然有效的决定与约束。实施计划不进 git：它随代码合入即失效，留在仓库里会与现行设计混淆，且体量大、不适合放进 PR 供人 review。
 
@@ -211,10 +215,11 @@ feature/<issue-id>-<short-kebab-summary>
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
 
 1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md) 与 [web/CLAUDE.md](web/CLAUDE.md) 的「校验」一节
-2. `git push -u origin <branch-name>`
-3. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。正文写法见下一节
-4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
-5. 没有自动建 PR 的 workflow，push 之后必须显式执行第 3 步
+2. 加载 design-docs 技能检查文档：本次改动带来的长期有效决定已写进 `docs/<模块>/README.md`；涉及的批次设计文档如已完成，已按技能瘦身。没有需要改的也要过一遍这一步
+3. `git push -u origin <branch-name>`
+4. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。正文写法见下一节
+5. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
+6. 没有自动建 PR 的 workflow，push 之后必须显式执行第 4 步
 
 ### 小改动搭车
 
