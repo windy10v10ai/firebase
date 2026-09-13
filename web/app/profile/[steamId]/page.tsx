@@ -81,9 +81,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
       <IdentityCard info={loaded.info} />
-      <StatsCard info={loaded.info} />
+      {/* 显式定位而非调整顺序：窄屏单列时战绩要排在会员卡之前 */}
+      <div className="lg:col-start-2 lg:col-end-4 lg:row-start-1 lg:row-end-3">
+        <StatsCard info={loaded.info} />
+      </div>
       <MemberCard member={loaded.info.member} />
     </div>
   );
