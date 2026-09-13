@@ -564,7 +564,7 @@ export interface DailyTaskHistoryEntry {
 
 Firestore 中的 `completedTasks` / `history[].tasks` 仍只保存 `{ taskId, star }`。`/game/start` 组装响应时按 `taskId` 查找当前任务定义，展开为含 `scope` / `metric` / `heroName` / `target` / `rewardSeasonPoint` 的完整 `TaskCandidateDto`；任务池中已不存在的旧 taskId 从响应数组过滤，但不影响独立保存的积分汇总。
 
-**写法对齐仓库现状**：仓库里 14 个 entity 全部使用裸 `@Collection()`，集合名由 fireorm 按 `pluralize.plural(类名)` 推导（`Player → Players`、`PlayerHeroAwakening → PlayerHeroAwakenings`）。`id` 上的 `@Exclude()` 与数组字段的 `= []` 默认值同样沿用 [player-hero-awakening.entity.ts](../../api/src/player-hero-awakening/entities/player-hero-awakening.entity.ts) 的写法。
+**写法对齐仓库现状**：仓库里 14 个 entity 全部使用裸 `@Collection()`，集合名由 fireorm 按 `pluralize.plural(类名)` 推导（`Player → Players`、`PlayerHeroAwakening → PlayerHeroAwakenings`）。`id` 上的 `@Exclude()` 与数组字段的 `= []` 默认值同样沿用 [player-hero-awakening.entity.ts](../../../api/src/player-hero-awakening/entities/player-hero-awakening.entity.ts) 的写法。
 
 **`dayId` 对齐现有日界口径**：格式 `YYYYMMDD`、**UTC** 日界，与 `PlayerRanking.id`（`new Date().toISOString().slice(0, 10).replace(/-/g, '')`）和会员签到（`setUTCHours(0, 0, 0, 0)`）一致。原 PR 的 `ChallengeDayClockService` 用的是服务器本地时区（`setHours()` / `getFullYear()`）加 `YYYY-MM-DD`，两个维度都与仓库现状不符——Cloud Functions 默认 UTC 所以当前表现一致，但那是隐式依赖，运行时时区一变日界就漂。
 

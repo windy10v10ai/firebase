@@ -143,7 +143,7 @@ Replace ALIPAY_XXX in [.env.local](api/.env.local).
 
 ## API Guide
 
-More usage details, including configuration, authentication, and example code, please refer to [API Guide](docs/API_GUIDE.md).
+More usage details, including configuration, authentication, and example code, please refer to [API Guide](docs/api/README.md).
 
 # Maintenance
 

@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <AuthProvider>
             <div className="relative z-10 flex flex-col min-h-screen">
               <Header />
-              <main className="container mx-auto px-4 py-8 flex-1">{children}</main>
+              <main className="container mx-auto px-3 py-6 sm:px-4 sm:py-8 flex-1">{children}</main>
               <Footer />
             </div>
           </AuthProvider>
