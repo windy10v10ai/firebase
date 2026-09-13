@@ -14,7 +14,14 @@ description: web/ 改动涉及页面行为时，用 Playwright 驱动无头 Chro
 3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过：375/768/1280
 4. 真实交互用 `page.click()` / `page.fill()`，不要 `eval el.value = ...`——React 受控输入的 `onChange` 不会被后者触发
 5. 每档用 `page.screenshot()` 存到 `web/.browser-verify/screenshots/`，后续贴 PR 时按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」一节操作
-6. 每档检查 `withPage` 返回的 console 错误数组，非空就是回归
+6. 每档检查 `withPage` 返回的 console 错误数组，非空就是回归。**`MISSING_MESSAGE` 要当回归看**——i18n key 缺失不会让页面崩，只会渲染成空白或 key 本身，肉眼扫截图看不出来，只有 console 里有
+7. **改动碰到界面文案时，中英文各过一遍**，不要只看默认语言。语言取自 `NEXT_LOCALE` cookie，没有就按 `Accept-Language` 判，见 [web/i18n/request.ts](../../../web/i18n/request.ts)：
+
+   ```js
+   const context = await browser.newContext({ viewport, locale: 'zh-CN' }); // 或 'en-US'
+   ```
+
+   无头 Chrome CLI 截图用 `--accept-lang=zh-CN`。一种语言有文案、另一种缺 key 的情况很常见，只跑一种等于没测
 
 ## 示例
 

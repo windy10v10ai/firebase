@@ -20,7 +20,8 @@
     "title": "DOTA2 10v10 AI 自定义地图",
     "workshop": {
       "title": "Steam 创意工坊",
-      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力"
+      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力",
+      "subscribe": "获得地图"
     },
     "github": {
       "title": "GitHub",
@@ -38,9 +39,23 @@
       ]
     },
     "summary": {
-      "profileLink": "个人主页"
+      "profileLink": "个人主页",
+      "heading": "ID {id}",
+      "battleLevel": "勇士等级",
+      "memberLevel": "会员等级",
+      "battlePoint": "可用勇士积分",
+      "memberPoint": "可用会员积分",
+      "member": {
+        "premium": "高级会员",
+        "normal": "普通会员",
+        "expireDate": "有效期至：{date}",
+        "expiredDate": "会员已于 {date} 到期"
+      }
     },
     "sample": {
+      "games": "游戏场次",
+      "winRate": "胜率",
+      "conduct": "行为分",
       "signIn": "每日签到",
       "vision": "额外视野",
       "cooldown": "冷却缩短",

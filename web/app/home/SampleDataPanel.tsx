@@ -39,8 +39,7 @@ function Level({ level }: { level: number }) {
  */
 export default function SampleDataPanel() {
   const t = useTranslations('home.sample');
-  const tIdentity = useTranslations('profile.identity');
-  const tStats = useTranslations('profile.stats');
+  const tSummary = useTranslations('home.summary');
 
   return (
     <div
@@ -48,24 +47,24 @@ export default function SampleDataPanel() {
       className="grid auto-rows-[84px] grid-cols-2 gap-2.5 p-3 sm:auto-rows-[92px] sm:grid-cols-4 sm:gap-3 sm:p-4"
     >
       <div className={COVERED}>
-        <Tile label={tIdentity('memberLevel')}>
+        <Tile label={tSummary('memberLevel')}>
           <Value className="text-member">3</Value>
         </Tile>
       </div>
       <div className={COVERED}>
-        <Tile label={tIdentity('memberPoint')}>
+        <Tile label={tSummary('memberPoint')}>
           <Value className="text-member">860</Value>
         </Tile>
       </div>
-      <Tile label={tStats('games')}>
+      <Tile label={t('games')}>
         <Value className="text-heading">1,284</Value>
       </Tile>
-      <Tile label={tIdentity('battleLevel')}>
+      <Tile label={tSummary('battleLevel')}>
         <Value className="text-season">42</Value>
       </Tile>
 
       <div className={COVERED}>
-        <Tile label={tIdentity('battlePoint')}>
+        <Tile label={tSummary('battlePoint')}>
           <Value className="text-season">1,240</Value>
         </Tile>
       </div>
@@ -74,14 +73,14 @@ export default function SampleDataPanel() {
           <Value className="text-heading">7</Value>
         </Tile>
       </div>
-      <Tile label={tStats('winRate')}>
+      <Tile label={t('winRate')}>
         <Value className="text-heading">75.2%</Value>
         <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-line">
           <div className="h-full bg-season-strong" style={{ width: `${WIN_RATE_PERCENT}%` }} />
         </div>
       </Tile>
       {/* 行为分不用金色：金色在本站专指会员，挂上去会被读成会员权益 */}
-      <Tile label={tStats('conduct')}>
+      <Tile label={t('conduct')}>
         <Value className="text-success">110</Value>
       </Tile>
 

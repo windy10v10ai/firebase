@@ -8,7 +8,10 @@ import Card from './components/Card';
 import LoginBanner from './home/LoginBanner';
 import PageCards from './home/PageCards';
 import PlayerSummary from './home/PlayerSummary';
+import WorkshopCard from './home/WorkshopCard';
 import { useAuth } from './lib/auth';
+
+const OTHER_LINKS = EXTERNAL_LINKS.filter((link) => link.labelKey !== 'workshop');
 
 export default function Home() {
   const t = useTranslations();
@@ -22,10 +25,12 @@ export default function Home() {
 
       {auth.status === 'authenticated' ? <PlayerSummary uid={auth.uid} /> : <LoginBanner />}
 
+      <WorkshopCard />
+
       <PageCards />
 
       <section className="space-y-6">
-        {EXTERNAL_LINKS.map((link) => (
+        {OTHER_LINKS.map((link) => (
           <Card
             key={link.href}
             href={link.href}
