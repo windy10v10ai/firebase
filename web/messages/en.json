@@ -2,6 +2,8 @@
   "navigation": {
     "home": "Windy10v10ai",
     "homeShort": "10v10AI",
+    "profile": "Profile",
+    "profileFull": "Profile",
     "property": "Attributes",
     "propertyFull": "Attribute Points",
     "awaken": "Awaken",
@@ -58,8 +60,8 @@
       "conduct": "Conduct Score",
       "signIn": "Daily check-in",
       "vision": "Bonus vision",
-      "cooldown": "Cooldown reduction",
-      "moveSpeed": "Move speed",
+      "cooldown": "Cooldown",
+      "moveSpeed": "Movement speed",
       "awakened": "Awakened heroes",
       "level": "Lv {n}"
     },
@@ -383,10 +385,10 @@
       "reset": "The reset did not go through, probably for want of usable points. The page now shows the latest state."
     },
     "names": {
-      "property_cooldown_percentage": "Cooldown reduction",
+      "property_cooldown_percentage": "Cooldown",
       "property_movespeed_bonus_constant": "Movement speed",
       "property_bonus_vision": "Bonus vision",
-      "property_aoe_bonus_constant_stacking": "Area of effect",
+      "property_aoe_bonus_constant_stacking": "AOE bonus",
       "property_health_regen_percentage": "Max health regen",
       "property_mana_regen_total_percentage": "Max mana regen",
       "property_ignore_movespeed_limit": "Unlimited movement speed",

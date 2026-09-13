@@ -86,7 +86,7 @@
 
 英文侧统一成 game 的 Attributes / Attribute Points：头部菜单、玩家主页入口原先各叫 Property、Property Points，与本页标题 Attributes 三个名字指同一处。中文侧本来就一致，没有动。
 
-两条属性名网站与 game 不一致，网站的更准，留给 game 改（见 [game#2415](https://github.com/windy10v10ai/game/issues/2415)）：冷却缩短 / Cooldown reduction（game 叫「冷却时间 ( % )」/ Cooldown (%)，看不出是减少还是增加）、Area of effect（game 的 AOE Bonus 是缩写）。
+26 条属性名以 game 的 `data_panel_player_property_*` 为准，只去掉名字里的单位后缀（`( % )`、`(%)`）——每级数值就写在名字下面，不用在名字里再说一遍；英文统一句首大写。
 
 ## 4. 交互与数据
 

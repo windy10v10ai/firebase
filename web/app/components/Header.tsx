@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, CirclePlus, Crown, ExternalLink, LogOut, Sparkles } from 'lucide-react';
+import { BookOpen, CirclePlus, Crown, ExternalLink, LogOut, Sparkles, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -22,6 +22,7 @@ const EXTERNAL_LINK_ICONS: Record<string, typeof GithubIcon> = {
 
 // 图标让人扫一眼认出是哪一行，所以只有会员的皇冠带色，四个都上色反而找不到东西
 const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: string }> = {
+  profile: { Icon: UserRound, className: 'text-content' },
   property: { Icon: CirclePlus, className: 'text-content' },
   awaken: { Icon: Sparkles, className: 'text-content' },
   membership: { Icon: Crown, className: 'text-member-strong' },
@@ -65,11 +66,17 @@ export default function Header() {
     (item): item is typeof item & { href: string } => item.href !== null,
   );
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
-  const isCurrent = (href: string) =>
-    pathname === href ||
-    pathname.startsWith(`${href}/`) ||
-    // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址都算停在这一项上
-    (href.startsWith('/my/') && pathname.endsWith(href.slice('/my'.length)));
+  // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上
+  const profileSubPath = pathname.startsWith('/profile/')
+    ? pathname.split('/').slice(3).join('/')
+    : null;
+  const isCurrent = (href: string) => {
+    if (href.startsWith('/my')) {
+      // 前缀匹配会让 /my/property 把「个人主页」也点亮，所以这一支只认整段相等
+      return pathname === href || profileSubPath === href.slice('/my'.length).replace(/^\//, '');
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
@@ -77,13 +84,9 @@ export default function Header() {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center gap-3">
           <Link href="/" className="text-xl font-bold text-heading link-hover whitespace-nowrap">
-            {/* 窄屏已登录时品牌收短，否则配上 ID 会横向溢出，见 phase-2g-header-layout.md */}
-            <span className={auth.status === 'authenticated' ? 'md:hidden' : 'hidden'}>
-              {t('homeShort')}
-            </span>
-            <span className={auth.status === 'authenticated' ? 'hidden md:inline' : ''}>
-              {t('home')}
-            </span>
+            {/* 窄屏一律收短：写全名在 375 放不下右侧控件，见 phase-2g-header-layout.md */}
+            <span className="md:hidden">{t('homeShort')}</span>
+            <span className="hidden md:inline">{t('home')}</span>
           </Link>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-4">

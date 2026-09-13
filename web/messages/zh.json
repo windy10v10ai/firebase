@@ -2,6 +2,8 @@
   "navigation": {
     "home": "Windy10v10ai",
     "homeShort": "10v10AI",
+    "profile": "我的",
+    "profileFull": "个人主页",
     "property": "属性",
     "propertyFull": "属性加点",
     "awaken": "觉醒",
@@ -58,7 +60,7 @@
       "conduct": "行为分",
       "signIn": "每日签到",
       "vision": "额外视野",
-      "cooldown": "冷却缩短",
+      "cooldown": "冷却时间",
       "moveSpeed": "移动速度",
       "awakened": "已觉醒英雄",
       "level": "{n} 级"
@@ -383,7 +385,7 @@
       "reset": "重置没成功，可用积分可能不够了。页面已经刷新成最新状态。"
     },
     "names": {
-      "property_cooldown_percentage": "冷却缩短",
+      "property_cooldown_percentage": "冷却时间",
       "property_movespeed_bonus_constant": "移动速度",
       "property_bonus_vision": "额外视野",
       "property_aoe_bonus_constant_stacking": "作用范围",

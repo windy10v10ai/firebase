@@ -91,7 +91,7 @@ export default function ProfilePage() {
         <PlayerCard info={loaded.info} />
       </div>
       <div className="lg:col-start-2 lg:row-start-1">
-        <LevelCard info={loaded.info} />
+        <LevelCard info={loaded.info} steamId={steamId} />
       </div>
       <div className="lg:col-start-2 lg:row-start-2">
         <FeatureEntryCard
