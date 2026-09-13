@@ -4,6 +4,7 @@ interface PlatformCardProps {
   subscribeText: string;
   href: string;
   titleClassName: string;
+  buttonClassName: string;
 }
 
 export default function PlatformCard({
@@ -12,6 +13,7 @@ export default function PlatformCard({
   subscribeText,
   href,
   titleClassName,
+  buttonClassName,
 }: PlatformCardProps) {
   return (
     <div className="card-container p-6 flex flex-col items-center text-center gap-3">
@@ -21,7 +23,7 @@ export default function PlatformCard({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="btn-member px-8"
+        className={`${buttonClassName} px-8`}
       >
         {subscribeText}
       </a>

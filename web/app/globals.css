@@ -79,7 +79,9 @@
 
   /* 渐变进不了 @theme，照搬游戏内 buttons.less 的取值 */
   .btn-member,
-  .btn-season {
+  .btn-season,
+  .btn-afdian,
+  .btn-kofi {
     @apply inline-flex min-h-11 items-center justify-center rounded-[7px] border px-5 text-sm font-extrabold text-white transition-[filter] md:min-h-10;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.53);
   }
@@ -94,19 +96,36 @@
     background-image: linear-gradient(90deg, #4f48b2, #0f033a);
   }
 
+  /* 赞助平台各自的按钮，渐变按 game 的做法从品牌色压到同色深档 */
+  .btn-afdian {
+    border-color: #a98bec;
+    background-image: linear-gradient(90deg, #946ce6, #3d2a66);
+  }
+
+  .btn-kofi {
+    border-color: #5cc3ea;
+    background-image: linear-gradient(90deg, #29abe0, #0d3d52);
+  }
+
   .btn-member:hover,
-  .btn-season:hover {
+  .btn-season:hover,
+  .btn-afdian:hover,
+  .btn-kofi:hover {
     filter: brightness(1.12);
   }
 
   .btn-member:active,
-  .btn-season:active {
+  .btn-season:active,
+  .btn-afdian:active,
+  .btn-kofi:active {
     filter: brightness(0.9);
   }
 
   /* 金底只降透明度仍看得清字，紫底会糊，所以禁用态换成灰底灰字 */
   .btn-member:disabled,
-  .btn-season:disabled {
+  .btn-season:disabled,
+  .btn-afdian:disabled,
+  .btn-kofi:disabled {
     @apply cursor-not-allowed border-line bg-panel-soft bg-none text-[#5d5d66];
     filter: none;
     text-shadow: none;
