@@ -30,6 +30,10 @@
   --color-accent-solid: #4f48b2;
   --color-accent-solid-hover: #5f57c8;
 
+  /* 链接既不属于勇士也不属于会员，单独一档，免得紫色链接被读成跟积分有关 */
+  --color-link: #6aa9e0;
+  --color-link-hover: #8dc2ef;
+
   --color-success: #7fd47f;
   --color-warning: #f5a623;
   --color-danger: #e87d7d;
@@ -59,8 +63,14 @@
     @apply transition-colors hover:border-season-border;
   }
 
+  /* 导航类链接：静止中性，悬停变链接蓝 */
   .link-hover {
-    @apply transition-colors hover:text-accent;
+    @apply transition-colors hover:text-link;
+  }
+
+  /* 正文里的内联链接：静止就上色，否则在整段文字里认不出来 */
+  .link-inline {
+    @apply text-link transition-colors hover:text-link-hover;
   }
 
   /* 渐变进不了 @theme，照搬游戏内 buttons.less 的取值 */

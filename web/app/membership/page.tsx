@@ -43,7 +43,7 @@ export default function MembershipPage() {
 
   return (
     <div className="space-y-8">
-      <Section title={t('membership.title')}>
+      <Section title={t('membership.title')} titleClassName="text-member-strong">
         <div className="space-y-6">
           <p className="text-content text-lg text-center">
             <EmojiLead text={t('membership.description')} />
@@ -89,7 +89,7 @@ export default function MembershipPage() {
         {MANUAL_ACTIVE_LINKS.map((link, index) => (
           <React.Fragment key={link.href}>
             {index > 0 ? <span className="mx-1">/</span> : ' '}
-            <Link href={link.href} className="inline-block py-1 text-accent hover:text-accent-hover">
+            <Link href={link.href} className="link-inline inline-block py-1">
               {t(link.labelKey)}
             </Link>
           </React.Fragment>
