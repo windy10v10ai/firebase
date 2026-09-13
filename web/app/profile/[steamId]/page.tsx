@@ -11,6 +11,7 @@ import PageSkeleton from '@/app/components/PageSkeleton';
 import { ApiError } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
+import { playerPagePath } from '@/app/lib/player-path';
 
 import FeatureEntryCard from './FeatureEntryCard';
 import LevelCard from './LevelCard';
@@ -98,6 +99,7 @@ export default function ProfilePage() {
           title={t('entries.property.title')}
           description={t('entries.property.description')}
           badge={t('entries.property.badge', { count: loaded.info.useableLevel })}
+          href={playerPagePath(steamId, 'property')}
         />
       </div>
       <div className="lg:col-start-2 lg:row-start-3">

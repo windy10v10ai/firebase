@@ -2,10 +2,10 @@
   "navigation": {
     "home": "Windy10v10ai",
     "homeShort": "10v10AI",
-    "property": "Property",
-    "propertyFull": "Property Points",
+    "property": "Attributes",
+    "propertyFull": "Attribute Points",
     "awaken": "Awaken",
-    "awakenFull": "Hero Awaken",
+    "awakenFull": "Hero Awakening",
     "wiki": "Skills & Items",
     "wikiFull": "Skills & Items",
     "workshop": "Steam Workshop",
@@ -270,7 +270,7 @@
       "remainingToLevel": "{amount} to level {level}",
       "usablePoints": "Usable Points",
       "attributePoints": "Usable Attribute Points",
-      "attributePointsHint": "See the property page for rules"
+      "attributePointsHint": "See the attributes page for rules"
     },
     "stats": {
       "title": "Stats",
@@ -300,12 +300,12 @@
     },
     "entries": {
       "property": {
-        "title": "Property Points",
+        "title": "Attributes",
         "description": "Spend points on permanent attributes",
         "badge": "Usable {count} points"
       },
       "awaken": {
-        "title": "Hero Awaken",
+        "title": "Hero Awakening",
         "description": "Unlock heroes' awakening talents"
       }
     }
@@ -370,7 +370,7 @@
       "increase": "One level more"
     },
     "reset": {
-      "title": "Reset attribute points",
+      "title": "Reset attributes",
       "description": "Clears every level you have added and refunds all attribute points so you can spend them again. Only usable points are charged — total points, lifetime points and your levels stay exactly as they are.",
       "useBattle": "Spend {cost} usable battle points",
       "battleShort": "You have {have} usable battle points, {need} short.",

@@ -72,7 +72,7 @@
       },
       "property": {
         "title": "属性加点",
-        "description": "查看属性、加点与初始化"
+        "description": "查看属性、加点与重置"
       },
       "awaken": {
         "title": "英雄觉醒",
@@ -332,7 +332,7 @@
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
       "formula": "总属性点 = 勇士等级 + 会员等级，两种等级每升 1 级各给 1 点，只升不降。点等级看明细。",
-      "reset": "初始化"
+      "reset": "重置属性"
     },
     "group": {
       "instant": {
@@ -370,7 +370,7 @@
       "increase": "多加一级"
     },
     "reset": {
-      "title": "初始化属性点",
+      "title": "重置属性",
       "description": "清空全部加点，属性点全额退回，可以重新分配。扣的是可用积分，累计积分与等级都不变，属性点总数也一点不少。",
       "useBattle": "消耗 {cost} 可用勇士积分",
       "battleShort": "可用勇士积分 {have}，还差 {need}。",
@@ -380,7 +380,7 @@
     },
     "error": {
       "upgrade": "加点没成功，可用属性点可能已经被别处用掉了。页面已经刷新成最新状态，再试一次。",
-      "reset": "初始化没成功，可用积分可能不够了。页面已经刷新成最新状态。"
+      "reset": "重置没成功，可用积分可能不够了。页面已经刷新成最新状态。"
     },
     "names": {
       "property_cooldown_percentage": "冷却缩短",

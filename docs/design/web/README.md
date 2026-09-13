@@ -146,7 +146,7 @@ Firestore
 | 3ab-api 开放属性与觉醒接口 | #1163 | 给已有的加点、洗点、觉醒、随机四个接口挂 `@AllowWeb()` | 已完成 |
 | 2g 顶部布局 | #1161 | 头部结构重做：站内外分组、两端同一套菜单、控件尺寸统一，见 [phase-2g-header-layout.md](phase-2g-header-layout.md) | 已完成 |
 | 7 视觉风格 | #1165 | 改 token 取值、字体，打磨基础组件，见 [phase-7-visual-style.md](phase-7-visual-style.md) | 已完成 |
-| 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、初始化，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
+| 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、重置，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机 | 未开始 |
 | 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 未开始 |
 | 8a 首页 | #1168 | 删「关于项目」，加登录引导与主要页面导航两块，见 [phase-8a-home-page.md](phase-8a-home-page.md) | 已完成 |

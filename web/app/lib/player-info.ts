@@ -50,7 +50,7 @@ export interface PlayerInfo {
   properties?: PropertyItem[];
 }
 
-/** 初始化属性点的价码，与 api 的 player-property.service.ts 保持一致 */
+/** 重置属性的价码，与 api 的 player-property.service.ts 保持一致 */
 export const RESET_PROPERTY_SEASON_POINT_COST = 2000;
 export const RESET_PROPERTY_MEMBER_POINT_COST = 1000;
 
