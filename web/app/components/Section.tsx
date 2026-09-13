@@ -14,7 +14,7 @@ export default function Section({
   titleClassName = '',
 }: SectionProps) {
   return (
-    <section className={`card-container p-8 ${className}`}>
+    <section className={`card-container p-4 sm:p-6 lg:p-8 ${className}`}>
       {title && <h2 className={`title-secondary mb-6 text-center ${titleClassName}`}>{title}</h2>}
       <div className={`max-w-3xl mx-auto ${containerClassName}`}>
         {children}

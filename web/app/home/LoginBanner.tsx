@@ -30,7 +30,7 @@ export default function LoginBanner() {
         className="pointer-events-none absolute inset-0 hidden sm:block"
         style={{ backgroundImage: `linear-gradient(90deg, ${WIDE_STOPS})` }}
       />
-      <div className="relative flex flex-col gap-4 px-5 pt-36 pb-5 sm:max-w-[460px] sm:p-8">
+      <div className="relative flex flex-col gap-4 px-4 pt-36 pb-4 sm:max-w-[460px] sm:p-6 lg:p-8">
         <h2 className="title-secondary">{t('title')}</h2>
         <p className="text-content">{t('description')}</p>
         <div className="flex flex-col items-start gap-2">

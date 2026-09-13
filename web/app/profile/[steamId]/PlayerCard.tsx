@@ -11,7 +11,7 @@ export default function PlayerCard({ info }: { info: PlayerInfo }) {
   const conductNet = info.commendCount - info.reportCount;
 
   return (
-    <section className="card-container space-y-4 p-6 sm:p-8">
+    <section className="card-container space-y-4 p-4 sm:p-6 lg:p-8">
       <div className="flex size-20 items-center justify-center rounded-full border border-line bg-panel-soft">
         <UserRound className="size-10 text-muted" aria-hidden="true" />
       </div>

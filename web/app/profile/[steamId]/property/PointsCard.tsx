@@ -17,7 +17,7 @@ interface PointsCardProps {
 }
 
 const BOX_CLASS =
-  'flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control px-4 py-3.5';
+  'flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control px-3 py-3 sm:px-4 sm:py-3.5';
 
 export default function PointsCard({
   steamId,
@@ -31,7 +31,7 @@ export default function PointsCard({
   const profileHref = playerPagePath(steamId);
 
   return (
-    <section className="card-container flex flex-col gap-4 p-6 sm:px-8">
+    <section className="card-container flex flex-col gap-4 p-4 sm:p-6 lg:px-8">
       <div className="flex items-center gap-3">
         <h2 className="title-secondary">{t('title')}</h2>
         <button
@@ -46,19 +46,19 @@ export default function PointsCard({
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className={BOX_CLASS}>
-          <span className="text-sm text-muted">{t('usable')}</span>
+          <span className="text-base text-muted">{t('usable')}</span>
           <span className="flex items-baseline gap-1">
-            <span className="text-2xl leading-none font-bold text-heading">{usableLevel}</span>
+            <span className="text-3xl leading-none font-bold text-heading">{usableLevel}</span>
             <span className="leading-none font-bold text-muted">/ {totalLevel}</span>
           </span>
         </div>
         <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
-          <span className="text-sm text-muted">{t('battleLevel')}</span>
-          <span className="text-2xl leading-none font-bold text-season">{seasonLevel}</span>
+          <span className="text-base text-muted">{t('battleLevel')}</span>
+          <span className="text-3xl leading-none font-bold text-season">{seasonLevel}</span>
         </Link>
         <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
-          <span className="text-sm text-muted">{t('memberLevel')}</span>
-          <span className="text-2xl leading-none font-bold text-member-strong">{memberLevel}</span>
+          <span className="text-base text-muted">{t('memberLevel')}</span>
+          <span className="text-3xl leading-none font-bold text-member-strong">{memberLevel}</span>
         </Link>
       </div>
 

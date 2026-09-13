@@ -77,7 +77,7 @@ export default function LevelCard({ info, steamId }: { info: PlayerInfo; steamId
   const t = useTranslations('profile.identity');
 
   return (
-    <section className="card-container space-y-6 p-6 sm:p-8">
+    <section className="card-container space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="grid gap-6 @container sm:grid-cols-2">
         <CurrencyBlock
           tone="season"
