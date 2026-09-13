@@ -34,6 +34,10 @@
   --color-link: #6aa9e0;
   --color-link-hover: #8dc2ef;
 
+  /* 赞助平台的品牌色，只用在各自的平台卡标题上 */
+  --color-afdian: #946ce6;
+  --color-kofi: #ff5e5b;
+
   --color-success: #7fd47f;
   --color-warning: #f5a623;
   --color-danger: #e87d7d;

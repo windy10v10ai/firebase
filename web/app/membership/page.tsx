@@ -19,8 +19,16 @@ function splitLeadingEmoji(text: string): [string | null, string] {
 }
 
 const MANUAL_ACTIVE_LINKS = [
-  { href: '/regist/afdian', labelKey: 'membership.manualActive.afdian' },
-  { href: '/regist/kofi', labelKey: 'membership.manualActive.kofi' },
+  {
+    href: '/regist/afdian',
+    labelKey: 'membership.manualActive.afdian',
+    colorClass: 'text-afdian hover:brightness-110',
+  },
+  {
+    href: '/regist/kofi',
+    labelKey: 'membership.manualActive.kofi',
+    colorClass: 'text-kofi hover:brightness-110',
+  },
 ];
 
 function EmojiLead({ text }: { text: string }) {
@@ -75,12 +83,14 @@ export default function MembershipPage() {
           price={t('membership.afdian.price')}
           subscribeText={t('membership.afdian.subscribe')}
           href={MEMBERSHIP_AFDIAN_LINK}
+          titleClassName="text-afdian"
         />
         <PlatformCard
           title={t('membership.kofi.title')}
           price={t('membership.kofi.price')}
           subscribeText={t('membership.kofi.subscribe')}
           href={MEMBERSHIP_KOFI_LINK}
+          titleClassName="text-kofi"
         />
       </div>
 
@@ -89,7 +99,10 @@ export default function MembershipPage() {
         {MANUAL_ACTIVE_LINKS.map((link, index) => (
           <React.Fragment key={link.href}>
             {index > 0 ? <span className="mx-1">/</span> : ' '}
-            <Link href={link.href} className="link-inline inline-block py-1">
+            <Link
+              href={link.href}
+              className={`inline-block py-1 transition-[filter] ${link.colorClass}`}
+            >
               {t(link.labelKey)}
             </Link>
           </React.Fragment>
