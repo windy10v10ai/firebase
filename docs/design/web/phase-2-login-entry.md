@@ -1,6 +1,6 @@
 # 批次 2：登录入口交互
 
-> 上级文档：[网站总体设计](README.md) 的「页面与菜单」。本文只定一件事：**玩家在网站上从哪里、怎样进入 Steam 登录**。鉴权链路见 [phase-2-steam-login.md](phase-2-steam-login.md)。
+> 上级文档：[网站架构](../../web/README.md) 的「页面与菜单」。本文只定一件事：**玩家在网站上从哪里、怎样进入 Steam 登录**。鉴权链路见 [phase-2-steam-login.md](phase-2-steam-login.md)。
 >
 > 已全部上线。
 
