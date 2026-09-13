@@ -51,7 +51,7 @@
         "premium": "高级会员",
         "normal": "普通会员",
         "expireDate": "有效期至：{date}",
-        "expiredDate": "会员已于 {date} 到期"
+        "expired": "会员已过期"
       }
     },
     "sample": {

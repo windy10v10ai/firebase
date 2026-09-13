@@ -52,6 +52,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
 
   const member = info?.member;
   const status = memberStatusKey(member);
+  const pending = !info && !failed;
   const valueOf = (read: (loaded: PlayerInfo) => number) =>
     info ? read(info).toLocaleString() : failed ? '—' : null;
 
@@ -61,26 +62,27 @@ export default function PlayerSummary({ uid }: { uid: string }) {
         <span className="flex size-14 shrink-0 items-center justify-center rounded-full border border-line bg-panel-soft">
           <UserRound className="size-7 text-muted" strokeWidth={1.7} aria-hidden="true" />
         </span>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <p className="text-2xl font-bold text-heading sm:text-[26px]">
             {t('heading', { id: uid })}
           </p>
           {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个 */}
-          {member?.enable ? (
-            <p className="flex flex-wrap items-baseline gap-x-2">
-              {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
-              <span className="font-medium text-member-strong">{t(`member.${status}`)}</span>
-              <span className="text-sm text-muted">
-                {t('member.expireDate', { date: member.expireDateString })}
-              </span>
-            </p>
-          ) : null}
-          {/* 没开通过不说话：一行「未开通会员」既没信息也没去处 */}
-          {member && !member.enable ? (
-            <p className="text-sm text-muted">
-              {t('member.expiredDate', { date: member.expireDateString })}
-            </p>
-          ) : null}
+          {/* 两行始终占位且不折行，会员信息晚到也不撑高身份行；没开通过留空，「未开通会员」既没信息也没去处 */}
+          <p className="flex flex-col sm:flex-row sm:items-center sm:gap-x-2">
+            {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
+            <span
+              className={`min-h-6 truncate ${member?.enable ? 'font-medium text-member-strong' : 'text-muted'}`}
+            >
+              {pending ? <Skeleton /> : member ? t(`member.${status}`) : null}
+            </span>
+            <span className="min-h-5 truncate text-sm text-muted">
+              {pending ? (
+                <Skeleton chars={10} />
+              ) : member ? (
+                t('member.expireDate', { date: member.expireDateString })
+              ) : null}
+            </span>
+          </p>
         </div>
         <Link
           href={playerPagePath(uid)}
@@ -91,7 +93,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
         </Link>
       </div>
 
-      <dl className="grid gap-x-8 sm:grid-cols-2" aria-busy={!info && !failed}>
+      <dl className="grid gap-x-8 sm:grid-cols-2" aria-busy={pending}>
         <StatRow
           label={t('battleLevel')}
           value={valueOf((loaded) => loaded.seasonLevel)}

@@ -16,7 +16,8 @@ import type { Metadata } from 'next';
 // 交给浏览器按页面实际用到的字形去取
 const notoSansSC = Noto_Sans_SC({
   weight: ['400', '500', '700'],
-  display: 'swap',
+  // 系统字体与 Noto Sans SC 字宽不同，中途换字体整页文字会跳；来不及就本次沿用系统字体，缓存后再用
+  display: 'optional',
   preload: false,
   // 不点名 emoji 字体时，emoji 会落到最后兜底的那一份，字形画得比排版宽度宽，
   // 紧跟其后的汉字被压住

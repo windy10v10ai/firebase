@@ -104,7 +104,7 @@ Firestore
 |------|------|------|
 | 样式 | Tailwind 4 + CSS 变量定义设计 token | 已完成，取值见 [phase-7-visual-style.md](../design/web/phase-7-visual-style.md) |
 | 组件 | 自建 Button、Input、Field、Spinner、Card 等一小套 | 已建，按需求继续加 |
-| 字体 | Noto Sans SC | 已完成；不加载额外标题字体 |
+| 字体 | Noto Sans SC，`display: optional` | 已完成；不加载额外标题字体。来不及就本次沿用系统字体，不中途换字体，避免整页文字跳动，见 [phase-10-first-paint.md](../design/web/phase-10-first-paint.md) |
 | 数据层 | 不引缓存库，页面自己用 `useState` 存一次响应 | 属性页已按这个做法落地。加点、重置的响应体就是新的完整 `PlayerInfo`，直接替换页面状态即可，没有需要失效的缓存；真出现跨页共享数据再引 TanStack Query |
 | 登录状态 | `AuthProvider` 包住 Firebase SDK 的 `onAuthStateChanged`，初始值来自服务端读到的 `player-uid` cookie；只有已登录 / 未登录两态，没有加载中 | 批次 10 落地 |
 | API 调用 | `apiFetch` 负责拼域名、带 token、转错误；每个资源一个取数函数 | 已完成。属性页没有建 hook——一个页面一次取数，包一层 hook 只是多一层间接 |
