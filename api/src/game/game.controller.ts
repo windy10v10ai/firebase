@@ -8,6 +8,7 @@ import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
@@ -107,8 +108,9 @@ export class GameController {
   async endLocal(
     @Body() gameEnd: GameEndDto,
     @CurrentServerType() serverType: SERVER_TYPE,
+    @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<string> {
-    const recorded = await this.localHostService.recordGameEnd(gameEnd);
+    const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
     if (recorded) {
       await this.gameService.recordMatchStats(gameEnd, serverType);
     }
