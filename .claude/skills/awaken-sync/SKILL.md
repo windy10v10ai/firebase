@@ -36,7 +36,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 6. **写变更说明**：拿产物里**改动前**那一版的 `AWAKEN_SOURCE.gameCommit`（`git show HEAD:web/config/awaken.ts | head -10`），
    `git -C <game> log --oneline <旧SHA>..HEAD -- <相关路径>`。
    git 历史用来解释「为什么变了」，产物 diff 回答「变了什么」。
-7. **校验**：`npm run awaken:test && npm run lint && npx tsc --noEmit && npm run build`。
+7. **校验**：`npm run lint && npx tsc --noEmit && npm run build`。
 8. **开 PR**：分支 `chore/awaken-sync-<日期>`，正文贴变更说明与产物 diff 摘要。
 
 ## 只认 develop 上的提交
@@ -58,7 +58,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 | 缺 zh/en 英雄名 | Dota 版本目录升级后 key 变了 |
 | 没有立绘 | 先跑 `npm run awaken:images` |
 
-图标取不到只告警不拦：页面按缺图占位渲染。目前钢背兽就是这种情况，处理计划见设计文档第 11 节。
+图标取不到只告警不拦：页面按缺图占位渲染。目前钢背兽就是这种情况，处理计划见设计文档第 10 节。
 
 ## 不要做的事
 

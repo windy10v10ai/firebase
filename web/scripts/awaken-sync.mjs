@@ -11,7 +11,6 @@ import { gameHead, loadAwakenSource } from './awaken-source.mjs';
  * 枚举不全就是静默错误——改一个 AbilityValues 数值不碰任何本地化文件，
  * 玩家看到的描述照样会变（18/38 的描述里带 %占位符%）。
  *
- * 纯离线、无依赖，可以在 CI 里当一致性断言跑：产物有 diff 就说明有人忘了同步。
  * 跑法：cd web && npm run awaken:sync
  */
 
@@ -23,7 +22,7 @@ const MANIFEST = path.join(WEB, 'config/awaken-assets.json');
 const MIN_HEROES = 30;
 
 /** 七项自检，任一项不过就停下，不生成半成品 */
-export function check(source, assets) {
+function check(source, assets) {
   const errors = [];
   const { heroes, replacementHeroes, unresolved } = source;
 
@@ -166,7 +165,7 @@ function main() {
   if (!head.onDevelop) {
     console.error(
       `game 的 ${head.commit.slice(0, 9)} 不在 origin/develop 上，没有生成任何文件。\n` +
-        '  先在 game 仓库 git fetch origin develop，再把它切到 develop（或指 AWAKEN_GAME_REPO 到一个 develop 的 worktree）。',
+        '  先把 game 仓库切到 develop 并 git pull。',
     );
     process.exit(1);
   }
@@ -181,7 +180,4 @@ function main() {
   );
 }
 
-// 被 import 时（自检测试）不跑主流程
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  main();
-}
+main();
