@@ -11,10 +11,10 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
+import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 
 import FeatureEntryCard from './FeatureEntryCard';
 import LevelCard from './LevelCard';
-import MemberCard from './MemberCard';
 import PlayerCard from './PlayerCard';
 import StatsCard from './StatsCard';
 
@@ -75,24 +75,20 @@ export default function ProfilePage() {
   const info = loaded?.info ?? null;
 
   return (
-    <div
-      className="grid gap-6 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start"
-      aria-busy={!info}
-    >
+    // 电脑宽度身份卡与等级卡同一行，入口卡与战绩卡通栏；更窄时按 DOM 顺序单列
+    <div className="grid gap-6 lg:grid-cols-3" aria-busy={!info}>
       {info ? null : (
         <p role="status" className="sr-only">
           {t('loading')}
         </p>
       )}
-      {/* 窄屏走 DOM 顺序单列；宽屏用显式网格坐标拆成左右两栏 */}
-      <div className="lg:col-start-1 lg:row-start-1">
-        <PlayerCard steamId={steamId} info={info} />
-      </div>
-      <div className="lg:col-start-2 lg:row-start-1">
+      <PlayerCard steamId={steamId} info={info} />
+      <div className="lg:col-span-2">
         <LevelCard info={info} steamId={steamId} />
       </div>
-      <div className="lg:col-start-2 lg:row-start-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:col-span-3">
         <FeatureEntryCard
+          tone="property"
           Icon={CirclePlus}
           title={t('entries.property.title')}
           description={t('entries.property.description')}
@@ -105,21 +101,26 @@ export default function ProfilePage() {
           }
           href={playerPagePath(steamId, 'property')}
         />
-      </div>
-      <div className="lg:col-start-2 lg:row-start-3">
         <FeatureEntryCard
+          tone="awaken"
           Icon={Sparkles}
           title={t('entries.awaken.title')}
           description={t('entries.awaken.description')}
+          badge={
+            info ? (
+              t('entries.awaken.badge', {
+                awakened: info.awakenedHeroes?.length ?? 0,
+                total: AWAKEN_HERO_COUNT,
+              })
+            ) : (
+              <Skeleton>{t('entries.awaken.badge', { awakened: 0, total: AWAKEN_HERO_COUNT })}</Skeleton>
+            )
+          }
           href={playerPagePath(steamId, 'awaken')}
         />
       </div>
-      <div className="lg:col-start-2 lg:row-start-4">
+      <div className="lg:col-span-3">
         <StatsCard info={info} />
-      </div>
-      {/* 跨 3 行接到战绩卡底部，让空档落在整块左栏末尾，不夹在两张入口卡中间 */}
-      <div className="lg:col-start-1 lg:row-start-2 lg:row-end-5">
-        <MemberCard info={info} />
       </div>
     </div>
   );

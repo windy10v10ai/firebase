@@ -12,6 +12,8 @@
 
 ## 2. 颜色
 
+> 配色分工与取值以 [docs/web/design-system.md](../../web/design-system.md) 为准；本节与其冲突处（accent、链接色、赞助平台按钮等），以后者为准。
+
 ### 底色与文字
 
 | token | 取值 | 用途 |
@@ -117,6 +119,8 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ## 4. 按钮
 
+> 按钮规范以 [docs/web/design-system.md](../../web/design-system.md)「按钮」为准。
+
 两种颜色，都照搬游戏内 `src/panorama/react/shared/styles/buttons.less` 的取值，白字加一层黑影。
 
 | 变体 | 底 | 描边 | 字 |
@@ -160,6 +164,8 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ### 悬停与当前页
 
+> 当前页下条与菜单竖条改用主色标记档，见 [docs/web/design-system.md](../../web/design-system.md)。
+
 取值照搬 game 的 `src/panorama/react/shared/styles/tab-navigation.less`：悬停只动亮度不动色相，时长 `@transition-fast` 0.15s、`ease-out`。
 
 | 元素 | 静止 | 悬停 | 当前页 |
@@ -178,6 +184,8 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 **窄屏的位置提示只在菜单里。** 下条长在横排上，而窄屏把横排整体收起来了。收起时不补页面名——375 那一行量下来只剩 13px 余量，塞不下；手机上页面标题本来就在头部正下方第一行。
 
 ### 菜单图标
+
+> 图标颜色改为功能色，见 [docs/web/design-system.md](../../web/design-system.md)「功能色」。
 
 ![菜单图标](images/header-menu.png)
 
@@ -238,6 +246,5 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 ## 8. 后续事项
 
 - 头像等批次 9 拿到 Steam Web API key 后替换占位图标；会员状态不额外加金边。
-- 觉醒页确定数据请求后，再决定是否在入口显示已觉醒数量。
 - Tooltip 采用成熟组件库实现，需覆盖视口避让、触屏、键盘焦点与滚动跟随。
 - 批次 3a 开工前决定是否引入 shadcn/ui，为属性、觉醒与技能物品页统一 Tabs、Dialog、Select、Progress、Tooltip。

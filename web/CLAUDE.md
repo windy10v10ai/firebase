@@ -56,6 +56,43 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **成排的条目卡网格写 `md:grid-cols-2 lg:grid-cols-3`。** 只有两项的卡组（如会员平台卡）到 `md:grid-cols-2` 为止
 - **容器查询（`@container` 配 `@sm:` 等）不受此限。** 它按所在卡片的宽度分栏，与屏幕档位无关
 
+## 可点击元素
+
+理由见 [docs/web/design-system.md](../docs/web/design-system.md)「可点击元素」。
+
+- **能点的一律手型，靠 `globals.css` base 层的全局规则**，调用点不写 `cursor-pointer`。可点击的控件用 `<button>` 或 `<a>` / `Link`，不用 `<div onClick>`
+- **整张卡或整行是链接时，右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
+- **悬停描边随归属**：属于勇士的入口用 `hover:border-season-border`，属于会员的用 `hover:border-member-border`，其余用 `.card-hover`
+- **整行链接里子元素各自写了文字颜色时，外层的 `link-hover` 看不出变化**。这种链接改用 `group`，在子元素上写 `group-hover:`
+
+## 颜色
+
+分工、取值与理由见 [docs/web/design-system.md](../docs/web/design-system.md)。
+
+- **调用点不写色值**，一律用 `globals.css` `@theme` 里的 token；要新颜色先加 token
+- **紫（`season`）与金（`member`）只表示勇士与会员两套货币**，不用于交互反馈或通用按钮
+- **交互反馈用主色标记档 `link` 系列**：链接、当前页标记、焦点框、转圈、`.card-hover` 都是它
+- **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
+- **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
+
+## 按钮
+
+按钮颜色回答「点了花什么」，不回答「这一页讲什么」。规格与理由见 [docs/web/design-system.md](../docs/web/design-system.md)「按钮」：
+
+| 操作 | 写法 |
+|---|---|
+| 花勇士积分，或与游戏里是同一个操作（加点、觉醒） | `.btn-season`，暂存一步用 `.btn-season-outline` |
+| 花会员积分 | `.btn-member` |
+| 提交、重试、跳转、去外部平台订阅或付款 | `.btn-primary`，即 `Button` 的默认 `variant` |
+| 取消、次要操作 | `.btn-secondary` |
+| 与主按钮并排的返回、跳过 | `.btn-ghost` |
+| 清空、重置这类撤不回的入口 | `.btn-danger` |
+| 登录类的第三方入口 | 次按钮外观加品牌图标，Steam 用 `STEAM_BUTTON_CLASS` |
+
+- **每屏最多一个主按钮**
+- **请求进行中用 `Button` 的 `loading`**：按钮内转圈并禁用，文案由调用方换成进行时。不盖整页遮罩
+- **游戏按钮（`.btn-season`、`.btn-member`）的取值照搬游戏仓库的 `buttons.less`，不改**，属性、觉醒页要与游戏内同名操作长得一样
+
 ## 校验
 
 `cd web && npm run lint && npx tsc --noEmit && npm run build`

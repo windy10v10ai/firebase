@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -84,7 +85,7 @@ export default function LevelCard({ info, steamId }: { info: PlayerInfo | null; 
   const t = useTranslations('profile.identity');
 
   return (
-    <section className="card-container card-pad space-y-6">
+    <section className="card-container card-pad h-full space-y-6">
       <div className="grid gap-6 @container md:grid-cols-2">
         <CurrencyBlock
           tone="season"
@@ -117,14 +118,20 @@ export default function LevelCard({ info, steamId }: { info: PlayerInfo | null; 
       </div>
       <Link
         href={playerPagePath(steamId, 'property')}
-        className="flex items-center justify-between border-t border-line pt-4 link-hover"
+        className="group flex items-center justify-between gap-4 border-t border-line pt-4"
       >
         <div>
-          <div className="text-content">{t('attributePoints')}</div>
+          <div className="text-content transition-colors group-hover:text-heading">{t('attributePoints')}</div>
           <div className="text-sm text-muted">{t('attributePointsHint')}</div>
         </div>
-        <span className="text-2xl font-bold tabular-nums text-heading">
-          {info ? info.useableLevel : <Skeleton>000</Skeleton>}
+        <span className="flex items-center gap-2">
+          <span className="text-2xl font-bold tabular-nums text-heading">
+            {info ? info.useableLevel : <Skeleton>000</Skeleton>}
+          </span>
+          <ChevronRight
+            className="size-4 shrink-0 text-muted transition group-hover:translate-x-0.5 group-hover:text-heading"
+            aria-hidden="true"
+          />
         </span>
       </Link>
     </section>

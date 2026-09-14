@@ -265,6 +265,7 @@
       "description": "Please refresh the page and try again."
     },
     "identity": {
+      "heading": "ID {id}",
       "battleLevel": "Battle Level",
       "memberLevel": "Member Level",
       "conductNet": "Commends minus Reports",
@@ -291,14 +292,12 @@
       "towerKills": "Tower Kills"
     },
     "member": {
-      "title": "Membership",
       "premium": "Premium Member",
       "normal": "Member",
       "expired": "Expired",
-      "none": "Not a member",
       "expireDate": "Valid until {date}",
       "expiredDate": "Expired on {date}",
-      "subscribe": "Subscribe"
+      "link": "Membership"
     },
     "entries": {
       "property": {
@@ -308,7 +307,8 @@
       },
       "awaken": {
         "title": "Hero Awakening",
-        "description": "Unlock heroes' awakening talents"
+        "description": "Unlock heroes' awakening talents",
+        "badge": "Awakened {awakened} / {total}"
       }
     }
   },
@@ -333,7 +333,7 @@
       "usable": "Usable / total",
       "battleLevel": "Battle level",
       "memberLevel": "Member level",
-      "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down. Tap a level for details.",
+      "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down.",
       "reset": "Reset"
     },
     "group": {
@@ -480,10 +480,35 @@
     "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
     "loggedInAs": "ID {uid}",
     "signOut": "Sign out",
-    "callbackLoading": "Signing in…",
-    "callbackError": "Sign-in verification failed. Please try again.",
-    "errorCode": "Error code: {code}",
-    "retry": "Try again later",
+    "callback": {
+      "title": "Signing in",
+      "description": "You're back from Steam. We're confirming your identity and signing you in, then we'll take you back to where you were.",
+      "steps": {
+        "verify": "Steam confirms your identity",
+        "signIn": "Sign in to the site",
+        "redirect": "Back to your page"
+      },
+      "waited": "waiting {seconds}s",
+      "attempt": "attempt {attempt}",
+      "retry": "Try again",
+      "relogin": "Sign in again",
+      "home": "Back to home",
+      "failTitle": "Sign-in didn't finish",
+      "failVerify": "We couldn't confirm this Steam sign-in. Please sign in with Steam again.",
+      "failSignIn": "We couldn't reach the sign-in service, most likely a network hiccup. Steam already confirmed you, so just try again.",
+      "diag": {
+        "stuckAt": "Stuck at step {step} · {name}",
+        "attempts": "{attempts, plural, one {# attempt} other {# attempts}} · {seconds}s total",
+        "player": "ID {id}",
+        "hint": "When reporting a problem, include this box in your screenshot",
+        "detail": {
+          "timeout": "timed out",
+          "unreachable": "unreachable",
+          "badResponse": "response was not JSON",
+          "other": "other network error"
+        }
+      }
+    },
     "profileTooltip": "View your profile",
     "panel": {
       "title": "Steam sign-in required",
