@@ -82,7 +82,8 @@ export default function Header() {
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
     <header ref={headerRef} className="relative z-20 border-b border-line bg-surface">
       <nav className="mx-auto max-w-7xl px-4 py-4">
-        <div className="flex justify-between items-center gap-3">
+        {/* 行高由账号位的 36px 控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
+        <div className="flex min-h-9 justify-between items-center gap-3">
           <Link href="/" className="text-xl font-bold text-heading link-hover whitespace-nowrap">
             {/* 窄屏一律收短：写全名在 375 放不下右侧控件，见 phase-2g-header-layout.md */}
             <span className="md:hidden">{t('homeShort')}</span>
@@ -192,14 +193,14 @@ export default function Header() {
             })}
             {auth.status === 'authenticated' ? (
               <>
-                <div className="my-1 h-px bg-line md:hidden" aria-hidden="true" />
+                <div className="my-1 h-px bg-line lg:hidden" aria-hidden="true" />
                 <button
                   type="button"
                   onClick={() => {
                     setMenuOpen(false);
                     auth.signOut();
                   }}
-                  className="nav-menu-item flex md:hidden w-full justify-between"
+                  className="nav-menu-item flex lg:hidden w-full justify-between"
                 >
                   <span>{tAuth('signOut')}</span>
                   <LogOut className="size-4 shrink-0" aria-hidden="true" />

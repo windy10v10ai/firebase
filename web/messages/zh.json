@@ -2,7 +2,7 @@
   "navigation": {
     "home": "Windy10v10ai",
     "homeShort": "10v10AI",
-    "profile": "我的",
+    "profile": "个人主页",
     "profileFull": "个人主页",
     "property": "属性",
     "propertyFull": "属性加点",
@@ -51,7 +51,7 @@
         "premium": "高级会员",
         "normal": "普通会员",
         "expireDate": "有效期至：{date}",
-        "expiredDate": "会员已于 {date} 到期"
+        "expired": "会员已过期"
       }
     },
     "sample": {
@@ -423,7 +423,6 @@
     "callbackError": "登录校验失败，请重试",
     "errorCode": "错误码 {code}",
     "retry": "请稍后重试",
-    "checkingLogin": "正在确认登录状态",
     "profileTooltip": "查看个人主页",
     "panel": {
       "title": "需要 Steam 登录",

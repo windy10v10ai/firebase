@@ -8,7 +8,8 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Button from '@/app/components/ui/button';
 import Spinner from '@/app/components/ui/spinner';
 import { ApiError, apiFetch } from '@/app/lib/api';
-import { buildSteamLoginUrl, isSafeNextPath } from '@/app/lib/steam-login';
+import { useAuth } from '@/app/lib/auth';
+import { isSafeNextPath } from '@/app/lib/steam-login';
 import { auth } from '@/config/firebase';
 
 interface SteamVerifyResponse {
@@ -51,6 +52,7 @@ function LoginCallbackContent() {
   const t = useTranslations('auth');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { loginUrl } = useAuth();
   const [failure, setFailure] = useState<Failure | null>(null);
 
   const nextParam = searchParams.get('next');
@@ -106,7 +108,7 @@ function LoginCallbackContent() {
             void signIn(failure.customToken);
           }
         : () => {
-            window.location.href = buildSteamLoginUrl(next);
+            window.location.href = loginUrl(next);
           };
 
     return (
