@@ -35,7 +35,9 @@
 
 增量不可靠的理由是具体的：game 有一次提交 `ef091e9f2 Tweak awaken balance values for Undying, Phoenix, KotL, Lich, Sniper and Drow Ranger`，只改了 KV 里的 `AbilityValues`，一个字的本地化文本都没动。但 **18/38 的描述里带 `%占位符%`**，数值一变，玩家看到的文字就变。按「本地化文件有没有改」判断要不要同步，这次会被整个漏掉。同类的隐形改动还有 `AbilityTextureName` 换图标、原版技能被 override 覆盖、`docs/reference/` 升版本。要靠 git 历史决定同步什么，就得把每一条能影响产物的路径枚举全，漏一条就是静默错误。
 
-**git 历史用来解释，不用来决定。** 产物头部记 game 的 commit SHA 与分支，下次同步时 `git log <旧SHA>..HEAD -- <输入路径>` 给出人能读的变更说明，写进 PR 正文。它回答「为什么变了」，产物 diff 回答「变了什么」。
+**git 历史用来解释，不用来决定。** 产物头部记 game 的 commit SHA，下次同步时 `git log <旧SHA>..HEAD -- <输入路径>` 给出人能读的变更说明，写进 PR 正文。它回答「为什么变了」，产物 diff 回答「变了什么」。
+
+**只认 develop 上的提交**，脚本判断 `HEAD` 是不是 `origin/develop` 的祖先，不满足就停下不生成。判断的是提交的位置而不是分支名：detached HEAD 拿不到分支名，而从 worktree 取数是常态。没有这道闸，从 game 的 feature 分支同步会静默通过，产出一份指向可能被推翻或改写的提交的数据——本批次第一次生成就踩了这个坑（数据碰巧没差，来源记错了）。
 
 ### 占位符要在生成时换成真实数值
 
@@ -178,7 +180,7 @@
 
 `.claude/skills/awaken-sync/SKILL.md`，放本仓库——它干的是「把 game 的改动搬进 web」。流程：
 
-1. 确认 game 仓库干净且已拉到最新，记下 `HEAD`
+1. 把 game 仓库切到 develop 并拉到最新（`HEAD` 由脚本写进产物，不用人记）
 2. 跑 `npm run awaken:sync`（纯离线，70ms，含七项自检）
 3. 自检不过就停下，把失败项报给人，不要猜着改
 4. 产物 `git diff` 为空就结束，不开 PR
@@ -186,9 +188,9 @@
 6. `git log <旧SHA>..HEAD` 生成变更说明
 7. 切分支、提交、开 PR，正文贴变更说明与产物 diff 摘要
 
-**取数和取图拆成两个命令。** 这样第 2 步可以在 CI 里跑：纯离线、无网络、70ms 的一致性断言。CI 挂了就说明有人忘了同步，比指望人记得可靠。
+**取数和取图拆成两个命令**，取数那步纯离线、无网络、70ms，本身适合当一致性断言跑。
 
-觉醒 KV 近一年改了 42 次，约每周一次。**每周跑一次的 GitHub Action 留到以后再加**，内容就是上面这套，有 diff 才开 PR。本批次只做脚本和 skill。
+**但这条链路现在进不了 CI**：game 的 `docs/reference/` 是 gitignored 的，只存在于本地检出，而炸弹人的占位符只有那里取得到（第 2 节）。想自动化得先把这批参考文件弄成 CI 拿得到的东西。觉醒 KV 近一年改了 42 次、约每周一次，值得做，但不在本批次。
 
 ## 9. 加载态
 
@@ -218,7 +220,7 @@
 ## 11. 后续事项
 
 - **上线后复验响应头**，确认 `next.config.ts` 的 `headers()` 盖过了 App Hosting 给 `web/public/` 的 `max-age=14400` 默认值。本地 Next 的默认值是 `max-age=0`，两者不同，本地测过不代表线上成立
-- **每周跑一次同步的 GitHub Action**，内容见第 8 节，有 diff 才开 PR
+- **让同步能在 CI 里跑**：前提是把 game 的 `docs/reference/`（现在 gitignored）弄成 CI 拿得到的东西，之后才谈得上每周一次的 GitHub Action，有 diff 才开 PR
 - 第 10 节的 5 个技能图标
 
 ## 12. 不做什么

@@ -108,10 +108,9 @@ function render(source, assets, head) {
 // 改觉醒数据要改 game 仓库，再跑 npm run awaken:sync 重新生成。
 // 数据来源与同步流程见 docs/design/web/phase-3b-awaken-page.md。
 
-/** 生成时 game 仓库的位置，下次同步时用它算出变更说明 */
+/** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
   gameCommit: ${quote(head.commit)},
-  gameBranch: ${quote(head.branch)},
   dotaVersion: ${quote(source.version)},
 } as const;
 
@@ -163,13 +162,22 @@ function main() {
   }
 
   const head = gameHead(source.game);
+  // feature 分支上的改动还可能被推翻或改写，据此生成的产物无从追溯
+  if (!head.onDevelop) {
+    console.error(
+      `game 的 ${head.commit.slice(0, 9)} 不在 origin/develop 上，没有生成任何文件。\n` +
+        '  先在 game 仓库 git fetch origin develop，再把它切到 develop（或指 AWAKEN_GAME_REPO 到一个 develop 的 worktree）。',
+    );
+    process.exit(1);
+  }
+
   const next = render(source, assets, head);
   const changed = !fs.existsSync(OUT) || fs.readFileSync(OUT, 'utf8') !== next;
   fs.writeFileSync(OUT, next);
 
   console.log(
     `${source.heroes.length} 个英雄，Dota ${source.version}，` +
-      `game ${head.branch}@${head.commit.slice(0, 9)} → ${changed ? '产物有变化' : '产物无变化'}`,
+      `game develop@${head.commit.slice(0, 9)} → ${changed ? '产物有变化' : '产物无变化'}`,
   );
 }
 

@@ -24,19 +24,28 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 
 ## 步骤
 
-1. **确认 game 仓库干净且已拉到最新**，记下 `HEAD`。脚本默认找与本仓库并列的
+1. **把 game 仓库切到 develop 并拉到最新**。脚本默认找与本仓库并列的
    `../windy10v10ai` 或 `../game`，其他位置用 `AWAKEN_GAME_REPO` 指绝对路径。
+   **`HEAD` 不用自己记**，脚本会写进产物的 `AWAKEN_SOURCE.gameCommit`。
 2. **取数**：`cd web && npm run awaken:sync`。纯离线，含七项自检。
 3. **自检不过就停下**，把失败项原样报给用户，**不要猜着改产物**——自检拦住的多半是
    game 侧漏同步（比如加了觉醒英雄但忘了同步 `AwakenTab.tsx`），要回 game 仓库修。
 4. **产物没变化就到此为止**，不开 PR。
 5. **有变化且提示缺图**时跑 `npm run awaken:images`（要联网，需先
    `npm i sharp --no-save`），再跑一次第 2 步。
-6. **写变更说明**：拿产物里上一版的 `AWAKEN_SOURCE.gameCommit`，
+6. **写变更说明**：拿产物里**改动前**那一版的 `AWAKEN_SOURCE.gameCommit`（`git show HEAD:web/config/awaken.ts | head -10`），
    `git -C <game> log --oneline <旧SHA>..HEAD -- <相关路径>`。
    git 历史用来解释「为什么变了」，产物 diff 回答「变了什么」。
 7. **校验**：`npm run awaken:test && npm run lint && npx tsc --noEmit && npm run build`。
 8. **开 PR**：分支 `chore/awaken-sync-<日期>`，正文贴变更说明与产物 diff 摘要。
+
+## 两个前提
+
+- **只认 develop 上的提交。** 脚本判断 `HEAD` 是不是 `origin/develop` 的祖先，不是看分支名叫什么——
+  detached HEAD 拿不到分支名，而从 worktree 跑是常态。不满足就停下不生成：feature 分支上的觉醒
+  改动还可能被推翻或改写，据此生成的产物没法追溯。报这个错先在 game 仓库 `git fetch origin develop`。
+- **`docs/reference/` 在 game 仓库里是 gitignored 的**，只存在于本地检出。所以从 game 的 worktree
+  取数要把它接过来（Windows 用 `mklink /J`），**这条同步链路也就没法只靠 git 在 CI 里跑**。
 
 ## 七项自检拦的是什么
 

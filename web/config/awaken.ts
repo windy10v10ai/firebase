@@ -2,10 +2,9 @@
 // 改觉醒数据要改 game 仓库，再跑 npm run awaken:sync 重新生成。
 // 数据来源与同步流程见 docs/design/web/phase-3b-awaken-page.md。
 
-/** 生成时 game 仓库的位置，下次同步时用它算出变更说明 */
+/** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "f633bf7ea8ab4f5207734d67fccd9cd0398669c3",
-  gameBranch: "feature/2415-fix-reset-property-season-point-cost",
+  gameCommit: "2782318d58ea88d99a9244475cf9980042aa69aa",
   dotaVersion: "7.41",
 } as const;
 

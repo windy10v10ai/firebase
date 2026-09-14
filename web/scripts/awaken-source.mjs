@@ -230,9 +230,23 @@ export function loadAwakenSource(repoRoot) {
   return { game, version, heroes, replacementHeroes, freeTrialHeroes, unresolved };
 }
 
-/** 记进产物头部，供下次同步时 `git log <旧SHA>..HEAD` 生成变更说明 */
+/**
+ * 记进产物头部，供下次同步时 `git log <旧SHA>..HEAD` 生成变更说明。
+ * `onDevelop` 判断的是提交在不在 origin/develop 上，不是分支叫不叫 develop——
+ * 分支名在 detached HEAD 下只会得到 "HEAD"，而同步脚本从 worktree 跑是常态。
+ */
 export function gameHead(game) {
   const run = (...args) =>
     execFileSync('git', ['-C', game, ...args], { encoding: 'utf8' }).trim();
-  return { commit: run('rev-parse', 'HEAD'), branch: run('rev-parse', '--abbrev-ref', 'HEAD') };
+  const commit = run('rev-parse', 'HEAD');
+  let onDevelop = false;
+  try {
+    execFileSync('git', ['-C', game, 'merge-base', '--is-ancestor', commit, 'origin/develop'], {
+      stdio: 'ignore',
+    });
+    onDevelop = true;
+  } catch {
+    // 不是祖先，或本地根本没有 origin/develop
+  }
+  return { commit, onDevelop };
 }
