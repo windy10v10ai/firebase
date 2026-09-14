@@ -497,7 +497,7 @@
       "failSignIn": "We couldn't reach the sign-in service, most likely a network hiccup. Steam already confirmed you, so just try again.",
       "diag": {
         "stuckAt": "Stuck at step {step} · {name}",
-        "attempts": "{attempts} attempts · {seconds}s total",
+        "attempts": "{attempts, plural, one {# attempt} other {# attempts}} · {seconds}s total",
         "player": "ID {id}",
         "hint": "When reporting a problem, include this box in your screenshot",
         "detail": {
