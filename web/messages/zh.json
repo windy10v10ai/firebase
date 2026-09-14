@@ -307,7 +307,8 @@
       },
       "awaken": {
         "title": "英雄觉醒",
-        "description": "解锁英雄的觉醒天赋"
+        "description": "解锁英雄的觉醒天赋",
+        "badge": "已觉醒 {awakened} / {total}"
       }
     }
   },

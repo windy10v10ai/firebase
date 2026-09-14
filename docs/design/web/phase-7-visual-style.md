@@ -246,6 +246,5 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 ## 8. 后续事项
 
 - 头像等批次 9 拿到 Steam Web API key 后替换占位图标；会员状态不额外加金边。
-- 觉醒页确定数据请求后，再决定是否在入口显示已觉醒数量。
 - Tooltip 采用成熟组件库实现，需覆盖视口避让、触屏、键盘焦点与滚动跟随。
 - 批次 3a 开工前决定是否引入 shadcn/ui，为属性、觉醒与技能物品页统一 Tabs、Dialog、Select、Progress、Tooltip。

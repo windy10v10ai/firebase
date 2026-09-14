@@ -72,7 +72,7 @@ export function memberStatusKey(member?: MemberInfo): string {
 
 /** 取个人主页要的全部数据，按 URL 里的 id 请求，不从登录态取 uid */
 export function fetchPlayerInfo(steamId: string) {
-  return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member,statsLifetime`);
+  return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member,statsLifetime,heroAwakening`);
 }
 
 /** 属性页要的数据，等级与可用积分本来就在响应里，一次请求够了 */

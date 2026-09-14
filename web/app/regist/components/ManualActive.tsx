@@ -127,7 +127,8 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
       ) : (
         <section className="space-y-8">
           <div className="space-y-3">
-            <h1 className="title-primary text-member-strong">
+            {/* 标题就是平台名，属于品牌标识，用平台自己的颜色 */}
+            <h1 className={`title-primary ${activeType === 'afdian' ? 'text-afdian' : 'text-kofi'}`}>
               {activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
             </h1>
             <p className="text-content">

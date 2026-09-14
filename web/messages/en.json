@@ -307,7 +307,8 @@
       },
       "awaken": {
         "title": "Hero Awakening",
-        "description": "Unlock heroes' awakening talents"
+        "description": "Unlock heroes' awakening talents",
+        "badge": "Awakened {awakened} / {total}"
       }
     }
   },

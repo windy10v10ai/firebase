@@ -11,6 +11,7 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
+import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 
 import FeatureEntryCard from './FeatureEntryCard';
 import LevelCard from './LevelCard';
@@ -105,6 +106,16 @@ export default function ProfilePage() {
           Icon={Sparkles}
           title={t('entries.awaken.title')}
           description={t('entries.awaken.description')}
+          badge={
+            info ? (
+              t('entries.awaken.badge', {
+                awakened: info.awakenedHeroes?.length ?? 0,
+                total: AWAKEN_HERO_COUNT,
+              })
+            ) : (
+              <Skeleton>{t('entries.awaken.badge', { awakened: 0, total: AWAKEN_HERO_COUNT })}</Skeleton>
+            )
+          }
           href={playerPagePath(steamId, 'awaken')}
         />
       </div>
