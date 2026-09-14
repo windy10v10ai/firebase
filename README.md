@@ -76,9 +76,6 @@ firebase use windy10v10ai
 
 # setup package
 npm install
-
-# web setting
-firebase experiments:enable webframeworks
 ```
 
 ### Set GCP
@@ -151,9 +148,21 @@ More usage details, including configuration, authentication, and example code, p
 
 ### Deploy with Github Action
 
-Github Action will deploy automatically when push to main branch.
+Github Action will deploy `functions`, `hosting` and `firestore` automatically when push to main branch.
 
-- main: Deploy Firebase Functions and Hosting
+A push is skipped entirely when every changed file sits in a path that cannot affect the Firebase deploy — `web/**`, `docs/**`, `.claude/**`, `.cursor/**`, `.vscode/**` and any `*.md`. The list lives in `paths-ignore` of [deploy_firebase.yml](.github/workflows/deploy_firebase.yml).
+
+### Deploy with Firebase App Hosting
+
+The Next.js site under `web/` is built and rolled out by App Hosting itself, not by any workflow in this repository. Backend `prod` tracks `main`, `dev` tracks `develop`, and both use `web` as their root directory.
+
+Both skip a push whose changes all fall outside the site. **The path list is not stored in this repository** — it belongs to the backend's rollout policy, so change it in Firebase console → App Hosting → the backend → deployment settings → ignored paths:
+
+```
+api/**,.github/**,docs/**,.claude/**,.cursor/**,.vscode/**,**.md
+```
+
+Instance limits do live here: [web/apphosting.yaml](web/apphosting.yaml), overridden for `dev` by `web/apphosting.dev.yaml`.
 
 ### Deploy Manually
 
@@ -182,7 +191,7 @@ firebase deploy --only functions,hosting
 ## Set secret environment variables
 
 1. Create env in [secret manager](https://console.cloud.google.com/security/secret-manager?project=windy10v10ai)
-2. Set function run with secrets in [index.ts](api/src/index.ts)
+2. Set function run with secrets in [index.ts](api/index.ts)
 3. Use secrets as `process.env.SECRET_NAME` in code
 
 ## Allow/Disable unauthenticated HTTP function invocation

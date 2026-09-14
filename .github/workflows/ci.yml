@@ -33,7 +33,7 @@ jobs:
 
           while IFS= read -r file; do
             case "$file" in
-              api/*|database.rules.json|firestore.indexes.json|firestore.rules)
+              api/*|firestore.indexes.json|firestore.rules)
                 api=true
                 ;;
               web/*)
