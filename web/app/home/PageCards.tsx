@@ -40,7 +40,7 @@ export default function PageCards() {
 
   return (
     <Section title={t('title')} containerClassName="max-w-none">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {PAGE_CARDS.map(({ key, Icon, iconClass }) => {
           const href = hrefOf[key] ?? null;
           const title = t(`${key}.title`);

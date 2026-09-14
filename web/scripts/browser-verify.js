@@ -3,6 +3,7 @@ const { chromium } = require('playwright-core');
 const VIEWPORTS = {
   375: { width: 375, height: 800 },
   768: { width: 768, height: 900 },
+  1024: { width: 1024, height: 900 },
   1280: { width: 1280, height: 900 },
 };
 
