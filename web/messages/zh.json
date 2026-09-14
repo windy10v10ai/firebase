@@ -421,7 +421,8 @@
     "signOut": "退出",
     "callbackLoading": "正在登录",
     "callbackError": "登录校验失败，请重试",
-    "retry": "重试",
+    "errorCode": "错误码 {code}",
+    "retry": "请稍后重试",
     "checkingLogin": "正在确认登录状态",
     "profileTooltip": "查看个人主页",
     "panel": {

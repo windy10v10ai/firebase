@@ -421,7 +421,8 @@
     "signOut": "Sign out",
     "callbackLoading": "Signing in…",
     "callbackError": "Sign-in verification failed. Please try again.",
-    "retry": "Retry",
+    "errorCode": "Error code: {code}",
+    "retry": "Try again later",
     "checkingLogin": "Checking sign-in status",
     "profileTooltip": "View your profile",
     "panel": {

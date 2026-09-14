@@ -10,7 +10,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
+// 线上把 Firebase Auth 的请求转到本站域名，再由 rewrites 转发出去，绕开直连不通的网络；
+// SDK 没有公开的地址覆盖参数，连模拟器是唯一的入口，代价与取舍见 docs/web/README.md。
 // 模拟器不校验 apiKey，本地开发不需要真实 Firebase 项目配置
-if (process.env.NODE_ENV === 'development') {
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+if (typeof window !== 'undefined') {
+  const authBaseUrl =
+    process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:9099' : window.location.origin;
+  connectAuthEmulator(auth, authBaseUrl, { disableWarnings: true });
 }
