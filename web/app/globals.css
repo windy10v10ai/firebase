@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* 配色分工见 docs/design/web/phase-12-color-system.md，底色与货币色取值与游戏内界面对齐，见 phase-7-visual-style.md */
+/* 配色分工见 docs/design/web/phase-12-color-system.md，取值见 docs/web/design-system.md */
 @theme {
   --color-surface: #09090b;
   --color-panel: #0f0f11;
@@ -87,7 +87,7 @@
   }
 
   /*
-   * 内边距按宽度收放，见 docs/design/web/phase-7-visual-style.md。
+   * 内边距按宽度收放，三个类的分工与用法见 web/CLAUDE.md 的「内边距」。
    * 页面外壳、卡片、嵌入块三层在窄屏会叠加，各自写死会把 375 的正文挤掉近三成。
    */
   .card-pad {
