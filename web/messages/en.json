@@ -5,7 +5,7 @@
     "profile": "Profile",
     "profileFull": "Profile",
     "property": "Attributes",
-    "propertyFull": "Attribute Points",
+    "propertyFull": "Attributes",
     "awaken": "Awaken",
     "awakenFull": "Hero Awakening",
     "wiki": "Skills & Items",
@@ -51,7 +51,7 @@
         "premium": "Premium member",
         "normal": "Member",
         "expireDate": "Valid until {date}",
-        "expiredDate": "Membership expired on {date}"
+        "expired": "Membership expired"
       }
     },
     "sample": {
@@ -89,7 +89,7 @@
         "description": "Preview and refresh your daily tasks"
       },
       "wiki": {
-        "title": "Abilities & Items",
+        "title": "Skills & Items",
         "description": "The abilities and items in the opening draft"
       }
     }
@@ -422,7 +422,6 @@
     "callbackLoading": "Signing in…",
     "callbackError": "Sign-in verification failed. Please try again.",
     "retry": "Retry",
-    "checkingLogin": "Checking sign-in status",
     "profileTooltip": "View your profile",
     "panel": {
       "title": "Steam sign-in required",

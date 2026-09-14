@@ -8,7 +8,8 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import Button from '@/app/components/ui/button';
 import Spinner from '@/app/components/ui/spinner';
 import { apiFetch } from '@/app/lib/api';
-import { buildSteamLoginUrl, isSafeNextPath } from '@/app/lib/steam-login';
+import { useAuth } from '@/app/lib/auth';
+import { isSafeNextPath } from '@/app/lib/steam-login';
 import { auth } from '@/config/firebase';
 
 interface SteamVerifyResponse {
@@ -19,6 +20,7 @@ function LoginCallbackContent() {
   const t = useTranslations('auth');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { loginUrl } = useAuth();
   const [error, setError] = useState(false);
 
   const nextParam = searchParams.get('next');
@@ -55,7 +57,7 @@ function LoginCallbackContent() {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center text-content">
         <p>{t('callbackError')}</p>
-        <Button onClick={() => (window.location.href = buildSteamLoginUrl(next))}>
+        <Button onClick={() => (window.location.href = loginUrl(next))}>
           {t('retry')}
         </Button>
       </div>

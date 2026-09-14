@@ -1,11 +1,9 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
-import PageSkeleton from '@/app/components/PageSkeleton';
 import { useAuth } from '@/app/lib/auth';
 import { playerPagePath } from '@/app/lib/player-path';
 
@@ -14,7 +12,6 @@ import { playerPagePath } from '@/app/lib/player-path';
  * 登录判断集中在这里，`/profile/<id>/*` 自己不写。
  */
 export default function MyPage() {
-  const t = useTranslations('auth');
   const auth = useAuth();
   const router = useRouter();
   const params = useParams<{ path?: string[] }>();
@@ -33,5 +30,6 @@ export default function MyPage() {
     return <LoginPanel />;
   }
 
-  return <PageSkeleton label={t('checkingLogin')} />;
+  // 已登录只做跳转，中转页本身不渲染内容
+  return null;
 }
