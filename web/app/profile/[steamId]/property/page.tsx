@@ -8,7 +8,6 @@ import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import PageSkeleton from '@/app/components/PageSkeleton';
 import { ApiError } from '@/app/lib/api';
-import { useAuth } from '@/app/lib/auth';
 import {
   fetchPlayerProperties,
   resetProperties,
@@ -36,7 +35,6 @@ const RESET_KEY = 'reset';
 export default function PropertyPage() {
   const t = useTranslations('property');
   const { steamId } = useParams<{ steamId: string }>();
-  const auth = useAuth();
 
   const [result, setResult] = useState<LoadResult | null>(null);
   // 属性名 → 还没提交的档数
@@ -46,15 +44,9 @@ export default function PropertyPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [failedAction, setFailedAction] = useState<string | null>(null);
 
-  const authResolved = auth.status !== 'loading';
   const loaded = result?.steamId === steamId ? result : null;
 
   useEffect(() => {
-    // 登录态还在恢复时请求发不出 token，会拿到一个不代表真实结果的 401
-    if (!authResolved) {
-      return;
-    }
-
     let cancelled = false;
 
     fetchPlayerProperties(steamId)
@@ -76,7 +68,7 @@ export default function PropertyPage() {
     return () => {
       cancelled = true;
     };
-  }, [authResolved, steamId]);
+  }, [steamId]);
 
   /** 请求失败后重新拉一次，免得界面停在已经不成立的数值上 */
   const resync = useCallback(async () => {
@@ -175,7 +167,7 @@ export default function PropertyPage() {
       />
 
       {failedAction ? (
-        <p role="alert" className="card-container border-danger/40 p-4 text-sm text-danger">
+        <p role="alert" className="card-container card-pad-sm border-danger/40 text-sm text-danger">
           {t(`error.${failedAction}`)}
         </p>
       ) : null}
@@ -190,7 +182,7 @@ export default function PropertyPage() {
                 {t(`group.${group}.hint`, { count: defs.length })}
               </span>
             </div>
-            <div className="grid gap-3 lg:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {defs.map((def) => {
                 const pendingCells = pending[def.name] ?? 0;
                 return (

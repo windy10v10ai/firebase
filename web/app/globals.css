@@ -63,6 +63,24 @@
     @apply rounded-[10px] border border-line bg-panel;
   }
 
+  /*
+   * 内边距按宽度收放，见 docs/design/web/phase-7-visual-style.md。
+   * 页面外壳、卡片、嵌入块三层在窄屏会叠加，各自写死会把 375 的正文挤掉近三成。
+   */
+  .card-pad {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  /* 网格里成排出现的条目卡，比整块区域卡再小一档 */
+  .card-pad-sm {
+    @apply p-3 sm:p-4;
+  }
+
+  /* 卡片内部的嵌入块，外面已有卡片那一层留白，只留最小一档 */
+  .box-pad {
+    @apply px-3 py-3 sm:px-4 sm:py-3.5;
+  }
+
   .card-hover {
     @apply transition-colors hover:border-season-border;
   }
@@ -96,6 +114,11 @@
     background-image: linear-gradient(90deg, #4f48b2, #0f033a);
   }
 
+  /* 可以开始但还不提交的一步：要看得出能点，又要比实心的确认按钮弱一档 */
+  .btn-season-outline {
+    @apply inline-flex min-h-11 items-center justify-center rounded-[7px] border border-[#7a6fd0] bg-season-soft px-5 text-sm font-extrabold text-accent-hover transition-[filter] md:min-h-10;
+  }
+
   /* 赞助平台各自的按钮，渐变按 game 的做法从品牌色压到同色深档 */
   .btn-afdian {
     border-color: #a98bec;
@@ -109,6 +132,7 @@
 
   .btn-member:hover,
   .btn-season:hover,
+  .btn-season-outline:hover,
   .btn-afdian:hover,
   .btn-kofi:hover {
     filter: brightness(1.12);
@@ -116,6 +140,7 @@
 
   .btn-member:active,
   .btn-season:active,
+  .btn-season-outline:active,
   .btn-afdian:active,
   .btn-kofi:active {
     filter: brightness(0.9);
@@ -124,6 +149,7 @@
   /* 金底只降透明度仍看得清字，紫底会糊，所以禁用态换成灰底灰字 */
   .btn-member:disabled,
   .btn-season:disabled,
+  .btn-season-outline:disabled,
   .btn-afdian:disabled,
   .btn-kofi:disabled {
     @apply cursor-not-allowed border-line bg-panel-soft bg-none text-[#5d5d66];

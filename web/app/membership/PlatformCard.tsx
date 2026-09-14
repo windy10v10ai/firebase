@@ -16,7 +16,7 @@ export default function PlatformCard({
   buttonClassName,
 }: PlatformCardProps) {
   return (
-    <div className="card-container p-4 sm:p-6 flex flex-col items-center text-center gap-3">
+    <div className="card-container card-pad flex flex-col items-center text-center gap-3">
       <h3 className={`title-secondary ${titleClassName}`}>{title}</h3>
       <p className="text-member text-xl font-bold">{price}</p>
       <a

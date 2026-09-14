@@ -53,7 +53,7 @@ export default function PageCards() {
             return (
               <div
                 key={key}
-                className="flex flex-col gap-2 rounded-[10px] border border-dashed border-line bg-panel p-4"
+                className="card-pad-sm flex flex-col gap-2 rounded-[10px] border border-dashed border-line bg-panel"
               >
                 <div className="flex items-center gap-2">
                   {icon}
@@ -68,7 +68,7 @@ export default function PageCards() {
           }
 
           return (
-            <Link key={key} href={href} className="card-container card-hover flex flex-col gap-2 p-4">
+            <Link key={key} href={href} className="card-container card-pad-sm card-hover flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 {icon}
                 <span className="flex-1 text-lg font-bold text-heading">{title}</span>

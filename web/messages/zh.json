@@ -2,7 +2,7 @@
   "navigation": {
     "home": "Windy10v10ai",
     "homeShort": "10v10AI",
-    "profile": "我的",
+    "profile": "个人主页",
     "profileFull": "个人主页",
     "property": "属性",
     "propertyFull": "属性加点",
@@ -51,7 +51,7 @@
         "premium": "高级会员",
         "normal": "普通会员",
         "expireDate": "有效期至：{date}",
-        "expiredDate": "会员已于 {date} 到期"
+        "expired": "会员已过期"
       }
     },
     "sample": {
@@ -347,26 +347,26 @@
       },
       "skill": {
         "title": "额外技能点",
-        "hint": "解锁比别的属性慢一倍：英雄每 4 级才到手 1 个 · {count} 条"
+        "hint": "解锁比别的属性慢一倍：英雄每 4 级才到手 1 点 · {count} 条"
       }
     },
     "card": {
       "level": "{level}/{max} 级",
-      "levelChange": "{from} → {to}/{max} 级",
       "perCell": "每级 {value}",
-      "perCellCost": "消耗 {cost} 点",
-      "skillValue": "{value} 个",
+      "stepCost": "每次升级消耗 {cost} 属性点",
+      "skillValue": "{value} 点",
       "full": "满级",
       "owned": "已获取",
       "notOwned": "未获取",
       "scalingBadge": "随英雄升级",
-      "skillBadge": "英雄每 4 级 1 个",
+      "skillBadge": "英雄每 4 级 1 点",
       "effectNote": "加到 {level} 级，英雄 {heroLevel} 级时全部生效",
       "effectEmpty": "加点之后这里会写出需要的英雄等级",
       "cellTip": "第 {cell} 级 · 英雄 {heroLevel} 级起生效",
       "upgrade": "升级",
       "upgradeTo": "升至 {level} 级",
-      "unlock": "使用 {cost} 点属性点升级",
+      "oneShotCost": "消耗 {cost} 属性点",
+      "notEnough": "属性点不足",
       "maxed": "已满级",
       "decrease": "少加一级",
       "increase": "多加一级"
@@ -421,8 +421,8 @@
     "signOut": "退出",
     "callbackLoading": "正在登录",
     "callbackError": "登录校验失败，请重试",
-    "retry": "重试",
-    "checkingLogin": "正在确认登录状态",
+    "errorCode": "错误码 {code}",
+    "retry": "请稍后重试",
     "profileTooltip": "查看个人主页",
     "panel": {
       "title": "需要 Steam 登录",

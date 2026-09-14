@@ -35,7 +35,7 @@ export default function FeatureEntryCard({
     </>
   );
 
-  const className = 'card-container flex items-center gap-4 p-4 sm:p-5';
+  const className = 'card-container card-pad-sm flex items-center gap-4';
 
   if (!href) {
     return <div className={className}>{body}</div>;

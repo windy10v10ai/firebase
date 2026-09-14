@@ -11,7 +11,6 @@ import Input from '@/app/components/ui/input';
 import Spinner from '@/app/components/ui/spinner';
 import { apiFetch } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
-import { buildSteamLoginUrl } from '@/app/lib/steam-login';
 
 import ActiveResult from './ActiveResult';
 import {
@@ -139,7 +138,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
             </p>
           </div>
 
-          <form noValidate onSubmit={handleSubmit} className="card-container space-y-6 p-5 sm:p-8">
+          <form noValidate onSubmit={handleSubmit} className="card-container card-pad space-y-6">
             <Field
               required
               htmlFor="inputSteamId"
@@ -162,7 +161,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
                       <span aria-hidden="true" className="hidden text-muted sm:inline">
                         /
                       </span>
-                      <a href={buildSteamLoginUrl(pathname)} className={helpLinkClass}>
+                      <a href={auth.loginUrl(pathname)} className={helpLinkClass}>
                         {t('input.steamId.steamAutoFill')}
                       </a>
                     </>

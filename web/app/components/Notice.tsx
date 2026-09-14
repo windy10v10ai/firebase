@@ -6,7 +6,7 @@ interface NoticeProps {
 /** 正文区整块换成一条说明：需要登录、资料未公开、读取失败都用它 */
 export default function Notice({ title, children }: NoticeProps) {
   return (
-    <section className="card-container mx-auto max-w-xl space-y-5 p-4 sm:p-6 lg:p-8">
+    <section className="card-container card-pad mx-auto max-w-xl space-y-5">
       <h1 className="title-primary">{title}</h1>
       {children}
     </section>

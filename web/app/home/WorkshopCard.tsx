@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import SteamIcon from '@/app/components/SteamIcon';
-import { STEAM_BUTTON_CLASS, STEAM_BUTTON_SIZE_CLASS } from '@/app/components/SteamLoginButton';
+import { STEAM_BUTTON_CLASS, STEAM_BUTTON_SIZE_CLASS } from '@/app/components/ui/button';
 import { EXTERNAL_LINKS } from '@/config/links';
 
 const WORKSHOP_HREF = EXTERNAL_LINKS.find((link) => link.labelKey === 'workshop')!.href;
@@ -11,7 +11,7 @@ export default function WorkshopCard() {
   const t = useTranslations('home.workshop');
 
   return (
-    <section className="card-container flex flex-col gap-4 p-4 sm:p-6">
+    <section className="card-container card-pad flex flex-col gap-4">
       <div className="space-y-2">
         <h2 className="title-secondary">{t('title')}</h2>
         <p className="text-content">{t('description')}</p>

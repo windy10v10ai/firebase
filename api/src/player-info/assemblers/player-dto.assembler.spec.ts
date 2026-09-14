@@ -111,4 +111,26 @@ describe('PlayerDtoAssembler', () => {
       expect(dto.useableMemberPoint).toBe(0);
     });
   });
+
+  describe('commendCount / reportCount', () => {
+    it('fields missing on the player document default to 0', async () => {
+      const dto = await assembler.assemblePlayerInfoDto(
+        makePlayer({ commendCount: undefined, reportCount: undefined }),
+        [],
+      );
+
+      expect(dto.commendCount).toBe(0);
+      expect(dto.reportCount).toBe(0);
+    });
+
+    it('existing counts are kept', async () => {
+      const dto = await assembler.assemblePlayerInfoDto(
+        makePlayer({ commendCount: 5, reportCount: 2 }),
+        [],
+      );
+
+      expect(dto.commendCount).toBe(5);
+      expect(dto.reportCount).toBe(2);
+    });
+  });
 });

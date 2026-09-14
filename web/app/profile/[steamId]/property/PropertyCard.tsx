@@ -2,7 +2,7 @@
 
 import { Minus, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 
 import {
   PROPERTY_MAX_LEVEL,
@@ -10,6 +10,7 @@ import {
   formatPropertyValue,
   heroLevelForCell,
   isOneShot,
+  levelsPerCell,
   valuePerCell,
   type PropertyDef,
 } from '@/config/properties';
@@ -27,9 +28,28 @@ interface PropertyCardProps {
   onUpgrade: (targetLevel: number) => void;
 }
 
+type CellState = 'filled' | 'pending' | 'empty';
+
 /** 浮层左对齐并且只在需要时渲染：留在原地会把窄屏撑出横向滚动条 */
 const TOOLTIP_CLASS =
   'pointer-events-none absolute bottom-[calc(100%+8px)] z-10 rounded-md border border-line bg-panel-soft px-2.5 py-1.5 text-xs whitespace-nowrap text-content';
+
+/** 按属性等级逐级取色，冰蓝过渡到勇士紫：只用一种紫，加满的页面就只剩黑和紫 */
+const LEVEL_COLORS = ['#86c5f0', '#8cb3f0', '#949ff0', '#9e8cec', '#a67be8', '#a26ae2', '#9b5de0', '#8d4dd4'];
+
+/** 升级按钮固定占一半宽：文字随暂存档数变化时，加减器和按钮都不跟着移动 */
+const ACTION_CLASS = 'w-1/2 shrink-0 px-3 whitespace-nowrap';
+
+function cellStyle(color: string, state: CellState, full: boolean): CSSProperties | undefined {
+  if (state === 'filled') {
+    return { backgroundColor: color, boxShadow: full ? `0 0 6px ${color}66` : undefined };
+  }
+  // 暂存的格子用同色半透明加描边，和已拥有的实色格区分
+  if (state === 'pending') {
+    return { backgroundColor: `${color}5c`, boxShadow: `inset 0 0 0 1px ${color}` };
+  }
+  return undefined;
+}
 
 /** 悬停或聚焦才出现的说明 */
 function Hint({ label, tip }: { label: string; tip: string }) {
@@ -79,18 +99,27 @@ export default function PropertyCard({
   const target = level + pendingCells * def.levelPerStep;
   const targetFilled = cellsFilled(def, target);
   const full = level >= PROPERTY_MAX_LEVEL;
+  const staged = pendingCells > 0;
+  const canStage = canAdd && targetFilled < def.barCells;
 
   const cells = Array.from({ length: def.barCells }, (_, index) => {
     const cell = index + 1;
-    const state = cell <= filled ? 'filled' : cell <= targetFilled ? 'pending' : 'empty';
-    return { cell, state };
+    const state: CellState = cell <= filled ? 'filled' : cell <= targetFilled ? 'pending' : 'empty';
+    return { cell, state, color: LEVEL_COLORS[cell * levelsPerCell(def) - 1] };
   });
 
+  const hint =
+    target > 0
+      ? t('card.effectNote', { level: targetFilled, heroLevel: heroLevelForCell(def, targetFilled) })
+      : t('card.effectEmpty');
+
   return (
-    <div className="card-container flex flex-col gap-3 p-3 sm:p-4">
+    <div className="card-container card-pad-sm flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-panel-soft text-muted">
-          <def.Icon className="size-5" />
+        <span
+          className={`flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-panel-soft ${level > 0 ? 'text-content' : 'text-muted'}`}
+        >
+          <def.Icon className="size-7" strokeWidth={1.75} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -100,43 +129,17 @@ export default function PropertyCard({
                 {t('card.full')}
               </span>
             ) : null}
-            {def.group === 'scaling' ? (
-              <Hint
-                label={t('card.scalingBadge')}
-                tip={
-                  target > 0
-                    ? t('card.effectNote', {
-                        level: targetFilled,
-                        heroLevel: heroLevelForCell(def, targetFilled),
-                      })
-                    : t('card.effectEmpty')
-                }
-              />
-            ) : null}
-            {def.group === 'skill' ? (
-              <Hint
-                label={t('card.skillBadge')}
-                tip={
-                  target > 0
-                    ? t('card.effectNote', {
-                        level: targetFilled,
-                        heroLevel: heroLevelForCell(def, targetFilled),
-                      })
-                    : t('card.effectEmpty')
-                }
-              />
-            ) : null}
+            {def.group === 'scaling' ? <Hint label={t('card.scalingBadge')} tip={hint} /> : null}
+            {def.group === 'skill' ? <Hint label={t('card.skillBadge')} tip={hint} /> : null}
           </div>
+          {/* 只写当前等级，暂存后的变化已经由进度条、数值和按钮文字表达 */}
           <span className="text-xs text-muted">
-            {pendingCells > 0
-              ? t('card.levelChange', { from: filled, to: targetFilled, max: def.barCells })
-              : t('card.level', { level: filled, max: def.barCells })}
+            {t('card.level', { level: filled, max: def.barCells })}
             {oneShot
               ? null
-              : ` · ${t('card.perCell', { value: def.group === 'skill' ? t('card.skillValue', { value: valuePerCell(def) }) : valuePerCell(def) })}`}
-            {!oneShot && def.levelPerStep > 1
-              ? ` · ${t('card.perCellCost', { cost: def.levelPerStep })}`
-              : null}
+              : def.levelPerStep > 1
+                ? ` · ${t('card.stepCost', { cost: def.levelPerStep })}`
+                : ` · ${t('card.perCell', { value: valuePerCell(def) })}`}
           </span>
         </div>
         <div className="flex shrink-0 items-baseline gap-1.5">
@@ -146,15 +149,11 @@ export default function PropertyCard({
             </span>
           ) : (
             <>
-              <span className="text-xl font-bold text-content">
-                {valueText(def, level)}
-              </span>
-              {pendingCells > 0 ? (
+              <span className="text-xl font-bold text-content">{valueText(def, level)}</span>
+              {staged ? (
                 <>
                   <span className="text-xs text-muted">→</span>
-                  <span className="text-xl font-bold text-season">
-                    {valueText(def, target)}
-                  </span>
+                  <span className="text-xl font-bold text-season">{valueText(def, target)}</span>
                 </>
               ) : null}
             </>
@@ -165,7 +164,7 @@ export default function PropertyCard({
       {/* 进度条只是把等级画出来，数值和等级都已经有文字，读屏不用再念一遍 */}
       <div aria-hidden="true" className="relative">
         <div className="flex gap-1">
-          {cells.map(({ cell, state }) => (
+          {cells.map(({ cell, state, color }) => (
             <span
               key={cell}
               onMouseEnter={() => setHoveredCell(cell)}
@@ -173,13 +172,8 @@ export default function PropertyCard({
               className="flex flex-1 cursor-help items-center py-1"
             >
               <span
-                className={`h-2.5 flex-1 rounded-sm ${
-                  state === 'filled'
-                    ? 'bg-season-strong'
-                    : state === 'pending'
-                      ? 'bg-season-strong/40'
-                      : 'bg-panel-soft'
-                }`}
+                className={`h-2.5 flex-1 rounded-sm ${state === 'empty' ? 'bg-panel-soft' : ''}`}
+                style={cellStyle(color, state, full)}
               />
             </span>
           ))}
@@ -195,53 +189,62 @@ export default function PropertyCard({
         )}
       </div>
 
-      {oneShot ? (
-        <button
-          type="button"
-          disabled={full || !canAdd || busy}
-          onClick={() => onUpgrade(PROPERTY_MAX_LEVEL)}
-          className="btn-season w-full"
-        >
-          {full ? t('card.maxed') : t('card.unlock', { cost: PROPERTY_MAX_LEVEL })}
-        </button>
+      {full ? (
+        // 满级不留按钮，同高的一条让同一行的卡片仍然对齐
+        <p className="flex min-h-11 items-center justify-center rounded-[7px] bg-panel-soft text-sm text-muted">
+          {t('card.maxed')}
+        </p>
+      ) : oneShot ? (
+        <div className="flex items-center justify-between gap-2.5">
+          <span className="min-w-0 text-sm text-muted">
+            {t('card.oneShotCost', { cost: PROPERTY_MAX_LEVEL })}
+          </span>
+          <button
+            type="button"
+            disabled={!canAdd || busy}
+            onClick={() => onUpgrade(PROPERTY_MAX_LEVEL)}
+            className={`btn-season ${ACTION_CLASS}`}
+          >
+            {canAdd ? t('card.upgrade') : t('card.notEnough')}
+          </button>
+        </div>
       ) : (
-        <div className="flex items-center gap-2.5">
-          <div className="flex flex-1 items-center overflow-hidden rounded-[7px] border border-line bg-control">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex w-[136px] shrink-0 items-center overflow-hidden rounded-[7px] border border-line bg-control">
             <button
               type="button"
               aria-label={t('card.decrease')}
-              disabled={pendingCells === 0 || busy}
+              disabled={!staged || busy}
               onClick={() => onPendingChange(pendingCells - 1)}
               className="flex size-11 items-center justify-center text-content transition-colors hover:bg-control-hover disabled:opacity-35 disabled:hover:bg-control"
             >
               <Minus className="size-4" />
             </button>
-            <span
-              className={`flex-1 text-center font-bold ${pendingCells > 0 ? 'text-season' : 'text-muted'}`}
-            >
-              {pendingCells > 0 ? `+${pendingCells}` : 0}
+            <span className={`flex-1 text-center font-bold ${staged ? 'text-season' : 'text-muted'}`}>
+              {staged ? `+${pendingCells}` : 0}
             </span>
             <button
               type="button"
               aria-label={t('card.increase')}
-              disabled={!canAdd || targetFilled >= def.barCells || busy}
+              disabled={!canStage || busy}
               onClick={() => onPendingChange(pendingCells + 1)}
               className="flex size-11 items-center justify-center text-content transition-colors hover:bg-control-hover disabled:opacity-35 disabled:hover:bg-control"
             >
               <Plus className="size-4" />
             </button>
           </div>
+          {/* 还没调整时点升级只是先加一档，不直接扣点；灰色只留给点不了的情况 */}
           <button
             type="button"
-            disabled={pendingCells === 0 || busy}
-            onClick={() => onUpgrade(target)}
-            className="btn-season shrink-0"
+            disabled={busy || (!staged && !canStage)}
+            onClick={() => (staged ? onUpgrade(target) : onPendingChange(1))}
+            className={`${staged || !canStage ? 'btn-season' : 'btn-season-outline'} ${ACTION_CLASS}`}
           >
-            {full
-              ? t('card.maxed')
-              : pendingCells > 0
-                ? t('card.upgradeTo', { level: targetFilled })
-                : t('card.upgrade')}
+            {staged
+              ? t('card.upgradeTo', { level: targetFilled })
+              : canStage
+                ? t('card.upgrade')
+                : t('card.notEnough')}
           </button>
         </div>
       )}

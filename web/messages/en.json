@@ -5,7 +5,7 @@
     "profile": "Profile",
     "profileFull": "Profile",
     "property": "Attributes",
-    "propertyFull": "Attribute Points",
+    "propertyFull": "Attributes",
     "awaken": "Awaken",
     "awakenFull": "Hero Awakening",
     "wiki": "Skills & Items",
@@ -51,7 +51,7 @@
         "premium": "Premium member",
         "normal": "Member",
         "expireDate": "Valid until {date}",
-        "expiredDate": "Membership expired on {date}"
+        "expired": "Membership expired"
       }
     },
     "sample": {
@@ -89,7 +89,7 @@
         "description": "Preview and refresh your daily tasks"
       },
       "wiki": {
-        "title": "Abilities & Items",
+        "title": "Skills & Items",
         "description": "The abilities and items in the opening draft"
       }
     }
@@ -352,9 +352,8 @@
     },
     "card": {
       "level": "Level {level}/{max}",
-      "levelChange": "Level {from} → {to}/{max}",
       "perCell": "{value} per level",
-      "perCellCost": "{cost} points each",
+      "stepCost": "{cost} attribute points per upgrade",
       "skillValue": "{value}",
       "full": "Maxed",
       "owned": "Owned",
@@ -366,7 +365,8 @@
       "cellTip": "Level {cell} · active from hero level {heroLevel}",
       "upgrade": "Upgrade",
       "upgradeTo": "Upgrade to {level}",
-      "unlock": "Upgrade for {cost} points",
+      "oneShotCost": "Costs {cost} attribute points",
+      "notEnough": "Not enough points",
       "maxed": "Maxed out",
       "decrease": "One level fewer",
       "increase": "One level more"
@@ -421,8 +421,8 @@
     "signOut": "Sign out",
     "callbackLoading": "Signing in…",
     "callbackError": "Sign-in verification failed. Please try again.",
-    "retry": "Retry",
-    "checkingLogin": "Checking sign-in status",
+    "errorCode": "Error code: {code}",
+    "retry": "Try again later",
     "profileTooltip": "View your profile",
     "panel": {
       "title": "Steam sign-in required",

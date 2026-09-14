@@ -56,7 +56,7 @@ export default function ResetDialog({
       }}
       className="card-container m-auto w-[min(28rem,calc(100vw-2rem))] p-0 text-content backdrop:bg-black/60"
     >
-      <div className="flex flex-col gap-5 p-5 sm:p-6">
+      <div className="card-pad flex flex-col gap-5">
         <div className="flex flex-col gap-2.5">
           <h2 className="title-secondary">{t('title')}</h2>
           <p className="leading-relaxed text-content">{t('description')}</p>
