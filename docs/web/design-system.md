@@ -22,9 +22,9 @@
 
 **为什么这样分**：紫色曾经同时是勇士积分色、全站交互色和默认按钮色，每一页都满是紫，玩家分不清哪块紫在说积分、哪块在说「能点」。一种颜色只承担一种含义，含义才读得出来。
 
-![头部与菜单：当前页标记用主色，菜单图标用功能色，皇冠仍是会员金](images/design-system/header-menu.jpg)
-
 ## 2. 取值
+
+![配色色板：中性、货币、网站主色、功能色、品牌色、状态色](images/design-system/palette.jpg)
 
 ### 中性与货币
 
@@ -76,10 +76,6 @@
 - **扩展顺序**：新功能先取预留 1，再取预留 2。它们分别离成功绿、主色蓝约 20°，排在最后；用完后新功能用中性图标，不再往色环里挤
 - 带含义的色相不做功能色：主色蓝、会员金、成功绿、危险红。不属于某个功能的入口（如个人主页）用中性灰
 
-![首页主要页面：图标按功能上色，鼠标停在第一张卡上时描边为主色标记档](images/design-system/home-page-cards.jpg)
-
-![个人主页：入口卡的图标底块用功能色，箭头与标签保持中性](images/design-system/profile.jpg)
-
 ### 品牌色
 
 | 平台 | token | 取值 | 与站内哪个颜色同色系 |
@@ -95,10 +91,6 @@
 - 例外：平台 SDK 自己渲染、且规定了外观的按钮（如 PayPal 智能按钮），照平台规定
 - 新增平台时加 token，并在上表登记它和谁同色系
 
-![会员页平台卡：平台名用品牌色，订阅按钮用网站主按钮](images/design-system/membership-platforms.jpg)
-
-![激活页标题就是平台名，用品牌色](images/design-system/regist-title.jpg)
-
 ### 状态色
 
 | token | 取值 | 用途 |
@@ -108,6 +100,8 @@
 | `--color-warning` | `#f5a623` | 警告 |
 
 ## 3. 按钮
+
+![按钮：网站按钮与游戏按钮在各状态下的样子，以及尺寸](images/design-system/buttons.jpg)
 
 ### 选哪种
 
@@ -140,8 +134,6 @@
 
 **请求进行中**：按钮内 16px 转圈，文字换成进行时，同时禁用；不盖整页遮罩。
 
-![登录失败页：主按钮与文字按钮并排](images/design-system/login-failed.jpg)
-
 ### 游戏按钮
 
 取值照搬游戏仓库 `src/panorama/react/shared/styles/buttons.less`，**不改**，属性、觉醒页要与游戏内同名操作长得一样。
@@ -153,8 +145,6 @@
 | `.btn-season-outline` | `season-soft` | `#7a6fd0` | `#bda0f0` |
 
 悬停 `brightness(1.12)`，按下 `brightness(0.9)`；禁用换成灰底灰字而不是降透明度——金底降透明度仍看得清，紫底会糊。
-
-![属性页：加点用游戏紫按钮，等级框是带箭头的入口](images/design-system/property-page.jpg)
 
 ## 4. 可点击元素
 
