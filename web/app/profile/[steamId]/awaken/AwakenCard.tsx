@@ -9,6 +9,11 @@ import { awakenAssetPath } from '@/app/lib/awaken';
 
 import type { AwakenHero } from '@/config/awaken';
 
+const BADGE_CLASS =
+  'rounded border border-success bg-black/60 px-1.5 text-[11px] font-bold text-success';
+/* 左边那个配平用的空位要能被挤掉：shrink 给大，缺宽度时先压它，压没了才轮到名字截断 */
+const BADGE_SPACER_CLASS = `${BADGE_CLASS} invisible min-w-0 overflow-hidden [flex-shrink:999]`;
+
 interface AwakenCardProps {
   hero: AwakenHero;
   /** 数据没到时为 null */
@@ -58,18 +63,23 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
         }`}
       />
       <div className="absolute inset-x-0 top-0 h-10 bg-linear-to-b from-surface/80 to-transparent" />
-      {/* 角标与英雄名同排：压在名字上的话，卡片一窄，截断后的名字末尾就被角标盖住 */}
-      <div className="absolute inset-x-1.5 top-1.5 flex items-center gap-1">
-        <span className="min-w-0 flex-1 truncate text-center text-[13px] font-bold text-heading [text-shadow:0_2px_4px_rgba(0,0,0,0.95)]">
+      {/*
+       * 照 game：英雄名落在卡片正中，限免角标压在右上角。角标右边占多宽，左边就空多宽，
+       * 名字放得下时就落在中线上；放不下先把左边那个空位挤掉，让名字用满到角标为止。
+       * 角标的位置一直占着——限免是常量、已不已觉醒要等接口，数据到了才插进去会让名字动一次。
+       */}
+      <div className="absolute inset-x-1.5 top-1.5 flex items-center justify-center gap-1">
+        {hero.freeTrial ? (
+          // 装同样的文案才拿得到同样的宽度，角标换了语言也不用改这里
+          <span aria-hidden="true" className={BADGE_SPACER_CLASS}>
+            {t('freeTrial')}
+          </span>
+        ) : null}
+        <span className="min-w-0 truncate text-[13px] font-bold text-heading [text-shadow:0_2px_4px_rgba(0,0,0,0.95)]">
           {hero.name[locale]}
         </span>
-        {/* 限免是常量、已不已觉醒要等接口，角标的位置因此一直占着：数据到了才插进去会把名字挤窄一次 */}
         {hero.freeTrial ? (
-          <span
-            className={`shrink-0 rounded border border-success bg-black/60 px-1.5 text-[11px] font-bold text-success ${
-              unlocked === false ? '' : 'invisible'
-            }`}
-          >
+          <span className={`${BADGE_CLASS} shrink-0 ${unlocked === false ? '' : 'invisible'}`}>
             {t('freeTrial')}
           </span>
         ) : null}
