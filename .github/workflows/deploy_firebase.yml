@@ -3,6 +3,15 @@ on:
   push:
     branches:
       - main
+    # 用排除而不是白名单：这里漏掉一条只是多发一次，白名单漏掉一条会静默不发。
+    # 网站在 web/ 下，由 App Hosting 自己构建发布，与这个 workflow 无关。
+    paths-ignore:
+      - 'web/**'
+      - 'docs/**'
+      - '.claude/**'
+      - '.cursor/**'
+      - '.vscode/**'
+      - '**.md'
 
 permissions:
   contents: read
@@ -14,64 +23,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Resolve deploy targets
-        id: scope
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          functions=false
-          hosting=false
-          rules=false
-          indexes=false
-
-          deploy_everything() {
-            functions=true
-            hosting=true
-            rules=true
-            indexes=true
-          }
-
-          # 首次 push 与 force push 的 before 指向取不到的提交，宁可多发一次也不能漏发
-          if ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
-            deploy_everything
-          else
-            while IFS= read -r file; do
-              case "$file" in
-                api/*|.nvmrc)
-                  functions=true
-                  ;;
-                public/*)
-                  hosting=true
-                  ;;
-                firestore.rules)
-                  rules=true
-                  ;;
-                firestore.indexes.json)
-                  indexes=true
-                  ;;
-                firebase.json|.firebaserc|.github/workflows/deploy_firebase.yml)
-                  deploy_everything
-                  ;;
-              esac
-            done < <(git diff --name-only --no-renames "$BEFORE_SHA...$HEAD_SHA")
-          fi
-
-          targets=()
-          if [[ "$functions" == true ]]; then targets+=(functions); fi
-          if [[ "$hosting" == true ]]; then targets+=(hosting); fi
-          if [[ "$rules" == true ]]; then targets+=(firestore:rules); fi
-          if [[ "$indexes" == true ]]; then targets+=(firestore:indexes); fi
-
-          only=$(IFS=,; echo "${targets[*]}")
-          echo "only=$only" >> "$GITHUB_OUTPUT"
-          echo "Deploy targets: ${only:-<none>}"
 
       - name: Setup Node
-        if: contains(steps.scope.outputs.only, 'functions')
         uses: actions/setup-node@v7
         with:
           node-version-file: '.nvmrc'
@@ -80,14 +33,12 @@ jobs:
 
       # firebase.json 的 functions predeploy 会在容器里 lint 和 build，但不装依赖
       - name: Install API dependencies
-        if: contains(steps.scope.outputs.only, 'functions')
         run: npm ci --prefix api
 
       - name: Deploy to Firebase
-        if: steps.scope.outputs.only != ''
         uses: w9jds/firebase-action@v15.22.3
         with:
-          args: deploy --only ${{ steps.scope.outputs.only }}
+          args: deploy --only functions,hosting,firestore
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WINDY10V10AI }}
           PROJECT_ID: windy10v10ai

@@ -148,15 +148,9 @@ More usage details, including configuration, authentication, and example code, p
 
 ### Deploy with Github Action
 
-Github Action will deploy automatically when push to main branch. Targets are resolved from the changed paths, and the job is skipped when nothing in the table below is touched.
+Github Action will deploy `functions`, `hosting` and `firestore` automatically when push to main branch.
 
-| Changed path | Deploy target |
-| --- | --- |
-| `api/**`, `.nvmrc` | `functions` |
-| `public/**` | `hosting` |
-| `firestore.rules` | `firestore:rules` |
-| `firestore.indexes.json` | `firestore:indexes` |
-| `firebase.json`, `.firebaserc`, the workflow itself | all of the above |
+A push is skipped entirely when every changed file sits in a path that cannot affect the Firebase deploy — `web/**`, `docs/**`, `.claude/**`, `.cursor/**`, `.vscode/**` and any `*.md`. The list lives in `paths-ignore` of [deploy_firebase.yml](.github/workflows/deploy_firebase.yml).
 
 The Next.js site under `web/` is not part of this workflow. Firebase App Hosting builds and rolls it out from its own GitHub integration.
 
