@@ -9,6 +9,8 @@ const TONE_CLASS = {
   awaken: { box: 'bg-feature-awaken-soft', icon: 'text-feature-awaken' },
 } as const;
 
+const BADGE_CLASS = 'rounded-full bg-panel-soft px-3 py-1 text-sm text-content';
+
 interface FeatureEntryCardProps {
   tone: keyof typeof TONE_CLASS;
   Icon: LucideIcon;
@@ -34,12 +36,10 @@ export default function FeatureEntryCard({
       <div className="min-w-0 flex-1">
         <div className="font-medium text-heading">{title}</div>
         <div className="text-sm text-muted">{description}</div>
+        {/* 手机宽度标签放右侧会把标题和描述挤成一词一行，挪到描述下方 */}
+        {badge ? <span className={`mt-1.5 inline-block md:hidden ${BADGE_CLASS}`}>{badge}</span> : null}
       </div>
-      {badge ? (
-        <span className="shrink-0 rounded-full bg-panel-soft px-3 py-1 text-sm text-content">
-          {badge}
-        </span>
-      ) : null}
+      {badge ? <span className={`hidden shrink-0 md:inline-block ${BADGE_CLASS}`}>{badge}</span> : null}
       <ChevronRight className="size-5 shrink-0 text-muted" aria-hidden="true" />
     </Link>
   );
