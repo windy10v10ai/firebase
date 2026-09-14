@@ -25,7 +25,7 @@ const config: NextConfig = {
       },
     ];
   },
-  // 网站页面、游戏客户端、支付宝回调共用这条转发，删掉会同时断掉登录与收款
+  // 不只服务页面：其他来源也经本站域名进 API，清单见 docs/api/README.md
   async rewrites() {
     return [
       {

@@ -19,7 +19,7 @@ export const apiFetch = async <Response>(path: string, init: RequestInit = {}) =
     headers.set('Authorization', `Bearer ${idToken}`);
   }
 
-  // 同源请求：部分网络连不到单独的 API 域名，而页面能打开就说明本站域名是通的
+  // 走同源，接口的可达性就和页面绑在一起
   const response = await fetch(path, {
     ...init,
     headers,
