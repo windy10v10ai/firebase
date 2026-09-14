@@ -33,6 +33,8 @@ Firestore
 - API 侧新增来源类型 `WEB` 与 `@AllowWeb()`，只有显式声明的路由接受网站来源；路由里的 `:steamId` 必须等于 token 的 uid，由 guard 统一拦。
 - 不用 session cookie，也不加网站专用 API key。登录凭据只在 Firebase SDK 手里，门禁只能做在浏览器里。
 - 另有一个 `player-uid` 提示 cookie，只供服务端决定首屏形态。**它不是凭据**：uid 本来就公开出现在地址里，API 只认 ID Token；任何鉴权、跳转、归属判断都不得依据它。
+- **Firebase Auth 的请求走本站域名转发，不直连 Google。** 换登录态与续期 token 由 SDK 直接打到 `googleapis.com`，部分网络到不了那里，表现是后端已经签发了 token、页面仍然报登录失败。`config/firebase.ts` 把 SDK 的请求地址指到本站，`next.config.ts` 的 rewrites 再转发出去。
+  - 生产代码里出现连模拟器的方法不是笔误，SDK 没有公开的地址覆盖参数，这是唯一的入口。它依赖 SDK 未承诺的内部行为，**升级 firebase 依赖后要把登录全链路重跑一遍**。
 
 ## 3. 页面与菜单
 

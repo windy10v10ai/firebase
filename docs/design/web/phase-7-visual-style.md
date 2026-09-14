@@ -126,6 +126,7 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 | 爱发电 | `linear-gradient(90deg, #946ce6, #3d2a66)` | `#a98bec` | 同上 |
 | Ko-fi | `linear-gradient(90deg, #29abe0, #0d3d52)` | `#5cc3ea` | 同上 |
 | 次要 | 透明 | `--color-line` | `--color-content` |
+| Steam | `--color-control` | `--color-line` | `--color-content` |
 | 禁用 | `--color-panel-soft` | `--color-line` | `#5d5d66` |
 
 尺寸与状态：
@@ -140,6 +141,10 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 | 禁用 | 换成灰底灰字，不要只降透明度——金底降一半仍看得见字，紫底会糊；另配一行小字说明为什么不能点 |
 
 渐变没法进 Tailwind 的 `@theme`，在 `@layer components` 里写成 `.btn-member` / `.btn-season` / `.btn-afdian` / `.btn-kofi` 四个类。
+
+**Steam 变体不跟上面的尺寸与状态表。** 高 36px、圆角 6px，悬停换底色而不是调亮度——跳去 Steam 的入口是中性控件，做亮度动效会被读成主操作。
+
+用在三处：登录入口（36px）、创意工坊订阅（56px）、登录回调失败后的重试。重试按钮与登录入口配色描边一致（同一件事的两个入口，不该让人重新判断），横向内边距放宽（页面里的独立操作，不必跟头部一样挤）。
 
 **会员页 `PlatformCard` 的两个订阅按钮统一使用 `.btn-season`。** 平台标题保留品牌色，金色标题和米金价格表示会员归属；个人主页会员卡的「前往订阅」保持 `.btn-member`。
 

@@ -6,20 +6,11 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/lib/auth';
 
 import SteamIcon from './SteamIcon';
+import { STEAM_BUTTON_CLASS, STEAM_BUTTON_SIZE_CLASS } from './ui/button';
 
 interface SteamLoginButtonProps {
   size?: 'default' | 'large';
 }
-
-/** 跳去 Steam 的中性控件，登录与创意工坊订阅共用 */
-export const STEAM_BUTTON_CLASS =
-  'inline-flex items-center whitespace-nowrap rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover';
-
-export const STEAM_BUTTON_SIZE_CLASS = {
-  // 36px 高，与登录后的账号控件统一，见 phase-2g-header-layout.md
-  default: 'h-9 gap-1.5 px-2.5',
-  large: 'min-h-14 gap-3 px-6 text-lg',
-};
 
 export default function SteamLoginButton({ size = 'default' }: SteamLoginButtonProps) {
   const t = useTranslations('auth');
