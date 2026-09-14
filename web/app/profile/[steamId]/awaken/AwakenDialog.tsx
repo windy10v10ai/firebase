@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
+import AbilityDetails from '@/app/components/AbilityDetails';
 import GameText from '@/app/components/GameText';
 import {
   AWAKEN_MEMBER_POINT_COST,
@@ -90,19 +91,33 @@ export default function AwakenDialog({
             ) : null}
             <div className="min-w-0">
               <div className="text-sm text-muted">{hero.name[locale]}</div>
-              <h2 className="mt-0.5 text-lg leading-snug font-bold">
-                <GameText text={hero.title[locale]} />
-              </h2>
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                <h2 className="text-lg leading-snug font-bold">
+                  <GameText text={hero.title[locale]} />
+                </h2>
+                {/* 状态跟着技能名一起被看到；底部状态条在付费按钮的位置，两处各管一件事 */}
+                {unlocked ? (
+                  <span className="inline-flex h-5.5 items-center gap-1 rounded border border-member-border bg-member-soft px-2 text-xs font-bold whitespace-nowrap text-member-strong">
+                    <Check className="size-3" aria-hidden="true" />
+                    {t('alreadyUnlocked')}
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
 
-          <p className="leading-relaxed">
-            <GameText text={hero.desc[locale]} />
-          </p>
+          <AbilityDetails
+            ability={hero.ability}
+            desc={hero.desc[locale]}
+            locale={locale}
+            variant="dialog"
+          />
+
+          <hr className="border-line" />
 
           {unlocked ? (
-            <p className="flex items-center gap-2 rounded-[7px] border border-member-border bg-member-soft px-3.5 py-2.5 text-sm font-bold text-member-strong">
-              <Check className="size-4.5" aria-hidden="true" />
+            <p className="flex min-h-11 items-center justify-center gap-2 rounded-[7px] bg-member-soft text-sm font-bold text-member-strong lg:min-h-10">
+              <Check className="size-4" aria-hidden="true" />
               {t('alreadyUnlocked')}
             </p>
           ) : (
@@ -141,7 +156,6 @@ export default function AwakenDialog({
                   })}
                 </p>
               ) : null}
-              <p className="text-sm text-muted">{t('permanent')}</p>
             </div>
           )}
 

@@ -39,6 +39,13 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 7. **校验**：`npm run lint && npx tsc --noEmit && npm run build`。
 8. **开 PR**：分支 `chore/awaken-sync-<日期>`，正文贴变更说明与产物 diff 摘要。
 
+## 产物里的技能提示框数据
+
+每个英雄除了名字、标题、描述，还有 `ability` 字段：技能属性、数值行、冷却、耗蓝、背景故事，供觉醒卡的悬浮提示和详情弹窗用。**取数规则以 [docs/web/ability-tooltip.md](../../../docs/web/ability-tooltip.md) 第 5 节为准**，要改规则先改文档，再改 `web/scripts/awaken-source.mjs`。
+
+- 某个技能在网站上少了一行数值，先查 game 本地化有没有 `DOTA_Tooltip_ability_<技能名>_<key>` 标签：没有标签的数值按规则不展示，要回 game 补标签，不要在网站侧放宽
+- 属性（技能、影响、伤害类型等）的文案在 `web/messages/*.json` 的 `ability` 命名空间，不来自同步；KV 出现新的取值时脚本输出 `null`，页面不显示该项，要在脚本与文案里一起补
+
 ## 只认 develop 上的提交
 
 脚本判断 `HEAD` 是不是 `origin/develop` 的祖先，不满足就停下不生成——feature 分支上的觉醒改动
