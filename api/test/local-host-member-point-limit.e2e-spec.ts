@@ -35,7 +35,7 @@ describe('本地 key 会员积分限额 (e2e)', () => {
     expect(res.status).toBe(400);
   });
 
-  it('当日累计到 2000 后再消耗被拒', async () => {
+  it('当日累计到 2000 后不再扣分，但仍返回 201', async () => {
     const steamId = STEAM_IDS.DAILY_CAP;
     for (let i = 0; i < 40; i++) {
       const ok = await request(app.getHttpServer())
@@ -45,12 +45,13 @@ describe('本地 key 会员积分限额 (e2e)', () => {
       expect(ok.status).toBe(201);
     }
 
-    const rejected = await request(app.getHttpServer())
+    const capped = await request(app.getHttpServer())
       .post(useUrl)
       .set('x-api-key', localKey)
       .send({ steamId, memberPoint: 1, reason: 'lottery' });
 
-    expect(rejected.status).toBe(400);
+    expect(capped.status).toBe(201);
+    expect(capped.body.useableMemberPoint).toBe(capped.body.memberPointTotal - 2000);
   });
 
   it('官方 key 不受限额约束', async () => {
