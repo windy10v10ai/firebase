@@ -152,7 +152,17 @@ Github Action will deploy `functions`, `hosting` and `firestore` automatically w
 
 A push is skipped entirely when every changed file sits in a path that cannot affect the Firebase deploy — `web/**`, `docs/**`, `.claude/**`, `.cursor/**`, `.vscode/**` and any `*.md`. The list lives in `paths-ignore` of [deploy_firebase.yml](.github/workflows/deploy_firebase.yml).
 
-The Next.js site under `web/` is not part of this workflow. Firebase App Hosting builds and rolls it out from its own GitHub integration.
+### Deploy with Firebase App Hosting
+
+The Next.js site under `web/` is built and rolled out by App Hosting itself, not by any workflow in this repository. Backend `prod` tracks `main`, `dev` tracks `develop`, and both use `web` as their root directory.
+
+Both skip a push whose changes all fall outside the site. **The path list is not stored in this repository** — it belongs to the backend's rollout policy, so change it in Firebase console → App Hosting → the backend → deployment settings → ignored paths:
+
+```
+api/**,.github/**,docs/**,.claude/**,.cursor/**,.vscode/**,**.md
+```
+
+Instance limits do live here: [web/apphosting.yaml](web/apphosting.yaml), overridden for `dev` by `web/apphosting.dev.yaml`.
 
 ### Deploy Manually
 

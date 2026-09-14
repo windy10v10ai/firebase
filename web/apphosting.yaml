@@ -1,0 +1,5 @@
+# 站点是静态壳加浏览器直连 API，正常流量用不到几个实例。设上限是为了挡住
+# 爬虫或请求堆积时实例数无节制扩张带来的账单，不是性能调优。
+# cpu 与 memory 不写，沿用 App Hosting 默认值。
+runConfig:
+  maxInstances: 5

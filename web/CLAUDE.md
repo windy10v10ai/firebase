@@ -20,6 +20,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **变量名必须带 `NEXT_PUBLIC_` 前缀**，否则不会注入客户端包，会静默回退到 `.env` 的生产域名——本地页面打的是生产接口，界面上看不出来。`config/constant.ts` 在 dev 下会把实际域名打到控制台，启动后扫一眼
 - **`.env.local` 不能进 git**。它在 `next build` 时同样生效，一旦提交，App Hosting 的生产构建会被本地值覆盖。需要共享的本地配置写进 `.env.development`
+- **初始化 Firebase SDK 只用 `NEXT_PUBLIC_FIREBASE_*`，不要用 App Hosting 注入的 `FIREBASE_WEBAPP_CONFIG`**。那份配置由 Firebase 服务端生成，字段跟着项目资源走，含有本站用不到也无法控制的值（如已废弃的 `databaseURL`），本地也拿不到同一份
 
 网站不放密钥：浏览器拿得到的值按定义都是公开的（Firebase Web SDK 配置、GA4 measurement ID 皆然）。真需要服务端密钥时走 App Hosting 的 secret 绑定，不进文件。
 
