@@ -39,13 +39,10 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 7. **校验**：`npm run awaken:test && npm run lint && npx tsc --noEmit && npm run build`。
 8. **开 PR**：分支 `chore/awaken-sync-<日期>`，正文贴变更说明与产物 diff 摘要。
 
-## 两个前提
+## 只认 develop 上的提交
 
-- **只认 develop 上的提交。** 脚本判断 `HEAD` 是不是 `origin/develop` 的祖先，不是看分支名叫什么——
-  detached HEAD 拿不到分支名，而从 worktree 跑是常态。不满足就停下不生成：feature 分支上的觉醒
-  改动还可能被推翻或改写，据此生成的产物没法追溯。报这个错先在 game 仓库 `git fetch origin develop`。
-- **`docs/reference/` 在 game 仓库里是 gitignored 的**，只存在于本地检出。所以从 game 的 worktree
-  取数要把它接过来（Windows 用 `mklink /J`），**这条同步链路也就没法只靠 git 在 CI 里跑**。
+脚本判断 `HEAD` 是不是 `origin/develop` 的祖先，不满足就停下不生成——feature 分支上的觉醒改动
+还可能被推翻或改写，据此生成的产物没法追溯。报这个错就去 game 仓库切到 develop 并拉最新。
 
 ## 七项自检拦的是什么
 
