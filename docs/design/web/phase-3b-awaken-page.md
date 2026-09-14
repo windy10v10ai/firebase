@@ -100,7 +100,7 @@
 | 自制图标，取自 game 仓库 `resource/flash3/images/spellicons/` | 3 |
 | 取不到，留占位 | 1 |
 
-后两类的明细见第 11 节。
+后两类的明细见第 10 节。
 
 ### 自托管，文件名带内容 hash
 
@@ -199,23 +199,7 @@
 
 失败态（401 / 403 / 404）仍整块替换，这是用户预期内的切换。
 
-## 10. 页面与组件
-
-| 路径 | 说明 |
-|------|------|
-| `web/app/profile/[steamId]/awaken/page.tsx` | 页面壳、数据拉取、错误分流 |
-| `web/app/profile/[steamId]/awaken/AwakenCard.tsx` | 英雄卡，五种状态 |
-| `web/app/profile/[steamId]/awaken/RandomCard.tsx` | 随机卡，三种状态 |
-| `web/app/profile/[steamId]/awaken/AwakenDialog.tsx` | 详情 + 付费弹窗 |
-| `web/app/profile/[steamId]/awaken/CandidatesDialog.tsx` | 随机候选层，含滚动动画 |
-| `web/app/components/GameText.tsx` | game 本地化文本的白名单渲染，日后其他页面也能用 |
-| `web/config/awaken.ts` | 同步脚本的产物，不手工改 |
-| `web/public/dota/` | 立绘与技能图标，同步脚本的产物 |
-| `scripts/awaken-sync.mjs` / `scripts/awaken-images.mjs` | 同步脚本 |
-
-三处接线：`FeatureEntryCard` 传 `href`、`config/nav.ts` 的 `awaken.href` 填上、`/my/awaken` 自动转。i18n key 已有 `navigation.awaken` / `awakenFull`、`profile.entries.awaken`。
-
-## 11. 批次 3 收尾：5 个技能图标
+## 10. 批次 3 收尾：5 个技能图标
 
 这 5 个等导出游戏原始资源才能真正修好，**放在批次 3 最后处理**，不单开 issue：
 
@@ -231,33 +215,13 @@
 
 **换资源不需要排期。** 文件名带内容 hash，流程是把 PNG 丢进 `web/public/dota/`、跑一次同步脚本，hash 变了、清单跟着变、旧文件被清掉，**改不到任何页面代码**。3b 只要保证「换图不用改代码」这个性质成立就够了。
 
-## 12. 验收标准
+## 11. 后续事项
 
-- 38 个英雄与随机卡在 375 / 768 / 1024 / 1280 四档都排得下，无横向滚动
-- 已觉醒、限免、积分不足三种状态与游戏内一致
-- 解锁成功后卡片就地变成已觉醒，可用积分同步减少，不整页刷新
-- 游戏里摇好未认领的候选，在网站点抽选后出现的是同一组 3 个
-- 中英文两套文案完整，没有缺 key
-- 同步脚本七项自检全绿；把 `AWAKEN_ABILITIES` 删掉一条能让第 2 项报错
+- **上线后复验响应头**，确认 `next.config.ts` 的 `headers()` 盖过了 App Hosting 给 `web/public/` 的 `max-age=14400` 默认值。本地 Next 的默认值是 `max-age=0`，两者不同，本地测过不代表线上成立
+- **每周跑一次同步的 GitHub Action**，内容见第 8 节，有 diff 才开 PR
+- 第 10 节的 5 个技能图标
 
-## 13. 测试清单
-
-已完成：
-
-- `npm run awaken:test`（七项自检各破坏一次，11 项全过）、`lint`、`tsc --noEmit`、`build`
-- 同步脚本跑通：38 个英雄、75 张图 736KB，缺图只有钢背兽一个
-- 浏览器实测四档宽度 × 中英文共 8 组：列数 2 / 4 / 6 / 6，单卡 170 / 175 / 155 / 198px，均无横向滚动、无元素越界、无 console 报错、无缺 key
-- **CLS 实测 ≤ 0.0004**（`PerformanceObserver` 收 `layout-shift`，覆盖首屏到数据到齐）。禁用 JS 打开生产构建，四档的首帧 HTML 已经是 39 张卡、78 张图、最终列数与最终高度
-- 交互实测：点卡开详情（技能标题色 `rgb(208,0,255)` 与 game 一致）、解锁 `PUT` 200 后卡片就地变已觉醒且计数 2→3、抽选 `PUT` 200 后老虎机定格、**连抽两次本地摇的候选不同、界面显示的是同一组**（验证渲染的是接口返回值）、选中候选后价格减半为 4000 / 2000
-- 本地生产构建实测响应头：`/dota/*` 为 `public, max-age=31536000, immutable`，对照的 `/favicon.webp` 仍是 `max-age=0`
-- **真实登录态端到端**（本地 emulator + 真 API，只替换 Steam 换 token 那一次请求）：勇士积分买 39,200→31,200 正好扣 8000；同一个英雄再点开显示已觉醒、没有付费按钮；连抽两次拿到同一组候选；候选半价用会员积分买 16,900→14,900 正好扣 2000；6 次请求全 200，零 console 报错
-
-布局与加载态的实测用 Playwright 路由拦截代替后端，好控制响应什么时候到。还没做、要等条件的：
-
-- **上线后再测一次响应头**，确认 `headers()` 在 App Hosting 上也盖过了它给 `public/` 的 `max-age=14400` 默认值——本地 Next 的默认值是 `max-age=0`，两者不同，本地测过不代表线上成立
-- **中英文各拍一组截图**放进 PR 正文，需要先建 PR 拿到编号
-
-## 14. 不做什么
+## 12. 不做什么
 
 - **不做搜索、筛选、排序。** game 就是一个平铺网格，38 个不算多；3a 也是同样口径。只在标题旁给一行「已觉醒 N / 38」
 - **不做已觉醒 / 未觉醒分组。** 会打乱 game 的顺序，而顺序是有意义的（新的在前）
