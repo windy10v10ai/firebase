@@ -81,7 +81,7 @@ export default function Header() {
   return (
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
     <header ref={headerRef} className="relative z-20 border-b border-line bg-surface">
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="mx-auto max-w-7xl px-4 py-4">
         {/* 行高由账号位的 36px 控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
         <div className="flex min-h-9 justify-between items-center gap-3">
           <Link href="/" className="text-xl font-bold text-heading link-hover whitespace-nowrap">

@@ -1,6 +1,6 @@
 ---
 name: design-docs
-description: 新建设计类文档要放哪里、或已完成批次的设计文档要不要瘦身时使用；覆盖 docs/ 下框架性文档、docs/design/ 下项目设计、docs/superpowers/plans/ 下实施计划的选址与生命周期。
+description: 写或改 docs/ 下任何文档之前必须先加载；也用于判断新内容放哪、已完成批次的设计文档怎么瘦身、建 PR 前检查长期有效的决定是否已同步进 docs/<模块>/README.md。覆盖 docs/ 下框架性文档、docs/design/ 下项目设计、docs/superpowers/plans/ 下实施计划的选址与生命周期。
 ---
 
 # 设计文档的选址与瘦身

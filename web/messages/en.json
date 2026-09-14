@@ -352,9 +352,8 @@
     },
     "card": {
       "level": "Level {level}/{max}",
-      "levelChange": "Level {from} → {to}/{max}",
       "perCell": "{value} per level",
-      "perCellCost": "{cost} points each",
+      "stepCost": "{cost} attribute points per upgrade",
       "skillValue": "{value}",
       "full": "Maxed",
       "owned": "Owned",
@@ -366,7 +365,8 @@
       "cellTip": "Level {cell} · active from hero level {heroLevel}",
       "upgrade": "Upgrade",
       "upgradeTo": "Upgrade to {level}",
-      "unlock": "Upgrade for {cost} points",
+      "oneShotCost": "Costs {cost} attribute points",
+      "notEnough": "Not enough points",
       "maxed": "Maxed out",
       "decrease": "One level fewer",
       "increase": "One level more"
