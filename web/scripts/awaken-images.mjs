@@ -30,12 +30,17 @@ const MAX_CROP = 1.35; // 横向最多裁到 1.35 倍宽，再宽就整体缩小
 const TRIM = 20; // 削掉透明留白与光晕，又不吃掉凤凰的火、寒冬飞龙的翼这类实体特效
 
 /**
- * 横向取景中心（0 最左、0.5 居中、1 最右）。
- * 默认居中：试过按 alpha 重心自动找头部，Dota 立绘里道具的体量和英雄本身相当
- * （鹰、剑、旗、坐骑），两种算法都是修好一个带坏一个，不如可预测的居中加点名修正。
+ * 取景修正。`x`/`y` 是取景中心占图的比例（0 最左 / 最上，1 最右 / 最下），
+ * `zoom` 在自动算出的尺寸上再放大——放大才腾得出横向平移的余量，MAX_CROP 那道限制也随之让位。
+ * 默认横向居中、纵向贴顶、不放大：试过按 alpha 重心自动找头部，Dota 立绘里道具的体量和英雄本身
+ * 相当（鹰、剑、旗、坐骑），两种算法都是修好一个带坏一个，不如可预测的默认值加点名修正。
  */
-const FOCUS = {
-  npc_dota_hero_sven: 0.62, // 大剑举在左上角，居中会把斯温本人挤出右边
+const FRAME = {
+  npc_dota_hero_sven: { x: 0.62 }, // 大剑举在左上角，居中会把斯温本人挤出右边
+  npc_dota_hero_axe: { x: 0.7 }, // 斧头横在身前，居中时人偏右
+  npc_dota_hero_monkey_king: { x: 0.7 }, // 金箍棒横在身前，同上
+  npc_dota_hero_kunkka: { x: 0.64, zoom: 1.2 }, // 刀比人长，让刀出画换人居中
+  npc_dota_hero_warlock: { x: 0.65, y: 0.68, zoom: 1.9 }, // 官方图里召唤物占了大半，取右下角的本体，召唤物只当背景；倍数再高本体就开始糊
 };
 
 /** 饰品路径的图标 CDN 上没有，退回同名原版图；键是 AbilityTextureName 原值 */
@@ -99,6 +104,8 @@ async function buildArt(sharp, heroName) {
   const trimmed = await sharp(raw).trim({ threshold: TRIM }).toBuffer({ resolveWithObject: true });
   const { width: tw, height: th } = trimmed.info;
 
+  const { x = 0.5, y, zoom = 1 } = FRAME[heroName] ?? {};
+
   let figH = FIG_H;
   let figW = Math.round(figH * (tw / th));
   if (figW > W * MAX_CROP) {
@@ -106,13 +113,14 @@ async function buildArt(sharp, heroName) {
     figW = Math.round(figW * k);
     figH = Math.round(figH * k);
   }
+  figW = Math.round(figW * zoom);
+  figH = Math.round(figH * zoom);
 
   let fig = await sharp(trimmed.data).resize(figW, figH).toBuffer();
   let offsetX = 0;
   let curW = figW;
   if (figW > W) {
-    const focus = FOCUS[heroName] ?? 0.5;
-    const left = Math.min(Math.max(Math.round(focus * figW - W / 2), 0), figW - W);
+    const left = Math.min(Math.max(Math.round(x * figW - W / 2), 0), figW - W);
     fig = await sharp(fig).extract({ left, top: 0, width: W, height: figH }).toBuffer();
     curW = W;
   } else {
@@ -121,7 +129,12 @@ async function buildArt(sharp, heroName) {
 
   const visible = H - TOP;
   if (figH > visible) {
-    fig = await sharp(fig).extract({ left: 0, top: 0, width: curW, height: visible }).toBuffer();
+    // 不点名 y 就沿用贴顶：头在图上方是常态，多出的腿脚压在按钮区后面
+    const crop =
+      y === undefined
+        ? 0
+        : Math.min(Math.max(Math.round(y * figH - visible / 2), 0), figH - visible);
+    fig = await sharp(fig).extract({ left: 0, top: crop, width: curW, height: visible }).toBuffer();
   }
   // 够高的贴顶，多出的腿脚压在按钮区后面；不够高的贴底站地上，不留悬空
   const meta = await sharp(fig).metadata();
@@ -163,19 +176,15 @@ async function main() {
 
   for (const hero of heroes) {
     const short = hero.heroName.replace('npc_dota_hero_', '');
-    const kept = previous.art[hero.heroName];
-    if (kept && fs.existsSync(path.join(OUT_DIR, kept))) {
-      manifest.art[hero.heroName] = kept;
+    // 立绘每次重算：原图在本地缓存里，取景参数一改就该跟着变。文件名按内容取 hash，没变的算出来还是同一个名字
+    const buf = await buildArt(sharp, hero.heroName);
+    if (!buf) {
+      missing.push(`立绘 ${short}`);
     } else {
-      const buf = await buildArt(sharp, hero.heroName);
-      if (!buf) {
-        missing.push(`立绘 ${short}`);
-      } else {
-        const name = `${short}.${hash8(buf)}.webp`;
-        fs.writeFileSync(path.join(OUT_DIR, name), buf);
-        manifest.art[hero.heroName] = name;
-        built++;
-      }
+      const name = `${short}.${hash8(buf)}.webp`;
+      if (name !== previous.art[hero.heroName]) built++;
+      fs.writeFileSync(path.join(OUT_DIR, name), buf);
+      manifest.art[hero.heroName] = name;
     }
 
     const keptIcon = previous.icons[hero.texture];
