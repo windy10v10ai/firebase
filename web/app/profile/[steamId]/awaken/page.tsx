@@ -6,9 +6,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import PageSkeleton from '@/app/components/PageSkeleton';
+import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
-import { useAuth } from '@/app/lib/auth';
 import {
   AWAKEN_MEMBER_POINT_COST,
   AWAKEN_RANDOM_CANDIDATE_COUNT,
@@ -44,10 +43,12 @@ const ALL_HERO_NAMES = AWAKEN_HEROES.map((hero) => hero.heroName);
 // 随机卡上扇形叠放的三张，取最新上线的 3 个觉醒
 const RANDOM_PREVIEW = AWAKEN_HEROES.slice(0, 3);
 
+const BOX_CLASS =
+  'box-pad flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control';
+
 export default function AwakenPage() {
   const t = useTranslations('awaken');
   const { steamId } = useParams<{ steamId: string }>();
-  const auth = useAuth();
 
   const [result, setResult] = useState<LoadResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -57,15 +58,9 @@ export default function AwakenPage() {
   const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [candidates, setCandidates] = useState<AwakenHero[]>([]);
 
-  // TODO(批次 10 #1176)：PageSkeleton 会被删掉，加载态改成结构直出 + 骨架块。
-  // 那一批合进 develop 后，这里连同「等登录态再发请求」的判断一起改。
-  const authResolved = auth.status !== 'loading';
   const loaded = result?.steamId === steamId ? result : null;
 
   useEffect(() => {
-    if (!authResolved) {
-      return;
-    }
     let cancelled = false;
     fetchPlayerAwakening(steamId)
       .then((info) => {
@@ -85,7 +80,7 @@ export default function AwakenPage() {
     return () => {
       cancelled = true;
     };
-  }, [authResolved, steamId]);
+  }, [steamId]);
 
   /** 请求失败后重新拉一次，免得界面停在已经不成立的数值上 */
   const resync = useCallback(async () => {
@@ -144,11 +139,7 @@ export default function AwakenPage() {
     [resync, steamId, target],
   );
 
-  if (!loaded) {
-    return <PageSkeleton label={t('loading')} />;
-  }
-
-  if (loaded.status === 'failed') {
+  if (loaded?.status === 'failed') {
     // 页面不判断登录，看得到看不到由接口说了算
     if (loaded.httpStatus === 401) {
       return <LoginPanel />;
@@ -161,19 +152,26 @@ export default function AwakenPage() {
     );
   }
 
-  const { info } = loaded;
+  const info = loaded?.info ?? null;
   const awakenedSet = new Set(awakenedNames);
   const remaining = AWAKEN_HEROES.length - awakenedSet.size;
   const canAffordDirect =
-    info.useableSeasonPoint >= AWAKEN_SEASON_POINT_COST ||
-    info.useableMemberPoint >= AWAKEN_MEMBER_POINT_COST;
+    !!info &&
+    (info.useableSeasonPoint >= AWAKEN_SEASON_POINT_COST ||
+      info.useableMemberPoint >= AWAKEN_MEMBER_POINT_COST);
   const canAffordRandom =
-    info.useableSeasonPoint >= AWAKEN_RANDOM_SEASON_POINT_COST ||
-    info.useableMemberPoint >= AWAKEN_RANDOM_MEMBER_POINT_COST;
-  const poolShort = remaining < AWAKEN_RANDOM_CANDIDATE_COUNT;
+    !!info &&
+    (info.useableSeasonPoint >= AWAKEN_RANDOM_SEASON_POINT_COST ||
+      info.useableMemberPoint >= AWAKEN_RANDOM_MEMBER_POINT_COST);
+  const poolShort = !!info && remaining < AWAKEN_RANDOM_CANDIDATE_COUNT;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" aria-busy={!info}>
+      {info ? null : (
+        <p role="status" className="sr-only">
+          {t('loading')}
+        </p>
+      )}
       <div className="space-y-1.5">
         <h1 className="title-primary">{t('title')}</h1>
         <p className="text-sm text-muted">{t('intro')}</p>
@@ -204,24 +202,36 @@ export default function AwakenPage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="box-pad flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control">
+      {/* 积分是五位数，三个并排时 768 放不下「可用勇士积分」这种长标签，会折行、高度还随数值长度变；一直到电脑档才排成一行 */}
+      <div className="flex flex-col gap-3 lg:flex-row">
+        <div className={BOX_CLASS}>
           <span className="text-base text-muted">{t('stats.awakened')}</span>
           <span className="flex items-baseline gap-1">
-            <span className="text-3xl leading-none font-bold text-heading">{awakenedSet.size}</span>
-            <span className="leading-none font-bold text-muted">/ {AWAKEN_HEROES.length}</span>
+            {/* 加载中整块代替「已觉醒 / 总数」：总数虽然是常量，分开显示会让那一横杠先到、数字后到 */}
+            {info ? (
+              <>
+                <span className="text-3xl leading-none font-bold text-heading">
+                  {awakenedSet.size}
+                </span>
+                <span className="leading-none font-bold text-muted">/ {AWAKEN_HEROES.length}</span>
+              </>
+            ) : (
+              <span className="text-3xl leading-none font-bold">
+                <Skeleton>0 / 00</Skeleton>
+              </span>
+            )}
           </span>
         </div>
-        <div className="box-pad flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control">
+        <div className={BOX_CLASS}>
           <span className="text-base text-muted">{t('stats.battlePoint')}</span>
           <span className="text-3xl leading-none font-bold text-season">
-            {info.useableSeasonPoint.toLocaleString()}
+            {info ? info.useableSeasonPoint.toLocaleString() : <Skeleton>00,000</Skeleton>}
           </span>
         </div>
-        <div className="box-pad flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control">
+        <div className={BOX_CLASS}>
           <span className="text-base text-muted">{t('stats.memberPoint')}</span>
           <span className="text-3xl leading-none font-bold text-member-strong">
-            {info.useableMemberPoint.toLocaleString()}
+            {info ? info.useableMemberPoint.toLocaleString() : <Skeleton>00,000</Skeleton>}
           </span>
         </div>
       </div>
@@ -232,7 +242,7 @@ export default function AwakenPage() {
         </p>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
         <RandomCard
           preview={RANDOM_PREVIEW}
           enabled={!busy && canAffordRandom && !poolShort}
@@ -243,8 +253,8 @@ export default function AwakenPage() {
           <AwakenCard
             key={hero.heroName}
             hero={hero}
-            unlocked={awakenedSet.has(hero.heroName)}
-            tooPoor={!canAffordDirect}
+            unlocked={info ? awakenedSet.has(hero.heroName) : null}
+            tooPoor={!!info && !canAffordDirect}
             busy={busy}
             onOpen={(picked) => setTarget({ hero: picked, fromRandom: false })}
           />
@@ -259,16 +269,18 @@ export default function AwakenPage() {
         onClose={() => setCandidatesOpen(false)}
       />
 
-      <AwakenDialog
-        hero={target?.hero ?? null}
-        unlocked={target ? awakenedSet.has(target.hero.heroName) : false}
-        fromRandom={target?.fromRandom ?? false}
-        busy={busy}
-        useableSeasonPoint={info.useableSeasonPoint}
-        useableMemberPoint={info.useableMemberPoint}
-        onClose={() => setTarget(null)}
-        onConfirm={handleConfirm}
-      />
+      {info ? (
+        <AwakenDialog
+          hero={target?.hero ?? null}
+          unlocked={target ? awakenedSet.has(target.hero.heroName) : false}
+          fromRandom={target?.fromRandom ?? false}
+          busy={busy}
+          useableSeasonPoint={info.useableSeasonPoint}
+          useableMemberPoint={info.useableMemberPoint}
+          onClose={() => setTarget(null)}
+          onConfirm={handleConfirm}
+        />
+      ) : null}
     </div>
   );
 }

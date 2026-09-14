@@ -5,13 +5,15 @@
 import { useLocale, useTranslations } from 'next-intl';
 
 import GameText from '@/app/components/GameText';
+import Skeleton from '@/app/components/ui/skeleton';
 import { awakenAssetPath } from '@/app/lib/awaken';
 
 import type { AwakenHero } from '@/config/awaken';
 
 interface AwakenCardProps {
   hero: AwakenHero;
-  unlocked: boolean;
+  /** 数据没到时为 null */
+  unlocked: boolean | null;
   /** 两种积分都不够 */
   tooPoor: boolean;
   /** 已有请求在飞，全部卡片一起禁用 */
@@ -29,12 +31,15 @@ interface AwakenCardProps {
 export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: AwakenCardProps) {
   const t = useTranslations('awaken');
   const locale = useLocale() === 'zh' ? 'zh' : 'en';
-  const disabled = !unlocked && (tooPoor || busy);
+  // 立绘、英雄名、技能图标都是本地常量，数据没到照样画；只有觉醒状态换成骨架块
+  const known = unlocked !== null;
+  const dimmed = !unlocked && (tooPoor || busy);
 
   return (
     <button
       type="button"
       onClick={() => onOpen(hero)}
+      disabled={!known}
       aria-label={hero.name[locale]}
       className={`group relative aspect-[145/190] w-full overflow-hidden rounded-[10px] border text-left transition-colors ${
         unlocked
@@ -50,18 +55,26 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
         loading="lazy"
         decoding="async"
         className={`absolute inset-0 size-full object-cover ${
-          disabled && tooPoor ? 'brightness-[0.62] saturate-[0.55]' : ''
+          dimmed && tooPoor ? 'brightness-[0.62] saturate-[0.55]' : ''
         }`}
       />
       <div className="absolute inset-x-0 top-0 h-10 bg-linear-to-b from-surface/80 to-transparent" />
-      <div className="absolute inset-x-1.5 top-1.5 truncate text-center text-[13px] font-bold text-heading [text-shadow:0_2px_4px_rgba(0,0,0,0.95)]">
-        {hero.name[locale]}
-      </div>
-      {hero.freeTrial && !unlocked ? (
-        <span className="absolute top-1 right-1 rounded border border-success bg-black/60 px-1.5 text-[11px] font-bold text-success">
-          {t('freeTrial')}
+      {/* 角标与英雄名同排：压在名字上的话，卡片一窄，截断后的名字末尾就被角标盖住 */}
+      <div className="absolute inset-x-1.5 top-1.5 flex items-center gap-1">
+        <span className="min-w-0 flex-1 truncate text-center text-[13px] font-bold text-heading [text-shadow:0_2px_4px_rgba(0,0,0,0.95)]">
+          {hero.name[locale]}
         </span>
-      ) : null}
+        {/* 限免是常量、已不已觉醒要等接口，角标的位置因此一直占着：数据到了才插进去会把名字挤窄一次 */}
+        {hero.freeTrial ? (
+          <span
+            className={`shrink-0 rounded border border-success bg-black/60 px-1.5 text-[11px] font-bold text-success ${
+              unlocked === false ? '' : 'invisible'
+            }`}
+          >
+            {t('freeTrial')}
+          </span>
+        ) : null}
+      </div>
 
       <div className="absolute inset-x-0 bottom-0 h-26 bg-linear-to-b from-transparent via-surface/95 to-surface/98" />
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-1.5 px-2.5 pb-2.5">
@@ -84,12 +97,12 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
           className={`flex h-7.5 w-full items-center justify-center rounded-[7px] border text-[13px] font-bold ${
             unlocked
               ? 'border-transparent bg-member-soft text-member-strong'
-              : disabled
+              : dimmed || !known
                 ? 'border-line bg-panel-soft/90 text-[#5d5d66]'
                 : 'border-[#7a6fd0] bg-linear-to-r from-[#4f48b2] to-[#0f033a] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.53)]'
           }`}
         >
-          {unlocked ? t('unlocked') : t('unlock')}
+          {known ? (unlocked ? t('unlocked') : t('unlock')) : <Skeleton>{t('unlocked')}</Skeleton>}
         </span>
       </div>
 
