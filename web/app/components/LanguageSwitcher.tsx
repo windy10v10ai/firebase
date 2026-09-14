@@ -26,12 +26,13 @@ export default function LanguageSwitcher() {
       onClick={toggleLocale}
       aria-label={t('switchLanguage')}
       title={t('switchLanguage')}
-      className="flex items-center rounded bg-gray-700 px-2 py-1 hover:bg-gray-600"
+      // 28px 高，量出的上限见 phase-2g-header-layout.md 的宽度约束
+      className="flex h-7 items-center rounded border border-line bg-control px-1.5 transition-colors hover:bg-control-hover"
     >
       {LOCALE_MARKS.map(({ locale: markLocale, mark }, index) => (
         <span key={markLocale} className="flex items-center">
-          {index > 0 ? <span className="mx-1 text-gray-500">/</span> : null}
-          <span className={markLocale === locale ? 'text-white' : 'text-gray-400'}>{mark}</span>
+          {index > 0 ? <span className="mx-1 text-muted">/</span> : null}
+          <span className={markLocale === locale ? 'text-heading' : 'text-muted'}>{mark}</span>
         </span>
       ))}
     </button>

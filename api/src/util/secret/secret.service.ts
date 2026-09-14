@@ -6,6 +6,7 @@ export enum SERVER_TYPE {
   TEST = 'TEST',
   ANIME = 'ANIME',
   LOCAL = 'LOCAL',
+  WEB = 'WEB',
   UNKNOWN = 'UNKNOWN',
 }
 

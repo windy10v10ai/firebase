@@ -3,32 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "awaken:sync": "node scripts/awaken-sync.mjs",
+    "awaken:images": "node scripts/awaken-images.mjs"
   },
   "dependencies": {
-    "antd": "^5.24.6",
-    "axios": "^1.18.0",
-    "eslint-config-next": "15.0.2",
-    "next": "15.5.21",
-    "next-intl": "^4.9.2",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "eslint-config-next": "16.3.5",
+    "firebase": "^12.19.0",
+    "lucide-react": "^1.45.0",
+    "next": "16.3.5",
+    "next-intl": "^4.14.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.20",
-    "@types/node": "26.1.2",
-    "@types/react": "18.3.12",
-    "@types/react-dom": "18.3.1",
-    "autoprefixer": "^10.4.17",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "26.4.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "eslint": "^9.39.5",
+    "eslint-import-resolver-typescript": "^3.10.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-unused-imports": "^4.4.1",
+    "playwright-core": "1.63.0",
     "postcss": "^8.5.18",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   }
 }

@@ -1,0 +1,79 @@
+'use client';
+
+import { RotateCcw } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import Skeleton from '@/app/components/ui/skeleton';
+import { playerPagePath } from '@/app/lib/player-path';
+
+/** 数值为 null 表示数据还没到 */
+interface PointsCardProps {
+  steamId: string;
+  /** 扣掉待提交的档数之后还剩多少 */
+  usableLevel: number | null;
+  totalLevel: number | null;
+  seasonLevel: number | null;
+  memberLevel: number | null;
+  onReset: () => void;
+}
+
+const BOX_CLASS =
+  'flex flex-1 items-baseline justify-between gap-3 box-pad rounded-lg border border-line bg-control';
+
+export default function PointsCard({
+  steamId,
+  usableLevel,
+  totalLevel,
+  seasonLevel,
+  memberLevel,
+  onReset,
+}: PointsCardProps) {
+  const t = useTranslations('property.points');
+  const profileHref = playerPagePath(steamId);
+
+  return (
+    <section className="card-container card-pad flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <h2 className="title-secondary">{t('title')}</h2>
+        <button
+          type="button"
+          onClick={onReset}
+          className="ml-auto flex min-h-11 items-center gap-2 rounded-[7px] border border-danger/50 bg-danger/8 px-4 text-sm text-danger transition-colors hover:bg-danger/15"
+        >
+          <RotateCcw className="size-4" />
+          {t('reset')}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3 md:flex-row">
+        <div className={BOX_CLASS}>
+          <span className="text-base text-muted">{t('usable')}</span>
+          <span className="flex items-baseline gap-1">
+            {/* 加载中用一整块代替「可用 / 总数」，宽度与常见数值相当，标签不会因此换行 */}
+            {usableLevel === null ? (
+              <span className="text-3xl leading-none font-bold">
+                <Skeleton>000</Skeleton>
+              </span>
+            ) : (
+              <>
+                <span className="text-3xl leading-none font-bold text-heading">{usableLevel}</span>
+                <span className="leading-none font-bold text-muted">/ {totalLevel}</span>
+              </>
+            )}
+          </span>
+        </div>
+        <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
+          <span className="text-base text-muted">{t('battleLevel')}</span>
+          <span className="text-3xl leading-none font-bold text-season">{seasonLevel ?? <Skeleton>000</Skeleton>}</span>
+        </Link>
+        <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
+          <span className="text-base text-muted">{t('memberLevel')}</span>
+          <span className="text-3xl leading-none font-bold text-member-strong">{memberLevel ?? <Skeleton>000</Skeleton>}</span>
+        </Link>
+      </div>
+
+      <p className="border-t border-line pt-3.5 text-sm text-muted">{t('formula')}</p>
+    </section>
+  );
+}
