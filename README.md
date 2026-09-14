@@ -76,9 +76,6 @@ firebase use windy10v10ai
 
 # setup package
 npm install
-
-# web setting
-firebase experiments:enable webframeworks
 ```
 
 ### Set GCP
@@ -151,9 +148,17 @@ More usage details, including configuration, authentication, and example code, p
 
 ### Deploy with Github Action
 
-Github Action will deploy automatically when push to main branch.
+Github Action will deploy automatically when push to main branch. Targets are resolved from the changed paths, and the job is skipped when nothing in the table below is touched.
 
-- main: Deploy Firebase Functions and Hosting
+| Changed path | Deploy target |
+| --- | --- |
+| `api/**`, `.nvmrc` | `functions` |
+| `public/**` | `hosting` |
+| `firestore.rules` | `firestore:rules` |
+| `firestore.indexes.json` | `firestore:indexes` |
+| `firebase.json`, `.firebaserc`, the workflow itself | all of the above |
+
+The Next.js site under `web/` is not part of this workflow. Firebase App Hosting builds and rolls it out from its own GitHub integration.
 
 ### Deploy Manually
 
@@ -182,7 +187,7 @@ firebase deploy --only functions,hosting
 ## Set secret environment variables
 
 1. Create env in [secret manager](https://console.cloud.google.com/security/secret-manager?project=windy10v10ai)
-2. Set function run with secrets in [index.ts](api/src/index.ts)
+2. Set function run with secrets in [index.ts](api/index.ts)
 3. Use secrets as `process.env.SECRET_NAME` in code
 
 ## Allow/Disable unauthenticated HTTP function invocation
