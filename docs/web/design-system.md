@@ -1,6 +1,6 @@
 # 网站视觉规范：配色、按钮与可点击元素
 
-> 本文是网站长期有效的视觉规范：颜色怎么分工、取什么值，按钮怎么选，能点的东西长什么样。只在规范变更时更新，不因批次完成而增删。形成过程与比较过的方案见批次文档 [phase-11-clickable-polish.md](../design/web/phase-11-clickable-polish.md)、[phase-12-color-system.md](../design/web/phase-12-color-system.md)、[phase-12-controls.md](../design/web/phase-12-controls.md)，那些文档会被瘦身；写代码时照着做的规约见 [web/CLAUDE.md](../../web/CLAUDE.md)「可点击元素」「颜色」「按钮」。
+> 本文是网站长期有效的视觉规范：颜色怎么分工、取什么值，按钮怎么选，能点的东西长什么样。只在规范变更时更新，不因批次完成而增删。各项决定的来由见批次文档 [phase-11-clickable-polish.md](../design/web/phase-11-clickable-polish.md)、[phase-12-color-system.md](../design/web/phase-12-color-system.md)、[phase-12-controls.md](../design/web/phase-12-controls.md)；写代码时照着做的规约见 [web/CLAUDE.md](../../web/CLAUDE.md)「可点击元素」「颜色」「按钮」。
 >
 > 取值的真相源是 `web/app/globals.css` 的 `@theme`，本文与它不一致时以代码为准，并回来改本文。
 
