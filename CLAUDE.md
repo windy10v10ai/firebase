@@ -121,6 +121,10 @@
 | NestJS API | 3001（Swagger `/api-doc`） | [api/CLAUDE.md](api/CLAUDE.md) |
 | Next.js web | 3000 | [web/CLAUDE.md](web/CLAUDE.md) |
 
+### 排查 bug
+
+**排查线上偶发故障、本地跑不通、登录链路异常之前，先用 Skill 工具加载 [debug-evidence](.claude/skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
+
 ---
 
 ## 代码规范
