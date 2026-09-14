@@ -11,7 +11,6 @@ import Input from '@/app/components/ui/input';
 import Spinner from '@/app/components/ui/spinner';
 import { apiFetch } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
-import { buildSteamLoginUrl } from '@/app/lib/steam-login';
 
 import ActiveResult from './ActiveResult';
 import {
@@ -148,7 +147,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               error={steamIdError}
               help={
                 // 窄屏一行放不下两条，各占一行；整条链接不从中间断开
-                <span className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                <span className="flex flex-col gap-1 md:flex-row md:items-center md:gap-2">
                   <a
                     href={STEAM_ID_HELP_URLS[activeType]}
                     target="_blank"
@@ -159,10 +158,10 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
                   </a>
                   {auth.status === 'unauthenticated' ? (
                     <>
-                      <span aria-hidden="true" className="hidden text-muted sm:inline">
+                      <span aria-hidden="true" className="hidden text-muted md:inline">
                         /
                       </span>
-                      <a href={buildSteamLoginUrl(pathname)} className={helpLinkClass}>
+                      <a href={auth.loginUrl(pathname)} className={helpLinkClass}>
                         {t('input.steamId.steamAutoFill')}
                       </a>
                     </>
@@ -226,7 +225,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               />
             </Field>
 
-            <Button type="submit" variant="member" disabled={!formValid || isLoading} className="w-full sm:w-auto">
+            <Button type="submit" variant="member" disabled={!formValid || isLoading} className="w-full md:w-auto">
               {t('submitButton.buttonText')}
             </Button>
           </form>

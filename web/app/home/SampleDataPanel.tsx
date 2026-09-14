@@ -7,7 +7,7 @@ const SIGN_IN_DONE = 3;
 
 // 宽屏靠遮罩压住左两列，窄屏没有这两列可压，直接不渲染，
 // 两档露出来的因此是同一组六格
-const COVERED = 'hidden sm:block';
+const COVERED = 'hidden md:block';
 
 function Tile({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -44,7 +44,7 @@ export default function SampleDataPanel() {
   return (
     <div
       aria-hidden="true"
-      className="grid auto-rows-[84px] grid-cols-2 gap-2.5 p-3 sm:auto-rows-[92px] sm:grid-cols-4 sm:gap-3 sm:p-4"
+      className="grid auto-rows-[84px] grid-cols-2 gap-2.5 p-3 md:auto-rows-[92px] md:grid-cols-4 md:gap-3 md:p-4"
     >
       <div className={COVERED}>
         <Tile label={tSummary('memberLevel')}>

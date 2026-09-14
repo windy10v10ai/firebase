@@ -32,6 +32,16 @@ const config: NextConfig = {
         source: '/api/:path*',
         destination: `${apiDomain}/api/:path*`,
       },
+      // Firebase Auth 的登录与续期请求由 config/firebase.ts 指到本站域名，在这里转发出去。
+      // 路径前缀是 SDK 拼出来的，不能改名
+      {
+        source: '/identitytoolkit.googleapis.com/:path*',
+        destination: 'https://identitytoolkit.googleapis.com/:path*',
+      },
+      {
+        source: '/securetoken.googleapis.com/:path*',
+        destination: 'https://securetoken.googleapis.com/:path*',
+      },
     ];
   },
 };

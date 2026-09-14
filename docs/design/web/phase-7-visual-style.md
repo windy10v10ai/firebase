@@ -126,13 +126,14 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 | 爱发电 | `linear-gradient(90deg, #946ce6, #3d2a66)` | `#a98bec` | 同上 |
 | Ko-fi | `linear-gradient(90deg, #29abe0, #0d3d52)` | `#5cc3ea` | 同上 |
 | 次要 | 透明 | `--color-line` | `--color-content` |
+| Steam | `--color-control` | `--color-line` | `--color-content` |
 | 禁用 | `--color-panel-soft` | `--color-line` | `#5d5d66` |
 
 尺寸与状态：
 
 | 项 | 值 |
 |---|---|
-| 高度 | 手机 44px、桌面 40px |
+| 高度 | 手机与平板 44px、电脑 40px |
 | 圆角 | 7px（36px 的用 6px） |
 | 字号 | 14px / 800 字重 |
 | 悬停 | `filter: brightness(1.12)` |
@@ -140,6 +141,10 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 | 禁用 | 换成灰底灰字，不要只降透明度——金底降一半仍看得见字，紫底会糊；另配一行小字说明为什么不能点 |
 
 渐变没法进 Tailwind 的 `@theme`，在 `@layer components` 里写成 `.btn-member` / `.btn-season` / `.btn-afdian` / `.btn-kofi` 四个类。
+
+**Steam 变体不跟上面的尺寸与状态表。** 高 36px、圆角 6px，悬停换底色而不是调亮度——跳去 Steam 的入口是中性控件，做亮度动效会被读成主操作。
+
+用在三处：登录入口（36px）、创意工坊订阅（56px）、登录回调失败后的重试。重试按钮与登录入口配色描边一致（同一件事的两个入口，不该让人重新判断），横向内边距放宽（页面里的独立操作，不必跟头部一样挤）。
 
 **会员页 `PlatformCard` 的两个订阅按钮统一使用 `.btn-season`。** 平台标题保留品牌色，金色标题和米金价格表示会员归属；个人主页会员卡的「前往订阅」保持 `.btn-member`。
 
@@ -213,11 +218,11 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 | 类 | 值 | 用在 |
 |---|---|---|
-| `.card-pad` | `p-4 sm:p-6 lg:p-8` | 整块区域卡：身份卡、等级卡、战绩卡、会员卡、属性点卡、`Section`、`Notice`、激活表单等 |
-| `.card-pad-sm` | `p-3 sm:p-4` | 网格里成排出现的条目卡：属性卡、首页页面入口卡、玩家主页功能入口卡，以及同尺寸的提示条 |
-| `.box-pad` | `px-3 py-3 sm:px-4 sm:py-3.5` | 卡片内部的嵌入块：属性点卡的数据框、战绩卡的概览框 |
+| `.card-pad` | `p-4 md:p-6 lg:p-8` | 整块区域卡：身份卡、等级卡、战绩卡、会员卡、属性点卡、`Section`、`Notice`、激活表单等 |
+| `.card-pad-sm` | `p-3 md:p-4` | 网格里成排出现的条目卡：属性卡、首页页面入口卡、玩家主页功能入口卡，以及同尺寸的提示条 |
+| `.box-pad` | `px-3 py-3 md:px-4 md:py-3.5` | 卡片内部的嵌入块：属性点卡的数据框、战绩卡的概览框 |
 
-页面外壳是 `px-3 sm:px-4`，不属于上面三类。
+页面外壳是 `px-3 md:px-4`，不属于上面三类。
 
 某一边要单独让位时（如顶部给背景图留空），仍然挂对应的类，只在调用点用方向 utility 覆盖那一边：utility 层排在 components 层之后，覆盖总会生效。`<dialog>` 这类自带默认内边距的元素，外层用 `p-0` 清掉，内层再挂类。
 

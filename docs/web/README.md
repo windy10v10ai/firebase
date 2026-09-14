@@ -19,7 +19,7 @@ NestJS API（Cloud Functions，AuthGuard 验 ID Token 或 API key）
 Firestore
 ```
 
-- **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染，服务端不碰用户数据。
+- **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染。服务端只读一个 uid 提示 cookie 决定首屏渲染哪套形态，不碰用户数据，见第 4 节「加载态」。
 - **NestJS API** 是唯一的数据入口。游戏客户端和网站调同一套接口，差别只在鉴权方式。
 - **Firebase Auth** 只用来签发和续期 ID Token，网站不直接读写 Firestore。
 - **浏览器直连 API**，API 开 CORS 白名单，网站服务端不做转发。细节见 [phase-0-api-access.md](../design/web/phase-0-api-access.md)。
@@ -31,7 +31,10 @@ Firestore
 - 玩家在 Steam 的 OpenID 页登录，后端二次核对签名后签发 Firebase Custom Token，浏览器换成 ID Token，之后每次调 API 带在 `Authorization: Bearer` 头里。
 - **uid 就是 32 位账号 ID**，与 Firestore 玩家文档 ID 一致，所有归属校验都比这一个值。
 - API 侧新增来源类型 `WEB` 与 `@AllowWeb()`，只有显式声明的路由接受网站来源；路由里的 `:steamId` 必须等于 token 的 uid，由 guard 统一拦。
-- 不用 session cookie，也不加网站专用 API key。登录态在 Firebase SDK 手里，服务端看不见，所以门禁只能做在浏览器里。
+- 不用 session cookie，也不加网站专用 API key。登录凭据只在 Firebase SDK 手里，门禁只能做在浏览器里。
+- 另有一个 `player-uid` 提示 cookie，只供服务端决定首屏形态。**它不是凭据**：uid 本来就公开出现在地址里，API 只认 ID Token；任何鉴权、跳转、归属判断都不得依据它。
+- **Firebase Auth 的请求走本站域名转发，不直连 Google。** 换登录态与续期 token 由 SDK 直接打到 `googleapis.com`，部分网络到不了那里，表现是后端已经签发了 token、页面仍然报登录失败。`config/firebase.ts` 把 SDK 的请求地址指到本站，`next.config.ts` 的 rewrites 再转发出去。
+  - 生产代码里出现连模拟器的方法不是笔误，SDK 没有公开的地址覆盖参数，这是唯一的入口。它依赖 SDK 未承诺的内部行为，**升级 firebase 依赖后要把登录全链路重跑一遍**。
 
 ## 3. 页面与菜单
 
@@ -72,7 +75,7 @@ Firestore
 
 未登录时菜单里的「属性」「觉醒」拼不出 id，链接需要一个落点。`/my/property` 就是这个落点：未登录在这里显示登录面板，登录后跳到 `/profile/<自己的 id>/property`。它同时兜住直接访问和书签。
 
-跳转只能在浏览器里做。Steam 的 `/my/*` 是服务端跳转，它有会话 cookie；我们的登录态在 Firebase SDK 手里，服务端看不见。所以从 `/my/` 进会多一次渲染。
+跳转只能在浏览器里做。Steam 的 `/my/*` 是服务端跳转，它有会话 cookie；我们的服务端只有提示 cookie、没有凭据，不能据此跳转。所以从 `/my/` 进会多一次渲染。
 
 ### 菜单
 
@@ -103,9 +106,9 @@ Firestore
 |------|------|------|
 | 样式 | Tailwind 4 + CSS 变量定义设计 token | 已完成，取值见 [phase-7-visual-style.md](../design/web/phase-7-visual-style.md) |
 | 组件 | 自建 Button、Input、Field、Spinner、Card 等一小套 | 已建，按需求继续加 |
-| 字体 | Noto Sans SC | 已完成；不加载额外标题字体 |
+| 字体 | Noto Sans SC，`display: optional` | 已完成；不加载额外标题字体。来不及就本次沿用系统字体，不中途换字体，避免整页文字跳动，见 [phase-10-first-paint.md](../design/web/phase-10-first-paint.md) |
 | 数据层 | 不引缓存库，页面自己用 `useState` 存一次响应 | 属性页已按这个做法落地。加点、重置的响应体就是新的完整 `PlayerInfo`，直接替换页面状态即可，没有需要失效的缓存；真出现跨页共享数据再引 TanStack Query |
-| 登录状态 | `AuthProvider` 包住 Firebase SDK 的 `onAuthStateChanged` | 已完成 |
+| 登录状态 | `AuthProvider` 包住 Firebase SDK 的 `onAuthStateChanged`，初始值来自服务端读到的 `player-uid` cookie；只有已登录 / 未登录两态，没有加载中 | 批次 10 落地 |
 | API 调用 | `apiFetch` 负责拼域名、带 token、转错误；每个资源一个取数函数 | 已完成。属性页没有建 hook——一个页面一次取数，包一层 hook 只是多一层间接 |
 
 ### 页面宽度
@@ -123,7 +126,21 @@ Firestore
 | 窄 | 672 | `max-w-2xl` | 激活表单、会员平台卡组 |
 | 提示 | 576 | `max-w-xl` | `Notice` |
 
-成排的条目卡按单卡宽度定列数，不随屏幕无限拉宽：单卡保持在手机单列时的宽度附近（约 350–410px）。属性页 768 起两列、1280 起三列。
+成排的条目卡按屏幕档位定列数：手机 1 列、平板 2 列、电脑 3 列。单卡宽度因此保持在手机单列时的附近（约 320–490px），宽屏上不被拉长。
+
+### 屏幕档位
+
+全站按三档设备排版，每档呈现什么是固定的：
+
+| 档位 | 宽度 | 头部 | 内容 | 按钮 |
+|------|------|------|------|------|
+| 手机 | < 768 | 品牌、语言、账号图标、汉堡菜单；横排导航收起 | 卡片单列；表格改成标签—内容列表 | 44px 高 |
+| 平板 | 768–1023 | 横排导航出现；账号仍只有图标，退出在菜单里 | 卡片两列；表格显示 | 44px 高 |
+| 电脑 | ≥ 1024 | 账号控件显示 ID 文字与退出按钮 | 卡片三列；个人主页左右分栏 | 40px 高 |
+
+**平板按触控设备对待。** 靠鼠标才成立的东西——较矮的按钮、常驻的次要按钮、完整的账号文字——到电脑这一档才出现；平板比手机多的只是宽度，够放横排导航与两列内容。
+
+不设 640 这一档：它介于手机与平板之间，没有对应的主流设备，也不在验证宽度里，按它切换的布局没人看得到。
 
 ### 渲染方式
 
@@ -134,11 +151,21 @@ Firestore
 | wiki 的技能、物品一览 | 构建时静态生成 | 公开、要被搜索，数据随版本更新时重新构建 |
 | 排行榜（如果上网站） | ISR | 公开但会变，唯一适合 ISR 的场景 |
 
+### 加载态
+
+页面一出现就是最终结构，之后只有数值在变，布局不动；首屏打开与站内跳转都适用。
+
+分两件事处理：**渲染哪套形态**（登录引导还是玩家内容）由服务端读 `player-uid` 提示 cookie 决定，Firebase 恢复完成后只做校正——登录凭据在 Firebase SDK 的 IndexedDB 里，服务器看不见，SDK 每次启动还要联网校验一次才给结论，不绕开就只能先按未登录渲染；**格子里的内容**没到时由容器留出位置，必有值的放骨架块，可能本来为空的只留白。
+
+写代码时的规约见 [web/CLAUDE.md](../../web/CLAUDE.md)「加载态」，设计过程见 [phase-10-first-paint.md](../design/web/phase-10-first-paint.md)。
+
 ## 5. 已定决策
 
 - 网站不直接访问数据库，所有操作走 API。
 - 用户身份：Steam OpenID + Firebase Custom Token，API 验 ID Token，不加网站专用 key；Custom Token 由 NestJS 后端签发。
 - 用户页面客户端渲染，不做 SSR；未登录的处理集中在 `/my/*` 一处，玩家页面自己不写登录判断。
+- 首屏登录形态靠 `player-uid` 提示 cookie 在服务端决定，不引服务端会话，也不用 Firebase 的 `browserCookiePersistence`：服务端只需知道渲染哪套形状，不需要凭据。
+- 玩家数据暂不做浏览器缓存。HTTP 缓存与「操作后立刻看到新值」冲突；应用层先显示旧值再刷新的做法另见 #1175。
 - 属性、觉醒各自独立页面，网站不做游戏内那种 tab 弹窗。
 - 玩家数据的页面路径带 steamId（`/profile/<steamId>/...`），公开资料页放 `/wiki/` 下。现阶段只能自己看自己，页面仍然按 URL 里的 id 取数据，为以后开放观看留路。
 - 个人主页先只显示 ID。昵称和头像要 Steam Web API key，单独排一批，排在功能之后。

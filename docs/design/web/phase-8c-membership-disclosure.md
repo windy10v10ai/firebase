@@ -8,4 +8,4 @@
 
 ## DataTable
 
-窄屏（<640px）渲染标签—内容卡片列表，768 及以上渲染表格；行层级用 `--color-panel` 与 `--color-panel-soft` 区分。
+手机（<768px）渲染标签—内容卡片列表，平板与电脑渲染表格；行层级用 `--color-panel` 与 `--color-panel-soft` 区分。

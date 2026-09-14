@@ -27,6 +27,34 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
 
+## 加载态
+
+页面一出现就是最终结构，之后只有数值在变；首屏打开与站内跳转都适用。为什么这样定见 [docs/web/README.md](../docs/web/README.md) 第 4 节「加载态」与 [phase-10-first-paint.md](../docs/design/web/phase-10-first-paint.md)。
+
+- **登录形态直接读 `useAuth()`，不写加载中分支。** `AuthState` 只有 `authenticated` / `unauthenticated` 两态，首屏初值来自根 layout 读到的 `player-uid` cookie。这个 cookie 只在 `AuthProvider` 的 `onAuthStateChanged` 里写和删；它不是凭据，不得用于鉴权、跳转或归属判断
+- **请求不等登录态。** `apiFetch` 取 token 前已经 `await auth.authStateReady()`，页面不写「登录态恢复后再发请求」的判断
+- **加载中渲染真实布局，必有值的位置放骨架块。** 用 `app/components/ui/skeleton.tsx`，放在字段原位（`{value ?? <Skeleton />}`）。不写替换整页的占位组件：那是第二套布局，要手工与真实页面保持同尺寸，改一处就会跳
+- **可能本来就为空的位置不放骨架，只占位。** 如非会员的会员行：容器用 `min-h-*` 按行高留出空间，数据到了原地填入。骨架块预告「这里马上有内容」，内容可能不存在时会误导
+- **尺寸由容器定，不由内容定。** 高度可能随文案长度变化的行加 `truncate` 不折行，父级 flex 项加 `min-w-0`；图片放进固定尺寸的容器，没到或加载失败时显示兜底图标
+- **失败态可以整块替换。** 401 换成登录面板、403 / 404 换成说明，这是用户预期内的切换
+- **不加路由级 `loading.tsx`。** 它在跳转时显示整页 fallback，等于第二套布局
+
+改动涉及加载过程时，浏览器验证要量 CLS：Playwright 里用 `PerformanceObserver` 收 `layout-shift`，首屏到数据加载完应接近 0；再用禁用 JS 的 context 打开，确认首帧 HTML 已经是最终结构。
+
+## 断点
+
+只用 `md:`（768）与 `lg:`（1024），不写 `sm:`、`xl:`、`2xl:`。三档各呈现什么、为什么这样分见 [docs/web/README.md](../docs/web/README.md) 第 4 节「屏幕档位」。
+
+| 档位 | 宽度 | 前缀 |
+|---|---|---|
+| 手机 | < 768 | 无前缀 |
+| 平板 | 768–1023 | `md:` |
+| 电脑 | ≥ 1024 | `lg:` |
+
+- **靠鼠标才成立的写 `lg:`，不写 `md:`。** 较矮的按钮（`min-h-11 lg:min-h-10`）、常驻的次要按钮、完整的账号文字都是这类；平板和手机一样按触控处理
+- **成排的条目卡网格写 `md:grid-cols-2 lg:grid-cols-3`。** 只有两项的卡组（如会员平台卡）到 `md:grid-cols-2` 为止
+- **容器查询（`@container` 配 `@sm:` 等）不受此限。** 它按所在卡片的宽度分栏，与屏幕档位无关
+
 ## 校验
 
 `cd web && npm run lint && npx tsc --noEmit && npm run build`
@@ -41,18 +69,19 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - 使用 Claude 桌面版内置浏览器时：打开外部站点（非 `localhost`）用 `preview_start` 并传 `url`，它会新开一个 tab；`navigate` 直接跳外部域名会返回 denied。进入站点后，同源内的跳转用 `navigate` 正常
 - 使用 Claude 桌面版内置浏览器时：它的 network 面板可能不记录跨域 XHR。拿不到请求记录时，改用页面内 `javascript_tool` 发同样的请求读状态码与响应体，并确认 console 没有 CORS 报错（Playwright 路径用 `page.on('response')` 直接拿跨域响应，不受此限制）
 - 操作真实页面：点按钮、填表单、提交，再从 network 面板确认请求方法、状态码、响应体，并确认 console 没有报错
-- 布局有改动时按下一节的三档宽度逐页验证，不要只看桌面宽度
+- 布局有改动时按下一节的四档宽度逐页验证，不要只看桌面宽度
 - 被验证的服务必须由**本分支**启动。端口被占用时先确认归属（可能是其他会话的旧代码），不要直接接着用，也不要直接 kill
 - 把做了什么操作、看到什么请求与响应写进 PR 正文的测试清单
 
 ## 验证宽度
 
-页面布局有改动时，按这三档逐页验证：
+页面布局有改动时，按这四档逐页验证。375、768、1024 分别是「断点」一节里三档的最窄处，布局最挤：
 
 | 宽度 | 代表 | 重点看 |
 |---|---|---|
 | 375 | 手机主流机型 | 头部元素是否接触或折行；表单能否完整填写并提交 |
-| 768 | 平板竖屏，也是头部由汉堡切回横排后最挤的一档 | 横排头部放不放得下；表单 label 与输入框的分栏有没有被挤压 |
+| 768 | 平板竖屏，也是头部由汉堡切回横排后最挤的一档 | 横排头部放不放得下；两列卡片与表单分栏有没有被挤压 |
+| 1024 | 电脑档起点，`lg:` 刚生效 | 三列卡片里的按钮文字是否溢出；头部 ID 文字与横排导航放不放得下 |
 | 1280 | PC | 内容区居中与留白是否正常；与改动前是否一致 |
 
 每档确认三件事：无横向滚动、无元素超出视口、头部元素互不接触。用 `resize_window` 切宽度，用 `javascript_tool` 量 `document.documentElement.scrollWidth > innerWidth` 与元素的 `getBoundingClientRect()`，不要只靠肉眼看截图。

@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 
 import SteamLoginButton from '@/app/components/SteamLoginButton';
-import { useAuth } from '@/app/lib/auth';
 
 import SampleDataPanel from './SampleDataPanel';
 
@@ -14,7 +13,6 @@ const WIDE_STOPS =
 
 export default function LoginBanner() {
   const t = useTranslations('home.intro');
-  const auth = useAuth();
 
   return (
     <section className="card-container relative overflow-hidden">
@@ -23,24 +21,19 @@ export default function LoginBanner() {
       </div>
       {/* 文案落在哪半边，遮罩就压哪半边：窄屏文案在下，宽屏在左 */}
       <div
-        className="pointer-events-none absolute inset-0 sm:hidden"
+        className="pointer-events-none absolute inset-0 md:hidden"
         style={{ backgroundImage: `linear-gradient(180deg, ${NARROW_STOPS})` }}
       />
       <div
-        className="pointer-events-none absolute inset-0 hidden sm:block"
+        className="pointer-events-none absolute inset-0 hidden md:block"
         style={{ backgroundImage: `linear-gradient(90deg, ${WIDE_STOPS})` }}
       />
       {/* 窄屏顶部要给背景图让位，所以只借 card-pad 的左右与底，上边距单独给 */}
-      <div className="card-pad relative flex flex-col gap-4 pt-36 sm:max-w-[460px] sm:pt-6 lg:pt-8">
+      <div className="card-pad relative flex flex-col gap-4 pt-36 md:max-w-[460px] md:pt-6 lg:pt-8">
         <h2 className="title-secondary">{t('title')}</h2>
         <p className="text-content">{t('description')}</p>
         <div className="flex flex-col items-start gap-2">
-          {/* 登录链接要读 window.location 拼回调地址，服务端渲染不到，先占住高度 */}
-          {auth.status === 'unauthenticated' ? (
-            <SteamLoginButton size="large" />
-          ) : (
-            <span className="min-h-14" aria-hidden="true" />
-          )}
+          <SteamLoginButton size="large" />
           <p className="text-sm text-muted">{t('privacy')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
