@@ -12,6 +12,8 @@
 
 ## 2. 颜色
 
+> 配色分工、网站主色、功能色与品牌色以 [phase-12-color-system.md](phase-12-color-system.md) 为准；本节的 accent、链接色、赞助平台按钮与其冲突处，以后者为准。
+
 ### 底色与文字
 
 | token | 取值 | 用途 |
@@ -117,6 +119,8 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ## 4. 按钮
 
+> 网站按钮与选型规则以 [phase-12-controls.md](phase-12-controls.md) 为准；本节只有游戏按钮（勇士紫、会员金）的取值仍然有效。
+
 两种颜色，都照搬游戏内 `src/panorama/react/shared/styles/buttons.less` 的取值，白字加一层黑影。
 
 | 变体 | 底 | 描边 | 字 |
@@ -160,6 +164,8 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ### 悬停与当前页
 
+> 当前页下条与菜单竖条改用主色标记档 `--color-link`，见 phase-12-color-system.md 第 2 节。
+
 取值照搬 game 的 `src/panorama/react/shared/styles/tab-navigation.less`：悬停只动亮度不动色相，时长 `@transition-fast` 0.15s、`ease-out`。
 
 | 元素 | 静止 | 悬停 | 当前页 |
@@ -178,6 +184,8 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 **窄屏的位置提示只在菜单里。** 下条长在横排上，而窄屏把横排整体收起来了。收起时不补页面名——375 那一行量下来只剩 13px 余量，塞不下；手机上页面标题本来就在头部正下方第一行。
 
 ### 菜单图标
+
+> 图标颜色改为功能色，见 phase-12-color-system.md 第 4 节。
 
 ![菜单图标](images/header-menu.png)
 

@@ -16,7 +16,7 @@ const Input = ({
 }: InputProps) => {
   const borderClass = invalid
     ? 'border-danger focus-within:ring-danger/30'
-    : 'border-line focus-within:border-accent focus-within:ring-accent/30';
+    : 'border-line focus-within:border-link focus-within:ring-link/30';
 
   return (
     <div

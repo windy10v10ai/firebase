@@ -20,13 +20,13 @@ const EXTERNAL_LINK_ICONS: Record<string, typeof GithubIcon> = {
   github: GithubIcon,
 };
 
-// 图标让人扫一眼认出是哪一行，所以只有会员的皇冠带色，四个都上色反而找不到东西
+// 每个功能一个颜色，与首页、个人主页的入口卡一致，见 docs/design/web/phase-12-color-system.md
 const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: string }> = {
   profile: { Icon: UserRound, className: 'text-content' },
-  property: { Icon: CirclePlus, className: 'text-content' },
-  awaken: { Icon: Sparkles, className: 'text-content' },
+  property: { Icon: CirclePlus, className: 'text-feature-property' },
+  awaken: { Icon: Sparkles, className: 'text-feature-awaken' },
   membership: { Icon: Crown, className: 'text-member-strong' },
-  wiki: { Icon: BookOpen, className: 'text-content' },
+  wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
 };
 
 export default function Header() {
@@ -193,14 +193,15 @@ export default function Header() {
             })}
             {auth.status === 'authenticated' ? (
               <>
-                <div className="my-1 h-px bg-line lg:hidden" aria-hidden="true" />
+                {/* 电脑宽度头部账号控件里也有退出，菜单照样保留，所有宽度都能在同一处找到 */}
+                <div className="my-1 h-px bg-line" aria-hidden="true" />
                 <button
                   type="button"
                   onClick={() => {
                     setMenuOpen(false);
                     auth.signOut();
                   }}
-                  className="nav-menu-item flex lg:hidden w-full justify-between"
+                  className="nav-menu-item w-full justify-between"
                 >
                   <span>{tAuth('signOut')}</span>
                   <LogOut className="size-4 shrink-0" aria-hidden="true" />

@@ -16,14 +16,14 @@ import Section from '@/app/components/Section';
 import { useAuth } from '@/app/lib/auth';
 import { playerPagePath } from '@/app/lib/player-path';
 
-// 顺序固定：第一行是玩家自己的东西，第二行是订阅与查阅
+// 顺序固定：第一行是玩家自己的东西，第二行是订阅与查阅；图标颜色与头部菜单、个人主页入口卡一致
 const PAGE_CARDS = [
   { key: 'profile', Icon: UserRound, iconClass: 'text-content' },
-  { key: 'property', Icon: CirclePlus, iconClass: 'text-muted' },
-  { key: 'awaken', Icon: Sparkles, iconClass: 'text-muted' },
+  { key: 'property', Icon: CirclePlus, iconClass: 'text-feature-property' },
+  { key: 'awaken', Icon: Sparkles, iconClass: 'text-feature-awaken' },
   { key: 'membership', Icon: Crown, iconClass: 'text-member-strong' },
-  { key: 'dailyTask', Icon: CalendarCheck, iconClass: 'text-muted' },
-  { key: 'wiki', Icon: BookOpen, iconClass: 'text-muted' },
+  { key: 'dailyTask', Icon: CalendarCheck, iconClass: 'text-feature-daily' },
+  { key: 'wiki', Icon: BookOpen, iconClass: 'text-feature-wiki' },
 ] as const;
 
 export default function PageCards() {
@@ -35,6 +35,7 @@ export default function PageCards() {
   const hrefOf: Record<string, string | null> = {
     profile: playerPagePath(uid),
     property: playerPagePath(uid, 'property'),
+    awaken: playerPagePath(uid, 'awaken'),
     membership: '/membership',
   };
 

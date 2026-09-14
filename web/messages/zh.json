@@ -265,6 +265,7 @@
       "description": "请稍后刷新页面重试。"
     },
     "identity": {
+      "heading": "ID {id}",
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
       "conductNet": "点赞举报净值",
@@ -291,14 +292,12 @@
       "towerKills": "推塔数"
     },
     "member": {
-      "title": "会员状态",
       "premium": "高级会员",
       "normal": "普通会员",
       "expired": "已过期",
-      "none": "未开通会员",
       "expireDate": "有效期至：{date}",
       "expiredDate": "已于 {date} 到期",
-      "subscribe": "前往订阅"
+      "link": "会员订阅"
     },
     "entries": {
       "property": {
@@ -333,7 +332,7 @@
       "usable": "可用 / 总数",
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
-      "formula": "总属性点 = 勇士等级 + 会员等级，两种等级每升 1 级各给 1 点，只升不降。点等级看明细。",
+      "formula": "总属性点 = 勇士等级 + 会员等级，两种等级每升 1 级各给 1 点，只升不降。",
       "reset": "重置属性"
     },
     "group": {
@@ -480,10 +479,35 @@
     "loginTooltip": "跳转到 Steam 官方页面登录，网站只获取你的 Steam ID",
     "loggedInAs": "ID {uid}",
     "signOut": "退出",
-    "callbackLoading": "正在登录",
-    "callbackError": "登录校验失败，请重试",
-    "errorCode": "错误码 {code}",
-    "retry": "请稍后重试",
+    "callback": {
+      "title": "正在登录",
+      "description": "已经从 Steam 回来，正在确认身份并进入网站，完成后自动回到刚才的页面。",
+      "steps": {
+        "verify": "Steam 确认身份",
+        "signIn": "登录网站",
+        "redirect": "回到刚才的页面"
+      },
+      "waited": "已等 {seconds} 秒",
+      "attempt": "第 {attempt} 次尝试",
+      "retry": "再试一次",
+      "relogin": "重新登录",
+      "home": "返回首页",
+      "failTitle": "登录没有完成",
+      "failVerify": "没能确认这次 Steam 登录，需要重新去 Steam 登录一次。",
+      "failSignIn": "没能连上登录服务，多半是网络不稳。Steam 那一步已经通过，直接再试一次就行。",
+      "diag": {
+        "stuckAt": "卡在 步骤 {step} · {name}",
+        "attempts": "尝试 {attempts} 次 · 共等 {seconds} 秒",
+        "player": "ID {id}",
+        "hint": "反馈问题时，截图请带上这一块",
+        "detail": {
+          "timeout": "超时",
+          "unreachable": "连不上",
+          "badResponse": "返回的不是 JSON",
+          "other": "其他网络错误"
+        }
+      }
+    },
     "profileTooltip": "查看个人主页",
     "panel": {
       "title": "需要 Steam 登录",

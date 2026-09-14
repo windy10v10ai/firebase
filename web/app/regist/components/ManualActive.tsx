@@ -8,7 +8,6 @@ import { type FormEvent, useState } from 'react';
 import Button from '@/app/components/ui/button';
 import Field from '@/app/components/ui/field';
 import Input from '@/app/components/ui/input';
-import Spinner from '@/app/components/ui/spinner';
 import { apiFetch } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
 
@@ -118,8 +117,6 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      {isLoading ? <Spinner label={t('submitButton.loadingText')} /> : null}
-
       {activationResult ? (
         <ActiveResult
           activeType={activeType}
@@ -225,8 +222,8 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               />
             </Field>
 
-            <Button type="submit" variant="member" disabled={!formValid || isLoading} className="w-full md:w-auto">
-              {t('submitButton.buttonText')}
+            <Button type="submit" loading={isLoading} disabled={!formValid} className="w-full md:w-auto">
+              {isLoading ? t('submitButton.loadingText') : t('submitButton.buttonText')}
             </Button>
           </form>
         </section>
