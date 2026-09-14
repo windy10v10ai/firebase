@@ -18,7 +18,7 @@
 | 7 视觉风格 | #1165 | 改 token 取值、字体，打磨基础组件，见 [phase-7-visual-style.md](phase-7-visual-style.md) | 已完成 |
 | 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、重置，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3a-2 宽屏与属性卡 | 无 | 全站外框 1280 封顶；属性页三列，属性卡进度条逐级取色、升级按钮分档，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
-| 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机，外加从 game 同步觉醒数据的脚本与 skill，见 [phase-3b-awaken-page.md](phase-3b-awaken-page.md) | 设计完成 |
+| 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机，外加从 game 同步觉醒数据的脚本与 skill，见 [phase-3b-awaken-page.md](phase-3b-awaken-page.md) | 已完成 |
 | 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 未开始 |
 | 8a 首页 | #1168 | 登录引导与主要页面导航 | 已完成 |
 | 8b 个人主页 | #1167 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 已完成 |
@@ -32,7 +32,13 @@
 
 ### 后续依赖
 
-觉醒功能页、游戏联动与 Steam 昵称头像仍按各自批次推进。个人主页的属性入口已接上链接，觉醒入口仍是视觉占位，页面上线后再启用。
+剩下的四批互不阻塞，可以同时推进：
+
+- **4 游戏联动**刚解锁——属性页与觉醒页都已上线，「前往网站」有落点了
+- **9 Steam 昵称头像**卡在申请 Steam Web API key，那是外部审批，越早交越好；它会再动一次头部账号区，位置已按 [phase-2g-header-layout.md](phase-2g-header-layout.md) 预留
+- **5 GA4** 与 **6 会员剩余**没有依赖，随时可插队
+
+`/wiki/*` 的技能与物品页仍未排期，菜单项靠 `config/nav.ts` 里 `href` 为 `null` 隐藏着。
 
 ### 子文档写什么
 

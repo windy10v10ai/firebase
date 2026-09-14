@@ -22,11 +22,11 @@ Firestore
 - **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染。服务端只读一个 uid 提示 cookie 决定首屏渲染哪套形态，不碰用户数据，见第 4 节「加载态」。
 - **NestJS API** 是唯一的数据入口。游戏客户端和网站调同一套接口，差别只在鉴权方式。
 - **Firebase Auth** 只用来签发和续期 ID Token，网站不直接读写 Firestore。
-- **浏览器直连 API**，API 开 CORS 白名单，网站服务端不做转发。细节见 [phase-0-api-access.md](../design/web/phase-0-api-access.md)。
+- **浏览器直连 API**，API 开 CORS 白名单，网站服务端不做转发。为什么这样定见 [phase-0-api-access.md](../design/web/phase-0-api-access.md)。
 
 ## 2. 鉴权设计
 
-做法见 [phase-2-steam-login.md](../design/web/phase-2-steam-login.md)。这里只留结论：
+做法见 [auth.controller.ts](../../api/src/auth/auth.controller.ts) 与 [auth.guard.ts](../../api/src/util/auth/auth.guard.ts)，当时的取舍见 [phase-2-steam-login.md](../design/web/phase-2-steam-login.md)。这里只留结论：
 
 - 玩家在 Steam 的 OpenID 页登录，后端二次核对签名后签发 Firebase Custom Token，浏览器换成 ID Token，之后每次调 API 带在 `Authorization: Bearer` 头里。
 - **uid 就是 32 位账号 ID**，与 Firestore 玩家文档 ID 一致，所有归属校验都比这一个值。
