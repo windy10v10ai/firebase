@@ -413,6 +413,67 @@
       "property_skill_points_bonus": "Bonus skill points"
     }
   },
+  "awaken": {
+    "title": "Hero Awakening",
+    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points.",
+    "loading": "Loading awakenings",
+    "unlock": "Awaken",
+    "unlocked": "Awakened",
+    "freeTrial": "FREE",
+    "iconMissing": "No icon",
+    "rules": {
+      "title": "Permanent Awaken",
+      "colon": ": ",
+      "directLabel": "Specific Hero",
+      "direct": "spend <b>8000</b> <season>usable Battle Points</season>, or <b>4000</b> <member>usable Member Points</member>, to permanently awaken a chosen hero.",
+      "randomLabel": "Random Draw",
+      "random": "half price, spend <b>4000</b> <season>usable Battle Points</season>, or <b>2000</b> <member>usable Member Points</member>, to awaken one of 3 randomly drawn heroes.",
+      "note": "Only spends usable points: usable points go down, but total points only ever go up and never lower your Battle/Member Level or attribute points. Permanent and irreversible — even if the awakened ability is buffed, nerfed, or reworked later, the hero’s awakening still applies."
+    },
+    "stats": {
+      "awakened": "Awakened",
+      "battlePoint": "Usable Battle Points",
+      "memberPoint": "Usable Member Points"
+    },
+    "dialog": {
+      "question": "Choose the points to spend to permanently awaken this hero?",
+      "halfPrice": "Random draw costs half the points.",
+      "permanent": "Permanent and irreversible.",
+      "alreadyUnlocked": "Awakened — applies automatically every match",
+      "useBattle": "{cost} usable Battle Points",
+      "useMember": "{cost} usable Member Points",
+      "battleShort": "You have {have} Battle Points, {need} short",
+      "memberShort": "You have {have} Member Points, {need} short",
+      "close": "Close"
+    },
+    "random": {
+      "title": "Random Awaken",
+      "halfPrice": "Half cost",
+      "threePick": "random 1 of 3",
+      "draw": "Draw",
+      "select": "Select",
+      "poolShort": "Fewer than 3 heroes available to awaken.",
+      "candidatesTitle": "Choose a hero to awaken permanently (half price)",
+      "candidatesDesc": "Spend 4000 usable Battle Points, or 2000 usable Member Points. Awaken one of these 3 randomly drawn heroes.",
+      "close": "Close"
+    },
+    "error": {
+      "unlock": "Awakening failed. No points were spent. Please try again later.",
+      "random": "Draw failed. No points were spent. Please try again later."
+    },
+    "private": {
+      "title": "Profile is private",
+      "description": "Only this player can see their awakenings."
+    },
+    "noRecord": {
+      "title": "No record yet",
+      "description": "This Steam ID has not played a match yet."
+    },
+    "failed": {
+      "title": "Could not load",
+      "description": "Awakenings are unavailable right now. Please try again later."
+    }
+  },
   "auth": {
     "login": "Sign in with Steam",
     "loginShort": "Sign in",

@@ -1,0 +1,3 @@
+# dev 后端只供开发自测，一个实例足够
+runConfig:
+  maxInstances: 1

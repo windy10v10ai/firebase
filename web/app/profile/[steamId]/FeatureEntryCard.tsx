@@ -1,15 +1,17 @@
 import { ChevronRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
+import type { ReactNode } from 'react';
+
 interface FeatureEntryCardProps {
   Icon: LucideIcon;
   title: string;
   description: string;
-  badge?: string;
+  badge?: ReactNode;
   href?: string;
 }
 
-// 觉醒（3b）还没有页面，没有 href 时只做视觉，不带跳转
+// 没有 href 时只做视觉，不带跳转：功能页还没上线的入口用得到
 export default function FeatureEntryCard({
   Icon,
   title,

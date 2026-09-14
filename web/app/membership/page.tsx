@@ -77,7 +77,7 @@ export default function MembershipPage() {
         </div>
       </Section>
 
-      <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
+      <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto">
         <PlatformCard
           title={t('membership.afdian.title')}
           price={t('membership.afdian.price')}

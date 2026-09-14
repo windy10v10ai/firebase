@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import PageSkeleton from '@/app/components/PageSkeleton';
 import { ApiError } from '@/app/lib/api';
 import {
   fetchPlayerProperties,
@@ -123,11 +122,7 @@ export default function PropertyPage() {
     [resync, steamId],
   );
 
-  if (!loaded) {
-    return <PageSkeleton label={t('loading')} />;
-  }
-
-  if (loaded.status === 'failed') {
+  if (loaded?.status === 'failed') {
     // 页面不判断登录，看得到看不到由接口说了算
     if (loaded.httpStatus === 401) {
       return <LoginPanel />;
@@ -140,18 +135,23 @@ export default function PropertyPage() {
     );
   }
 
-  const { info } = loaded;
+  const info = loaded?.info ?? null;
   const levelOf = (name: string) =>
-    info.properties?.find((property) => property.name === name)?.level ?? 0;
+    info ? (info.properties?.find((property) => property.name === name)?.level ?? 0) : null;
 
   const stagedLevels = PROPERTY_LIST.reduce(
     (sum, def) => sum + (pending[def.name] ?? 0) * def.levelPerStep,
     0,
   );
-  const usableLevel = info.useableLevel - stagedLevels;
+  const usableLevel = info ? info.useableLevel - stagedLevels : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" aria-busy={!info}>
+      {info ? null : (
+        <p role="status" className="sr-only">
+          {t('loading')}
+        </p>
+      )}
       <div className="space-y-1.5">
         <h1 className="title-primary">{t('title')}</h1>
         <p className="text-sm text-muted">{t('intro')}</p>
@@ -160,10 +160,14 @@ export default function PropertyPage() {
       <PointsCard
         steamId={steamId}
         usableLevel={usableLevel}
-        totalLevel={info.totalLevel}
-        seasonLevel={info.seasonLevel}
-        memberLevel={info.memberLevel}
-        onReset={() => setDialogOpen(true)}
+        totalLevel={info?.totalLevel ?? null}
+        seasonLevel={info?.seasonLevel ?? null}
+        memberLevel={info?.memberLevel ?? null}
+        onReset={() => {
+          if (info) {
+            setDialogOpen(true);
+          }
+        }}
       />
 
       {failedAction ? (
@@ -182,7 +186,7 @@ export default function PropertyPage() {
                 {t(`group.${group}.hint`, { count: defs.length })}
               </span>
             </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {defs.map((def) => {
                 const pendingCells = pending[def.name] ?? 0;
                 return (
@@ -191,7 +195,7 @@ export default function PropertyPage() {
                     def={def}
                     level={levelOf(def.name)}
                     pendingCells={pendingCells}
-                    canAdd={usableLevel >= def.levelPerStep}
+                    canAdd={usableLevel !== null && usableLevel >= def.levelPerStep}
                     busy={busy !== null}
                     onPendingChange={(cells) =>
                       setPending((current) => ({ ...current, [def.name]: cells }))
@@ -205,14 +209,16 @@ export default function PropertyPage() {
         );
       })}
 
-      <ResetDialog
-        open={dialogOpen}
-        busy={busy === RESET_KEY}
-        useableSeasonPoint={info.useableSeasonPoint}
-        useableMemberPoint={info.useableMemberPoint}
-        onClose={() => setDialogOpen(false)}
-        onConfirm={handleReset}
-      />
+      {info ? (
+        <ResetDialog
+          open={dialogOpen}
+          busy={busy === RESET_KEY}
+          useableSeasonPoint={info.useableSeasonPoint}
+          useableMemberPoint={info.useableMemberPoint}
+          onClose={() => setDialogOpen(false)}
+          onConfirm={handleReset}
+        />
+      ) : null}
     </div>
   );
 }

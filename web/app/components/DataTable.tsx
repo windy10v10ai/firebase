@@ -23,7 +23,7 @@ function ItemContent({ content }: { content: string[] }) {
 export default function DataTable({ items, className = '' }: DataTableProps) {
   return (
     <div className={`w-full overflow-hidden rounded-[10px] border border-line bg-panel ${className}`}>
-      <table className="hidden w-full sm:table">
+      <table className="hidden w-full md:table">
         <tbody>
           {items.map((item, index) => (
             <tr
@@ -43,7 +43,7 @@ export default function DataTable({ items, className = '' }: DataTableProps) {
         </tbody>
       </table>
 
-      <dl className="divide-y divide-line sm:hidden">
+      <dl className="divide-y divide-line md:hidden">
         {items.map((item, index) => (
           <div key={item.title} className={index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'}>
             <dt className="px-4 pt-4 font-medium text-heading">{item.title}</dt>
