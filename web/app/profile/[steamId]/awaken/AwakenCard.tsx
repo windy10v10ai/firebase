@@ -5,7 +5,6 @@
 import { useLocale, useTranslations } from 'next-intl';
 
 import GameText from '@/app/components/GameText';
-import Skeleton from '@/app/components/ui/skeleton';
 import { awakenAssetPath } from '@/app/lib/awaken';
 
 import type { AwakenHero } from '@/config/awaken';
@@ -31,7 +30,7 @@ interface AwakenCardProps {
 export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: AwakenCardProps) {
   const t = useTranslations('awaken');
   const locale = useLocale() === 'zh' ? 'zh' : 'en';
-  // 立绘、英雄名、技能图标都是本地常量，数据没到照样画；只有觉醒状态换成骨架块
+  // 立绘、英雄名、技能图标都是本地常量，数据没到照样画；这时按钮按未觉醒的样子置灰锁住
   const known = unlocked !== null;
   const dimmed = !unlocked && (tooPoor || busy);
 
@@ -102,7 +101,7 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
                 : 'border-[#7a6fd0] bg-linear-to-r from-[#4f48b2] to-[#0f033a] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.53)]'
           }`}
         >
-          {known ? (unlocked ? t('unlocked') : t('unlock')) : <Skeleton>{t('unlocked')}</Skeleton>}
+          {unlocked ? t('unlocked') : t('unlock')}
         </span>
       </div>
 

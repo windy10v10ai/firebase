@@ -179,7 +179,8 @@ export default function AwakenPage() {
 
       <section className="card-container card-pad">
         <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>
-        <div className="flex flex-col gap-1.5 leading-relaxed">
+        {/* body 没有设默认文字色，富文本里没被 chunk 包住的那部分不给颜色就是黑字 */}
+        <div className="flex flex-col gap-1.5 leading-relaxed text-content">
           <p>
             <span className="font-bold text-heading">{t('rules.directLabel')}</span>
             {t('rules.colon')}
