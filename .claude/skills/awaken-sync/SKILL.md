@@ -58,7 +58,9 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 | 缺 zh/en 英雄名 | Dota 版本目录升级后 key 变了 |
 | 没有立绘 | 先跑 `npm run awaken:images` |
 
-图标取不到只告警不拦：页面按缺图占位渲染。目前钢背兽就是这种情况，处理计划见设计文档第 10 节。
+图标取不到只告警不拦：页面按缺图占位渲染。
+
+**CDN 没有的饰品图标**（`AbilityTextureName` 带目录的那种）从 Dota 客户端的 `pak01_dir.vpk` 导出 PNG，按贴图路径原样放进 `web/scripts/awaken-icons/`，如 `bristleback/bb_2022_immortal_ability_icon/bb_2022_immortal_bristleback.png`，再跑第 5 步。有导出文件时脚本优先用它，清单里已有的旧图会被替换；导出的原图要进 git，下次重跑才取得到。
 
 ## 不要做的事
 

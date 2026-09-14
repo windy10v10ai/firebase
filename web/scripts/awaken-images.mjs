@@ -43,6 +43,12 @@ const FRAME = {
   npc_dota_hero_warlock: { x: 0.65, y: 0.68, zoom: 1.9 }, // 官方图里召唤物占了大半，取右下角的本体，召唤物只当背景；倍数再高本体就开始糊
 };
 
+/**
+ * 从游戏客户端导出的饰品图标，CDN 上没有。按 AbilityTextureName 的完整路径存放，
+ * 同名的原版图标与饰品版不会互相顶替；有导出文件时优先于下面的原版图兜底
+ */
+const EXPORTED_ICON_DIR = path.join(WEB, 'scripts/awaken-icons');
+
 /** 饰品路径的图标 CDN 上没有，退回同名原版图；键是 AbilityTextureName 原值 */
 const TEXTURE_FALLBACK = {
   'keeper_of_the_light/kotl_ti7_immortal/keeper_of_the_light_illuminate_alt':
@@ -148,7 +154,10 @@ async function buildArt(sharp, heroName) {
 
 async function buildIcon(sharp, texture, game) {
   let raw = null;
-  if (FROM_GAME_REPO.has(texture)) {
+  const exported = path.join(EXPORTED_ICON_DIR, `${texture}.png`);
+  if (fs.existsSync(exported)) {
+    raw = fs.readFileSync(exported);
+  } else if (FROM_GAME_REPO.has(texture)) {
     const file = path.join(game, 'game/resource/flash3/images/spellicons', `${texture}.png`);
     if (fs.existsSync(file)) raw = fs.readFileSync(file);
   } else {
@@ -188,7 +197,9 @@ async function main() {
     }
 
     const keptIcon = previous.icons[hero.texture];
-    if (keptIcon && fs.existsSync(path.join(OUT_DIR, keptIcon))) {
+    // 有导出原图时每次重算：换成饰品版要顶掉清单里的兜底图，内容没变的算出来还是同一个名字
+    const hasExported = fs.existsSync(path.join(EXPORTED_ICON_DIR, `${hero.texture}.png`));
+    if (!hasExported && keptIcon && fs.existsSync(path.join(OUT_DIR, keptIcon))) {
       manifest.icons[hero.texture] = keptIcon;
     } else {
       const buf = await buildIcon(sharp, hero.texture, game);

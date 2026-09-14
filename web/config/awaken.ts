@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "2782318d58ea88d99a9244475cf9980042aa69aa",
+  gameCommit: "3c04fd3433cc227dca841bfb8210a8ac87401668",
   dotaVersion: "7.41",
 } as const;
 
@@ -307,7 +307,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     abilityName: "special_bonus_unique_bristleback_upgrade",
     freeTrial: false,
     art: "bristleback.dbf2bd7c.webp",
-    icon: null,
+    icon: "bb_2022_immortal_bristleback.307200d3.webp",
     name: { zh: "钢背兽", en: "Bristleback" },
     title: { zh: "<font color='#d000ff'>自动喷刺 觉醒</font>", en: "<font color='#d000ff'>Auto Quill Awakened</font>" },
     desc: { zh: "<font color='#00CED1'>自动施法：</font>开启后，当范围内有敌方英雄时，钢背兽自动施放刺针扫射，并对最近的敌方英雄施放粘稠鼻液。<br><br><font color='#d000ff'>觉醒强化：</font>粘稠鼻液：基础降甲提升至<font color='#FFFFFF'><b>10</b></font>点，每层降甲提升至<font color='#FFFFFF'><b>6</b></font>点，叠加上限提升至<font color='#FFFFFF'><b>10</b></font>层<br>刺针扫射：伤害上限提升至<font color='#FFFFFF'><b>1000</b></font><br>战意：叠加上限提升至<font color='#FFFFFF'><b>20</b></font>层", en: "<font color='#00CED1'>Autocast:</font> With autocast enabled, whenever enemy heroes are in range, Bristleback automatically fires Quill Spray and casts Viscous Nasal Goo on the nearest enemy hero.<br><br><font color='#d000ff'>Awakening Bonuses:</font> Viscous Nasal Goo: base armor reduction raised to <font color='#FFFFFF'><b>10</b></font>, per-stack to <font color='#FFFFFF'><b>6</b></font>, stack limit raised to <font color='#FFFFFF'><b>10</b></font><br>Quill Spray: damage cap raised to <font color='#FFFFFF'><b>1000</b></font><br>Warpath: max stacks raised to <font color='#FFFFFF'><b>20</b></font>" },
