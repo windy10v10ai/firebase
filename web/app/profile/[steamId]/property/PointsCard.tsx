@@ -1,6 +1,6 @@
 'use client';
 
-import { RotateCcw } from 'lucide-react';
+import { ChevronRight, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -20,6 +20,11 @@ interface PointsCardProps {
 
 const BOX_CLASS =
   'flex flex-1 items-baseline justify-between gap-3 box-pad rounded-lg border border-line bg-control';
+
+// 等级框是跳个人主页的入口，靠箭头和悬停表达能点
+const LINK_BOX_CLASS = 'group transition-colors hover:bg-control-hover';
+const LINK_LABEL_CLASS = 'text-base text-muted transition-colors group-hover:text-content';
+const CHEVRON_CLASS = 'size-4 shrink-0 text-muted transition group-hover:translate-x-0.5 group-hover:text-heading';
 
 export default function PointsCard({
   steamId,
@@ -63,13 +68,20 @@ export default function PointsCard({
             )}
           </span>
         </div>
-        <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
-          <span className="text-base text-muted">{t('battleLevel')}</span>
-          <span className="text-3xl leading-none font-bold text-season">{seasonLevel ?? <Skeleton>000</Skeleton>}</span>
+        <Link href={profileHref} className={`${BOX_CLASS} ${LINK_BOX_CLASS} hover:border-season-border`}>
+          <span className={LINK_LABEL_CLASS}>{t('battleLevel')}</span>
+          <span className="flex items-center gap-2">
+            <span className="text-3xl leading-none font-bold text-season">{seasonLevel ?? <Skeleton>000</Skeleton>}</span>
+            <ChevronRight className={CHEVRON_CLASS} aria-hidden="true" />
+          </span>
         </Link>
-        <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
-          <span className="text-base text-muted">{t('memberLevel')}</span>
-          <span className="text-3xl leading-none font-bold text-member-strong">{memberLevel ?? <Skeleton>000</Skeleton>}</span>
+        {/* 悬停描边随货币色：会员框用金边，紫只代表勇士 */}
+        <Link href={profileHref} className={`${BOX_CLASS} ${LINK_BOX_CLASS} hover:border-member-border`}>
+          <span className={LINK_LABEL_CLASS}>{t('memberLevel')}</span>
+          <span className="flex items-center gap-2">
+            <span className="text-3xl leading-none font-bold text-member-strong">{memberLevel ?? <Skeleton>000</Skeleton>}</span>
+            <ChevronRight className={CHEVRON_CLASS} aria-hidden="true" />
+          </span>
         </Link>
       </div>
 

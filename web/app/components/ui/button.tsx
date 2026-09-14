@@ -1,8 +1,10 @@
+import { LoaderCircle } from 'lucide-react';
+
 import type { ComponentPropsWithoutRef } from 'react';
 
-type ButtonVariant = 'season' | 'member' | 'secondary' | 'steam';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'season' | 'member';
 
-/** 跳去 Steam 的中性控件，登录与创意工坊订阅共用 */
+/** 跳去 Steam 的入口：次按钮外观加 Steam 图标，登录与创意工坊订阅共用 */
 export const STEAM_BUTTON_CLASS =
   'inline-flex items-center whitespace-nowrap rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover';
 
@@ -12,34 +14,42 @@ export const STEAM_BUTTON_SIZE_CLASS = {
   large: 'min-h-14 gap-3 px-6 text-lg',
 };
 
-const BASE_CLASS =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed';
-
+// 纯色是网站自己的操作，渐变只给花勇士积分或会员积分的操作，选型见 web/CLAUDE.md「按钮」
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  primary: 'btn-primary',
+  secondary: 'btn-secondary',
+  ghost: 'btn-ghost',
+  danger: 'btn-danger',
   season: 'btn-season',
   member: 'btn-member',
-  secondary:
-    'inline-flex min-h-11 lg:min-h-10 items-center justify-center rounded-[7px] border border-line px-5 text-sm font-extrabold text-content transition-colors hover:bg-panel-soft disabled:text-[#5d5d66]',
-  // 页面里的独立操作，比头部那个挤在一行里的同风格入口留更多横向余量
-  steam: `${STEAM_BUTTON_CLASS} h-9 px-8 justify-center`,
 };
 
 interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
   variant?: ButtonVariant;
+  /** 请求进行中：按钮内转圈并禁用，文案由调用方换成进行时 */
+  loading?: boolean;
 }
 
 const Button = ({
   className = '',
   type = 'button',
-  variant = 'season',
+  variant = 'primary',
+  loading = false,
+  disabled,
+  children,
   ...props
 }: ButtonProps) => {
   return (
     <button
       type={type}
-      className={`${VARIANT_CLASS[variant]} ${BASE_CLASS} ${className}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={`${VARIANT_CLASS[variant]} ${className}`}
       {...props}
-    />
+    >
+      {loading ? <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden="true" /> : null}
+      {children}
+    </button>
   );
 };
 

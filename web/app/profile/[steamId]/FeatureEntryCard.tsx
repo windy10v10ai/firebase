@@ -3,49 +3,44 @@ import Link from 'next/link';
 
 import type { ReactNode } from 'react';
 
+// 功能色只上图标与图标底块，箭头与描边保持中性，见 docs/design/web/phase-12-color-system.md
+const TONE_CLASS = {
+  property: { box: 'bg-feature-property-soft', icon: 'text-feature-property' },
+  awaken: { box: 'bg-feature-awaken-soft', icon: 'text-feature-awaken' },
+} as const;
+
+const BADGE_CLASS = 'rounded-full bg-panel-soft px-3 py-1 text-sm text-content';
+
 interface FeatureEntryCardProps {
+  tone: keyof typeof TONE_CLASS;
   Icon: LucideIcon;
   title: string;
   description: string;
   badge?: ReactNode;
-  href?: string;
+  href: string;
 }
 
-// 没有 href 时只做视觉，不带跳转：功能页还没上线的入口用得到
 export default function FeatureEntryCard({
+  tone,
   Icon,
   title,
   description,
   badge,
   href,
 }: FeatureEntryCardProps) {
-  const body = (
-    <>
-      <div className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-season-soft">
-        <Icon className="size-5 text-season" aria-hidden="true" />
+  return (
+    <Link href={href} className="card-container card-pad-sm card-hover flex items-center gap-4">
+      <div className={`flex size-11 shrink-0 items-center justify-center rounded-[10px] ${TONE_CLASS[tone].box}`}>
+        <Icon className={`size-5 ${TONE_CLASS[tone].icon}`} aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="font-medium text-heading">{title}</div>
         <div className="text-sm text-muted">{description}</div>
+        {/* 手机宽度标签放右侧会把标题和描述挤成一词一行，挪到描述下方 */}
+        {badge ? <span className={`mt-1.5 inline-block md:hidden ${BADGE_CLASS}`}>{badge}</span> : null}
       </div>
-      {badge ? (
-        <span className="shrink-0 rounded-full bg-panel-soft px-3 py-1 text-sm text-content">
-          {badge}
-        </span>
-      ) : null}
-      <ChevronRight className="size-5 shrink-0 text-season" aria-hidden="true" />
-    </>
-  );
-
-  const className = 'card-container card-pad-sm flex items-center gap-4';
-
-  if (!href) {
-    return <div className={className}>{body}</div>;
-  }
-
-  return (
-    <Link href={href} className={`${className} transition-colors hover:border-season`}>
-      {body}
+      {badge ? <span className={`hidden shrink-0 md:inline-block ${BADGE_CLASS}`}>{badge}</span> : null}
+      <ChevronRight className="size-5 shrink-0 text-muted" aria-hidden="true" />
     </Link>
   );
 }
