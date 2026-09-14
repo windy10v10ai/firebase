@@ -50,17 +50,26 @@ export default function PointsCard({
         <div className={BOX_CLASS}>
           <span className="text-base text-muted">{t('usable')}</span>
           <span className="flex items-baseline gap-1">
-            <span className="text-3xl leading-none font-bold text-heading">{usableLevel ?? <Skeleton>0</Skeleton>}</span>
-            <span className="leading-none font-bold text-muted">/ {totalLevel ?? <Skeleton>000</Skeleton>}</span>
+            {/* 加载中用一整块代替「可用 / 总数」，宽度与常见数值相当，标签不会因此换行 */}
+            {usableLevel === null ? (
+              <span className="text-3xl leading-none font-bold">
+                <Skeleton>000</Skeleton>
+              </span>
+            ) : (
+              <>
+                <span className="text-3xl leading-none font-bold text-heading">{usableLevel}</span>
+                <span className="leading-none font-bold text-muted">/ {totalLevel}</span>
+              </>
+            )}
           </span>
         </div>
         <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
           <span className="text-base text-muted">{t('battleLevel')}</span>
-          <span className="text-3xl leading-none font-bold text-season">{seasonLevel ?? <Skeleton>00</Skeleton>}</span>
+          <span className="text-3xl leading-none font-bold text-season">{seasonLevel ?? <Skeleton>000</Skeleton>}</span>
         </Link>
         <Link href={profileHref} className={`${BOX_CLASS} card-hover`}>
           <span className="text-base text-muted">{t('memberLevel')}</span>
-          <span className="text-3xl leading-none font-bold text-member-strong">{memberLevel ?? <Skeleton>00</Skeleton>}</span>
+          <span className="text-3xl leading-none font-bold text-member-strong">{memberLevel ?? <Skeleton>000</Skeleton>}</span>
         </Link>
       </div>
 

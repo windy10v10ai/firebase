@@ -58,7 +58,7 @@ function CurrencyBlock({ tone, t, levelLabel, values }: CurrencyBlockProps) {
       <div className="flex items-baseline justify-between">
         <span className="text-content">{levelLabel}</span>
         <span className={`text-3xl font-bold tabular-nums ${TONE_TEXT[tone]}`}>
-          {values ? values.level : <Skeleton>00</Skeleton>}
+          {values ? values.level : <Skeleton>000</Skeleton>}
         </span>
       </div>
       <div className="h-1.5 rounded-full bg-panel-soft">
@@ -73,7 +73,7 @@ function CurrencyBlock({ tone, t, levelLabel, values }: CurrencyBlockProps) {
       >
         <span className="text-content">{t('usablePoints')}</span>
         <span className={`text-xl font-bold tabular-nums ${TONE_TEXT[tone]}`}>
-          {values ? values.usablePoint.toLocaleString() : <Skeleton />}
+          {values ? values.usablePoint.toLocaleString() : <Skeleton>000,000</Skeleton>}
         </span>
       </div>
     </div>
@@ -124,7 +124,7 @@ export default function LevelCard({ info, steamId }: { info: PlayerInfo | null; 
           <div className="text-sm text-muted">{t('attributePointsHint')}</div>
         </div>
         <span className="text-2xl font-bold tabular-nums text-heading">
-          {info ? info.useableLevel : <Skeleton>00</Skeleton>}
+          {info ? info.useableLevel : <Skeleton>000</Skeleton>}
         </span>
       </Link>
     </section>
