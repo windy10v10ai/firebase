@@ -45,18 +45,9 @@ const FRAME = {
 
 /**
  * 从游戏客户端导出的饰品图标，CDN 上没有。按 AbilityTextureName 的完整路径存放，
- * 同名的原版图标与饰品版不会互相顶替；有导出文件时优先于下面的原版图兜底
+ * 同名的原版图标与饰品版不会互相顶替。不拿原版图兜底：长得不一样，报缺图才会有人去导出
  */
 const EXPORTED_ICON_DIR = path.join(WEB, 'scripts/awaken-icons');
-
-/** 饰品路径的图标 CDN 上没有，退回同名原版图；键是 AbilityTextureName 原值 */
-const TEXTURE_FALLBACK = {
-  'keeper_of_the_light/kotl_ti7_immortal/keeper_of_the_light_illuminate_alt':
-    'keeper_of_the_light_illuminate_alt',
-  'lina/lina_ti6_immortal/lina_laguna_blade': 'lina_laguna_blade',
-  'witch_doctor/ribbitar_icon/witch_doctor_death_ward': 'witch_doctor_death_ward',
-  'necrolyte/apostle_of_decay_icons/necrolyte_heartstopper_aura': 'necrolyte_heartstopper_aura',
-};
 
 /** 自制图标，CDN 没有，从 game 仓库取 */
 const FROM_GAME_REPO = new Set([
@@ -162,9 +153,6 @@ async function buildIcon(sharp, texture, game) {
     if (fs.existsSync(file)) raw = fs.readFileSync(file);
   } else {
     raw = await fetchBuffer(`${CDN}/abilities/${texture}.png`);
-    if (!raw && TEXTURE_FALLBACK[texture]) {
-      raw = await fetchBuffer(`${CDN}/abilities/${TEXTURE_FALLBACK[texture]}.png`);
-    }
   }
   if (!raw) return null;
   return sharp(raw).resize(96, 96).webp({ quality: 85 }).toBuffer();
