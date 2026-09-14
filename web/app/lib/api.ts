@@ -1,4 +1,3 @@
-import { API_DOMAIN } from '@/config/constant';
 import { auth } from '@/config/firebase';
 
 export class ApiError extends Error {
@@ -20,7 +19,8 @@ export const apiFetch = async <Response>(path: string, init: RequestInit = {}) =
     headers.set('Authorization', `Bearer ${idToken}`);
   }
 
-  const response = await fetch(`${API_DOMAIN}${path}`, {
+  // 走同源，接口的可达性就和页面绑在一起
+  const response = await fetch(path, {
     ...init,
     headers,
   });

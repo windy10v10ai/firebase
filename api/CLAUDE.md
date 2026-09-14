@@ -46,6 +46,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - **裸 `/api` 在线上到不了**：Hosting rewrite 是 `^/api/.*`、函数白名单是 `^/api/(game|player|...)`，两个都不匹配，实测 404。要探活用 `GET /api/player/ranking`
 - **functions emulator 会伪造 CORS 头**：它给所有请求套了一层 `cors({ origin: true })`，预检由它直接答、任何 `Origin` 都放行。经 `localhost:5000` 的链路只能验通路，验不了白名单——白名单以 e2e（直连 Nest）和线上为准
 - 改了 CORS、鉴权、响应格式这类会影响网站页面行为的东西，最终验证要在浏览器里实际操作页面，做法见 [web/CLAUDE.md](../web/CLAUDE.md) 的「浏览器验证」
+- **网站域名的 `/api` 转发驮着支付宝回调**：`ALIPAY_NOTIFY_URL` 指向 `windy10v10ai.com`，请求经 `web/next.config.ts` 的 rewrite 进函数。改那条 rewrite 的目的地要连收款一起验，入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
 
 ## 命名与文件名
 

@@ -1,6 +1,6 @@
 # 批次 0：浏览器到 API 的访问路径
 
-> 状态：已完成。总体架构见 [docs/web/README.md](../../web/README.md) 第 1 节；CORS 白名单与预检配置的真相源是 `AppGlobalSettings`，本地开发怎么覆盖域名见 [web/CLAUDE.md](../../../web/CLAUDE.md)。
+> 状态：已完成，其中「浏览器直连 API」一条已被 [api-entry](../api-entry/README.md) 取代——部分网络连不到 API 子域。总体架构见 [docs/web/README.md](../../web/README.md) 第 1 节；CORS 白名单与预检配置的真相源是 `AppGlobalSettings`，本地开发怎么覆盖域名见 [web/CLAUDE.md](../../../web/CLAUDE.md)。
 
 ## 决定
 

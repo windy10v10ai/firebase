@@ -22,7 +22,7 @@ Firestore
 - **Next.js** 只负责出页面。用户相关页面在构建时预渲染成静态外壳，数据由浏览器登录后调 API 获取并渲染。服务端只读一个 uid 提示 cookie 决定首屏渲染哪套形态，不碰用户数据，见第 4 节「加载态」。
 - **NestJS API** 是唯一的数据入口。游戏客户端和网站调同一套接口，差别只在鉴权方式。
 - **Firebase Auth** 只用来签发和续期 ID Token，网站不直接读写 Firestore。
-- **浏览器直连 API**，API 开 CORS 白名单，网站服务端不做转发。为什么这样定见 [phase-0-api-access.md](../design/web/phase-0-api-access.md)。
+- **浏览器用相对路径调 API**，由 `web/next.config.ts` 的 rewrite 转发出去，页面只跟本站域名打交道。为什么这样定见 [api-entry/README.md](../design/api-entry/README.md)。
 
 ## 2. 鉴权设计
 
