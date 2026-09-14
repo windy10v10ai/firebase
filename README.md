@@ -154,22 +154,15 @@ A push is skipped entirely when every changed file sits in a path that cannot af
 
 ### Deploy with Firebase App Hosting
 
-The Next.js site under `web/` is built and rolled out by App Hosting itself, not by any workflow in this repository. Both backends use `web` as their root directory.
+The Next.js site under `web/` is built and rolled out by App Hosting itself, not by any workflow in this repository. Backend `prod` tracks `main`, `dev` tracks `develop`, and both use `web` as their root directory.
 
-| Backend | Branch | Serves |
-| --- | --- | --- |
-| `prod` | `main` | https://windy10v10ai.com |
-| `dev` | `develop` | https://dev--windy10v10ai.asia-east1.hosted.app |
-
-A push whose changes all fall outside the site is skipped, the same idea as the workflow above. **This list is not stored in the repository** — it belongs to the backend's rollout policy. Change it in Firebase console → App Hosting → the backend → deployment settings → ignored paths:
+Both skip a push whose changes all fall outside the site. **The path list is not stored in this repository** — it belongs to the backend's rollout policy, so change it in Firebase console → App Hosting → the backend → deployment settings → ignored paths:
 
 ```
 api/**,.github/**,docs/**,.claude/**,.cursor/**,.vscode/**,**.md
 ```
 
-Set on `dev`. Not yet set on `prod`, so every release still rebuilds the site.
-
-Instance limits live in [web/apphosting.yaml](web/apphosting.yaml), with `web/apphosting.dev.yaml` overriding them for `dev`. Unlike the ignored paths, those are version controlled.
+Instance limits do live here: [web/apphosting.yaml](web/apphosting.yaml), overridden for `dev` by `web/apphosting.dev.yaml`.
 
 ### Deploy Manually
 
