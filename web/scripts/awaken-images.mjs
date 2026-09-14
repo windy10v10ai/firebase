@@ -39,7 +39,7 @@ const FRAME = {
   npc_dota_hero_sven: { x: 0.62 }, // 大剑举在左上角，居中会把斯温本人挤出右边
   npc_dota_hero_axe: { x: 0.7 }, // 斧头横在身前，居中时人偏右
   npc_dota_hero_monkey_king: { x: 0.7 }, // 金箍棒横在身前，同上
-  npc_dota_hero_bristleback: { x: 0.7 }, // 链锤甩在身前，同上
+  npc_dota_hero_bristleback: { x: 0.7, y: 0.55, zoom: 1.25 }, // 链锤甩在身前，同上；横向余量不够把脸移出图标，放大后取景下移，让脸露在图标左上
   npc_dota_hero_kunkka: { x: 0.64, zoom: 1.2 }, // 刀比人长，让刀出画换人居中
   npc_dota_hero_warlock: { x: 0.65, y: 0.68, zoom: 1.9 }, // 官方图里召唤物占了大半，取右下角的本体，召唤物只当背景；倍数再高本体就开始糊
 };

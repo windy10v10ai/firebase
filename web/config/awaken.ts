@@ -306,7 +306,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     heroName: "npc_dota_hero_bristleback",
     abilityName: "special_bonus_unique_bristleback_upgrade",
     freeTrial: false,
-    art: "bristleback.125f507a.webp",
+    art: "bristleback.ab6ed6be.webp",
     icon: "bb_2022_immortal_bristleback.307200d3.webp",
     name: { zh: "钢背兽", en: "Bristleback" },
     title: { zh: "<font color='#d000ff'>自动喷刺 觉醒</font>", en: "<font color='#d000ff'>Auto Quill Awakened</font>" },
