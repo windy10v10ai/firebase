@@ -12,7 +12,7 @@
 
 ## 2. 颜色
 
-> 配色分工、网站主色、功能色与品牌色以 [phase-12-color-system.md](phase-12-color-system.md) 为准；本节的 accent、链接色、赞助平台按钮与其冲突处，以后者为准。
+> 配色分工与取值以 [docs/web/design-system.md](../../web/design-system.md) 为准；本节与其冲突处（accent、链接色、赞助平台按钮等），以后者为准。
 
 ### 底色与文字
 
@@ -119,7 +119,7 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ## 4. 按钮
 
-> 网站按钮与选型规则以 [phase-12-controls.md](phase-12-controls.md) 为准；本节只有游戏按钮（勇士紫、会员金）的取值仍然有效。
+> 按钮规范以 [docs/web/design-system.md](../../web/design-system.md)「按钮」为准。
 
 两种颜色，都照搬游戏内 `src/panorama/react/shared/styles/buttons.less` 的取值，白字加一层黑影。
 
@@ -164,7 +164,7 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ### 悬停与当前页
 
-> 当前页下条与菜单竖条改用主色标记档 `--color-link`，见 phase-12-color-system.md 第 2 节。
+> 当前页下条与菜单竖条改用主色标记档，见 [docs/web/design-system.md](../../web/design-system.md)。
 
 取值照搬 game 的 `src/panorama/react/shared/styles/tab-navigation.less`：悬停只动亮度不动色相，时长 `@transition-fast` 0.15s、`ease-out`。
 
@@ -185,7 +185,7 @@ Noto Sans SC 全量很大，用 `next/font` 按子集加载，`display: swap`。
 
 ### 菜单图标
 
-> 图标颜色改为功能色，见 phase-12-color-system.md 第 4 节。
+> 图标颜色改为功能色，见 [docs/web/design-system.md](../../web/design-system.md)「功能色」。
 
 ![菜单图标](images/header-menu.png)
 

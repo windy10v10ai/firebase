@@ -67,7 +67,7 @@
 
 ### 规约
 
-已写进 `web/CLAUDE.md`「可点击元素」，理由在 `docs/web/README.md` 第 4 节「配色与按钮」：
+已写进 `web/CLAUDE.md`「可点击元素」，长期规范见 `docs/web/design-system.md`「可点击元素」：
 
 - 能点的一律手型，靠全局规则，不在调用点写 `cursor-pointer`；可点击的控件用 `<button>` 或 `<a>`，不用 `<div onClick>`
 - 整张卡或整行是链接时，右侧放 `ChevronRight`，悬停要有可见变化；不能点的不放箭头

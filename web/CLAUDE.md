@@ -58,7 +58,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 可点击元素
 
-理由见 [docs/web/README.md](../docs/web/README.md) 第 4 节「配色与按钮」与 [phase-11-clickable-polish.md](../docs/design/web/phase-11-clickable-polish.md)。
+理由见 [docs/web/design-system.md](../docs/web/design-system.md)「可点击元素」。
 
 - **能点的一律手型，靠 `globals.css` base 层的全局规则**，调用点不写 `cursor-pointer`。可点击的控件用 `<button>` 或 `<a>` / `Link`，不用 `<div onClick>`
 - **整张卡或整行是链接时，右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
@@ -67,17 +67,17 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 颜色
 
-取值、截图与放弃的方案见 [phase-12-color-system.md](../docs/design/web/phase-12-color-system.md)，长期结论在 [docs/web/README.md](../docs/web/README.md) 第 4 节「配色与按钮」。
+分工、取值与理由见 [docs/web/design-system.md](../docs/web/design-system.md)。
 
 - **调用点不写色值**，一律用 `globals.css` `@theme` 里的 token；要新颜色先加 token
 - **紫（`season`）与金（`member`）只表示勇士与会员两套货币**，不用于交互反馈或通用按钮
 - **交互反馈用主色标记档 `link` 系列**：链接、当前页标记、焦点框、转圈、`.card-hover` 都是它
-- **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 phase-12-color-system.md 第 4 节的顺序取色，先加 token
-- **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停。新增品牌加 token，并在 phase-12-color-system.md 第 5 节登记它和站内哪个颜色撞色
+- **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
+- **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
 
 ## 按钮
 
-按钮颜色回答「点了花什么」，不回答「这一页讲什么」：
+按钮颜色回答「点了花什么」，不回答「这一页讲什么」。规格与理由见 [docs/web/design-system.md](../docs/web/design-system.md)「按钮」：
 
 | 操作 | 写法 |
 |---|---|
