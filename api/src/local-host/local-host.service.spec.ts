@@ -257,18 +257,16 @@ describe('LocalHostService', () => {
     it('单笔超过 50 拒绝', async () => {
       const { service } = createService();
 
-      await expect(service.assertMemberPointWithinLimit(1, 51)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.checkMemberPointLimit(1, 51)).rejects.toThrow(BadRequestException);
     });
 
     it('单笔等于 50 通过', async () => {
       const { service } = createService();
 
-      await expect(service.assertMemberPointWithinLimit(1, 50)).resolves.toBeUndefined();
+      await expect(service.checkMemberPointLimit(1, 50)).resolves.toBe(true);
     });
 
-    it('当日累计超过 2000 拒绝', async () => {
+    it('当日累计超过 2000 返回 false，不抛错', async () => {
       const { service, store } = createService();
       store.set('1', {
         id: '1',
@@ -276,9 +274,7 @@ describe('LocalHostService', () => {
         dailyUsedMemberPoint: 1980,
       });
 
-      await expect(service.assertMemberPointWithinLimit(1, 50)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.checkMemberPointLimit(1, 50)).resolves.toBe(false);
     });
 
     it('记账累加当日消耗，不动其他计数', async () => {

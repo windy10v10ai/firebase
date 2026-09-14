@@ -162,12 +162,13 @@ export class LocalHostService {
     return true;
   }
 
-  /** 本地来源消耗会员积分前的限额检查，超限抛 400。 */
-  async assertMemberPointWithinLimit(
+  /** 本地来源消耗会员积分前的限额检查：单笔超限抛 400，当日累计超限返回 false。 */
+  async checkMemberPointLimit(
     steamId: number,
     memberPoint: number,
     origin: ClientOrigin = {},
-  ): Promise<void> {
+  ): Promise<boolean> {
+    // 单笔超限只可能来自伪造或客户端 bug，正常玩法碰不到，按错误处理
     if (memberPoint > LOCAL_MEMBER_POINT_SINGLE_CAP) {
       logger.warn('local: member point rejected', {
         steamId,
@@ -182,15 +183,18 @@ export class LocalHostService {
     const current = await this.rateLimitRepository.findById(steamId.toString());
     const counters = getDailyCounters(current, getUtcMidnight(new Date()));
     if (counters.usedMemberPoint + memberPoint > LOCAL_MEMBER_POINT_DAILY_CAP) {
-      logger.warn('local: member point rejected', {
+      // 玩得多的人正常就会碰到每日上限，不算异常
+      logger.info('local: member point skipped', {
         steamId,
         memberPoint,
         reason: 'daily cap',
         ip: origin.ip,
         country: origin.country,
       });
-      throw new BadRequestException();
+      return false;
     }
+
+    return true;
   }
 
   /** 本地来源消耗会员积分成功后累加当日计数。 */
