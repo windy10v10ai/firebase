@@ -1,6 +1,6 @@
 'use client';
 
-import { Minus, Plus } from 'lucide-react';
+import { Hourglass, Minus, Plus, TrendingUp, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, type CSSProperties } from 'react';
 
@@ -31,9 +31,13 @@ interface PropertyCardProps {
 
 type CellState = 'filled' | 'pending' | 'empty';
 
-/** 浮层左对齐并且只在需要时渲染：留在原地会把窄屏撑出横向滚动条 */
+/** 浮层只在需要时渲染：留在原地会把窄屏撑出横向滚动条 */
 const TOOLTIP_CLASS =
-  'pointer-events-none absolute bottom-[calc(100%+8px)] z-10 rounded-md border border-line bg-panel-soft px-2.5 py-1.5 text-xs whitespace-nowrap text-content';
+  'pointer-events-none absolute bottom-[calc(100%+8px)] z-10 rounded-md border border-line bg-panel-soft px-2.5 py-1.5 text-xs text-content';
+
+/** 取进度条第一级的冰蓝：表示随等级增长，又不占用勇士紫、会员金和链接蓝 */
+const HINT_CLASS =
+  'inline-flex size-5 shrink-0 cursor-help items-center justify-center rounded-full bg-[#86c5f0]/15 text-[#86c5f0]';
 
 /** 按属性等级逐级取色，冰蓝过渡到勇士紫：只用一种紫，加满的页面就只剩黑和紫 */
 const LEVEL_COLORS = ['#86c5f0', '#8cb3f0', '#949ff0', '#9e8cec', '#a67be8', '#a26ae2', '#9b5de0', '#8d4dd4'];
@@ -52,8 +56,10 @@ function cellStyle(color: string, state: CellState, full: boolean): CSSPropertie
   return undefined;
 }
 
-/** 悬停或聚焦才出现的说明 */
-function Hint({ label, tip }: { label: string; tip: string }) {
+/**
+ * 名称后的小图标，悬停或聚焦时给出规则名与生效说明。分组标题已经讲过规则，卡片上只留记号：文字标签跟在长名称后会折行
+ */
+function Hint({ Icon, label, tip }: { Icon: LucideIcon; label: string; tip: string }) {
   const [open, setOpen] = useState(false);
   return (
     <span
@@ -62,11 +68,14 @@ function Hint({ label, tip }: { label: string; tip: string }) {
       onMouseLeave={() => setOpen(false)}
       onFocus={() => setOpen(true)}
       onBlur={() => setOpen(false)}
-      className="relative inline-flex cursor-help items-center rounded-full bg-panel-soft px-2 py-0.5 text-xs text-muted"
+      className={HINT_CLASS}
     >
-      {label}
+      <Icon className="size-3" strokeWidth={2.5} aria-hidden="true" />
+      <span className="sr-only">{label}</span>
+      {/* 浮层挂在名称那一栏上、与它同宽，文字折行也不会顶出卡片 */}
       {open ? (
-        <span role="tooltip" className={`${TOOLTIP_CLASS} left-0`}>
+        <span role="tooltip" className={`${TOOLTIP_CLASS} inset-x-0`}>
+          <span className="block text-[#86c5f0]">{label}</span>
           {tip}
         </span>
       ) : null}
@@ -135,11 +144,13 @@ export default function PropertyCard({
         >
           <def.Icon className="size-7" strokeWidth={1.75} />
         </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="relative flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-heading">{t(`names.${def.name}`)}</span>
-            {def.group === 'scaling' ? <Hint label={t('card.scalingBadge')} tip={hint} /> : null}
-            {def.group === 'skill' ? <Hint label={t('card.skillBadge')} tip={hint} /> : null}
+            {def.group === 'scaling' ? (
+              <Hint Icon={TrendingUp} label={t('card.scalingBadge')} tip={hint} />
+            ) : null}
+            {def.group === 'skill' ? <Hint Icon={Hourglass} label={t('card.skillBadge')} tip={hint} /> : null}
           </div>
           <span className="text-xs text-muted">
             {known ? levelText : <Skeleton>{levelText}</Skeleton>}
@@ -195,7 +206,7 @@ export default function PropertyCard({
         </div>
         {/* 浮层挂在整条进度条的中线上，挂在格子上的话两头会顶出卡片 */}
         {hoveredCell === null ? null : (
-          <span className={`${TOOLTIP_CLASS} left-1/2 -translate-x-1/2`}>
+          <span className={`${TOOLTIP_CLASS} left-1/2 -translate-x-1/2 whitespace-nowrap`}>
             {t('card.cellTip', {
               cell: hoveredCell,
               heroLevel: heroLevelForCell(def, hoveredCell),
