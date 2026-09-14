@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "2782318d58ea88d99a9244475cf9980042aa69aa",
+  gameCommit: "3c04fd3433cc227dca841bfb8210a8ac87401668",
   dotaVersion: "7.41",
 } as const;
 
@@ -167,7 +167,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     abilityName: "special_bonus_unique_keeper_of_the_light_upgrade",
     freeTrial: false,
     art: "keeper_of_the_light.9ef18e85.webp",
-    icon: "keeper_of_the_light_illuminate_alt.0617ab17.webp",
+    icon: "keeper_of_the_light_illuminate_alt.3e76621d.webp",
     name: { zh: "光之守卫", en: "Keeper of the Light" },
     title: { zh: "<font color='#d000ff'>冲击波 觉醒</font>", en: "<font color='#d000ff'>Illuminate Awakened</font>" },
     desc: { zh: "冲击波基础伤害提高100点，最大蓄力时间缩短至<font color='#FFFFFF'><b>1.5</b></font>秒，距离提高至<font color='#FFFFFF'><b>2300</b></font>，宽度提高至<font color='#FFFFFF'><b>600</b></font>，速度提高至<font color='#FFFFFF'><b>1350</b></font>。<br>冲击波每命中一名敌方英雄获得1层聚光，每层使冲击波伤害提高20%%。", en: "Increases Illuminate's base damage by 100, shortens max channel time to <font color='#FFFFFF'><b>1.5</b></font> seconds, extends distance to <font color='#FFFFFF'><b>2300</b></font>, width to <font color='#FFFFFF'><b>600</b></font> and speed to <font color='#FFFFFF'><b>1350</b></font>.<br>Each enemy Hero hit by Illuminate grants 1 Focus stack, and each stack increases Illuminate damage by 20%%." },
@@ -297,7 +297,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     abilityName: "special_bonus_unique_lina_upgrade",
     freeTrial: false,
     art: "lina.1feb5196.webp",
-    icon: "lina_laguna_blade.9078ccb8.webp",
+    icon: "lina_laguna_blade.3872b268.webp",
     name: { zh: "莉娜", en: "Lina" },
     title: { zh: "<font color='#d000ff'>神灭斩 觉醒</font>", en: "<font color='#d000ff'>Laguna Blade Awakened</font>" },
     desc: { zh: "每次释放神灭斩，对目标额外造成等同本次神灭斩伤害的<font color='#FFE56E'>纯粹伤害</font>，该伤害受技能增强影响。", en: "Each time Lina casts Laguna Blade, the target takes additional <font color='#FFE56E'>pure damage</font> equal to that Laguna Blade's damage, affected by Spell Amplification." },
@@ -306,8 +306,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     heroName: "npc_dota_hero_bristleback",
     abilityName: "special_bonus_unique_bristleback_upgrade",
     freeTrial: false,
-    art: "bristleback.dbf2bd7c.webp",
-    icon: null,
+    art: "bristleback.e570ac82.webp",
+    icon: "bb_2022_immortal_bristleback.307200d3.webp",
     name: { zh: "钢背兽", en: "Bristleback" },
     title: { zh: "<font color='#d000ff'>自动喷刺 觉醒</font>", en: "<font color='#d000ff'>Auto Quill Awakened</font>" },
     desc: { zh: "<font color='#00CED1'>自动施法：</font>开启后，当范围内有敌方英雄时，钢背兽自动施放刺针扫射，并对最近的敌方英雄施放粘稠鼻液。<br><br><font color='#d000ff'>觉醒强化：</font>粘稠鼻液：基础降甲提升至<font color='#FFFFFF'><b>10</b></font>点，每层降甲提升至<font color='#FFFFFF'><b>6</b></font>点，叠加上限提升至<font color='#FFFFFF'><b>10</b></font>层<br>刺针扫射：伤害上限提升至<font color='#FFFFFF'><b>1000</b></font><br>战意：叠加上限提升至<font color='#FFFFFF'><b>20</b></font>层", en: "<font color='#00CED1'>Autocast:</font> With autocast enabled, whenever enemy heroes are in range, Bristleback automatically fires Quill Spray and casts Viscous Nasal Goo on the nearest enemy hero.<br><br><font color='#d000ff'>Awakening Bonuses:</font> Viscous Nasal Goo: base armor reduction raised to <font color='#FFFFFF'><b>10</b></font>, per-stack to <font color='#FFFFFF'><b>6</b></font>, stack limit raised to <font color='#FFFFFF'><b>10</b></font><br>Quill Spray: damage cap raised to <font color='#FFFFFF'><b>1000</b></font><br>Warpath: max stacks raised to <font color='#FFFFFF'><b>20</b></font>" },
@@ -337,7 +337,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     abilityName: "special_bonus_unique_witch_doctor_upgrade",
     freeTrial: false,
     art: "witch_doctor.a24c9516.webp",
-    icon: "witch_doctor_death_ward.a97d1193.webp",
+    icon: "witch_doctor_death_ward.4d3b1148.webp",
     name: { zh: "巫医", en: "Witch Doctor" },
     title: { zh: "<font color='#d000ff'>神语 觉醒</font>", en: "<font color='#d000ff'>Divine Words Awakened</font>" },
     desc: { zh: "巫医沟通神明，死亡守卫与变身术守卫被召唤时，攻击力按巫医当前技能增强的50%%等比提升。", en: "By communing with the gods, Witch Doctor's Death Wards and Voodoo Switcheroo wards gain attack damage scaled by 50%% of his current Spell Amplification when summoned." },
@@ -367,7 +367,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     abilityName: "necrolyte_heartstopper_aura_datadriven",
     freeTrial: false,
     art: "necrolyte.422957a5.webp",
-    icon: "necrolyte_heartstopper_aura.56cc3008.webp",
+    icon: "necrolyte_heartstopper_aura.3189edc7.webp",
     name: { zh: "瘟疫法师", en: "Necrophos" },
     title: { zh: "<font color='#d000ff'>竭心光环 觉醒</font>", en: "<font color='#d000ff'>Heartstopper Aura Awakened</font>" },
     desc: { zh: "死灵法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><font color='#d000ff'>造成的伤害可以被技能增强。</font>", en: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font>" },
