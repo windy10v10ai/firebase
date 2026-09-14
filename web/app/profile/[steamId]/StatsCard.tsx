@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import Skeleton from '@/app/components/ui/skeleton';
+
 import StatList from './StatList';
 
 import type { PlayerInfo, StatsLifetime } from '@/app/lib/player-info';
@@ -19,14 +21,18 @@ const LIFETIME_KEYS = [
   'towerKills',
 ] as const satisfies readonly (keyof StatsLifetime)[];
 
-export default function StatsCard({ info }: { info: PlayerInfo }) {
+export default function StatsCard({ info }: { info: PlayerInfo | null }) {
   const t = useTranslations('profile.stats');
-  const winRate = info.matchCount > 0 ? Math.round((info.winCount / info.matchCount) * 100) : 0;
 
   const overview = [
-    { label: t('games'), value: info.matchCount.toLocaleString() },
-    { label: t('winRate'), value: `${winRate}%` },
-    { label: t('conduct'), value: String(info.conductPoint) },
+    { label: t('games'), value: info ? info.matchCount.toLocaleString() : null },
+    {
+      label: t('winRate'),
+      value: info
+        ? `${info.matchCount > 0 ? Math.round((info.winCount / info.matchCount) * 100) : 0}%`
+        : null,
+    },
+    { label: t('conduct'), value: info ? String(info.conductPoint) : null },
   ];
 
   return (
@@ -36,7 +42,7 @@ export default function StatsCard({ info }: { info: PlayerInfo }) {
         {overview.map(({ label, value }) => (
           <div key={label} className="box-pad rounded-[10px] border border-line bg-panel-soft">
             <dt className="text-sm text-muted">{label}</dt>
-            <dd className="mt-1 text-2xl font-bold tabular-nums text-heading">{value}</dd>
+            <dd className="mt-1 text-2xl font-bold tabular-nums text-heading">{value ?? <Skeleton />}</dd>
           </div>
         ))}
       </dl>
@@ -45,7 +51,7 @@ export default function StatsCard({ info }: { info: PlayerInfo }) {
         <StatList
           items={LIFETIME_KEYS.map((key) => ({
             label: t(key),
-            value: (info.statsLifetime?.[key] ?? 0).toLocaleString(),
+            value: info ? (info.statsLifetime?.[key] ?? 0).toLocaleString() : null,
           }))}
         />
       </div>

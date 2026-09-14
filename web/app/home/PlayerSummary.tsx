@@ -64,12 +64,12 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           <UserRound className="size-7 text-muted" strokeWidth={1.7} aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-2xl font-bold text-heading sm:text-[26px]">
+          <p className="text-2xl font-bold text-heading md:text-[26px]">
             {t('heading', { id: uid })}
           </p>
           {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个；没开通过留空，「未开通会员」既没信息也没去处 */}
           {/* 两行始终占位且不折行，会员信息晚到也不撑高身份行；加载中同样只留白，非会员本来就空着，放骨架会预告不存在的内容 */}
-          <p className="flex flex-col sm:flex-row sm:items-center sm:gap-x-2">
+          <p className="flex flex-col md:flex-row md:items-center md:gap-x-2">
             {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
             <span
               className={`min-h-6 truncate ${member?.enable ? 'font-medium text-member-strong' : 'text-muted'}`}
@@ -82,12 +82,12 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           </p>
         </div>
         <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap text-link transition-colors group-hover:text-link-hover">
-          <span className="hidden sm:inline">{t('profileLink')}</span>
+          <span className="hidden md:inline">{t('profileLink')}</span>
           <ChevronRight className="size-4" aria-hidden="true" />
         </span>
       </Link>
 
-      <dl className="grid gap-x-8 sm:grid-cols-2" aria-busy={pending}>
+      <dl className="grid gap-x-8 md:grid-cols-2" aria-busy={pending}>
         <StatRow
           label={t('battleLevel')}
           value={valueOf((loaded) => loaded.seasonLevel)}

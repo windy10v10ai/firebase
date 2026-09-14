@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import PageSkeleton from '@/app/components/PageSkeleton';
+import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
@@ -59,11 +59,7 @@ export default function ProfilePage() {
     };
   }, [steamId]);
 
-  if (!loaded) {
-    return <PageSkeleton label={t('loading')} />;
-  }
-
-  if (loaded.status === 'failed') {
+  if (loaded?.status === 'failed') {
     // 页面不判断登录，看得到看不到由接口说了算
     if (loaded.httpStatus === 401) {
       return <LoginPanel />;
@@ -76,21 +72,37 @@ export default function ProfilePage() {
     );
   }
 
+  const info = loaded?.info ?? null;
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start">
+    <div
+      className="grid gap-6 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start"
+      aria-busy={!info}
+    >
+      {info ? null : (
+        <p role="status" className="sr-only">
+          {t('loading')}
+        </p>
+      )}
       {/* 窄屏走 DOM 顺序单列；宽屏用显式网格坐标拆成左右两栏 */}
       <div className="lg:col-start-1 lg:row-start-1">
-        <PlayerCard info={loaded.info} />
+        <PlayerCard steamId={steamId} info={info} />
       </div>
       <div className="lg:col-start-2 lg:row-start-1">
-        <LevelCard info={loaded.info} steamId={steamId} />
+        <LevelCard info={info} steamId={steamId} />
       </div>
       <div className="lg:col-start-2 lg:row-start-2">
         <FeatureEntryCard
           Icon={CirclePlus}
           title={t('entries.property.title')}
           description={t('entries.property.description')}
-          badge={t('entries.property.badge', { count: loaded.info.useableLevel })}
+          badge={
+            info ? (
+              t('entries.property.badge', { count: info.useableLevel })
+            ) : (
+              <Skeleton>{t('entries.property.badge', { count: 0 })}</Skeleton>
+            )
+          }
           href={playerPagePath(steamId, 'property')}
         />
       </div>
@@ -102,11 +114,11 @@ export default function ProfilePage() {
         />
       </div>
       <div className="lg:col-start-2 lg:row-start-4">
-        <StatsCard info={loaded.info} />
+        <StatsCard info={info} />
       </div>
       {/* 跨 3 行接到战绩卡底部，让空档落在整块左栏末尾，不夹在两张入口卡中间 */}
       <div className="lg:col-start-1 lg:row-start-2 lg:row-end-5">
-        <MemberCard member={loaded.info.member} />
+        <MemberCard info={info} />
       </div>
     </div>
   );
