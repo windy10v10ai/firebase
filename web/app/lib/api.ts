@@ -1,4 +1,3 @@
-import { API_DOMAIN } from '@/config/constant';
 import { auth } from '@/config/firebase';
 
 export class ApiError extends Error {
@@ -20,7 +19,8 @@ export const apiFetch = async <Response>(path: string, init: RequestInit = {}) =
     headers.set('Authorization', `Bearer ${idToken}`);
   }
 
-  const response = await fetch(`${API_DOMAIN}${path}`, {
+  // 同源请求：部分网络连不到单独的 API 域名，而页面能打开就说明本站域名是通的
+  const response = await fetch(path, {
     ...init,
     headers,
   });
