@@ -1,6 +1,6 @@
 // 本文件由 web/scripts/awaken-sync.mjs 生成，不要手改。
 // 改觉醒数据要改 game 仓库，再跑 npm run awaken:sync 重新生成。
-// 数据来源与同步流程见 docs/design/web/phase-3b-awaken-page.md。
+// 数据来源与同步流程见 .claude/skills/awaken-sync/SKILL.md，当时的取舍见 docs/design/web/phase-3b-awaken-page.md。
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {

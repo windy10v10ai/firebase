@@ -2,7 +2,7 @@ interface SteamIconProps {
   className?: string;
 }
 
-// 自绘而非用 Valve 官方按钮图，配色能跟着站点走，见 phase-2-login-entry.md 第 2 节
+// 自绘而非用 Valve 官方按钮图，配色能跟着站点走，见 docs/design/web/phase-2-login-entry.md
 export default function SteamIcon({ className }: SteamIconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
