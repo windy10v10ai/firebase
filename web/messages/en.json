@@ -295,7 +295,7 @@
       "premium": "Premium",
       "normal": "Member",
       "expired": "Expired",
-      "expireDate": "Valid until {date}",
+      "expireDate": "Until {date}",
       "link": "Membership"
     },
     "entries": {
