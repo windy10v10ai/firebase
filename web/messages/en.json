@@ -43,6 +43,10 @@
     "summary": {
       "profileLink": "Profile",
       "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "Copy",
+        "copied": "Copied"
+      },
       "battleLevel": "Battle Level",
       "memberLevel": "Member Level",
       "battlePoint": "Usable Battle Points",
@@ -266,6 +270,10 @@
     },
     "identity": {
       "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "Copy",
+        "copied": "Copied"
+      },
       "battleLevel": "Battle Level",
       "memberLevel": "Member Level",
       "conductNet": "Commends minus Reports",
