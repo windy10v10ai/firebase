@@ -69,6 +69,23 @@ describe('本地 key 放行名单 (e2e)', () => {
       expect(res.body.ga4Config.serverType).toBe('LOCAL');
     });
 
+    it('GET /api/game/probe 回传边缘给出的国家码', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/game/probe')
+        .set('x-api-key', localKey)
+        .set('cf-ipcountry', 'CN');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ country: 'CN' });
+    });
+
+    it('GET /api/game/probe 边缘没给国家码时不返回该字段', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/game/probe')
+        .set('x-api-key', localKey);
+      expect(res.status).toBe(200);
+      expect(res.body.country).toBeUndefined();
+    });
+
     it('POST /api/daily-task/refresh', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/daily-task/refresh')
