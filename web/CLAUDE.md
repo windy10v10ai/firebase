@@ -10,7 +10,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 | 文件 | Next 何时读取 | 进 git | 内容 |
 |---|---|---|---|
-| `.env` | 所有环境，优先级最低 | 是 | 兜底值，生产域名 `https://api.windy10v10ai.com` |
+| `.env` | 所有环境，优先级最低 | 是 | 兜底值，生产函数地址 `https://asia-northeast1-windy10v10ai.cloudfunctions.net/client` |
 | `.env.development` | 仅 `next dev` | 是 | 本机 API `http://localhost:3001` |
 | `.env.local` | 除 test 外所有环境，覆盖前两者 | 否 | 仅供个人临时覆盖（ngrok、拿本地页面打生产接口排查） |
 
