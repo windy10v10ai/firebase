@@ -296,8 +296,9 @@
       "normal": "Member",
       "expired": "Expired",
       "expireDate": "Valid until {date}",
-      "expiredDate": "Expired on {date}",
-      "link": "Membership"
+      "link": "Membership",
+      "premiumShort": "Premium",
+      "expireDateShort": "Until {date}"
     },
     "entries": {
       "property": {
