@@ -9,12 +9,14 @@ import AbilityDetails from '@/app/components/AbilityDetails';
 import GameText from '@/app/components/GameText';
 import { awakenAssetPath } from '@/app/lib/awaken';
 
+import { useBadgeWrap } from './use-badge-wrap';
+
 import type { AwakenHero } from '@/config/awaken';
 
 const BADGE_CLASS =
   'rounded border border-success bg-black/60 px-1.5 text-[11px] font-bold text-success';
-/* 左边那个配平用的空位要能被挤掉：shrink 给大，缺宽度时先压它，压没了才轮到名字截断 */
-const BADGE_SPACER_CLASS = `${BADGE_CLASS} invisible min-w-0 overflow-hidden [flex-shrink:999]`;
+/* 左边配平用的空位不参与压缩：挤不下时整行换成两行，压它会让名字跟着缩出省略号 */
+const BADGE_SPACER_CLASS = `${BADGE_CLASS} invisible shrink-0`;
 
 /** 与 w-85 一致 */
 const TOOLTIP_WIDTH = 340;
@@ -47,6 +49,7 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
   // 立绘、英雄名、技能图标都是本地常量，数据没到照样画；这时按钮按未觉醒的样子置灰锁住
   const known = unlocked !== null;
   const dimmed = !unlocked && (tooPoor || busy);
+  const { rowRef, nameRef, badgeRef, wrap } = useBadgeWrap<HTMLDivElement>(hero.freeTrial);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
@@ -109,24 +112,41 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
             dimmed && tooPoor ? 'brightness-[0.62] saturate-[0.55]' : ''
           }`}
         />
-        <div className="absolute inset-x-0 top-0 h-10 bg-linear-to-b from-surface/80 to-transparent" />
+        <div
+          className={`absolute inset-x-0 top-0 bg-linear-to-b from-surface/80 to-transparent ${
+            wrap ? 'h-14' : 'h-10'
+          }`}
+        />
         {/*
-         * 照 game：英雄名落在卡片正中，限免角标压在右上角。角标右边占多宽，左边就空多宽，
-         * 名字放得下时就落在中线上；放不下先把左边那个空位挤掉，让名字用满到角标为止。
+         * 照 game：英雄名落在卡片正中，限免角标压在右上角，角标右边占多宽、左边就空多宽。
+         * 名字加两侧角标放不下时名字独占第一行，角标退到第二行右侧，顶部压暗跟着加深，名字不截断。
          * 角标的位置一直占着——限免是常量、已不已觉醒要等接口，数据到了才插进去会让名字动一次。
          */}
-        <div className="absolute inset-x-1.5 top-1.5 flex items-center justify-center gap-1">
-          {hero.freeTrial ? (
+        <div
+          ref={rowRef}
+          className={`absolute inset-x-1.5 top-1.5 flex ${
+            wrap ? 'flex-col items-center gap-0.5' : 'items-center justify-center gap-1'
+          }`}
+        >
+          {hero.freeTrial && !wrap ? (
             // 装同样的文案才拿得到同样的宽度，角标换了语言也不用改这里
             <span aria-hidden="true" className={BADGE_SPACER_CLASS}>
               {t('freeTrial')}
             </span>
           ) : null}
-          <span className="min-w-0 truncate text-[13px] font-bold text-heading [text-shadow:0_2px_4px_rgba(0,0,0,0.95)]">
+          <span
+            ref={nameRef}
+            className="max-w-full min-w-0 truncate text-[13px] font-bold text-heading [text-shadow:0_2px_4px_rgba(0,0,0,0.95)]"
+          >
             {hero.name[locale]}
           </span>
           {hero.freeTrial ? (
-            <span className={`${BADGE_CLASS} shrink-0 ${unlocked === false ? '' : 'invisible'}`}>
+            <span
+              ref={badgeRef}
+              className={`${BADGE_CLASS} shrink-0 ${wrap ? 'self-end' : ''} ${
+                unlocked === false ? '' : 'invisible'
+              }`}
+            >
               {t('freeTrial')}
             </span>
           ) : null}

@@ -58,6 +58,9 @@
   --color-warning: #f5a623;
   --color-danger: #e87d7d;
 
+  /* 折扣标签专用，不借用 danger：折扣不是危险，还要和绿色的限免标签一眼分开 */
+  --color-discount: #ff6b6b;
+
   /* 游戏语义色，只用在技能提示框：取值照搬 Dota 本地化里的伤害类型色 */
   --color-dota-physical: #ae2f28;
   --color-dota-magical: #5b93d1;
@@ -79,6 +82,12 @@
 
   button:disabled {
     cursor: not-allowed;
+  }
+
+  /* 模态弹窗打开时锁住页面，手指在弹窗或遮罩上滑动不带着背后的页面滚；留住滚动条槽位，电脑上页面不左右跳 */
+  html:has(dialog:modal) {
+    overflow: hidden;
+    scrollbar-gutter: stable;
   }
 }
 

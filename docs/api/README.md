@@ -5,6 +5,7 @@
 ## 目录
 
 - [对外入口](#对外入口)
+- [对外依赖](#对外依赖)
 - [API 访问配置](#api-访问配置)
   - [Firebase 重写规则配置](#firebase-重写规则配置)
   - [API 路由处理](#api-路由处理)
@@ -30,8 +31,26 @@
 | 爱发电 / Ko-fi 回调 | `windy10v10ai.web.app` | Firebase Hosting → 函数 |
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
+- 转发目的地是函数自己的地址 `https://asia-northeast1-windy10v10ai.cloudfunctions.net/client`，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting。这个地址由区域、项目 ID、函数名拼成，重新部署不变，改函数名或换区域才需要跟着改
 - 支付宝的回调地址由 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL` 决定；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
-- **改 `web/next.config.ts` 的转发目的地会同时改掉支付宝回调的路径**，要连收款一起验
+- **改 `API_ORIGIN` 会同时改掉支付宝回调的路径**，要连收款一起验
+- 经网站域名转发进来的请求没有 Cloudflare 的 `cf-connecting-ip` / `cf-ipcountry`，按 IP 限流（`local-host`）只对直连 API 域名的来源有效
+
+## 对外依赖
+
+API 自己往外调的第三方服务：
+
+| 服务 | 用在 | 凭据 | 缓存 |
+|---|---|---|---|
+| Steam OpenID | 登录回调的二次核对 | 无 | 无 |
+| Steam Web API `GetPlayerSummaries` | 玩家昵称与头像地址 | `STEAM_WEB_API_KEY` | Firestore `SteamProfiles`，正常 24 小时、取不到 1 小时 |
+| 爱发电订单查询 | 补激活遗漏的订单 | `AFDIAN_API_TOKEN` | 无 |
+| GA4 Measurement Protocol | 服务端埋点 | `GA4_API_SECRET` | 无 |
+
+两条只对 Steam Web API 成立、但必须守住的规矩：
+
+- **key 只存在于服务端**：不下发给浏览器，也不做让浏览器间接打到 Steam 的转发。配额是 10 万次/天，靠上面那层缓存，实际调用量按「一天内被看过的不同玩家数」计
+- **头像图片不经过 API**：接口只返回 `avatars.steamstatic.com` 上的地址，图片字节由浏览器直接取，我们既不付流量也不占函数调用
 
 ## API 访问配置
 

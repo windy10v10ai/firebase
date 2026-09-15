@@ -85,7 +85,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     heroName: "npc_dota_hero_nyx_assassin",
     abilityName: "special_bonus_unique_nyx_assassin_mobile_burrow_awaken",
     freeTrial: true,
-    art: "nyx_assassin.2cf59963.webp",
+    art: "nyx_assassin.29612b0f.webp",
     icon: "nyx_assassin_burrow.a289b3f2.webp",
     name: { zh: "司夜刺客", en: "Nyx Assassin" },
     title: { zh: "<font color='#d000ff'>钻地 觉醒</font>", en: "<font color='#d000ff'>Burrow Awakened</font>" },

@@ -10,7 +10,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 | 文件 | Next 何时读取 | 进 git | 内容 |
 |---|---|---|---|
-| `.env` | 所有环境，优先级最低 | 是 | 兜底值，生产域名 `https://api.windy10v10ai.com` |
+| `.env` | 所有环境，优先级最低 | 是 | 兜底值，生产函数地址 `https://asia-northeast1-windy10v10ai.cloudfunctions.net/client` |
 | `.env.development` | 仅 `next dev` | 是 | 本机 API `http://localhost:3001` |
 | `.env.local` | 除 test 外所有环境，覆盖前两者 | 否 | 仅供个人临时覆盖（ngrok、拿本地页面打生产接口排查） |
 
@@ -90,6 +90,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **交互反馈用主色标记档 `link` 系列**：链接、当前页标记、焦点框、转圈、`.card-hover` 都是它
 - **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
 - **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
+- **折扣标签用 `discount`，不用 `danger`**，形状与限免标签一致，见 design-system.md「状态色」
 
 ## 按钮
 

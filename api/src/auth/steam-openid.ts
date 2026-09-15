@@ -1,7 +1,7 @@
+import { toAccountId } from '../util/steam-id';
+
 const STEAM_OPENID_ENDPOINT = 'https://steamcommunity.com/openid/login';
 const CLAIMED_ID_PATTERN = /^https:\/\/steamcommunity\.com\/openid\/id\/(\d{17})$/;
-// SteamID64 与 32 位账号 ID 的固定偏移量，见 Valve 的 SteamID 规范
-const STEAM_ID64_BASE = BigInt('76561197960265728');
 
 export { STEAM_OPENID_ENDPOINT };
 
@@ -38,9 +38,5 @@ export function parseAccountId(claimedId: string | null): number | undefined {
   if (!matched) {
     return undefined;
   }
-  const accountId = BigInt(matched[1]) - STEAM_ID64_BASE;
-  if (accountId <= BigInt(0) || accountId > BigInt(Number.MAX_SAFE_INTEGER)) {
-    return undefined;
-  }
-  return Number(accountId);
+  return toAccountId(matched[1]);
 }

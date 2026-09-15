@@ -11,6 +11,7 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
+import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
 import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 
 import FeatureEntryCard from './FeatureEntryCard';
@@ -32,8 +33,10 @@ export default function ProfilePage() {
   const t = useTranslations('profile');
   const { steamId } = useParams<{ steamId: string }>();
   const [result, setResult] = useState<LoadResult | null>(null);
+  const [steamProfile, setSteamProfile] = useState<SteamProfile | null>(null);
 
   const loaded = result?.steamId === steamId ? result : null;
+  const profile = steamProfile?.steamId === steamId ? steamProfile : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +56,21 @@ export default function ProfilePage() {
           });
         }
       });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [steamId]);
+
+  // 昵称头像单独发一次，与上面那次并行：它要向 Steam 取数，快慢不该拖住整页
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchSteamProfile(steamId).then((fetched) => {
+      if (!cancelled) {
+        setSteamProfile(fetched);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -82,7 +100,7 @@ export default function ProfilePage() {
           {t('loading')}
         </p>
       )}
-      <PlayerCard steamId={steamId} info={info} />
+      <PlayerCard steamId={steamId} info={info} profile={profile} />
       <div className="lg:col-span-2">
         <LevelCard info={info} steamId={steamId} />
       </div>
