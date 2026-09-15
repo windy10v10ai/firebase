@@ -18,8 +18,8 @@ import {
 
 import type { AwakenHero } from '@/config/awaken';
 
-// 展开时按渐隐高度回退滚动距离，接着被盖住的那几行往下读，不从已经看过的地方重来
-const FADE_HEIGHT = 48;
+// 滑过这一点就算知道能滑了，提示不再出现；再小容易被点按时的手指抖动触发
+const HINT_DISMISS_DISTANCE = 8;
 // 抽屉只在手机档出现，与 md: 断点同一口径
 const SHEET_QUERY = '(max-width: 767px)';
 // 手指移动超过它才算拖动，轻点头部不会让抽屉跟着抖
@@ -46,7 +46,7 @@ interface AwakenDialogProps {
 /**
  * 详情与付费合一。看清楚买的是什么、再选用哪种积分付，本来就是一件事。
  * 用原生 <dialog> 白拿焦点陷阱和 Esc 关闭，和属性页的重置弹窗同一套。
- * 付费按钮的位置不随技能说明长短变；说明放不下时电脑直接滚动，触屏先收起、点「详细」再滚动。理由见 docs/web/ability-tooltip.md。
+ * 付费按钮的位置不随技能说明长短变；说明放不下时直接滚动，触屏在底部渐隐里提示可以滑。理由见 docs/web/ability-tooltip.md。
  */
 export default function AwakenDialog({
   hero,
@@ -68,14 +68,12 @@ export default function AwakenDialog({
     null,
   );
   const suppressClick = useRef(false);
-  // 说明区下面还有没露出来的内容；收起、滚动中都用它决定渐隐
+  // 说明区下面还有没露出来的内容；渐隐和滑动提示都看它
   const [moreBelow, setMoreBelow] = useState(false);
-  // 记的是展开了哪个英雄，换英雄时自然回到收起，不用另写重置
-  const [expandedHero, setExpandedHero] = useState<string | null>(null);
-  const expanded = hero !== null && expandedHero === hero.heroName;
-  const collapsed = moreBelow && !expanded;
+  // 提示只教一次：滑过就不再出现，滑回顶部也不回来，免得一直压着最后一行
+  const [hintDismissed, setHintDismissed] = useState(false);
 
-  // 先打开再量高度，两步都在绘制前完成，收起态第一帧就是对的
+  // 先打开再量高度，两步都在绘制前完成，渐隐和提示第一帧就是对的
   useLayoutEffect(() => {
     const dialog = ref.current;
     if (!dialog) {
@@ -108,6 +106,8 @@ export default function AwakenDialog({
     }
     // 说明区是同一个元素，换英雄时不归零会停在上一个英雄滚到的位置
     body.scrollTop = 0;
+    // 关掉重开或换英雄都算新的一次打开，提示重新出现
+    setHintDismissed(false);
     updateMoreBelow();
     // 窗口高度、字体加载都会改变放不放得下
     const observer = new ResizeObserver(updateMoreBelow);
@@ -130,21 +130,6 @@ export default function AwakenDialog({
     dialog.addEventListener('touchmove', onTouchMove, { passive: false });
     return () => dialog.removeEventListener('touchmove', onTouchMove);
   }, []);
-
-  const expand = () => {
-    const body = bodyRef.current;
-    if (!hero || !body) {
-      return;
-    }
-    const top = Math.max(0, body.clientHeight - FADE_HEIGHT * 2);
-    setExpandedHero(hero.heroName);
-    // 「详细」按钮点完就消失，焦点交给说明区，键盘用户可以接着用方向键滚
-    body.focus({ preventScroll: true });
-    body.scrollTo({
-      top,
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    });
-  };
 
   const onDragStart = (event: PointerEvent<HTMLDialogElement>) => {
     suppressClick.current = false;
@@ -282,11 +267,13 @@ export default function AwakenDialog({
             <div
               ref={bodyRef}
               tabIndex={-1}
-              onScroll={updateMoreBelow}
-              // 电脑有滚轮，直接滚比多点一次「详细」省事；触屏第一眼不出滚动条
-              className={`min-h-0 flex-auto overscroll-contain outline-none lg:overflow-y-auto lg:pe-8 ${
-                expanded ? 'overflow-y-auto' : 'overflow-hidden'
-              }`}
+              onScroll={(event) => {
+                updateMoreBelow();
+                if (event.currentTarget.scrollTop > HINT_DISMISS_DISTANCE) {
+                  setHintDismissed(true);
+                }
+              }}
+              className="min-h-0 flex-auto overflow-y-auto overscroll-contain outline-none lg:pe-8"
             >
               <div ref={contentRef} className="flex flex-col gap-4.5">
                 <AbilityDetails
@@ -301,22 +288,20 @@ export default function AwakenDialog({
             {moreBelow ? (
               <div
                 aria-hidden="true"
-                style={{ height: FADE_HEIGHT }}
-                className="pointer-events-none absolute start-0 end-0 bottom-0 bg-linear-to-b from-transparent to-panel lg:end-8"
+                className="pointer-events-none absolute start-0 end-0 bottom-0 h-12 bg-linear-to-b from-transparent to-panel lg:end-8"
               />
             ) : null}
-          </div>
-
-          {collapsed ? (
-            <button
-              type="button"
-              onClick={expand}
-              className="link-inline -mt-2.5 inline-flex min-h-8 items-center gap-1 self-start text-sm font-bold lg:hidden"
+            {/* 触屏的滚动条平时藏着，光有渐隐看不出能滑；电脑档有滚轮，不提示。文案不写方向：写「向下滑」有人会往下拉，拉到头部就关掉了抽屉 */}
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute start-0 end-0 bottom-0.5 flex items-center justify-center gap-0.5 text-xs leading-4.5 font-medium text-muted transition-opacity duration-200 lg:hidden ${
+                moreBelow && !hintDismissed ? 'opacity-100' : 'opacity-0'
+              }`}
             >
-              {t('more')}
-              <ChevronDown className="size-4" aria-hidden="true" />
-            </button>
-          ) : null}
+              {t('scrollHint')}
+              <ChevronDown className="size-4 motion-safe:animate-scroll-hint" />
+            </div>
+          </div>
 
           <hr className="border-line" />
 

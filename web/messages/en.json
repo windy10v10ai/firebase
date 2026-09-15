@@ -443,7 +443,7 @@
       "useMember": "{cost} usable Member Points",
       "battleShort": "You have {have} Battle Points, {need} short",
       "memberShort": "You have {have} Member Points, {need} short",
-      "more": "More",
+      "scrollHint": "Swipe for more",
       "close": "Close"
     },
     "random": {
@@ -518,8 +518,7 @@
     },
     "cooldown": "Cooldown",
     "manaCost": "Mana Cost",
-    "aoe": "Affected by AoE bonuses",
-    "spellAmp": "Affected by spell amplification"
+    "aoe": "Affected by AoE bonuses"
   },
   "auth": {
     "login": "Sign in with Steam",
