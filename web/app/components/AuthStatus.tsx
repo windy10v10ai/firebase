@@ -16,7 +16,7 @@ export default function AuthStatus() {
   const t = useTranslations('auth');
   const auth = useAuth();
   const uid = auth.status === 'authenticated' ? auth.uid : null;
-  const [loaded, setLoaded] = useState<SteamProfile | null>(null);
+  const [loaded, setLoaded] = useState<SteamProfile | null>(() => auth.initialProfile);
   // 换了账号时旧资料立刻失效，不用先手动置空
   const profile = loaded?.steamId === uid ? loaded : null;
 
