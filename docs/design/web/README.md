@@ -25,7 +25,7 @@
 | 8a 首页 | #1168 | 登录引导与主要页面导航 | 已完成 |
 | 8b 个人主页 | #1167 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 已完成 |
 | 8c 会员页与商业披露 | #1170 | 会员页订阅按钮统一紫色；披露页、数据表与文档收尾 | 已完成 |
-| 9 Steam 昵称头像 | 待建 | 申请 Steam Web API key、后端加接口与缓存、网站显示昵称头像 | 未开始 |
+| 9 Steam 昵称头像 | 无 | 后端加 `steam-profile` 接口与 Firestore 缓存，头部账号区与身份卡显示昵称头像，见 [phase-9-steam-profile.md](phase-9-steam-profile.md) | 已完成 |
 | 10 首屏与加载态 | #1176 | 首屏按 cookie 定登录形态，加载中改为原位骨架块，全站断点统一为手机 / 平板 / 电脑三档，见 [phase-10-first-paint.md](phase-10-first-paint.md) | 已完成 |
 | 11 可点击元素与玩家页细节 | 无 | 按钮手型光标、属性页等级入口加箭头、个人主页会员状态并入身份卡，见 [phase-11-clickable-polish.md](phase-11-clickable-polish.md) | 已完成 |
 | 12 配色与控件 | 无 | 网站主色、功能色、品牌色与按钮体系，最终规范见 [docs/web/design-system.md](../../web/design-system.md)；取舍过程见 [phase-12-color-system.md](phase-12-color-system.md)、[phase-12-controls.md](phase-12-controls.md)（含登录等待、头部退出） | 已完成 |
@@ -34,10 +34,7 @@
 
 ### 后续依赖
 
-剩下的三批互不阻塞，可以同时推进：
-
-- **9 Steam 昵称头像**卡在申请 Steam Web API key，那是外部审批，越早交越好；它会再动一次头部账号区，位置已按 [phase-2g-header-layout.md](phase-2g-header-layout.md) 预留
-- **5 GA4** 与 **6 会员剩余**没有依赖，随时可插队
+剩下的 **5 GA4** 与 **6 会员剩余**互不阻塞，也不依赖别的批次，随时可以插队。
 
 `/wiki/*` 的技能与物品页仍未排期，菜单项靠 `config/nav.ts` 里 `href` 为 `null` 隐藏着。
 
