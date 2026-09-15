@@ -80,6 +80,19 @@ function check(source, assets) {
     }
   }
 
+  // 8. 标题、描述、背景故事里不允许残留反斜杠转义：出现说明本地化解析没有把 \n \" \\ 等还原干净
+  for (const hero of heroes) {
+    for (const [lang, text] of Object.entries(hero.text)) {
+      if (text.title.includes('\\')) errors.push(`${hero.abilityName} 的 ${lang} 标题残留反斜杠转义`);
+      if (text.desc.includes('\\')) errors.push(`${hero.abilityName} 的 ${lang} 描述残留反斜杠转义`);
+    }
+    if (hero.ability.lore) {
+      for (const [lang, value] of Object.entries(hero.ability.lore)) {
+        if (value.includes('\\')) errors.push(`${hero.abilityName} 的 ${lang} 背景故事残留反斜杠转义`);
+      }
+    }
+  }
+
   return { errors, warnings };
 }
 
