@@ -43,6 +43,7 @@ const FRAME = {
   npc_dota_hero_monkey_king: { x: 0.7 }, // 金箍棒横在身前，同上
   npc_dota_hero_bristleback: { x: 0.7, zoom: 0.9, top: 6 }, // 链锤甩在身前，同上；脸落在技能图标的位置，缩小后头顶贴上沿，背刺完整
   npc_dota_hero_kunkka: { x: 0.64, zoom: 1.2 }, // 刀比人长，让刀出画换人居中
+  npc_dota_hero_nyx_assassin: { x: 0.4 }, // 居中时人物偏左
   npc_dota_hero_warlock: { x: 0.65, y: 0.68, zoom: 1.9 }, // 官方图里召唤物占了大半，取右下角的本体，召唤物只当背景；倍数再高本体就开始糊
 };
 

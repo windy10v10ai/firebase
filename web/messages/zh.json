@@ -437,17 +437,17 @@
     },
     "dialog": {
       "question": "选择消耗的积分，觉醒该英雄",
-      "halfPrice": "随机抽选消耗积分减半。",
       "alreadyUnlocked": "已觉醒",
       "useBattle": "{cost} 可用勇士积分",
       "useMember": "{cost} 可用会员积分",
       "battleShort": "勇士积分 {have}，还差 {need}",
       "memberShort": "会员积分 {have}，还差 {need}",
+      "more": "详细",
       "close": "关闭"
     },
     "random": {
       "title": "随机觉醒",
-      "halfPrice": "消耗积分减半",
+      "discount": "-50%",
       "threePick": "随机 3 选 1",
       "draw": "抽选",
       "select": "选择",
