@@ -26,6 +26,8 @@ const SHEET_QUERY = '(max-width: 767px)';
 const DRAG_START_DISTANCE = 6;
 // 下拉不到这个距离就松手按回弹处理，免得碰一下就关
 const DRAG_CLOSE_DISTANCE = 96;
+// 单手时拇指常按在抽屉上沿外侧一点，这一段遮罩也算抽屉头部
+const DRAG_EDGE_OUTSET = 24;
 // 与抽屉的 duration-200 一致，滑出屏幕后再真正关闭
 const SHEET_CLOSE_MS = 200;
 
@@ -61,9 +63,11 @@ export default function AwakenDialog({
   const ref = useRef<HTMLDialogElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pointerId: number; startY: number; distance: number; active: boolean } | null>(
     null,
   );
+  const suppressClick = useRef(false);
   // 说明区下面还有没露出来的内容；收起、滚动中都用它决定渐隐
   const [moreBelow, setMoreBelow] = useState(false);
   // 记的是展开了哪个英雄，换英雄时自然回到收起，不用另写重置
@@ -112,6 +116,21 @@ export default function AwakenDialog({
     return () => observer.disconnect();
   }, [hero]);
 
+  // 拖动开始后拦下触摸滑动：浏览器一接管滑动就发 pointercancel 打断拖动，遮罩上又设不了 touch-action
+  useLayoutEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) {
+      return;
+    }
+    const onTouchMove = (event: TouchEvent) => {
+      if (drag.current) {
+        event.preventDefault();
+      }
+    };
+    dialog.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => dialog.removeEventListener('touchmove', onTouchMove);
+  }, []);
+
   const expand = () => {
     const body = bodyRef.current;
     if (!hero || !body) {
@@ -127,14 +146,24 @@ export default function AwakenDialog({
     });
   };
 
-  const onDragStart = (event: PointerEvent<HTMLDivElement>) => {
-    if (busy || !window.matchMedia(SHEET_QUERY).matches) {
+  const onDragStart = (event: PointerEvent<HTMLDialogElement>) => {
+    suppressClick.current = false;
+    const dialog = ref.current;
+    const header = headerRef.current;
+    if (busy || !dialog || !header || !window.matchMedia(SHEET_QUERY).matches) {
+      return;
+    }
+    const target = event.target as Node;
+    // 按在遮罩上时事件落在 dialog 本身；只认抽屉上沿外那一段，其余遮罩只能点着关闭
+    const top = dialog.getBoundingClientRect().top;
+    const onEdge = target === dialog && event.clientY < top && event.clientY >= top - DRAG_EDGE_OUTSET;
+    if (!onEdge && !header.contains(target)) {
       return;
     }
     drag.current = { pointerId: event.pointerId, startY: event.clientY, distance: 0, active: false };
   };
 
-  const onDragMove = (event: PointerEvent<HTMLDivElement>) => {
+  const onDragMove = (event: PointerEvent<HTMLDialogElement>) => {
     const current = drag.current;
     const dialog = ref.current;
     if (!current || current.pointerId !== event.pointerId || !dialog) {
@@ -154,13 +183,15 @@ export default function AwakenDialog({
     dialog.style.translate = `0 ${distance}px`;
   };
 
-  const onDragEnd = (event: PointerEvent<HTMLDivElement>) => {
+  const onDragEnd = (event: PointerEvent<HTMLDialogElement>) => {
     const current = drag.current;
     const dialog = ref.current;
     drag.current = null;
     if (!current?.active || !dialog) {
       return;
     }
+    // 拖过之后松手还会补发一次 click，从遮罩起拖时会被当成点遮罩关闭
+    suppressClick.current = true;
     dialog.style.transition = '';
     if (event.type === 'pointerup' && current.distance > DRAG_CLOSE_DISTANCE) {
       dialog.style.translate = '0 100%';
@@ -180,11 +211,20 @@ export default function AwakenDialog({
       ref={ref}
       onCancel={onClose}
       onClick={(event) => {
+        if (suppressClick.current) {
+          suppressClick.current = false;
+          return;
+        }
         // 点遮罩关闭：事件落在 dialog 本身而不是里面的内容时才算点在遮罩上
         if (event.target === ref.current) {
           onClose();
         }
       }}
+      // 抽屉上沿外那一段遮罩也能拖，手势挂在 dialog 上，按下的位置决定算不算拖动
+      onPointerDown={onDragStart}
+      onPointerMove={onDragMove}
+      onPointerUp={onDragEnd}
+      onPointerCancel={onDragEnd}
       // 手机是贴底的抽屉，按钮落在拇指区；平板起居中且统一高度，换英雄时按钮不挪位置
       className="card-container m-0 mt-auto max-h-[calc(100dvh-3rem)] w-full max-w-none rounded-t-[14px] rounded-b-none border-b-0 p-0 text-content transition-[translate] duration-200 ease-out backdrop:bg-black/60 open:flex open:flex-col starting:open:translate-y-full md:m-auto md:h-[min(40rem,calc(100dvh-4rem))] md:max-h-none md:w-[min(28rem,calc(100vw-2rem))] md:rounded-[10px] md:border-b md:transition-none md:starting:open:translate-y-0"
     >
@@ -205,13 +245,10 @@ export default function AwakenDialog({
             <X className="size-5" aria-hidden="true" />
           </button>
 
-          {/* 下拉关闭只认头部连同上方的横杠区域，说明区展开后的滚动不会被当成下拉 */}
+          {/* 下拉关闭认头部整条：左右到抽屉边，往下带上与说明区之间的空隙；说明区不参与，展开后的滚动不会被当成下拉 */}
           <div
-            onPointerDown={onDragStart}
-            onPointerMove={onDragMove}
-            onPointerUp={onDragEnd}
-            onPointerCancel={onDragEnd}
-            className="-mt-6 flex touch-none items-start gap-4 pt-6 pe-9 md:mt-0 md:touch-auto md:pt-0 lg:pe-6"
+            ref={headerRef}
+            className="-mx-4 -mt-6 -mb-4.5 flex touch-none items-start gap-4 ps-4 pe-13 pt-6 pb-4.5 md:mx-0 md:mt-0 md:mb-0 md:touch-auto md:ps-0 md:pe-9 md:pt-0 md:pb-0 lg:pe-6"
           >
             {hero.icon ? (
               <img
