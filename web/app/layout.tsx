@@ -6,7 +6,12 @@ import { getLocale } from 'next-intl/server';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import { AuthProvider } from './lib/auth';
-import { PLAYER_UID_COOKIE, parsePlayerUid } from './lib/auth-hint';
+import {
+  PLAYER_PROFILE_COOKIE,
+  PLAYER_UID_COOKIE,
+  parsePlayerProfileHint,
+  parsePlayerUid,
+} from './lib/auth-hint';
 
 import './globals.css';
 
@@ -51,14 +56,19 @@ async function requestOrigin(): Promise<string> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   const messages = (await import(`../messages/${locale}.json`)).default;
-  const initialUid = parsePlayerUid((await cookies()).get(PLAYER_UID_COOKIE)?.value);
+  const cookieStore = await cookies();
+  const initialUid = parsePlayerUid(cookieStore.get(PLAYER_UID_COOKIE)?.value);
+  const initialProfile = parsePlayerProfileHint(
+    cookieStore.get(PLAYER_PROFILE_COOKIE)?.value,
+    initialUid,
+  );
   const siteOrigin = await requestOrigin();
 
   return (
     <html lang={locale}>
       <body className={`${notoSansSC.className} min-h-screen bg-surface`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <AuthProvider initialUid={initialUid} siteOrigin={siteOrigin}>
+          <AuthProvider initialUid={initialUid} initialProfile={initialProfile} siteOrigin={siteOrigin}>
             <div className="relative z-10 flex flex-col min-h-screen">
               <Header />
               <main className="mx-auto w-full max-w-7xl px-3 py-6 md:px-4 md:py-8 flex-1">{children}</main>

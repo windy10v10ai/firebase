@@ -66,6 +66,19 @@
   --color-dota-magical: #5b93d1;
   --color-dota-pure: #d8ae53;
   --color-dota-mana: #2f7fd6;
+
+  /* 滑动提示的箭头只轻轻上下动：幅度大了像在催促，还会和抽屉顶部的横杠抢眼 */
+  --animate-scroll-hint: scroll-hint 1.6s ease-in-out infinite;
+
+  @keyframes scroll-hint {
+    0%,
+    100% {
+      translate: 0 -1px;
+    }
+    50% {
+      translate: 0 2px;
+    }
+  }
 }
 
 @layer base {

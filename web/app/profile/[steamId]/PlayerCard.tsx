@@ -4,6 +4,7 @@ import { ChevronRight, ThumbsUp } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
 import { memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
@@ -59,11 +60,29 @@ export default function PlayerCard({
           />
         </span>
         <div className="min-w-0 flex-1 flex flex-col">
-          <h1 className="truncate text-2xl font-bold text-heading md:text-[26px]">
-            {personaName ?? idText}
+          <h1 className="flex min-w-0 items-center text-2xl font-bold text-heading md:text-[26px]">
+            {personaName ? (
+              <span className="min-w-0 truncate">{personaName}</span>
+            ) : (
+              <IdWithCopy
+                id={steamId}
+                idText={idText}
+                copyTooltip={t('copyId.tooltip')}
+                copiedLabel={t('copyId.copied')}
+              />
+            )}
           </h1>
           {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，两种情况卡片一样高 */}
-          <span className="min-h-5 truncate text-sm text-muted">{personaName ? idText : null}</span>
+          <span className="min-h-5 min-w-0 truncate text-sm text-muted">
+            {personaName ? (
+              <IdWithCopy
+                id={steamId}
+                idText={idText}
+                copyTooltip={t('copyId.tooltip')}
+                copiedLabel={t('copyId.copied')}
+              />
+            ) : null}
+          </span>
           {/*
             电脑档身份卡只占三栏里的一栏，文字列仅 177px，装不下「状态 + 有效期」一行，所以拆成两行；
             手机与平板的卡是通栏的，并成一行能省下一行高度，空出的位置正好给上面的 ID。

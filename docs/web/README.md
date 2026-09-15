@@ -33,6 +33,7 @@ Firestore
 - API 侧新增来源类型 `WEB` 与 `@AllowWeb()`，只有显式声明的路由接受网站来源；路由里的 `:steamId` 必须等于 token 的 uid，由 guard 统一拦。
 - 不用 session cookie，也不加网站专用 API key。登录凭据只在 Firebase SDK 手里，门禁只能做在浏览器里。
 - 另有一个 `player-uid` 提示 cookie，只供服务端决定首屏形态。**它不是凭据**：uid 本来就公开出现在地址里，API 只认 ID Token；任何鉴权、跳转、归属判断都不得依据它。
+- 同理有一个 `player-profile` 提示 cookie，把 Steam 昵称头像也搬到首屏渲染阶段，避免先出现 ID 再跳成昵称的闪烁；同样不是凭据，取值见「已定决策」。
 - **Firebase Auth 的请求走本站域名转发，不直连 Google。** 换登录态与续期 token 由 SDK 直接打到 `googleapis.com`，部分网络到不了那里，表现是后端已经签发了 token、页面仍然报登录失败。`config/firebase.ts` 把 SDK 的请求地址指到本站，`next.config.ts` 的 rewrites 再转发出去。
   - 生产代码里出现连模拟器的方法不是笔误，SDK 没有公开的地址覆盖参数，这是唯一的入口。它依赖 SDK 未承诺的内部行为，**升级 firebase 依赖后要把登录全链路重跑一遍**。
 
@@ -181,10 +182,10 @@ Firestore
 - 用户身份：Steam OpenID + Firebase Custom Token，API 验 ID Token，不加网站专用 key；Custom Token 由 NestJS 后端签发。
 - 用户页面客户端渲染，不做 SSR；未登录的处理集中在 `/my/*` 一处，玩家页面自己不写登录判断。
 - 首屏登录形态靠 `player-uid` 提示 cookie 在服务端决定，不引服务端会话，也不用 Firebase 的 `browserCookiePersistence`：服务端只需知道渲染哪套形状，不需要凭据。
-- 玩家数据暂不做浏览器缓存。HTTP 缓存与「操作后立刻看到新值」冲突；应用层先显示旧值再刷新的做法另见 #1175。
+- 玩家数据暂不做浏览器缓存。HTTP 缓存与「操作后立刻看到新值」冲突；应用层先显示旧值再刷新的做法另见 #1175。Steam 昵称头像是例外：它不随玩家操作变化，缓存进 `player-profile` cookie 只做首屏展示，挂载后仍会照常发请求纠正。
 - 属性、觉醒各自独立页面，网站不做游戏内那种 tab 弹窗。
 - 玩家数据的页面路径带 steamId（`/profile/<steamId>/...`），公开资料页放 `/wiki/` 下。现阶段只能自己看自己，页面仍然按 URL 里的 id 取数据，为以后开放观看留路。
-- Steam 昵称与头像走独立接口，服务端缓存一天；头像图片由浏览器直连 Steam 的图床，网站不代理。Steam Web API key 只存在于 NestJS 服务端，任何形式都不下发到浏览器。取不到时退回只显示 ID 的形态，做法见 [phase-9-steam-profile.md](../design/web/phase-9-steam-profile.md)。
+- Steam 昵称与头像走独立接口，服务端缓存一天；头像图片由浏览器直连 Steam 的图床，网站不代理。Steam Web API key 只存在于 NestJS 服务端，任何形式都不下发到浏览器。取不到时退回只显示 ID 的形态，做法见 [phase-9-steam-profile.md](../design/web/phase-9-steam-profile.md)。取到后额外写进 `player-profile` cookie，下次打开页面服务端直接读出、首屏就是昵称，不用等这次请求；挂载后仍会重新请求一次纠正过期值。
 - 激活页在登录后自动填入 Dota2 ID（等于 uid），未登录仍可手填，激活接口保持 Public。
 - 不做「记录」页：后端没有积分流水，只有当日限额计数；要做得新建集合并在每处积分变动加写入，价值不够。
 - 会员购买排最后：本地主机已能购买，网站只是第二入口，订阅介绍页也已经有了。

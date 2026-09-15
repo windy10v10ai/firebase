@@ -43,6 +43,10 @@
     "summary": {
       "profileLink": "个人主页",
       "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "复制",
+        "copied": "已复制"
+      },
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
       "battlePoint": "可用勇士积分",
@@ -266,6 +270,10 @@
     },
     "identity": {
       "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "复制",
+        "copied": "已复制"
+      },
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
       "conductNet": "点赞举报净值",
@@ -443,7 +451,7 @@
       "useMember": "{cost} 可用会员积分",
       "battleShort": "勇士积分 {have}，还差 {need}",
       "memberShort": "会员积分 {have}，还差 {need}",
-      "more": "详细",
+      "scrollHint": "滑动查看更多",
       "close": "关闭"
     },
     "random": {
@@ -518,8 +526,7 @@
     },
     "cooldown": "冷却时间",
     "manaCost": "魔法消耗",
-    "aoe": "受范围加成影响",
-    "spellAmp": "受技能增强影响"
+    "aoe": "受范围加成影响"
   },
   "auth": {
     "login": "通过 Steam 登录",
