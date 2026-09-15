@@ -296,7 +296,9 @@
       "normal": "普通会员",
       "expired": "已过期",
       "expireDate": "有效期至：{date}",
-      "link": "会员订阅"
+      "link": "会员订阅",
+      "premiumShort": "高级会员",
+      "expireDateShort": "有效期至 {date}"
     },
     "entries": {
       "property": {

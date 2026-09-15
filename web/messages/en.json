@@ -292,11 +292,13 @@
       "towerKills": "Tower Kills"
     },
     "member": {
-      "premium": "Premium",
+      "premium": "Premium Member",
       "normal": "Member",
       "expired": "Expired",
-      "expireDate": "Until {date}",
-      "link": "Membership"
+      "expireDate": "Valid until {date}",
+      "link": "Membership",
+      "premiumShort": "Premium",
+      "expireDateShort": "Until {date}"
     },
     "entries": {
       "property": {

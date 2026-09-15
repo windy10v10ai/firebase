@@ -26,13 +26,25 @@ export default function PlayerCard({
   const personaName = profile?.personaName ?? null;
   // 金色代表会员有效，过期了照样上金会让人以为还在生效
   const statusClass = member?.enable ? 'font-medium text-member-strong' : 'text-muted';
-  const statusText = member ? tMember(memberStatusKey(member)) : null;
-  // 过期态的状态词已经说明了含义，日期不再配前缀
-  const dateText = member
-    ? member.enable
-      ? tMember('expireDate', { date: member.expireDateString })
-      : member.expireDateString
-    : null;
+  // 并成一行的那一档放不下完整写法，单独取一套短文案，做法与头部品牌名的 home / homeShort 一致
+  const statusText = (short: boolean) => {
+    if (!member) {
+      return null;
+    }
+    const key = memberStatusKey(member);
+    // 三档里只有高级会员的英文写法长到那一行装不下
+    return tMember(short && key === 'premium' ? 'premiumShort' : key);
+  };
+  const dateText = (short: boolean) => {
+    if (!member) {
+      return null;
+    }
+    // 过期态的状态词已经说明了含义，日期不再配前缀
+    if (!member.enable) {
+      return member.expireDateString;
+    }
+    return tMember(short ? 'expireDateShort' : 'expireDate', { date: member.expireDateString });
+  };
 
   return (
     // 网格项默认 min-width:auto，昵称不换行会把整列撑宽，truncate 也就永远轮不到生效
@@ -60,13 +72,17 @@ export default function PlayerCard({
           <span className="mt-1 flex min-h-6 items-baseline gap-2 lg:hidden">
             {member ? (
               <>
-                <span className={`shrink-0 ${statusClass}`}>{statusText}</span>
-                <span className="truncate text-sm text-muted">{dateText}</span>
+                <span className={`shrink-0 ${statusClass}`}>{statusText(true)}</span>
+                <span className="truncate text-sm text-muted">{dateText(true)}</span>
               </>
             ) : null}
           </span>
-          <span className={`mt-1 hidden min-h-6 truncate lg:block ${statusClass}`}>{statusText}</span>
-          <span className="hidden min-h-5 truncate text-sm text-muted lg:block">{dateText}</span>
+          <span className={`mt-1 hidden min-h-6 truncate lg:block ${statusClass}`}>
+            {statusText(false)}
+          </span>
+          <span className="hidden min-h-5 truncate text-sm text-muted lg:block">
+            {dateText(false)}
+          </span>
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
