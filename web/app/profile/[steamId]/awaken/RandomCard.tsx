@@ -9,7 +9,7 @@ import { awakenAssetPath } from '@/app/lib/awaken';
 import type { AwakenHero } from '@/config/awaken';
 
 interface RandomCardProps {
-  /** 卡面拼贴的三张立绘，取最新上线的 3 个觉醒 */
+  /** 卡面拼贴的三张立绘，按左中右排列 */
   preview: AwakenHero[];
   enabled: boolean;
   /** 剩余可觉醒不足 3 个 */

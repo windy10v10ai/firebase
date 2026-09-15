@@ -40,8 +40,14 @@ const FAILURE_KEY: Record<number, string> = {
 
 const HERO_BY_NAME = new Map(AWAKEN_HEROES.map((hero) => [hero.heroName, hero]));
 const ALL_HERO_NAMES = AWAKEN_HEROES.map((hero) => hero.heroName);
-// 随机卡上扇形叠放的三张，取最新上线的 3 个觉醒
-const RANDOM_PREVIEW = AWAKEN_HEROES.slice(0, 3);
+// 随机卡拼贴的三张立绘固定挑选：压暗成灰后仍好看，最新上线的几个不一定适合当卡面
+const RANDOM_PREVIEW = [
+  'npc_dota_hero_skywrath_mage',
+  'npc_dota_hero_legion_commander',
+  'npc_dota_hero_sniper',
+]
+  .map((name) => HERO_BY_NAME.get(name))
+  .filter((hero) => !!hero);
 
 const BOX_CLASS =
   'box-pad flex flex-1 items-baseline justify-between gap-3 rounded-lg border border-line bg-control';
