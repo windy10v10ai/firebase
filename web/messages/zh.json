@@ -447,7 +447,7 @@
     },
     "random": {
       "title": "随机觉醒",
-      "halfPrice": "消耗积分减半",
+      "discount": "-50%",
       "threePick": "随机 3 选 1",
       "draw": "抽选",
       "select": "选择",

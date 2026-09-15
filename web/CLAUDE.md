@@ -90,6 +90,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **交互反馈用主色标记档 `link` 系列**：链接、当前页标记、焦点框、转圈、`.card-hover` 都是它
 - **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
 - **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
+- **折扣标签用 `discount`，不用 `danger`**，形状与限免标签一致，见 design-system.md「状态色」
 
 ## 按钮
 

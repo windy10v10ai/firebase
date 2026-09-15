@@ -20,7 +20,7 @@
 | 3a-2 宽屏与属性卡 | 无 | 全站外框 1280 封顶；属性页三列，属性卡进度条逐级取色、升级按钮分档，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机，外加从 game 同步觉醒数据的脚本与 skill，见 [phase-3b-awaken-page.md](phase-3b-awaken-page.md) | 已完成 |
 | 3b-2 觉醒技能提示框 | 无 | 觉醒卡悬停弹出 Dota 式技能提示，详情弹窗补上数值与冷却耗蓝，「已觉醒」标记与弹窗文案调整，见 [phase-3b-2-ability-tooltip.md](phase-3b-2-ability-tooltip.md) | 已完成 |
-| 3b-3 觉醒详情弹窗 | 无 | 手机贴底抽屉、平板起统一高度，说明放不下时收起加「详细」，关闭挪到右上角，随机半价划掉原价，见 [phase-3b-3-awaken-dialog.md](phase-3b-3-awaken-dialog.md) | 已完成 |
+| 3b-3 觉醒详情弹窗与随机卡 | 无 | 手机贴底抽屉可下拉关闭、平板起统一高度；说明放不下时电脑直接滚动、触屏收起加「详细」；关闭挪到右上角；随机半价划掉原价，随机卡换立绘拼贴底并加「-50%」标签，见 [phase-3b-3-awaken-dialog.md](phase-3b-3-awaken-dialog.md) | 已完成 |
 | 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 已完成 |
 | 8a 首页 | #1168 | 登录引导与主要页面导航 | 已完成 |
 | 8b 个人主页 | #1167 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 已完成 |

@@ -447,7 +447,7 @@
     },
     "random": {
       "title": "Random Awaken",
-      "halfPrice": "Half cost",
+      "discount": "-50%",
       "threePick": "random 1 of 3",
       "draw": "Draw",
       "select": "Select",
