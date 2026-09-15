@@ -43,6 +43,10 @@
     "summary": {
       "profileLink": "个人主页",
       "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "复制",
+        "copied": "已复制"
+      },
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
       "battlePoint": "可用勇士积分",
@@ -266,6 +270,10 @@
     },
     "identity": {
       "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "复制",
+        "copied": "已复制"
+      },
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
       "conductNet": "点赞举报净值",
