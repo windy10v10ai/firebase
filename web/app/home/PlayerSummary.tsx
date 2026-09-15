@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
+import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerInfo, memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
@@ -30,9 +31,10 @@ function StatRow({
 
 export default function PlayerSummary({ uid }: { uid: string }) {
   const t = useTranslations('home.summary');
+  const { initialProfile } = useAuth();
   const [info, setInfo] = useState<PlayerInfo | null>(null);
   const [failed, setFailed] = useState(false);
-  const [loadedProfile, setLoadedProfile] = useState<SteamProfile | null>(null);
+  const [loadedProfile, setLoadedProfile] = useState<SteamProfile | null>(() => initialProfile);
 
   // 网格始终占位，失败时数值显示为横线，卡片高度不随请求结果变化
   useEffect(() => {

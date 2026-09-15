@@ -9,6 +9,7 @@ import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
+import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
@@ -32,8 +33,9 @@ const FAILURE_KEY: Record<number, string> = {
 export default function ProfilePage() {
   const t = useTranslations('profile');
   const { steamId } = useParams<{ steamId: string }>();
+  const { initialProfile } = useAuth();
   const [result, setResult] = useState<LoadResult | null>(null);
-  const [steamProfile, setSteamProfile] = useState<SteamProfile | null>(null);
+  const [steamProfile, setSteamProfile] = useState<SteamProfile | null>(() => initialProfile);
 
   const loaded = result?.steamId === steamId ? result : null;
   const profile = steamProfile?.steamId === steamId ? steamProfile : null;
