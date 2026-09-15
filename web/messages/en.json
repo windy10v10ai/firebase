@@ -436,10 +436,9 @@
       "memberPoint": "Usable Member Points"
     },
     "dialog": {
-      "question": "Choose the points to spend to permanently awaken this hero?",
+      "question": "Choose the points to spend to awaken this hero",
       "halfPrice": "Random draw costs half the points.",
-      "permanent": "Permanent and irreversible.",
-      "alreadyUnlocked": "Awakened — applies automatically every match",
+      "alreadyUnlocked": "Awakened",
       "useBattle": "{cost} usable Battle Points",
       "useMember": "{cost} usable Member Points",
       "battleShort": "You have {have} Battle Points, {need} short",
@@ -473,6 +472,53 @@
       "title": "Could not load",
       "description": "Awakenings are unavailable right now. Please try again later."
     }
+  },
+  "ability": {
+    "behavior": {
+      "label": "ABILITY:",
+      "noTarget": "No Target",
+      "passive": "Passive",
+      "channeled": "Channeled",
+      "autocast": "Auto-Cast",
+      "aura": "Aura",
+      "toggle": "Toggle",
+      "target": "Unit Target",
+      "point": "Point Target",
+      "unitOrPoint": "Unit or Point Target"
+    },
+    "targeting": {
+      "label": "AFFECTS:",
+      "enemy": "Enemies",
+      "enemyHeroes": "Enemy Heroes",
+      "enemyUnits": "Enemy Units",
+      "allies": "Allies",
+      "alliedHeroes": "Allied Heroes",
+      "alliedUnits": "Allied Units",
+      "heroes": "Heroes",
+      "units": "Units"
+    },
+    "damageType": {
+      "label": "DAMAGE TYPE:",
+      "physical": "Physical",
+      "magical": "Magical",
+      "pure": "Pure"
+    },
+    "piercesImmunity": {
+      "label": "PIERCES DEBUFF IMMUNITY:",
+      "yes": "Yes",
+      "no": "No",
+      "alliesYesEnemiesNo": "Allies Yes, Enemies No"
+    },
+    "dispellable": {
+      "label": "DISPELLABLE:",
+      "strong": "Strong Dispels Only",
+      "soft": "Yes",
+      "no": "Cannot be dispelled"
+    },
+    "cooldown": "Cooldown",
+    "manaCost": "Mana Cost",
+    "aoe": "Affected by AoE bonuses",
+    "spellAmp": "Affected by spell amplification"
   },
   "auth": {
     "login": "Sign in with Steam",

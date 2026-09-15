@@ -33,13 +33,17 @@
 | `--color-surface` | `#09090b` | 页面底色 |
 | `--color-panel` | `#0f0f11` | 卡片、头部 |
 | `--color-panel-soft` / `--color-control` | `#17171a` | 嵌入块、控件底 |
-| `--color-control-hover` | `#1f1f23` | 控件悬停 |
+| `--color-control-hover` / `--color-panel-raised` | `#1f1f23` | 控件悬停 / 浮层标题块 |
 | `--color-line` | `#27272a` | 描边与分隔线 |
+| `--color-line-strong` | `#3f3f46` | 浮层描边 |
 | `--color-heading` / `--color-content` / `--color-muted` | `#fafafa` / `#d4d4d8` / `#8b8b93` | 标题 / 正文 / 次要 |
+| `--color-faint` | `#5d5d66` | 禁用文字、数值分隔符 |
 | `--color-season` / `-strong` | `#a874ea` / `#9b5de0` | 勇士文字 / 填充；`-soft`、`-border` 为 12%、40% 透明 |
 | `--color-member` / `-strong` | `#e0caa5` / `#daa520` | 会员数值 / 标题与填充；`-soft`、`-border` 为 11%、40% 透明 |
 
 勇士紫取自游戏的 season point 色，金取自游戏的 `@color-gold` 与 `@color-gold-muted`。
+
+`--color-dota-*`（伤害类型色、魔法消耗色）是游戏语义色，只用在技能提示框，取值与用法见 [ability-tooltip.md](ability-tooltip.md) 第 2 节。
 
 ### 网站主色（电光蓝）
 

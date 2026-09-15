@@ -5,13 +5,16 @@
   --color-surface: #09090b;
   --color-panel: #0f0f11;
   --color-panel-soft: #17171a;
+  --color-panel-raised: #1f1f23;
   --color-line: #27272a;
+  --color-line-strong: #3f3f46;
   --color-control: #17171a;
   --color-control-hover: #1f1f23;
 
   --color-heading: #fafafa;
   --color-content: #d4d4d8;
   --color-muted: #8b8b93;
+  --color-faint: #5d5d66;
 
   /* 紫与金只表示两套货币：勇士一律紫、会员一律金，不拿来当交互色 */
   --color-season: #a874ea;
@@ -54,6 +57,12 @@
   --color-success: #7fd47f;
   --color-warning: #f5a623;
   --color-danger: #e87d7d;
+
+  /* 游戏语义色，只用在技能提示框：取值照搬 Dota 本地化里的伤害类型色 */
+  --color-dota-physical: #ae2f28;
+  --color-dota-magical: #5b93d1;
+  --color-dota-pure: #d8ae53;
+  --color-dota-mana: #2f7fd6;
 }
 
 @layer base {

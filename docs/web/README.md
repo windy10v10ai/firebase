@@ -152,6 +152,10 @@ Firestore
 
 分工、取值、按钮选型与可点击元素的规范及截图见 [design-system.md](design-system.md)；写代码时的规约见 [web/CLAUDE.md](../../web/CLAUDE.md)「可点击元素」「颜色」「按钮」。
 
+### 技能提示框
+
+**觉醒页与 wiki 的技能、物品页共用一套技能块**：内容和顺序照游戏内的提示框，外观用网站自己的中性色，数据由同步脚本从 game 仓库生成。组成、数值排法与取数规则见 [ability-tooltip.md](ability-tooltip.md)。
+
 ### 渲染方式
 
 | 页面 | 方式 | 原因 |

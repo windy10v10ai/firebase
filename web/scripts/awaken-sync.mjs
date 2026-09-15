@@ -98,6 +98,7 @@ function render(source, assets, head) {
         `name: { zh: ${quote(hero.text.zh.heroName)}, en: ${quote(hero.text.en.heroName)} }`,
         `title: { zh: ${quote(hero.text.zh.title)}, en: ${quote(hero.text.en.title)} }`,
         `desc: { zh: ${quote(hero.text.zh.desc)}, en: ${quote(hero.text.en.desc)} }`,
+        `ability: ${quote(hero.ability)}`,
       ];
       return `  {\n${fields.map((f) => `    ${f},`).join('\n')}\n  },`;
     })
@@ -118,6 +119,54 @@ export interface AwakenText {
   en: string;
 }
 
+export type AbilityBehavior =
+  | 'toggle'
+  | 'channeled'
+  | 'autocast'
+  | 'aura'
+  | 'passive'
+  | 'unitOrPoint'
+  | 'target'
+  | 'point'
+  | 'noTarget';
+
+export type AbilityTargeting =
+  | 'enemy'
+  | 'enemyHeroes'
+  | 'enemyUnits'
+  | 'allies'
+  | 'alliedHeroes'
+  | 'alliedUnits'
+  | 'heroes'
+  | 'units';
+
+export type AbilityDamageType = 'physical' | 'magical' | 'pure';
+
+export interface AbilityValueRow {
+  /** game 本地化里的标签，已去掉表示百分比的前缀 % */
+  label: AwakenText;
+  /** 各级取值；各级相同时只有一项 */
+  levels: string[];
+  percent: boolean;
+  /** 受范围加成影响 */
+  aoe: boolean;
+  /** 受技能增强影响 */
+  spellAmp: boolean;
+}
+
+/** 技能提示框要的数据，取数规则见 docs/web/ability-tooltip.md；没有的项为 null 或空数组 */
+export interface AbilityDetail {
+  behavior: AbilityBehavior | null;
+  targeting: AbilityTargeting | null;
+  damageType: AbilityDamageType | null;
+  piercesImmunity: 'yes' | 'no' | 'alliesYesEnemiesNo' | null;
+  dispellable: 'strong' | 'soft' | 'no' | null;
+  values: AbilityValueRow[];
+  cooldown: string[] | null;
+  manaCost: string[] | null;
+  lore: AwakenText | null;
+}
+
 export interface AwakenHero {
   /** npc_dota_hero_xxx，接口收发用的就是它 */
   heroName: string;
@@ -131,8 +180,9 @@ export interface AwakenHero {
   name: AwakenText;
   /** 技能标题，原样保留 game 本地化里的 <font> 标记 */
   title: AwakenText;
-  /** 技能完整描述，%占位符% 已在生成时换成真实数值 */
+  /** 技能完整描述，%占位符% 已在生成时换成真实数值，%% 已还原成 % */
   desc: AwakenText;
+  ability: AbilityDetail;
 }
 
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
