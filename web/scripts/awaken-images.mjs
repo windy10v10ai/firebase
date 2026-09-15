@@ -32,6 +32,8 @@ const TRIM = 20; // 削掉透明留白与光晕，又不吃掉凤凰的火、寒
 /**
  * 取景修正。`x`/`y` 是取景中心占图的比例（0 最左 / 最上，1 最右 / 最下），
  * `zoom` 在自动算出的尺寸上再放大——放大才腾得出横向平移的余量，MAX_CROP 那道限制也随之让位。
+ * `top` 把人物头顶钉在这个高度（px，可以伸进名字那条带），多出的腿脚在底边裁掉；配合小于 1 的 `zoom`，
+ * 让脸避开卡片底部的技能图标，又不像往下取景那样切掉头顶。
  * 默认横向居中、纵向贴顶、不放大：试过按 alpha 重心自动找头部，Dota 立绘里道具的体量和英雄本身
  * 相当（鹰、剑、旗、坐骑），两种算法都是修好一个带坏一个，不如可预测的默认值加点名修正。
  */
@@ -39,18 +41,16 @@ const FRAME = {
   npc_dota_hero_sven: { x: 0.62 }, // 大剑举在左上角，居中会把斯温本人挤出右边
   npc_dota_hero_axe: { x: 0.7 }, // 斧头横在身前，居中时人偏右
   npc_dota_hero_monkey_king: { x: 0.7 }, // 金箍棒横在身前，同上
+  npc_dota_hero_bristleback: { x: 0.7, zoom: 0.9, top: 6 }, // 链锤甩在身前，同上；脸落在技能图标的位置，缩小后头顶贴上沿，背刺完整
   npc_dota_hero_kunkka: { x: 0.64, zoom: 1.2 }, // 刀比人长，让刀出画换人居中
   npc_dota_hero_warlock: { x: 0.65, y: 0.68, zoom: 1.9 }, // 官方图里召唤物占了大半，取右下角的本体，召唤物只当背景；倍数再高本体就开始糊
 };
 
-/** 饰品路径的图标 CDN 上没有，退回同名原版图；键是 AbilityTextureName 原值 */
-const TEXTURE_FALLBACK = {
-  'keeper_of_the_light/kotl_ti7_immortal/keeper_of_the_light_illuminate_alt':
-    'keeper_of_the_light_illuminate_alt',
-  'lina/lina_ti6_immortal/lina_laguna_blade': 'lina_laguna_blade',
-  'witch_doctor/ribbitar_icon/witch_doctor_death_ward': 'witch_doctor_death_ward',
-  'necrolyte/apostle_of_decay_icons/necrolyte_heartstopper_aura': 'necrolyte_heartstopper_aura',
-};
+/**
+ * 从游戏客户端导出的饰品图标，CDN 上没有。按 AbilityTextureName 的完整路径存放，
+ * 同名的原版图标与饰品版不会互相顶替。不拿原版图兜底：长得不一样，报缺图才会有人去导出
+ */
+const EXPORTED_ICON_DIR = path.join(WEB, 'scripts/awaken-icons');
 
 /** 自制图标，CDN 没有，从 game 仓库取 */
 const FROM_GAME_REPO = new Set([
@@ -104,7 +104,7 @@ async function buildArt(sharp, heroName) {
   const trimmed = await sharp(raw).trim({ threshold: TRIM }).toBuffer({ resolveWithObject: true });
   const { width: tw, height: th } = trimmed.info;
 
-  const { x = 0.5, y, zoom = 1 } = FRAME[heroName] ?? {};
+  const { x = 0.5, y, zoom = 1, top: pinnedTop } = FRAME[heroName] ?? {};
 
   let figH = FIG_H;
   let figW = Math.round(figH * (tw / th));
@@ -125,6 +125,15 @@ async function buildArt(sharp, heroName) {
     curW = W;
   } else {
     offsetX = Math.round((W - figW) / 2);
+  }
+
+  if (pinnedTop !== undefined) {
+    const height = Math.min(figH, H - pinnedTop);
+    fig = await sharp(fig).extract({ left: 0, top: 0, width: curW, height }).toBuffer();
+    return sharp(BG(W, H))
+      .composite([{ input: fig, left: offsetX, top: pinnedTop }])
+      .webp({ quality: 82 })
+      .toBuffer();
   }
 
   const visible = H - TOP;
@@ -148,14 +157,14 @@ async function buildArt(sharp, heroName) {
 
 async function buildIcon(sharp, texture, game) {
   let raw = null;
-  if (FROM_GAME_REPO.has(texture)) {
+  const exported = path.join(EXPORTED_ICON_DIR, `${texture}.png`);
+  if (fs.existsSync(exported)) {
+    raw = fs.readFileSync(exported);
+  } else if (FROM_GAME_REPO.has(texture)) {
     const file = path.join(game, 'game/resource/flash3/images/spellicons', `${texture}.png`);
     if (fs.existsSync(file)) raw = fs.readFileSync(file);
   } else {
     raw = await fetchBuffer(`${CDN}/abilities/${texture}.png`);
-    if (!raw && TEXTURE_FALLBACK[texture]) {
-      raw = await fetchBuffer(`${CDN}/abilities/${TEXTURE_FALLBACK[texture]}.png`);
-    }
   }
   if (!raw) return null;
   return sharp(raw).resize(96, 96).webp({ quality: 85 }).toBuffer();
@@ -188,7 +197,9 @@ async function main() {
     }
 
     const keptIcon = previous.icons[hero.texture];
-    if (keptIcon && fs.existsSync(path.join(OUT_DIR, keptIcon))) {
+    // 有导出原图时每次重算：导出图换过就要顶掉清单里的旧图，内容没变的算出来还是同一个名字
+    const hasExported = fs.existsSync(path.join(EXPORTED_ICON_DIR, `${hero.texture}.png`));
+    if (!hasExported && keptIcon && fs.existsSync(path.join(OUT_DIR, keptIcon))) {
       manifest.icons[hero.texture] = keptIcon;
     } else {
       const buf = await buildIcon(sharp, hero.texture, game);

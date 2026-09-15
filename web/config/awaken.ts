@@ -4,13 +4,61 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "2782318d58ea88d99a9244475cf9980042aa69aa",
+  gameCommit: "f9a9d9096f649add3e3733fbf5b7bb78d51b60d7",
   dotaVersion: "7.41",
 } as const;
 
 export interface AwakenText {
   zh: string;
   en: string;
+}
+
+export type AbilityBehavior =
+  | 'toggle'
+  | 'channeled'
+  | 'autocast'
+  | 'aura'
+  | 'passive'
+  | 'unitOrPoint'
+  | 'target'
+  | 'point'
+  | 'noTarget';
+
+export type AbilityTargeting =
+  | 'enemy'
+  | 'enemyHeroes'
+  | 'enemyUnits'
+  | 'allies'
+  | 'alliedHeroes'
+  | 'alliedUnits'
+  | 'heroes'
+  | 'units';
+
+export type AbilityDamageType = 'physical' | 'magical' | 'pure';
+
+export interface AbilityValueRow {
+  /** game 本地化里的标签，已去掉表示百分比的前缀 % */
+  label: AwakenText;
+  /** 各级取值；各级相同时只有一项 */
+  levels: string[];
+  percent: boolean;
+  /** 受范围加成影响 */
+  aoe: boolean;
+  /** 受技能增强影响 */
+  spellAmp: boolean;
+}
+
+/** 技能提示框要的数据，取数规则见 docs/web/ability-tooltip.md；没有的项为 null 或空数组 */
+export interface AbilityDetail {
+  behavior: AbilityBehavior | null;
+  targeting: AbilityTargeting | null;
+  damageType: AbilityDamageType | null;
+  piercesImmunity: 'yes' | 'no' | 'alliesYesEnemiesNo' | null;
+  dispellable: 'strong' | 'soft' | 'no' | null;
+  values: AbilityValueRow[];
+  cooldown: string[] | null;
+  manaCost: string[] | null;
+  lore: AwakenText | null;
 }
 
 export interface AwakenHero {
@@ -26,8 +74,9 @@ export interface AwakenHero {
   name: AwakenText;
   /** 技能标题，原样保留 game 本地化里的 <font> 标记 */
   title: AwakenText;
-  /** 技能完整描述，%占位符% 已在生成时换成真实数值 */
+  /** 技能完整描述，%占位符% 已在生成时换成真实数值，%% 已还原成 % */
   desc: AwakenText;
+  ability: AbilityDetail;
 }
 
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
@@ -41,6 +90,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "司夜刺客", en: "Nyx Assassin" },
     title: { zh: "<font color='#d000ff'>钻地 觉醒</font>", en: "<font color='#d000ff'>Burrow Awakened</font>" },
     desc: { zh: "钻地状态下可以保持正常移动速度并自由移动，同时保留钻地的其他效果。", en: "Nyx Assassin can move freely at his normal movement speed while Burrowed, while retaining all other Burrow effects." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_beastmaster",
@@ -51,6 +101,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "兽王", en: "Beastmaster" },
     title: { zh: "<font color='#d000ff'>野性之斧 觉醒</font>", en: "<font color='#d000ff'>Wild Axes Awakened</font>" },
     desc: { zh: "兽王投出他的斧头然后召回它们，切开飞过的敌人和树木。每把飞斧对同一个敌人只能击中一次，并且使受到来自兽王和其单位的伤害增加。减益持续时间受状态抗性影响。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方单位时自动朝最远的敌方英雄投斧。<br><font color='#d000ff'>觉醒强化：</font>飞斧伤害提高，伤害加深持续时间延长，飞斧以极快速度飞出并返回，斯洛姆战鼓的伤害，治疗和原始咆哮提供的敲鼓层数一并提高。", en: "Beastmaster sends his axes flying and calls them home again, slicing through enemy units and trees along their path. Each axe can hit an enemy once, and amplifies subsequent damage from Beastmaster and his units. Debuff duration is affected by Status Resistance.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, throws the axes toward the farthest enemy hero whenever an enemy unit is within cast range.<br><font color='#d000ff'>AWAKENED:</font> Axe damage is increased, damage amplification lasts longer, the axes travel out and back at extreme speed, and Drums of Slom gains increased damage, healing, and drum stacks from Primal Roar." },
+    ability: {"behavior":"autocast","targeting":"enemyUnits","damageType":"magical","piercesImmunity":"yes","dispellable":"soft","values":[{"label":{"zh":"每把飞斧伤害：","en":"DAMAGE PER AXE:"},"levels":["80","160","240","320","400"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"每把加深伤害：","en":"DAMAGE AMP PER STACK:"},"levels":["5","6","7","8","9"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"负面效果持续时间：","en":"DEBUFF DURATION:"},"levels":["10","11","12","13","14"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"飞斧飞行时间：","en":"AXE TRAVEL TIME:"},"levels":["0.4"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["8"],"manaCost":["50","55","60","65","70"],"lore":null},
   },
   {
     heroName: "npc_dota_hero_earthshaker",
@@ -61,6 +112,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "宇智波牛神", en: "Earthshaker" },
     title: { zh: "<font color='#d000ff'>余震 觉醒</font>", en: "<font color='#d000ff'>Aftershock Awakened</font>" },
     desc: { zh: "余震命中的每个单位都会在原地触发一次小余震，对附近敌人造成独立的魔法伤害。多个小余震可同时命中同一目标，每批小余震只会将同一目标眩晕一次。小余震不会再次触发此效果。", en: "Each unit hit by Aftershock creates a small Aftershock at its position, dealing separate magical damage to nearby enemies. Multiple small Aftershocks can hit the same unit, but each batch stuns a unit only once. Small Aftershocks cannot trigger this effect again." },
+    ability: {"behavior":"passive","targeting":null,"damageType":"magical","piercesImmunity":"no","dispellable":"no","values":[{"label":{"zh":"小余震伤害：","en":"SMALL AFTERSHOCK DAMAGE:"},"levels":["50"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"小余震作用范围：","en":"SMALL AFTERSHOCK RADIUS:"},"levels":["70"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"小余震眩晕时间：","en":"SMALL AFTERSHOCK STUN DURATION:"},"levels":["50"],"percent":true,"aoe":false,"spellAmp":false}],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_abyssal_underlord",
@@ -71,6 +123,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "孽主", en: "Underlord" },
     title: { zh: "<font color='#d000ff'>恶魔之势 觉醒</font>", en: "<font color='#d000ff'>Demon's Reach Awakened</font>" },
     desc: { zh: "孽主在拥有衰退光环的攻击力加成时，攻击具有分裂效果。分裂距离随当前加成攻击力提高。", en: "Underlord's attacks cleave while he has bonus damage from Atrophy Aura. Cleave distance increases with each point of bonus damage." },
+    ability: {"behavior":"passive","targeting":null,"damageType":"physical","piercesImmunity":null,"dispellable":null,"values":[{"label":{"zh":"分裂伤害：","en":"CLEAVE DAMAGE:"},"levels":["100"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"分裂距离（基础）：","en":"CLEAVE DISTANCE (BASE):"},"levels":["100"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"分裂距离（每点叠加攻击力）：","en":"CLEAVE DISTANCE (PER STACK):"},"levels":["5"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_slark",
@@ -80,7 +133,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "slark_essence_shift.2ac17b05.webp",
     name: { zh: "斯拉克", en: "Slark" },
     title: { zh: "<font color='#d000ff'>精华侵蚀 觉醒</font>", en: "<font color='#d000ff'>Essence Erosion Awakened</font>" },
-    desc: { zh: "斯拉克击杀敌人时，将能量转移偷取属性总量的10%%永久偷走该英雄的全属性。<br>敌方英雄的基础属性最低保留<font color='#FFFFFF'><b>1</b></font>点。", en: "When Slark kills an enemy hero, he permanently steals 10%% of the total attributes his Essence Shift has taken from that hero.<br>An enemy hero's base attributes never fall below <font color='#FFFFFF'><b>1</b></font>." },
+    desc: { zh: "斯拉克击杀敌人时，将能量转移偷取属性总量的10%永久偷走该英雄的全属性。<br>敌方英雄的基础属性最低保留<font color='#FFFFFF'><b>1</b></font>点。", en: "When Slark kills an enemy hero, he permanently steals 10% of the total attributes his Essence Shift has taken from that hero.<br>An enemy hero's base attributes never fall below <font color='#FFFFFF'><b>1</b></font>." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_abaddon",
@@ -91,6 +145,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "亚巴顿", en: "Abaddon" },
     title: { zh: "<font color='#d000ff'>畅快淋漓 觉醒</font>", en: "<font color='#d000ff'>The Quickening Awakened</font>" },
     desc: { zh: "亚巴顿附近900范围内有单位阵亡时，他的所有冷却时间都会减少。非英雄单位阵亡减少0.2秒，英雄阵亡减少3秒。", en: "Whenever a unit dies within 900 range of Abaddon, all his cooldowns are reduced. Non-hero deaths reduce them by 0.2s; hero deaths reduce them by 3s." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_skywrath_mage",
@@ -101,6 +156,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "天怒法师", en: "Skywrath Mage" },
     title: { zh: "<font color='#d000ff'>天裔之杖 觉醒</font>", en: "<font color='#d000ff'>Staff of the Scion Awakened</font>" },
     desc: { zh: "<font color='#d000ff'>觉醒强化：</font>天怒法师获得天裔之杖，其技能对敌方英雄造成<font color='#05CAFF'>魔法伤害</font>时，他所有技能的冷却时间都会减少0.1秒。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方英雄时，天怒法师自动施放上古封印、震荡光弹、神秘之耀与奥法鹰隼，其中奥法鹰隼在只有小兵时也会施放。", en: "<font color='#d000ff'>Awakening Bonus:</font> Skywrath Mage gains Staff of the Scion. Every time his abilities deal <font color='#05CAFF'>magical damage</font> to an enemy hero, the cooldown of all his abilities is reduced by 0.1s.<br><br><font color='#00CED1'>Autocast:</font> While enabled, Skywrath Mage automatically casts Ancient Seal, Concussive Shot, Mystic Flare and Arcane Bolt whenever an enemy hero is within cast range. Arcane Bolt also fires at creeps when no hero is available." },
+    ability: {"behavior":"autocast","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_dazzle",
@@ -111,6 +167,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "戴泽", en: "Dazzle" },
     title: { zh: "<font color='#d000ff'>薄葬 觉醒</font>", en: "<font color='#d000ff'>Shallow Grave Awakened</font>" },
     desc: { zh: "对自己或队友施放薄葬后，目标在薄葬持续期间获得<font color='#FFCC66'>黑皇杖</font>效果。", en: "After casting Shallow Grave on yourself or an ally, the target gains the <font color='#FFCC66'>Black King Bar</font> effect for the duration of Shallow Grave." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_elder_titan",
@@ -121,6 +178,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "上古巨神", en: "Elder Titan" },
     title: { zh: "<font color='#d000ff'>灵体游魂 觉醒</font>", en: "<font color='#d000ff'>Astral Spirit Awakened</font>" },
     desc: { zh: "上古巨神放出他的灵体游魂，灵魂对任何经过的单位都会造成伤害。当它与巨神合体时，它每伤害过一个单位都会给予若干攻击力和移动速度加成。\\n\\n灵体游魂拥有回音重踏，回归和自然秩序三个技能。<br><br><font color='#d000ff'>觉醒强化：</font>冷却时间缩短。<br><font color='#00CED1'>自动施法：</font>技能冷却完毕且附近存在敌方英雄时，自动朝距离最远的敌方英雄放出游魂，游魂可召回时立即自动收回，无需手动操作；开启期间手动放出的游魂同样会被自动收回。", en: "Elder Titan sends forth his Astral Spirit, damaging any units it passes through.  When the spirit rejoins the Titan, it grants bonus damage and movement speed for each unit it passed through.\\n\\nThe Astral Spirit possesses the Echo Stomp, Return Spirit, and Natural Order abilities.<br><br><font color='#d000ff'>Awakening Bonus:</font> Reduced cooldown.<br><font color='#00CED1'>Autocast:</font> Whenever the ability is off cooldown and an enemy hero is nearby, automatically sends the spirit toward the farthest enemy hero, then recalls it automatically as soon as the recall is available, with no manual input required. While active, manually cast spirits are also recalled automatically." },
+    ability: {"behavior":"autocast","targeting":null,"damageType":"magical","piercesImmunity":"yes","dispellable":"soft","values":[{"label":{"zh":"作用范围：","en":"RADIUS:"},"levels":["275"],"percent":false,"aoe":true,"spellAmp":false},{"label":{"zh":"伤害：","en":"DAMAGE:"},"levels":["50"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"灵体持续时间：","en":"DURATION:"},"levels":["10.0"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"加成持续时间：","en":"BUFF DURATION:"},"levels":["10.0"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"移动速度加成（非英雄）：","en":"BONUS SPEED (CREEPS):"},"levels":["1.5"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"移动速度加成（英雄）：","en":"BONUS SPEED (HEROES):"},"levels":["4","5","6","7","8"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"攻击力加成（非英雄）：","en":"BONUS DAMAGE (CREEPS):"},"levels":["3","7","11","15","19"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"攻击力加成（英雄）：","en":"BONUS DAMAGE (HEROES):"},"levels":["17","38","59","80","101"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["16","15","14","13","12"],"manaCost":["80","90","100","110","120"],"lore":null},
   },
   {
     heroName: "npc_dota_hero_techies",
@@ -131,6 +189,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "茶神", en: "hechahecha" },
     title: { zh: "<font color='#d000ff'>斯奎的瞄准镜 觉醒</font>", en: "<font color='#d000ff'>Squee's Scope Awakened</font>" },
     desc: { zh: "每点攻击速度都会让工程师获得1攻击距离和攻击弹道速度。", en: "Techies gains 1 attack range and attack projectile speed for each point of attack speed." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":"no","dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_undying",
@@ -141,6 +200,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "不朽尸王", en: "Undying" },
     title: { zh: "<font color='#d000ff'>血肉腐朽 觉醒</font>", en: "<font color='#d000ff'>Flesh Decay Awakened</font>" },
     desc: { zh: "血肉傀儡期间，尸王的普通攻击命中敌人时，会以该敌人为中心施放一次腐朽，最多每0.6秒触发一次。此次施放不消耗魔法，且不影响腐朽的冷却时间。<br>幻象和破坏状态下无法触发。<br>无攻击间隔的衍生攻击无法触发。", en: "While Flesh Golem is active, each of Undying's normal attacks casts Decay centered on the enemy hit, triggering at most once every 0.6 seconds. This cast costs no mana and does not affect Decay's cooldown.<br>Cannot be triggered by illusions or while Broken.<br>Derived attacks with no attack cooldown cannot trigger this effect." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_lich",
@@ -151,6 +211,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "巫妖", en: "Lich" },
     title: { zh: "<font color='#d000ff'>寒灾轮回</font>", en: "<font color='#d000ff'>Frost Calamity Cycle</font>" },
     desc: { zh: "提升连环霜冻的弹道速度与跳跃范围，并延长减速和霜缚的持续时间。<br><br>命中英雄或肉山时额外造成相当于智力0.75倍的魔法伤害，并叠加1层寒灾印记，持续8秒，叠满3层后自动引爆；也可对已叠加印记的敌人施放寒霜爆发提前引爆。引爆会在350范围内造成相当于智力0.75倍乘以当前印记层数的魔法伤害，并<font color='#2DD5E4'>眩晕</font>敌人0.6秒。<br><br>若已学会寒冰尖柱，连环霜冻命中附近唯一的敌方英雄时会自动在其位置施放寒冰尖柱。", en: "Increases Chain Frost's projectile speed and bounce range, and extends the duration of its slow and Frostbound.<br><br>Hits on a hero or Roshan deal bonus magical damage equal to 0.75x Intelligence and apply a stack of Frost Calamity lasting 8 seconds, detonating automatically at 3 stacks; casting Frost Blast on a marked enemy also detonates it early. Detonation deals magical damage in a 350 radius equal to 0.75x Intelligence per stack consumed and <font color='#2DD5E4'>Stuns</font> enemies for 0.6 seconds.<br><br>If Ice Spire is already learned, hitting the only enemy hero nearby with Chain Frost casts Ice Spire at that hero automatically." },
+    ability: {"behavior":"passive","targeting":null,"damageType":"magical","piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_doom_bringer",
@@ -161,16 +222,18 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "末日使者", en: "Doom" },
     title: { zh: "<font color='#d000ff'>末日 觉醒</font>", en: "<font color='#d000ff'>Doom Awakened</font>" },
     desc: { zh: "对敌人施加末日诅咒，对其进行驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。\\n\\n驱散类型：弱驱散\\n\\n持有<font color='#92acf5'>阿哈利姆神杖</font>时，末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。\\n\\n觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。", en: "Inflicts a curse that dispels an enemy and prevents them from casting spells or healing in any way, while taking damage over time.\\n\\nDISPEL TYPE: Basic Dispel\\n\\nWith <font color='#92acf5'>Aghanim's Scepter</font>, Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.\\n\\nAfter awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level." },
+    ability: {"behavior":"target","targeting":"units","damageType":"pure","piercesImmunity":"yes","dispellable":"no","values":[{"label":{"zh":"持续时间：","en":"DURATION:"},"levels":["12","14","16","18"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"每秒伤害：","en":"DAMAGE PER SECOND:"},"levels":["66","132","198","264"],"percent":false,"aoe":false,"spellAmp":true}],"cooldown":["60"],"manaCost":["150","200","250","300"],"lore":null},
   },
   {
     heroName: "npc_dota_hero_keeper_of_the_light",
     abilityName: "special_bonus_unique_keeper_of_the_light_upgrade",
     freeTrial: false,
     art: "keeper_of_the_light.9ef18e85.webp",
-    icon: "keeper_of_the_light_illuminate_alt.0617ab17.webp",
+    icon: "keeper_of_the_light_illuminate_alt.3e76621d.webp",
     name: { zh: "光之守卫", en: "Keeper of the Light" },
     title: { zh: "<font color='#d000ff'>冲击波 觉醒</font>", en: "<font color='#d000ff'>Illuminate Awakened</font>" },
-    desc: { zh: "冲击波基础伤害提高100点，最大蓄力时间缩短至<font color='#FFFFFF'><b>1.5</b></font>秒，距离提高至<font color='#FFFFFF'><b>2300</b></font>，宽度提高至<font color='#FFFFFF'><b>600</b></font>，速度提高至<font color='#FFFFFF'><b>1350</b></font>。<br>冲击波每命中一名敌方英雄获得1层聚光，每层使冲击波伤害提高20%%。", en: "Increases Illuminate's base damage by 100, shortens max channel time to <font color='#FFFFFF'><b>1.5</b></font> seconds, extends distance to <font color='#FFFFFF'><b>2300</b></font>, width to <font color='#FFFFFF'><b>600</b></font> and speed to <font color='#FFFFFF'><b>1350</b></font>.<br>Each enemy Hero hit by Illuminate grants 1 Focus stack, and each stack increases Illuminate damage by 20%%." },
+    desc: { zh: "冲击波基础伤害提高100点，最大蓄力时间缩短至<font color='#FFFFFF'><b>1.5</b></font>秒，距离提高至<font color='#FFFFFF'><b>2300</b></font>，宽度提高至<font color='#FFFFFF'><b>600</b></font>，速度提高至<font color='#FFFFFF'><b>1350</b></font>。<br>冲击波每命中一名敌方英雄获得1层聚光，每层使冲击波伤害提高20%。", en: "Increases Illuminate's base damage by 100, shortens max channel time to <font color='#FFFFFF'><b>1.5</b></font> seconds, extends distance to <font color='#FFFFFF'><b>2300</b></font>, width to <font color='#FFFFFF'><b>600</b></font> and speed to <font color='#FFFFFF'><b>1350</b></font>.<br>Each enemy Hero hit by Illuminate grants 1 Focus stack, and each stack increases Illuminate damage by 20%." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[{"label":{"zh":"聚光层数上限：","en":"MAX FOCUS STACKS:"},"levels":["10"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"聚光持续时间：","en":"FOCUS DURATION:"},"levels":["20"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_crystal_maiden",
@@ -181,6 +244,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "水晶室女", en: "Crystal Maiden" },
     title: { zh: "<font color='#d000ff'>极寒领域 觉醒</font>", en: "<font color='#d000ff'>Freezing Field Awakened</font>" },
     desc: { zh: "施放极寒领域获得<font color='#FFCC66'>黑皇杖</font>效果。<br><br>同时获得<font color='#FFFFFF'>法术抵抗</font>，持续<font color='#FFFFFF'><b>10</b></font>秒，抵挡一次敌方指向性法术后消失。", en: "Casting Freezing Field grants the <font color='#FFCC66'>Black King Bar</font> effect.<br><br>Also grants <font color='#FFFFFF'>Spellblock</font> for <font color='#FFFFFF'><b>10</b></font> seconds, consumed after blocking one enemy targeted spell." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_tiny",
@@ -191,6 +255,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "小小", en: "Tiny" },
     title: { zh: "<font color='#d000ff'>小小 觉醒</font>", en: "<font color='#d000ff'>Tiny Awakened</font>" },
     desc: { zh: "抓起的树木不再因攻击次数耗尽而损毁。<br>长大不再降低攻击速度。", en: "The grabbed tree is no longer destroyed when its attack count runs out.<br>Grow no longer reduces attack speed." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_legion_commander",
@@ -201,6 +266,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "军团指挥官", en: "Legion Commander" },
     title: { zh: "<font color='#d000ff'>自动决斗·觉醒</font>", en: "<font color='#d000ff'>Auto Duel · Awakened</font>" },
     desc: { zh: "<font color='#00CED1'>自动施法：</font>开启后，若决斗可以施放，则自动对决斗施法距离外额外200范围内最近的可见敌方英雄施放决斗。不会选择幻象，只有大概率能击杀目标、且不会让自身陷入残血时才会触发。<br><br>自动决斗会无视并消耗目标的被动法术格挡与反弹效果。<br><br>决斗期间，军团指挥官获得<font color='#FFCC66'>黑皇杖</font>效果，目标无法被选中。", en: "<font color='#00CED1'>Autocast:</font> While enabled and Duel is ready, automatically casts Duel on the nearest visible enemy hero within Duel's cast range plus 200. Illusions are ignored, and it only triggers when there's a high chance of killing the target without leaving Legion Commander critically low on health.<br><br>Auto Duel ignores and consumes the target's passive spell block and reflection effects.<br><br>During Duel, Legion Commander gains the <font color='#FFCC66'>Black King Bar</font> effect, and the target cannot be selected." },
+    ability: {"behavior":"autocast","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[{"label":{"zh":"额外自动决斗范围：","en":"BONUS AUTO DUEL RANGE:"},"levels":["200"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":null,"manaCost":null,"lore":{"zh":"荣誉无需邀约，最近的敌人就是对手。","en":"Honor needs no invitation; the nearest enemy will do."}},
   },
   {
     heroName: "npc_dota_hero_phoenix",
@@ -210,7 +276,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "phoenix_sun_ray.82f04e59.webp",
     name: { zh: "凤凰", en: "Phoenix" },
     title: { zh: "<font color='#d000ff'>烈日炙烤 觉醒</font>", en: "<font color='#d000ff'>Sun Ray Awakened</font>" },
-    desc: { zh: "烈日炙烤的光束末端对目标造成的伤害与治疗更高。光束强度从 50%% 长度处开始增强，在 1200 距离处达到基础伤害/治疗的 180%%。若光束长度进一步增加，末端的伤害和治疗量会继续提高。", en: "Sun Ray does more damage and healing to targets near the end of the beam. Beam intensity starts increasing at 50%% of its length, reaching 180%% of base damage and healing at 1200 range. Extending the beam further makes the endpoint's damage and healing keep increasing." },
+    desc: { zh: "烈日炙烤的光束末端对目标造成的伤害与治疗更高。光束强度从 50% 长度处开始增强，在 1200 距离处达到基础伤害/治疗的 180%。若光束长度进一步增加，末端的伤害和治疗量会继续提高。", en: "Sun Ray does more damage and healing to targets near the end of the beam. Beam intensity starts increasing at 50% of its length, reaching 180% of base damage and healing at 1200 range. Extending the beam further makes the endpoint's damage and healing keep increasing." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_warlock",
@@ -220,7 +287,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "warlock_rain_of_chaos.85a151c2.webp",
     name: { zh: "术士", en: "Warlock" },
     title: { zh: "<font color='#D000FF'>地狱火献祭 觉醒</font>", en: "<font color='#D000FF'>Infernal Immolation Awakened</font>" },
-    desc: { zh: "地狱火的永恒献祭每秒伤害提高，数值等于术士当前生命恢复与魔法恢复之和的150%%。", en: "Increases Infernal's Permanent Immolation damage per second by the sum of Warlock's current Health Regeneration and Mana Regeneration, multiplied by 150%%." },
+    desc: { zh: "地狱火的永恒献祭每秒伤害提高，数值等于术士当前生命恢复与魔法恢复之和的150%。", en: "Increases Infernal's Permanent Immolation damage per second by the sum of Warlock's current Health Regeneration and Mana Regeneration, multiplied by 150%." },
+    ability: {"behavior":"passive","targeting":null,"damageType":"magical","piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_sven",
@@ -231,6 +299,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "斯温", en: "Sven" },
     title: { zh: "<font color='#d000ff'>斯温 觉醒</font>", en: "<font color='#d000ff'>Sven Awakened</font>" },
     desc: { zh: "施放风暴之拳后获得<font color='#FFCC66'>黑皇杖</font>效果，持续2秒，期间力量提升20 40 60 80 100点，攻击速度提升20 40 60 80 100点。", en: "Casting Storm Hammer grants the <font color='#FFCC66'>Black King Bar</font> effect for 2 seconds, increasing Strength by 20 40 60 80 100 and Attack Speed by 20 40 60 80 100 during that time." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_rattletrap",
@@ -240,7 +309,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "rattletrap_power_cogs.98dbaed7.webp",
     name: { zh: "发条技师", en: "Clockwerk" },
     title: { zh: "<font color='#d000ff'>发条 觉醒</font>", en: "<font color='#d000ff'>Power Cogs Awakened</font>" },
-    desc: { zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%%</b></font>。", en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%%</b></font> during that time." },
+    desc: { zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%</b></font>。", en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_windrunner",
@@ -251,6 +321,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "风行者", en: "Windranger" },
     title: { zh: "<font color='#d000ff'>旋风 觉醒</font>", en: "<font color='#d000ff'>Whirlwind Awakened</font>" },
     desc: { zh: "集中火力不再需要施法目标，而是对风行者攻击距离 + 150范围内的随机敌人发动攻击。每秒发动固定次数的攻击，以英雄优先。\\n\\n学会本技能后，施放风行时进入<font color='#d7ccc7'>隐身</font>状态，持续时间与风行相同。攻击敌人后会短暂显形，随后重新隐身。移动不会破坏隐身状态。", en: "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing Heroes.\\n\\nLearning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility." },
+    ability: {"behavior":"noTarget","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":"no","values":[{"label":{"zh":"持续时间：","en":"DURATION:"},"levels":["8","9","10","11"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"每秒攻击次数：","en":"ATTACKS PER SECOND:"},"levels":["4","5","6","7"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"攻击伤害降低：","en":"ATTACK DAMAGE REDUCTION:"},"levels":["-25"],"percent":true,"aoe":false,"spellAmp":false}],"cooldown":["60","55","50","45"],"manaCost":["75","150","225","300"],"lore":{"zh":"狂风所至，箭雨无处不在。","en":"Where the gale blows, arrows rain without end."}},
   },
   {
     heroName: "npc_dota_hero_kunkka",
@@ -261,6 +332,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "昆卡", en: "Kunkka" },
     title: { zh: "<font color='#d000ff'>洪流浪潮 觉醒</font>", en: "<font color='#d000ff'>Torrent Storm Awakened</font>" },
     desc: { zh: "在目标地点1100范围内，每0.2秒在一个随机区域释放一道洪流，持续4.0秒。", en: "Releases a Torrent in a random area within 1100 range of the target position once every 0.2 for 4.0 seconds." },
+    ability: {"behavior":"point","targeting":null,"damageType":"magical","piercesImmunity":"no","dispellable":"no","values":[],"cooldown":["60"],"manaCost":["275"],"lore":{"zh":"一百个陆地的联盟也牵制不了这些滔天海浪。","en":"A hundred leagues of dry land couldn't keep these seas at bay."}},
   },
   {
     heroName: "npc_dota_hero_ogre_magi",
@@ -271,6 +343,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "食人魔魔法师", en: "Ogre Magi" },
     title: { zh: "<font color='#d000ff'>多重施法（觉醒）</font>", en: "<font color='#d000ff'>Multicast (Awakened)</font>" },
     desc: { zh: "使英雄在单次施法中有概率多次施放同一技能和物品，多重施法间隔为0.6秒。<br>食人魔魔法师觉醒时额外获得此技能，与大招多重施法叠加形成双重多重施法，并移除先天技能傻福。", en: "Allows you cast abilities and items multiple times with each use. Each multicast has a 0.6 second interval.<br>When Ogre Magi is Awakened, this skill is granted in addition to the ultimate Multicast, stacking into a double multicast, and the innate Dumb Luck ability is removed." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[{"label":{"zh":"2X施放概率：","en":"2X CAST CHANCE:"},"levels":["75"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"3X施放概率：","en":"3X CAST CHANCE:"},"levels":["15","20","25","30"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"4X施放概率：","en":"4X CAST CHANCE:"},"levels":["0","5","10","15"],"percent":true,"aoe":false,"spellAmp":false}],"cooldown":null,"manaCost":null,"lore":{"zh":"可以触发绝大多数的技能和物品，持续施法不会触发多重施法。","en":"Can trigger most abilities and items, channel ability won't trigger multiple casting."}},
   },
   {
     heroName: "npc_dota_hero_winter_wyvern",
@@ -280,7 +353,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "winter_wyvern_winters_curse.9a18c140.webp",
     name: { zh: "寒冬飞龙", en: "Winter Wyvern" },
     title: { zh: "<font color='#d000ff'>寒冬诅咒 觉醒</font>", en: "<font color='#d000ff'>Winter's Curse Awakened</font>" },
-    desc: { zh: "寒冬诅咒的主目标死亡时，诅咒转移给范围内血量最低的敌方单位，持续时间为原时长的<font color='#FFFFFF'><b>50%%</b></font>。", en: "When the primary target of Winter's Curse dies, the curse transfers to the enemy unit with the lowest health in the radius, lasting <font color='#FFFFFF'><b>50%%</b></font> of the original duration." },
+    desc: { zh: "寒冬诅咒的主目标死亡时，诅咒转移给范围内血量最低的敌方单位，持续时间为原时长的<font color='#FFFFFF'><b>50%</b></font>。", en: "When the primary target of Winter's Curse dies, the curse transfers to the enemy unit with the lowest health in the radius, lasting <font color='#FFFFFF'><b>50%</b></font> of the original duration." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_monkey_king",
@@ -291,26 +365,29 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "齐天大圣", en: "Monkey King" },
     title: { zh: "<font color='#d000ff'>齐天大圣 觉醒</font>", en: "<font color='#d000ff'>Monkey King Awakened</font>" },
     desc: { zh: "棒击大地额外伤害提升<font color='#FFFFFF'><b>200</b></font>，施法距离提升<font color='#FFFFFF'><b>700</b></font>。<br>可以在被控制状态下施放斗战胜佛。<br>施放斗战胜佛时获得<font color='#FFCC66'>黑皇杖</font>效果，持续到大招结束。", en: "Boundless Strike gains <font color='#FFFFFF'><b>200</b></font> bonus damage and <font color='#FFFFFF'><b>700</b></font> cast range.<br>Can cast Defy while disabled.<br>When casting Defy, gains the <font color='#FFCC66'>Black King Bar</font> effect until the ability ends." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_lina",
     abilityName: "special_bonus_unique_lina_upgrade",
     freeTrial: false,
     art: "lina.1feb5196.webp",
-    icon: "lina_laguna_blade.9078ccb8.webp",
+    icon: "lina_laguna_blade.3872b268.webp",
     name: { zh: "莉娜", en: "Lina" },
     title: { zh: "<font color='#d000ff'>神灭斩 觉醒</font>", en: "<font color='#d000ff'>Laguna Blade Awakened</font>" },
     desc: { zh: "每次释放神灭斩，对目标额外造成等同本次神灭斩伤害的<font color='#FFE56E'>纯粹伤害</font>，该伤害受技能增强影响。", en: "Each time Lina casts Laguna Blade, the target takes additional <font color='#FFE56E'>pure damage</font> equal to that Laguna Blade's damage, affected by Spell Amplification." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_bristleback",
     abilityName: "special_bonus_unique_bristleback_upgrade",
     freeTrial: false,
-    art: "bristleback.dbf2bd7c.webp",
-    icon: null,
+    art: "bristleback.e570ac82.webp",
+    icon: "bb_2022_immortal_bristleback.307200d3.webp",
     name: { zh: "钢背兽", en: "Bristleback" },
     title: { zh: "<font color='#d000ff'>自动喷刺 觉醒</font>", en: "<font color='#d000ff'>Auto Quill Awakened</font>" },
     desc: { zh: "<font color='#00CED1'>自动施法：</font>开启后，当范围内有敌方英雄时，钢背兽自动施放刺针扫射，并对最近的敌方英雄施放粘稠鼻液。<br><br><font color='#d000ff'>觉醒强化：</font>粘稠鼻液：基础降甲提升至<font color='#FFFFFF'><b>10</b></font>点，每层降甲提升至<font color='#FFFFFF'><b>6</b></font>点，叠加上限提升至<font color='#FFFFFF'><b>10</b></font>层<br>刺针扫射：伤害上限提升至<font color='#FFFFFF'><b>1000</b></font><br>战意：叠加上限提升至<font color='#FFFFFF'><b>20</b></font>层", en: "<font color='#00CED1'>Autocast:</font> With autocast enabled, whenever enemy heroes are in range, Bristleback automatically fires Quill Spray and casts Viscous Nasal Goo on the nearest enemy hero.<br><br><font color='#d000ff'>Awakening Bonuses:</font> Viscous Nasal Goo: base armor reduction raised to <font color='#FFFFFF'><b>10</b></font>, per-stack to <font color='#FFFFFF'><b>6</b></font>, stack limit raised to <font color='#FFFFFF'><b>10</b></font><br>Quill Spray: damage cap raised to <font color='#FFFFFF'><b>1000</b></font><br>Warpath: max stacks raised to <font color='#FFFFFF'><b>20</b></font>" },
+    ability: {"behavior":"autocast","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_drow_ranger",
@@ -320,7 +397,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "drow_ranger_multishot_arcana.be05e297.webp",
     name: { zh: "卓尔游侠", en: "Drow Ranger" },
     title: { zh: "<font color='#d000ff'>裂影箭 觉醒</font>", en: "<font color='#d000ff'>Splinter Shot Awakened</font>" },
-    desc: { zh: "普攻有40%%概率分裂出箭矢，射向主目标周围最多2名敌人，每支造成本次攻击伤害50%%的物理伤害，并附带霜冻之箭的减速效果。<br>分裂箭矢将穿透敌人的防御，无视他们的<font color='#FFFFFF'><b>基础护甲</b></font>。", en: "Attacks have a 40%% chance to splinter into arrows that fly at up to 2 enemies around the primary target, each dealing 50%% of the attack's damage as physical damage and applying Frost Arrows' slow.<br>Splinter arrows pierce through defenses, ignoring their <font color='#FFFFFF'><b>base armor</b></font>." },
+    desc: { zh: "普攻有40%概率分裂出箭矢，射向主目标周围最多2名敌人，每支造成本次攻击伤害50%的物理伤害，并附带霜冻之箭的减速效果。<br>分裂箭矢将穿透敌人的防御，无视他们的<font color='#FFFFFF'><b>基础护甲</b></font>。", en: "Attacks have a 40% chance to splinter into arrows that fly at up to 2 enemies around the primary target, each dealing 50% of the attack's damage as physical damage and applying Frost Arrows' slow.<br>Splinter arrows pierce through defenses, ignoring their <font color='#FFFFFF'><b>base armor</b></font>." },
+    ability: {"behavior":"passive","targeting":null,"damageType":"physical","piercesImmunity":"no","dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_nevermore",
@@ -330,17 +408,19 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "nevermore_dark_lord_demon.66647540.webp",
     name: { zh: "影魔", en: "Shadow Fiend" },
     title: { zh: "<font color='#d000ff'>魂之挽歌护体 觉醒</font>", en: "<font color='#d000ff'>Requiem of Souls Guard Awakened</font>" },
-    desc: { zh: "释放魂之挽歌的施法前摇期间，影魔获得<font color='#FFCC66'>黑皇杖</font>效果，避免被控制打断。<br><br>支配死灵击杀英雄获得<font color='#FFFFFF'><b>10</b></font>个灵魂，击杀小兵获得<font color='#FFFFFF'><b>3</b></font>个灵魂。<br><br>提升施法速度<font color='#FFFFFF'><b>50%%</b></font>，降低暗影压制与魂之挽歌的施法抬手时间。", en: "During Requiem of Souls' cast animation, Shadow Fiend gains the <font color='#FFCC66'>Black King Bar</font> effect, preventing his cast from being interrupted by disables.<br><br>Necromastery grants <font color='#FFFFFF'><b>10</b></font> souls per hero kill and <font color='#FFFFFF'><b>3</b></font> souls per unit kill.<br><br>Increases cast speed by <font color='#FFFFFF'><b>50%%</b></font>, reducing the cast point of Shadowraze and Requiem of Souls." },
+    desc: { zh: "释放魂之挽歌的施法前摇期间，影魔获得<font color='#FFCC66'>黑皇杖</font>效果，避免被控制打断。<br><br>支配死灵击杀英雄获得<font color='#FFFFFF'><b>10</b></font>个灵魂，击杀小兵获得<font color='#FFFFFF'><b>3</b></font>个灵魂。<br><br>提升施法速度<font color='#FFFFFF'><b>50%</b></font>，降低暗影压制与魂之挽歌的施法抬手时间。", en: "During Requiem of Souls' cast animation, Shadow Fiend gains the <font color='#FFCC66'>Black King Bar</font> effect, preventing his cast from being interrupted by disables.<br><br>Necromastery grants <font color='#FFFFFF'><b>10</b></font> souls per hero kill and <font color='#FFFFFF'><b>3</b></font> souls per unit kill.<br><br>Increases cast speed by <font color='#FFFFFF'><b>50%</b></font>, reducing the cast point of Shadowraze and Requiem of Souls." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_witch_doctor",
     abilityName: "special_bonus_unique_witch_doctor_upgrade",
     freeTrial: false,
     art: "witch_doctor.a24c9516.webp",
-    icon: "witch_doctor_death_ward.a97d1193.webp",
+    icon: "witch_doctor_death_ward.4d3b1148.webp",
     name: { zh: "巫医", en: "Witch Doctor" },
     title: { zh: "<font color='#d000ff'>神语 觉醒</font>", en: "<font color='#d000ff'>Divine Words Awakened</font>" },
-    desc: { zh: "巫医沟通神明，死亡守卫与变身术守卫被召唤时，攻击力按巫医当前技能增强的50%%等比提升。", en: "By communing with the gods, Witch Doctor's Death Wards and Voodoo Switcheroo wards gain attack damage scaled by 50%% of his current Spell Amplification when summoned." },
+    desc: { zh: "巫医沟通神明，死亡守卫与变身术守卫被召唤时，攻击力按巫医当前技能增强的50%等比提升。", en: "By communing with the gods, Witch Doctor's Death Wards and Voodoo Switcheroo wards gain attack damage scaled by 50% of his current Spell Amplification when summoned." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":"no","values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_phantom_assassin",
@@ -351,6 +431,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "幻影刺客", en: "Phantom Assassin" },
     title: { zh: "<font color='#d000ff'>幻影突袭 觉醒</font>", en: "<font color='#d000ff'>Phantom Strike Awakened</font>" },
     desc: { zh: "幻影刺客闪烁到一个目标单位身旁，获得短暂的攻击速度加成和<font color='#FFCC66'>黑皇杖</font>效果，并自动发起攻击。<br><br>窒碍短匕弹道速度提升。施放窒碍短匕后获得短暂<font color='#FFCC66'>黑皇杖</font>效果。", en: "Phantom Assassin blinks to a target unit, gaining bonus attack speed and the <font color='#FFCC66'>Black King Bar</font> effect briefly, then automatically attacks.<br><br>Stifling Dagger's projectile speed is increased. Casting Stifling Dagger briefly grants the <font color='#FFCC66'>Black King Bar</font> effect." },
+    ability: {"behavior":"target","targeting":"enemyUnits","damageType":null,"piercesImmunity":"no","dispellable":null,"values":[{"label":{"zh":"攻击速度加成：","en":"Bonus Attack Speed:"},"levels":["80","120","160","200","240"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"持续时间：","en":"Duration:"},"levels":["2.0"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["14","12","10","8","6"],"manaCost":["50"],"lore":null},
   },
   {
     heroName: "npc_dota_hero_zuus",
@@ -361,16 +442,18 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "宙斯", en: "Zeus" },
     title: { zh: "<font color='#d000ff'>神王 觉醒</font>", en: "<font color='#d000ff'>God King Awakened</font>" },
     desc: { zh: "开启自动施法后，宙斯自动对施法距离内的敌人施放弧形闪电与雷击。<br><br>优先对英雄施法，范围内只有小兵时仅施放弧形闪电。", en: "When autocast is enabled, Zeus automatically casts Arc Lightning and Lightning Bolt on enemies within cast range.<br><br>Prioritizes heroes. Casts only Arc Lightning when only creeps are in range." },
+    ability: {"behavior":"autocast","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_necrolyte",
     abilityName: "necrolyte_heartstopper_aura_datadriven",
     freeTrial: false,
     art: "necrolyte.422957a5.webp",
-    icon: "necrolyte_heartstopper_aura.56cc3008.webp",
+    icon: "necrolyte_heartstopper_aura.3189edc7.webp",
     name: { zh: "瘟疫法师", en: "Necrophos" },
     title: { zh: "<font color='#d000ff'>竭心光环 觉醒</font>", en: "<font color='#d000ff'>Heartstopper Aura Awakened</font>" },
     desc: { zh: "死灵法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><font color='#d000ff'>造成的伤害可以被技能增强。</font>", en: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font>" },
+    ability: {"behavior":"aura","targeting":"enemy","damageType":"magical","piercesImmunity":"yes","dispellable":null,"values":[{"label":{"zh":"作用范围：","en":"Radius:"},"levels":["700"],"percent":false,"aoe":true,"spellAmp":false},{"label":{"zh":"每秒最大生命值伤害：","en":"Max Health Damage per Second:"},"levels":["0.6","0.9","1.2","1.5","1.8"],"percent":true,"aoe":false,"spellAmp":true}],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_axe",
@@ -381,6 +464,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "斧王", en: "Axe" },
     title: { zh: "<font color='#d000ff'>无情铁手 觉醒</font>", en: "<font color='#d000ff'>Ruthless Hand Awakened</font>" },
     desc: { zh: "<font color='#00CED1'>自动施放：自动斩杀</font><br><br>开启自动施法后，只要淘汰之刃冷却就绪，斧王便自动检测施法范围内血量低于斩杀线的敌方英雄并立即施放淘汰之刃。", en: "<font color='#00CED1'>Autocast: Auto Cull</font><br><br>With autocast enabled, whenever Culling Blade is off cooldown, Axe automatically detects enemy heroes within cast range whose health is below the cull threshold and casts Culling Blade immediately." },
+    ability: {"behavior":"autocast","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":{"zh":"利刃所向，皆为收割。","en":"Where the blade falls, the harvest follows."}},
   },
   {
     heroName: "npc_dota_hero_sniper",
@@ -391,6 +475,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "狙击手", en: "Sniper" },
     title: { zh: "<font color='#d000ff'>暗杀 觉醒</font>", en: "<font color='#d000ff'>Assassinate Awakened</font>" },
     desc: { zh: "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><font color='#FFFFFF'>神杖升级：命中的敌方英雄附加眩晕效果。</font>", en: "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>" },
+    ability: {"behavior":"point","targeting":"enemyHeroes","damageType":"physical","piercesImmunity":null,"dispellable":null,"values":[{"label":{"zh":"暗杀范围:","en":"RADIUS:"},"levels":["350"],"percent":false,"aoe":true,"spellAmp":false},{"label":{"zh":"致命一击伤害:","en":"CRITICAL DAMAGE:"},"levels":["220","240","260","280"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"额外物理伤害:","en":"BONUS PHYSICAL DAMAGE:"},"levels":["300","400","500","600"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["10.0"],"manaCost":["150","200","250","300"],"lore":{"zh":"扣下扳机的那一刻，整片战场都为之屏息。","en":"For the space of a heartbeat, the whole battlefield holds its breath."}},
   },
   {
     heroName: "npc_dota_hero_juggernaut",
@@ -400,7 +485,8 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "juggernaut_blade_fury_immortal_crimson.65715ed0.webp",
     name: { zh: "主宰", en: "Juggernaut" },
     title: { zh: "<font color='#d000ff'>剑刃风暴 觉醒</font>", en: "<font color='#d000ff'>Blade Fury Awakened</font>" },
-    desc: { zh: "剑圣化身旋转风暴，每秒对周围敌人造成基础伤害加目标最大生命百分比的魔法伤害。期间获得<font color='#FFCC66'>减益免疫</font>和80%%魔法抗性，可以正常攻击但攻击力降低50%%。旋转结束时对自身施加强效驱散。", en: "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80%% magic resistance, and can attack normally but with attack power reduced by 50%%. Performs a strong dispel on himself when the spin ends." },
+    desc: { zh: "剑圣化身旋转风暴，每秒对周围敌人造成基础伤害加目标最大生命百分比的魔法伤害。期间获得<font color='#FFCC66'>减益免疫</font>和80%魔法抗性，可以正常攻击但攻击力降低50%。旋转结束时对自身施加强效驱散。", en: "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80% magic resistance, and can attack normally but with attack power reduced by 50%. Performs a strong dispel on himself when the spin ends." },
+    ability: {"behavior":"channeled","targeting":null,"damageType":"magical","piercesImmunity":"no","dispellable":"no","values":[{"label":{"zh":"作用范围：","en":"RADIUS:"},"levels":["350"],"percent":false,"aoe":true,"spellAmp":false},{"label":{"zh":"持续时间：","en":"DURATION:"},"levels":["5"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"基础伤害：","en":"BASE DAMAGE:"},"levels":["80","160","240","320","400"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"每秒最大生命伤害：","en":"MAX HEALTH DAMAGE PER SECOND:"},"levels":["2"],"percent":true,"aoe":false,"spellAmp":true}],"cooldown":["20","19","18","17","16"],"manaCost":["100","105","110","115","120"],"lore":null},
   },
   {
     heroName: "npc_dota_hero_pudge",
@@ -411,6 +497,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "帕吉", en: "Pudge" },
     title: { zh: "<font color='#d000ff'>肉钩 觉醒</font>", en: "<font color='#d000ff'>Meat Hook Awakened</font>" },
     desc: { zh: "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。", en: "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed." },
+    ability: {"behavior":"autocast","targeting":null,"damageType":"pure","piercesImmunity":"yes","dispellable":null,"values":[{"label":{"zh":"伤害：","en":"DAMAGE:"},"levels":["150","220","290","360","430"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"钩子速度：","en":"HOOK SPEED:"},"levels":["2100","2400","2700","3000","3300"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"基础施法距离：","en":"BASE CAST RANGE:"},"levels":["1800","2100","2400","2700","3000"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["14","13","12","11","10"],"manaCost":["110","120","130","140","150"],"lore":null},
   },
 ];
 

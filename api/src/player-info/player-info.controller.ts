@@ -70,11 +70,15 @@ export class PlayerInfoController {
   ): Promise<PlayerInfoDto> {
     const isLocal = serverType === SERVER_TYPE.LOCAL;
     if (isLocal) {
-      await this.localHostService.assertMemberPointWithinLimit(
+      const withinLimit = await this.localHostService.checkMemberPointLimit(
         dto.steamId,
         dto.memberPoint,
         origin,
       );
+      // 客户端不管成功失败都会刷新玩家数据，碰到每日上限回报错只会换来一次重试
+      if (!withinLimit) {
+        return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
+      }
     }
 
     await this.playerService.useMemberPoint(dto);

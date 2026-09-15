@@ -4,6 +4,7 @@
 
 ## 目录
 
+- [对外入口](#对外入口)
 - [API 访问配置](#api-访问配置)
   - [Firebase 重写规则配置](#firebase-重写规则配置)
   - [API 路由处理](#api-路由处理)
@@ -17,6 +18,21 @@
   - [认证错误](#认证错误)
 - [开发环境信息](#开发环境信息)
 
+## 对外入口
+
+所有来源最终都进同一个 `client` 函数，但入口域名不同：
+
+| 来源 | 入口域名 | 经过 |
+|---|---|---|
+| 网站浏览器 | `windy10v10ai.com` | Cloudflare → App Hosting（`web/next.config.ts` 的 `/api` 转发）→ 函数 |
+| 支付宝回调 | `windy10v10ai.com` | 同上 |
+| 游戏服务器 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
+| 爱发电 / Ko-fi 回调 | `windy10v10ai.web.app` | Firebase Hosting → 函数 |
+
+- 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
+- 支付宝的回调地址由 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL` 决定；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
+- **改 `web/next.config.ts` 的转发目的地会同时改掉支付宝回调的路径**，要连收款一起验
+
 ## API 访问配置
 
 ### Firebase 重写规则配置
@@ -26,14 +42,14 @@
 ```json
 "rewrites": [
   {
-    "regex": "^/api/(game|afdian|analytics|player).*",
+    "regex": "^/api/.*",
     "function": "client",
     "region": "asia-northeast1"
   }
 ]
 ```
 
-如果需要添加新的 API 路径，请在正则表达式中添加相应的路径前缀。
+Hosting 只按 `^/api/.*` 放行，路径前缀的白名单在下一节的函数里，新增顶层前缀要改那一处。
 
 ### API 路由处理
 
@@ -49,7 +65,7 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex = '^/api/(game|afdian|analytics|player).*';
+    const regex = '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello).*';
     callServerWithRegex(regex, req, res);
   },
 );

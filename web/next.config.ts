@@ -4,9 +4,9 @@ import type { NextConfig } from 'next';
 
 const withNextIntl = createNextIntlPlugin();
 
-const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN;
-if (!apiDomain) {
-  throw new Error('NEXT_PUBLIC_API_DOMAIN is required to build the API proxy');
+const apiOrigin = process.env.API_ORIGIN;
+if (!apiOrigin) {
+  throw new Error('API_ORIGIN is required to build the API proxy');
 }
 
 const config: NextConfig = {
@@ -25,12 +25,12 @@ const config: NextConfig = {
       },
     ];
   },
-  // 游戏客户端把 API 请求发到网站域名，由这里转发到 API。网站页面自身直连 API，不经过这条规则
+  // 不只服务页面：其他来源也经本站域名进 API，清单见 docs/api/README.md
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: `${apiDomain}/api/:path*`,
+        destination: `${apiOrigin}/api/:path*`,
       },
       // Firebase Auth 的登录与续期请求由 config/firebase.ts 指到本站域名，在这里转发出去。
       // 路径前缀是 SDK 拼出来的，不能改名

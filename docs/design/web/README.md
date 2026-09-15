@@ -19,7 +19,8 @@
 | 3a 属性页 | #1119 | `/profile/<steamId>/property`：查看、加点、重置，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3a-2 宽屏与属性卡 | 无 | 全站外框 1280 封顶；属性页三列，属性卡进度条逐级取色、升级按钮分档，见 [phase-3a-property-page.md](phase-3a-property-page.md) | 已完成 |
 | 3b 觉醒页 | #1120 | `/profile/<steamId>/awaken`：已觉醒列表、解锁、随机，外加从 game 同步觉醒数据的脚本与 skill，见 [phase-3b-awaken-page.md](phase-3b-awaken-page.md) | 已完成 |
-| 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 未开始 |
+| 3b-2 觉醒技能提示框 | 无 | 觉醒卡悬停弹出 Dota 式技能提示，详情弹窗补上数值与冷却耗蓝，「已觉醒」标记与弹窗文案调整，见 [phase-3b-2-ability-tooltip.md](phase-3b-2-ability-tooltip.md) | 已完成 |
+| 4 游戏联动 | windy10v10ai/game#2411 | game 仓库：「前往网站」按钮、刷新按钮、FAQ | 已完成 |
 | 8a 首页 | #1168 | 登录引导与主要页面导航 | 已完成 |
 | 8b 个人主页 | #1167 | 身份卡与战绩卡按勇士紫 / 会员金上色，宽屏分栏 | 已完成 |
 | 8c 会员页与商业披露 | #1170 | 会员页订阅按钮统一紫色；披露页、数据表与文档收尾 | 已完成 |
@@ -32,9 +33,8 @@
 
 ### 后续依赖
 
-剩下的四批互不阻塞，可以同时推进：
+剩下的三批互不阻塞，可以同时推进：
 
-- **4 游戏联动**刚解锁——属性页与觉醒页都已上线，「前往网站」有落点了
 - **9 Steam 昵称头像**卡在申请 Steam Web API key，那是外部审批，越早交越好；它会再动一次头部账号区，位置已按 [phase-2g-header-layout.md](phase-2g-header-layout.md) 预留
 - **5 GA4** 与 **6 会员剩余**没有依赖，随时可插队
 
