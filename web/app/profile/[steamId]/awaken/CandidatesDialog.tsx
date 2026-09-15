@@ -105,7 +105,7 @@ function CandidatesRoll({ candidates, rollPool, onSelect, onClose }: RollProps) 
               width={290}
               height={380}
               className={`absolute inset-0 size-full object-cover ${
-                settled ? '' : 'blur-[2px] brightness-80'
+                settled ? '' : 'blur-[1px] brightness-80'
               }`}
             />
             {settled ? (

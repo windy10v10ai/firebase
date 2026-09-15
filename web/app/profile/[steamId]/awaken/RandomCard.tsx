@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 
 import { awakenAssetPath } from '@/app/lib/awaken';
 
+import { useBadgeWrap } from './use-badge-wrap';
+
 import type { AwakenHero } from '@/config/awaken';
 
 interface RandomCardProps {
@@ -19,8 +21,8 @@ interface RandomCardProps {
 
 const DISCOUNT_CLASS =
   'rounded border border-discount bg-black/60 px-1.5 text-[11px] font-bold text-discount';
-/* 与英雄卡的限免标签同一套居中法：左边放一个等宽的隐形占位，标题才落在正中 */
-const DISCOUNT_SPACER_CLASS = `${DISCOUNT_CLASS} invisible min-w-0 overflow-hidden [flex-shrink:999]`;
+/* 与英雄卡的限免标签同一套排法：左边放一个等宽的隐形占位，标题才落在正中；放不下时标签换到第二行 */
+const DISCOUNT_SPACER_CLASS = `${DISCOUNT_CLASS} invisible shrink-0`;
 
 /**
  * 随机抽选入口：固定在网格首位，金色描边照游戏的做法与英雄卡区分。
@@ -28,6 +30,7 @@ const DISCOUNT_SPACER_CLASS = `${DISCOUNT_CLASS} invisible min-w-0 overflow-hidd
  */
 export default function RandomCard({ preview, enabled, poolShort, onClick }: RandomCardProps) {
   const t = useTranslations('awaken.random');
+  const { rowRef, nameRef, badgeRef, wrap } = useBadgeWrap<HTMLSpanElement>(true);
 
   return (
     <button
@@ -56,16 +59,33 @@ export default function RandomCard({ preview, enabled, poolShort, onClick }: Ran
       <span className="absolute inset-x-0 top-0 h-18 bg-linear-to-b from-surface/90 to-transparent" />
       <span className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent via-surface/95 to-surface/98" />
 
-      <span className="absolute inset-x-1.5 top-1.5 flex items-center justify-center gap-1">
-        <span aria-hidden="true" className={DISCOUNT_SPACER_CLASS}>
-          {t('discount')}
-        </span>
-        <span className="min-w-0 truncate text-[13px] font-bold text-member [text-shadow:0_2px_4px_rgba(0,0,0,0.9)]">
+      <span
+        ref={rowRef}
+        className={`absolute inset-x-1.5 top-1.5 flex ${
+          wrap ? 'flex-col items-center gap-0.5' : 'items-center justify-center gap-1'
+        }`}
+      >
+        {wrap ? null : (
+          <span aria-hidden="true" className={DISCOUNT_SPACER_CLASS}>
+            {t('discount')}
+          </span>
+        )}
+        <span
+          ref={nameRef}
+          className="max-w-full min-w-0 truncate text-[13px] font-bold text-member [text-shadow:0_2px_4px_rgba(0,0,0,0.9)]"
+        >
           {t('title')}
         </span>
-        <span className={`${DISCOUNT_CLASS} shrink-0`}>{t('discount')}</span>
+        <span ref={badgeRef} className={`${DISCOUNT_CLASS} shrink-0 ${wrap ? 'self-end' : ''}`}>
+          {t('discount')}
+        </span>
       </span>
-      <span className="absolute inset-x-2.5 top-11 text-center text-[11px] leading-relaxed text-member/85 [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]">
+      {/* 标签换到第二行时副标题跟着下移，免得和标签叠在一起 */}
+      <span
+        className={`absolute inset-x-2.5 text-center text-[11px] leading-relaxed text-member/85 [text-shadow:0_1px_3px_rgba(0,0,0,0.9)] ${
+          wrap ? 'top-12' : 'top-11'
+        }`}
+      >
         {t('threePick')}
       </span>
       <span
