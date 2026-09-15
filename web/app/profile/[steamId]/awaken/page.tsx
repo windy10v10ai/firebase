@@ -53,7 +53,7 @@ export default function AwakenPage() {
   const [result, setResult] = useState<LoadResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
-  // 打开详情的英雄，以及它是不是从随机候选点进来的（决定半价文案）
+  // 打开详情的英雄，以及它是不是从随机候选点进来的（决定按钮上的价格）
   const [target, setTarget] = useState<{ hero: AwakenHero; fromRandom: boolean } | null>(null);
   const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [candidates, setCandidates] = useState<AwakenHero[]>([]);

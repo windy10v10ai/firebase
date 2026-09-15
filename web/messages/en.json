@@ -437,12 +437,12 @@
     },
     "dialog": {
       "question": "Choose the points to spend to awaken this hero",
-      "halfPrice": "Random draw costs half the points.",
       "alreadyUnlocked": "Awakened",
       "useBattle": "{cost} usable Battle Points",
       "useMember": "{cost} usable Member Points",
       "battleShort": "You have {have} Battle Points, {need} short",
       "memberShort": "You have {have} Member Points, {need} short",
+      "more": "More",
       "close": "Close"
     },
     "random": {
