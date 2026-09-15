@@ -189,7 +189,8 @@ export default function AwakenDialog({
       className="card-container m-0 mt-auto max-h-[calc(100dvh-3rem)] w-full max-w-none rounded-t-[14px] rounded-b-none border-b-0 p-0 text-content transition-[translate] duration-200 ease-out backdrop:bg-black/60 open:flex open:flex-col starting:open:translate-y-full md:m-auto md:h-[min(40rem,calc(100dvh-4rem))] md:max-h-none md:w-[min(28rem,calc(100vw-2rem))] md:rounded-[10px] md:border-b md:transition-none md:starting:open:translate-y-0"
     >
       {hero ? (
-        <div className="card-pad flex min-h-0 flex-1 flex-col gap-4.5 pt-6 lg:pt-8">
+        // 手机抽屉的高度随内容定，伸缩基准要按内容算：基准写成 0% 时 iOS Safari 当成 0 高，整张抽屉只剩内边距那一条
+        <div className="card-pad flex min-h-0 flex-auto flex-col gap-4.5 pt-6 lg:pt-8">
           <span
             aria-hidden="true"
             className="pointer-events-none absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-line-strong md:hidden"
@@ -240,13 +241,13 @@ export default function AwakenDialog({
           </div>
 
           {/* 电脑档让说明区伸进右侧留白，滚动条贴着弹窗边缘；-me-8 与 card-pad 的 lg:p-8 对应 */}
-          <div className="relative flex min-h-0 flex-1 flex-col lg:-me-8">
+          <div className="relative flex min-h-0 flex-auto flex-col lg:-me-8">
             <div
               ref={bodyRef}
               tabIndex={-1}
               onScroll={updateMoreBelow}
               // 电脑有滚轮，直接滚比多点一次「详细」省事；触屏第一眼不出滚动条
-              className={`min-h-0 flex-1 overscroll-contain outline-none lg:overflow-y-auto lg:pe-8 ${
+              className={`min-h-0 flex-auto overscroll-contain outline-none lg:overflow-y-auto lg:pe-8 ${
                 expanded ? 'overflow-y-auto' : 'overflow-hidden'
               }`}
             >
