@@ -24,6 +24,15 @@ export default function PlayerCard({
   const member = info?.member;
   const idText = t('heading', { id: steamId });
   const personaName = profile?.personaName ?? null;
+  // 金色代表会员有效，过期了照样上金会让人以为还在生效
+  const statusClass = member?.enable ? 'font-medium text-member-strong' : 'text-muted';
+  const statusText = member ? tMember(memberStatusKey(member)) : null;
+  // 过期态的状态词已经说明了含义，日期不再配前缀
+  const dateText = member
+    ? member.enable
+      ? tMember('expireDate', { date: member.expireDateString })
+      : member.expireDateString
+    : null;
 
   return (
     // 网格项默认 min-width:auto，昵称不换行会把整列撑宽，truncate 也就永远轮不到生效
@@ -43,25 +52,21 @@ export default function PlayerCard({
           </h1>
           {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，两种情况卡片一样高 */}
           <span className="min-h-5 truncate text-sm text-muted">{personaName ? idText : null}</span>
-          {/* 会员状态与有效期并成一行，空出的位置给 ID；非会员整行为空，放骨架会预告不存在的内容 */}
-          <span className="mt-1 flex min-h-6 items-baseline gap-2">
+          {/*
+            电脑档身份卡只占三栏里的一栏，文字列仅 177px，装不下「状态 + 有效期」一行，所以拆成两行；
+            手机与平板的卡是通栏的，并成一行能省下一行高度，空出的位置正好给上面的 ID。
+            非会员时两种形态都整行留空，放骨架会预告不存在的内容。
+          */}
+          <span className="mt-1 flex min-h-6 items-baseline gap-2 lg:hidden">
             {member ? (
               <>
-                {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
-                <span
-                  className={`shrink-0 ${member.enable ? 'font-medium text-member-strong' : 'text-muted'}`}
-                >
-                  {tMember(memberStatusKey(member))}
-                </span>
-                <span className="truncate text-sm text-muted">
-                  {/* 过期态的状态词已经说明了含义，日期不再配前缀，直接显示日期本身 */}
-                  {member.enable
-                    ? tMember('expireDateInline', { date: member.expireDateString })
-                    : member.expireDateString}
-                </span>
+                <span className={`shrink-0 ${statusClass}`}>{statusText}</span>
+                <span className="truncate text-sm text-muted">{dateText}</span>
               </>
             ) : null}
           </span>
+          <span className={`mt-1 hidden min-h-6 truncate lg:block ${statusClass}`}>{statusText}</span>
+          <span className="hidden min-h-5 truncate text-sm text-muted lg:block">{dateText}</span>
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 border-t border-line pt-4">

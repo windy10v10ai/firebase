@@ -4,20 +4,15 @@ import request from 'supertest';
 import { SteamProfileApiService } from '../src/steam-profile/steam-profile.api.service';
 
 import { createIdTokenForSteamId } from './util/util-auth';
-import { getLocalApiKey, initTest } from './util/util-http';
+import { initTest } from './util/util-http';
 
-const steamProfileUrl = (steamId: number) => `/api/player/${steamId}/steam-profile`;
-
-function getWithBearer(app: INestApplication, url: string, idToken: string): request.Test {
-  return request(app.getHttpServer()).get(url).set('Authorization', `Bearer ${idToken}`);
-}
-
+// 归属校验与 key 类型是 auth.guard.ts 对所有路由的通用行为，已在 player-info-web.e2e-spec.ts
+// 验过一次，这里只验这条路由自己的事：接得通，且 Steam 给不出结果时不是错误响应
 describe('SteamProfileController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     app = await initTest();
-    // 不打真的 Steam：这里验的是路由、鉴权与查不到时的响应形状
     jest.spyOn(app.get(SteamProfileApiService), 'fetchPlayerSummary').mockResolvedValue(undefined);
   });
 
@@ -29,25 +24,15 @@ describe('SteamProfileController (e2e)', () => {
     const steamId = 200000901;
     const idToken = await createIdTokenForSteamId(steamId);
 
-    const response = await getWithBearer(app, steamProfileUrl(steamId), idToken).expect(200);
+    const response = await request(app.getHttpServer())
+      .get(`/api/player/${steamId}/steam-profile`)
+      .set('Authorization', `Bearer ${idToken}`)
+      .expect(200);
 
     expect(response.body).toEqual({
       steamId: `${steamId}`,
       personaName: null,
       avatarUrl: null,
     });
-  });
-
-  it('拿 A 的 token 请求 B 的资料，返回 403', async () => {
-    const idTokenA = await createIdTokenForSteamId(200000902);
-
-    await getWithBearer(app, steamProfileUrl(200000903), idTokenA).expect(403);
-  });
-
-  it('本地主机那条 key 调不到这条接口', async () => {
-    await request(app.getHttpServer())
-      .get(steamProfileUrl(200000904))
-      .set('x-api-key', getLocalApiKey())
-      .expect(401);
   });
 });
