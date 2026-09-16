@@ -225,4 +225,6 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 
 图片用 `<img src="..." width="...">` 控制宽度，`![]()` 语法无法限制尺寸。
 
+**拍图这一步可以派给子代理**，前提与指令写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「把 PR 截图交给子代理」。验收仍归主会话。
+
 **改动碰到界面文案时，中英文各拍一组。**一种语言有文案、另一种缺 key 的情况从截图上看不出来，两组图摆在一起才拦得住。
