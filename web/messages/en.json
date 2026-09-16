@@ -99,7 +99,7 @@
     }
   },
   "offline": {
-    "title": "Launch mode and when data takes effect",
+    "title": "Game launch mode and when data takes effect",
     "link": "When data takes effect",
     "lead": "Whether the game can read your latest data depends on how it is launched.",
     "leadOffline": "<name>Offline mode</name>: launched from the Arcade. Since Dota 2 7.41f this cannot reach the server, so the game reads the data as of the last map update.",
@@ -390,7 +390,7 @@
       "description": "Refresh and try again, or come back in a little while."
     },
     "title": "Attributes",
-    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent, carry into every game, and are made here on this site.",
+    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game.",
     "points": {
       "title": "Attribute points",
       "usable": "Usable / total",
@@ -478,7 +478,7 @@
   },
   "awaken": {
     "title": "Hero Awakening",
-    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points, here on this site.",
+    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points.",
     "loading": "Loading awakenings",
     "unlock": "Awaken",
     "unlocked": "Awakened",
