@@ -50,8 +50,8 @@ export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps
 
   return (
     <div className="space-y-3 border-t border-line pt-4">
-      <div className="flex items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+        <div className="min-w-0">
           <div className="text-content">{t('title')}</div>
           <div className="mt-0.5 text-sm text-muted">{subText}</div>
         </div>
@@ -61,7 +61,7 @@ export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps
             {t('done')}
           </span>
         ) : (
-          <Button onClick={onClick} loading={pending} className="shrink-0">
+          <Button onClick={onClick} loading={pending} className="w-full shrink-0 md:w-auto">
             {pending ? t('pending') : t('action')}
           </Button>
         )}
