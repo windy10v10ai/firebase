@@ -14,7 +14,7 @@
     "github": "GitHub",
     "membershipShort": "Member",
     "membership": "Membership",
-    "offline": "Offline mode",
+    "offline": "When data takes effect",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -99,67 +99,65 @@
     }
   },
   "offline": {
-    "title": "Offline mode and online mode",
-    "lead": "Since Dota 2 7.41f, the game cannot make any network request in offline mode. Offline mode is what you get launching from the Arcade: membership, attributes and awakenings come from the data exported when the map was last updated, which makes this site the only place your data can be changed. Online mode is started with a console command, and the game reads and writes the server as usual.",
-    "short": "In offline mode, changes you make here reach the game after the next map update.",
-    "link": "About offline mode",
-    "homeCard": "Offline mode is launched from the Arcade and is multiplayer; changes you make here reach the game after the next map update. Online mode is solo only, and changes you make here apply in your next game. Open this to see how the two differ.",
+    "title": "Launch mode and when data takes effect",
+    "link": "When data takes effect",
+    "lead": "Whether the game can read your latest data depends on how it is launched.",
+    "leadOffline": "<name>Offline mode</name>: launched from the Arcade. Since Dota 2 7.41f this cannot reach the server, so the game reads the data as of the last map update.",
+    "leadOnline": "<name>Online mode</name>: launched with a console command. It reaches the server and reads the latest data, but you can only play solo.",
+    "homeCard": {
+      "offline": "Launched from the Arcade, the attribute points, awakenings and other changes you make take effect in-game at the next map update.",
+      "online": "Launched from the console, they take effect in the next game. Open this to see how."
+    },
+    "notice": {
+      "property": "Launched from the Arcade, attribute points take effect in-game at the next map update. Launched from the console, they take effect right away.",
+      "awaken": "Launched from the Arcade, awakenings take effect in-game at the next map update. Launched from the console, they take effect right away.",
+      "link": "Learn how"
+    },
     "compare": {
       "title": "The two modes",
-      "item": "What",
       "offline": "Offline mode",
-      "offlineHint": "Launched from the Arcade",
+      "offlineHint": "From the Arcade",
       "online": "Online mode",
-      "onlineHint": "Launched from the console",
-      "rows": [
-        {
-          "label": "Players",
-          "offline": "Multiplayer",
-          "online": "Solo only"
-        },
-        {
-          "label": "Membership, attributes, hero awakenings, hotkeys, game presets",
-          "offline": "Active, from the data exported when the map was last updated",
-          "online": "Active, as this site shows them now"
-        },
-        {
-          "label": "End-of-game points and daily tasks",
-          "offline": "Points are not recorded and daily tasks are hidden",
-          "online": "Recorded as usual"
-        },
-        {
-          "label": "Spending points, awakening heroes and refreshing player info in-game",
-          "offline": "Unavailable",
-          "online": "Available"
-        },
-        {
-          "label": "When changes made here reach the game",
-          "offline": "After the next map update; the map updates two to three times a week",
-          "online": "In your next game"
-        }
-      ]
+      "onlineHint": "From the console",
+      "yes": "Yes",
+      "no": "No",
+      "multiplayer": "Multiplayer",
+      "multiplayerOnline": "Solo only",
+      "latestData": "Reads your latest data",
+      "latestDataOffline": "Last map update",
+      "points": "End-of-game points and daily tasks",
+      "checkIn": "Daily check-in and event points",
+      "refresh": "Refreshing player info in-game",
+      "noteModes": "Membership, attribute points and hero awakenings apply in both modes; offline mode uses the data as of the last map update.",
+      "noteTiming": "The map updates two to three times a week. Attribute points, awakenings and other changes you make are picked up at the next map update in offline mode, and in the next game in online mode."
     },
     "online": {
       "title": "How to get into online mode",
       "steps": [
-        "Enable the developer console in Dota 2’s settings",
-        "Back at the Dota 2 main menu, press your console hotkey to open it",
-        "Enter the command below, replacing [map name] with the map you want"
+        "In Dota 2 settings, search for \"console\" and tick Enable Console",
+        "In the hotkey settings, bind a key to Console",
+        "Back at the Dota 2 main menu, press that key to open the console",
+        "Pick the difficulty you want and enter one of the commands below in the console"
       ],
-      "command": "dota_launch_custom_game 2307479570 [map name]",
+      "difficulty": {
+        "dota": "Difficulty N1–N5",
+        "hard": "Difficulty N6–N8",
+        "custom": "Custom difficulty"
+      },
       "copy": "Copy",
       "copied": "Copied"
     },
     "website": {
-      "title": "This site is the only way in",
-      "body": "Spending attribute points, resetting them, awakening heroes and the daily check-in all happen here. Both modes pick up what you change here, the only difference being how soon."
+      "title": "Attributes and awakenings happen on this site only",
+      "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. Both modes pick up the changes, and only differ in how soon.",
+      "checkIn": "The daily check-in can be claimed here, and launching in online mode claims it automatically."
     }
   },
   "membership": {
     "title": "10v10AI Premium Membership",
     "description": "⭐Subscribe to get the following benefits (please leave your Dota2 friend ID in the message to auto-activate)",
     "benefits": [
-      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for each daily check-in on this site, with up to 7 makeup days",
+      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for each daily check-in, with up to 7 makeup days",
       "🎯 Skill draft upgraded to a pick-1-of-8, with the 2 extra skills more likely to be advanced abilities",
       "🪙 Unlocks the in-game 99999 gold cap",
       "🎁 One free reroll for treasure chest item drops",
@@ -167,7 +165,7 @@
       "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
       "🎮 One free reroll each for the starting active and passive skill draft"
     ],
-    "note": "😊In offline mode, your membership applies in-game after the next map update.",
+    "note": "😊When membership takes effect: launched from the console, refresh in-game and it applies right away; launched from the Arcade, it applies at the next map update.",
     "afdian": {
       "title": "Afdian",
       "price": "CN¥29.8/month",
@@ -242,7 +240,7 @@
       "serviceTime": {
         "title": "Delivery times",
         "content": [
-          "Membership service is available immediately after successful subscription payment. When it takes effect inside the game depends on the launch mode; see the offline mode page on this site"
+          "Membership service is available immediately after successful subscription payment. When it takes effect inside the game depends on how the game is launched; see \"When data takes effect\" on this site"
         ]
       },
       "paymentMethods": {
@@ -301,7 +299,7 @@
     },
     "avticeResult": {
       "success": {
-        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nIn offline mode, your membership applies in-game after the next map update.",
+        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nWhen it takes effect: launched from the Arcade, at the next map update; launched from the console, refresh in-game and it applies right away.",
         "btnText": "Return to Home"
       },
       "error": {
@@ -319,7 +317,7 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Data shows up after you finish a game in online mode. Games played in offline mode do not report back."
+      "description": "Data shows up after you finish a game launched from the console. Games launched from the Arcade do not report back."
     },
     "failed": {
       "title": "Failed to load",
@@ -340,7 +338,7 @@
     },
     "stats": {
       "title": "Stats",
-      "offlineNote": "Only games played in online mode record stats and conduct score; games played in offline mode are not counted.",
+      "offlineNote": "Only games launched from the console record match stats and conduct score.",
       "games": "Games",
       "winRate": "Win Rate",
       "conduct": "Conduct Score",
@@ -385,14 +383,14 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Check the ID, or play a game in online mode."
+      "description": "Check the ID, or play a game launched from the console."
     },
     "failed": {
       "title": "Could not load",
       "description": "Refresh and try again, or come back in a little while."
     },
     "title": "Attributes",
-    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game. In offline mode the in-game panel cannot change them, so spend your points here.",
+    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent, carry into every game, and are made here on this site.",
     "points": {
       "title": "Attribute points",
       "usable": "Usable / total",
@@ -480,7 +478,7 @@
   },
   "awaken": {
     "title": "Hero Awakening",
-    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points. In offline mode the in-game panel cannot unlock them, so awaken heroes here.",
+    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points, here on this site.",
     "loading": "Loading awakenings",
     "unlock": "Awaken",
     "unlocked": "Awakened",
@@ -531,7 +529,7 @@
     },
     "noRecord": {
       "title": "No record yet",
-      "description": "No record for this Steam ID yet. Play a game in online mode, then come back."
+      "description": "No record for this Steam ID yet. Play a game launched from the console, then come back."
     },
     "failed": {
       "title": "Could not load",

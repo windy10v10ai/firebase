@@ -1,114 +1,168 @@
+import { Check } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
 import Section from '../components/Section';
 
-interface CompareRow {
-  label: string;
-  offline: string;
-  online: string;
+interface Cell {
+  ok: boolean;
+  noteKey?: string;
 }
 
-/** 列头：模式名在上，怎么开局在下，让玩家把名字和操作对上 */
-function ModeHead({ name, hint }: { name: string; hint: string }) {
-  return (
-    <>
-      <span className="block font-medium text-heading">{name}</span>
-      <span className="block text-xs font-normal text-muted">{hint}</span>
-    </>
-  );
-}
+const COMPARE_ROWS: { labelKey: string; offline: Cell; online: Cell }[] = [
+  {
+    labelKey: 'multiplayer',
+    offline: { ok: true },
+    online: { ok: false, noteKey: 'multiplayerOnline' },
+  },
+  {
+    labelKey: 'latestData',
+    offline: { ok: false, noteKey: 'latestDataOffline' },
+    online: { ok: true },
+  },
+  { labelKey: 'points', offline: { ok: false }, online: { ok: true } },
+  { labelKey: 'checkIn', offline: { ok: false }, online: { ok: true } },
+  { labelKey: 'refresh', offline: { ok: false }, online: { ok: true } },
+];
+
+// 三张地图对应三个难度档，直接给出整条命令，玩家不用自己拼地图名
+const LAUNCH_COMMANDS = [
+  { key: 'dota', name: 'Dota', command: 'dota_launch_custom_game 2307479570 dota' },
+  { key: 'hard', name: 'Hard', command: 'dota_launch_custom_game 2307479570 hard' },
+  { key: 'custom', name: 'Custom', command: 'dota_launch_custom_game 2307479570 custom' },
+];
 
 export default function OfflinePage() {
   const t = useTranslations('offline');
-  const rows: CompareRow[] = t.raw('compare.rows');
-  const steps: string[] = t.raw('online.steps');
-  const command = t('online.command');
 
-  const modes = [
-    { key: 'offline', name: t('compare.offline'), hint: t('compare.offlineHint') },
-    { key: 'online', name: t('compare.online'), hint: t('compare.onlineHint') },
-  ] as const;
+  const modeName = (chunks: React.ReactNode) => (
+    <b className="font-medium text-heading">{chunks}</b>
+  );
+
+  // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把模式列挤到折行
+  const renderCell = (cell: Cell) => (
+    <span className="inline-flex items-center gap-2 text-left">
+      {cell.ok ? (
+        <Check
+          className="size-[18px] shrink-0 text-success md:size-5"
+          strokeWidth={2.5}
+          aria-label={t('compare.yes')}
+        />
+      ) : (
+        <span className="shrink-0 text-lg leading-5 text-faint md:text-xl" aria-label={t('compare.no')}>
+          —
+        </span>
+      )}
+      {cell.noteKey ? (
+        <span className="hidden text-sm text-muted md:inline">{t(`compare.${cell.noteKey}`)}</span>
+      ) : null}
+    </span>
+  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <section className="space-y-4">
         <h1 className="title-primary">{t('title')}</h1>
         <p className="text-content">{t('lead')}</p>
+        <div className="space-y-2">
+          <p className="text-content text-pretty">{t.rich('leadOffline', { name: modeName })}</p>
+          <p className="text-content text-pretty">{t.rich('leadOnline', { name: modeName })}</p>
+        </div>
       </section>
 
       <Section title={t('compare.title')}>
         <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
-          <table className="hidden w-full md:table">
+          <table className="w-full table-fixed">
             <thead>
               <tr className="border-b border-line bg-panel-raised">
-                <th scope="col" className="w-1/3 px-4 py-3 text-left font-medium text-muted">
-                  {t('compare.item')}
+                <th className="px-2 py-3 md:p-4" />
+                <th
+                  scope="col"
+                  className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4"
+                >
+                  <span className="block text-sm font-bold text-heading md:text-lg">
+                    {t('compare.offline')}
+                  </span>
+                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
+                    {t('compare.offlineHint')}
+                  </span>
                 </th>
-                {modes.map((mode) => (
-                  <th key={mode.key} scope="col" className="px-4 py-3 text-left">
-                    <ModeHead name={mode.name} hint={mode.hint} />
-                  </th>
-                ))}
+                <th
+                  scope="col"
+                  className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4"
+                >
+                  <span className="block text-sm font-bold text-heading md:text-lg">
+                    {t('compare.online')}
+                  </span>
+                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
+                    {t('compare.onlineHint')}
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
+              {COMPARE_ROWS.map((row, index) => (
                 <tr
-                  key={row.label}
+                  key={row.labelKey}
                   className={`border-b border-line last:border-b-0 ${
                     index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'
                   }`}
                 >
-                  <th scope="row" className="px-4 py-4 text-left align-top font-medium text-heading">
-                    {row.label}
+                  <th
+                    scope="row"
+                    className="px-2 py-3 text-left align-middle text-[13px] leading-[19px] font-medium text-heading md:p-4 md:text-base md:leading-6"
+                  >
+                    {t(`compare.${row.labelKey}`)}
                   </th>
-                  {modes.map((mode) => (
-                    <td key={mode.key} className="px-4 py-4 align-top text-content">
-                      {row[mode.key]}
-                    </td>
-                  ))}
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.offline)}</td>
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.online)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-
-          {/* 窄屏放不下三列，改成每项一块，两种模式各占一行 */}
-          <dl className="divide-y divide-line md:hidden">
-            {rows.map((row, index) => (
-              <div
-                key={row.label}
-                className={`px-4 py-4 ${index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'}`}
-              >
-                <dt className="font-medium text-heading">{row.label}</dt>
-                <dd className="mt-2 space-y-2">
-                  {modes.map((mode) => (
-                    <div key={mode.key}>
-                      <p className="text-xs text-muted">{mode.name}</p>
-                      <p className="text-content">{row[mode.key]}</p>
-                    </div>
-                  ))}
-                </dd>
-              </div>
-            ))}
-          </dl>
+        </div>
+        <div className="mt-3 space-y-1.5 text-[13px] leading-[19px] text-muted md:text-sm md:leading-5">
+          <p>{t('compare.noteModes')}</p>
+          <p>{t('compare.noteTiming')}</p>
         </div>
       </Section>
 
       <Section title={t('online.title')}>
         <ol className="list-decimal space-y-2 pl-5 text-content marker:text-muted">
-          {steps.map((step) => (
-            <li key={step}>{step}</li>
+          {t.raw('online.steps').map((step: string) => (
+            <li key={step} className="pl-1">
+              {step}
+            </li>
           ))}
         </ol>
-        <div className="box-pad mt-4 flex items-center gap-2 rounded-[10px] border border-line bg-panel-soft">
-          <code className="min-w-0 flex-1 break-all font-mono text-sm text-heading">{command}</code>
-          <CopyIdButton value={command} tooltip={t('online.copy')} copiedLabel={t('online.copied')} />
+        <div className="mt-4 space-y-2">
+          {LAUNCH_COMMANDS.map((item) => (
+            <div
+              key={item.key}
+              className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
+            >
+              <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
+                <span className="text-[15px] font-medium text-heading">{item.name}</span>
+                <span className="text-[13px] text-muted">{t(`online.difficulty.${item.key}`)}</span>
+              </span>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <code className="min-w-0 flex-1 break-all font-mono text-sm text-heading">
+                  {item.command}
+                </code>
+                <CopyIdButton
+                  value={item.command}
+                  tooltip={t('online.copy')}
+                  copiedLabel={t('online.copied')}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </Section>
 
       <Section title={t('website.title')}>
-        <p className="text-content">{t('website.body')}</p>
+        <p className="text-content text-pretty">{t('website.body')}</p>
+        <p className="mt-2 text-content text-pretty">{t('website.checkIn')}</p>
       </Section>
     </div>
   );

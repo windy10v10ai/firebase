@@ -158,7 +158,7 @@ export default function PropertyPage() {
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
 
-      <OfflineNotice />
+      <OfflineNotice subject="property" />
 
       <PointsCard
         steamId={steamId}

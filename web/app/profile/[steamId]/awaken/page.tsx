@@ -184,7 +184,7 @@ export default function AwakenPage() {
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
 
-      <OfflineNotice />
+      <OfflineNotice subject="awaken" />
 
       <section className="card-container card-pad">
         <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>
