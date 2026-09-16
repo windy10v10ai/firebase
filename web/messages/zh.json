@@ -279,9 +279,7 @@
       "conductNet": "点赞举报净值",
       "cumulative": "累计 {total}",
       "remainingToLevel": "距 {level} 级还差 {amount}",
-      "usablePoints": "可用积分",
-      "attributePoints": "可用属性点",
-      "attributePointsHint": "加点规则见属性页"
+      "usablePoints": "可用积分"
     },
     "stats": {
       "title": "战绩",
