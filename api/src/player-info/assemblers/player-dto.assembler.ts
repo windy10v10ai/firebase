@@ -62,6 +62,7 @@ export class PlayerDtoAssembler {
     }
     if (include.includes('member') && member) {
       dto.member = new MemberDto(member);
+      dto.checkIn = { memberPoint: this.membersService.getCheckInPoints(member) };
     }
     if (include.includes('statsLifetime')) {
       dto.statsLifetime = statsLifetime ?? undefined;

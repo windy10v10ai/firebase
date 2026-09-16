@@ -282,6 +282,26 @@ export class MembersService {
     return member.expireDate > oneDataAgo;
   }
 
+  // 发放当日签到与补签的会员积分，游戏开局与网站签到共用同一份判定与写入。
+  async checkIn(steamId: number): Promise<CheckInPoints> {
+    const member = await this.findOne(steamId);
+    if (!member) {
+      return { dailyPoint: 0, catchUpDays: 0, catchUpPoint: 0 };
+    }
+    return this.checkInMember(member);
+  }
+
+  // 开局接口已经批量取过会员，单独留一个入口避免每人再读一次
+  async checkInMember(member: Member): Promise<CheckInPoints> {
+    const points = this.getCheckInPoints(member);
+    const total = points.dailyPoint + points.catchUpPoint;
+    if (total > 0) {
+      await this.playerService.upsertAddPoint(member.steamId, { memberPointTotal: total });
+      await this.updateMemberLastDailyDate(member);
+    }
+    return points;
+  }
+
   // 登录后把 lastDailyDate 推进到今天（无论是当日签到还是补签命中）
   async updateMemberLastDailyDate(member: Member) {
     member.lastDailyDate = this.getTodayDate();

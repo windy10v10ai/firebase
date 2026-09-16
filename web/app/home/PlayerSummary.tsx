@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import CheckInRow from '@/app/components/CheckInRow';
 import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
@@ -169,6 +170,8 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           className="text-member"
         />
       </dl>
+
+      <CheckInRow info={info} steamId={uid} onClaimed={setInfo} />
     </section>
   );
 }
