@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
-import CopyIdButton from '@/app/components/CopyIdButton';
+import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
 import { useAuth } from '@/app/lib/auth';
@@ -81,9 +81,16 @@ export default function PlayerSummary({ uid }: { uid: string }) {
 
   return (
     <section className="card-container card-pad space-y-5">
-      {/* 整行都能点：窄屏把链接文字收成箭头，ID 才放得进一行；复制按钮是按钮，不能嵌进这个 <Link>，单独放外面 */}
+      {/* 窄屏把链接文字收成箭头，ID 才放得进一行 */}
       <div className="flex items-center gap-2">
-        <Link href={playerPagePath(uid)} className="group flex min-w-0 flex-1 items-center gap-4">
+        {/* 铺一层透明链接负责整块跳转，复制按钮不能嵌进 <a>，靠 IdWithCopy 的 relative 盖在链接上面接住点击 */}
+        <div className="relative flex min-w-0 flex-1 items-center gap-4">
+          <Link
+            href={playerPagePath(uid)}
+            className="absolute inset-0 rounded-[10px]"
+            aria-hidden="true"
+            tabIndex={-1}
+          />
           <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-panel-soft">
             <PlayerAvatar
               avatarUrl={profile?.avatarUrl}
@@ -93,11 +100,29 @@ export default function PlayerSummary({ uid }: { uid: string }) {
             />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-2xl font-bold text-heading md:text-[26px]">
-              {personaName ?? idText}
+            <p className="flex min-w-0 items-center text-2xl font-bold text-heading md:text-[26px]">
+              {personaName ? (
+                <span className="min-w-0 truncate">{personaName}</span>
+              ) : (
+                <IdWithCopy
+                  id={uid}
+                  idText={idText}
+                  copyTooltip={t('copyId.tooltip')}
+                  copiedLabel={t('copyId.copied')}
+                />
+              )}
             </p>
             {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，写法同 profile 页身份卡 */}
-            <p className="min-h-5 truncate text-sm text-muted">{personaName ? idText : null}</p>
+            <p className="min-h-5 min-w-0 truncate text-sm text-muted">
+              {personaName ? (
+                <IdWithCopy
+                  id={uid}
+                  idText={idText}
+                  copyTooltip={t('copyId.tooltip')}
+                  copiedLabel={t('copyId.copied')}
+                />
+              ) : null}
+            </p>
             {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个；没开通过留空，「未开通会员」既没信息也没去处 */}
             {/* 两行始终占位且不折行，会员信息晚到也不撑高身份行；加载中同样只留白，非会员本来就空着，放骨架会预告不存在的内容 */}
             <p className="flex flex-col md:flex-row md:items-center md:gap-x-2">
@@ -112,8 +137,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
               </span>
             </p>
           </div>
-        </Link>
-        <CopyIdButton value={uid} tooltip={t('copyId.tooltip')} copiedLabel={t('copyId.copied')} />
+        </div>
         <Link
           href={playerPagePath(uid)}
           className="inline-flex shrink-0 items-center gap-1 text-sm whitespace-nowrap text-link transition-colors hover:text-link-hover"
