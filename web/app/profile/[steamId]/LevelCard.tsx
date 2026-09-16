@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import CheckInRow from '@/app/components/CheckInRow';
 import Skeleton from '@/app/components/ui/skeleton';
 import { playerPagePath } from '@/app/lib/player-path';
 
@@ -81,7 +82,14 @@ function CurrencyBlock({ tone, t, levelLabel, values }: CurrencyBlockProps) {
   );
 }
 
-export default function LevelCard({ info, steamId }: { info: PlayerInfo | null; steamId: string }) {
+interface LevelCardProps {
+  info: PlayerInfo | null;
+  steamId: string;
+  /** 只有本人的页面才传，别人的页面上整行不存在 */
+  onCheckInClaimed?: (player: PlayerInfo) => void;
+}
+
+export default function LevelCard({ info, steamId, onCheckInClaimed }: LevelCardProps) {
   const t = useTranslations('profile.identity');
 
   return (
@@ -134,6 +142,9 @@ export default function LevelCard({ info, steamId }: { info: PlayerInfo | null; 
           />
         </span>
       </Link>
+      {onCheckInClaimed ? (
+        <CheckInRow info={info} steamId={steamId} onClaimed={onCheckInClaimed} />
+      ) : null}
     </section>
   );
 }

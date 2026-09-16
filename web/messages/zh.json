@@ -570,5 +570,18 @@
       "scope": "只获取你的 Steam ID，就是你的 Dota2 ID。",
       "safety": "点下面的按钮跳到 steamcommunity.com 登录，密码输在 Steam 官网，本站拿不到。已经登录 Steam 的话点一下就回来了。"
     }
+  },
+  "checkIn": {
+    "title": "今日签到",
+    "available": "可领 {amount} 会员积分",
+    "availableWithCatchUp": "含补签 {days} 天，可领 {amount} 会员积分",
+    "action": "立即签到",
+    "pending": "签到中…",
+    "done": "今天已签到",
+    "nextTime": "北京时间明天 08:00 后可再签",
+    "detailDaily": "今日签到",
+    "detailCatchUp": "补签 {days} 天",
+    "detailNote": "补签最多 7 天，会员过期后作废",
+    "failed": "签到失败，请重试"
   }
 }

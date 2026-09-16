@@ -239,3 +239,96 @@ describe('MembersService.updateMemberExpireDate', () => {
     );
   });
 });
+
+describe('MembersService.checkIn', () => {
+  function createContext(member?: Member) {
+    let store = member;
+    const repository = {
+      findById: jest.fn(async () => store),
+      update: jest.fn(async (next: Member) => {
+        store = next;
+        return next;
+      }),
+    } as unknown as BaseFirestoreRepository<Member>;
+    const playerService = { upsertAddPoint: jest.fn(async () => undefined) };
+    const service = new MembersService(repository, playerService as never);
+    return { service, repository, playerService, read: () => store };
+  }
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('当日首次签到：加当日积分并把签到日推进到今天', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { service, playerService, read } = createContext(
+      buildMember({
+        periodStartDate: new Date('2026-07-01T00:00:00Z'),
+        lastDailyDate: new Date('2026-08-09T00:00:00Z'),
+      }),
+    );
+
+    const result = await service.checkIn(1);
+
+    expect(result).toEqual({ dailyPoint: 100, catchUpDays: 0, catchUpPoint: 0 });
+    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(1, { memberPointTotal: 100 });
+    expect(read().lastDailyDate).toEqual(new Date('2026-08-10T00:00:00Z'));
+  });
+
+  it('漏签 3 天：当日与补签合成一次加分', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { service, playerService } = createContext(
+      buildMember({
+        periodStartDate: new Date('2026-07-01T00:00:00Z'),
+        lastDailyDate: new Date('2026-08-06T00:00:00Z'),
+      }),
+    );
+
+    const result = await service.checkIn(1);
+
+    expect(result).toEqual({ dailyPoint: 100, catchUpDays: 3, catchUpPoint: 300 });
+    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(1, { memberPointTotal: 400 });
+  });
+
+  it('当日重复签到：不加分也不再写签到日', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { service, repository, playerService } = createContext(
+      buildMember({
+        periodStartDate: new Date('2026-07-01T00:00:00Z'),
+        lastDailyDate: new Date('2026-08-10T00:00:00Z'),
+      }),
+    );
+
+    const result = await service.checkIn(1);
+
+    expect(result).toEqual({ dailyPoint: 0, catchUpDays: 0, catchUpPoint: 0 });
+    expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('会员已过期：不加分', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { service, playerService } = createContext(
+      buildMember({
+        expireDate: new Date('2026-08-08T00:00:00Z'),
+        periodStartDate: new Date('2026-07-01T00:00:00Z'),
+        lastDailyDate: new Date('2026-07-20T00:00:00Z'),
+      }),
+    );
+
+    const result = await service.checkIn(1);
+
+    expect(result).toEqual({ dailyPoint: 0, catchUpDays: 0, catchUpPoint: 0 });
+    expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+  });
+
+  it('没有会员记录：返回全 0，不抛异常', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { service, playerService } = createContext(undefined);
+
+    const result = await service.checkIn(1);
+
+    expect(result).toEqual({ dailyPoint: 0, catchUpDays: 0, catchUpPoint: 0 });
+    expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+  });
+});

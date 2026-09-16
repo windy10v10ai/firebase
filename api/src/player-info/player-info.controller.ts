@@ -14,6 +14,7 @@ import {
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { LocalHostService } from '../local-host/local-host.service';
+import { MembersService } from '../members/members.service';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
 import { AwakenHeroDto } from '../player-hero-awakening/dto/awaken-hero.dto';
@@ -28,6 +29,7 @@ import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { PlayerInfoInclude } from './assemblers/player-dto.assembler';
+import { CheckInResultDto } from './dto/check-in-result.dto';
 import { PlayerInfoDto } from './dto/player-info.dto';
 import { PlayerInfoService } from './player-info.service';
 
@@ -40,6 +42,7 @@ export class PlayerInfoController {
     private readonly playerService: PlayerService,
     private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
     private readonly localHostService: LocalHostService,
+    private readonly membersService: MembersService,
   ) {}
 
   @AllowLocal()
@@ -94,6 +97,15 @@ export class PlayerInfoController {
     }
 
     return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
+  }
+
+  @AllowWeb()
+  @Post(':steamId/check-in')
+  @ApiOperation({ summary: "Claim today's check-in points" })
+  async checkIn(@Param('steamId', ParseIntPipe) steamId: number): Promise<CheckInResultDto> {
+    const memberPoint = await this.membersService.checkIn(steamId);
+    const player = await this.playerInfoService.findPlayerInfoBySteamId(steamId, ['member']);
+    return { memberPoint, player };
   }
 
   @AllowWeb()

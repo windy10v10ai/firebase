@@ -29,10 +29,13 @@
 | 10 首屏与加载态 | #1176 | 首屏按 cookie 定登录形态，加载中改为原位骨架块，全站断点统一为手机 / 平板 / 电脑三档，见 [phase-10-first-paint.md](phase-10-first-paint.md) | 已完成 |
 | 11 可点击元素与玩家页细节 | 无 | 按钮手型光标、属性页等级入口加箭头、个人主页会员状态并入身份卡，见 [phase-11-clickable-polish.md](phase-11-clickable-polish.md) | 已完成 |
 | 12 配色与控件 | 无 | 网站主色、功能色、品牌色与按钮体系，最终规范见 [docs/web/design-system.md](../../web/design-system.md)；取舍过程见 [phase-12-color-system.md](phase-12-color-system.md)、[phase-12-controls.md](phase-12-controls.md)（含登录等待、头部退出） | 已完成 |
+| 13 网站签到 | #1214 | 游戏内发不出请求，会员每日积分停发；新增签到接口把发放接过来，首页与个人主页各加一个入口，接口形状为勇士积分预留，见 [phase-13-check-in.md](phase-13-check-in.md) | 进行中 |
 | 5 GA4 | #1122 | 网站接入 GA4 | 未开始 |
 | 6 会员剩余 | #1123 | 积分、支付宝二维码购买；连带把支付宝、爱发电、Ko-fi 的回调地址改到 `api.windy10v10ai.com`，见 [api-entry](../api-entry/README.md) | 未开始 |
 
 ### 后续依赖
+
+**勇士积分签到**另开批次，依赖本批的接口先落地。
 
 剩下的 **5 GA4** 与 **6 会员剩余**互不阻塞，也不依赖别的批次，随时可以插队。
 

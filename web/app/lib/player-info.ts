@@ -25,6 +25,20 @@ export interface AwakenedHero {
   heroName: string;
 }
 
+export interface CheckInPoints {
+  dailyPoint: number;
+  catchUpDays: number;
+  catchUpPoint: number;
+}
+
+export interface CheckInStatus {
+  memberPoint: CheckInPoints;
+}
+
+export interface CheckInResult extends CheckInStatus {
+  player: PlayerInfo;
+}
+
 export interface PropertyItem {
   name: string;
   level: number;
@@ -53,6 +67,7 @@ export interface PlayerInfo {
   statsLifetime?: StatsLifetime;
   properties?: PropertyItem[];
   awakenedHeroes?: AwakenedHero[];
+  checkIn?: CheckInStatus;
 }
 
 /** 重置属性的价码，与 api 的 player-property.service.ts 保持一致 */
@@ -78,6 +93,11 @@ export function fetchPlayerInfo(steamId: string) {
 /** 属性页要的数据，等级与可用积分本来就在响应里，一次请求够了 */
 export function fetchPlayerProperties(steamId: string) {
   return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=property`);
+}
+
+/** 领取今日签到与补签的积分，响应里带回刷新后的玩家信息 */
+export function claimCheckIn(steamId: string) {
+  return apiFetch<CheckInResult>(`/api/player/${steamId}/check-in`, { method: 'POST' });
 }
 
 /** level 是升到的目标等级，不是增量 */
