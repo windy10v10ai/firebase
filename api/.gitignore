@@ -33,3 +33,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# 离线快照导出产物：含明文 steamId，不进版本控制
+/scripts/offline-snapshot/output
