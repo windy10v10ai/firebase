@@ -24,6 +24,9 @@ export default async function Footer() {
                 {t(link.labelKey)}
               </a>
             ))}
+            <Link href="/offline" className="text-content link-hover">
+              {t('offline')}
+            </Link>
             <Link href="/legal/disclosure" className="text-content link-hover">
               {t('disclosure')}
             </Link>

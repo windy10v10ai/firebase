@@ -14,6 +14,7 @@
     "github": "GitHub",
     "membershipShort": "Member",
     "membership": "Membership",
+    "offline": "Offline mode",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -31,12 +32,11 @@
     },
     "intro": {
       "title": "Sign in to check your own data anytime",
-      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and spend attribute points on your heroes — without launching the game.",
+      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
       "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
       "upcoming": [
         "More statistics",
         "Daily tasks",
-        "Daily check-in",
         "Ability and item draft list"
       ]
     },
@@ -98,11 +98,68 @@
       }
     }
   },
+  "offline": {
+    "title": "Offline mode and online mode",
+    "lead": "Since Dota 2 7.41f, the game cannot make any network request in offline mode. Offline mode is what you get launching from the Arcade: membership, attributes and awakenings come from the data exported when the map was last updated, which makes this site the only place your data can be changed. Online mode is started with a console command, and the game reads and writes the server as usual.",
+    "short": "In offline mode, changes you make here reach the game after the next map update.",
+    "link": "About offline mode",
+    "homeCard": "Offline mode is launched from the Arcade and is multiplayer; changes you make here reach the game after the next map update. Online mode is solo only, and changes you make here apply in your next game. Open this to see how the two differ.",
+    "compare": {
+      "title": "The two modes",
+      "item": "What",
+      "offline": "Offline mode",
+      "offlineHint": "Launched from the Arcade",
+      "online": "Online mode",
+      "onlineHint": "Launched from the console",
+      "rows": [
+        {
+          "label": "Players",
+          "offline": "Multiplayer",
+          "online": "Solo only"
+        },
+        {
+          "label": "Membership, attributes, hero awakenings, hotkeys, game presets",
+          "offline": "Active, from the data exported when the map was last updated",
+          "online": "Active, as this site shows them now"
+        },
+        {
+          "label": "End-of-game points and daily tasks",
+          "offline": "Points are not recorded and daily tasks are hidden",
+          "online": "Recorded as usual"
+        },
+        {
+          "label": "Spending points, awakening heroes and refreshing player info in-game",
+          "offline": "Unavailable",
+          "online": "Available"
+        },
+        {
+          "label": "When changes made here reach the game",
+          "offline": "After the next map update; the map updates two to three times a week",
+          "online": "In your next game"
+        }
+      ]
+    },
+    "online": {
+      "title": "How to get into online mode",
+      "steps": [
+        "Enable the developer console in Dota 2’s settings",
+        "Back at the Dota 2 main menu, press your console hotkey to open it",
+        "Enter the command below, replacing [map name] with the map you want"
+      ],
+      "command": "dota_launch_custom_game 2307479570 [map name]",
+      "copy": "Copy",
+      "copied": "Copied"
+    },
+    "website": {
+      "title": "This site is the only way in",
+      "body": "Spending attribute points, resetting them, awakening heroes and the daily check-in all happen here. Both modes pick up what you change here, the only difference being how soon."
+    }
+  },
   "membership": {
     "title": "10v10AI Premium Membership",
     "description": "⭐Subscribe to get the following benefits (please leave your Dota2 friend ID in the message to auto-activate)",
     "benefits": [
-      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for your first login each day",
+      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for each daily check-in on this site, with up to 7 makeup days",
       "🎯 Skill draft upgraded to a pick-1-of-8, with the 2 extra skills more likely to be advanced abilities",
       "🪙 Unlocks the in-game 99999 gold cap",
       "🎁 One free reroll for treasure chest item drops",
@@ -110,7 +167,7 @@
       "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
       "🎮 One free reroll each for the starting active and passive skill draft"
     ],
-    "note": "😊Membership takes effect automatically starting from your next game",
+    "note": "😊In offline mode, your membership applies in-game after the next map update.",
     "afdian": {
       "title": "Afdian",
       "price": "CN¥29.8/month",
@@ -185,7 +242,7 @@
       "serviceTime": {
         "title": "Delivery times",
         "content": [
-          "Membership service is available immediately after successful subscription payment"
+          "Membership service is available immediately after successful subscription payment. When it takes effect inside the game depends on the launch mode; see the offline mode page on this site"
         ]
       },
       "paymentMethods": {
@@ -244,12 +301,12 @@
     },
     "avticeResult": {
       "success": {
-        "message": "Your membership has been successfully activated. Thank you for your support!\n\nIf it is not yet active in-game, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.",
+        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nIn offline mode, your membership applies in-game after the next map update.",
         "btnText": "Return to Home"
       },
       "error": {
         "afdianMessage": "Please check if your Dota2 friend ID and Afdian Order No are correct.\nIf the problem persists, please contact us for manual processing.",
-        "kofiMessage": "No unactivated orders found.\nIf you have successfully subscribed, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.\nIf it still does not take effect, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
+        "kofiMessage": "No unactivated orders found.\nIf you have already subscribed, it may have been activated automatically. Sign in with Steam here and your profile will show your membership status and expiry date.\nIf no membership shows up there either, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
         "btnText": "Try Again"
       }
     }
@@ -262,7 +319,7 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Data shows up after your first finished game."
+      "description": "Data shows up after you finish a game in online mode. Games played in offline mode do not report back."
     },
     "failed": {
       "title": "Failed to load",
@@ -283,6 +340,7 @@
     },
     "stats": {
       "title": "Stats",
+      "offlineNote": "Only games played in online mode record stats and conduct score; games played in offline mode are not counted.",
       "games": "Games",
       "winRate": "Win Rate",
       "conduct": "Conduct Score",
@@ -327,14 +385,14 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Check the ID, or play a game first."
+      "description": "Check the ID, or play a game in online mode."
     },
     "failed": {
       "title": "Could not load",
       "description": "Refresh and try again, or come back in a little while."
     },
     "title": "Attributes",
-    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game.",
+    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game. In offline mode the in-game panel cannot change them, so spend your points here.",
     "points": {
       "title": "Attribute points",
       "usable": "Usable / total",
@@ -422,7 +480,7 @@
   },
   "awaken": {
     "title": "Hero Awakening",
-    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points.",
+    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points. In offline mode the in-game panel cannot unlock them, so awaken heroes here.",
     "loading": "Loading awakenings",
     "unlock": "Awaken",
     "unlocked": "Awakened",
@@ -473,7 +531,7 @@
     },
     "noRecord": {
       "title": "No record yet",
-      "description": "This Steam ID has not played a match yet."
+      "description": "No record for this Steam ID yet. Play a game in online mode, then come back."
     },
     "failed": {
       "title": "Could not load",

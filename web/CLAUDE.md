@@ -29,6 +29,14 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
 
+## 文案里的两种开局模式
+
+理由见 [docs/web/README.md](../docs/web/README.md) 的「两种开局模式」，取值见[根目录 CLAUDE.md](../CLAUDE.md) 的「用语」。
+
+- **只用「离线模式」「在线模式」两个名字**，「控制台启动」只用来说明怎么进在线模式
+- **不写「立即生效」「回游戏点刷新」**，也不写「打一局就有数据」
+- **完整规则只写在 `/offline`**，别的页面挂 `OfflineNotice` 或一条指向它的链接，不重写一遍
+
 ## 加载态
 
 页面一出现就是最终结构，之后只有数值在变；首屏打开与站内跳转都适用。为什么这样定见 [docs/web/README.md](../docs/web/README.md) 第 4 节「加载态」与 [phase-10-first-paint.md](../docs/design/web/phase-10-first-paint.md)。
