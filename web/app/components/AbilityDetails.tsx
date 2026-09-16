@@ -159,7 +159,6 @@ function ValueRow({
         <Levels levels={row.levels} percent={row.percent} className={color} />
       </span>
       {row.aoe ? <AoeIcon label={t('aoe')} /> : null}
-      {row.spellAmp ? <SpellAmpIcon label={t('spellAmp')} /> : null}
     </div>
   );
 }
@@ -210,20 +209,6 @@ function AoeIcon({ label }: { label: string }) {
       <title>{label}</title>
       <circle cx="6" cy="6" r="4.75" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="6" cy="6" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-function SpellAmpIcon({ label }: { label: string }) {
-  return (
-    <svg viewBox="0 0 12 12" fill="none" className="ms-1 size-3 shrink-0 text-muted" role="img">
-      <title>{label}</title>
-      <path
-        d="M6 1V11M1 6H11M2.5 2.5L9.5 9.5M9.5 2.5L2.5 9.5"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }

@@ -9,6 +9,7 @@ import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
+import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
@@ -32,9 +33,13 @@ const FAILURE_KEY: Record<number, string> = {
 export default function ProfilePage() {
   const t = useTranslations('profile');
   const { steamId } = useParams<{ steamId: string }>();
+  const auth = useAuth();
+  const { initialProfile } = auth;
   const [result, setResult] = useState<LoadResult | null>(null);
-  const [steamProfile, setSteamProfile] = useState<SteamProfile | null>(null);
+  const [steamProfile, setSteamProfile] = useState<SteamProfile | null>(() => initialProfile);
 
+  // 个人主页能看别人的，签到入口只给本人
+  const isSelf = auth.status === 'authenticated' && auth.uid === steamId;
   const loaded = result?.steamId === steamId ? result : null;
   const profile = steamProfile?.steamId === steamId ? steamProfile : null;
 
@@ -102,7 +107,13 @@ export default function ProfilePage() {
       )}
       <PlayerCard steamId={steamId} info={info} profile={profile} />
       <div className="lg:col-span-2">
-        <LevelCard info={info} steamId={steamId} />
+        <LevelCard
+          info={info}
+          steamId={steamId}
+          onCheckInClaimed={
+            isSelf ? (player) => setResult({ steamId, status: 'ready', info: player }) : undefined
+          }
+        />
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:col-span-3">
         <FeatureEntryCard

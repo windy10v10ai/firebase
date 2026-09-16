@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { auth } from '@/config/firebase';
 
-import { PLAYER_UID_COOKIE, PLAYER_UID_COOKIE_MAX_AGE_SECONDS } from './auth-hint';
+import { PLAYER_UID_COOKIE, PLAYER_UID_COOKIE_MAX_AGE_SECONDS, type PlayerProfileHint } from './auth-hint';
 import { buildSteamLoginUrl } from './steam-login';
 
 type AuthState = { status: 'unauthenticated' } | { status: 'authenticated'; uid: string };
@@ -14,6 +14,8 @@ type AuthContextValue = AuthState & {
   signOut: () => Promise<void>;
   /** Steam 登录链接，登录完跳回 currentPath */
   loginUrl: (currentPath: string) => string;
+  /** 服务端从 cookie 解出的昵称头像，只做首屏的初始值；steamId 对不上当前登录玩家时为 null */
+  initialProfile: PlayerProfileHint | null;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -29,12 +31,13 @@ function writeUidHint(uid: string | null) {
 
 interface AuthProviderProps {
   initialUid: string | null;
+  initialProfile: PlayerProfileHint | null;
   siteOrigin: string;
   children: ReactNode;
 }
 
 /** 首屏按服务端读到的提示 cookie 渲染，Firebase 恢复出结论后以它为准 */
-export function AuthProvider({ initialUid, siteOrigin, children }: AuthProviderProps) {
+export function AuthProvider({ initialUid, initialProfile, siteOrigin, children }: AuthProviderProps) {
   const [state, setState] = useState(() => toState(initialUid));
 
   useEffect(
@@ -54,6 +57,7 @@ export function AuthProvider({ initialUid, siteOrigin, children }: AuthProviderP
         ...state,
         signOut: () => firebaseSignOut(auth),
         loginUrl: (currentPath) => buildSteamLoginUrl(siteOrigin, currentPath),
+        initialProfile,
       }}
     >
       {children}

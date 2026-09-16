@@ -58,11 +58,16 @@ function blockBodies(text) {
   return out;
 }
 
+/** KeyValues 转义：\n \t 还原成对应字符，\\ 还原成单个反斜杠，其余 \x 按引擎行为丢弃反斜杠 */
+function unescapeKv(raw) {
+  return raw.replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c === 't' ? '\t' : c));
+}
+
 /** `"key" "value"` 扁平表，本地化文件用 */
 function parseFlatKv(file) {
   const map = new Map();
   for (const m of readText(file).matchAll(/"([^"\r\n]+)"\s*"((?:[^"\\]|\\.)*)"/g)) {
-    map.set(m[1], m[2]);
+    map.set(m[1], unescapeKv(m[2]));
   }
   return map;
 }
@@ -353,10 +358,11 @@ export function loadAwakenSource(repoRoot) {
         }
         return value;
       });
+      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换
       text[lang] = {
         heroName: src.addon.get(entry.heroName) ?? src.reference.get(`${entry.heroName}:n`) ?? '',
-        title,
-        desc,
+        title: title.replace(/\n/g, '<br>'),
+        desc: desc.replace(/\n/g, '<br>'),
       };
     }
 

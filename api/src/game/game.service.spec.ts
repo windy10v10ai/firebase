@@ -1,8 +1,10 @@
 import { Test } from '@nestjs/testing';
+import { BaseFirestoreRepository } from 'fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
+import { Member, MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
@@ -250,5 +252,70 @@ describe('GameService', () => {
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
       expect(result).toEqual([]);
     });
+  });
+});
+
+describe('GameService.addDailyMemberPoints', () => {
+  function createContext(member: Member) {
+    let store = member;
+    const repository = {
+      findById: jest.fn(async () => store),
+      update: jest.fn(async (next: Member) => {
+        store = next;
+        return next;
+      }),
+    } as unknown as BaseFirestoreRepository<Member>;
+    const playerService = { upsertAddPoint: jest.fn(async () => undefined) };
+    const membersService = new MembersService(repository, playerService as never);
+    const gameService = new GameService(
+      playerService as never,
+      null,
+      null,
+      null,
+      membersService,
+      null,
+      null,
+    );
+    return { gameService, playerService, read: () => store };
+  }
+
+  const member: Member = {
+    id: '1',
+    steamId: 1,
+    expireDate: new Date('2099-01-01T00:00:00Z'),
+    level: MemberLevel.NORMAL,
+    periodStartDate: new Date('2026-07-01T00:00:00Z'),
+    lastDailyDate: new Date('2026-08-06T00:00:00Z'),
+  };
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('漏签 3 天：一次加满 400，当日与补签各回一条游戏内提示', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { gameService, playerService, read } = createContext({ ...member });
+
+    const pointInfo = await gameService.addDailyMemberPoints([read()]);
+
+    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(1, { memberPointTotal: 400 });
+    expect(read().lastDailyDate).toEqual(new Date('2026-08-10T00:00:00Z'));
+    expect(pointInfo).toEqual([
+      expect.objectContaining({ steamId: 1, memberPoint: 100 }),
+      expect.objectContaining({ steamId: 1, memberPoint: 300 }),
+    ]);
+  });
+
+  it('当日已签到：不加分，也不回提示', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-10T00:00:00Z'));
+    const { gameService, playerService, read } = createContext({
+      ...member,
+      lastDailyDate: new Date('2026-08-10T00:00:00Z'),
+    });
+
+    const pointInfo = await gameService.addDailyMemberPoints([read()]);
+
+    expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
+    expect(pointInfo).toEqual([]);
   });
 });
