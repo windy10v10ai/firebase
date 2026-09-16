@@ -14,6 +14,7 @@
     "github": "GitHub",
     "membershipShort": "Member",
     "membership": "Membership",
+    "offline": "When data takes effect",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -31,12 +32,11 @@
     },
     "intro": {
       "title": "Sign in to check your own data anytime",
-      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and spend attribute points on your heroes — without launching the game.",
+      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
       "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
       "upcoming": [
         "More statistics",
         "Daily tasks",
-        "Daily check-in",
         "Ability and item draft list"
       ]
     },
@@ -98,11 +98,66 @@
       }
     }
   },
+  "offline": {
+    "title": "Game launch mode and when data takes effect",
+    "link": "When data takes effect",
+    "lead": "Whether the game can read your latest data depends on how it is launched.",
+    "leadOffline": "<name>Offline mode</name>: launched from the Arcade. Since Dota 2 7.41f this cannot reach the server, so the game reads the data as of the last map update.",
+    "leadOnline": "<name>Online mode</name>: launched with a console command. It reaches the server and reads the latest data, but you can only play solo.",
+    "homeCard": {
+      "offline": "Launched from the Arcade, the attribute points, awakenings and other changes you make take effect in-game at the next map update.",
+      "online": "Launched from the console, they take effect in the next game. Open this to see how."
+    },
+    "notice": {
+      "property": "Launched from the Arcade, attribute points take effect in-game at the next map update. Launched from the console, they take effect right away.",
+      "awaken": "Launched from the Arcade, awakenings take effect in-game at the next map update. Launched from the console, they take effect right away.",
+      "link": "Learn how"
+    },
+    "compare": {
+      "title": "The two modes",
+      "offline": "Offline mode",
+      "offlineHint": "From the Arcade",
+      "online": "Online mode",
+      "onlineHint": "From the console",
+      "yes": "Yes",
+      "no": "No",
+      "multiplayer": "Multiplayer",
+      "multiplayerOnline": "Solo only",
+      "latestData": "Reads your latest data",
+      "latestDataOffline": "Last map update",
+      "points": "End-of-game points and daily tasks",
+      "checkIn": "Daily check-in and event points",
+      "refresh": "Refreshing player info in-game",
+      "noteModes": "Membership, attribute points and hero awakenings apply in both modes; offline mode uses the data as of the last map update.",
+      "noteTiming": "The map updates two to three times a week. Attribute points, awakenings and other changes you make are picked up at the next map update in offline mode, and in the next game in online mode."
+    },
+    "online": {
+      "title": "How to get into online mode",
+      "steps": [
+        "In Dota 2 settings, search for \"console\" and tick Enable Console",
+        "In the hotkey settings, bind a key to Console",
+        "Back at the Dota 2 main menu, press that key to open the console",
+        "Pick the difficulty you want and enter one of the commands below in the console"
+      ],
+      "difficulty": {
+        "dota": "Difficulty N1–N5",
+        "hard": "Difficulty N6–N8",
+        "custom": "Custom difficulty"
+      },
+      "copy": "Copy",
+      "copied": "Copied"
+    },
+    "website": {
+      "title": "Attributes and awakenings happen on this site only",
+      "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. Both modes pick up the changes, and only differ in how soon.",
+      "checkIn": "The daily check-in can be claimed here, and launching in online mode claims it automatically."
+    }
+  },
   "membership": {
     "title": "10v10AI Premium Membership",
     "description": "⭐Subscribe to get the following benefits (please leave your Dota2 friend ID in the message to auto-activate)",
     "benefits": [
-      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for your first login each day",
+      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for each daily check-in, with up to 7 makeup days",
       "🎯 Skill draft upgraded to a pick-1-of-8, with the 2 extra skills more likely to be advanced abilities",
       "🪙 Unlocks the in-game 99999 gold cap",
       "🎁 One free reroll for treasure chest item drops",
@@ -110,7 +165,7 @@
       "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
       "🎮 One free reroll each for the starting active and passive skill draft"
     ],
-    "note": "😊Membership takes effect automatically starting from your next game",
+    "note": "😊When membership takes effect: launched from the console, refresh in-game and it applies right away; launched from the Arcade, it applies at the next map update.",
     "afdian": {
       "title": "Afdian",
       "price": "CN¥29.8/month",
@@ -185,7 +240,7 @@
       "serviceTime": {
         "title": "Delivery times",
         "content": [
-          "Membership service is available immediately after successful subscription payment"
+          "Membership service is available immediately after successful subscription payment. When it takes effect inside the game depends on how the game is launched; see \"When data takes effect\" on this site"
         ]
       },
       "paymentMethods": {
@@ -244,12 +299,12 @@
     },
     "avticeResult": {
       "success": {
-        "message": "Your membership has been successfully activated. Thank you for your support!\n\nIf it is not yet active in-game, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.",
+        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nWhen it takes effect: launched from the Arcade, at the next map update; launched from the console, refresh in-game and it applies right away.",
         "btnText": "Return to Home"
       },
       "error": {
         "afdianMessage": "Please check if your Dota2 friend ID and Afdian Order No are correct.\nIf the problem persists, please contact us for manual processing.",
-        "kofiMessage": "No unactivated orders found.\nIf you have successfully subscribed, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.\nIf it still does not take effect, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
+        "kofiMessage": "No unactivated orders found.\nIf you have already subscribed, it may have been activated automatically. Sign in with Steam here and your profile will show your membership status and expiry date.\nIf no membership shows up there either, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
         "btnText": "Try Again"
       }
     }
@@ -262,7 +317,7 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Data shows up after your first finished game."
+      "description": "Data shows up after you finish a game launched from the console. Games launched from the Arcade do not report back."
     },
     "failed": {
       "title": "Failed to load",
@@ -283,6 +338,7 @@
     },
     "stats": {
       "title": "Stats",
+      "offlineNote": "Only games launched from the console record match stats and conduct score.",
       "games": "Games",
       "winRate": "Win Rate",
       "conduct": "Conduct Score",
@@ -327,7 +383,7 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Check the ID, or play a game first."
+      "description": "Check the ID, or play a game launched from the console."
     },
     "failed": {
       "title": "Could not load",
@@ -473,7 +529,7 @@
     },
     "noRecord": {
       "title": "No record yet",
-      "description": "This Steam ID has not played a match yet."
+      "description": "No record for this Steam ID yet. Play a game launched from the console, then come back."
     },
     "failed": {
       "title": "Could not load",
