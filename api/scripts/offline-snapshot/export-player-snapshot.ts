@@ -303,6 +303,10 @@ async function main(): Promise<void> {
     'player_snapshot_setting',
     buildSettingSnapshot(settingDocs),
   );
+  // 游戏内离线提示要告诉玩家数据截至哪天，否则看不出是否已同步网站上的改动
+  writeKvFile(outputDir, 'player_snapshot_meta.kv', 'player_snapshot_meta', {
+    exportedAt: Math.floor(Date.now() / 1000),
+  });
 }
 
 main().catch((err) => {
