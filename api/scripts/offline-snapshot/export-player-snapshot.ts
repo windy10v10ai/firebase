@@ -47,6 +47,53 @@ interface AwakeningDoc {
   awakenings: { heroName: string }[];
 }
 
+interface SettingDoc {
+  isRememberAbilityKey?: boolean;
+  activeAbilityKey?: string;
+  passiveAbilityKey?: string;
+  passiveAbilityKey2?: string;
+  activeAbilityQuickCast?: boolean;
+  passiveAbilityQuickCast?: boolean;
+  passiveAbilityQuickCast2?: boolean;
+  inventorySlot7Key?: string;
+  inventorySlot7QuickCast?: boolean;
+  inventorySlot8Key?: string;
+  inventorySlot8QuickCast?: boolean;
+  inventorySlot9Key?: string;
+  inventorySlot9QuickCast?: boolean;
+  wardObserverKey?: string;
+  wardObserverQuickCast?: boolean;
+  wardSentryKey?: string;
+  wardSentryQuickCast?: boolean;
+  gamePresetDota?: { difficulty: number };
+  gamePresetHard?: { difficulty: number };
+  gamePresetCustom?: { gameOptions: Record<string, string | number> };
+}
+
+// 非默认值才写进 KV：大部分玩家从没改过键位，省略即代表默认（未改键/未开快速施法）
+const SETTING_STRING_FIELDS = [
+  'activeAbilityKey',
+  'passiveAbilityKey',
+  'passiveAbilityKey2',
+  'inventorySlot7Key',
+  'inventorySlot8Key',
+  'inventorySlot9Key',
+  'wardObserverKey',
+  'wardSentryKey',
+] as const;
+
+const SETTING_BOOLEAN_FIELDS = [
+  'isRememberAbilityKey',
+  'activeAbilityQuickCast',
+  'passiveAbilityQuickCast',
+  'passiveAbilityQuickCast2',
+  'inventorySlot7QuickCast',
+  'inventorySlot8QuickCast',
+  'inventorySlot9QuickCast',
+  'wardObserverQuickCast',
+  'wardSentryQuickCast',
+] as const;
+
 function daysAgo(days: number): Date {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - days);
@@ -57,21 +104,32 @@ function toUnixSeconds(timestamp: Timestamp): number {
   return Math.floor(timestamp.toMillis() / 1000);
 }
 
+async function fetchByIds<T extends FirebaseFirestore.DocumentData>(
+  db: Firestore,
+  collectionName: string,
+  ids: string[],
+): Promise<FirebaseFirestore.DocumentSnapshot<T>[]> {
+  const collection = db.collection(collectionName) as CollectionReference<T>;
+  const results: FirebaseFirestore.DocumentSnapshot<T>[] = [];
+
+  for (let i = 0; i < ids.length; i += BATCH_GET_SIZE) {
+    const chunk = ids.slice(i, i + BATCH_GET_SIZE);
+    const refs = chunk.map((id) => collection.doc(id) as DocumentReference<T>);
+    const docs = (await db.getAll(...refs)) as FirebaseFirestore.DocumentSnapshot<T>[];
+    results.push(...docs);
+  }
+  return results;
+}
+
 async function fetchExtraPlayers(
   db: Firestore,
   steamIds: string[],
 ): Promise<Map<string, PlayerDoc>> {
+  const docs = await fetchByIds<PlayerDoc>(db, 'Players', steamIds);
   const result = new Map<string, PlayerDoc>();
-  const playersCollection = db.collection('Players') as CollectionReference<PlayerDoc>;
-
-  for (let i = 0; i < steamIds.length; i += BATCH_GET_SIZE) {
-    const chunk = steamIds.slice(i, i + BATCH_GET_SIZE);
-    const refs = chunk.map((id) => playersCollection.doc(id) as DocumentReference<PlayerDoc>);
-    const docs = await db.getAll(...refs);
-    for (const doc of docs) {
-      if (doc.exists) {
-        result.set(doc.id, doc.data() as PlayerDoc);
-      }
+  for (const doc of docs) {
+    if (doc.exists) {
+      result.set(doc.id, doc.data() as PlayerDoc);
     }
   }
   return result;
@@ -138,6 +196,39 @@ function buildAwakenSnapshot(awakeningDocs: FirebaseFirestore.QueryDocumentSnaps
   return out;
 }
 
+function buildSettingSnapshot(
+  settingDocs: FirebaseFirestore.DocumentSnapshot<SettingDoc>[],
+): KvObject {
+  const out: KvObject = {};
+  for (const doc of settingDocs) {
+    if (!doc.exists) continue;
+    const data = doc.data() as SettingDoc;
+    const record: KvObject = {};
+
+    for (const field of SETTING_STRING_FIELDS) {
+      const value = data[field];
+      if (value) record[field] = value;
+    }
+    for (const field of SETTING_BOOLEAN_FIELDS) {
+      if (data[field]) record[field] = 1;
+    }
+    if (data.gamePresetDota) record.gamePresetDota = data.gamePresetDota.difficulty;
+    if (data.gamePresetHard) record.gamePresetHard = data.gamePresetHard.difficulty;
+    if (data.gamePresetCustom) {
+      const optionsOut: KvObject = {};
+      for (const [key, value] of Object.entries(data.gamePresetCustom.gameOptions)) {
+        optionsOut[key] = value;
+      }
+      record.gamePresetCustom = optionsOut;
+    }
+
+    if (Object.keys(record).length > 0) {
+      out[doc.id] = record;
+    }
+  }
+  return out;
+}
+
 function writeKvFile(outputDir: string, fileName: string, rootKey: string, data: KvObject): void {
   const content = serializeKvFile(rootKey, data);
   const filePath = path.join(outputDir, fileName);
@@ -185,6 +276,9 @@ async function main(): Promise<void> {
     playersById.set(steamId, player);
   }
 
+  // 快捷键设置跟 Players 活跃窗口取交集：按已知 steamId 精确取，不用全量扫描省 Firestore 读取
+  const settingDocs = await fetchByIds<SettingDoc>(db, 'PlayerSettings', [...playersById.keys()]);
+
   writeKvFile(
     outputDir,
     'player_snapshot_member.kv',
@@ -202,6 +296,12 @@ async function main(): Promise<void> {
     'player_snapshot_awaken.kv',
     'player_snapshot_awaken',
     buildAwakenSnapshot(awakeningSnapshot.docs),
+  );
+  writeKvFile(
+    outputDir,
+    'player_snapshot_setting.kv',
+    'player_snapshot_setting',
+    buildSettingSnapshot(settingDocs),
   );
 }
 
