@@ -138,9 +138,9 @@ Start ngrok: `ngrok http 5000`
 
 Replace ALIPAY_XXX in [.env.local](api/.env.local).
 
-## API Guide
+## API Architecture
 
-More usage details, including configuration, authentication, and example code, please refer to [API Guide](docs/api/README.md).
+Entry domains, outbound dependencies, routing and auth: see [API Architecture](docs/api/README.md).
 
 # Maintenance
 

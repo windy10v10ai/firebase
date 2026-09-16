@@ -14,6 +14,7 @@ import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
+import { ProbeResponse } from './dto/probe.response';
 import { GameService } from './game.service';
 
 @ApiTags('Game')
@@ -27,6 +28,14 @@ export class GameController {
     private readonly dailyTaskService: DailyTaskService,
     private readonly localHostService: LocalHostService,
   ) {}
+
+  // 国家码只在玩家直连 API 域名时代表玩家本人；经中转入口回源进来的请求，
+  // 边缘看到的是中转服务器，返回的是它所在地
+  @AllowLocal()
+  @Get('probe')
+  probe(@CurrentClientOrigin() origin: ClientOrigin): ProbeResponse {
+    return { country: origin.country };
+  }
 
   @AllowLocal()
   @Get('start')
