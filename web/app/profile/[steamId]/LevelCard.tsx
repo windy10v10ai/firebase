@@ -1,12 +1,8 @@
 'use client';
 
-import { ChevronRight } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import CheckInRow from '@/app/components/CheckInRow';
 import Skeleton from '@/app/components/ui/skeleton';
-import { playerPagePath } from '@/app/lib/player-path';
 
 import type { PlayerInfo } from '@/app/lib/player-info';
 
@@ -82,18 +78,11 @@ function CurrencyBlock({ tone, t, levelLabel, values }: CurrencyBlockProps) {
   );
 }
 
-interface LevelCardProps {
-  info: PlayerInfo | null;
-  steamId: string;
-  /** 只有本人的页面才传，别人的页面上整行不存在 */
-  onCheckInClaimed?: (player: PlayerInfo) => void;
-}
-
-export default function LevelCard({ info, steamId, onCheckInClaimed }: LevelCardProps) {
+export default function LevelCard({ info }: { info: PlayerInfo | null }) {
   const t = useTranslations('profile.identity');
 
   return (
-    <section className="card-container card-pad h-full space-y-6">
+    <section className="card-container card-pad h-full">
       <div className="grid gap-6 @container md:grid-cols-2">
         <CurrencyBlock
           tone="season"
@@ -124,27 +113,6 @@ export default function LevelCard({ info, steamId, onCheckInClaimed }: LevelCard
           }
         />
       </div>
-      <Link
-        href={playerPagePath(steamId, 'property')}
-        className="group flex items-center justify-between gap-4 border-t border-line pt-4"
-      >
-        <div>
-          <div className="text-content transition-colors group-hover:text-heading">{t('attributePoints')}</div>
-          <div className="text-sm text-muted">{t('attributePointsHint')}</div>
-        </div>
-        <span className="flex items-center gap-2">
-          <span className="text-2xl font-bold tabular-nums text-heading">
-            {info ? info.useableLevel : <Skeleton>000</Skeleton>}
-          </span>
-          <ChevronRight
-            className="size-4 shrink-0 text-muted transition group-hover:translate-x-0.5 group-hover:text-heading"
-            aria-hidden="true"
-          />
-        </span>
-      </Link>
-      {onCheckInClaimed ? (
-        <CheckInRow info={info} steamId={steamId} onClaimed={onCheckInClaimed} />
-      ) : null}
     </section>
   );
 }

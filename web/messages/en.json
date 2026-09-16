@@ -279,9 +279,7 @@
       "conductNet": "Commends minus Reports",
       "cumulative": "Total {total}",
       "remainingToLevel": "{amount} to level {level}",
-      "usablePoints": "Usable Points",
-      "attributePoints": "Usable Attribute Points",
-      "attributePointsHint": "See the attributes page for rules"
+      "usablePoints": "Usable Points"
     },
     "stats": {
       "title": "Stats",

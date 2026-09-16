@@ -98,24 +98,23 @@ export default function ProfilePage() {
   const info = loaded?.info ?? null;
 
   return (
-    // 电脑宽度身份卡与等级卡同一行，入口卡与战绩卡通栏；更窄时按 DOM 顺序单列
+    // 电脑宽度左栏放身份卡、右栏放等级卡与两张入口卡，战绩卡通栏；更窄时按 DOM 顺序单列
     <div className="grid gap-6 lg:grid-cols-3" aria-busy={!info}>
       {info ? null : (
         <p role="status" className="sr-only">
           {t('loading')}
         </p>
       )}
-      <PlayerCard steamId={steamId} info={info} profile={profile} />
-      <div className="lg:col-span-2">
-        <LevelCard
-          info={info}
-          steamId={steamId}
-          onCheckInClaimed={
-            isSelf ? (player) => setResult({ steamId, status: 'ready', info: player }) : undefined
-          }
-        />
-      </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:col-span-3">
+      <PlayerCard
+        steamId={steamId}
+        info={info}
+        profile={profile}
+        onCheckInClaimed={
+          isSelf ? (player) => setResult({ steamId, status: 'ready', info: player }) : undefined
+        }
+      />
+      <div className="grid gap-6 lg:col-span-2">
+        <LevelCard info={info} />
         <FeatureEntryCard
           tone="property"
           Icon={CirclePlus}
