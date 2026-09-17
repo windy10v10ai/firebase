@@ -3,10 +3,19 @@
 // 玩家自己的页面指向 /my/*：菜单里拼不出 steamId，登录后由那一页转到 /profile/<id>/*
 export const SITE_NAV_ITEMS = [
   { key: 'profile', shortLabelKey: 'profile', fullLabelKey: 'profileFull', href: '/my' },
-  { key: 'property', shortLabelKey: 'property', fullLabelKey: 'propertyFull', href: '/my/property' },
+  {
+    key: 'property',
+    shortLabelKey: 'property',
+    fullLabelKey: 'propertyFull',
+    href: '/my/property',
+  },
   { key: 'awaken', shortLabelKey: 'awaken', fullLabelKey: 'awakenFull', href: '/my/awaken' },
-  { key: 'membership', shortLabelKey: 'membershipShort', fullLabelKey: 'membership', href: '/membership' },
-  // 768 的横排已经排满，再加一项会溢出，说明页只进菜单
-  { key: 'offline', shortLabelKey: 'offline', fullLabelKey: 'offline', href: '/offline', menuOnly: true },
+  {
+    key: 'membership',
+    shortLabelKey: 'membershipShort',
+    fullLabelKey: 'membership',
+    href: '/membership',
+  },
+  { key: 'launch', shortLabelKey: 'launchShort', fullLabelKey: 'launch', href: '/launch' },
   { key: 'wiki', shortLabelKey: 'wiki', fullLabelKey: 'wikiFull', href: null },
 ] as const;

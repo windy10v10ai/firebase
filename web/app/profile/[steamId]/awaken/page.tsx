@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import OfflineNotice from '@/app/components/OfflineNotice';
+import LaunchNotice from '@/app/components/LaunchNotice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import {
@@ -184,7 +184,7 @@ export default function AwakenPage() {
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
 
-      <OfflineNotice subject="awaken" />
+      <LaunchNotice subject="awaken" />
 
       <section className="card-container card-pad">
         <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>

@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import AcceleratorHint from './AcceleratorHint';
 import Notice from './Notice';
 import SteamLoginButton from './SteamLoginButton';
 
@@ -18,7 +19,10 @@ export default function LoginPanel() {
           <li key={key}>{t(key)}</li>
         ))}
       </ul>
-      <SteamLoginButton size="large" />
+      <div className="flex flex-col items-start gap-2">
+        <SteamLoginButton size="large" />
+        <AcceleratorHint />
+      </div>
     </Notice>
   );
 }

@@ -9,6 +9,7 @@ import { useAuth } from '@/app/lib/auth';
 import { playerPagePath } from '@/app/lib/player-path';
 import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
 
+import AcceleratorHint from './AcceleratorHint';
 import PlayerAvatar from './PlayerAvatar';
 import SteamLoginButton from './SteamLoginButton';
 
@@ -36,7 +37,12 @@ export default function AuthStatus() {
   }, [uid]);
 
   if (uid === null) {
-    return <SteamLoginButton />;
+    return (
+      <div className="group relative">
+        <SteamLoginButton />
+        <AcceleratorHint variant="tooltip" />
+      </div>
+    );
   }
 
   return (
