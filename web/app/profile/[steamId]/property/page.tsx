@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import OfflineNotice from '@/app/components/OfflineNotice';
+import LaunchNotice from '@/app/components/LaunchNotice';
 import { ApiError } from '@/app/lib/api';
 import {
   fetchPlayerProperties,
@@ -158,7 +158,7 @@ export default function PropertyPage() {
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
 
-      <OfflineNotice subject="property" />
+      <LaunchNotice subject="property" />
 
       <PointsCard
         steamId={steamId}
