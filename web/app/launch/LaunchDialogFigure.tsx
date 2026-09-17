@@ -38,12 +38,10 @@ export default function LaunchDialogFigure({
       ) : null}
       {note ? <p className="mt-2 text-[13px] leading-5 text-muted">{note}</p> : null}
       <div className="mt-4 flex justify-end gap-2">
-        <span className={`bg-primary px-4 py-1.5 text-xs text-white ${buttonShape}`}>
+        <span className={`bg-primary-active px-4 py-1.5 text-xs text-content ${buttonShape}`}>
           {confirm}
         </span>
-        <span
-          className={`border border-line-strong px-4 py-1.5 text-xs text-content ${buttonShape}`}
-        >
+        <span className={`border border-line-strong px-4 py-1.5 text-xs text-muted ${buttonShape}`}>
           {cancel}
         </span>
       </div>

@@ -99,8 +99,8 @@
     "title": "启动游戏",
     "link": "数据生效时机",
     "difficulty": {
-      "dota": "N1 ~ N5 难度",
-      "hard": "N6 ~ N8 难度",
+      "dota": "N1 ~ N5",
+      "hard": "N6 ~ N8",
       "custom": "自定义难度"
     },
     "site": {

@@ -99,8 +99,8 @@
     "title": "Start the game",
     "link": "When data takes effect",
     "difficulty": {
-      "dota": "Difficulty N1–N5",
-      "hard": "Difficulty N6–N8",
+      "dota": "N1–N5",
+      "hard": "N6–N8",
       "custom": "Custom difficulty"
     },
     "site": {
