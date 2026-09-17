@@ -29,6 +29,15 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
 
+## 文案里的两种开局模式
+
+理由见 [docs/web/README.md](../docs/web/README.md) 的「两种开局模式」，取值见[根目录 CLAUDE.md](../CLAUDE.md) 的「用语」。
+
+- **只用「离线模式」「在线模式」两个名字**，「控制台启动」只用来说明怎么进在线模式
+- **入口不上术语**：页脚、首页卡、提示条说「什么时候在游戏内生效」，模式名只在 `/offline` 解释
+- **说生效时机必须带上模式**：离线模式等下次地图更新，在线模式下一局生效、游戏内刷新当场生效。不写不分模式的「立即生效」「回游戏点刷新」，也不写「打一局就有数据」
+- **完整规则只写在 `/offline`**，别的页面挂 `OfflineNotice` 或一条指向它的链接，不重写一遍
+
 ## 加载态
 
 页面一出现就是最终结构，之后只有数值在变；首屏打开与站内跳转都适用。为什么这样定见 [docs/web/README.md](../docs/web/README.md) 第 4 节「加载态」与 [phase-10-first-paint.md](../docs/design/web/phase-10-first-paint.md)。
@@ -215,5 +224,7 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 - **桌面宽度（1280）上下排列**，各占一行，`<img width="760">` 或更宽。并排后每张只剩 460px，桌面版的间距、字号、对齐全看不清，比不出所以然
 
 图片用 `<img src="..." width="...">` 控制宽度，`![]()` 语法无法限制尺寸。
+
+**拍图这一步可以派给子代理**，前提与指令写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「把 PR 截图交给子代理」。验收仍归主会话。
 
 **改动碰到界面文案时，中英文各拍一组。**一种语言有文案、另一种缺 key 的情况从截图上看不出来，两组图摆在一起才拦得住。

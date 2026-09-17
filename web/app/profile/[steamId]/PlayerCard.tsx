@@ -4,22 +4,23 @@ import { ChevronRight, ThumbsUp } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import CheckInRow from '@/app/components/CheckInRow';
 import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
 import { memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
 import { type SteamProfile } from '@/app/lib/steam-profile';
 
-/** 身份卡：ID 取自地址，数据没到也能先显示；会员状态只做陈述，订阅入口是底部的文字链接 */
-export default function PlayerCard({
-  steamId,
-  info,
-  profile,
-}: {
+interface PlayerCardProps {
   steamId: string;
   info: PlayerInfo | null;
   profile: SteamProfile | null;
-}) {
+  /** 只有本人的页面才传，别人的页面上整行不存在 */
+  onCheckInClaimed?: (player: PlayerInfo) => void;
+}
+
+/** 身份卡：ID 取自地址，数据没到也能先显示；会员状态只做陈述，订阅入口是底部的文字链接 */
+export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }: PlayerCardProps) {
   const t = useTranslations('profile.identity');
   const tMember = useTranslations('profile.member');
   const member = info?.member;
@@ -48,8 +49,9 @@ export default function PlayerCard({
   };
 
   return (
-    // 网格项默认 min-width:auto，昵称不换行会把整列撑宽，truncate 也就永远轮不到生效
-    <section className="card-container card-pad flex min-w-0 flex-col justify-between gap-5">
+    // 网格项默认 min-width:auto，昵称不换行会把整列撑宽，truncate 也就永远轮不到生效。
+    // 不跟着右栏拉高：非会员没有签到行，拉满只会在卡里留出一大片空白
+    <section className="card-container card-pad flex min-w-0 flex-col gap-5 lg:self-start">
       <div className="flex items-center gap-4">
         <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-panel-soft">
           <PlayerAvatar
@@ -104,6 +106,9 @@ export default function PlayerCard({
           </span>
         </div>
       </div>
+      {onCheckInClaimed ? (
+        <CheckInRow info={info} steamId={steamId} onClaimed={onCheckInClaimed} />
+      ) : null}
       <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
         <div className="flex items-center gap-1.5 text-content" title={t('conductNet')}>
           <ThumbsUp className="size-4 text-success" aria-hidden="true" />

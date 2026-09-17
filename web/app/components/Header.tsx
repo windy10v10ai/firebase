@@ -1,6 +1,15 @@
 'use client';
 
-import { BookOpen, CirclePlus, Crown, ExternalLink, LogOut, Sparkles, UserRound } from 'lucide-react';
+import {
+  BookOpen,
+  CirclePlus,
+  Crown,
+  ExternalLink,
+  Info,
+  LogOut,
+  Sparkles,
+  UserRound,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -27,6 +36,8 @@ const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: strin
   awaken: { Icon: Sparkles, className: 'text-feature-awaken' },
   membership: { Icon: Crown, className: 'text-member-strong' },
   wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
+  // 说明页不是功能入口，不占功能色
+  offline: { Icon: Info, className: 'text-muted' },
 };
 
 export default function Header() {
@@ -63,7 +74,8 @@ export default function Header() {
   }, [menuOpen]);
 
   const visibleSiteNavItems = SITE_NAV_ITEMS.filter(
-    (item): item is typeof item & { href: string } => item.href !== null,
+    (item): item is typeof item & { href: string } =>
+      item.href !== null && !('menuOnly' in item && item.menuOnly),
   );
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
   // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上

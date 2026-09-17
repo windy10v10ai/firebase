@@ -49,8 +49,10 @@ export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps
       : t('available', { amount: available });
 
   return (
-    <div className="space-y-3 border-t border-line pt-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+    // 这一行在首页通栏、在身份卡里只占三栏中的一栏，宽窄看容器不看屏幕
+    <div className="@container space-y-3 border-t border-line pt-4">
+      {/* 容器装不下「文案 + 按钮」一行时，按钮挪到文字下方并通栏 */}
+      <div className="flex flex-col gap-3 @sm:flex-row @sm:items-center @sm:justify-between @sm:gap-4">
         <div className="min-w-0">
           <div className="text-content">{t('title')}</div>
           <div className="mt-0.5 text-sm text-muted">{subText}</div>
@@ -61,7 +63,7 @@ export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps
             {t('done')}
           </span>
         ) : (
-          <Button onClick={onClick} loading={pending} className="w-full shrink-0 md:w-auto">
+          <Button onClick={onClick} loading={pending} className="w-full shrink-0 @sm:w-auto">
             {pending ? t('pending') : t('action')}
           </Button>
         )}

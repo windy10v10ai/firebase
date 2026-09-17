@@ -6,6 +6,7 @@ import { EXTERNAL_LINKS } from '@/config/links';
 
 import Card from './components/Card';
 import LoginBanner from './home/LoginBanner';
+import OfflineCard from './home/OfflineCard';
 import PageCards from './home/PageCards';
 import PlayerSummary from './home/PlayerSummary';
 import WorkshopCard from './home/WorkshopCard';
@@ -24,6 +25,8 @@ export default function Home() {
       </section>
 
       {auth.status === 'authenticated' ? <PlayerSummary uid={auth.uid} /> : <LoginBanner />}
+
+      <OfflineCard />
 
       <WorkshopCard />
 
