@@ -1,8 +1,10 @@
-import { Check } from 'lucide-react';
+import { Check, ChevronRight, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
 import Section from '../components/Section';
+
+import LaunchDialogFigure from './LaunchDialogFigure';
 
 interface Cell {
   ok: boolean;
@@ -25,12 +27,20 @@ const COMPARE_ROWS: { labelKey: string; offline: Cell; online: Cell }[] = [
   { labelKey: 'refresh', offline: { ok: false }, online: { ok: true } },
 ];
 
-// 三张地图对应三个难度档，直接给出整条命令，玩家不用自己拼地图名
-const LAUNCH_COMMANDS = [
-  { key: 'dota', name: 'Dota', command: 'dota_launch_custom_game 2307479570 dota' },
-  { key: 'hard', name: 'Hard', command: 'dota_launch_custom_game 2307479570 hard' },
-  { key: 'custom', name: 'Custom', command: 'dota_launch_custom_game 2307479570 custom' },
+const CUSTOM_GAME_ID = '2307479570';
+
+// 三张地图对应三个难度档，地图名让玩家自己填等于多一步出错机会
+const LAUNCH_MODES = [
+  { key: 'dota', name: 'Dota', map: 'dota' },
+  { key: 'hard', name: 'Hard', map: 'hard' },
+  { key: 'custom', name: 'Custom', map: 'custom' },
 ];
+
+// steam://run 的启动参数整段要编码，+ 与空格原样传过去 Steam 收到的是空参数
+const launchUrl = (map: string) =>
+  `steam://run/570//%2Bdota_launch_custom_game%20${CUSTOM_GAME_ID}%20${map}/`;
+
+const launchCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID} ${map}`;
 
 export default function OfflinePage() {
   const t = useTranslations('offline');
@@ -49,7 +59,10 @@ export default function OfflinePage() {
           aria-label={t('compare.yes')}
         />
       ) : (
-        <span className="shrink-0 text-lg leading-5 text-faint md:text-xl" aria-label={t('compare.no')}>
+        <span
+          className="shrink-0 text-lg leading-5 text-faint md:text-xl"
+          aria-label={t('compare.no')}
+        >
           —
         </span>
       )}
@@ -61,25 +74,75 @@ export default function OfflinePage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <section className="space-y-4">
-        <h1 className="title-primary">{t('title')}</h1>
-        <p className="text-content">{t('lead')}</p>
-        <div className="space-y-2">
-          <p className="text-content text-pretty">{t.rich('leadOffline', { name: modeName })}</p>
-          <p className="text-content text-pretty">{t.rich('leadOnline', { name: modeName })}</p>
+      <h1 className="title-primary">{t('title')}</h1>
+
+      <Section title={t('launch.title')}>
+        <p className="text-content text-pretty">
+          {t('launch.lead')} <span className="font-medium text-warning">{t('launch.warning')}</span>
+        </p>
+        <div className="mt-4 grid gap-2.5 md:grid-cols-3">
+          {LAUNCH_MODES.map((mode) => (
+            <a
+              key={mode.key}
+              href={launchUrl(mode.map)}
+              className="card-container card-hover box-pad flex items-center gap-3"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium text-heading">{mode.name}</span>
+                <span className="block text-[13px] text-muted">{t(`launch.${mode.key}`)}</span>
+              </span>
+              <Play className="size-[18px] shrink-0 text-link" aria-hidden="true" />
+            </a>
+          ))}
         </div>
-      </section>
+      </Section>
+
+      <Section title={t('dialogs.title')}>
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-2.5">
+            <p className="text-content text-pretty">
+              <span className="font-medium text-heading">1.</span> {t('dialogs.step1')}
+            </p>
+            <LaunchDialogFigure
+              pill
+              title={t('dialogs.browser.title')}
+              body={t('dialogs.browser.body')}
+              confirm={t('dialogs.browser.confirm')}
+              cancel={t('dialogs.browser.cancel')}
+            />
+          </div>
+          <div className="space-y-2.5">
+            <p className="text-content text-pretty">
+              <span className="font-medium text-heading">2.</span> {t('dialogs.step2')}
+            </p>
+            <LaunchDialogFigure
+              title={t('dialogs.steam.title')}
+              body={t('dialogs.steam.body')}
+              params={`+${launchCommand('hard')}`}
+              note={t('dialogs.steam.note')}
+              confirm={t('dialogs.steam.confirm')}
+              cancel={t('dialogs.steam.cancel')}
+            />
+          </div>
+        </div>
+      </Section>
 
       <Section title={t('compare.title')}>
+        <div className="mb-5 space-y-2">
+          <p className="text-content">{t('compare.lead')}</p>
+          <p className="text-content text-pretty">
+            {t.rich('compare.leadOffline', { name: modeName })}
+          </p>
+          <p className="text-content text-pretty">
+            {t.rich('compare.leadOnline', { name: modeName })}
+          </p>
+        </div>
         <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
           <table className="w-full table-fixed">
             <thead>
               <tr className="border-b border-line bg-panel-raised">
                 <th className="px-2 py-3 md:p-4" />
-                <th
-                  scope="col"
-                  className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4"
-                >
+                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.offline')}
                   </span>
@@ -87,10 +150,7 @@ export default function OfflinePage() {
                     {t('compare.offlineHint')}
                   </span>
                 </th>
-                <th
-                  scope="col"
-                  className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4"
-                >
+                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.online')}
                   </span>
@@ -127,43 +187,53 @@ export default function OfflinePage() {
         </div>
       </Section>
 
-      <Section title={t('online.title')}>
-        <ol className="list-decimal space-y-2 pl-5 text-content marker:text-muted">
-          {t.raw('online.steps').map((step: string) => (
-            <li key={step} className="pl-1">
-              {step}
-            </li>
-          ))}
-        </ol>
-        <div className="mt-4 space-y-2">
-          {LAUNCH_COMMANDS.map((item) => (
-            <div
-              key={item.key}
-              className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
-            >
-              <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
-                <span className="text-[15px] font-medium text-heading">{item.name}</span>
-                <span className="text-[13px] text-muted">{t(`online.difficulty.${item.key}`)}</span>
-              </span>
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <code className="min-w-0 flex-1 break-all font-mono text-sm text-heading">
-                  {item.command}
-                </code>
-                <CopyIdButton
-                  value={item.command}
-                  tooltip={t('online.copy')}
-                  copiedLabel={t('online.copied')}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
       <Section title={t('website.title')}>
         <p className="text-content text-pretty">{t('website.body')}</p>
         <p className="mt-2 text-content text-pretty">{t('website.checkIn')}</p>
       </Section>
+
+      <details className="card-container card-pad group">
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-content [&::-webkit-details-marker]:hidden">
+          <ChevronRight
+            className="size-4 shrink-0 text-muted transition-transform group-open:rotate-90"
+            aria-hidden="true"
+          />
+          {t('fallback.title')}
+        </summary>
+        <div className="mt-4">
+          <p className="text-content text-pretty">{t('fallback.intro')}</p>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-content marker:text-muted">
+            {t.raw('fallback.steps').map((step: string) => (
+              <li key={step} className="pl-1">
+                {step}
+              </li>
+            ))}
+          </ol>
+          <div className="mt-4 space-y-2">
+            {LAUNCH_MODES.map((mode) => (
+              <div
+                key={mode.key}
+                className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
+              >
+                <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
+                  <span className="text-[15px] font-medium text-heading">{mode.name}</span>
+                  <span className="text-[13px] text-muted">{t(`launch.${mode.key}`)}</span>
+                </span>
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <code className="min-w-0 flex-1 font-mono text-sm break-all text-heading">
+                    {launchCommand(mode.map)}
+                  </code>
+                  <CopyIdButton
+                    value={launchCommand(mode.map)}
+                    tooltip={t('fallback.copy')}
+                    copiedLabel={t('fallback.copied')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
