@@ -1,4 +1,4 @@
-import { Check, Clock, Play } from 'lucide-react';
+import { Check, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
@@ -128,10 +128,8 @@ export default function LaunchPage() {
             <p className="text-sm text-warning text-pretty">{t('dialogs.step2Hint')}</p>
           </div>
         </div>
-        <p className="mt-5 flex items-start gap-2 text-content text-pretty">
-          <span className="font-medium text-heading">3.</span>
-          <Clock className="mt-1 size-[17px] shrink-0 text-warning" aria-hidden="true" />
-          <span className="min-w-0 flex-1">{t.rich('dialogs.step3', { wait })}</span>
+        <p className="mt-5 text-content text-pretty">
+          <span className="font-medium text-heading">3.</span> {t.rich('dialogs.step3', { wait })}
         </p>
       </Section>
 

@@ -113,7 +113,7 @@
       "step1": "浏览器问要不要打开 Steam，选「打开 Steam」。",
       "step2": "Steam 显示这次的启动参数，选「继续」。",
       "step2Hint": "这个提示在 Steam 窗口里。没看到就点开 Steam。",
-      "step3": "然后<wait>等十几秒</wait>，Steam 和 Dota 2 才会依次打开。",
+      "step3": "<wait>请耐心等待十几秒</wait>，Steam 和 Dota 2 会依次打开。",
       "browser": {
         "title": "要打开 Steam 吗？",
         "body": "有个网站想打开此应用。",
