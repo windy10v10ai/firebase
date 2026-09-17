@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Play } from 'lucide-react';
+import { Check, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
@@ -42,8 +42,8 @@ const launchUrl = (map: string) =>
 
 const launchCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID} ${map}`;
 
-export default function OfflinePage() {
-  const t = useTranslations('offline');
+export default function LaunchPage() {
+  const t = useTranslations('launch');
 
   const modeName = (chunks: React.ReactNode) => (
     <b className="font-medium text-heading">{chunks}</b>
@@ -76,9 +76,9 @@ export default function OfflinePage() {
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="title-primary">{t('title')}</h1>
 
-      <Section title={t('launch.title')}>
+      <Section title={t('site.title')}>
         <p className="text-content text-pretty">
-          {t('launch.lead')} <span className="font-medium text-warning">{t('launch.warning')}</span>
+          {t('site.lead')} <span className="font-medium text-warning">{t('site.warning')}</span>
         </p>
         <div className="mt-4 grid gap-2.5 md:grid-cols-3">
           {LAUNCH_MODES.map((mode) => (
@@ -89,7 +89,7 @@ export default function OfflinePage() {
             >
               <span className="min-w-0 flex-1">
                 <span className="block text-[15px] font-medium text-heading">{mode.name}</span>
-                <span className="block text-[13px] text-muted">{t(`launch.${mode.key}`)}</span>
+                <span className="block text-[13px] text-muted">{t(`difficulty.${mode.key}`)}</span>
               </span>
               <Play className="size-[18px] shrink-0 text-link" aria-hidden="true" />
             </a>
@@ -192,48 +192,39 @@ export default function OfflinePage() {
         <p className="mt-2 text-content text-pretty">{t('website.checkIn')}</p>
       </Section>
 
-      <details className="card-container card-pad group">
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-content [&::-webkit-details-marker]:hidden">
-          <ChevronRight
-            className="size-4 shrink-0 text-muted transition-transform group-open:rotate-90"
-            aria-hidden="true"
-          />
-          {t('fallback.title')}
-        </summary>
-        <div className="mt-4">
-          <p className="text-content text-pretty">{t('fallback.intro')}</p>
-          <ol className="mt-3 list-decimal space-y-2 pl-5 text-content marker:text-muted">
-            {t.raw('fallback.steps').map((step: string) => (
-              <li key={step} className="pl-1">
-                {step}
-              </li>
-            ))}
-          </ol>
-          <div className="mt-4 space-y-2">
-            {LAUNCH_MODES.map((mode) => (
-              <div
-                key={mode.key}
-                className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
-              >
-                <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
-                  <span className="text-[15px] font-medium text-heading">{mode.name}</span>
-                  <span className="text-[13px] text-muted">{t(`launch.${mode.key}`)}</span>
-                </span>
-                <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <code className="min-w-0 flex-1 font-mono text-sm break-all text-heading">
-                    {launchCommand(mode.map)}
-                  </code>
-                  <CopyIdButton
-                    value={launchCommand(mode.map)}
-                    tooltip={t('fallback.copy')}
-                    copiedLabel={t('fallback.copied')}
-                  />
-                </div>
+      <Section title={t('console.title')}>
+        <p className="text-content text-pretty">{t('console.intro')}</p>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-content marker:text-muted">
+          {t.raw('console.steps').map((step: string) => (
+            <li key={step} className="pl-1">
+              {step}
+            </li>
+          ))}
+        </ol>
+        <div className="mt-4 space-y-2">
+          {LAUNCH_MODES.map((mode) => (
+            <div
+              key={mode.key}
+              className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
+            >
+              <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
+                <span className="text-[15px] font-medium text-heading">{mode.name}</span>
+                <span className="text-[13px] text-muted">{t(`difficulty.${mode.key}`)}</span>
+              </span>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <code className="min-w-0 flex-1 font-mono text-sm break-all text-heading">
+                  {launchCommand(mode.map)}
+                </code>
+                <CopyIdButton
+                  value={launchCommand(mode.map)}
+                  tooltip={t('console.copy')}
+                  copiedLabel={t('console.copied')}
+                />
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </details>
+      </Section>
     </div>
   );
 }

@@ -5,8 +5,8 @@ import {
   CirclePlus,
   Crown,
   ExternalLink,
-  Info,
   LogOut,
+  Play,
   Sparkles,
   UserRound,
 } from 'lucide-react';
@@ -36,8 +36,8 @@ const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: strin
   awaken: { Icon: Sparkles, className: 'text-feature-awaken' },
   membership: { Icon: Crown, className: 'text-member-strong' },
   wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
-  // 说明页不是功能入口，不占功能色
-  offline: { Icon: Info, className: 'text-muted' },
+  // 启动游戏不属于任何一块玩家数据，用中性色
+  launch: { Icon: Play, className: 'text-content' },
 };
 
 export default function Header() {
@@ -74,8 +74,7 @@ export default function Header() {
   }, [menuOpen]);
 
   const visibleSiteNavItems = SITE_NAV_ITEMS.filter(
-    (item): item is typeof item & { href: string } =>
-      item.href !== null && !('menuOnly' in item && item.menuOnly),
+    (item): item is typeof item & { href: string } => item.href !== null,
   );
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
   // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上
@@ -97,9 +96,9 @@ export default function Header() {
         {/* 行高由账号位的 36px 控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
         <div className="flex min-h-9 justify-between items-center gap-3">
           <Link href="/" className="text-xl font-bold text-heading link-hover whitespace-nowrap">
-            {/* 窄屏一律收短：写全名在 375 放不下右侧控件，见 phase-2g-header-layout.md */}
-            <span className="md:hidden">{t('homeShort')}</span>
-            <span className="hidden md:inline">{t('home')}</span>
+            {/* 1024 以下一律收短：全名加五个站内项在 768 会把右侧控件挤出屏幕 */}
+            <span className="lg:hidden">{t('homeShort')}</span>
+            <span className="hidden lg:inline">{t('home')}</span>
           </Link>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-4">

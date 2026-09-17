@@ -14,7 +14,8 @@
     "github": "GitHub",
     "membershipShort": "Member",
     "membership": "Membership",
-    "offline": "When data takes effect",
+    "launch": "Start the game",
+    "launchShort": "Launch",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -94,16 +95,18 @@
       }
     }
   },
-  "offline": {
-    "title": "Game launch mode and when data takes effect",
+  "launch": {
+    "title": "Start the game",
     "link": "When data takes effect",
-    "launch": {
-      "title": "Start the game from this site",
-      "lead": "Solo only. Connects to the server and reads your latest data.",
-      "warning": "You must quit Dota 2 first.",
+    "difficulty": {
       "dota": "Difficulty N1–N5",
       "hard": "Difficulty N6–N8",
       "custom": "Custom difficulty"
+    },
+    "site": {
+      "title": "Start the game from this site",
+      "lead": "Solo only. Connects to the server and reads your latest data.",
+      "warning": "You must quit Dota 2 first."
     },
     "dialogs": {
       "title": "Two prompts will appear",
@@ -122,6 +125,18 @@
         "confirm": "Continue",
         "cancel": "Cancel"
       }
+    },
+    "console": {
+      "title": "Launch from the console",
+      "intro": "This is the same thing as the links above: both launch the game with the same parameters, and the game behaves identically. The links only save you the steps below. Use this when nothing happens after you click a link.",
+      "steps": [
+        "In Dota 2 settings, search for \"console\" and tick Enable Console",
+        "In the hotkey settings, bind a key to Console",
+        "Back at the Dota 2 main menu, press that key to open the console",
+        "Pick the difficulty you want and enter one of the commands below in the console"
+      ],
+      "copy": "Copy",
+      "copied": "Copied"
     },
     "homeCard": {
       "offline": "Launched from the Arcade, the attribute points, awakenings and other changes you make take effect in-game at the next map update.",
@@ -157,18 +172,6 @@
       "title": "Attributes and awakenings happen on this site only",
       "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. The game picks the changes up either way, and only differs in how soon.",
       "checkIn": "The daily check-in can be claimed here, and starting the game from this site claims it automatically."
-    },
-    "fallback": {
-      "title": "Nothing happened? Launch with a command instead",
-      "intro": "If your browser blocked the link, or Steam is not handling links like it, launch from the console by hand.",
-      "steps": [
-        "In Dota 2 settings, search for \"console\" and tick Enable Console",
-        "In the hotkey settings, bind a key to Console",
-        "Back at the Dota 2 main menu, press that key to open the console",
-        "Pick the difficulty you want and enter one of the commands below in the console"
-      ],
-      "copy": "Copy",
-      "copied": "Copied"
     }
   },
   "membership": {
