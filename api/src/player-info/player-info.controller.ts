@@ -84,7 +84,7 @@ export class PlayerInfoController {
       }
     }
 
-    await this.playerService.useMemberPoint(dto);
+    await this.playerService.useMemberPoint(dto, serverType);
 
     // 扣分失败会先抛出，所以记账放在成功之后，失败不占额度
     if (isLocal) {
@@ -114,8 +114,9 @@ export class PlayerInfoController {
   async upgradePlayerProperty(
     @Param('steamId', ParseIntPipe) steamId: number,
     @Body() dto: UpgradePlayerPropertyDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<PlayerInfoDto> {
-    await this.playerPropertyService.upgrade({ steamId, ...dto });
+    await this.playerPropertyService.upgrade({ steamId, ...dto }, serverType);
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
   }
 
@@ -125,8 +126,9 @@ export class PlayerInfoController {
   async resetPlayerProperty(
     @Param('steamId', ParseIntPipe) steamId: number,
     @Query('useMemberPoint', ParseBoolPipe) useMemberPoint: boolean,
+    @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<PlayerInfoDto> {
-    await this.playerPropertyService.reset(steamId, useMemberPoint);
+    await this.playerPropertyService.reset(steamId, useMemberPoint, serverType);
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['property']);
   }
 
@@ -136,8 +138,14 @@ export class PlayerInfoController {
   async awakenHero(
     @Param('steamId', ParseIntPipe) steamId: number,
     @Body() dto: AwakenHeroDto,
+    @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<PlayerInfoDto> {
-    await this.playerHeroAwakeningService.awaken(steamId, dto.heroName, dto.useMemberPoint);
+    await this.playerHeroAwakeningService.awaken(
+      steamId,
+      dto.heroName,
+      dto.useMemberPoint,
+      serverType,
+    );
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['heroAwakening']);
   }
 

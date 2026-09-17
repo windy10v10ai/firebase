@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { auth } from '@/config/firebase';
 
+import { setAnalyticsUserId } from './analytics';
 import { PLAYER_UID_COOKIE, PLAYER_UID_COOKIE_MAX_AGE_SECONDS, type PlayerProfileHint } from './auth-hint';
 import { buildSteamLoginUrl } from './steam-login';
 
@@ -46,6 +47,7 @@ export function AuthProvider({ initialUid, initialProfile, siteOrigin, children 
       onAuthStateChanged(auth, (user) => {
         const uid = user?.uid ?? null;
         writeUidHint(uid);
+        setAnalyticsUserId(uid);
         setState(toState(uid));
       }),
     [],

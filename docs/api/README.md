@@ -38,5 +38,6 @@ API 自己往外调的第三方服务：
 
 - Hosting 只按 `^/api/.*` 放行，顶层路径前缀的白名单在 `api/index.ts` 的 `client` 函数里。新增顶层前缀两处都要改，漏了会在进入 NestJS 之前被 403
 - 服务端来源用 `x-api-key`，网站用 `Authorization: Bearer`，判定都在 `api/src/util/auth/auth.guard.ts`。公开端点挂 `@Public()`，网站要调的挂 `@AllowWeb()`
+- **装饰器是加法，不是排他**：不挂任何装饰器的路由，官方服务器的 key 就能调；`@AllowWeb()` 额外放行网页，`@AllowLocal()` 额外放行打包进地图、随时可能泄露的本地主机 key。所以路由本身不代表来源，要区分来源取 `@CurrentServerType()`
 - 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由同上一节最后一条；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)

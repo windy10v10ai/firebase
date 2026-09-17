@@ -3,6 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 
+import Analytics from './components/Analytics';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import { AuthProvider } from './lib/auth';
@@ -76,6 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </AuthProvider>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );
