@@ -597,6 +597,7 @@
     "login": "Sign in with Steam",
     "loginShort": "Sign in",
     "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
+    "acceleratorHint": "New tab won't load? Turn on your <b>accelerator</b> for <b>Steam</b>.",
     "loggedInAs": "ID {uid}",
     "signOut": "Sign out",
     "callback": {
