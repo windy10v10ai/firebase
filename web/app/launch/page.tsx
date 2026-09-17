@@ -49,6 +49,8 @@ export default function LaunchPage() {
     <b className="font-medium text-heading">{chunks}</b>
   );
 
+  const wait = (chunks: React.ReactNode) => <b className="font-medium text-warning">{chunks}</b>;
+
   // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把模式列挤到折行
   const renderCell = (cell: Cell) => (
     <span className="inline-flex items-center gap-2 text-left">
@@ -80,18 +82,27 @@ export default function LaunchPage() {
         <p className="text-content text-pretty">
           {t('site.lead')} <span className="font-medium text-warning">{t('site.warning')}</span>
         </p>
-        <div className="mt-4 grid gap-2.5 md:grid-cols-3">
+        <div className="mt-4 grid gap-5 md:grid-cols-3">
           {LAUNCH_MODES.map((mode) => (
             <a
               key={mode.key}
               href={launchUrl(mode.map)}
-              className="card-container card-hover box-pad flex items-center gap-3"
+              className="card-hover group box-pad flex items-center gap-3 rounded-[10px] border border-line-strong bg-panel-soft"
             >
-              <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-medium text-heading">{mode.name}</span>
-                <span className="block text-[13px] text-muted">{t(`difficulty.${mode.key}`)}</span>
+              {/* 蓝色只出现在这个徽章上：三块卡面同时铺满主色会刺眼，也压过上面那句警告 */}
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary shadow-[0_6px_16px_-8px_var(--color-primary-glow)] transition-colors group-hover:bg-primary-hover">
+                <Play
+                  className="size-4 translate-x-px text-white"
+                  fill="currentColor"
+                  aria-hidden="true"
+                />
               </span>
-              <Play className="size-[18px] shrink-0 text-link" aria-hidden="true" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-bold text-heading">
+                  {t(`difficulty.${mode.key}`)}
+                </span>
+                <span className="block text-xs text-muted">{mode.name}</span>
+              </span>
             </a>
           ))}
         </div>
@@ -123,8 +134,12 @@ export default function LaunchPage() {
               confirm={t('dialogs.steam.confirm')}
               cancel={t('dialogs.steam.cancel')}
             />
+            <p className="text-sm text-warning text-pretty">{t('dialogs.step2Hint')}</p>
           </div>
         </div>
+        <p className="mt-5 text-content text-pretty">
+          <span className="font-medium text-heading">3.</span> {t.rich('dialogs.step3', { wait })}
+        </p>
       </Section>
 
       <Section title={t('compare.title')}>
@@ -208,8 +223,10 @@ export default function LaunchPage() {
               className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
             >
               <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
-                <span className="text-[15px] font-medium text-heading">{mode.name}</span>
-                <span className="text-[13px] text-muted">{t(`difficulty.${mode.key}`)}</span>
+                <span className="text-[15px] font-medium text-heading">
+                  {t(`difficulty.${mode.key}`)}
+                </span>
+                <span className="text-[13px] text-muted">{mode.name}</span>
               </span>
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <code className="min-w-0 flex-1 font-mono text-sm break-all text-heading">
