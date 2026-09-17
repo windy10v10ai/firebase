@@ -20,9 +20,9 @@ export default function AcceleratorHint({ variant = 'inline' }: AcceleratorHintP
 
   if (variant === 'tooltip') {
     return (
-      <div className="pointer-events-none absolute top-full right-0 z-10 mt-2 whitespace-nowrap rounded-md border border-warning/50 bg-panel-raised px-3 py-2 text-xs text-warning opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+      <div className="pointer-events-none absolute top-full right-0 z-10 mt-2 whitespace-nowrap rounded-md border border-warning/50 bg-panel-raised px-3 py-2 text-xs text-content opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         <span className="flex items-center gap-1.5">
-          <TriangleAlert className="size-3.5 shrink-0" aria-hidden="true" />
+          <TriangleAlert className="size-3.5 shrink-0 text-warning" aria-hidden="true" />
           {text}
         </span>
       </div>
@@ -30,8 +30,8 @@ export default function AcceleratorHint({ variant = 'inline' }: AcceleratorHintP
   }
 
   return (
-    <p className="flex items-start gap-1.5 text-sm text-warning">
-      <TriangleAlert className="size-4 shrink-0 translate-y-0.5" aria-hidden="true" />
+    <p className="inline-flex items-start gap-1.5 rounded-md border border-warning/30 bg-warning/8 px-3 py-2 text-sm text-content">
+      <TriangleAlert className="size-4 shrink-0 translate-y-0.5 text-warning" aria-hidden="true" />
       <span>{text}</span>
     </p>
   );
