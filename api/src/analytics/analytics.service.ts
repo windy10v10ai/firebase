@@ -65,6 +65,7 @@ export class AnalyticsService {
     points: number,
     useMemberPoint: boolean,
     reason: string,
+    serverType: SERVER_TYPE,
   ): Promise<void> {
     await this.sendEvent(steamId.toString(), {
       name: 'player_use_point',
@@ -74,6 +75,7 @@ export class AnalyticsService {
         point: points,
         points,
         type: reason,
+        server_type: serverType,
       },
     });
   }

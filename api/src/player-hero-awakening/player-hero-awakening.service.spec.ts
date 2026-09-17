@@ -1,6 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { FieldValue } from 'firebase-admin/firestore';
 
+import { SERVER_TYPE } from '../util/secret/secret.service';
+
 import { PlayerHeroAwakeningService } from './player-hero-awakening.service';
 
 describe('PlayerHeroAwakeningService', () => {
@@ -59,7 +61,7 @@ describe('PlayerHeroAwakeningService', () => {
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
         createService({ seasonPointTotal: 10000, usedSeasonPoint: 0 });
 
-      await service.awaken(steamId, validHeroName, false);
+      await service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
         usedSeasonPoint: 8000,
@@ -69,6 +71,7 @@ describe('PlayerHeroAwakeningService', () => {
         8000,
         false,
         'hero_awakening',
+        SERVER_TYPE.WEB,
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 8000 }]);
@@ -78,7 +81,7 @@ describe('PlayerHeroAwakeningService', () => {
       const { service, playerService, playerHeroAwakeningRepository, analyticsService } =
         createService({ memberPointTotal: 4000, usedMemberPoint: 0 });
 
-      await service.awaken(steamId, validHeroName, true);
+      await service.awaken(steamId, validHeroName, true, SERVER_TYPE.WEB);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
         usedMemberPoint: 4000,
@@ -88,6 +91,7 @@ describe('PlayerHeroAwakeningService', () => {
         4000,
         true,
         'hero_awakening',
+        SERVER_TYPE.WEB,
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 4000 }]);
@@ -99,7 +103,7 @@ describe('PlayerHeroAwakeningService', () => {
         usedSeasonPoint: 2001,
       });
 
-      await expect(service.awaken(steamId, validHeroName, false)).rejects.toThrow(
+      await expect(service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB)).rejects.toThrow(
         BadRequestException,
       );
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
@@ -112,7 +116,7 @@ describe('PlayerHeroAwakeningService', () => {
         usedMemberPoint: 1,
       });
 
-      await expect(service.awaken(steamId, validHeroName, true)).rejects.toThrow(
+      await expect(service.awaken(steamId, validHeroName, true, SERVER_TYPE.WEB)).rejects.toThrow(
         BadRequestException,
       );
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
@@ -121,16 +125,16 @@ describe('PlayerHeroAwakeningService', () => {
     it('无效英雄名应报错', async () => {
       const { service, playerService } = createService({ seasonPointTotal: 10000 });
 
-      await expect(service.awaken(steamId, 'npc_dota_hero_not_a_real_hero', false)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.awaken(steamId, 'npc_dota_hero_not_a_real_hero', false, SERVER_TYPE.WEB),
+      ).rejects.toThrow(BadRequestException);
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
     });
 
     it('玩家不存在应报错', async () => {
       const { service } = createService(null);
 
-      await expect(service.awaken(steamId, validHeroName, false)).rejects.toThrow(
+      await expect(service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -141,7 +145,9 @@ describe('PlayerHeroAwakeningService', () => {
         [{ heroName: validHeroName }],
       );
 
-      await expect(service.awaken(steamId, validHeroName, false)).resolves.toBeUndefined();
+      await expect(
+        service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB),
+      ).resolves.toBeUndefined();
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
       expect(playerHeroAwakeningRepository.update).not.toHaveBeenCalled();
     });
@@ -154,7 +160,7 @@ describe('PlayerHeroAwakeningService', () => {
           candidates,
         );
 
-      await service.awaken(steamId, validHeroName, false);
+      await service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
         usedSeasonPoint: 4000,
@@ -164,6 +170,7 @@ describe('PlayerHeroAwakeningService', () => {
         4000,
         false,
         'hero_awakening_random',
+        SERVER_TYPE.WEB,
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedSeasonPoint: 4000 }]);
@@ -178,7 +185,7 @@ describe('PlayerHeroAwakeningService', () => {
           candidates,
         );
 
-      await service.awaken(steamId, validHeroName, true);
+      await service.awaken(steamId, validHeroName, true, SERVER_TYPE.WEB);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
         usedMemberPoint: 2000,
@@ -188,6 +195,7 @@ describe('PlayerHeroAwakeningService', () => {
         2000,
         true,
         'hero_awakening_random',
+        SERVER_TYPE.WEB,
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.awakenings).toEqual([{ heroName: validHeroName, usedMemberPoint: 2000 }]);
@@ -202,7 +210,7 @@ describe('PlayerHeroAwakeningService', () => {
           candidates,
         );
 
-      await service.awaken(steamId, validHeroName, false);
+      await service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
         usedSeasonPoint: 8000,
@@ -212,6 +220,7 @@ describe('PlayerHeroAwakeningService', () => {
         8000,
         false,
         'hero_awakening',
+        SERVER_TYPE.WEB,
       );
       const savedDoc = playerHeroAwakeningRepository.update.mock.calls[0][0];
       expect(savedDoc.randomCandidates.candidates).toEqual(candidates);

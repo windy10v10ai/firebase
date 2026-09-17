@@ -7,6 +7,7 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GetHeroId } from '../analytics/data/hero-data';
 import { PlayerService } from '../player/player.service';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { PlayerHeroAwakening } from './entities/player-hero-awakening.entity';
 import { HeroAwakeningItem } from './types/hero-awakening-item.types';
@@ -27,7 +28,12 @@ export class PlayerHeroAwakeningService {
     private readonly analyticsService: AnalyticsService,
   ) {}
 
-  async awaken(steamId: number, heroName: string, useMemberPoint: boolean): Promise<void> {
+  async awaken(
+    steamId: number,
+    heroName: string,
+    useMemberPoint: boolean,
+    serverType: SERVER_TYPE,
+  ): Promise<void> {
     GetHeroId(heroName);
 
     const player = await this.playerService.findBySteamId(steamId);
@@ -64,7 +70,7 @@ export class PlayerHeroAwakeningService {
       item.usedSeasonPoint = cost;
     }
     await this.saveAwakening(doc, item, isRandomHit);
-    await this.analyticsService.playerUsePoint(steamId, cost, useMemberPoint, reason);
+    await this.analyticsService.playerUsePoint(steamId, cost, useMemberPoint, reason, serverType);
   }
 
   private resolveCost(useMemberPoint: boolean, isRandomHit: boolean): number {

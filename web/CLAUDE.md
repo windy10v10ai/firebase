@@ -29,6 +29,15 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
 
+## 统计
+
+理由见 [docs/web/README.md](../docs/web/README.md) 第 5 节「统计」。
+
+- **事件发在哪端，看浏览器在不在场**：页面浏览、登录成功这类浏览器行为用 `app/lib/analytics.ts` 的 `trackEvent`；加点、洗点、觉醒、签到这些改数据的动作由 API 在服务端发，网站不再发一次，否则同一件事记两遍
+- **不用 `firebase/analytics`（`getAnalytics`、`logEvent`）**：它初始化时要多取一次远端配置，等于多一个可能到不了的域名；我们只需要 gtag 发事件这一件事
+- **登录态变化时设 user_id**，只在 `AuthProvider` 那一处维护，退出时传 `null`
+- **测量 ID 读 `NEXT_PUBLIC_GA_MEASUREMENT_ID`**，留空即不加载 gtag。它是公开值，按上面「本地开发」的规约可以进 git
+
 ## 文案里的开局方式
 
 理由见 [docs/web/README.md](../docs/web/README.md) 的「开局方式与命名」，取值见[根目录 CLAUDE.md](../CLAUDE.md) 的「用语」。

@@ -4,6 +4,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { UsePlayerMemberPointsDto } from './dto/use-player-member-points.dto';
@@ -151,7 +152,7 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
-  async useMemberPoint(dto: UsePlayerMemberPointsDto): Promise<Player> {
+  async useMemberPoint(dto: UsePlayerMemberPointsDto, serverType: SERVER_TYPE): Promise<Player> {
     const memberPoint = Math.trunc(dto.memberPoint);
     if (memberPoint < 1) {
       throw new BadRequestException();
@@ -169,7 +170,13 @@ export class PlayerService {
 
     player.usedMemberPoint = (player.usedMemberPoint ?? 0) + memberPoint;
     await this.playerRepository.update(player);
-    await this.analyticsService.playerUsePoint(dto.steamId, memberPoint, true, dto.reason);
+    await this.analyticsService.playerUsePoint(
+      dto.steamId,
+      memberPoint,
+      true,
+      dto.reason,
+      serverType,
+    );
     return player;
   }
 
