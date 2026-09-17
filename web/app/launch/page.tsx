@@ -1,4 +1,4 @@
-import { Check, Play } from 'lucide-react';
+import { Check, Clock, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
@@ -48,6 +48,8 @@ export default function LaunchPage() {
   const modeName = (chunks: React.ReactNode) => (
     <b className="font-medium text-heading">{chunks}</b>
   );
+
+  const wait = (chunks: React.ReactNode) => <b className="font-medium text-warning">{chunks}</b>;
 
   // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把模式列挤到折行
   const renderCell = (cell: Cell) => (
@@ -123,8 +125,14 @@ export default function LaunchPage() {
               confirm={t('dialogs.steam.confirm')}
               cancel={t('dialogs.steam.cancel')}
             />
+            <p className="text-sm text-warning text-pretty">{t('dialogs.step2Hint')}</p>
           </div>
         </div>
+        <p className="mt-5 flex items-start gap-2 text-content text-pretty">
+          <span className="font-medium text-heading">3.</span>
+          <Clock className="mt-1 size-[17px] shrink-0 text-warning" aria-hidden="true" />
+          <span className="min-w-0 flex-1">{t.rich('dialogs.step3', { wait })}</span>
+        </p>
       </Section>
 
       <Section title={t('compare.title')}>

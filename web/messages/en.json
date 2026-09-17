@@ -109,9 +109,11 @@
       "warning": "You must quit Dota 2 first."
     },
     "dialogs": {
-      "title": "Two prompts will appear",
+      "title": "What happens after you click",
       "step1": "Your browser asks whether to open Steam. Choose \"Open Steam\".",
       "step2": "Steam shows the launch parameters for this game. Choose \"Continue\".",
+      "step2Hint": "This prompt appears inside Steam. If you do not see it, open Steam.",
+      "step3": "Then <wait>wait ten or twenty seconds</wait> while Steam and Dota 2 open.",
       "browser": {
         "title": "Open Steam?",
         "body": "This site wants to open this application.",

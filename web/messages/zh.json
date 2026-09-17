@@ -109,9 +109,11 @@
       "warning": "必须退出 Dota 2 再执行。"
     },
     "dialogs": {
-      "title": "点了会跳出两个提示",
+      "title": "点了之后会发生什么",
       "step1": "浏览器问要不要打开 Steam，选「打开 Steam」。",
       "step2": "Steam 显示这次的启动参数，选「继续」。",
+      "step2Hint": "这个提示在 Steam 窗口里。没看到就点开 Steam。",
+      "step3": "然后<wait>等十几秒</wait>，Steam 和 Dota 2 才会依次打开。",
       "browser": {
         "title": "要打开 Steam 吗？",
         "body": "有个网站想打开此应用。",
