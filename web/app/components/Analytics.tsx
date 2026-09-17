@@ -2,7 +2,7 @@ import Script from 'next/script';
 
 import { GA_MEASUREMENT_ID } from '../lib/analytics';
 
-// 用 gtag 而非 firebase/analytics：后者要多取一次远端配置，且默认发往 Firebase 项目所链的媒体资源
+// 用 gtag 而非 firebase/analytics：只需要它发事件，不值得为此多一次远端配置请求与一个可能到不了的域名
 export default function Analytics() {
   if (!GA_MEASUREMENT_ID) {
     return null;
