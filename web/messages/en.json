@@ -14,7 +14,8 @@
     "github": "GitHub",
     "membershipShort": "Member",
     "membership": "Membership",
-    "offline": "When data takes effect",
+    "launch": "Start the game",
+    "launchShort": "Launch",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
     "menu": "Menu"
@@ -34,11 +35,7 @@
       "title": "Sign in to check your own data anytime",
       "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
       "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
-      "upcoming": [
-        "More statistics",
-        "Daily tasks",
-        "Ability and item draft list"
-      ]
+      "upcoming": ["More statistics", "Daily tasks", "Ability and item draft list"]
     },
     "summary": {
       "profileLink": "Profile",
@@ -98,27 +95,67 @@
       }
     }
   },
-  "offline": {
-    "title": "Game launch mode and when data takes effect",
+  "launch": {
+    "title": "Start the game",
     "link": "When data takes effect",
-    "lead": "Whether the game can read your latest data depends on how it is launched.",
-    "leadOffline": "<name>Offline mode</name>: launched from the Arcade. Since Dota 2 7.41f this cannot reach the server, so the game reads the data as of the last map update.",
-    "leadOnline": "<name>Online mode</name>: launched with a console command. It reaches the server and reads the latest data, but you can only play solo.",
+    "difficulty": {
+      "dota": "Difficulty N1–N5",
+      "hard": "Difficulty N6–N8",
+      "custom": "Custom difficulty"
+    },
+    "site": {
+      "title": "Start the game from this site",
+      "lead": "Solo only. Connects to the server and reads your latest data.",
+      "warning": "You must quit Dota 2 first."
+    },
+    "dialogs": {
+      "title": "Two prompts will appear",
+      "step1": "Your browser asks whether to open Steam. Choose \"Open Steam\".",
+      "step2": "Steam shows the launch parameters for this game. Choose \"Continue\".",
+      "browser": {
+        "title": "Open Steam?",
+        "body": "This site wants to open this application.",
+        "confirm": "Open Steam",
+        "cancel": "Cancel"
+      },
+      "steam": {
+        "title": "Launching Game with Custom Parameters",
+        "body": "Dota 2 is attempting to launch with the optional parameters displayed below.",
+        "note": "If you did not request this launch or do not understand these options, select \"Cancel\".",
+        "confirm": "Continue",
+        "cancel": "Cancel"
+      }
+    },
+    "console": {
+      "title": "Launch from the console",
+      "intro": "This is the same thing as the links above: both launch the game with the same parameters, and the game behaves identically. The links only save you the steps below. Use this when nothing happens after you click a link.",
+      "steps": [
+        "In Dota 2 settings, search for \"console\" and tick Enable Console",
+        "In the hotkey settings, bind a key to Console",
+        "Back at the Dota 2 main menu, press that key to open the console",
+        "Pick the difficulty you want and enter one of the commands below in the console"
+      ],
+      "copy": "Copy",
+      "copied": "Copied"
+    },
     "homeCard": {
       "offline": "Launched from the Arcade, the attribute points, awakenings and other changes you make take effect in-game at the next map update.",
-      "online": "Launched from the console, they take effect in the next game. Open this to see how."
+      "online": "Started from this site, they take effect in your next game. Open this to see how."
     },
     "notice": {
-      "property": "Launched from the Arcade, attribute points take effect in-game at the next map update. Launched from the console, they take effect right away.",
-      "awaken": "Launched from the Arcade, awakenings take effect in-game at the next map update. Launched from the console, they take effect right away.",
+      "property": "Launched from the Arcade, attribute points take effect in-game at the next map update. Start the game from this site and they apply in your next game.",
+      "awaken": "Launched from the Arcade, awakenings take effect in-game at the next map update. Start the game from this site and they apply in your next game.",
       "link": "Learn how"
     },
     "compare": {
-      "title": "The two modes",
+      "title": "The two ways to start",
+      "lead": "Whether the game can read your latest data depends on how you start it.",
+      "leadOffline": "<name>Launched from the Arcade</name>: since Dota 2 7.41f this cannot reach the server, so the game reads the data as of the last map update. That is offline mode.",
+      "leadOnline": "<name>Started from this site</name>: it reaches the server and reads your latest data, so that is online mode. The trade-off is that you can only play solo.",
       "offline": "Offline mode",
       "offlineHint": "From the Arcade",
       "online": "Online mode",
-      "onlineHint": "From the console",
+      "onlineHint": "From this site",
       "yes": "Yes",
       "no": "No",
       "multiplayer": "Multiplayer",
@@ -128,29 +165,13 @@
       "points": "End-of-game points and daily tasks",
       "checkIn": "Daily check-in and event points",
       "refresh": "Refreshing player info in-game",
-      "noteModes": "Membership, attribute points and hero awakenings apply in both modes; offline mode uses the data as of the last map update.",
-      "noteTiming": "The map updates two to three times a week. Attribute points, awakenings and other changes you make are picked up at the next map update in offline mode, and in the next game in online mode."
-    },
-    "online": {
-      "title": "How to get into online mode",
-      "steps": [
-        "In Dota 2 settings, search for \"console\" and tick Enable Console",
-        "In the hotkey settings, bind a key to Console",
-        "Back at the Dota 2 main menu, press that key to open the console",
-        "Pick the difficulty you want and enter one of the commands below in the console"
-      ],
-      "difficulty": {
-        "dota": "Difficulty N1–N5",
-        "hard": "Difficulty N6–N8",
-        "custom": "Custom difficulty"
-      },
-      "copy": "Copy",
-      "copied": "Copied"
+      "noteModes": "Membership, attribute points and hero awakenings apply either way; launched from the Arcade the game uses the data as of the last map update.",
+      "noteTiming": "The map updates two to three times a week. Attribute points, awakenings and other changes you make here are picked up at the next map update when you launch from the Arcade, and in your next game when you start from this site."
     },
     "website": {
       "title": "Attributes and awakenings happen on this site only",
-      "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. Both modes pick up the changes, and only differ in how soon.",
-      "checkIn": "The daily check-in can be claimed here, and launching in online mode claims it automatically."
+      "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. The game picks the changes up either way, and only differs in how soon.",
+      "checkIn": "The daily check-in can be claimed here, and starting the game from this site claims it automatically."
     }
   },
   "membership": {
@@ -165,7 +186,7 @@
       "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
       "🎮 One free reroll each for the starting active and passive skill draft"
     ],
-    "note": "😊When membership takes effect: launched from the console, refresh in-game and it applies right away; launched from the Arcade, it applies at the next map update.",
+    "note": "😊When membership takes effect: start the game from this site and it applies in your next game; launched from the Arcade, it applies at the next map update.",
     "afdian": {
       "title": "Afdian",
       "price": "CN¥29.8/month",
@@ -192,9 +213,7 @@
     "items": {
       "legalName": {
         "title": "Legal Name",
-        "content": [
-          "Windy (Individual)"
-        ]
+        "content": ["Windy (Individual)"]
       },
       "address": {
         "title": "Address",
@@ -210,21 +229,15 @@
       },
       "email": {
         "title": "Email Address",
-        "content": [
-          "windy10v10ai@gmail.com"
-        ]
+        "content": ["windy10v10ai@gmail.com"]
       },
       "operator": {
         "title": "Head of Operator",
-        "content": [
-          "Windy"
-        ]
+        "content": ["Windy"]
       },
       "otherFees": {
         "title": "Additional Fees",
-        "content": [
-          "Payment processing fee: Fees will be charged according to the payment method"
-        ]
+        "content": ["Payment processing fee: Fees will be charged according to the payment method"]
       },
       "refundPolicy": {
         "title": "Exchanges and returns policy",
@@ -262,9 +275,7 @@
       },
       "price": {
         "title": "Price",
-        "content": [
-          "10v10AI Membership Subscription: CN¥29.8/month or US$4/month"
-        ]
+        "content": ["10v10AI Membership Subscription: CN¥29.8/month or US$4/month"]
       }
     }
   },
@@ -299,7 +310,7 @@
     },
     "avticeResult": {
       "success": {
-        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nWhen it takes effect: launched from the Arcade, at the next map update; launched from the console, refresh in-game and it applies right away.",
+        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nWhen it takes effect: launched from the Arcade, at the next map update; started from this site, in your next game.",
         "btnText": "Return to Home"
       },
       "error": {
@@ -317,7 +328,7 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Data shows up after you finish a game launched from the console. Games launched from the Arcade do not report back."
+      "description": "Data shows up after you finish a game started from this site. Games launched from the Arcade do not report back."
     },
     "failed": {
       "title": "Failed to load",
@@ -338,7 +349,7 @@
     },
     "stats": {
       "title": "Stats",
-      "offlineNote": "Only games launched from the console record match stats and conduct score.",
+      "offlineNote": "Only games started from this site record match stats and conduct score.",
       "games": "Games",
       "winRate": "Win Rate",
       "conduct": "Conduct Score",
@@ -383,7 +394,7 @@
     },
     "noRecord": {
       "title": "No record for this player",
-      "description": "Check the ID, or play a game launched from the console."
+      "description": "Check the ID, or play a game started from this site."
     },
     "failed": {
       "title": "Could not load",
@@ -529,7 +540,7 @@
     },
     "noRecord": {
       "title": "No record yet",
-      "description": "No record for this Steam ID yet. Play a game launched from the console, then come back."
+      "description": "No record for this Steam ID yet. Play a game started from this site, then come back."
     },
     "failed": {
       "title": "Could not load",

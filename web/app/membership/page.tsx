@@ -73,8 +73,8 @@ export default function MembershipPage() {
 
           <p className="text-muted text-sm text-center">
             <EmojiLead text={t('membership.note')} />{' '}
-            <Link href="/offline" className="text-link link-hover whitespace-nowrap">
-              {t('offline.link')}
+            <Link href="/launch" className="text-link link-hover whitespace-nowrap">
+              {t('launch.link')}
             </Link>
           </p>
         </div>

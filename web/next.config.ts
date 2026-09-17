@@ -25,6 +25,10 @@ const config: NextConfig = {
       },
     ];
   },
+  // /offline 这个地址随上一版说明页发出去过，游戏内与帖子里都可能还留着
+  async redirects() {
+    return [{ source: '/offline', destination: '/launch', permanent: true }];
+  },
   // 不只服务页面：其他来源也经本站域名进 API，清单见 docs/api/README.md
   async rewrites() {
     return [
