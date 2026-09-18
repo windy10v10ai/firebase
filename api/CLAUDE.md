@@ -46,7 +46,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 
 ## 常见坑
 
-- `firestore-backup/` 不在仓库里，是从 GCP `gsutil` 拉的；没有它时不要带 `--import` 启动 emulator
+- `firestore-backup/` 不在仓库里，是从 GCP `gcloud storage` 拉的；没有它时不要带 `--import` 启动 emulator
 - API 通过 `FIRESTORE_EMULATOR_HOST` 连本地 emulator；忘记设这个变量会去连生产 Firestore 然后失败（无凭证）
 - Firestore emulator 需要 Java JRE
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
