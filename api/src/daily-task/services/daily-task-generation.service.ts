@@ -17,6 +17,8 @@ const SEED_MAX_LENGTH = 128;
 const DEFAULT_GENERAL_TASK_WEIGHT = 2;
 const REDUCED_GENERAL_TASK_WEIGHT = 1;
 const REDUCED_GENERAL_TASK_METRICS = new Set([TaskMetric.ASSISTS, TaskMetric.HEALING]);
+/** 单机开局没有队友，这两类任务打不出来，暂不参与生成。 */
+const DISABLED_TASK_METRICS = new Set<TaskMetric>([TaskMetric.ASSISTS, TaskMetric.HEALING]);
 
 export function getGeneralTaskWeight(task: TaskDefinition): number {
   return REDUCED_GENERAL_TASK_METRICS.has(task.metric)
@@ -49,11 +51,11 @@ export class DailyTaskGenerationService {
   private readonly taskById = new Map(DAILY_TASKS.map((task) => [task.id, task]));
 
   private readonly generalTasks = DAILY_TASKS.filter(
-    (task) => task.scope === TaskScope.PERSONAL_GENERAL,
+    (task) => task.scope === TaskScope.PERSONAL_GENERAL && !DISABLED_TASK_METRICS.has(task.metric),
   ).sort((left, right) => left.id.localeCompare(right.id));
 
   private readonly heroTasks = DAILY_TASKS.filter(
-    (task) => task.scope === TaskScope.PERSONAL_HERO,
+    (task) => task.scope === TaskScope.PERSONAL_HERO && !DISABLED_TASK_METRICS.has(task.metric),
   ).sort((left, right) => left.id.localeCompare(right.id));
 
   generateCandidates(
