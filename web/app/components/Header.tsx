@@ -73,9 +73,10 @@ export default function Header() {
     };
   }, [menuOpen]);
 
-  const visibleSiteNavItems = SITE_NAV_ITEMS.filter(
+  // 启动游戏是最常用的操作，横排里排在最前最好点；手机装不了 Steam，菜单不跟着调
+  const topRowNavItems = SITE_NAV_ITEMS.filter(
     (item): item is typeof item & { href: string } => item.href !== null,
-  );
+  ).sort((left, right) => Number('topFirst' in right) - Number('topFirst' in left));
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
   // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上
   const profileSubPath = pathname.startsWith('/profile/')
@@ -102,7 +103,7 @@ export default function Header() {
           </Link>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-4">
-              {visibleSiteNavItems.map((item) => (
+              {topRowNavItems.map((item) => (
                 <Link
                   key={item.key}
                   href={item.href}

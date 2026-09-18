@@ -1,6 +1,6 @@
 # 批次 9：Steam 昵称头像
 
-> 状态：已完成。长期决策见 [docs/web/README.md](../../web/README.md) 第 5 节与 [docs/api/README.md](../../api/README.md) 的「对外依赖」。
+> 状态：已完成。长期决策见 [docs/web/README.md](../../web/README.md) 第 6 节与 [docs/api/README.md](../../api/README.md) 的「对外依赖」。
 
 网站只显示 32 位数字 ID，头部账号区在手机上更是只有一个人形图标，玩家认不出那是自己的账号。这一批把 Steam 的昵称和头像取回来显示。
 

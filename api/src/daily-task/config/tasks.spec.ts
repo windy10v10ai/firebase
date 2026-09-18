@@ -67,7 +67,7 @@ describe('daily task configuration', () => {
       [TaskMetric.ASSISTS]: 40,
       [TaskMetric.LAST_HITS]: 200,
       [TaskMetric.TOWER_KILLS]: 4,
-      [TaskMetric.HERO_DAMAGE]: 1_000_000,
+      [TaskMetric.HERO_DAMAGE]: 800_000,
       [TaskMetric.HEALING]: 40_000,
       [TaskMetric.TOTAL_GOLD_EARNED]: 240_000,
       [TaskMetric.DAMAGE_TAKEN]: 200_000,

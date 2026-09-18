@@ -46,12 +46,13 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 
 ## 常见坑
 
-- `firestore-backup/` 不在仓库里，是从 GCP `gsutil` 拉的；没有它时不要带 `--import` 启动 emulator
+- `firestore-backup/` 不在仓库里，是从 GCP `gcloud storage` 拉的；没有它时不要带 `--import` 启动 emulator
 - API 通过 `FIRESTORE_EMULATOR_HOST` 连本地 emulator；忘记设这个变量会去连生产 Firestore 然后失败（无凭证）
 - Firestore emulator 需要 Java JRE
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
 - **新增顶层路由前缀必须登记到 `api/index.ts` 中 `client` 函数的路径白名单**（那个 `regex` 常量，形如 `^/api/(game|player|...).*`）。不在白名单里的请求在进入 NestJS 之前就被 403 `Invalid path` 拦掉，服务端只留一条 `Abnormal request on API Cloud Function! Path: ...`，controller、guard、e2e 全都看不到任何痕迹——e2e 直连 Nest，不经过这层，所以测试全绿也可能线上 403
 - **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节
+- **`@AllowWeb()` 不等于「只有网站能调」**：不挂任何装饰器时，任何有效的官方服务器 key 都能调，它只是额外放行网页来源，`@AllowLocal()` 同理额外放行本地主机 key。要按来源区分行为或统计，用 `@CurrentServerType()` 取 guard 算出来的来源，不要靠路由挂了什么装饰器去推
 - **给已有接口补挂 `@AllowWeb()` 不需要新开 e2e 用例**：归属校验（自己 200 / 别人 403 / 无 token 401）是 `auth.guard.ts` 里对所有带 `:steamId` 路由的通用逻辑，已在 [player-info-web.e2e-spec.ts](test/player-info-web.e2e-spec.ts) 验证过一次，不必逐个接口重复验证。只有装饰器改动之外还有新业务逻辑时才写新用例
 - **裸 `/api` 在线上到不了**：Hosting rewrite 是 `^/api/.*`、函数白名单是 `^/api/(game|player|...)`，两个都不匹配，实测 404。要探活用公开端点 `GET /api/hello`
 - **functions emulator 会伪造 CORS 头**：它给所有请求套了一层 `cors({ origin: true })`，预检由它直接答、任何 `Origin` 都放行。经 `localhost:5000` 的链路只能验通路，验不了白名单——白名单以 e2e（直连 Nest）和线上为准

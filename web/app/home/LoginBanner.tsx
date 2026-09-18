@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import AcceleratorHint from '@/app/components/AcceleratorHint';
 import SteamLoginButton from '@/app/components/SteamLoginButton';
 
 import SampleDataPanel from './SampleDataPanel';
@@ -34,6 +35,7 @@ export default function LoginBanner() {
         <p className="text-content">{t('description')}</p>
         <div className="flex flex-col items-start gap-2">
           <SteamLoginButton size="large" />
+          <AcceleratorHint />
           <p className="text-sm text-muted">{t('privacy')}</p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import Button from '@/app/components/ui/button';
+import { trackEvent } from '@/app/lib/analytics';
 import { ApiError, apiFetch } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
 import { isSafeNextPath } from '@/app/lib/steam-login';
@@ -183,6 +184,7 @@ function LoginCallbackContent() {
             setAttempt(nextAttempt);
           }
         });
+        trackEvent('login', { method: 'steam' });
         enterStage('redirect');
         router.replace(next);
       } catch (error) {

@@ -99,8 +99,8 @@
     "title": "Start the game",
     "link": "When data takes effect",
     "difficulty": {
-      "dota": "Difficulty N1–N5",
-      "hard": "Difficulty N6–N8",
+      "dota": "N1–N5",
+      "hard": "N6–N8",
       "custom": "Custom difficulty"
     },
     "site": {
@@ -109,9 +109,11 @@
       "warning": "You must quit Dota 2 first."
     },
     "dialogs": {
-      "title": "Two prompts will appear",
+      "title": "What happens after you click",
       "step1": "Your browser asks whether to open Steam. Choose \"Open Steam\".",
       "step2": "Steam shows the launch parameters for this game. Choose \"Continue\".",
+      "step2Hint": "This prompt appears inside Steam. If you do not see it, open Steam.",
+      "step3": "<wait>Please wait ten or twenty seconds</wait> while Steam and Dota 2 open.",
       "browser": {
         "title": "Open Steam?",
         "body": "This site wants to open this application.",
@@ -139,8 +141,9 @@
       "copied": "Copied"
     },
     "homeCard": {
-      "offline": "Launched from the Arcade, the attribute points, awakenings and other changes you make take effect in-game at the next map update.",
-      "online": "Started from this site, they take effect in your next game. Open this to see how."
+      "title": "Start the game from this site",
+      "online": "Started from this site, the game reaches the server and reads your latest data, so your attribute points and awakenings apply in your next game. Open this to see how.",
+      "offline": "Launched from the Arcade the game cannot reach the server; it reads the data as of the last map update, so your changes wait for it."
     },
     "notice": {
       "property": "Launched from the Arcade, attribute points take effect in-game at the next map update. Start the game from this site and they apply in your next game.",
@@ -597,6 +600,7 @@
     "login": "Sign in with Steam",
     "loginShort": "Sign in",
     "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
+    "acceleratorHint": "New tab won't load? Turn on your <b>accelerator</b> for <b>Steam</b>.",
     "loggedInAs": "ID {uid}",
     "signOut": "Sign out",
     "callback": {
