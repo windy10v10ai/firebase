@@ -124,6 +124,18 @@ describe('DailyTaskGenerationService', () => {
     ]);
   });
 
+  it('never generates assist or healing candidates', () => {
+    for (let steamId = 1; steamId <= 100; steamId++) {
+      for (let round = 1; round <= 3; round++) {
+        const candidates = service.generateCandidates('20260816', steamId, round, 0, []);
+        for (const candidate of candidates) {
+          expect(candidate.metric).not.toBe(TaskMetric.ASSISTS);
+          expect(candidate.metric).not.toBe(TaskMetric.HEALING);
+        }
+      }
+    }
+  });
+
   it('assigns each star exactly once per round', () => {
     const candidates = service.generateCandidates('20260816', 483215844, 1, 0, []);
 
