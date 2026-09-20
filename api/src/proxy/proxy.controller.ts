@@ -9,12 +9,14 @@ import {
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 
+import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { AllowQueryKey } from '../util/auth/allow-query-key.decorator';
+import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
@@ -36,6 +38,18 @@ export class ProxyController {
     private readonly playerInfoService: PlayerInfoService,
   ) {}
 
+  // 对应 GET /game/probe
+  @Get('game-probe')
+  gameProbe(
+    @Query('requestId') requestId: string,
+    @CurrentClientOrigin() origin: ClientOrigin,
+  ): string {
+    validateRequestId(requestId);
+    const body: ProbeResponse = { country: origin.country };
+    return buildProxySuccessHtml(requestId, body);
+  }
+
+  // 对应 GET /game/start
   @Get('game-start')
   async gameStart(
     @Query('requestId') requestId: string,
@@ -56,6 +70,7 @@ export class ProxyController {
     return buildProxySuccessHtml(requestId, result);
   }
 
+  // 对应 GET /player/:steamId/info
   @Get('player-info')
   async playerInfo(
     @Query('requestId') requestId: string,
