@@ -9,9 +9,12 @@ import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
+import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
+import { PlayerInfoService } from '../player-info/player-info.service';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GA4ConfigDto } from './dto/ga4-config.dto';
+import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
 @Injectable()
 export class GameService {
@@ -23,7 +26,65 @@ export class GameService {
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
+    private readonly playerInfoService: PlayerInfoService,
   ) {}
+
+  /**
+   * 开局编排：建档、活动奖励、会员每日积分、GA4 上报、每日任务快照、GA4 配置。
+   * `include` 由调用方决定要不要带上 property、heroAwakening（代理路由拆开请求时少传）。
+   */
+  async start(
+    steamIds: number[],
+    matchId: number,
+    version: string,
+    serverType: SERVER_TYPE,
+    include: PlayerInfoInclude[],
+  ): Promise<GameStart> {
+    steamIds = this.validateSteamIds(steamIds);
+
+    const pointInfo: PointInfoDto[] = [];
+
+    // 创建新玩家，更新最后游戏时间
+    await Promise.all(steamIds.map((steamId) => this.upsertPlayerInfo(steamId)));
+
+    // 获取活动奖励
+    const eventRewardInfo = await this.giveEventReward(steamIds, serverType);
+    pointInfo.push(...eventRewardInfo);
+
+    // 获取会员 添加每日会员积分
+    const members = await this.membersService.findBySteamIds(steamIds);
+    // 添加每日会员积分
+    const memberDailyPointInfo = await this.addDailyMemberPoints(members);
+    pointInfo.push(...memberDailyPointInfo);
+
+    // ----------------- 以下为统计数据 -----------------
+    // 统计数据发送至GA4
+    const isLocal = serverType === SERVER_TYPE.LOCAL;
+    await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType, version);
+
+    // ----------------- 以下为返回数据 -----------------
+    const steamIdsStr = steamIds.map((id) => id.toString());
+    const players = await this.playerInfoService.findPlayerInfoBySteamIds(steamIdsStr, include);
+
+    // 构建响应对象
+    const response: GameStart = {
+      players,
+      pointInfo,
+    };
+
+    const dailyTasks = await this.dailyTaskService.getSnapshots(steamIds);
+    if (dailyTasks.length > 0) {
+      response.dailyTasks = dailyTasks;
+    }
+
+    // 获取GA4配置信息
+    const ga4Config = this.getGA4Config(serverType);
+    if (ga4Config) {
+      response.ga4Config = ga4Config;
+    }
+
+    return response;
+  }
 
   /** 正式结算：累加每个玩家的战绩与积分，并记录每日任务。 */
   async recordGameEnd(gameEnd: GameEndDto): Promise<void> {

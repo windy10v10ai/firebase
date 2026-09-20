@@ -9,6 +9,7 @@ import { MembersService } from '../members/members.service';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
+import { PlayerInfoService } from '../player-info/player-info.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
@@ -69,6 +70,10 @@ describe('GameService', () => {
           useValue: {
             getSecretValue: jest.fn(),
           },
+        },
+        {
+          provide: PlayerInfoService,
+          useValue: { findPlayerInfoBySteamIds: jest.fn() },
         },
       ],
     }).compile();
@@ -273,6 +278,7 @@ describe('GameService.addDailyMemberPoints', () => {
       null,
       null,
       membersService,
+      null,
       null,
       null,
     );

@@ -93,6 +93,29 @@ describe('本地 key 放行名单 (e2e)', () => {
         .send({ steamId: DAILY_TASK_STEAM_ID, dayId: '20260909' });
       expect(res.status).toBe(201);
     });
+
+    it('GET /api/proxy/game-start（网页控件无法带请求头，走 query 的 apiKey）', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/proxy/game-start')
+        .query({
+          requestId: 'p_1_1',
+          steamIds: `${GAME_START_STEAM_ID}`,
+          matchId: 1,
+          apiKey: localKey,
+        });
+      expect(res.status).toBe(200);
+      expect(res.text).toMatch(/^<!DOCTYPE html><title>p_1_1\|/);
+      expect(res.text).not.toContain('ERR:');
+    });
+
+    it('GET /api/proxy/player-info（网页控件无法带请求头，走 query 的 apiKey）', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/proxy/player-info')
+        .query({ requestId: 'p_2_1', steamId: STEAM_ID, apiKey: localKey });
+      expect(res.status).toBe(200);
+      expect(res.text).toMatch(/^<!DOCTYPE html><title>p_2_1\|/);
+      expect(res.text).not.toContain('ERR:');
+    });
   });
 
   describe('未放行的接口返回 401', () => {
@@ -143,5 +166,13 @@ describe('本地 key 放行名单 (e2e)', () => {
       .query({ steamIds: `${STEAM_ID}`, matchId: 1, version: 'v4.05' })
       .set('x-api-key', 'not-a-real-key');
     expect(res.status).toBe(401);
+  });
+
+  it('代理路由的鉴权失败不返回 401，而是 200 + ERR:unauthorized（网页控件读不到非 200 的 title）', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/proxy/game-start')
+      .query({ requestId: 'p_1_1', steamIds: `${STEAM_ID}`, matchId: 1, apiKey: 'not-a-real-key' });
+    expect(res.status).toBe(200);
+    expect(res.text).toBe('<!DOCTYPE html><title>p_1_1|ERR:unauthorized</title>');
   });
 });
