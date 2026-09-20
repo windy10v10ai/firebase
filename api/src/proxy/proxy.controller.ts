@@ -21,7 +21,7 @@ import { SERVER_TYPE } from '../util/secret/secret.service';
 import { ProxyExceptionFilter } from './proxy-exception.filter';
 import { buildProxySuccessHtml, validateRequestId } from './proxy-response.util';
 
-// 本地主机拿不到 HTTP 请求对象时，由代发玩家的客户端网页控件代为访问，
+// 游廊多人对局发不出 HTTP 请求，由代发玩家的客户端网页控件代为访问，
 // 每个玩家拆成 game-start、player-info 两个并行请求，回来后按字段浅合并
 const PROXY_GAME_START_INCLUDE: PlayerInfoInclude[] = ['member', 'setting', 'statsLifetime'];
 
