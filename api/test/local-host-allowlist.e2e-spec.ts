@@ -116,6 +116,15 @@ describe('本地 key 放行名单 (e2e)', () => {
       expect(res.text).toMatch(/^<!DOCTYPE html><title>p_2_1\|/);
       expect(res.text).not.toContain('ERR:');
     });
+
+    it('GET /api/proxy/game-probe（网页控件无法带请求头，走 query 的 apiKey）', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/proxy/game-probe')
+        .query({ requestId: 'p_3_1', apiKey: localKey })
+        .set('cf-ipcountry', 'CN');
+      expect(res.status).toBe(200);
+      expect(res.text).toBe('<!DOCTYPE html><title>p_3_1|{"country":"CN"}</title>');
+    });
   });
 
   describe('未放行的接口返回 401', () => {
