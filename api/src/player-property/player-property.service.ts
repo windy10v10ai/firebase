@@ -8,6 +8,7 @@ import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 import { PlayerService } from '../player/player.service';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
+import { PlayerPropertyInput } from './dto/player-property-input.dto';
 import { PlayerPropertyItemDto } from './dto/player-property-item.dto';
 import { PlayerProperty } from './entities/player-property.entity';
 
@@ -70,7 +71,7 @@ export class PlayerPropertyService {
    * 3. 写入 property 文档
    * 4. 同步 player.usedLevel（双写埋点，等回填脚本完成后切换读取路径）
    */
-  async upgrade(propertyDto: PlayerPropertyItemDto, serverType: SERVER_TYPE): Promise<void> {
+  async upgrade(propertyDto: PlayerPropertyInput, serverType: SERVER_TYPE): Promise<void> {
     this.validatePropertyName(propertyDto.name);
 
     const player = await this.playerService.findBySteamId(propertyDto.steamId);
@@ -172,7 +173,7 @@ export class PlayerPropertyService {
     await this.deleteBySteamId(steamId);
   }
 
-  async upsert(propertyDto: PlayerPropertyItemDto): Promise<PlayerProperty> {
+  async upsert(propertyDto: PlayerPropertyInput): Promise<PlayerProperty> {
     const id = propertyDto.steamId.toString();
     let playerProperty = await this.playerPropertyRepository.findById(id);
 
@@ -200,7 +201,6 @@ export class PlayerPropertyService {
     return playerProperty.properties
       .filter((p) => p.level > 0)
       .map((p) => ({
-        steamId: playerProperty.steamId,
         name: p.name,
         level: p.level,
       }));

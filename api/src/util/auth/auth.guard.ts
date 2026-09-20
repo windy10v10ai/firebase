@@ -11,6 +11,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { SERVER_TYPE, SecretService } from '../secret/secret.service';
 
 import { ALLOW_LOCAL_KEY } from './allow-local.decorator';
+import { ALLOW_QUERY_KEY_KEY } from './allow-query-key.decorator';
 import { ALLOW_WEB_KEY } from './allow-web.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { RequestWithServerType } from './server-type.decorator';
@@ -40,7 +41,16 @@ export class AuthGuard implements CanActivate {
       return this.authenticateWeb(context, request, authorization.slice(BEARER_PREFIX.length));
     }
 
-    const apiKey = request.headers['x-api-key'] as string;
+    let apiKey = request.headers['x-api-key'] as string;
+    if (!apiKey) {
+      const allowQueryKey = this.reflector.getAllAndOverride<boolean>(ALLOW_QUERY_KEY_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+      if (allowQueryKey) {
+        apiKey = request.query.apiKey as string;
+      }
+    }
     const serverType = this.secretService.getServerTypeByApiKey(apiKey);
     request.serverType = serverType;
 

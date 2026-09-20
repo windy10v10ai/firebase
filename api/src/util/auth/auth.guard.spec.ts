@@ -5,6 +5,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { SERVER_TYPE } from '../secret/secret.service';
 
 import { ALLOW_LOCAL_KEY } from './allow-local.decorator';
+import { ALLOW_QUERY_KEY_KEY } from './allow-query-key.decorator';
 import { ALLOW_WEB_KEY } from './allow-web.decorator';
 import { AuthGuard } from './auth.guard';
 import { IS_PUBLIC_KEY } from './public.decorator';
@@ -12,12 +13,20 @@ import { RequestWithServerType } from './server-type.decorator';
 
 jest.mock('firebase-admin/auth');
 
-function createContext(options: { apiKey?: string; bearerToken?: string; steamId?: string } = {}) {
+function createContext(
+  options: {
+    apiKey?: string;
+    queryApiKey?: string;
+    bearerToken?: string;
+    steamId?: string;
+  } = {},
+) {
   const headers: Record<string, string> = {};
   if (options.apiKey) headers['x-api-key'] = options.apiKey;
   if (options.bearerToken) headers.authorization = `Bearer ${options.bearerToken}`;
   const request = {
     headers,
+    query: options.queryApiKey === undefined ? {} : { apiKey: options.queryApiKey },
     params: options.steamId === undefined ? {} : { steamId: options.steamId },
   } as unknown as RequestWithServerType;
   const context = {
@@ -71,6 +80,28 @@ describe('AuthGuard', () => {
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(request.serverType).toBe(SERVER_TYPE.LOCAL);
+  });
+
+  it('挂了 AllowQueryKey 且没有请求头时，从 query 的 apiKey 读取', async () => {
+    const guard = createGuard({ [ALLOW_LOCAL_KEY]: true, [ALLOW_QUERY_KEY_KEY]: true });
+    const { context, request } = createContext({ queryApiKey: 'local-key' });
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(request.serverType).toBe(SERVER_TYPE.LOCAL);
+  });
+
+  it('没挂 AllowQueryKey 时，不读取 query 的 apiKey', async () => {
+    const guard = createGuard({ [ALLOW_LOCAL_KEY]: true });
+    const { context } = createContext({ queryApiKey: 'local-key' });
+
+    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('请求头带了 key 时，忽略 query 的 apiKey', async () => {
+    const guard = createGuard({ [ALLOW_QUERY_KEY_KEY]: true });
+    const { context } = createContext({ apiKey: 'windy-key', queryApiKey: 'nope' });
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
   it('Public 路由直接放行，不解析来源', async () => {
