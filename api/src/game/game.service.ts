@@ -1,22 +1,125 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
+import { AnalyticsService } from '../analytics/analytics.service';
+import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
+import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
 import { PlayerService } from '../player/player.service';
+import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
+import { PlayerInfoService } from '../player-info/player-info.service';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GA4ConfigDto } from './dto/ga4-config.dto';
+import { GameStart } from './dto/game-start.response';
 import { PointInfoDto } from './dto/point-info.dto';
 @Injectable()
 export class GameService {
   constructor(
     private readonly playerService: PlayerService,
+    private readonly dailyTaskService: DailyTaskService,
+    private readonly analyticsService: AnalyticsService,
+    private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
+    private readonly playerInfoService: PlayerInfoService,
   ) {}
+
+  /**
+   * 开局编排：建档、活动奖励、会员每日积分、GA4 上报、每日任务快照、GA4 配置。
+   * `include` 由调用方决定要不要带上 property、heroAwakening（代理路由拆开请求时少传）。
+   */
+  async start(
+    steamIds: number[],
+    matchId: number,
+    version: string,
+    serverType: SERVER_TYPE,
+    include: PlayerInfoInclude[],
+  ): Promise<GameStart> {
+    steamIds = this.validateSteamIds(steamIds);
+
+    const pointInfo: PointInfoDto[] = [];
+
+    // 创建新玩家，更新最后游戏时间
+    await Promise.all(steamIds.map((steamId) => this.upsertPlayerInfo(steamId)));
+
+    // 获取活动奖励
+    const eventRewardInfo = await this.giveEventReward(steamIds, serverType);
+    pointInfo.push(...eventRewardInfo);
+
+    // 获取会员 添加每日会员积分
+    const members = await this.membersService.findBySteamIds(steamIds);
+    // 添加每日会员积分
+    const memberDailyPointInfo = await this.addDailyMemberPoints(members);
+    pointInfo.push(...memberDailyPointInfo);
+
+    // ----------------- 以下为统计数据 -----------------
+    // 统计数据发送至GA4
+    const isLocal = serverType === SERVER_TYPE.LOCAL;
+    await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType, version);
+
+    // ----------------- 以下为返回数据 -----------------
+    const steamIdsStr = steamIds.map((id) => id.toString());
+    const players = await this.playerInfoService.findPlayerInfoBySteamIds(steamIdsStr, include);
+
+    // 构建响应对象
+    const response: GameStart = {
+      players,
+      pointInfo,
+    };
+
+    const dailyTasks = await this.dailyTaskService.getSnapshots(steamIds);
+    if (dailyTasks.length > 0) {
+      response.dailyTasks = dailyTasks;
+    }
+
+    // 获取GA4配置信息
+    const ga4Config = this.getGA4Config(serverType);
+    if (ga4Config) {
+      response.ga4Config = ga4Config;
+    }
+
+    return response;
+  }
+
+  /** 正式结算：累加每个玩家的战绩与积分，并记录每日任务。 */
+  async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
+    const players = gameEnd.players.filter((player) => player.steamId > 0);
+    // 行为分只在组队局计算
+    const isParty = players.length >= 2;
+
+    await Promise.all(
+      players.map((player) =>
+        this.playerService.upsertGameEnd(
+          player.steamId,
+          player.teamId === gameEnd.winnerTeamId,
+          player.battlePoints,
+          player.isDisconnected,
+          isParty,
+        ),
+      ),
+    );
+
+    await this.dailyTaskService.recordGameEnd(gameEnd.players);
+  }
+
+  /** 上报对局统计，与结算规则无关，正式结算与本地结算共用。 */
+  async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
+    await Promise.all([
+      this.analyticsService.gameEndMatch(gameEnd, serverType),
+      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+      ...gameEnd.players.map((player) =>
+        this.playerStatsLifetimeService.accumulate(player.steamId, player, {
+          matchId: gameEnd.matchId,
+          gameOptions: gameEnd.gameOptions,
+        }),
+      ),
+    ]);
+  }
 
   getOK(): string {
     return 'OK';
@@ -38,35 +141,27 @@ export class GameService {
     const pointInfoDtos: PointInfoDto[] = [];
     for (const member of members) {
       const { dailyPoint, catchUpDays, catchUpPoint } =
-        this.membersService.getCheckInPoints(member);
-      const totalPoint = dailyPoint + catchUpPoint;
-      // 判断是否为会员
-      if (totalPoint > 0) {
-        await this.playerService.upsertAddPoint(member.steamId, {
-          memberPointTotal: totalPoint,
-        });
-        await this.membersService.updateMemberLastDailyDate(member);
+        await this.membersService.checkInMember(member);
 
-        if (dailyPoint > 0) {
-          pointInfoDtos.push({
-            steamId: member.steamId,
-            title: {
-              cn: '获得会员经验',
-              en: 'Get Member Experience',
-            },
-            memberPoint: dailyPoint,
-          });
-        }
-        if (catchUpDays > 0) {
-          pointInfoDtos.push({
-            steamId: member.steamId,
-            title: {
-              cn: `补签会员经验 x${catchUpDays}天`,
-              en: `Member Check-in Catch-up x${catchUpDays} day(s)`,
-            },
-            memberPoint: catchUpPoint,
-          });
-        }
+      if (dailyPoint > 0) {
+        pointInfoDtos.push({
+          steamId: member.steamId,
+          title: {
+            cn: '获得会员经验',
+            en: 'Get Member Experience',
+          },
+          memberPoint: dailyPoint,
+        });
+      }
+      if (catchUpDays > 0) {
+        pointInfoDtos.push({
+          steamId: member.steamId,
+          title: {
+            cn: `补签会员经验 x${catchUpDays}天`,
+            en: `Member Check-in Catch-up x${catchUpDays} day(s)`,
+          },
+          memberPoint: catchUpPoint,
+        });
       }
     }
 
@@ -82,9 +177,9 @@ export class GameService {
     const pointInfoDtos: PointInfoDto[] = [];
 
     // FIXME 活动每次需要更新
-    const startTime = new Date('2026-08-02T00:00:00.000Z');
-    const endTime = new Date('2026-08-09T23:59:59.999Z');
-    const memberRewardPoint = 2000;
+    const startTime = new Date('2026-09-12T00:00:00.000Z');
+    const endTime = new Date('2026-09-19T23:59:59.999Z');
+    const seasonRewardPoint = 5000;
 
     const now = new Date();
 
@@ -98,18 +193,18 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= startTime && now <= endTime && !rewardResult.result?.awaken20260802) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.compensation20260912) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          memberPointTotal: memberRewardPoint,
+          seasonPointTotal: seasonRewardPoint,
         });
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '觉醒活动奖励',
-            en: 'Awaken Event Reward',
+            cn: '服务器故障补偿',
+            en: 'Server Outage Compensation',
           },
-          memberPoint: memberRewardPoint,
+          seasonPoint: seasonRewardPoint,
         });
       }
     }
@@ -122,8 +217,8 @@ export class GameService {
    * @returns GA4配置信息，如果不符合条件则返回undefined
    */
   getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
-    // 非官方服务器不发送GA4配置信息
-    if (serverType === SERVER_TYPE.LOCAL || serverType === SERVER_TYPE.UNKNOWN) {
+    // 来源不明的服务器不参与GA4统计
+    if (serverType === SERVER_TYPE.UNKNOWN) {
       return undefined;
     }
 

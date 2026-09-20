@@ -1,35 +1,209 @@
 {
   "navigation": {
     "home": "Windy10v10ai",
-    "disclosure": "Business Disclosure"
+    "homeShort": "10v10AI",
+    "profile": "Profile",
+    "profileFull": "Profile",
+    "property": "Attributes",
+    "propertyFull": "Attributes",
+    "awaken": "Awaken",
+    "awakenFull": "Hero Awakening",
+    "wiki": "Skills & Items",
+    "wikiFull": "Skills & Items",
+    "workshop": "Steam Workshop",
+    "github": "GitHub",
+    "membershipShort": "Member",
+    "membership": "Membership",
+    "launch": "Start the game",
+    "launchShort": "Launch",
+    "disclosure": "Business Disclosure",
+    "switchLanguage": "Switch language",
+    "menu": "Menu"
   },
   "home": {
     "title": "DOTA2 10v10 AI Custom Map",
-    "steamWorkshop": {
+    "workshop": {
       "title": "Steam Workshop",
-      "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates."
-    },
-    "membership": {
-      "title": "Membership Subscription",
-      "description": "⭐Membership grants the following benefits:",
-      "note": "❗Remember to leave your Dota2 friend ID in the message to automatically activate your membership.",
-      "benefits": [
-        "Receive 1000 membership points for each monthly subscription",
-        "Gain 100 membership points for playing every day",
-        "Get one extra reroll in Ability Draft",
-        "Respawn time reduced to 5 seconds, and buyback cooldown reduced to 2 minutes",
-        "Enjoy a special Membership BUFF in-game"
-      ],
-      "subscribe": "Subscribe Now",
-      "subscribeLink": "https://afdian.com/a/windy10v10ai"
+      "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates.",
+      "subscribe": "Get the map"
     },
     "github": {
       "title": "GitHub",
       "description": "View project source code, changelog, and contribute to the project"
     },
-    "about": {
-      "title": "About Project",
-      "description": "This is a DOTA2 custom map project that brings you a new 10v10 AI battle experience.\nYou can subscribe to membership to unlock more features and enjoy better gaming experience.\nWe will continue to optimize and update, your support is our motivation to keep improving."
+    "intro": {
+      "title": "Sign in to check your own data anytime",
+      "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
+      "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
+      "upcoming": ["More statistics", "Daily tasks", "Ability and item draft list"]
+    },
+    "summary": {
+      "profileLink": "Profile",
+      "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "Copy",
+        "copied": "Copied"
+      },
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "battlePoint": "Usable Battle Points",
+      "memberPoint": "Usable Member Points",
+      "member": {
+        "premium": "Premium member",
+        "normal": "Member",
+        "expireDate": "Valid until {date}",
+        "expired": "Membership expired"
+      }
+    },
+    "sample": {
+      "games": "Games",
+      "winRate": "Win Rate",
+      "conduct": "Conduct Score",
+      "signIn": "Daily check-in",
+      "vision": "Bonus vision",
+      "cooldown": "Cooldown",
+      "moveSpeed": "Movement speed",
+      "awakened": "Awakened heroes",
+      "level": "Lv {n}"
+    },
+    "pages": {
+      "title": "Main pages",
+      "soon": "Coming soon",
+      "profile": {
+        "title": "Profile",
+        "description": "Match record, Battle and Member levels, usable points"
+      },
+      "property": {
+        "title": "Attributes",
+        "description": "View attributes, spend and reset points"
+      },
+      "awaken": {
+        "title": "Hero Awakening",
+        "description": "Awakened heroes, unlock and randomise"
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Member benefits, Afdian and Ko-fi subscriptions"
+      },
+      "dailyTask": {
+        "title": "Daily Tasks",
+        "description": "Preview and refresh your daily tasks"
+      },
+      "wiki": {
+        "title": "Skills & Items",
+        "description": "The abilities and items in the opening draft"
+      }
+    }
+  },
+  "launch": {
+    "title": "Start the game",
+    "link": "When data takes effect",
+    "difficulty": {
+      "dota": "N1–N5",
+      "hard": "N6–N8",
+      "custom": "Custom difficulty"
+    },
+    "site": {
+      "title": "Start the game from this site",
+      "lead": "Solo only. Connects to the server and reads your latest data.",
+      "warning": "You must quit Dota 2 first."
+    },
+    "dialogs": {
+      "title": "What happens after you click",
+      "step1": "Your browser asks whether to open Steam. Choose \"Open Steam\".",
+      "step2": "Steam shows the launch parameters for this game. Choose \"Continue\".",
+      "step2Hint": "This prompt appears inside Steam. If you do not see it, open Steam.",
+      "step3": "<wait>Please wait ten or twenty seconds</wait> while Steam and Dota 2 open.",
+      "browser": {
+        "title": "Open Steam?",
+        "body": "This site wants to open this application.",
+        "confirm": "Open Steam",
+        "cancel": "Cancel"
+      },
+      "steam": {
+        "title": "Launching Game with Custom Parameters",
+        "body": "Dota 2 is attempting to launch with the optional parameters displayed below.",
+        "note": "If you did not request this launch or do not understand these options, select \"Cancel\".",
+        "confirm": "Continue",
+        "cancel": "Cancel"
+      }
+    },
+    "console": {
+      "title": "Launch from the console",
+      "intro": "This is the same thing as the links above: both launch the game with the same parameters, and the game behaves identically. The links only save you the steps below. Use this when nothing happens after you click a link.",
+      "steps": [
+        "In Dota 2 settings, search for \"console\" and tick Enable Console",
+        "In the hotkey settings, bind a key to Console",
+        "Back at the Dota 2 main menu, press that key to open the console",
+        "Pick the difficulty you want and enter one of the commands below in the console"
+      ],
+      "copy": "Copy",
+      "copied": "Copied"
+    },
+    "homeCard": {
+      "title": "Start the game from this site",
+      "online": "Started from this site, the game reaches the server and reads your latest data, so your attribute points and awakenings apply in your next game. Open this to see how.",
+      "offline": "Launched from the Arcade the game cannot reach the server; it reads the data as of the last map update, so your changes wait for it."
+    },
+    "notice": {
+      "property": "Launched from the Arcade, attribute points take effect in-game at the next map update. Start the game from this site and they apply in your next game.",
+      "awaken": "Launched from the Arcade, awakenings take effect in-game at the next map update. Start the game from this site and they apply in your next game.",
+      "link": "Learn how"
+    },
+    "compare": {
+      "title": "The two ways to start",
+      "lead": "Whether the game can read your latest data depends on how you start it.",
+      "leadOffline": "<name>Launched from the Arcade</name>: since Dota 2 7.41f this cannot reach the server, so the game reads the data as of the last map update. That is offline mode.",
+      "leadOnline": "<name>Started from this site</name>: it reaches the server and reads your latest data, so that is online mode. The trade-off is that you can only play solo.",
+      "offline": "Offline mode",
+      "offlineHint": "From the Arcade",
+      "online": "Online mode",
+      "onlineHint": "From this site",
+      "yes": "Yes",
+      "no": "No",
+      "multiplayer": "Multiplayer",
+      "multiplayerOnline": "Solo only",
+      "latestData": "Reads your latest data",
+      "latestDataOffline": "Last map update",
+      "points": "End-of-game points and daily tasks",
+      "checkIn": "Daily check-in and event points",
+      "refresh": "Refreshing player info in-game",
+      "noteModes": "Membership, attribute points and hero awakenings apply either way; launched from the Arcade the game uses the data as of the last map update.",
+      "noteTiming": "The map updates two to three times a week. Attribute points, awakenings and other changes you make here are picked up at the next map update when you launch from the Arcade, and in your next game when you start from this site."
+    },
+    "website": {
+      "title": "Attributes and awakenings happen on this site only",
+      "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. The game picks the changes up either way, and only differs in how soon.",
+      "checkIn": "The daily check-in can be claimed here, and starting the game from this site claims it automatically."
+    }
+  },
+  "membership": {
+    "title": "10v10AI Premium Membership",
+    "description": "⭐Subscribe to get the following benefits (please leave your Dota2 friend ID in the message to auto-activate)",
+    "benefits": [
+      "💎 Membership points: 1000 points instantly per subscribed month, plus 100 points for each daily check-in, with up to 7 makeup days",
+      "🎯 Skill draft upgraded to a pick-1-of-8, with the 2 extra skills more likely to be advanced abilities",
+      "🪙 Unlocks the in-game 99999 gold cap",
+      "🎁 One free reroll for treasure chest item drops",
+      "⚔️ Exclusive membership BUFF: +10 attack, +5% spell amplification, +300 HP, +200 MP",
+      "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
+      "🎮 One free reroll each for the starting active and passive skill draft"
+    ],
+    "note": "😊When membership takes effect: start the game from this site and it applies in your next game; launched from the Arcade, it applies at the next map update.",
+    "afdian": {
+      "title": "Afdian",
+      "price": "CN¥29.8/month",
+      "subscribe": "Subscribe on Afdian"
+    },
+    "kofi": {
+      "title": "Ko-fi",
+      "price": "US$4/month",
+      "subscribe": "Subscribe on Ko-fi"
+    },
+    "manualActive": {
+      "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
+      "afdian": "Afdian",
+      "kofi": "Ko-fi"
     }
   },
   "footer": {
@@ -38,7 +212,7 @@
   "disclosure": {
     "title": "Business Disclosure",
     "description": "According to the requirements of the Specified Commercial Transactions Act, we hereby disclose the following business information.",
-    "lastUpdate": "Last updated: March 26, 2025",
+    "lastUpdate": "Last updated: September 12, 2026",
     "items": {
       "legalName": {
         "title": "Legal Name",
@@ -46,11 +220,15 @@
       },
       "address": {
         "title": "Address",
-        "content": ["Will be disclosed upon request"]
+        "content": [
+          "Provided without delay upon request, please contact us at the email address below"
+        ]
       },
       "phone": {
         "title": "Phone Number",
-        "content": ["Will be disclosed upon request"]
+        "content": [
+          "Provided without delay upon request, please contact us at the email address below"
+        ]
       },
       "email": {
         "title": "Email Address",
@@ -78,22 +256,29 @@
       "serviceTime": {
         "title": "Delivery times",
         "content": [
-          "Membership service is available immediately after successful subscription payment"
+          "Membership service is available immediately after successful subscription payment. When it takes effect inside the game depends on how the game is launched; see \"When data takes effect\" on this site"
         ]
       },
       "paymentMethods": {
         "title": "Accepted Payment Methods",
-        "content": ["Alipay", "WeChat Pay", "Credit Card"]
+        "content": [
+          "Alipay",
+          "WeChat Pay",
+          "Stripe",
+          "PayPal",
+          "Note: available payment methods and settlement currency vary by payment platform"
+        ]
       },
       "paymentCycle": {
         "title": "Payment period",
         "content": [
-          "Alipay, WeChat Pay, and credit card payments are instant, membership service will be activated immediately after successful payment"
+          "All four payment methods are processed instantly, and membership is activated as soon as the payment succeeds",
+          "With the monthly auto-renewing plan, the fee is charged automatically every month and can be cancelled at any time"
         ]
       },
       "price": {
         "title": "Price",
-        "content": ["10v10AI Membership Subscription: ¥30/month"]
+        "content": ["10v10AI Membership Subscription: CN¥29.8/month or US$4/month"]
       }
     }
   },
@@ -107,7 +292,8 @@
         "title": "Dota2 Friend ID",
         "placeholder": "Please enter your Dota2 friend ID",
         "help": "Please enter a valid Dota2 friend ID, format: numbers only, up to 10 digits",
-        "helpLink": "How to find your Dota2 friend ID?"
+        "helpLink": "How to find your Dota2 friend ID?",
+        "steamAutoFill": "Fill in with Steam sign-in"
       },
       "afdianOrderId": {
         "title": "Afdian Order No",
@@ -122,18 +308,349 @@
       }
     },
     "submitButton": {
-      "buttonText": "Activate Membership"
+      "buttonText": "Activate Membership",
+      "loadingText": "Activating membership"
     },
     "avticeResult": {
       "success": {
-        "message": "Your membership has been successfully activated. Thank you for your support!\n\nIf it is not yet active in-game, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.",
+        "message": "Your membership has been successfully activated. Thank you for your support!\n\nSign in with Steam here and your profile will show your membership status and expiry date.\nWhen it takes effect: launched from the Arcade, at the next map update; started from this site, in your next game.",
         "btnText": "Return to Home"
       },
       "error": {
         "afdianMessage": "Please check if your Dota2 friend ID and Afdian Order No are correct.\nIf the problem persists, please contact us for manual processing.",
-        "kofiMessage": "No unactivated orders found.\nIf you have successfully subscribed, go to Profile → Member and click \"Refresh Member Status\" to apply immediately.\nIf it still does not take effect, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
+        "kofiMessage": "No unactivated orders found.\nIf you have already subscribed, it may have been activated automatically. Sign in with Steam here and your profile will show your membership status and expiry date.\nIf no membership shows up there either, please check if your Dota2 friend ID and Ko-fi email address are correct, or contact us for manual processing.",
         "btnText": "Try Again"
       }
     }
+  },
+  "profile": {
+    "loading": "Loading player data",
+    "private": {
+      "title": "This player's profile is not public",
+      "description": "For now you can only view your own profile."
+    },
+    "noRecord": {
+      "title": "No record for this player",
+      "description": "Data shows up after you finish a game started from this site. Games launched from the Arcade do not report back."
+    },
+    "failed": {
+      "title": "Failed to load",
+      "description": "Please refresh the page and try again."
+    },
+    "identity": {
+      "heading": "ID {id}",
+      "copyId": {
+        "tooltip": "Copy",
+        "copied": "Copied"
+      },
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "conductNet": "Commends minus Reports",
+      "cumulative": "Total {total}",
+      "remainingToLevel": "{amount} to level {level}",
+      "usablePoints": "Usable Points"
+    },
+    "stats": {
+      "title": "Stats",
+      "offlineNote": "Only games started from this site record match stats and conduct score.",
+      "games": "Games",
+      "winRate": "Win Rate",
+      "conduct": "Conduct Score",
+      "lifetime": "Career Stats",
+      "kills": "Kills",
+      "deaths": "Deaths",
+      "assists": "Assists",
+      "lastHits": "Last Hits",
+      "totalGoldEarned": "Gold Earned",
+      "heroDamage": "Hero Damage",
+      "damageTaken": "Damage Taken",
+      "healing": "Healing",
+      "towerKills": "Tower Kills"
+    },
+    "member": {
+      "premium": "Premium Member",
+      "normal": "Member",
+      "expired": "Expired",
+      "expireDate": "Valid until {date}",
+      "link": "Membership",
+      "premiumShort": "Premium",
+      "expireDateShort": "Until {date}"
+    },
+    "entries": {
+      "property": {
+        "title": "Attributes",
+        "description": "Spend points on permanent attributes",
+        "badge": "Usable {count} points"
+      },
+      "awaken": {
+        "title": "Hero Awakening",
+        "description": "Unlock heroes' awakening talents",
+        "badge": "Awakened {awakened} / {total}"
+      }
+    }
+  },
+  "property": {
+    "loading": "Loading attributes",
+    "private": {
+      "title": "This profile is not visible",
+      "description": "Attributes can only be viewed and changed by the account owner."
+    },
+    "noRecord": {
+      "title": "No record for this player",
+      "description": "Check the ID, or play a game started from this site."
+    },
+    "failed": {
+      "title": "Could not load",
+      "description": "Refresh and try again, or come back in a little while."
+    },
+    "title": "Attributes",
+    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game.",
+    "points": {
+      "title": "Attribute points",
+      "usable": "Usable / total",
+      "battleLevel": "Battle level",
+      "memberLevel": "Member level",
+      "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down.",
+      "reset": "Reset"
+    },
+    "group": {
+      "instant": {
+        "title": "Active from hero level 1",
+        "hint": "No hero level needed — the full value applies as soon as the game starts · {count} attributes"
+      },
+      "scaling": {
+        "title": "Unlocks as your hero levels",
+        "hint": "One level unlocks every 2 hero levels, so these do nothing at hero level 1 · {count} attributes"
+      },
+      "skill": {
+        "title": "Bonus skill points",
+        "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels · {count} attribute"
+      }
+    },
+    "card": {
+      "level": "Level {level}/{max}",
+      "perCell": "{value} per level",
+      "stepCost": "{cost} attribute points per upgrade",
+      "skillValue": "{value}",
+      "full": "Maxed",
+      "owned": "Owned",
+      "notOwned": "Not owned",
+      "scalingBadge": "Scales with hero level",
+      "skillBadge": "1 per 4 hero levels",
+      "effectNote": "At level {level}, fully active once your hero reaches level {heroLevel}",
+      "effectEmpty": "Add a level and this will tell you the hero level it needs",
+      "cellTip": "Level {cell} · active from hero level {heroLevel}",
+      "upgrade": "Upgrade",
+      "upgradeTo": "Upgrade to {level}",
+      "oneShotCost": "Costs {cost} attribute points",
+      "notEnough": "Not enough points",
+      "maxed": "Maxed out",
+      "decrease": "One level fewer",
+      "increase": "One level more"
+    },
+    "reset": {
+      "title": "Reset attributes",
+      "description": "Clears every level you have added and refunds all attribute points so you can spend them again. Only usable points are charged — total points, lifetime points and your levels stay exactly as they are.",
+      "useBattle": "Spend {cost} usable battle points",
+      "battleShort": "You have {have} usable battle points, {need} short.",
+      "useMember": "Spend {cost} usable member points",
+      "memberShort": "You have {have} usable member points, {need} short.",
+      "cancel": "Cancel"
+    },
+    "error": {
+      "upgrade": "The upgrade did not go through — the points may already have been spent elsewhere. The page now shows the latest state; try again.",
+      "reset": "The reset did not go through, probably for want of usable points. The page now shows the latest state."
+    },
+    "names": {
+      "property_cooldown_percentage": "Cooldown",
+      "property_movespeed_bonus_constant": "Movement speed",
+      "property_bonus_vision": "Bonus vision",
+      "property_aoe_bonus_constant_stacking": "AOE bonus",
+      "property_health_regen_percentage": "Max health regen",
+      "property_mana_regen_total_percentage": "Max mana regen",
+      "property_ignore_movespeed_limit": "Unlimited movement speed",
+      "property_cannot_miss": "True strike",
+      "property_flying": "Flying status",
+      "property_slow_immune": "Slow immunity",
+      "property_cast_range_bonus_stacking": "Cast range",
+      "property_spell_amplify_percentage": "Spell damage",
+      "property_status_resistance_stacking": "Status resistance",
+      "property_evasion_constant": "Evasion",
+      "property_magical_resistance_bonus": "Magic resistance",
+      "property_incoming_damage_percentage": "Damage reduction",
+      "property_attack_range_bonus": "Attack range (ranged only)",
+      "property_physical_armor_bonus": "Physical armor",
+      "property_preattack_bonus_damage": "Attack damage",
+      "property_attackspeed_bonus_constant": "Attack speed",
+      "property_stats_strength_bonus": "Strength",
+      "property_stats_agility_bonus": "Agility",
+      "property_stats_intellect_bonus": "Intelligence",
+      "property_lifesteal": "Lifesteal",
+      "property_spell_lifesteal": "Spell lifesteal",
+      "property_skill_points_bonus": "Bonus skill points"
+    }
+  },
+  "awaken": {
+    "title": "Hero Awakening",
+    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points.",
+    "loading": "Loading awakenings",
+    "unlock": "Awaken",
+    "unlocked": "Awakened",
+    "freeTrial": "FREE",
+    "iconMissing": "No icon",
+    "rules": {
+      "title": "Permanent Awaken",
+      "colon": ": ",
+      "directLabel": "Specific Hero",
+      "direct": "spend <b>8000</b> <season>usable Battle Points</season>, or <b>4000</b> <member>usable Member Points</member>, to permanently awaken a chosen hero.",
+      "randomLabel": "Random Draw",
+      "random": "half price, spend <b>4000</b> <season>usable Battle Points</season>, or <b>2000</b> <member>usable Member Points</member>, to awaken one of 3 randomly drawn heroes.",
+      "note": "Only spends usable points: usable points go down, but total points only ever go up and never lower your Battle/Member Level or attribute points. Permanent and irreversible — even if the awakened ability is buffed, nerfed, or reworked later, the hero’s awakening still applies."
+    },
+    "stats": {
+      "awakened": "Awakened",
+      "battlePoint": "Usable Battle Points",
+      "memberPoint": "Usable Member Points"
+    },
+    "dialog": {
+      "question": "Choose the points to spend to awaken this hero",
+      "alreadyUnlocked": "Awakened",
+      "useBattle": "{cost} usable Battle Points",
+      "useMember": "{cost} usable Member Points",
+      "battleShort": "You have {have} Battle Points, {need} short",
+      "memberShort": "You have {have} Member Points, {need} short",
+      "scrollHint": "Swipe for more",
+      "close": "Close"
+    },
+    "random": {
+      "title": "Random Awaken",
+      "discount": "-50%",
+      "threePick": "random 1 of 3",
+      "draw": "Draw",
+      "select": "Select",
+      "poolShort": "Fewer than 3 heroes available to awaken.",
+      "candidatesTitle": "Choose a hero to awaken permanently (half price)",
+      "candidatesDesc": "Spend 4000 usable Battle Points, or 2000 usable Member Points. Awaken one of these 3 randomly drawn heroes.",
+      "close": "Close"
+    },
+    "error": {
+      "unlock": "Awakening failed. No points were spent. Please try again later.",
+      "random": "Draw failed. No points were spent. Please try again later."
+    },
+    "private": {
+      "title": "Profile is private",
+      "description": "Only this player can see their awakenings."
+    },
+    "noRecord": {
+      "title": "No record yet",
+      "description": "No record for this Steam ID yet. Play a game started from this site, then come back."
+    },
+    "failed": {
+      "title": "Could not load",
+      "description": "Awakenings are unavailable right now. Please try again later."
+    }
+  },
+  "ability": {
+    "behavior": {
+      "label": "ABILITY:",
+      "noTarget": "No Target",
+      "passive": "Passive",
+      "channeled": "Channeled",
+      "autocast": "Auto-Cast",
+      "aura": "Aura",
+      "toggle": "Toggle",
+      "target": "Unit Target",
+      "point": "Point Target",
+      "unitOrPoint": "Unit or Point Target"
+    },
+    "targeting": {
+      "label": "AFFECTS:",
+      "enemy": "Enemies",
+      "enemyHeroes": "Enemy Heroes",
+      "enemyUnits": "Enemy Units",
+      "allies": "Allies",
+      "alliedHeroes": "Allied Heroes",
+      "alliedUnits": "Allied Units",
+      "heroes": "Heroes",
+      "units": "Units"
+    },
+    "damageType": {
+      "label": "DAMAGE TYPE:",
+      "physical": "Physical",
+      "magical": "Magical",
+      "pure": "Pure"
+    },
+    "piercesImmunity": {
+      "label": "PIERCES DEBUFF IMMUNITY:",
+      "yes": "Yes",
+      "no": "No",
+      "alliesYesEnemiesNo": "Allies Yes, Enemies No"
+    },
+    "dispellable": {
+      "label": "DISPELLABLE:",
+      "strong": "Strong Dispels Only",
+      "soft": "Yes",
+      "no": "Cannot be dispelled"
+    },
+    "cooldown": "Cooldown",
+    "manaCost": "Mana Cost",
+    "aoe": "Affected by AoE bonuses"
+  },
+  "auth": {
+    "login": "Sign in with Steam",
+    "loginShort": "Sign in",
+    "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
+    "acceleratorHint": "New tab won't load? Turn on your <b>accelerator</b> for <b>Steam</b>.",
+    "loggedInAs": "ID {uid}",
+    "signOut": "Sign out",
+    "callback": {
+      "title": "Signing in",
+      "description": "You're back from Steam. We're confirming your identity and signing you in, then we'll take you back to where you were.",
+      "steps": {
+        "verify": "Steam confirms your identity",
+        "signIn": "Sign in to the site",
+        "redirect": "Back to your page"
+      },
+      "waited": "waiting {seconds}s",
+      "attempt": "attempt {attempt}",
+      "retry": "Try again",
+      "relogin": "Sign in again",
+      "home": "Back to home",
+      "failTitle": "Sign-in didn't finish",
+      "failVerify": "We couldn't confirm this Steam sign-in. Please sign in with Steam again.",
+      "failSignIn": "We couldn't reach the sign-in service, most likely a network hiccup. Steam already confirmed you, so just try again.",
+      "diag": {
+        "stuckAt": "Stuck at step {step} · {name}",
+        "attempts": "{attempts, plural, one {# attempt} other {# attempts}} · {seconds}s total",
+        "player": "ID {id}",
+        "hint": "When reporting a problem, include this box in your screenshot",
+        "detail": {
+          "timeout": "timed out",
+          "unreachable": "unreachable",
+          "badResponse": "response was not JSON",
+          "other": "other network error"
+        }
+      }
+    },
+    "profileTooltip": "View your profile",
+    "panel": {
+      "title": "Steam sign-in required",
+      "why": "This page reads and changes your Windy10v10AI game data, so we need to confirm it belongs to you.",
+      "scope": "We only get your Steam ID, the same number as your Dota2 ID.",
+      "safety": "The button below takes you to steamcommunity.com. Your password is entered on Steam, never on this site. If you are already signed in to Steam, one click brings you back."
+    }
+  },
+  "checkIn": {
+    "title": "Daily check-in",
+    "available": "Claim {amount} member points",
+    "availableWithCatchUp": "Includes {days} makeup day(s), claim {amount} member points",
+    "action": "Check in",
+    "pending": "Checking in…",
+    "done": "Checked in today",
+    "nextTime": "Available again after 00:00 UTC",
+    "detailDaily": "Today's check-in",
+    "detailCatchUp": "Makeup x{days} day(s)",
+    "detailNote": "Up to 7 makeup days; forfeited once membership expires",
+    "failed": "Check-in failed, please try again"
   }
 }

@@ -2,24 +2,33 @@
 
 本仓库为 Firebase + Cloud Functions（NestJS API） + Next.js Web 的 monorepo，DOTA2 自定义游戏后端。完整启动命令见 `README.md`。
 
-## 语言偏好
+本文只写全仓库通用的约定，分四组：输出规范、仓库结构、代码规范、交付流程。各子目录的启动方式、校验命令、专属规约写在自己的 `CLAUDE.md` 里，改哪个目录看哪一份。
 
-**默认用中文（简体）回复**，除非用户明确要求英文。
+---
 
-以下保持英文：
+## 输出规范
 
-- 代码标识符、提交信息
-- PR 标题与正文（见「推送到 develop 的流程」）
-- 技术术语、API 名称、类名、函数名等标识符，引用时保持原样
+### 语言
 
-**代码注释用中文**，写法见「注释规约」。
+**默认用中文（简体）**，除非用户明确要求英文。按场景：
+
+| 场景 | 语言 |
+|---|---|
+| 对话回复、review 报告、说明文档 | 中文 |
+| 代码注释 | 中文，写法见「注释规约」 |
+| PR 正文 | 中文，写法见「回复风格」 |
+| 提交信息、PR 标题 | 英文 |
+| 代码标识符（类名、函数名、变量名） | 英文 |
+| 技术术语、API 名称、类名等的引用 | 原样，不翻译 |
 
 讨论代码时中英混用：解释用中文，代码引用用英文。
 
-## 回复风格
+### 回复风格
 
 读者每天处理大量事务、精力有限。回复必须做到：
 
+- **收到指令先回一句方向**，讲清接下来打算干什么，一两句，不列计划清单，然后直接开始干活
+- **干活过程不播报**。不解说步骤，不逐条汇报工具调用，不写「接下来我要…」「现在我来…」
 - **先说结论，再展开**。重点放第一句，细节往后放
 - **短**。短词、短句、短段落，段落之间用标题或列表分层
 - **说人话**。不用生僻词和行话，常见技术词（缓存、接口、轮询）可以用
@@ -29,77 +38,49 @@
 - **短不等于省略背景**。下结论前先交代清楚这是什么、发生在什么情况下。宁可多写一段背景，也不要让读者看不懂结论从哪来
 - **解释改动按固定顺序展开**：原来是什么 → 改成什么 → 代码要做的事 → 问题在哪 → 用户要做什么。跳过第一步读者就接不上
 
-这条规则约束的是**写给用户看的内容**：对话回复、review 报告、总结与说明文档。
+约束的是**写给用户看的内容**：对话回复、review 报告、总结与说明文档、PR 正文。
 
-以下各有自己的规约，冲突时以各自规约为准：
+**例外**：CLAUDE.md / AGENTS.md 这类规则文档的首要读者是模型，**准确优先于通俗**，该写全的字段名、API 名、路径要写全，不为了好懂而模糊化。
 
-- 代码注释（中文，见「注释规约」）、提交信息与 PR 标题正文（英文）
-- CLAUDE.md / AGENTS.md 这类规则文档：首要读者是模型，**准确优先于通俗**，该写全的字段名、API 名、路径要写全，不为了好懂而模糊化
+### 用语
 
-## 项目结构
+面向玩家的文案用「勇士」这套说法，代码和数据库字段保留历史上的 `season`。两边不一致是有意的：改字段名要动 Firestore 的历史数据和游戏客户端，不值得。
 
-| 目录 | 说明 |
-|---|---|
-| `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 |
-| `web/` | Next.js 前端 |
-| `extensions/` | Firebase BigQuery export 配置 |
+| 概念 | 中文文案 | 英文文案 | API 字段 |
+|---|---|---|---|
+| 勇士积分 | 勇士积分（可用 / 累计） | Battle Points (usable / total) | `seasonPointTotal`、`useableSeasonPoint` |
+| 勇士等级 | 勇士等级 | Battle Level | `seasonLevel` |
+| 会员积分 | 会员积分（可用 / 累计） | Member Points (usable / total) | `memberPointTotal`、`useableMemberPoint` |
+| 会员等级 | 会员等级 | Member Level | `memberLevel` |
 
-## 本地开发
+「赛季」是旧说法，新写的界面文案、设计文档一律不再用。`web/` 新建的 i18n key 与变量名用 `battle`，只有直接照抄 API 响应的类型定义保留 `season`——转换就发生在这一层。
 
-1. **Firestore emulator**（必须先启动）：`firebase emulators:start --only firestore --project windy10v10ai`
-2. **API**（依赖 `FIRESTORE_EMULATOR_HOST=localhost:8080`）：`cd api && npm run start` 或 `npm run start:debug`
-3. **Web**：`cd web && npm run dev`
-4. 三个一起启：根目录 `npm run start`（emulator 没有 `firestore-backup/` 数据目录时仍会以空 DB 启动）
+开局这件事有三个维度，各有各的词，不互相替代，与 game 侧一致：
 
-### 端口
+| 维度 | 中文文案 | 英文文案 |
+|---|---|---|
+| 玩家怎么开始 | 从游廊开局 / 从网站启动游戏 | Launched from the Arcade / Started from this site |
+| 这局连没连服务器 | 离线、离线模式 / 在线、在线模式 | Offline (mode) / Online (mode) |
+| 这局跑在谁的机器上 | 本地主机 / 服务器主机 | Local host / Dedicated server |
 
-- Firestore emulator: 8080，Emulator UI: 4000
-- NestJS API: 3001，Swagger: 3001/api-doc
-- Next.js web: 3000
+现在只有两种开局方式，第三个维度还没有区别：
 
-## 测试
+| 开局方式 | 连接状态 | 主机 | 玩家看到什么 |
+|---|---|---|---|
+| 从游廊开局 | 离线 | 本地主机 | 多人联机；会员、属性、觉醒沿用地图更新时导出的数据；结算积分与每日任务不记录，每日签到和活动积分也领不到；网站上的改动下次地图更新后生效 |
+| 从网站启动游戏 | 在线 | 本地主机 | 只能单人；结算积分、每日任务、每日签到与活动积分都正常；游戏内可以「刷新玩家信息」；网站上的改动下一局即生效 |
 
-- **Unit**：`cd api && npm run test`（无需 emulator）
-- **E2E**：`cd api && npm run test:e2e`（自带 `firebase emulators:exec`，跑前要确认 8080 没被占用）
-- **Lint**：`cd api && npm run lint`、`cd web && npm run lint`
+- **动作名只用「从游廊开局」「从网站启动游戏」**，不拿连接状态当动作名，不写「用在线模式开局」。「用控制台启动」降级成兜底说明，只出现在 `/launch` 最后一节
+- **「离线」「在线」是连接状态的正式说法**，游戏内显示对局状态的地方照常用；网站上用在解释数据新旧与两种方式的对比
+- **「本地主机」「服务器主机」是主机维度的说法**，不用来指代连接状态。服务器主机还不存在，将来才有
+- 不用「离线数据」「实时数据」「联机」「一键开局」
+- 加点与觉醒两种开局方式都只能在网站上做，游戏内那两个按钮是跳转到网站
 
-## 常见坑
+**入口说动作，不上状态词**：页脚、首页卡、提示条写怎么开局、什么时候在游戏内生效，「哪种方式是离线、哪种是在线」只在 `/launch` 页解释一次。完整说明与理由见 [docs/web/README.md](docs/web/README.md) 的「开局方式与命名」。
 
-- `firestore-backup/` 不在仓库里，是从 GCP `gsutil` 拉的；没有它时不要带 `--import` 启动 emulator
-- API 通过 `FIRESTORE_EMULATOR_HOST` 连本地 emulator；忘记设这个变量会去连生产 Firestore 然后失败（无凭证）
-- Firestore emulator 需要 Java JRE
-- E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
-- **新增顶层路由前缀必须登记到 `api/index.ts` 中 `client` 函数的路径白名单**（那个 `regex` 常量，形如 `^/api/(game|player|...).*`）。不在白名单里的请求在进入 NestJS 之前就被 403 `Invalid path` 拦掉，服务端只留一条 `Abnormal request on API Cloud Function! Path: ...`，controller、guard、e2e 全都看不到任何痕迹——e2e 直连 Nest，不经过这层，所以测试全绿也可能线上 403
+### 注释规约
 
-## 分支命名
-
-实现 GitHub issue 时，从 `develop` 切新分支：
-
-```
-feature/<issue-id>-<short-kebab-summary>
-```
-
-- `<issue-id>`：GitHub issue 编号（纯数字，不带 `#`）
-- `<short-kebab-summary>`：3–6 个英文小写单词，`-` 连接，描述本次改动核心
-- 例：issue #858「Alipay Step 2: 模块骨架 + 创建二维码接口」→ `feature/858-alipay-module-skeleton`
-
-非 issue 驱动的改动可使用 `fix/...`、`chore/...`、`docs/...` 前缀，命名规则同上。
-
-**不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/superpowers/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
-
-## 推送到 develop 的流程
-
-不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
-
-1. 实现完成后先跑完整校验（unit + lint + e2e，见上方「测试」一节），全部通过才能推送
-2. `git push -u origin <branch-name>`
-3. `gh pr create`，base 为 `develop`；PR body 用 `## Summary` + `## Test plan`（勾选已跑过的校验项），不需要审批的小改动也走这个流程；标题用英文
-4. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
-5. 不再依赖 `.github/workflows/create_develop_pr.yml` 自动建 PR（已废弃删除）——push 后必须显式执行第 3 步
-
-## 注释规约
-
-**代码注释用中文。** 只写**为什么这样做**，不写**这行代码做了什么**——读者能从代码本身读懂的，不要再用注释复述一遍。一条注释如果只是对代码的复述，宁可不写：字段名、数值、分支行为都会随代码演进，注释里的副本不会跟着更新，两者一旦不一致，读者反而无法判断谁是真相源。
+只写**为什么这样做**，不写**这行代码做了什么**——读者能从代码本身读懂的，不要再用注释复述一遍。一条注释如果只是对代码的复述，宁可不写：字段名、数值、分支行为都会随代码演进，注释里的副本不会跟着更新，两者一旦不一致，读者反而无法判断谁是真相源。
 
 不写：
 
@@ -120,12 +101,72 @@ feature/<issue-id>-<short-kebab-summary>
 
 一处注释一两行即可，不分段、不用 bullet 列表。
 
-## 命名规范
+---
 
-## 设计原则
+## 仓库结构
+
+### 目录
+
+| 目录 | 说明 | 专属规约 |
+|---|---|---|
+| `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 | [api/CLAUDE.md](api/CLAUDE.md) |
+| `web/` | Next.js 前端 | [web/CLAUDE.md](web/CLAUDE.md) |
+| `extensions/` | Firebase BigQuery export 配置 | — |
+
+### 文档目录
+
+三类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
+
+**写或改 `docs/` 下任何文档之前，先用 Skill 工具加载 [design-docs](.claude/skills/design-docs/SKILL.md) 技能**，按它判断内容该进哪一类，不凭印象定路径。向用户承诺「会写进哪份文档」之前同样先加载。批次完成后怎么瘦身也见该技能。
+
+| 类型 | 路径 | 进 git |
+|---|---|---|
+| 框架性文档（某模块长期有效的架构、鉴权、技术选型、视觉等规范） | `docs/<模块>/README.md`，如 `docs/web/README.md`；专题内容多时另建 `docs/<模块>/<专题>.md`，如 `docs/web/design-system.md` | 是 |
+| 设计文档（brainstorming 产出的 spec，某次批次/功能的具体设计） | `docs/design/<主题>/<阶段>.md` | 是 |
+| 实施计划（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已覆盖 `docs/superpowers/` |
+
+- `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`sql-migration`
+- `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
+
+框架性文档写**外部设计与架构**：玩家看到什么、各部分怎么搭、为什么这样定、放弃了什么。写代码时照着做的约束（「做 X，不做 Y」）写进对应目录的 `CLAUDE.md`，只写规约本身并链接回框架性文档里的理由，不在两边各写一份。判断一句话放哪：违反它是「这次改动做错了」，进 `CLAUDE.md`；是「系统的结构变了」，进框架性文档。
+
+**长期有效的内容随改动同步，不等用户提醒。**一次设计或实现如果新增或改变了某模块长期有效的决定（架构、鉴权、技术选型、全站通用的布局与视觉约定），在同一个 PR 里更新对应的 `docs/<模块>/` 框架性文档；只写进批次设计文档不算完成，批次文档会被瘦身甚至删除，长期决定留在那里会跟着消失。**规范本身（取值、规格、选型规则）也要进框架性文档，不是只在 README 写几句结论、把规范留在批次文档。**框架性文档的配图画规范本身（色板、组件状态矩阵、交互样式），不放已实现页面的截图，方案对比等过程图不进 git。
+
+框架性文档只在决策变更时更新，不因批次完成而增删；设计文档批次完成后压成一屏读完的短文：状态行、决定（每条一句理由）、不做、后续事项，格式见 design-docs 技能。实施计划不进 git：它随代码合入即失效，留在仓库里会与现行设计混淆，且体量大、不适合放进 PR 供人 review。
+
+### 本地开发
+
+三个服务一起启：根目录 `npm run start`（emulator 没有 `firestore-backup/` 数据目录时仍会以空 DB 启动）。
+
+| 服务 | 端口 | 单独启动 |
+|---|---|---|
+| Firestore emulator | 8080（UI 4000） | [api/CLAUDE.md](api/CLAUDE.md) |
+| NestJS API | 3001（Swagger `/api-doc`） | [api/CLAUDE.md](api/CLAUDE.md) |
+| Next.js web | 3000 | [web/CLAUDE.md](web/CLAUDE.md) |
+
+### 排查 bug
+
+**排查线上偶发故障、本地跑不通、登录链路异常之前，先用 Skill 工具加载 [debug-evidence](.claude/skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
+
+---
+
+## 代码规范
+
+### 设计原则
 
 - 遵循 KISS、DRY、YAGNI：优先选择直接、易读且满足当前需求的实现，避免为低概率场景引入不必要的抽象、复杂性或基础设施。
 - 仅在确有复用价值时提取公共逻辑；不要为了假设的未来需求提前设计。
+- **改动范围保持最小**：用最简单的机制满足当前需求，不顺手重构、不扩大 diff。
+- 「最小」指的是复杂度，不是字符数。为省几个字段而让多处代码必须遵守同一条隐式约定，是把复杂度从数据挪到了逻辑里，不算简化。
+
+### 命名规范
+
+- 局部变量、函数、方法、字段：`camelCase`
+- 类、接口、类型、enum：`PascalCase`
+- enum 成员：业务上下文决定，多数项目用 `PascalCase` 或 `SCREAMING_SNAKE_CASE`，本仓库以 `PascalCase` 为主（参考 `MemberLevel.NORMAL` 这种已有 `SCREAMING_SNAKE` 的特例除外）
+- 文件名：`kebab-case`
+
+NestJS 专属的后缀与目录约定（`*.controller.ts`、DTO、entity 等）见 [api/CLAUDE.md](api/CLAUDE.md)。
 
 ### 常量（无状态、编译期确定的字面量）
 
@@ -152,48 +193,129 @@ export class FooService {
 
 **例外**：仅当常量需要从 DI/config 注入、或与类紧耦合（如 `static PROPERTY_NAME_LIST` 这种"类的元数据"）时，可以是 `static readonly` / `private static readonly`。
 
-### 变量与函数
+---
 
-- 局部变量、函数、方法、字段：`camelCase`
-- 类、接口、类型、enum：`PascalCase`
-- enum 成员：业务上下文决定，多数项目用 `PascalCase` 或 `SCREAMING_SNAKE_CASE`，本仓库以 `PascalCase` 为主（参考 `MemberLevel.NORMAL` 这种已有 `SCREAMING_SNAKE` 的特例除外）
-- DTO 类后缀 `Dto`，entity 类无后缀（参考 `Player`、`Member`）
+## 交付流程
 
-### 文件名
+### 设计完成后直接实现
 
-- TypeScript 文件：`kebab-case`，按职责加后缀：`*.controller.ts` / `*.service.ts` / `*.module.ts` / `*.entity.ts` / `*.dto.ts`
-- 测试：`*.spec.ts`（unit）、`*.e2e-spec.ts`（e2e）
+**设计文档写完、方案已经拍板后，如果实现改动小到能装进同一个 PR，就接着实现，不要停下来等第二次指令。**文档与实现进同一个 PR，按「PR 正文」的格式写，设计结论落在「概要」，代码改动落在「改动说明」。
 
-## Firestore 操作规范
+只有这几种情况才拆成两个 PR：
 
-### 删除字段
+- **设计还没定**——仍在给方案、等拍板，这一轮就只有文档
+- **实现跨多个批次或多个目录**，一个 PR 的正文说不清
+- **改动大到 review 不过来**，或者需要分阶段上线
 
-`undefined` 赋值**不会**删除 Firestore 字段，字段会保留旧值。需要删除字段时必须用 `FieldValue.delete()`：
+判断不了时按这条定：**PR 正文的「改动说明」能不能用一两段话讲清楚**。讲不清就拆。
 
-```ts
-import { FieldValue } from 'firebase-admin/firestore';
+拆开时，设计文档的 PR 先合，实现 PR 堆在它上面，并在「概要」里写明依赖关系。
 
-// ✅ 正确：真正删除字段
-preset[dto.map] = FieldValue.delete() as any;
+用户明确只要设计时（「先给出几套方案」「写设计」这类），按用户说的做，不要自作主张接着实现。
 
-// ❌ 错误：字段不会被删除
-preset[dto.map] = undefined;
+### 分支命名
+
+实现 GitHub issue 时，从 `develop` 切新分支：
+
+```
+feature/<issue-id>-<short-kebab-summary>
 ```
 
-### E2E 测试规范
+- `<issue-id>`：GitHub issue 编号（纯数字，不带 `#`）
+- `<short-kebab-summary>`：3–6 个英文小写单词，`-` 连接，描述本次改动核心
+- 例：issue #858「Alipay Step 2: 模块骨架 + 创建二维码接口」→ `feature/858-alipay-module-skeleton`
 
-- **有 Firestore 持久化副作用的 bug 必须先写 e2e 复现（验证 bug 确实发生），再修复，再验证测试通过**
-- E2E 用 `test/` 目录下的 `*.e2e-spec.ts`，通过 HTTP 请求验证完整行为（包括持久化后重新读取）
-- 各测试用例使用独立 steamId（不同用例间不共享），避免状态污染
-- 工具函数放 `test/util/` 下复用
+非 issue 驱动的改动可使用 `fix/...`、`chore/...`、`docs/...` 前缀，命名规则同上。
 
-## 模块化模式（player 子模块为例）
+**不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/design/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
 
-新增独立子功能时遵循以下模式：
+**本地没有其他进行中的改动时，直接在当前 checkout 上切分支修改**，不需要建 worktree。只有本地已有未提交的改动或另一个分支正在进行时，才用 worktree 隔离，避免互相污染。
 
-1. `entities/foo.entity.ts` — Firestore `@Collection()` + 字段定义
-2. `dto/update-foo.dto.ts` — 请求体 DTO（class-validator 校验）
-3. `foo.service.ts` — 业务逻辑，`getOrGenerateDefault` 负责首次创建
-4. `player.module.ts` — `FireormModule.forFeature` 注册 entity，`providers`/`exports` 注册 service
-5. `player.controller.ts` — 添加路由，鉴权与现有接口一致
-6. 若新增的是**顶层路由前缀**（不在既有 `game`/`player`/`alipay` 等之下），同步更新 `api/index.ts` 的路径白名单（见「常见坑」）
+### 一个仓库多个会话
+
+多个会话共用同一份本地仓库时，各会话用 `git worktree add` 而非切换主检出的分支来隔离工作，避免互相覆盖对方的工作区。
+
+**主检出当前在哪个分支，不由自己决定。**动手前先看 `git branch --show-current`：不是自己要的分支就不要 `git checkout` 切过去，另一个会话可能正在那上面干活。要操作别的分支，`git worktree add` 到 scratchpad 里去。
+
+**只提交自己负责的文件。**`git commit` 前先 `git status`，确认没把别人的改动一起带进来。
+
+### 推送到 develop
+
+不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
+
+1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md) 与 [web/CLAUDE.md](web/CLAUDE.md) 的「校验」一节
+2. 加载 design-docs 技能检查文档：本次改动带来的长期有效决定已写进 `docs/<模块>/README.md`；涉及的批次设计文档如已完成，已按技能瘦身。没有需要改的也要过一遍这一步
+3. `git push -u origin <branch-name>`
+4. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。正文写法见下一节
+5. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
+6. 没有自动建 PR 的 workflow，push 之后必须显式执行第 4 步
+
+### 小改动搭车
+
+**手上有还没合并的 PR 时，零散的小改动直接并进去，不要为每一条单开一个。** 文档措辞、注释、命名、规约补充这类尤其如此——单开一个 PR，走流程的成本比改动本身还大，review 列表里也全是噪音。
+
+搭车前确认三件事，任何一条不满足就另开分支：
+
+- 改动与当前 PR 的主题**不冲突**。「纯升级的 PR 不改页面」这类既定规矩优先，不能为了省一个 PR 破例
+- 当前 PR **还没合并**。合并前都能追加
+- 改动**小到能在现有正文里一两句说清**。说不清就是它该自己占一个 PR
+
+搭车后要把它写进当前 PR 正文的「改动说明」，不能只有 commit 没有交代。
+
+**手上一个开着的 PR 都没有时，把这类小改动攒着，等下一个 PR 搭车，不要为它单开一个。** 规约、注释、措辞这些不急，等一会儿没有代价；单开一个 PR 的流程成本远大于改动本身。只有改动本身有时效性（挡着别人、线上有问题）才值得立刻单开。
+
+### PR 正文
+
+标题用英文，正文用中文，写法遵循「回复风格」。
+
+按下列顺序分段，每段一个 `##` 标题。概要、改动说明、测试清单三段必需，界面变化与后续事项按需添加。每段的内部结构自行判断，小改动每段一两句即可。
+
+| 段落 | 必需 | 内容 |
+|---|---|---|
+| 概要 | 是 | 这个 PR 做什么、对应哪个 issue。堆叠在其他 PR 上时说明依赖关系 |
+| 改动说明 | 是 | 写这个 PR 做了什么、为什么，不写怎么写的。涉及用户能感知的变化时分两部分：先「用户功能」——用户看到什么变化，不提代码和文件名；再「技术实现」——只写关键决定和它的理由。**两部分各控制在三五句以内**，讲不完说明该拆 PR。纯技术改动（网站不可见）不分部分，只写技术实现。涉及行为或性能差异时给实测数字 |
+| 界面变化 | 改动碰到网站页面时 | 前后对比截图。**有没有差异都要放图**，测量数据只作补充不能代替截图。做法见 [web/CLAUDE.md](web/CLAUDE.md) 的「PR 截图」 |
+| 测试清单 | 是 | 勾选已执行的校验命令，并写明浏览器 / e2e 实测的操作与观察结果 |
+| 后续事项 | 有遗留动作时 | 发布后需要复验的项、依赖的配置变更、计划中的后续 PR |
+
+**改动说明只写「不看 diff 就不知道」的东西。** 改了哪些文件、哪个类名、哪个取值，diff 里一眼可见，不写；取舍过程写在设计文档里，正文给一条链接而不是复述一遍。
+
+测试清单两条要求：
+
+- 只勾实际执行过的项。未执行的标注「不适用」并说明原因
+- 注明验证覆盖的范围与未覆盖的部分。HTTP 状态码不代表业务结果，业务结果单独说明
+
+### 合并方式
+
+**用户给出合并指令时直接执行，不用再确认一次**；没有指令则不要主动合并。按 PR 的去向选方式，不要用 `gh pr merge` 的交互式选择：
+
+| PR | 方式 | 命令 |
+|---|---|---|
+| `feature` / `fix` / `chore` / `docs` → `develop` | squash | `gh pr merge <编号> --squash` |
+| `develop` → `main`（Release PR） | merge commit | `gh pr merge <编号> --merge` |
+
+feature 分支的中间提交对 `develop` 的历史没有价值，压成一条。`develop` → `main` 是两条长期分支对齐，保留每条提交，`main` 的历史才与 `develop` 一一对应。
+
+仓库设置里 rebase 已关闭，不是可选项。
+
+**CI 还没跑完时加 `--auto`**，让 GitHub 在检查通过后自己合，别用 `--admin` 绕过分支保护。分支保护要求检查通过，此时直接 `gh pr merge` 会被拒绝并提示 `the base branch policy prohibits the merge`——那是还有检查在跑，不是权限不够。
+
+### 合并后清理
+
+PR 合并后立刻清理该分支，不用等提醒。分支在 worktree 里：
+
+```
+git worktree remove <path> --force
+git branch -D <branch-name>
+git worktree prune
+```
+
+分支直接切在主 checkout 上（未建 worktree）：
+
+```
+git checkout develop
+git pull
+git branch -D <branch-name>
+```
+
+不清理的话，遗留的 worktree 和分支会越积越多，所以这一步是收尾的默认动作而非可选项。

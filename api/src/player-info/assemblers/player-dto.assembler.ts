@@ -32,6 +32,9 @@ export class PlayerDtoAssembler {
     include: PlayerInfoInclude[],
   ): Promise<PlayerInfoDto> {
     const dto = player as PlayerInfoDto;
+    // 玩家文档不保证带这两个计数，接口按 number 对外承诺
+    dto.commendCount = dto.commendCount ?? 0;
+    dto.reportCount = dto.reportCount ?? 0;
 
     this.calculateLevelData(dto);
     dto.useableLevel = this.calculateUseableLevel(dto);
@@ -59,6 +62,7 @@ export class PlayerDtoAssembler {
     }
     if (include.includes('member') && member) {
       dto.member = new MemberDto(member);
+      dto.checkIn = { memberPoint: this.membersService.getCheckInPoints(member) };
     }
     if (include.includes('statsLifetime')) {
       dto.statsLifetime = statsLifetime ?? undefined;

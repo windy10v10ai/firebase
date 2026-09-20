@@ -39,7 +39,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_hero_damage',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 1_000_000,
+    target: 800_000,
   },
   {
     id: 'general_healing',

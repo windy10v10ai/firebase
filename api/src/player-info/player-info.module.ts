@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { LocalHostModule } from '../local-host/local-host.module';
 import { MembersModule } from '../members/members.module';
 import { PlayerModule } from '../player/player.module';
 import { PlayerHeroAwakeningModule } from '../player-hero-awakening/player-hero-awakening.module';
@@ -17,6 +18,7 @@ import { PlayerInfoService } from './player-info.service';
     PlayerPropertyModule,
     AnalyticsModule,
     PlayerHeroAwakeningModule,
+    LocalHostModule,
   ],
   controllers: [PlayerInfoController],
   providers: [PlayerInfoService, PlayerDtoAssembler],

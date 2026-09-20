@@ -12,6 +12,7 @@ import {
   post,
   restoreDate,
 } from './util/util-http';
+import { addMember } from './util/util-member';
 import {
   addPlayerProperty,
   awakenHero,
@@ -22,7 +23,6 @@ import {
 
 const gameStartUrl = '/api/game/start/';
 const gameEndUrl = '/api/game/end';
-const memberPostUrl = '/api/members/';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = getTestApiKey();
@@ -152,14 +152,13 @@ describe('PlayerController (e2e)', () => {
 
   describe('/api/game/start/ (Get)', () => {
     const matchId = 1;
-    it('未携带 API key 时返回不含有效数据', async () => {
+    it('未携带 API key 时返回 401', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const result = await request(app.getHttpServer())
         .get(gameStartUrl)
         .query({ steamIds: [100000000], matchId });
 
-      expect(result.status).toEqual(200);
-      expect(result.body.pointInfo).toEqual([]);
+      expect(result.status).toEqual(401);
     });
 
     describe('单人开始', () => {
@@ -200,11 +199,7 @@ describe('PlayerController (e2e)', () => {
         ['高级会员 新玩家 当日首次', 100000012, MemberLevel.PREMIUM],
       ])('%s', async (title, steamId, level) => {
         mockDate('2023-12-01T00:00:00.000Z');
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level,
-        });
+        await addMember(app, steamId, 1, level);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -281,11 +276,7 @@ describe('PlayerController (e2e)', () => {
         ],
       ])('%s', async (title, dateMember, steamId, date1, point1, date2, point2, level) => {
         mockDate(dateMember);
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level,
-        });
+        await addMember(app, steamId, 1, level);
 
         mockDate(date1);
         const result = await get(app, gameStartUrl, {
@@ -314,16 +305,8 @@ describe('PlayerController (e2e)', () => {
     describe('多人开始', () => {
       it('普通玩家 会员 混合', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
-        await post(app, memberPostUrl, {
-          steamId: 100000032,
-          month: 1,
-          level: MemberLevel.NORMAL,
-        });
-        await post(app, memberPostUrl, {
-          steamId: 100000033,
-          month: 1,
-          level: MemberLevel.PREMIUM,
-        });
+        await addMember(app, 100000032, 1, MemberLevel.NORMAL);
+        await addMember(app, 100000033, 1, MemberLevel.PREMIUM);
 
         const steamIds = [100000030, 100000031, 100000032, 100000033];
 
@@ -350,11 +333,7 @@ describe('PlayerController (e2e)', () => {
         mockDate('2023-12-01T00:00:00.000Z');
 
         // 创建会员
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.NORMAL,
-        });
+        await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -375,11 +354,7 @@ describe('PlayerController (e2e)', () => {
         const steamId = 100000705;
         mockDate('2023-12-01T00:00:00.000Z');
 
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.PREMIUM,
-        });
+        await addMember(app, steamId, 1, MemberLevel.PREMIUM);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -454,11 +429,7 @@ describe('PlayerController (e2e)', () => {
         mockDate('2023-12-01T00:00:00.000Z');
 
         // 创建会员
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.NORMAL,
-        });
+        await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -476,11 +447,7 @@ describe('PlayerController (e2e)', () => {
         const steamId = 100000704;
         mockDate('2023-12-01T00:00:00.000Z');
 
-        await post(app, memberPostUrl, {
-          steamId,
-          month: 1,
-          level: MemberLevel.PREMIUM,
-        });
+        await addMember(app, steamId, 1, MemberLevel.PREMIUM);
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -535,8 +502,8 @@ describe('PlayerController (e2e)', () => {
     describe('事件奖励', () => {
       it('windy主机 活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000901;
-        // 活动期间: 2026-08-02 ~ 2026-08-09
-        mockDate('2026-08-03T00:00:00.000Z');
+        // 活动期间: 2026-09-12 ~ 2026-09-19
+        mockDate('2026-09-13T00:00:00.000Z');
 
         const result = await callGameStartAsWindyHost(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -545,26 +512,26 @@ describe('PlayerController (e2e)', () => {
         const pointInfo = result.body.pointInfo;
         const eventReward = pointInfo.find(
           (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
-            p.steamId === steamId && p.memberPoint,
+            p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeDefined();
-        expect(eventReward.memberPoint).toEqual(2000);
+        expect(eventReward.seasonPoint).toEqual(5000);
 
         // 验证玩家积分
         const player = await getPlayer(app, steamId);
-        expect(player.memberPointTotal).toEqual(2000);
-        expect(player.seasonPointTotal).toEqual(0);
+        expect(player.seasonPointTotal).toEqual(5000);
+        expect(player.memberPointTotal).toEqual(0);
       });
 
       it('windy主机 活动期间内第二次登录 不重复获得积分', async () => {
         const steamId = 100000902;
-        mockDate('2026-08-03T00:00:00.000Z');
+        mockDate('2026-09-13T00:00:00.000Z');
 
         // 第一次登录
         await callGameStartAsWindyHost(app, [steamId]);
         const player1 = await getPlayer(app, steamId);
-        expect(player1.memberPointTotal).toEqual(2000);
-        expect(player1.seasonPointTotal).toEqual(0);
+        expect(player1.seasonPointTotal).toEqual(5000);
+        expect(player1.memberPointTotal).toEqual(0);
 
         // 第二次登录
         const result = await callGameStartAsWindyHost(app, [steamId]);
@@ -574,20 +541,20 @@ describe('PlayerController (e2e)', () => {
         const pointInfo = result.body.pointInfo;
         const eventReward = pointInfo.find(
           (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
-            p.steamId === steamId && p.memberPoint,
+            p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeUndefined();
 
         // 积分不变
         const player2 = await getPlayer(app, steamId);
-        expect(player2.memberPointTotal).toEqual(2000);
-        expect(player2.seasonPointTotal).toEqual(0);
+        expect(player2.seasonPointTotal).toEqual(5000);
+        expect(player2.memberPointTotal).toEqual(0);
       });
 
       it('windy主机 活动期间外 不获得活动积分', async () => {
         const steamId = 100000903;
         // 活动期间外
-        mockDate('2026-08-10T00:00:00.000Z');
+        mockDate('2026-09-20T00:00:00.000Z');
 
         const result = await callGameStartAsWindyHost(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -596,7 +563,7 @@ describe('PlayerController (e2e)', () => {
         const pointInfo = result.body.pointInfo;
         const eventReward = pointInfo.find(
           (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
-            p.steamId === steamId && p.memberPoint,
+            p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeUndefined();
 
@@ -609,7 +576,7 @@ describe('PlayerController (e2e)', () => {
       it('test主机 活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000904;
         // 活动期间内
-        mockDate('2026-08-03T00:00:00.000Z');
+        mockDate('2026-09-13T00:00:00.000Z');
 
         const result = await callGameStart(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -618,21 +585,21 @@ describe('PlayerController (e2e)', () => {
         const pointInfo = result.body.pointInfo;
         const eventReward = pointInfo.find(
           (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
-            p.steamId === steamId && p.memberPoint,
+            p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeDefined();
-        expect(eventReward.memberPoint).toEqual(2000);
+        expect(eventReward.seasonPoint).toEqual(5000);
 
         // 验证玩家积分
         const player = await getPlayer(app, steamId);
-        expect(player.memberPointTotal).toEqual(2000);
-        expect(player.seasonPointTotal).toEqual(0);
+        expect(player.seasonPointTotal).toEqual(5000);
+        expect(player.memberPointTotal).toEqual(0);
       });
 
       it('anime主机 活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000906;
         // 活动期间内
-        mockDate('2026-08-03T00:00:00.000Z');
+        mockDate('2026-09-13T00:00:00.000Z');
 
         const result = await callGameStartAsAnimeHost(app, [steamId]);
         expect(result.status).toEqual(200);
@@ -641,37 +608,43 @@ describe('PlayerController (e2e)', () => {
         const pointInfo = result.body.pointInfo;
         const eventReward = pointInfo.find(
           (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
-            p.steamId === steamId && p.memberPoint,
+            p.steamId === steamId && p.seasonPoint,
         );
         expect(eventReward).toBeDefined();
-        expect(eventReward.memberPoint).toEqual(2000);
+        expect(eventReward.seasonPoint).toEqual(5000);
 
         // 验证玩家积分
         const player = await getPlayer(app, steamId);
-        expect(player.memberPointTotal).toEqual(2000);
-        expect(player.seasonPointTotal).toEqual(0);
+        expect(player.seasonPointTotal).toEqual(5000);
+        expect(player.memberPointTotal).toEqual(0);
 
         // 验证鉴权放行且下发GA4配置
         expect(result.body.ga4Config).toBeDefined();
         expect(result.body.ga4Config.serverType).toEqual('ANIME');
       });
 
-      it('未知来源主机 活动期间内 不获得活动积分', async () => {
+      it('未知来源主机 返回 401', async () => {
         const steamId = 100000905;
-        // 活动期间内
-        mockDate('2026-08-03T00:00:00.000Z');
 
-        // 未知来源提前返回，不会创建玩家记录，因此只校验响应体
         const result = await request(app.getHttpServer())
           .get(gameStartUrl)
-          .query({ steamIds: [steamId], matchId: 1 });
-        expect(result.status).toEqual(200);
-        expect(result.body.pointInfo).toEqual([]);
+          .query({ steamIds: [steamId], matchId: 1 })
+          .set('x-api-key', 'unknown-key');
+        expect(result.status).toEqual(401);
       });
     });
   });
 
   describe('/api/game/end (Post) 游戏结算', () => {
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    beforeAll(async () => {
+      for (const steamId of [
+        100000101, 100000102, 100000103, 100000104, 100000105, 100000111, 100000112, 100000113,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it.each([
       ['单人结算 0分', 100000101, 0, 0],
       ['单人结算 90分', 100000102, 90, 90],
@@ -892,6 +865,16 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('/api/game/end (Post) 行为分', () => {
+    // 结算不再自动创建玩家，正式流程里玩家由开局接口创建
+    beforeAll(async () => {
+      for (const steamId of [
+        100002001, 100002011, 100002012, 100002021, 100002022, 100002023, 100002024, 100002025,
+        100002026,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it('单人局不计算行为分', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100002001;

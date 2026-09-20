@@ -26,6 +26,9 @@
     }
   ],
   "emulators": {
+    "auth": {
+      "port": 9099
+    },
     "functions": {
       "port": 5001,
       "host": "0.0.0.0"
@@ -36,13 +39,7 @@
     },
     "ui": {
       "enabled": true
-    },
-    "database": {
-      "port": 9000
     }
-  },
-  "database": {
-    "rules": "database.rules.json"
   },
   "extensions": {
     "firestore-bigquery-export-players": "firebase/firestore-bigquery-export@0.2.5",

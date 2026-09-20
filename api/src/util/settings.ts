@@ -1,7 +1,23 @@
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
+// 网站页面可能出现的来源。既是 CORS 白名单，也是 Steam 回调地址的白名单——能调 API 的
+// 站点和能承载登录页的站点是同一批。游戏客户端的请求不带 Origin，cors 中间件原样放过
+export const SITE_ORIGIN_WHITELIST = [
+  'https://windy10v10ai.com',
+  'https://prod--windy10v10ai.asia-east1.hosted.app',
+  'https://dev--windy10v10ai.asia-east1.hosted.app',
+  'http://localhost:3000',
+];
+// 预检结果缓存一天，带 Authorization 或 JSON body 的接口只在首次多一次函数调用
+const CORS_PREFLIGHT_MAX_AGE_SECONDS = 86400;
+
 export function AppGlobalSettings(app: INestApplication) {
+  app.enableCors({
+    origin: SITE_ORIGIN_WHITELIST,
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    maxAge: CORS_PREFLIGHT_MAX_AGE_SECONDS,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

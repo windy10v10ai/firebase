@@ -8,7 +8,7 @@ import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/scheduler';
 
 import { AppModule } from './src/app.module';
-import { TaskController } from './src/task/task.controller';
+import { AfdianService } from './src/afdian/afdian.service';
 import { SECRET } from './src/util/secret/secret.service';
 import { AppGlobalSettings } from './src/util/settings';
 
@@ -44,6 +44,7 @@ const commonSecrets = isLocal
       defineSecret(SECRET.ALIPAY_APP_ID),
       defineSecret(SECRET.ALIPAY_APP_PRIVATE_KEY),
       defineSecret(SECRET.ALIPAY_PUBLIC_KEY),
+      defineSecret(SECRET.STEAM_WEB_API_KEY),
     ];
 
 export const client = onRequest(
@@ -55,7 +56,7 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex = '^/api/(game|afdian|analytics|player|kofi|alipay|daily-task).*';
+    const regex = '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello|proxy).*';
     callServerWithRegex(regex, req, res);
   },
 );
@@ -77,6 +78,8 @@ async function callServerWithRegex(
 // function need authenticated
 export const admin = onRequest(
   {
+    // 管理接口在应用层是 @Public 的，拦截全靠这里；v2 的默认值是允许匿名调用
+    invoker: 'private',
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
@@ -102,8 +105,7 @@ export const scheduledOrderCheck = onSchedule(
   async () => {
     logger.info('Schedule Function triggered');
     const app = await promiseApplicationReady;
-    const task = app.get(TaskController);
-    const result = await task.activeRecentOrder(10);
+    const result = await app.get(AfdianService).activeRecentOrder(10);
     if (result.activeTradeNos.length > 0) {
       logger.warn(`Active trade nos: ${result.activeTradeNos}`);
     }

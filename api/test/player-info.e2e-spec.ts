@@ -1,6 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 
+import { MemberLevel } from '../src/members/entities/members.entity';
+
 import { del, get, initTest, mockDate, post, put, restoreDate } from './util/util-http';
+import { addMember } from './util/util-member';
 import { addPlayerProperty, awakenHero, createPlayer, getPlayerDto } from './util/util-player';
 
 const getPlayerInfoUrl = '/api/player';
@@ -70,7 +73,7 @@ describe('PlayerInfoController (e2e)', () => {
       const steamId = 200000602;
       mockDate('2023-12-01T00:00:00.000Z');
       await createPlayer(app, { steamId, seasonPointTotal: 0, memberPointTotal: 0 });
-      await post(app, '/api/members/', { steamId, month: 1, level: 'NORMAL' });
+      await addMember(app, steamId, 1, MemberLevel.NORMAL);
 
       const result = await get(app, `${getPlayerInfoUrl}/${steamId}/info`, { include: 'member' });
 
@@ -469,20 +472,20 @@ describe('PlayerInfoController (e2e)', () => {
     describe('可以重置', () => {
       it.each([
         [
-          '使用勇士积分重置 level2',
+          '使用勇士积分重置',
           {
             steamId: 200000402,
             useMemberPoint: false,
             before: {
-              seasonPointTotal: 200,
+              seasonPointTotal: 2000,
               memberPointTotal: 0,
               usedSeasonPoint: 0,
               usedMemberPoint: 0,
             },
             after: {
-              seasonPointTotal: 200,
+              seasonPointTotal: 2000,
               memberPointTotal: 0,
-              usedSeasonPoint: 200,
+              usedSeasonPoint: 2000,
               usedMemberPoint: 0,
               useableSeasonPoint: 0,
               useableMemberPoint: 0,
@@ -490,22 +493,22 @@ describe('PlayerInfoController (e2e)', () => {
           },
         ],
         [
-          '使用勇士积分重置 level3',
+          '使用勇士积分重置：消耗不随勇士等级变化',
           {
             steamId: 200000403,
             useMemberPoint: false,
             before: {
-              seasonPointTotal: 300,
+              seasonPointTotal: 39200,
               memberPointTotal: 1000,
               usedSeasonPoint: 0,
               usedMemberPoint: 0,
             },
             after: {
-              seasonPointTotal: 300,
+              seasonPointTotal: 39200,
               memberPointTotal: 1000,
-              usedSeasonPoint: 300,
+              usedSeasonPoint: 2000,
               usedMemberPoint: 0,
-              useableSeasonPoint: 0,
+              useableSeasonPoint: 37200,
               useableMemberPoint: 1000,
             },
           },
@@ -600,17 +603,17 @@ describe('PlayerInfoController (e2e)', () => {
             steamId: 200000401,
             useMemberPoint: false,
             before: {
-              seasonPointTotal: 200,
+              seasonPointTotal: 2000,
               memberPointTotal: 0,
               usedSeasonPoint: 1,
               usedMemberPoint: 0,
             },
             after: {
-              seasonPointTotal: 200,
+              seasonPointTotal: 2000,
               memberPointTotal: 0,
               usedSeasonPoint: 1,
               usedMemberPoint: 0,
-              useableSeasonPoint: 199,
+              useableSeasonPoint: 1999,
               useableMemberPoint: 0,
             },
           },

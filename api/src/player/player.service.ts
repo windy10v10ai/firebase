@@ -4,6 +4,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { UsePlayerMemberPointsDto } from './dto/use-player-member-points.dto';
@@ -50,47 +51,41 @@ export class PlayerService {
     isWinner: boolean,
     battlePoints: number,
     isDisconnect: boolean,
-    isParty: boolean,
-  ) {
-    const settledPoints = this.normalizeBattlePoints(battlePoints);
-    if (settledPoints !== battlePoints) {
+    calculateConductPoint: boolean,
+  ): Promise<void> {
+    const normalizedPoints = this.normalizeBattlePoints(battlePoints);
+    if (normalizedPoints !== battlePoints) {
       logger.warn('game/end: battlePoints out of range, normalizing', {
         steamId,
         battlePoints,
-        settledPoints,
+        normalizedPoints,
       });
     }
-    const player = await this.getOrNewPlayerBySteamId(steamId);
+    // 结算不创建玩家：开局接口已经创建过，查不到说明这次结算没有对应的开局
+    const player = await this.playerRepository.findById(steamId.toString());
+    if (!player) {
+      logger.warn('game/end: player not found, skip', { steamId });
+      return;
+    }
 
     player.matchCount++;
     if (isWinner) {
       player.winCount++;
     }
 
-    player.seasonPointTotal += settledPoints;
+    player.seasonPointTotal += normalizedPoints;
 
     if (isDisconnect) {
       player.disconnectCount++;
     }
-    // 行为分计算：只有组队时才计算
-    if (isParty) {
+    // 行为分被冒用会害到别人，只有可信来源才计算
+    if (calculateConductPoint) {
       player.conductPoint = this.playerConductService.calculateGameEndConductPoint(
         player.conductPoint ?? 100,
         isDisconnect,
       );
     }
 
-    await this.playerRepository.update(player);
-  }
-
-  // 本地主机受限结算专用：只加 seasonPointTotal，不动 matchCount/winCount/
-  // disconnectCount/conductPoint。玩家必须已存在，不自动创建。
-  async addLocalSeasonPoints(steamId: number, battlePoints: number): Promise<void> {
-    const player = await this.playerRepository.findById(steamId.toString());
-    if (!player) {
-      return;
-    }
-    player.seasonPointTotal += battlePoints;
     await this.playerRepository.update(player);
   }
 
@@ -157,7 +152,7 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
-  async useMemberPoint(dto: UsePlayerMemberPointsDto): Promise<Player> {
+  async useMemberPoint(dto: UsePlayerMemberPointsDto, serverType: SERVER_TYPE): Promise<Player> {
     const memberPoint = Math.trunc(dto.memberPoint);
     if (memberPoint < 1) {
       throw new BadRequestException();
@@ -175,7 +170,13 @@ export class PlayerService {
 
     player.usedMemberPoint = (player.usedMemberPoint ?? 0) + memberPoint;
     await this.playerRepository.update(player);
-    await this.analyticsService.playerUsePoint(dto.steamId, memberPoint, true, dto.reason);
+    await this.analyticsService.playerUsePoint(
+      dto.steamId,
+      memberPoint,
+      true,
+      dto.reason,
+      serverType,
+    );
     return player;
   }
 
@@ -190,39 +191,6 @@ export class PlayerService {
     const player = await this.getOrNewPlayerBySteamId(steamId);
     player.usedLevel = value < 0 ? 0 : value;
     await this.playerRepository.update(player);
-  }
-
-  // TODO: 临时统计接口，用完删除
-  async getConductPointStats(): Promise<{
-    totalPlayers: number;
-    buckets: { range: string; count: number; percentage: string }[];
-  }> {
-    const aprilStart = new Date('2026-04-01T00:00:00.000Z');
-    const allPlayers = await this.playerRepository
-      .whereGreaterOrEqualThan('lastMatchTime', aprilStart)
-      .find();
-
-    const total = allPlayers.length;
-    const bucketDefs = [
-      { label: '110~120', min: 110, max: 120 },
-      { label: '100~109', min: 100, max: 109 },
-      { label: '80~99', min: 80, max: 99 },
-      { label: '60~79', min: 60, max: 79 },
-      { label: '0~59', min: 0, max: 59 },
-    ];
-
-    const buckets = bucketDefs.map(({ label, min, max }) => {
-      const count = allPlayers.filter(
-        (p) => (p.conductPoint ?? 100) >= min && (p.conductPoint ?? 100) <= max,
-      ).length;
-      return {
-        range: label,
-        count,
-        percentage: total > 0 ? ((count / total) * 100).toFixed(1) + '%' : '0%',
-      };
-    });
-
-    return { totalPlayers: total, buckets };
   }
 
   private generateNewPlayerEntity(steamId: number): Player {

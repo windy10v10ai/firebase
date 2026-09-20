@@ -1,11 +1,12 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, NotFoundException } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
 
 import { Member, MemberLevel } from '../src/members/entities/members.entity';
 
-import { get, initTest, mockDate, post } from './util/util-http';
+import { initTest, mockDate } from './util/util-http';
+import { addMember, findMember } from './util/util-member';
 
-describe('MemberController (e2e)', () => {
+describe('MembersService (e2e)', () => {
   let app: INestApplication;
   let membersRepository: BaseFirestoreRepository<Member>;
 
@@ -16,10 +17,9 @@ describe('MemberController (e2e)', () => {
     membersRepository = app.get('MemberRepository');
   });
 
-  describe('members/ (GET)', () => {
-    it('获取不存在的会员 return 404', async () => {
-      const response = await get(app, '/api/members/987654321');
-      expect(response.status).toEqual(404);
+  describe('查询会员', () => {
+    it('获取不存在的会员 抛出 NotFoundException', async () => {
+      await expect(findMember(app, 987654321)).rejects.toThrow(NotFoundException);
     });
 
     describe('获取存在已过期的会员', () => {
@@ -32,9 +32,7 @@ describe('MemberController (e2e)', () => {
           level: MemberLevel.NORMAL,
         });
 
-        const response = await get(app, '/api/members/20200801');
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
+        expect(await findMember(app, 20200801)).toEqual({
           steamId: 20200801,
           expireDateString: '2020-08-01',
           enable: false,
@@ -51,9 +49,7 @@ describe('MemberController (e2e)', () => {
           level: MemberLevel.NORMAL,
         });
 
-        const response = await get(app, '/api/members/20200802');
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
+        expect(await findMember(app, 20200802)).toEqual({
           steamId: 20200802,
           expireDateString: '2020-08-02',
           enable: false,
@@ -72,9 +68,7 @@ describe('MemberController (e2e)', () => {
           level: MemberLevel.NORMAL,
         });
 
-        const response = await get(app, '/api/members/20300801');
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
+        expect(await findMember(app, 20300801)).toEqual({
           steamId: 20300801,
           expireDateString: '2030-08-01',
           enable: true,
@@ -91,9 +85,7 @@ describe('MemberController (e2e)', () => {
           level: MemberLevel.PREMIUM,
         });
 
-        const response = await get(app, '/api/members/20300802');
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
+        expect(await findMember(app, 20300802)).toEqual({
           steamId: 20300802,
           expireDateString: '2030-08-02',
           enable: true,
@@ -103,7 +95,7 @@ describe('MemberController (e2e)', () => {
     });
   });
 
-  describe('members/ (POST)', () => {
+  describe('开通会员', () => {
     it.each([
       [1, 300000001, MemberLevel.NORMAL],
       [2, 300000002, MemberLevel.NORMAL],
@@ -127,20 +119,11 @@ describe('MemberController (e2e)', () => {
         level,
       };
 
-      const responseBefore = await get(app, `/api/members/${steamId}`);
-      expect(responseBefore.status).toEqual(404);
+      await expect(findMember(app, steamId)).rejects.toThrow(NotFoundException);
 
-      const responseCreate = await post(app, '/api/members', {
-        steamId,
-        month,
-        level,
-      });
-      expect(responseCreate.status).toEqual(201);
-      expect(responseCreate.body).toEqual(expectBodyJson);
+      expect(await addMember(app, steamId, month, level)).toEqual(expectBodyJson);
 
-      const responseAfter = await get(app, `/api/members/${steamId}`);
-      expect(responseAfter.status).toEqual(200);
-      expect(responseAfter.body).toEqual(expectBodyJson);
+      expect(await findMember(app, steamId)).toEqual(expectBodyJson);
     });
 
     it.each([
@@ -176,20 +159,11 @@ describe('MemberController (e2e)', () => {
           level: expectLevel,
         };
 
-        const responseBefore = await get(app, `/api/members/${steamId}`);
-        expect(responseBefore.status).toEqual(200);
+        await findMember(app, steamId);
 
-        const responseCreate = await post(app, '/api/members', {
-          steamId,
-          month,
-          level: expectLevel,
-        });
-        expect(responseCreate.status).toEqual(201);
-        expect(responseCreate.body).toEqual(expectBodyJson);
+        expect(await addMember(app, steamId, month, expectLevel)).toEqual(expectBodyJson);
 
-        const responseAfter = await get(app, `/api/members/${steamId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(await findMember(app, steamId)).toEqual(expectBodyJson);
       },
     );
 
@@ -222,20 +196,11 @@ describe('MemberController (e2e)', () => {
           level: expectLevel,
         };
 
-        const responseBefore = await get(app, `/api/members/${steamId}`);
-        expect(responseBefore.status).toEqual(200);
+        await findMember(app, steamId);
 
-        const responseCreate = await post(app, '/api/members', {
-          steamId,
-          month,
-          level: expectLevel,
-        });
-        expect(responseCreate.status).toEqual(201);
-        expect(responseCreate.body).toEqual(expectBodyJson);
+        expect(await addMember(app, steamId, month, expectLevel)).toEqual(expectBodyJson);
 
-        const responseAfter = await get(app, `/api/members/${steamId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(await findMember(app, steamId)).toEqual(expectBodyJson);
       },
     );
 
@@ -263,20 +228,11 @@ describe('MemberController (e2e)', () => {
           level: MemberLevel.PREMIUM,
         };
 
-        const responseBefore = await get(app, `/api/members/${steamId}`);
-        expect(responseBefore.status).toEqual(200);
+        await findMember(app, steamId);
 
-        const responseCreate = await post(app, '/api/members', {
-          steamId,
-          month,
-          level: MemberLevel.NORMAL,
-        });
-        expect(responseCreate.status).toEqual(201);
-        expect(responseCreate.body).toEqual(expectBodyJson);
+        expect(await addMember(app, steamId, month, MemberLevel.NORMAL)).toEqual(expectBodyJson);
 
-        const responseAfter = await get(app, `/api/members/${steamId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(await findMember(app, steamId)).toEqual(expectBodyJson);
       },
     );
 
@@ -315,20 +271,11 @@ describe('MemberController (e2e)', () => {
           level: MemberLevel.PREMIUM,
         };
 
-        const responseBefore = await get(app, `/api/members/${steamId}`);
-        expect(responseBefore.status).toEqual(200);
+        await findMember(app, steamId);
 
-        const responseCreate = await post(app, '/api/members', {
-          steamId,
-          month,
-          level: MemberLevel.PREMIUM,
-        });
-        expect(responseCreate.status).toEqual(201);
-        expect(responseCreate.body).toEqual(expectBodyJson);
+        expect(await addMember(app, steamId, month, MemberLevel.PREMIUM)).toEqual(expectBodyJson);
 
-        const responseAfter = await get(app, `/api/members/${steamId}`);
-        expect(responseAfter.status).toEqual(200);
-        expect(responseAfter.body).toEqual(expectBodyJson);
+        expect(await findMember(app, steamId)).toEqual(expectBodyJson);
       },
     );
   });

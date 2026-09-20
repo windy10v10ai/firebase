@@ -10,6 +10,7 @@ import { AppModule } from '../src/app.module';
 import { MemberLevel } from '../src/members/entities/members.entity';
 import { AppGlobalSettings } from '../src/util/settings';
 
+import { getLocalApiKey } from './util/util-http';
 import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
 
 /**
@@ -33,6 +34,8 @@ const STEAM_IDS = {
   WEBHOOK_AMOUNT_MISMATCH: 300010010,
   WEBHOOK_WAIT_BUYER_PAY: 300010011,
   WEBHOOK_IDEMPOTENT: 300010012,
+  LOCAL_ORDER_CAP: 300010013,
+  LOCAL_ORDER_RESET: 300010014,
 } as const;
 
 describe('AlipayController (e2e)', () => {
@@ -96,6 +99,12 @@ describe('AlipayController (e2e)', () => {
       .post(`${prefixPath}/order/create`)
       .set('x-api-key', apiKey)
       .send(body);
+
+  const createOrderWithLocalKey = async (steamId: number) =>
+    request(app.getHttpServer())
+      .post(`${prefixPath}/order/create`)
+      .set('x-api-key', getLocalApiKey())
+      .send({ steamId, productCode: AlipayProductCode.MEMBER_PREMIUM });
 
   const queryOrder = async (outTradeNo: string) =>
     request(app.getHttpServer())
@@ -339,6 +348,37 @@ describe('AlipayController (e2e)', () => {
       expect(r2.text).toBe('success');
       const afterSecond = (await getPlayer(app, steamId)).memberPointTotal;
       expect(afterSecond).toBe(afterFirst); // 不重复加
+    });
+  });
+
+  describe('本地 key 下单限流', () => {
+    it('当日第 11 次下单被拒', async () => {
+      const steamId = STEAM_IDS.LOCAL_ORDER_CAP;
+      for (let i = 0; i < 10; i++) {
+        const ok = await createOrderWithLocalKey(steamId);
+        expect(ok.status).toBe(201);
+      }
+
+      const rejected = await createOrderWithLocalKey(steamId);
+
+      expect(rejected.status).toBe(400);
+    });
+
+    it('支付成功后下单次数清零', async () => {
+      const steamId = STEAM_IDS.LOCAL_ORDER_RESET;
+      let lastOutTradeNo = '';
+      for (let i = 0; i < 10; i++) {
+        const ok = await createOrderWithLocalKey(steamId);
+        expect(ok.status).toBe(201);
+        lastOutTradeNo = ok.body.outTradeNo;
+      }
+
+      const paid = await postWebhook(buildNotify({ out_trade_no: lastOutTradeNo }));
+      expect(paid.text).toBe('success');
+
+      const afterPaid = await createOrderWithLocalKey(steamId);
+
+      expect(afterPaid.status).toBe(201);
     });
   });
 });

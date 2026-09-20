@@ -10,6 +10,7 @@ import { AlipayModule } from './alipay/alipay.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
 import { KofiModule } from './kofi/kofi.module';
@@ -17,7 +18,8 @@ import { MembersModule } from './members/members.module';
 import { PlayerModule } from './player/player.module';
 import { PlayerInfoModule } from './player-info/player-info.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
-import { TaskModule } from './task/task.module';
+import { ProxyModule } from './proxy/proxy.module';
+import { SteamProfileModule } from './steam-profile/steam-profile.module';
 import { AuthGuard } from './util/auth/auth.guard';
 import { SecretModule } from './util/secret/secret.module';
 
@@ -49,8 +51,10 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
     AdminModule,
     EventRewardsModule,
     AnalyticsModule,
+    AuthModule,
     SecretModule,
-    TaskModule,
+    SteamProfileModule,
+    ProxyModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],

@@ -1,56 +1,47 @@
-"use client";
+'use client';
 
-import {useTranslations} from 'next-intl';
-import React from 'react';
+import { useTranslations } from 'next-intl';
+
+import { EXTERNAL_LINKS } from '@/config/links';
 
 import Card from './components/Card';
-import ProductDisplay from './components/ProductDisplay';
-import Section from './components/Section';
+import LoginBanner from './home/LoginBanner';
+import LaunchCard from './home/LaunchCard';
+import PageCards from './home/PageCards';
+import PlayerSummary from './home/PlayerSummary';
+import WorkshopCard from './home/WorkshopCard';
+import { useAuth } from './lib/auth';
+
+const OTHER_LINKS = EXTERNAL_LINKS.filter((link) => link.labelKey !== 'workshop');
 
 export default function Home() {
   const t = useTranslations();
+  const auth = useAuth();
 
   return (
-    <div className="space-y-8">
-      {/* 欢迎区域 */}
-      <section className="text-center py-6">
+    <div className="mx-auto max-w-4xl space-y-8">
+      <section className="py-6 text-center">
         <h1 className="title-primary">{t('home.title')}</h1>
       </section>
 
-      {/* 会员订阅 */}
-      <ProductDisplay
-        title={t('home.membership.title')}
-        description={t('home.membership.description')}
-        benefits={t.raw('home.membership.benefits')}
-        subscribeText={t('home.membership.subscribe')}
-        subscribeLink={t('home.membership.subscribeLink')}
-        imagePath="/images/membership.png"
-        note={t('home.membership.note')}
-      />
+      {auth.status === 'authenticated' ? <PlayerSummary uid={auth.uid} /> : <LoginBanner />}
 
-      {/* 链接区域 */}
-      <section className="max-w-2xl mx-auto">
-        <div className="space-y-6">
-          <Card 
-            href="https://steamcommunity.com/sharedfiles/filedetails/?id=2307479570"
-            title={t('home.steamWorkshop.title')}
-            description={t('home.steamWorkshop.description')}
-          />
+      <LaunchCard />
 
-          <Card 
-            href="https://github.com/windy10v10ai/game"
-            title={t('home.github.title')}
-            description={t('home.github.description')}
+      <WorkshopCard />
+
+      <PageCards />
+
+      <section className="space-y-6">
+        {OTHER_LINKS.map((link) => (
+          <Card
+            key={link.href}
+            href={link.href}
+            title={t(`home.${link.labelKey}.title`)}
+            description={t(`home.${link.labelKey}.description`)}
           />
-        </div>
+        ))}
       </section>
-
-      {/* 项目介绍 */}
-      <Section title={t('home.about.title')}>
-        <p className="text-content text-center whitespace-pre-line">
-          {t('home.about.description')}
-        </p>
-      </Section>
     </div>
   );
 }

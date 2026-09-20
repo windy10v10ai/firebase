@@ -1,5 +1,5 @@
-import { getRequestConfig } from 'next-intl/server';
 import { cookies, headers } from 'next/headers';
+import { getRequestConfig } from 'next-intl/server';
 
 export const locales = ['en', 'zh'];
 export const defaultLocale = 'en';

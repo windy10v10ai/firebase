@@ -4,6 +4,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
+import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
@@ -35,6 +36,7 @@ export class AlipayService {
     private readonly membersService: MembersService,
     private readonly playerService: PlayerService,
     private readonly analyticsPurchaseService: AnalyticsPurchaseService,
+    private readonly localHostService: LocalHostService,
   ) {}
 
   async createOrder(dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
@@ -159,6 +161,9 @@ export class AlipayService {
     order.rawNotify = { ...notify };
     order.updatedAt = new Date();
     await this.alipayOrderRepository.update(order);
+
+    // 付过钱的玩家不该再被下单次数挡住
+    await this.localHostService.resetOrderCount(order.steamId);
 
     await this.analyticsPurchaseService.alipayPurchase(order);
 

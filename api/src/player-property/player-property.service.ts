@@ -6,12 +6,17 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { PlayerLevelHelper } from '../player/helpers/player-level.helper';
 import { PlayerService } from '../player/player.service';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
+import { PlayerPropertyInput } from './dto/player-property-input.dto';
 import { PlayerPropertyItemDto } from './dto/player-property-item.dto';
 import { PlayerProperty } from './entities/player-property.entity';
 
 const RESET_PROPERTY_MEMBER_POINT_COST = 1000;
+// 定价与等级脱钩：按等级浮动时，等级越高洗一次越贵，高等级玩家反而不敢调整加点
+const RESET_PROPERTY_SEASON_POINT_COST = 2000;
 const RESET_PROPERTY_REASON = 'reset_property';
+const UPGRADE_PROPERTY_REASON = 'upgrade_property';
 
 @Injectable()
 export class PlayerPropertyService {
@@ -66,7 +71,7 @@ export class PlayerPropertyService {
    * 3. 写入 property 文档
    * 4. 同步 player.usedLevel（双写埋点，等回填脚本完成后切换读取路径）
    */
-  async upgrade(propertyDto: PlayerPropertyItemDto): Promise<void> {
+  async upgrade(propertyDto: PlayerPropertyInput, serverType: SERVER_TYPE): Promise<void> {
     this.validatePropertyName(propertyDto.name);
 
     const player = await this.playerService.findBySteamId(propertyDto.steamId);
@@ -111,6 +116,17 @@ export class PlayerPropertyService {
     // 不会像增量写入那样累积偏差。
     const newUsedLevel = currentUsedLevel + levelDelta;
     await this.playerService.setUsedLevel(propertyDto.steamId, newUsedLevel);
+
+    // 花的是勇士等级不是积分，事件里的点数记的是加了几级，靠 type 与其他用途区分
+    if (levelDelta > 0) {
+      await this.analyticsService.playerUsePoint(
+        propertyDto.steamId,
+        levelDelta,
+        false,
+        UPGRADE_PROPERTY_REASON,
+        serverType,
+      );
+    }
   }
 
   /**
@@ -118,7 +134,7 @@ export class PlayerPropertyService {
    * 消耗赛季可用积分或会员可用积分（usedSeasonPoint/usedMemberPoint 增加，不影响积分总数和等级），
    * 删除 property 文档，并将 player.usedLevel 重置为 0
    */
-  async reset(steamId: number, useMemberPoint: boolean): Promise<void> {
+  async reset(steamId: number, useMemberPoint: boolean, serverType: SERVER_TYPE): Promise<void> {
     const player = await this.playerService.findBySteamId(steamId);
     if (!player) {
       throw new BadRequestException();
@@ -131,23 +147,33 @@ export class PlayerPropertyService {
         throw new BadRequestException();
       }
       await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
-      await this.analyticsService.playerUsePoint(steamId, cost, true, RESET_PROPERTY_REASON);
+      await this.analyticsService.playerUsePoint(
+        steamId,
+        cost,
+        true,
+        RESET_PROPERTY_REASON,
+        serverType,
+      );
     } else {
-      const seasonPointTotal = player.seasonPointTotal ?? 0;
-      const seasonLevel = PlayerLevelHelper.getSeasonLevelBuyPoint(seasonPointTotal);
-      const cost = PlayerLevelHelper.getSeasonNextLevelPoint(seasonLevel);
-      const useableSeasonPoint = seasonPointTotal - (player.usedSeasonPoint ?? 0);
+      const cost = RESET_PROPERTY_SEASON_POINT_COST;
+      const useableSeasonPoint = (player.seasonPointTotal ?? 0) - (player.usedSeasonPoint ?? 0);
       if (useableSeasonPoint < cost) {
         throw new BadRequestException();
       }
       await this.playerService.upsertAddPoint(steamId, { usedSeasonPoint: cost });
-      await this.analyticsService.playerUsePoint(steamId, cost, false, RESET_PROPERTY_REASON);
+      await this.analyticsService.playerUsePoint(
+        steamId,
+        cost,
+        false,
+        RESET_PROPERTY_REASON,
+        serverType,
+      );
     }
 
     await this.deleteBySteamId(steamId);
   }
 
-  async upsert(propertyDto: PlayerPropertyItemDto): Promise<PlayerProperty> {
+  async upsert(propertyDto: PlayerPropertyInput): Promise<PlayerProperty> {
     const id = propertyDto.steamId.toString();
     let playerProperty = await this.playerPropertyRepository.findById(id);
 
@@ -175,7 +201,6 @@ export class PlayerPropertyService {
     return playerProperty.properties
       .filter((p) => p.level > 0)
       .map((p) => ({
-        steamId: playerProperty.steamId,
         name: p.name,
         level: p.level,
       }));

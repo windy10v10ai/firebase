@@ -7,6 +7,8 @@ import { Player } from '../../player/entities/player.entity';
 import { HeroAwakeningItemDto } from '../../player-hero-awakening/dto/hero-awakening-item.dto';
 import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 
+import { PlayerCheckInDto } from './check-in-result.dto';
+
 export class PlayerInfoDto extends Player {
   @ApiProperty()
   seasonLevel: number;
@@ -38,4 +40,6 @@ export class PlayerInfoDto extends Player {
   statsLifetime?: PlayerStatsLifetime;
   @ApiPropertyOptional()
   awakenedHeroes?: HeroAwakeningItemDto[];
+  @ApiPropertyOptional()
+  checkIn?: PlayerCheckInDto;
 }

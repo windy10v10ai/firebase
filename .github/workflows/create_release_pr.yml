@@ -34,7 +34,7 @@ jobs:
       - name: Create Pull Request
         id: cpr
         if: steps.check_pr.outputs.pr_exists == ''
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           title: Release
           branch: develop
@@ -51,7 +51,7 @@ jobs:
 
       - name: Enable Pull Request Automerge
         if: steps.check_pr.outputs.pr_exists == ''
-        uses: peter-evans/enable-pull-request-automerge@v3
+        uses: peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d # v3
         with:
           token: ${{ secrets.WINDY_PR_PAT }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
