@@ -36,6 +36,7 @@ export class ProxyController {
     private readonly playerInfoService: PlayerInfoService,
   ) {}
 
+  // 对应 GET /game/start
   @Get('game-start')
   async gameStart(
     @Query('requestId') requestId: string,
@@ -56,6 +57,7 @@ export class ProxyController {
     return buildProxySuccessHtml(requestId, result);
   }
 
+  // 对应 GET /player/:steamId/info
   @Get('player-info')
   async playerInfo(
     @Query('requestId') requestId: string,
