@@ -54,6 +54,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节
 - **`@AllowWeb()` 不等于「只有网站能调」**：不挂任何装饰器时，任何有效的官方服务器 key 都能调，它只是额外放行网页来源，`@AllowLocal()` 同理额外放行本地主机 key。要按来源区分行为或统计，用 `@CurrentServerType()` 取 guard 算出来的来源，不要靠路由挂了什么装饰器去推
 - **调用方带不了请求头时用 `@AllowQueryKey()`**（[allow-query-key.decorator.ts](src/util/auth/allow-query-key.decorator.ts)）：挂了这个装饰器的路由，`x-api-key` 请求头缺失时改读 query 的 `apiKey`；挂了但请求头存在时仍优先用请求头。`ProxyController`（[proxy.controller.ts](src/proxy/proxy.controller.ts)）是目前唯一用例——游戏内的 `DOTAHTMLPanel` 只能发不带头的 GET，且读不到非 200 状态码，所以这类路由还要配一个把所有异常转成 200 + 自定义错误格式的 `@UseFilters()` 过滤器，参考 `ProxyExceptionFilter`
+- **新增代理路由按原路由推名字**：`/proxy/` 加上原路径去掉路径参数后用连字符拍平，`GET /player/:steamId/info` → `/proxy/player-info`，路径参数改走 query。规则与理由见 [docs/api/README.md](../docs/api/README.md) 的「代理路由」
 - **给已有接口补挂 `@AllowWeb()` 不需要新开 e2e 用例**：归属校验（自己 200 / 别人 403 / 无 token 401）是 `auth.guard.ts` 里对所有带 `:steamId` 路由的通用逻辑，已在 [player-info-web.e2e-spec.ts](test/player-info-web.e2e-spec.ts) 验证过一次，不必逐个接口重复验证。只有装饰器改动之外还有新业务逻辑时才写新用例
 - **裸 `/api` 在线上到不了**：Hosting rewrite 是 `^/api/.*`、函数白名单是 `^/api/(game|player|...)`，两个都不匹配，实测 404。要探活用公开端点 `GET /api/hello`
 - **functions emulator 会伪造 CORS 头**：它给所有请求套了一层 `cors({ origin: true })`，预检由它直接答、任何 `Origin` 都放行。经 `localhost:5000` 的链路只能验通路，验不了白名单——白名单以 e2e（直连 Nest）和线上为准
