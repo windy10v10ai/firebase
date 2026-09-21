@@ -82,7 +82,9 @@ export class AnalyticsService {
 
   // ------------------------ 通过game end API调用 ------------------------
   async gameEndPlayerBot(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
-    const playerCount = gameEnd.players.filter((player) => player.steamId > 0).length;
+    // TODO: game 发布并保证必带 playerCount 后，去掉回退，统一用 gameEnd.playerCount 判定
+    const playerCount =
+      gameEnd.playerCount ?? gameEnd.players.filter((player) => player.steamId > 0).length;
     await Promise.all(
       gameEnd.players.map(async (player) => {
         const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';

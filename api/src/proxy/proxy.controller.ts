@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   NotFoundException,
@@ -9,8 +10,11 @@ import {
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 
+import { AnalyticsService } from '../analytics/analytics.service';
+import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
+import { LocalHostService } from '../local-host/local-host.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
@@ -21,6 +25,7 @@ import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { ProxyExceptionFilter } from './proxy-exception.filter';
+import { decodeProxyBody } from './proxy-request.util';
 import { buildProxySuccessHtml, validateRequestId } from './proxy-response.util';
 
 // 游廊多人对局发不出 HTTP 请求，由代发玩家的客户端网页控件代为访问，
@@ -35,7 +40,9 @@ const PROXY_GAME_START_INCLUDE: PlayerInfoInclude[] = ['member', 'setting', 'sta
 export class ProxyController {
   constructor(
     private readonly gameService: GameService,
+    private readonly analyticsService: AnalyticsService,
     private readonly playerInfoService: PlayerInfoService,
+    private readonly localHostService: LocalHostService,
   ) {}
 
   // 对应 GET /game/probe
@@ -82,6 +89,28 @@ export class ProxyController {
     // 新玩家可能还没经过 game-start 建档，把「查无此人」当成「没有可选字段」，不算失败
     const player = await this.findPlayerInfoOrUndefined(steamId, include);
     return buildProxySuccessHtml(requestId, player ?? {});
+  }
+
+  // 对应 POST /game/end/local。一条请求只带一个玩家，逐人过限额与冷却；
+  // 整场事件 gameEndMatch 凑不齐全场数据，不在这条路径上发，只发按玩家的 gameEndPlayerBot
+  @Get('game-end-local-post')
+  async gameEndLocalPost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+    @CurrentClientOrigin() origin: ClientOrigin,
+    @CurrentServerType() serverType: SERVER_TYPE,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const gameEnd = await decodeProxyBody(GameEndDto, body);
+    if (gameEnd.players.length !== 1) {
+      throw new BadRequestException();
+    }
+    const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
+    if (recorded) {
+      await this.gameService.recordPlayerStats(gameEnd);
+      await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
+    }
+    return buildProxySuccessHtml(requestId, { recorded });
   }
 
   private async findPlayerInfoOrUndefined(

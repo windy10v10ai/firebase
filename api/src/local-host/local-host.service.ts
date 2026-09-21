@@ -142,7 +142,7 @@ export class LocalHostService {
       qualifiedPlayers.map((player) => this.checkPlayerLimit(player)),
     );
 
-    // 一份报文里只要有一个玩家可疑，整份报文都不可信，所以整场拒绝而不是跳过他一个
+    // 多人报文里有人不通过就整份拒绝，是为了省掉部分成功的处理，不是安全上的要求
     const rejected = checks.find((check) => !check.ok);
     if (rejected) {
       logger.warn('game/end/local: rejected, no points or daily task recorded for this match', {

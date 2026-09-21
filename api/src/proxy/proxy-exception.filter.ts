@@ -26,7 +26,13 @@ export class ProxyExceptionFilter implements ExceptionFilter {
     const code = STATUS_ERROR_CODE[status] ?? 'internal';
 
     if (code === 'internal') {
-      logger.error('[Proxy] unhandled exception', { requestId, exception });
+      // Error 的 message 与 stack 都不可枚举，直接交给日志会序列化成空对象，
+      // 只剩下 requestId 无从排查
+      logger.error('[Proxy] unhandled exception', {
+        requestId,
+        error:
+          exception instanceof Error ? (exception.stack ?? exception.message) : String(exception),
+      });
     }
 
     response.status(HttpStatus.OK).type('html').send(buildProxyErrorHtml(requestId, code));

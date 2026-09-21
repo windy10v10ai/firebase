@@ -90,7 +90,8 @@ export class GameService {
   async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
     const players = gameEnd.players.filter((player) => player.steamId > 0);
     // 行为分只在组队局计算
-    const isParty = players.length >= 2;
+    // TODO: game 发布并保证必带 playerCount 后，去掉回退，统一用 gameEnd.playerCount 判定
+    const isParty = (gameEnd.playerCount ?? players.length) >= 2;
 
     await Promise.all(
       players.map((player) =>
@@ -107,18 +108,24 @@ export class GameService {
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
   }
 
-  /** 上报对局统计，与结算规则无关，正式结算与本地结算共用。 */
-  async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
+  /** 上报对局级 GA4 事件（整场与按玩家），与结算规则无关。 */
+  async recordMatchAnalytics(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
       this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-      ...gameEnd.players.map((player) =>
+    ]);
+  }
+
+  /** 累计报文中每个玩家的生涯统计。 */
+  async recordPlayerStats(gameEnd: GameEndDto): Promise<void> {
+    await Promise.all(
+      gameEnd.players.map((player) =>
         this.playerStatsLifetimeService.accumulate(player.steamId, player, {
           matchId: gameEnd.matchId,
           gameOptions: gameEnd.gameOptions,
         }),
       ),
-    ]);
+    );
   }
 
   getOK(): string {
