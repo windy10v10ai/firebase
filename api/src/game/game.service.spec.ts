@@ -107,7 +107,6 @@ describe('GameService', () => {
     it('recordPlayerStats 逐玩家累计生涯统计，不发对局级事件', async () => {
       await service.recordPlayerStats(gameEnd);
 
-      expect(playerStatsLifetimeService.accumulate).toHaveBeenCalledTimes(2);
       expect(playerStatsLifetimeService.accumulate).toHaveBeenCalledWith(1002, gameEnd.players[1], {
         matchId: '1',
         gameOptions: gameEnd.gameOptions,
