@@ -74,7 +74,9 @@ export class ProxyController {
       serverType,
       PROXY_GAME_START_INCLUDE,
     );
-    return buildProxySuccessHtml(requestId, result);
+    // 历史随天数线性增长，攒几天就会撑爆 title 上限；游廊对局里的历史页缺失时按空处理
+    const dailyTasks = result.dailyTasks?.map(({ history: _history, ...rest }) => rest);
+    return buildProxySuccessHtml(requestId, { ...result, dailyTasks });
   }
 
   // 对应 GET /player/:steamId/info
