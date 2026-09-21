@@ -226,12 +226,17 @@ describe('Daily task Phase1 (e2e)', () => {
     const secondSnapshot = findSnapshot(secondStart.body, steamId);
     expect(secondSnapshot.dayId).toBe('20260817');
     expect(secondSnapshot.completedTasks).toEqual([]);
-    expect(secondSnapshot.history[0]).toEqual({
+    expect(secondSnapshot).not.toHaveProperty('history');
+    expect(secondSnapshot.candidates).toHaveLength(3);
+
+    const full = await get(app, `/api/daily-task/${steamId}`);
+    expect(full.status).toBe(200);
+    expect(full.body.candidates).toEqual(secondSnapshot.candidates);
+    expect(full.body.history[0]).toEqual({
       dayId: '20260816',
       tasks: [candidate],
       seasonPoint: candidate.rewardSeasonPoint,
     });
-    expect(secondSnapshot.candidates).toHaveLength(3);
   });
 
   it('drops stale-day records without blocking base points', async () => {
