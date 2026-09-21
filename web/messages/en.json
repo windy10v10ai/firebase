@@ -8,6 +8,8 @@
     "propertyFull": "Attributes",
     "awaken": "Awaken",
     "awakenFull": "Hero Awakening",
+    "dailyTask": "Tasks",
+    "dailyTaskFull": "Daily Tasks",
     "wiki": "Skills & Items",
     "wikiFull": "Skills & Items",
     "workshop": "Steam Workshop",
@@ -35,7 +37,7 @@
       "title": "Sign in to check your own data anytime",
       "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
       "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
-      "upcoming": ["More statistics", "Daily tasks", "Ability and item draft list"]
+      "upcoming": ["More statistics", "Ability and item draft list"]
     },
     "summary": {
       "profileLink": "Profile",
@@ -399,6 +401,10 @@
         "title": "Hero Awakening",
         "description": "Unlock heroes' awakening talents",
         "badge": "Awakened {awakened} / {total}"
+      },
+      "dailyTask": {
+        "title": "Daily Tasks",
+        "description": "Today's tasks and 30 days of history"
       }
     }
   },
@@ -561,6 +567,90 @@
     "failed": {
       "title": "Could not load",
       "description": "Awakenings are unavailable right now. Please try again later."
+    }
+  },
+  "dailyTask": {
+    "title": "Daily Tasks",
+    "intro": "Three rounds a day, one task out of three each round. Complete them in game — the match must be won — and Battle Points are awarded on the end screen.",
+    "loading": "Loading daily tasks",
+    "today": "Today",
+    "todayPoint": "Battle Points today",
+    "roundProgress": "{done} of {total} rounds done",
+    "roundTotal": "/ {total} rounds",
+    "round": "Round {round}",
+    "refresh": "Refresh Tasks",
+    "refreshing": "Refreshing",
+    "refreshed": "Refreshed",
+    "refreshFailed": "Refresh failed. Try again in a moment.",
+    "noCandidate": "No tasks available right now. Check back next match.",
+    "allDone": "All {total} rounds completed today",
+    "completed": "Completed today",
+    "history": "History",
+    "historyEmpty": "No history yet. Completed tasks will show up here, day by day.",
+    "reward": "+{n}",
+    "star": "{n} stars",
+    "columns": {
+      "date": "Date",
+      "tasks": "Completed",
+      "points": "Total Points"
+    },
+    "summary": {
+      "title": "Last {days} days",
+      "days": "Days with a task done",
+      "tasks": "Tasks completed",
+      "points": "Battle Points earned",
+      "dayCount": "{n} days",
+      "taskCount": "{n} tasks"
+    },
+    "metric": {
+      "kills": "Kills",
+      "assists": "Assists",
+      "last_hits": "Last Hits",
+      "tower_kills": "Towers",
+      "hero_damage": "Damage",
+      "healing": "Healing",
+      "total_gold_earned": "Gold",
+      "damage_taken": "Damage Taken",
+      "stun_duration": "Stun",
+      "roshan_kills": "Roshan"
+    },
+    "task": {
+      "general": {
+        "kills": "Get <b>{target}</b> hero kills this match",
+        "assists": "Get <b>{target}</b> assists this match",
+        "last_hits": "Get <b>{target}</b> last hits this match",
+        "tower_kills": "Destroy <b>{target}</b> towers this match",
+        "hero_damage": "Deal <b>{target}</b> hero damage this match",
+        "healing": "Heal allied heroes for <b>{target}</b> this match",
+        "total_gold_earned": "Earn <b>{target}</b> total gold this match",
+        "damage_taken": "Take <b>{target}</b> damage from enemy heroes this match",
+        "stun_duration": "Stun or root enemy heroes for <b>{target}</b> seconds this match",
+        "roshan_kills": "Kill Roshan <b>{target}</b> times this match"
+      },
+      "hero": {
+        "kills": "Get <b>{target}</b> hero kills this match as {hero}",
+        "assists": "Get <b>{target}</b> assists this match as {hero}",
+        "last_hits": "Get <b>{target}</b> last hits this match as {hero}",
+        "tower_kills": "Destroy <b>{target}</b> towers this match as {hero}",
+        "hero_damage": "Deal <b>{target}</b> hero damage this match as {hero}",
+        "healing": "Heal allied heroes for <b>{target}</b> this match as {hero}",
+        "total_gold_earned": "Earn <b>{target}</b> total gold this match as {hero}",
+        "damage_taken": "Take <b>{target}</b> damage from enemy heroes this match as {hero}",
+        "stun_duration": "Stun or root enemy heroes for <b>{target}</b> seconds this match as {hero}",
+        "roshan_kills": "Kill Roshan <b>{target}</b> times this match as {hero}"
+      }
+    },
+    "private": {
+      "title": "This record is private",
+      "description": "Daily tasks are only visible to the signed-in owner."
+    },
+    "noRecord": {
+      "title": "No record yet",
+      "description": "This Steam ID has no record yet. Start the game from this site, play a match, then come back."
+    },
+    "failed": {
+      "title": "Could not load",
+      "description": "Daily tasks are unavailable right now. Please try again later."
     }
   },
   "ability": {

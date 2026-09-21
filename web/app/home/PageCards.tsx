@@ -37,6 +37,7 @@ export default function PageCards() {
     property: playerPagePath(uid, 'property'),
     awaken: playerPagePath(uid, 'awaken'),
     membership: '/membership',
+    dailyTask: playerPagePath(uid, 'daily-task'),
   };
 
   return (

@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 const TONE_CLASS = {
   property: { box: 'bg-feature-property-soft', icon: 'text-feature-property' },
   awaken: { box: 'bg-feature-awaken-soft', icon: 'text-feature-awaken' },
+  dailyTask: { box: 'bg-feature-daily-soft', icon: 'text-feature-daily' },
 } as const;
 
 const BADGE_CLASS = 'rounded-full bg-panel-soft px-3 py-1 text-sm text-content';
