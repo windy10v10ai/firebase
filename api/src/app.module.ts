@@ -24,8 +24,8 @@ import { AuthGuard } from './util/auth/auth.guard';
 import { SecretModule } from './util/secret/secret.module';
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? 'local';
-// 数据落在哪个 Firestore project。线上与本地都取默认值，e2e 用它把每个 jest worker 的数据分开
-export const FIRESTORE_PROJECT_ID = process.env.FIRESTORE_PROJECT_ID ?? 'windy10v10ai';
+// 数据落在哪个 Firestore project。只有 e2e 会设这个环境变量，用来把每个 jest worker 的数据分开，线上与本地都走默认值
+export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'windy10v10ai';
 
 @Module({
   imports: [

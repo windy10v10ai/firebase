@@ -46,13 +46,15 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 
 直写时用 `getTestFirestore()`（[util-firestore.ts](test/util/util-firestore.ts)），不要用 `getFirestore()`：后者拿到的是默认 project，与被测应用不在同一份数据里，理由见下面「常见坑」里 project 隔离那一条。
 
+**每个 e2e 文件用自己的一段 steamId，不要和别的文件重复。** 一个 jest worker 会先后跑多个文件、共用一份数据，撞号时前一个文件留下的玩家会带进后一个。
+
 ## 常见坑
 
 - `firestore-backup/` 不在仓库里，是从 GCP `gcloud storage` 拉的；没有它时不要带 `--import` 启动 emulator
 - API 通过 `FIRESTORE_EMULATOR_HOST` 连本地 emulator；忘记设这个变量会去连生产 Firestore 然后失败（无凭证）
 - Firestore emulator 需要 Java JRE
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
-- **E2E 每个 jest worker 用一个独立的 Firestore project**（[setup-worker-project.ts](test/util/setup-worker-project.ts) 按 `JEST_WORKER_ID` 设 `FIRESTORE_PROJECT_ID`，[app.module.ts](src/app.module.ts) 读它）：并行的套件共用一个模拟器实例，不隔离的话全库级写操作（`POST /api/admin/player-property/reset` 就是一个）会删掉别的套件正在用的文档，套件之间撞 steamId 也会互相覆盖，症状是单跑必过、跑全量时随机挂。Auth 不跟着隔离，模拟器只按启动时的 project 签发 ID Token
+- **E2E 每个 jest worker 用一个独立的 Firestore project**（[setup-worker-project.ts](test/util/setup-worker-project.ts) 按 `JEST_WORKER_ID` 设 `E2E_FIRESTORE_PROJECT_ID`，[app.module.ts](src/app.module.ts) 读它）：并行的套件共用一个模拟器实例，不隔离的话全库级写操作（`POST /api/admin/player-property/reset` 就是一个）会删掉别的套件正在用的文档，套件之间撞 steamId 也会互相覆盖，症状是单跑必过、跑全量时随机挂。Auth 不跟着隔离，模拟器只按启动时的 project 签发 ID Token
 - **新增顶层路由前缀必须登记到 `api/index.ts` 中 `client` 函数的路径白名单**（那个 `regex` 常量，形如 `^/api/(game|player|...).*`）。不在白名单里的请求在进入 NestJS 之前就被 403 `Invalid path` 拦掉，服务端只留一条 `Abnormal request on API Cloud Function! Path: ...`，controller、guard、e2e 全都看不到任何痕迹——e2e 直连 Nest，不经过这层，所以测试全绿也可能线上 403
 - **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节
 - **`@AllowWeb()` 不等于「只有网站能调」**：不挂任何装饰器时，任何有效的官方服务器 key 都能调，它只是额外放行网页来源，`@AllowLocal()` 同理额外放行本地主机 key。要按来源区分行为或统计，用 `@CurrentServerType()` 取 guard 算出来的来源，不要靠路由挂了什么装饰器去推
