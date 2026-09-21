@@ -107,14 +107,12 @@ export class GameService {
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
   }
 
-  /** 上报整场对局事件，需要全场数据，与结算规则无关。 */
+  /** 上报对局级 GA4 事件（整场与按玩家），与结算规则无关。 */
   async recordMatchAnalytics(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
-    await this.analyticsService.gameEndMatch(gameEnd, serverType);
-  }
-
-  /** 按玩家上报对局事件，每个玩家一条，报文里只有一个玩家时也能独立成立。 */
-  async recordPlayerAnalytics(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
-    await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
+    await Promise.all([
+      this.analyticsService.gameEndMatch(gameEnd, serverType),
+      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+    ]);
   }
 
   /** 累计报文中每个玩家的生涯统计。 */

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 
+import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
@@ -39,6 +40,7 @@ const PROXY_GAME_START_INCLUDE: PlayerInfoInclude[] = ['member', 'setting', 'sta
 export class ProxyController {
   constructor(
     private readonly gameService: GameService,
+    private readonly analyticsService: AnalyticsService,
     private readonly playerInfoService: PlayerInfoService,
     private readonly localHostService: LocalHostService,
   ) {}
@@ -90,7 +92,7 @@ export class ProxyController {
   }
 
   // 对应 POST /game/end/local。一条请求只带一个玩家，逐人过限额与冷却；
-  // 整场对局事件凑不齐全场数据，不在这条路径上发
+  // 整场事件 gameEndMatch 凑不齐全场数据，不在这条路径上发，只发按玩家的 gameEndPlayerBot
   @Get('game-end-local-post')
   async gameEndLocalPost(
     @Query('requestId') requestId: string,
@@ -106,7 +108,7 @@ export class ProxyController {
     const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
     if (recorded) {
       await this.gameService.recordPlayerStats(gameEnd);
-      await this.gameService.recordPlayerAnalytics(gameEnd, serverType);
+      await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
     }
     return buildProxySuccessHtml(requestId, { recorded });
   }

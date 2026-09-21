@@ -57,7 +57,6 @@ export class GameController {
   ): Promise<string> {
     await this.gameService.recordGameEnd(gameEnd);
     await this.gameService.recordPlayerStats(gameEnd);
-    await this.gameService.recordPlayerAnalytics(gameEnd, serverType);
     await this.gameService.recordMatchAnalytics(gameEnd, serverType);
     return this.gameService.getOK();
   }
@@ -75,7 +74,6 @@ export class GameController {
     const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
     if (recorded) {
       await this.gameService.recordPlayerStats(gameEnd);
-      await this.gameService.recordPlayerAnalytics(gameEnd, serverType);
       await this.gameService.recordMatchAnalytics(gameEnd, serverType);
     }
     return this.gameService.getOK();
