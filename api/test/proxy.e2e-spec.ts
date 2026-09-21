@@ -44,6 +44,31 @@ describe('ProxyController (e2e)', () => {
     expect(res.text).toContain('ERR:bad_request');
   });
 
+  describe('daily-task', () => {
+    const steamId = 310030003;
+    const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+
+    it('daily-task 只回 history；daily-task-refresh-post 解出 body 并走原校验', async () => {
+      const history = await request(app.getHttpServer())
+        .get('/api/proxy/daily-task')
+        .query({ requestId: 'p_3_1', steamId, apiKey: localKey });
+      expect(JSON.parse(decodeProxyTitle(history.text).data)).toEqual({ steamId, history: [] });
+
+      const dayId = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const refreshed = await request(app.getHttpServer())
+        .get('/api/proxy/daily-task-refresh-post')
+        .query({ requestId: 'p_3_2', body: encode({ steamId, dayId }), apiKey: localKey });
+      const snapshot = JSON.parse(decodeProxyTitle(refreshed.text).data);
+      expect(snapshot).toMatchObject({ steamId, dayId, refreshRemaining: 0 });
+      expect(snapshot).not.toHaveProperty('history');
+
+      const invalid = await request(app.getHttpServer())
+        .get('/api/proxy/daily-task-refresh-post')
+        .query({ requestId: 'p_3_3', body: encode({ steamId, dayId: 'bad' }), apiKey: localKey });
+      expect(invalid.text).toContain('ERR:bad_request');
+    });
+  });
+
   describe('game-end-local-post', () => {
     const steamId = 310030002;
     const payload = {

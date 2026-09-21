@@ -32,7 +32,7 @@
 | 13 网站签到 | #1214 | 游戏内发不出请求，会员每日积分停发；新增签到接口把发放接过来，首页与个人主页各加一个入口，接口形状为勇士积分预留，见 [phase-13-check-in.md](phase-13-check-in.md) | 已完成 |
 | 5 GA4 | #1122 | 网页接入 gtag，与游戏共用媒体资源、各一条数据流；服务端事件补来源与加点，见 [phase-5-ga4.md](phase-5-ga4.md) | 已完成 |
 | 6 会员剩余 | #1123 | 积分、支付宝二维码购买；连带把支付宝、爱发电、Ko-fi 的回调地址改到 `api.windy10v10ai.com`，见 [api-entry](../api-entry/README.md) | 未开始 |
-| 14 每日任务与 30 天历史 | 无 | `/profile/<steamId>/daily-task`：今天的任务状态与 30 天历史；游戏内受代发通道的 4096 字符上限只能看 5 天，见 [phase-14-daily-task.md](phase-14-daily-task.md) | 未开始 |
+| 14 每日任务与 30 天历史 | 无 | `/profile/<steamId>/daily-task`：今天的任务状态与 30 天历史；游廊的离线局受代发通道 4096 字符上限只能看 5 天，网站一律 30 天，见 [phase-14-daily-task.md](phase-14-daily-task.md) | 未开始 |
 
 ### 后续依赖
 

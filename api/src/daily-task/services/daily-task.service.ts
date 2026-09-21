@@ -4,7 +4,7 @@ import { logger } from 'firebase-functions';
 import { GameEndPlayerDto } from '../../analytics/dto/game-end-dto';
 import { getUtcDayId } from '../../util/date';
 import { MAX_REFRESH_PER_ROUND, ROUNDS_PER_DAY } from '../config/tasks';
-import { DailyTaskSnapshotDto } from '../dto/daily-task-snapshot.dto';
+import { DailyTaskHistoryEntryDto, DailyTaskSnapshotDto } from '../dto/daily-task-snapshot.dto';
 import { PlayerDailyTask } from '../entities/player-daily-task.entity';
 
 import { DailyTaskGenerationService } from './daily-task-generation.service';
@@ -38,14 +38,22 @@ export class DailyTaskService {
   }
 
   async getSnapshot(steamId: number, today = getUtcDayId()): Promise<DailyTaskSnapshotDto> {
-    const document = await this.store.transact(steamId, (current) => {
+    return this.toSnapshot(steamId, await this.loadDocument(steamId, today));
+  }
+
+  /** 带历史的完整快照。归档只在取快照时懒触发，所以同样走会写库的路径，不能改成纯读。 */
+  async getSnapshotWithHistory(steamId: number): Promise<DailyTaskSnapshotDto> {
+    const document = await this.loadDocument(steamId, getUtcDayId());
+    return { ...this.toSnapshot(steamId, document), history: this.resolveHistory(document) };
+  }
+
+  private loadDocument(steamId: number, today: string): Promise<PlayerDailyTask> {
+    return this.store.transact(steamId, (current) => {
       const normalized = current ? this.normalize(current) : this.createDocument(steamId, today);
       const next = normalized.dayId === today ? normalized : this.resetForNewDay(normalized, today);
       const shouldWrite = !current || next !== normalized;
       return { result: next, ...(shouldWrite ? { next } : {}) };
     });
-
-    return this.toSnapshot(steamId, document);
   }
 
   /** 消耗一次本轮刷新额度，重掷三个候选。额度上限为 1 时重试天然幂等，上调上限需要另加幂等键。 */
@@ -173,14 +181,17 @@ export class DailyTaskService {
       todaySeasonPoint: document.todaySeasonPoint,
       // 当天打满后没有可刷的候选
       refreshRemaining: allRoundsDone ? 0 : MAX_REFRESH_PER_ROUND - document.refreshCount,
-      history: document.history.map((entry) => ({
-        dayId: entry.dayId,
-        tasks: entry.tasks
-          .map((task) => this.generationService.resolveCompletedTask(task))
-          .filter((task): task is NonNullable<typeof task> => task !== undefined),
-        seasonPoint: entry.seasonPoint,
-      })),
     };
+  }
+
+  private resolveHistory(document: PlayerDailyTask): DailyTaskHistoryEntryDto[] {
+    return document.history.map((entry) => ({
+      dayId: entry.dayId,
+      tasks: entry.tasks
+        .map((task) => this.generationService.resolveCompletedTask(task))
+        .filter((task): task is NonNullable<typeof task> => task !== undefined),
+      seasonPoint: entry.seasonPoint,
+    }));
   }
 
   private createDocument(steamId: number, dayId: string): PlayerDailyTask {
