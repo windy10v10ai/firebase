@@ -90,12 +90,13 @@ export class ProxyController {
   }
 
   // 对应 POST /game/end/local。一条请求只带一个玩家，逐人过限额与冷却；
-  // 对局级 GA4 事件凑不齐全场数据，不在这条路径上发
+  // 整场对局事件凑不齐全场数据，不在这条路径上发
   @Get('game-end-local-post')
   async gameEndLocalPost(
     @Query('requestId') requestId: string,
     @Query('body') body: string,
     @CurrentClientOrigin() origin: ClientOrigin,
+    @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<string> {
     validateRequestId(requestId);
     const gameEnd = await decodeProxyBody(GameEndDto, body);
@@ -105,6 +106,7 @@ export class ProxyController {
     const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
     if (recorded) {
       await this.gameService.recordPlayerStats(gameEnd);
+      await this.gameService.recordPlayerAnalytics(gameEnd, serverType);
     }
     return buildProxySuccessHtml(requestId, { recorded });
   }

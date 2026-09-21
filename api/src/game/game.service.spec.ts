@@ -89,19 +89,25 @@ describe('GameService', () => {
     playerStatsLifetimeService = moduleRef.get(PlayerStatsLifetimeService);
   });
 
-  describe('recordMatchAnalytics / recordPlayerStats', () => {
+  describe('recordMatchAnalytics / recordPlayerAnalytics / recordPlayerStats', () => {
     const gameEnd = {
       matchId: '1',
       gameOptions: { towerPowerPct: 100 },
       players: [{ steamId: 1001 }, { steamId: 1002 }],
     } as unknown as GameEndDto;
 
-    it('recordMatchAnalytics 只发对局级事件，不累计生涯统计', async () => {
+    it('recordMatchAnalytics 只发整场事件', async () => {
       await service.recordMatchAnalytics(gameEnd, SERVER_TYPE.WINDY);
 
       expect(analyticsService.gameEndMatch).toHaveBeenCalledWith(gameEnd, SERVER_TYPE.WINDY);
+      expect(analyticsService.gameEndPlayerBot).not.toHaveBeenCalled();
+    });
+
+    it('recordPlayerAnalytics 只发按玩家事件', async () => {
+      await service.recordPlayerAnalytics(gameEnd, SERVER_TYPE.WINDY);
+
       expect(analyticsService.gameEndPlayerBot).toHaveBeenCalledWith(gameEnd, SERVER_TYPE.WINDY);
-      expect(playerStatsLifetimeService.accumulate).not.toHaveBeenCalled();
+      expect(analyticsService.gameEndMatch).not.toHaveBeenCalled();
     });
 
     it('recordPlayerStats 逐玩家累计生涯统计，不发对局级事件', async () => {
