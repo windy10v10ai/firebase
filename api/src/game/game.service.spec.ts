@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BaseFirestoreRepository } from 'fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member, MemberLevel } from '../members/entities/members.entity';
@@ -20,6 +21,8 @@ describe('GameService', () => {
   let secretService: jest.Mocked<SecretService>;
   let playerService: jest.Mocked<PlayerService>;
   let eventRewardsService: jest.Mocked<EventRewardsService>;
+  let analyticsService: jest.Mocked<AnalyticsService>;
+  let playerStatsLifetimeService: jest.Mocked<PlayerStatsLifetimeService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -32,6 +35,7 @@ describe('GameService', () => {
             upsertMemberPoint: jest.fn(),
             updateLastMatchTime: jest.fn(),
             upsertAddPoint: jest.fn(),
+            upsertGameEnd: jest.fn(),
           },
         },
         {
@@ -55,7 +59,7 @@ describe('GameService', () => {
         },
         {
           provide: AnalyticsService,
-          useValue: {},
+          useValue: { gameEndMatch: jest.fn(), gameEndPlayerBot: jest.fn() },
         },
         {
           provide: PlayerStatsLifetimeService,
@@ -82,6 +86,45 @@ describe('GameService', () => {
     secretService = moduleRef.get(SecretService);
     playerService = moduleRef.get(PlayerService);
     eventRewardsService = moduleRef.get(EventRewardsService);
+    analyticsService = moduleRef.get(AnalyticsService);
+    playerStatsLifetimeService = moduleRef.get(PlayerStatsLifetimeService);
+  });
+
+  describe('recordGameEnd 组队判定', () => {
+    const player = { steamId: 1001, teamId: 2, battlePoints: 10, isDisconnected: false };
+    const build = (playerCount?: number) =>
+      ({ winnerTeamId: 2, players: [player], playerCount }) as unknown as GameEndDto;
+
+    it('报文带 playerCount 时按它判定，单玩家报文也能算组队局', async () => {
+      await service.recordGameEnd(build(4));
+
+      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1001, true, 10, false, true);
+    });
+
+    it('没带 playerCount 时按报文里的真人数判定', async () => {
+      await service.recordGameEnd(build());
+
+      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1001, true, 10, false, false);
+    });
+  });
+
+  describe('recordPlayerStats', () => {
+    const gameEnd = {
+      matchId: '1',
+      gameOptions: { towerPowerPct: 100 },
+      players: [{ steamId: 1001 }, { steamId: 1002 }],
+    } as unknown as GameEndDto;
+
+    it('recordPlayerStats 逐玩家累计生涯统计，不发对局级事件', async () => {
+      await service.recordPlayerStats(gameEnd);
+
+      expect(playerStatsLifetimeService.accumulate).toHaveBeenCalledWith(1002, gameEnd.players[1], {
+        matchId: '1',
+        gameOptions: gameEnd.gameOptions,
+      });
+      expect(analyticsService.gameEndMatch).not.toHaveBeenCalled();
+      expect(analyticsService.gameEndPlayerBot).not.toHaveBeenCalled();
+    });
   });
   describe('getOK', () => {
     it('should return OK', () => {
