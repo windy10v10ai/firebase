@@ -40,7 +40,7 @@
 
 剩下的 **6 会员剩余**不依赖别的批次，随时可以插队。
 
-**14 每日任务**卡在游戏侧：取历史的接口在 [game#2435](https://github.com/windy10v10ai/game/issues/2435) 的阶段 3.5，还没实现；「显示今天的任务」还缺一条只读接口，那条连计划都没有。历史那半边接口一到位就能做。
+**14 每日任务**卡在游戏侧：它依赖的 `GET /daily-task/{steamId}` 在 [game#2435](https://github.com/windy10v10ai/game/issues/2435) 的阶段 3.5，还没实现。整个页面只依赖这一条，接口一到位就能做。
 
 `/wiki/*` 的技能与物品页仍未排期，菜单项靠 `config/nav.ts` 里 `href` 为 `null` 隐藏着。
 
