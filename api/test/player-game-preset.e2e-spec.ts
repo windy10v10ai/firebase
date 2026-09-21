@@ -17,7 +17,7 @@ describe('PlayerGamePresetController (e2e)', () => {
 
   describe(`${playerUrl}/:id/game-preset (Put)`, () => {
     it('保存 dota 难度 - 返回 PlayerSetting 含 gamePresetDota', async () => {
-      const steamId = 300500001;
+      const steamId = 300900001;
       const res = await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'dota',
         remember: true,
@@ -30,7 +30,7 @@ describe('PlayerGamePresetController (e2e)', () => {
     });
 
     it('保存 hard 难度 - 返回 PlayerSetting 含 gamePresetHard', async () => {
-      const steamId = 300500002;
+      const steamId = 300900002;
       const res = await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'hard',
         remember: true,
@@ -41,7 +41,7 @@ describe('PlayerGamePresetController (e2e)', () => {
     });
 
     it('保存 custom 整套 KV - 返回 PlayerSetting 含 gamePresetCustom', async () => {
-      const steamId = 300500003;
+      const steamId = 300900003;
       const gameOptions = {
         multiplierRadiant: 1,
         multiplierDire: 2,
@@ -67,7 +67,7 @@ describe('PlayerGamePresetController (e2e)', () => {
     });
 
     it('保存多张图后各槽位独立保留', async () => {
-      const steamId = 300500004;
+      const steamId = 300900004;
       await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'dota',
         remember: true,
@@ -86,7 +86,7 @@ describe('PlayerGamePresetController (e2e)', () => {
     });
 
     it('remember: false 应清除对应 flat 字段，其余槽位不受影响', async () => {
-      const steamId = 300500005;
+      const steamId = 300900005;
       await put(app, `${playerUrl}/${steamId}/game-preset`, {
         map: 'dota',
         remember: true,

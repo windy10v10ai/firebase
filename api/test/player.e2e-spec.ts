@@ -12,8 +12,8 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe(`${playerRankUrl} (Get)`, () => {
-    const testPlayerA = 300400001;
-    const testPlayerB = 300400002;
+    const testPlayerA = 300800001;
+    const testPlayerB = 300800002;
 
     beforeEach(async () => {
       // 创建两个测试玩家并设置较高的勇士积分以确保他们出现在排行榜中
