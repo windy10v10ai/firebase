@@ -107,18 +107,24 @@ export class GameService {
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
   }
 
-  /** 上报对局统计，与结算规则无关，正式结算与本地结算共用。 */
-  async recordMatchStats(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
+  /** 上报对局级统计（整场事件与人机标记），与结算规则无关。 */
+  async recordMatchAnalytics(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),
       this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-      ...gameEnd.players.map((player) =>
+    ]);
+  }
+
+  /** 累计报文中每个玩家的生涯统计。 */
+  async recordPlayerStats(gameEnd: GameEndDto): Promise<void> {
+    await Promise.all(
+      gameEnd.players.map((player) =>
         this.playerStatsLifetimeService.accumulate(player.steamId, player, {
           matchId: gameEnd.matchId,
           gameOptions: gameEnd.gameOptions,
         }),
       ),
-    ]);
+    );
   }
 
   getOK(): string {

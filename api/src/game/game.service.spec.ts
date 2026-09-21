@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BaseFirestoreRepository } from 'fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member, MemberLevel } from '../members/entities/members.entity';
@@ -20,6 +21,8 @@ describe('GameService', () => {
   let secretService: jest.Mocked<SecretService>;
   let playerService: jest.Mocked<PlayerService>;
   let eventRewardsService: jest.Mocked<EventRewardsService>;
+  let analyticsService: jest.Mocked<AnalyticsService>;
+  let playerStatsLifetimeService: jest.Mocked<PlayerStatsLifetimeService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -55,7 +58,7 @@ describe('GameService', () => {
         },
         {
           provide: AnalyticsService,
-          useValue: {},
+          useValue: { gameEndMatch: jest.fn(), gameEndPlayerBot: jest.fn() },
         },
         {
           provide: PlayerStatsLifetimeService,
@@ -82,6 +85,36 @@ describe('GameService', () => {
     secretService = moduleRef.get(SecretService);
     playerService = moduleRef.get(PlayerService);
     eventRewardsService = moduleRef.get(EventRewardsService);
+    analyticsService = moduleRef.get(AnalyticsService);
+    playerStatsLifetimeService = moduleRef.get(PlayerStatsLifetimeService);
+  });
+
+  describe('recordMatchAnalytics / recordPlayerStats', () => {
+    const gameEnd = {
+      matchId: '1',
+      gameOptions: { towerPowerPct: 100 },
+      players: [{ steamId: 1001 }, { steamId: 1002 }],
+    } as unknown as GameEndDto;
+
+    it('recordMatchAnalytics 只发对局级事件，不累计生涯统计', async () => {
+      await service.recordMatchAnalytics(gameEnd, SERVER_TYPE.WINDY);
+
+      expect(analyticsService.gameEndMatch).toHaveBeenCalledWith(gameEnd, SERVER_TYPE.WINDY);
+      expect(analyticsService.gameEndPlayerBot).toHaveBeenCalledWith(gameEnd, SERVER_TYPE.WINDY);
+      expect(playerStatsLifetimeService.accumulate).not.toHaveBeenCalled();
+    });
+
+    it('recordPlayerStats 逐玩家累计生涯统计，不发对局级事件', async () => {
+      await service.recordPlayerStats(gameEnd);
+
+      expect(playerStatsLifetimeService.accumulate).toHaveBeenCalledTimes(2);
+      expect(playerStatsLifetimeService.accumulate).toHaveBeenCalledWith(1002, gameEnd.players[1], {
+        matchId: '1',
+        gameOptions: gameEnd.gameOptions,
+      });
+      expect(analyticsService.gameEndMatch).not.toHaveBeenCalled();
+      expect(analyticsService.gameEndPlayerBot).not.toHaveBeenCalled();
+    });
   });
   describe('getOK', () => {
     it('should return OK', () => {
