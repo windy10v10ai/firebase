@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { logger } from 'firebase-functions';
 
 import {
   buildProxyErrorHtml,
@@ -32,6 +33,28 @@ describe('buildProxySuccessHtml', () => {
 
     expect(html).toContain('&lt;a&gt; &amp; b');
     expect(html).not.toContain('<a>');
+  });
+
+  it('title 超限时记 warn，带上 requestId 与实际长度', () => {
+    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+    buildProxySuccessHtml('req1', 'x'.repeat(4096));
+
+    // requestId + 分隔符 + 4096 个字符加两侧引号
+    expect(warn).toHaveBeenCalledWith('[Proxy] title too long', {
+      requestId: 'req1',
+      titleLength: 4 + 1 + 4096 + 2,
+    });
+    warn.mockRestore();
+  });
+
+  it('title 未超限时不记 warn', () => {
+    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+    buildProxySuccessHtml('req1', { a: 1 });
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it('title 长度达到 4096 时改为返回 ERR:too_long', () => {
