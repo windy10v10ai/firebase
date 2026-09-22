@@ -53,6 +53,13 @@ playerStatsRecent/{steamId}
 - **刷分局跳过**。直接复用 `shouldSkipStatsLifetimeForGameOptions`，与生涯战绩同一个口径。两份数据的入口不一致会让人无法解释为什么这局在战绩里有、在累计里没有
 - **单字段超上限只丢那个字段**。复用 `validateStatContribution` 的每局上限，异常值落回 0 并记日志，整场仍然记录。否则一个坏数值会让整局在战绩里凭空消失
 - **不按 matchId 去重**。控制台启动的对局引擎给的 matchId 恒为 `"0"`，拿它比对会把不同对局误判成重放。防重复由本地主机那条路已有的冷却窗口承担，与 [local-host.service.ts](../../../api/src/local-host/local-host.service.ts) 的现有做法一致
+- **不用事务**。读-改-写即可。一个玩家同一时刻只在一局游戏里，结算天然顺序发生；极端情况下两条请求撞在一起会丢一场记录，这个代价可以接受。规约见 [api/CLAUDE.md](../../../api/CLAUDE.md) 的「并发与一致性」
+
+## 索引
+
+`matches` 要在 [firestore.indexes.json](../../../firestore.indexes.json) 的 `fieldOverrides` 里关掉单字段索引。Firestore 默认给每个字段建索引、数组也不例外，而这个数组永远只按 docId 整份取、不参与任何查询。留着索引是白占存储，每次结算还要跟着更新索引条目。
+
+这是整块数组这个结构带来的唯一一处真实开销，也是唯一能直接关掉的。50 KB 的读写本身不额外花钱——Firestore 按文档次数计费而不按字节，函数与数据库同区、流量不计出口费。
 
 ## 接口
 
