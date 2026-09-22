@@ -63,6 +63,17 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 改动涉及加载过程时，浏览器验证要量 CLS：Playwright 里用 `PerformanceObserver` 收 `layout-shift`，首屏到数据加载完应接近 0；再用禁用 JS 的 context 打开，确认首帧 HTML 已经是最终结构。
 
+## 多语言
+
+理由见 [docs/web/README.md](../docs/web/README.md) 第 4 节「多语言」。
+
+- **语言清单只写在 `i18n/locales.ts`**：代码、单字标记、母语名在同一处，新增语言改这一个数组，探测、cookie 校验、切换列表跟着变
+- **新语言可以只译一部分**，`messages/<locale>.json` 缺的 key 由 `i18n/messages.ts` 合并英文补上；**`messages/en.json` 必须齐全**，它是兜底的那一份，缺 key 就没有东西可回落
+- **组件里取语言用 `useLocale()`，cookie 名用 `LOCALE_COOKIE`**，不写字面量
+- **语言控件不得超过 44px 宽**，上限的来历见 [phase-2g-header-layout.md](../docs/design/web/phase-2g-header-layout.md)
+- **横排导航加项前先确认 768 放得下**：那一档最多四项，俄语文案最长；让位的项在 `config/nav.ts` 标 `desktopOnly`
+- **改界面文案时三种语言各验一遍**：缺 key 不会让页面崩，只在 console 的 `MISSING_MESSAGE` 里看得到
+
 ## 断点
 
 只用 `md:`（768）与 `lg:`（1024），不写 `sm:`、`xl:`、`2xl:`。三档各呈现什么、为什么这样分见 [docs/web/README.md](../docs/web/README.md) 第 4 节「屏幕档位」。
@@ -238,4 +249,4 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 
 **拍图这一步可以派给子代理**，前提与指令写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「把 PR 截图交给子代理」。验收仍归主会话。
 
-**改动碰到界面文案时，中英文各拍一组。**一种语言有文案、另一种缺 key 的情况从截图上看不出来，两组图摆在一起才拦得住。
+**改动碰到界面文案时，中、英、俄各拍一组。**一种语言有文案、另一种缺 key 的情况从截图上看不出来，几组图摆在一起才拦得住。

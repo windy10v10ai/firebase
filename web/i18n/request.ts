@@ -1,38 +1,38 @@
 import { cookies, headers } from 'next/headers';
 import { getRequestConfig } from 'next-intl/server';
 
-export const locales = ['en', 'zh'];
-export const defaultLocale = 'en';
+import { DEFAULT_LOCALE, LOCALES, LOCALE_COOKIE, isLocale, type Locale } from './locales';
+import { loadMessages } from './messages';
 
-async function getBrowserLocale(): Promise<string> {
+// 按 Accept-Language 自己的排序取第一个支持的语言：排在前面的就是玩家更想要的那种
+async function getBrowserLocale(): Promise<Locale> {
   const headersList = await headers();
-  const acceptLanguage = headersList.get('accept-language') || '';
-
-  // 解析 Accept-Language 头
+  const acceptLanguage = headersList.get('accept-language') ?? '';
   const languages = acceptLanguage
     .split(',')
-    .map((lang) => lang.split(';')[0].trim())
-    .filter((lang) => lang.length > 0);
-  // 检查是否支持中文
-  const hasChinese = languages.some(
-    (lang) =>
-      lang.toLowerCase().startsWith('zh') ||
-      lang.toLowerCase().startsWith('zh-cn') ||
-      lang.toLowerCase().startsWith('zh-tw'),
-  );
+    .map((language) => language.split(';')[0].trim().toLowerCase())
+    .filter((language) => language.length > 0);
 
-  return hasChinese ? 'zh' : 'en';
+  for (const language of languages) {
+    const matched = LOCALES.find(
+      ({ code }) => language === code || language.startsWith(`${code}-`),
+    );
+    if (matched) {
+      return matched.code;
+    }
+  }
+
+  return DEFAULT_LOCALE;
 }
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
-
-  // 优先使用 cookie 中的语言设置，如果没有则使用浏览器语言
-  const locale = cookieLocale || (await getBrowserLocale());
+  // cookie 的值可以被手工改成任意字符串，不校验就会去 import 一个不存在的语言文件
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+  const locale = isLocale(cookieLocale) ? cookieLocale : await getBrowserLocale();
 
   return {
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default,
+    messages: await loadMessages(locale),
   };
 });

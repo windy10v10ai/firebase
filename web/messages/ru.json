@@ -1,0 +1,34 @@
+{
+  "navigation": {
+    "home": "Windy10v10ai",
+    "homeShort": "10v10AI",
+    "profile": "Профиль",
+    "profileFull": "Профиль",
+    "property": "Атрибуты",
+    "propertyFull": "Атрибуты",
+    "awaken": "Пробуждение",
+    "awakenFull": "Пробуждение героев",
+    "dailyTask": "Задания",
+    "dailyTaskFull": "Ежедневные задания",
+    "wiki": "Способности и предметы",
+    "wikiFull": "Способности и предметы",
+    "workshop": "Мастерская Steam",
+    "github": "GitHub",
+    "membershipShort": "Подписка",
+    "membership": "Подписка",
+    "launch": "Запустить игру",
+    "launchShort": "Запуск",
+    "disclosure": "Коммерческая информация",
+    "switchLanguage": "Сменить язык",
+    "menu": "Меню"
+  },
+  "auth": {
+    "login": "Войти через Steam",
+    "loginShort": "Войти",
+    "loginTooltip": "Откроется официальная страница входа Steam. Мы получаем только ваш Steam ID.",
+    "acceleratorHint": "Новая вкладка не открывается? Включите <b>ускоритель</b> для <b>Steam</b>.",
+    "loggedInAs": "ID {uid}",
+    "signOut": "Выйти",
+    "profileTooltip": "Открыть профиль"
+  }
+}
