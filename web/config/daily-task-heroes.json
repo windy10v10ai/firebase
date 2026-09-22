@@ -60,9 +60,9 @@
     "en": "Bounty Hunter"
   },
   "npc_dota_hero_brewmaster": {
-    "icon": "brewmaster.6b539641.png",
-    "zh": "酒仙",
-    "en": "Brewmaster"
+    "icon": "brewmaster.108efbb6.png",
+    "zh": "开膛手杰克",
+    "en": "Jack the Ripper"
   },
   "npc_dota_hero_bristleback": {
     "icon": "bristleback.ecc9c835.png",
@@ -70,9 +70,9 @@
     "en": "Bristleback"
   },
   "npc_dota_hero_broodmother": {
-    "icon": "broodmother.574f876a.png",
-    "zh": "育母蜘蛛",
-    "en": "Broodmother"
+    "icon": "broodmother.477850b3.png",
+    "zh": "阿尔托莉雅・潘德拉贡",
+    "en": "Artoria Pendragon"
   },
   "npc_dota_hero_centaur": {
     "icon": "centaur.cbe2085e.png",
@@ -85,9 +85,9 @@
     "en": "Chaos Knight"
   },
   "npc_dota_hero_chen": {
-    "icon": "chen.3f4aa3da.png",
-    "zh": "陈",
-    "en": "Chen"
+    "icon": "chen.d38357cb.png",
+    "zh": "孙悟空",
+    "en": "Goku"
   },
   "npc_dota_hero_clinkz": {
     "icon": "clinkz.79a24e39.png",
@@ -100,9 +100,9 @@
     "en": "Crystal Maiden"
   },
   "npc_dota_hero_dark_seer": {
-    "icon": "dark_seer.78d4273a.png",
-    "zh": "黑暗贤者",
-    "en": "Dark Seer"
+    "icon": "dark_seer.67543d2e.png",
+    "zh": "执剑泰斗",
+    "en": "Sword Master"
   },
   "npc_dota_hero_dark_willow": {
     "icon": "dark_willow.47bbbc8b.png",
@@ -151,7 +151,7 @@
   },
   "npc_dota_hero_earthshaker": {
     "icon": "earthshaker.4764184e.png",
-    "zh": "撼地者",
+    "zh": "宇智波牛神",
     "en": "Earthshaker"
   },
   "npc_dota_hero_elder_titan": {
@@ -305,9 +305,9 @@
     "en": "Medusa"
   },
   "npc_dota_hero_meepo": {
-    "icon": "meepo.7588ca64.png",
-    "zh": "米波",
-    "en": "Meepo"
+    "icon": "meepo.4daf6b73.png",
+    "zh": "初音未来",
+    "en": "Miku"
   },
   "npc_dota_hero_mirana": {
     "icon": "mirana.a3db1551.png",
@@ -375,7 +375,7 @@
     "en": "Oracle"
   },
   "npc_dota_hero_pangolier": {
-    "icon": "pangolier.84b05956.png",
+    "icon": "pangolier.ecbce671.png",
     "zh": "石鳞剑士",
     "en": "Pangolier"
   },
@@ -385,9 +385,9 @@
     "en": "Phantom Assassin"
   },
   "npc_dota_hero_phantom_lancer": {
-    "icon": "phantom_lancer.940e38b1.png",
-    "zh": "幻影长矛手",
-    "en": "Phantom Lancer"
+    "icon": "phantom_lancer.235dd839.png",
+    "zh": "八云紫",
+    "en": "Yukari Yakumo"
   },
   "npc_dota_hero_phoenix": {
     "icon": "phoenix.8ec5ba82.png",
@@ -520,9 +520,9 @@
     "en": "Sven"
   },
   "npc_dota_hero_techies": {
-    "icon": "techies.5564a9e9.png",
-    "zh": "工程师",
-    "en": "Techies"
+    "icon": "techies.611e9692.png",
+    "zh": "茶神",
+    "en": "hechahecha"
   },
   "npc_dota_hero_templar_assassin": {
     "icon": "templar_assassin.9825f328.png",
@@ -590,9 +590,9 @@
     "en": "Viper"
   },
   "npc_dota_hero_visage": {
-    "icon": "visage.d8f720a4.png",
-    "zh": "维萨吉",
-    "en": "Visage"
+    "icon": "visage.c5bba541.png",
+    "zh": "沉渊之剑",
+    "en": "Abyss Sword"
   },
   "npc_dota_hero_void_spirit": {
     "icon": "void_spirit.af1ee442.png",

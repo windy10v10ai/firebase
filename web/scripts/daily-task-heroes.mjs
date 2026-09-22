@@ -16,6 +16,10 @@ const REPO = path.resolve(WEB, '..');
 const TASKS_CONFIG = path.join(REPO, 'api/src/daily-task/config/tasks.ts');
 const OUT_DIR = path.join(WEB, 'public/heroes');
 const MANIFEST = path.join(WEB, 'config/daily-task-heroes.json');
+// game 仓库把这些内部英雄名换了皮（改了模型/名字），Dota 官方数据里查到的还是原版，
+// 换皮的名字/头像收在这张表和同目录 daily-task-hero-overrides/ 下，逐条覆盖官方数据
+const OVERRIDES_FILE = path.join(WEB, 'config/daily-task-hero-overrides.json');
+const OVERRIDE_ICON_DIR = path.join(WEB, 'config/daily-task-hero-overrides');
 
 const ICON_CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons';
 
@@ -55,18 +59,29 @@ async function main() {
 
   const heroes = readHeroNames();
   const previous = fs.existsSync(MANIFEST) ? JSON.parse(fs.readFileSync(MANIFEST, 'utf8')) : {};
+  const overrides = JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf8'));
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const manifest = {};
   const missing = [];
   let fetched = 0;
+  let skinned = 0;
 
   for (const heroName of heroes) {
     const short = heroName.replace('npc_dota_hero_', '');
+    const override = overrides[heroName];
     const kept = previous[heroName];
     let icon = kept?.icon;
 
-    if (!icon || !fs.existsSync(path.join(OUT_DIR, icon))) {
+    if (override?.icon) {
+      const buf = fs.readFileSync(path.join(OVERRIDE_ICON_DIR, `${short}.png`));
+      const wantIcon = `${short}.${hash8(buf)}.png`;
+      if (icon !== wantIcon || !fs.existsSync(path.join(OUT_DIR, icon))) {
+        fs.writeFileSync(path.join(OUT_DIR, wantIcon), buf);
+        icon = wantIcon;
+        skinned++;
+      }
+    } else if (!icon || !fs.existsSync(path.join(OUT_DIR, icon))) {
       const buf = await fetchIcon(short);
       if (buf) {
         icon = `${short}.${hash8(buf)}.png`;
@@ -78,8 +93,8 @@ async function main() {
       }
     }
 
-    const zhName = zh.get(heroName);
-    const enName = en.get(heroName);
+    const zhName = override?.zh ?? zh.get(heroName);
+    const enName = override?.en ?? en.get(heroName);
     if (!zhName || !enName) {
       missing.push(`名字 ${short}`);
     }
@@ -103,7 +118,7 @@ async function main() {
     .filter(Boolean)
     .reduce((sum, f) => sum + fs.statSync(path.join(OUT_DIR, f)).size, 0);
   console.log(
-    `英雄 ${heroes.length} 个：新下载 ${fetched}，沿用 ${heroes.length - fetched}，` +
+    `英雄 ${heroes.length} 个：新下载 ${fetched}，换皮 ${skinned}，沿用 ${heroes.length - fetched - skinned}，` +
       `清掉旧文件 ${pruned}，共 ${(total / 1024).toFixed(0)}KB（Dota ${version}）`,
   );
   if (missing.length) {
