@@ -70,13 +70,6 @@ export default function MembershipPage() {
               );
             })}
           </ul>
-
-          <p className="text-muted text-sm text-center">
-            <EmojiLead text={t('membership.note')} />{' '}
-            <Link href="/launch" className="text-link link-hover whitespace-nowrap">
-              {t('launch.link')}
-            </Link>
-          </p>
         </div>
       </Section>
 
