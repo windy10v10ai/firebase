@@ -10,6 +10,8 @@
     "awakenFull": "英雄觉醒",
     "dailyTask": "任务",
     "dailyTaskFull": "每日任务",
+    "leaderboard": "排行榜",
+    "leaderboardFull": "排行榜",
     "wiki": "技能物品",
     "wikiFull": "技能与物品",
     "workshop": "Steam 创意工坊",
@@ -94,6 +96,10 @@
       "wiki": {
         "title": "技能与物品",
         "description": "开局抽选的技能与物品一览"
+      },
+      "leaderboard": {
+        "title": "排行榜",
+        "description": "勇士积分前 500 名与我的排名"
       }
     }
   },
@@ -409,17 +415,18 @@
     "entries": {
       "property": {
         "title": "属性加点",
-        "description": "用属性点提升永久属性",
         "badge": "可用属性点 {count}"
       },
       "awaken": {
         "title": "英雄觉醒",
-        "description": "解锁英雄的觉醒天赋",
         "badge": "已觉醒 {awakened} / {total}"
       },
       "dailyTask": {
-        "title": "每日任务",
-        "description": "今天的任务与 30 天记录"
+        "title": "每日任务"
+      },
+      "leaderboard": {
+        "title": "排行榜",
+        "badge": "排名 {rank}"
       }
     }
   },
@@ -667,6 +674,20 @@
     "failed": {
       "title": "读取失败",
       "description": "暂时拿不到每日任务，请稍后再试。"
+    }
+  },
+  "leaderboard": {
+    "title": "勇士积分排行榜",
+    "columns": {
+      "rank": "排名",
+      "player": "玩家"
+    },
+    "myRank": "我的排名",
+    "loginPrompt": "登录后查看我的排名",
+    "locateMe": "定位到我的位置",
+    "failed": {
+      "title": "排行榜读取失败",
+      "description": "请稍后刷新页面重试。"
     }
   },
   "ability": {

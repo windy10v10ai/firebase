@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { FireormModule } from 'nestjs-fireorm';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { SteamProfileModule } from '../steam-profile/steam-profile.module';
 
 import { PlayerConduct } from './entities/player-conduct.entity';
 import { PlayerRanking } from './entities/player-ranking.entity';
@@ -29,6 +30,7 @@ import { PlayerService } from './player.service';
       PlayerStatsRecent,
     ]),
     AnalyticsModule,
+    SteamProfileModule,
   ],
   controllers: [PlayerController],
   providers: [

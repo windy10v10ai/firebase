@@ -1,16 +1,15 @@
 import { Collection } from 'fireorm';
 
+export interface RankedPlayer {
+  steamId: string;
+  personaName: string | null;
+  avatarUrl: string | null;
+}
+
+// id = UTC 天号 YYYYMMDD，一天一份快照
 @Collection()
 export class PlayerRanking {
-  id: string; // YYYYMMDD
-  // 排名玩家SteamId
-  topSteamIds: string[];
-  // 各分段分数
-  rankScores: {
-    top1000: number;
-    top2000: number;
-    top3000: number;
-    top4000: number;
-    top5000: number;
-  };
+  id: string;
+  // 线上还留着只有 topSteamIds 的旧快照，读到没有这个字段的当作不存在
+  players?: RankedPlayer[];
 }
