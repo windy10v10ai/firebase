@@ -383,6 +383,11 @@
         "lastHits": "补刀",
         "points": "勇士积分"
       },
+      "columnsFull": {
+        "difficulty": "难度",
+        "level": "英雄等级",
+        "duration": "对局时长"
+      },
       "win": "胜",
       "loss": "负",
       "difficultyCustom": "自定义",

@@ -387,6 +387,11 @@
         "lastHits": "Добив.",
         "points": "Battle Points"
       },
+      "columnsFull": {
+        "difficulty": "Сложность",
+        "level": "Уровень героя",
+        "duration": "Длительность матча"
+      },
       "win": "Победа",
       "loss": "Поражение",
       "difficultyCustom": "Особая",
