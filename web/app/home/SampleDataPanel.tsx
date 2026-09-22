@@ -79,7 +79,7 @@ export default function SampleDataPanel() {
           <div className="h-full bg-season-strong" style={{ width: `${WIN_RATE_PERCENT}%` }} />
         </div>
       </Tile>
-      {/* 行为分不用金色：金色在本站专指会员，挂上去会被读成会员权益 */}
+      {/* 行为分不用金色：会员用金色，挂上去会被读成会员权益 */}
       <Tile label={t('conduct')}>
         <Value className="text-success">110</Value>
       </Tile>

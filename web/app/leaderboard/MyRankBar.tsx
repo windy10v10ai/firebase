@@ -110,7 +110,7 @@ export default function MyRankBar({ uid, loaded, listRank, myRowRef }: MyRankBar
 
   const identity = (rankText: ReactNode) => (
     <>
-      <span className="min-w-11 shrink-0 whitespace-nowrap pl-1 text-lg font-bold text-season">
+      <span className="min-w-11 shrink-0 whitespace-nowrap text-center text-lg font-bold text-season">
         {rankText}
       </span>
       <PlayerAvatar

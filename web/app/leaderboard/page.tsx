@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
       {/* overflow-clip 只裁圆角，不像 overflow-hidden 那样新建滚动容器，底栏的 sticky 才能贴住视口 */}
       <section className="card-container overflow-clip">
         <div className="flex h-10 items-center gap-3 border-b border-line bg-panel-soft px-3 text-sm text-muted md:px-4">
-          <span className="w-11 shrink-0">{t('columns.rank')}</span>
+          <span className="w-11 shrink-0 text-center">{t('columns.rank')}</span>
           <span>{t('columns.player')}</span>
         </div>
         <ol>
@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
               ))
             : Array.from({ length: PLACEHOLDER_ROWS }, (_, index) => (
                 <li key={index} className="flex h-13 items-center gap-3 border-b border-panel-raised px-3 md:h-14 md:px-4">
-                  <span className="w-11 shrink-0">
+                  <span className="w-11 shrink-0 text-center">
                     <Skeleton>00</Skeleton>
                   </span>
                   <span className="size-9 shrink-0 animate-pulse rounded-lg bg-line md:size-10" />
