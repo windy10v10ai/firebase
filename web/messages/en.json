@@ -131,7 +131,7 @@
     },
     "console": {
       "title": "Launch from the console",
-      "intro": "This is the same thing as the links above: both launch the game with the same parameters, and the game behaves identically. The links only save you the steps below. Use this when nothing happens after you click a link.",
+      "intro": "Works the same as the links above, just typed by hand. Use it if clicking a link does nothing.",
       "steps": [
         "In Dota 2 settings, search for \"console\" and tick Enable Console",
         "In the hotkey settings, bind a key to Console",
@@ -147,20 +147,18 @@
     },
     "compare": {
       "title": "The two ways to start",
-      "lead": "Both ways reach the server, read your latest data and record your games.",
-      "leadArcade": "<name>Launched from the Arcade</name>: the usual way, and multiplayer works. It may occasionally fail to reach the server.",
-      "leadSite": "<name>Started from this site</name>: the backup. The connection is more stable, but you can only play solo.",
       "arcade": "From the Arcade",
-      "arcadeHint": "Recommended",
+      "arcadeHint": "Main",
       "site": "From this site",
       "siteHint": "Backup",
       "multiplayerSite": "Solo only",
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",
       "stableArcade": "May occasionally fail",
-      "noteOffline": "A game that can't reach the server runs in offline mode: membership, attributes and awakenings use the data from the last map update, and the game's points and stats are not recorded. The map updates two to three times a week.",
+      "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded. The map updates two to three times a week.",
       "yes": "Yes",
       "no": "No",
+      "partial": "Not always",
       "multiplayer": "Multiplayer"
     },
     "website": {
