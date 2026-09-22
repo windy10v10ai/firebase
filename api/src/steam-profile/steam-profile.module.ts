@@ -10,6 +10,6 @@ import { SteamProfileService } from './steam-profile.service';
   imports: [FireormModule.forFeature([SteamProfile])],
   controllers: [SteamProfileController],
   providers: [SteamProfileService, SteamProfileApiService],
-  exports: [SteamProfileService],
+  exports: [SteamProfileService, SteamProfileApiService],
 })
 export class SteamProfileModule {}

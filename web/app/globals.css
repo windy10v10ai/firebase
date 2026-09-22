@@ -16,7 +16,7 @@
   --color-muted: #8b8b93;
   --color-faint: #5d5d66;
 
-  /* 紫与金只表示两套货币：勇士一律紫、会员一律金，不拿来当交互色 */
+  /* 勇士一律紫、会员一律金，两者都不拿来当交互色 */
   --color-season: #a874ea;
   --color-season-strong: #9b5de0;
   --color-season-soft: rgba(155, 93, 224, 0.12);
