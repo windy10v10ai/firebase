@@ -366,7 +366,8 @@
     },
     "recent": {
       "title": "近期战绩",
-      "note": "保留最近 {count} 场，更早的不再保留。",
+      "note": "只保留最近 {count} 场，更早的不再保留。",
+      "noteLabel": "近期战绩说明",
       "columns": {
         "hero": "英雄",
         "result": "结果",

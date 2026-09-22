@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import InfoPopover from '@/app/components/InfoPopover';
 import Skeleton from '@/app/components/ui/skeleton';
 import {
   fetchRecentMatches,
@@ -150,6 +151,8 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   }, [steamId]);
 
   const loaded = result?.steamId === steamId ? result : null;
+  // 一条都没有时表头是空架子，反而让人以为数据没加载出来
+  const hasRows = loaded === null || (loaded.status === 'ready' && loaded.matches.length > 0);
 
   const withIcon = (src: string, text: string) => (
     <>
@@ -213,14 +216,19 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
 
   return (
     <section className="card-container @container pt-4 pb-2" aria-busy={!loaded}>
-      <div className="space-y-1.5 px-3 md:px-4">
+      <div className="flex items-center gap-1.5 px-3 md:px-4">
         <h2 className="title-secondary">{t('title')}</h2>
-        <p className="text-sm text-muted">{t('note', { count: RECENT_MATCH_LIMIT })}</p>
+        {/* 「只留 50 场」是一次性知识，常驻一行字占地方，收进说明弹层 */}
+        <InfoPopover label={t('noteLabel')}>
+          <p className="text-content">{t('note', { count: RECENT_MATCH_LIMIT })}</p>
+        </InfoPopover>
       </div>
 
       {/* 表头把每局都要横着比的几项换成结算界面的图标：窄列放得下，玩家也认得出 */}
       <div
-        className={`mt-3 hidden px-4 pb-2 text-xs text-muted md:grid md:items-center md:gap-x-3 ${COLUMNS_CLASS}`}
+        className={`mt-3 px-4 pb-2 text-xs text-muted md:items-center md:gap-x-3 ${
+          hasRows ? 'hidden md:grid' : 'hidden'
+        } ${COLUMNS_CLASS}`}
       >
         <span />
         <span />

@@ -370,7 +370,8 @@
     },
     "recent": {
       "title": "Recent Matches",
-      "note": "Keeps your last {count} matches; older ones are dropped.",
+      "note": "Only your last {count} matches are kept; older ones are dropped.",
+      "noteLabel": "About Recent Matches",
       "columns": {
         "hero": "Hero",
         "result": "Result",
