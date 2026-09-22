@@ -7,12 +7,14 @@ import { PlayerConduct } from './entities/player-conduct.entity';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { PlayerStatsLifetime } from './entities/player-stats-lifetime.entity';
+import { PlayerStatsRecent } from './entities/player-stats-recent.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
 import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
 import { PlayerStatsLifetimeService } from './player-stats-lifetime.service';
+import { PlayerStatsRecentService } from './player-stats-recent.service';
 import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
 
@@ -24,6 +26,7 @@ import { PlayerService } from './player.service';
       PlayerSetting,
       PlayerConduct,
       PlayerStatsLifetime,
+      PlayerStatsRecent,
     ]),
     AnalyticsModule,
   ],
@@ -34,6 +37,7 @@ import { PlayerService } from './player.service';
     PlayerSettingService,
     PlayerConductService,
     PlayerStatsLifetimeService,
+    PlayerStatsRecentService,
     PlayerGamePresetService,
   ],
   exports: [
@@ -42,6 +46,7 @@ import { PlayerService } from './player.service';
     PlayerSettingService,
     PlayerConductService,
     PlayerStatsLifetimeService,
+    PlayerStatsRecentService,
     PlayerGamePresetService,
   ],
 })

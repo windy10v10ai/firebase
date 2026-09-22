@@ -18,6 +18,7 @@ import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 import FeatureEntryCard from './FeatureEntryCard';
 import LevelCard from './LevelCard';
 import PlayerCard from './PlayerCard';
+import RecentMatchesCard from './RecentMatchesCard';
 import StatsCard from './StatsCard';
 
 // 带上请求时用的 steamId，换一个玩家时旧结果立刻失效，不用先手动置回加载中
@@ -98,7 +99,7 @@ export default function ProfilePage() {
   const info = loaded?.info ?? null;
 
   return (
-    // 电脑宽度左栏放身份卡、右栏放等级卡与两张入口卡，战绩卡通栏；更窄时按 DOM 顺序单列
+    // 电脑宽度左栏放身份卡、右栏放等级卡与两张入口卡，两张战绩卡通栏；更窄时按 DOM 顺序单列
     <div className="grid gap-6 lg:grid-cols-3" aria-busy={!info}>
       {info ? null : (
         <p role="status" className="sr-only">
@@ -155,8 +156,10 @@ export default function ProfilePage() {
           href={playerPagePath(steamId, 'daily-task')}
         />
       </div>
-      <div className="lg:col-span-3">
+      <div className="lg:col-span-3 grid gap-6">
         <StatsCard info={info} />
+        {/* 自己发一次请求：满员 50 场约 50 KB，挂在首屏那次请求上会拖慢整页 */}
+        <RecentMatchesCard steamId={steamId} />
       </div>
     </div>
   );

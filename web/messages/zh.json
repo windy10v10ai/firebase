@@ -364,6 +364,39 @@
       "healing": "治疗",
       "towerKills": "推塔数"
     },
+    "recent": {
+      "title": "近期战绩",
+      "note": "保留最近 {count} 场，更早的不再保留。",
+      "columns": {
+        "hero": "英雄",
+        "result": "结果",
+        "duration": "时长",
+        "kda": "K / D / A",
+        "points": "勇士积分",
+        "lastHits": "补刀"
+      },
+      "win": "胜",
+      "loss": "负",
+      "disconnected": "掉线",
+      "awaken": "已觉醒",
+      "points": "+{n}",
+      "groups": {
+        "combat": "战斗",
+        "growth": "发育",
+        "attributes": "局末属性"
+      },
+      "level": "等级",
+      "stuns": "眩晕（秒）",
+      "roshanKills": "肉山击杀",
+      "strength": "力量",
+      "agility": "敏捷",
+      "intellect": "智力",
+      "footer": "难度 N{difficulty} · 版本 {version}",
+      "empty": "还没有记录的对局。",
+      "failed": "近期战绩暂时取不到，稍后再试。",
+      "showAll": "查看全部 {count} 场",
+      "collapse": "收起"
+    },
     "member": {
       "premium": "高级会员",
       "normal": "普通会员",
