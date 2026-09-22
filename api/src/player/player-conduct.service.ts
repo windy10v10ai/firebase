@@ -31,6 +31,12 @@ export class PlayerConductService {
       throw new NotFoundException(`Target player ${toSteamId} not found`);
     }
 
+    // 冷却按发起人与目标这一对记录，发起人能随便填就等于没有冷却
+    const source = await this.playerRepository.findById(fromSteamId.toString());
+    if (!source) {
+      throw new NotFoundException(`Source player ${fromSteamId} not found`);
+    }
+
     const recordId = `${fromSteamId}_${toSteamId}`;
     const existing = await this.playerConductRepository.findById(recordId);
     const now = new Date();

@@ -60,6 +60,7 @@ export class PlayerController {
     return this.playerGamePresetService.update(id, dto);
   }
 
+  @AllowLocal()
   @Post('/conduct')
   @ApiOperation({ summary: 'Commend or report another player' })
   async conduct(@Body() dto: ConductPlayerDto): Promise<Player> {
