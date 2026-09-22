@@ -14,10 +14,10 @@
 
 ## 数据结构
 
-顶级集合 `playerStatsRecent`，docId = steamId，单文档一个定长 50 的数组，新场次 prepend 后截断。
+一个玩家一个文档，docId = steamId，单文档一个定长 50 的数组，新场次插到最前再截断。集合名由 fireorm 按 entity 类名推出来，与其他 entity 一样不显式写。
 
 ```
-playerStatsRecent/{steamId}
+PlayerStatsRecent
   matches: [
     // 对局
     matchId, endedAt, version, durationSec, win, difficulty,
@@ -36,7 +36,7 @@ playerStatsRecent/{steamId}
   updatedAt
 ```
 
-一行约 1 KB，50 场满员约 50 KB，距 Firestore 单文档 1 MB 上限有二十倍余量。体积压力真的出现时，最先砍的是三个倍率字段——刷分局已经被过滤掉，剩下的对局这三个值接近恒定。
+实测一行 32 个字段、JSON 724 字节（旧客户端没有出装那几项时 489 字节），50 场满员不到 40 KB，距 Firestore 单文档 1 MB 上限有二十倍余量。体积压力真的出现时，最先砍的是三个倍率字段——刷分局已经被过滤掉，剩下的对局这三个值接近恒定。
 
 几个取值来源：
 
@@ -58,7 +58,7 @@ playerStatsRecent/{steamId}
 
 ## 索引
 
-`matches` 要在 [firestore.indexes.json](../../../firestore.indexes.json) 的 `fieldOverrides` 里关掉单字段索引。Firestore 默认给每个字段建索引、数组也不例外，而这个数组永远只按 docId 整份取、不参与任何查询。留着索引是白占存储，每次结算还要跟着更新索引条目。
+`matches` 在 [firestore.indexes.json](../../../firestore.indexes.json) 的 `fieldOverrides` 里关掉了单字段索引。那份配置读不到装饰器，只能写死集合名，取 fireorm 推出来的复数形式。Firestore 默认给每个字段建索引、数组也不例外，而这个数组永远只按 docId 整份取、不参与任何查询。留着索引是白占存储，每次结算还要跟着更新索引条目。
 
 这是整块数组这个结构带来的唯一一处真实开销，也是唯一能直接关掉的。50 KB 的读写本身不额外花钱——Firestore 按文档次数计费而不按字节，函数与数据库同区、流量不计出口费。
 
@@ -72,7 +72,9 @@ playerStatsRecent/{steamId}
 
 ## 网页
 
-个人主页「战绩」卡下方新增「近期战绩」卡，自己发一次请求、独立骨架屏。默认 10 行，点「查看全部」展开到 50。一行五项：英雄、胜负、时长、K/D/A、本局积分；点开一行看这场的完整数值。
+个人主页「战绩」卡下方新增「近期战绩」卡，自己发一次请求、独立骨架屏。默认 10 行，点「查看全部」展开到 50。一行五项：英雄、胜负、时长、K/D/A、本局积分；点开一行看这场的完整数值。手机上一行排不下五项，拆成两行，第二行与英雄名左对齐。
+
+英雄头像与中英文名沿用每日任务那份清单，顺手从 `config/daily-task.ts` 挪进 `config/heroes.ts`：它本来就是通用英雄资源，挂在每日任务名下只是因为当时只有那一个消费方。清单覆盖 127 个英雄，与 api 侧 `hero-data.ts` 认的名字完全一致，查不到的退回内部名并留空头像。
 
 ## 游戏端依赖
 

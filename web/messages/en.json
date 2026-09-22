@@ -382,6 +382,34 @@
       "healing": "Healing",
       "towerKills": "Tower Kills"
     },
+    "recent": {
+      "title": "Recent Matches",
+      "note": "Keeps your last {count} matches; older ones are dropped.",
+      "columns": {
+        "hero": "Hero",
+        "result": "Result",
+        "duration": "Duration",
+        "kda": "K / D / A",
+        "points": "Battle Points"
+      },
+      "win": "Win",
+      "loss": "Loss",
+      "disconnected": "Left",
+      "awaken": "Awakened",
+      "points": "+{n}",
+      "level": "Level",
+      "stuns": "Stun Duration (s)",
+      "roshanKills": "Roshan Kills",
+      "strength": "Strength",
+      "agility": "Agility",
+      "intellect": "Intelligence",
+      "difficulty": "Difficulty",
+      "version": "Version",
+      "empty": "No matches recorded yet.",
+      "failed": "Recent matches are unavailable right now. Please try again later.",
+      "showAll": "Show all {count} matches",
+      "collapse": "Collapse"
+    },
     "member": {
       "premium": "Premium Member",
       "normal": "Member",

@@ -382,6 +382,34 @@
       "healing": "Лечение",
       "towerKills": "Уничтожено башен"
     },
+    "recent": {
+      "title": "Последние матчи",
+      "note": "Хранятся последние {count, plural, one {# матч} few {# матча} many {# матчей} other {# матча}}, более старые удаляются.",
+      "columns": {
+        "hero": "Герой",
+        "result": "Результат",
+        "duration": "Длительность",
+        "kda": "K / D / A",
+        "points": "Battle Points"
+      },
+      "win": "Победа",
+      "loss": "Поражение",
+      "disconnected": "Вышел",
+      "awaken": "Пробуждён",
+      "points": "+{n}",
+      "level": "Уровень",
+      "stuns": "Оглушение (с)",
+      "roshanKills": "Убийства Рошана",
+      "strength": "Сила",
+      "agility": "Ловкость",
+      "intellect": "Интеллект",
+      "difficulty": "Сложность",
+      "version": "Версия",
+      "empty": "Пока нет записанных матчей.",
+      "failed": "Последние матчи сейчас недоступны. Попробуйте позже.",
+      "showAll": "Показать все {count, plural, one {# матч} few {# матча} many {# матчей} other {# матча}}",
+      "collapse": "Свернуть"
+    },
     "member": {
       "premium": "Premium-подписчик",
       "normal": "Подписчик",

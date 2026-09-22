@@ -8,6 +8,7 @@ import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
+import { PlayerStatsRecentService } from '../player/player-stats-recent.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoService } from '../player-info/player-info.service';
@@ -23,6 +24,7 @@ export class GameService {
     private readonly dailyTaskService: DailyTaskService,
     private readonly analyticsService: AnalyticsService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly playerStatsRecentService: PlayerStatsRecentService,
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
@@ -119,12 +121,13 @@ export class GameService {
   /** 累计报文中每个玩家的生涯统计。 */
   async recordPlayerStats(gameEnd: GameEndDto): Promise<void> {
     await Promise.all(
-      gameEnd.players.map((player) =>
+      gameEnd.players.flatMap((player) => [
         this.playerStatsLifetimeService.accumulate(player.steamId, player, {
           matchId: gameEnd.matchId,
           gameOptions: gameEnd.gameOptions,
         }),
-      ),
+        this.playerStatsRecentService.record(player, gameEnd),
+      ]),
     );
   }
 
