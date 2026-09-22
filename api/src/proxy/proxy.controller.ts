@@ -17,6 +17,13 @@ import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
 import { LocalHostService } from '../local-host/local-host.service';
+import { ConductPlayerDto } from '../player/dto/conduct-player.dto';
+import { UpdatePlayerGamePresetDto } from '../player/dto/update-player-game-preset.dto';
+import { UpdatePlayerSettingDto } from '../player/dto/update-player-setting.dto';
+import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
+import { PlayerConductService } from '../player/player-conduct.service';
+import { PlayerGamePresetService } from '../player/player-game-preset.service';
+import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
@@ -49,6 +56,9 @@ export class ProxyController {
     private readonly playerInfoService: PlayerInfoService,
     private readonly localHostService: LocalHostService,
     private readonly dailyTaskService: DailyTaskService,
+    private readonly playerSettingService: PlayerSettingService,
+    private readonly playerGamePresetService: PlayerGamePresetService,
+    private readonly playerConductService: PlayerConductService,
   ) {}
 
   // 对应 GET /game/probe
@@ -143,6 +153,58 @@ export class ProxyController {
       await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
     }
     return buildProxySuccessHtml(requestId, { recorded });
+  }
+
+  // 对应 PUT /player/:id/setting
+  @Get('player-setting-put')
+  async playerSettingPut(
+    @Query('requestId') requestId: string,
+    @Query('steamId', ParseIntPipe) steamId: number,
+    @Query('body') body: string,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(UpdatePlayerSettingDto, body);
+    const setting = await this.playerSettingService.update(steamId.toString(), dto);
+    return buildProxySuccessHtml(requestId, setting);
+  }
+
+  // 对应 PUT /player/:id/game-preset
+  @Get('player-game-preset-put')
+  async playerGamePresetPut(
+    @Query('requestId') requestId: string,
+    @Query('steamId', ParseIntPipe) steamId: number,
+    @Query('body') body: string,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(UpdatePlayerGamePresetDto, body);
+    const setting = await this.playerGamePresetService.update(steamId.toString(), dto);
+    return buildProxySuccessHtml(requestId, setting);
+  }
+
+  // 对应 POST /player/member-points/use
+  @Get('player-member-points-use-post')
+  async playerMemberPointsUsePost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+    @CurrentServerType() serverType: SERVER_TYPE,
+    @CurrentClientOrigin() origin: ClientOrigin,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(UsePlayerMemberPointsDto, body);
+    const player = await this.playerInfoService.useMemberPoint(dto, serverType, origin);
+    return buildProxySuccessHtml(requestId, player);
+  }
+
+  // 对应 POST /player/conduct
+  @Get('player-conduct-post')
+  async playerConductPost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(ConductPlayerDto, body);
+    const player = await this.playerConductService.conduct(dto);
+    return buildProxySuccessHtml(requestId, player);
   }
 
   private async findPlayerInfoOrUndefined(
