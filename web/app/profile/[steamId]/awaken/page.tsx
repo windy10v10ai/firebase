@@ -100,7 +100,10 @@ export default function AwakenPage() {
   }, [steamId]);
 
   const awakenedNames = useMemo(
-    () => (loaded?.status === 'ready' ? loaded.info.awakenedHeroes ?? [] : []).map((a) => a.heroName),
+    () =>
+      (loaded?.status === 'ready' ? loaded.info.awakenedHeroes ?? [] : []).map((a) =>
+        typeof a === 'string' ? a : a.heroName,
+      ),
     [loaded],
   );
 

@@ -132,6 +132,8 @@ function createGameEndPayload(options: GameEndPayloadOptions = {}) {
     version: 'v4.05',
     winnerTeamId: options.winnerTeamId ?? 2,
     players: (options.players ?? []).map(createGameEndPlayer),
+    // 空 players 只出现在这里的夹具里，真实报文至少有一个真人
+    playerCount: Math.max(1, (options.players ?? []).filter((player) => player.steamId > 0).length),
     gameTimeMsec: 900000,
     gameOptions: defaultGameOptions,
     difficulty: 5,
@@ -420,8 +422,7 @@ describe('PlayerController (e2e)', () => {
 
         const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
         expect(player).toBeDefined();
-        expect(player.awakenedHeroes).toHaveLength(1);
-        expect(player.awakenedHeroes[0].heroName).toEqual('npc_dota_hero_axe');
+        expect(player.awakenedHeroes).toEqual(['npc_dota_hero_axe']);
       });
 
       it('验证 pointInfo 包含正确的会员积分信息', async () => {
@@ -658,6 +659,7 @@ describe('PlayerController (e2e)', () => {
         matchId: '8000000001',
         version: 'v4.05',
         winnerTeamId: 2,
+        playerCount: 1,
         players: [
           {
             isDisconnected: false,
@@ -733,6 +735,7 @@ describe('PlayerController (e2e)', () => {
         matchId: '8000000001',
         version: 'v4.05',
         winnerTeamId: 2,
+        playerCount: 3,
         players: [
           {
             isDisconnected: false,

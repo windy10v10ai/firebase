@@ -86,9 +86,9 @@ describe('HeroAwakeningController (e2e)', () => {
 
       expect(second.status).toEqual(200);
       expect(second.body.usedSeasonPoint).toEqual(usedSeasonPointAfterFirst);
-      expect(
-        second.body.awakenedHeroes.filter((h: { heroName: string }) => h.heroName === heroName),
-      ).toHaveLength(1);
+      expect(second.body.awakenedHeroes.filter((name: string) => name === heroName)).toHaveLength(
+        1,
+      );
     });
   });
 
@@ -103,9 +103,7 @@ describe('HeroAwakeningController (e2e)', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body.usedSeasonPoint).toEqual(4000);
-      expect(response.body.awakenedHeroes).toEqual(
-        expect.arrayContaining([{ heroName: 'npc_dota_hero_axe' }]),
-      );
+      expect(response.body.awakenedHeroes).toEqual(expect.arrayContaining(['npc_dota_hero_axe']));
 
       // 候选集已清空：再次 ensure 应当存入全新候选集，而不是返回旧的
       const newCandidates = ['npc_dota_hero_pudge', 'npc_dota_hero_sven', 'npc_dota_hero_tiny'];
@@ -152,9 +150,7 @@ describe('HeroAwakeningController (e2e)', () => {
       expect(response.status).toEqual(200);
       expect(response.body.usedSeasonPoint).toEqual(4000);
       expect(
-        response.body.awakenedHeroes.filter(
-          (h: { heroName: string }) => h.heroName === 'npc_dota_hero_axe',
-        ),
+        response.body.awakenedHeroes.filter((name: string) => name === 'npc_dota_hero_axe'),
       ).toHaveLength(1);
 
       // 候选集已被第一次认领清空：再次 ensure 应存入全新候选集
