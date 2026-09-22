@@ -71,7 +71,9 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **新语言可以只译一部分**，`messages/<locale>.json` 缺的 key 由 `i18n/messages.ts` 合并英文补上；**`messages/en.json` 必须齐全**，它是兜底的那一份，缺 key 就没有东西可回落
 - **组件里取语言用 `useLocale()`，cookie 名用 `LOCALE_COOKIE`**，不写字面量
 - **语言控件不得超过 44px 宽**，上限的来历见 [phase-2g-header-layout.md](../docs/design/web/phase-2g-header-layout.md)
-- **横排导航加项前先确认 768 放得下**：那一档最多四项，俄语文案最长；让位的项在 `config/nav.ts` 标 `desktopOnly`
+- **横排导航加项前先确认放得下**：768 最多四项，让位的项在 `config/nav.ts` 标 `desktopOnly`；新增语言要量 1024 已登录这一档，放不下六项就在 `i18n/locales.ts` 给它标 `compactNav`
+- **俄文译法先查 game 仓库的 `game/resource/addon_russian.txt`**，游戏里已有的说法照搬；游戏俄文里保持英文的专有名词（Battle Points、Member Points、Battle Level、Member Level）网站也不译
+- **俄文里带数量的句子用 ICU plural 写全 `one` / `few` / `many` / `other`**，英文原文没有 plural 也一样；传入的参数必须是数字，不能是 `toLocaleString()` 之后的字符串
 - **改界面文案时三种语言各验一遍**：缺 key 不会让页面崩，只在 console 的 `MISSING_MESSAGE` 里看得到
 
 ## 断点
