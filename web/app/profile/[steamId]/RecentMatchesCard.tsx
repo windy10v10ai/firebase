@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import InfoPopover from '@/app/components/InfoPopover';
 import Skeleton from '@/app/components/ui/skeleton';
 import {
   fetchRecentMatches,
@@ -21,11 +22,14 @@ const SKELETON_ROWS = 3;
 // 数据列一律 minmax 加权重：写死宽度的那一版俄文「Поражение」会压到时长上，
 // 全给英雄名当 1fr 又会把数字全挤到右边、中间留一大片空。表头再加一层 truncate 兜底
 const COLUMNS_CLASS =
-  'md:grid-cols-[3px_28px_minmax(84px,1.5fr)_minmax(40px,0.7fr)_minmax(52px,0.6fr)_minmax(92px,0.9fr)_minmax(40px,0.5fr)_minmax(56px,0.7fr)_minmax(56px,0.7fr)_auto_16px]';
+  'md:grid-cols-[3px_48px_23px_28px_minmax(84px,1.4fr)_minmax(52px,0.55fr)_minmax(92px,0.85fr)_minmax(40px,0.45fr)_minmax(56px,0.65fr)_minmax(56px,0.65fr)_auto_16px]';
 const HEAD_CELL = 'min-w-0 truncate';
-// 手机一行排不下九项，只留英雄、K/D/A、时长与积分，胜负交给左边的色条
+// 手机一行排不下十项，只留难度、英雄、等级、K/D/A、时长与积分
 const ROW_CLASS = `flex w-full items-center gap-2.5 border-t border-line px-3 py-2.5 text-left md:grid md:gap-x-3 md:px-4 ${COLUMNS_CLASS}`;
 const DESKTOP_ONLY = 'hidden md:block';
+/** 游戏里 1–8 对应 N1–N8，其余取值都是自定义模式 */
+const MIN_DIFFICULTY = 1;
+const MAX_DIFFICULTY = 8;
 
 type LoadResult =
   | { steamId: string; status: 'failed' }
@@ -57,6 +61,27 @@ function GameIcon({ src, label, size = 15 }: { src: string; label?: string; size
       className="inline-block shrink-0 object-contain"
       style={{ width: size, height: size }}
     />
+  );
+}
+
+/** 难度是整行的前提：N8 的补刀、金钱、伤害整体都比 N3 高，所以排在所有读数之前 */
+function DifficultyBadge({ difficulty, customLabel }: { difficulty: number; customLabel: string }) {
+  const known =
+    Number.isInteger(difficulty) && difficulty >= MIN_DIFFICULTY && difficulty <= MAX_DIFFICULTY;
+  return (
+    // 宽度写死：按文字伸缩时「自定义」比 N8 宽一截，后面的等级、头像、英雄名各行就错开了
+    <span className="inline-flex w-12 shrink-0 items-center justify-center rounded border border-line-strong bg-panel-raised px-1 py-px text-[10px] font-semibold whitespace-nowrap text-content">
+      {known ? `N${difficulty}` : customLabel}
+    </span>
+  );
+}
+
+/** 照搬游戏结算界面的等级圈：同样的暗金描边与字色，尺寸按这一行的高度缩到 23px */
+function LevelRing({ level, locale }: { level: number; locale: string }) {
+  return (
+    <span className="hidden size-[23px] shrink-0 items-center justify-center rounded-full border border-hero-level-border bg-surface text-[12px] tracking-[0.5px] tabular-nums text-hero-level shadow-[inset_0_0_8px_rgba(0,0,0,0.9)] md:inline-flex">
+      {level.toLocaleString(locale)}
+    </span>
   );
 }
 
@@ -150,6 +175,8 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   }, [steamId]);
 
   const loaded = result?.steamId === steamId ? result : null;
+  // 一条都没有时表头是空架子，反而让人以为数据没加载出来
+  const hasRows = loaded === null || (loaded.status === 'ready' && loaded.matches.length > 0);
 
   const withIcon = (src: string, text: string) => (
     <>
@@ -179,7 +206,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
         title: t('groups.growth'),
         accentClass: 'bg-member-strong',
         items: [
-          { label: t('level'), value: match.level.toLocaleString(locale) },
           { label: tStats('towerKills'), value: match.towerKills.toLocaleString(locale) },
           { label: t('roshanKills'), value: match.roshanKills.toLocaleString(locale) },
         ],
@@ -213,21 +239,29 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
 
   return (
     <section className="card-container @container pt-4 pb-2" aria-busy={!loaded}>
-      <div className="space-y-1.5 px-3 md:px-4">
+      <div className="flex items-center gap-1.5 px-3 md:px-4">
         <h2 className="title-secondary">{t('title')}</h2>
-        <p className="text-sm text-muted">{t('note', { count: RECENT_MATCH_LIMIT })}</p>
+        {/* 「只留 50 场」是一次性知识，常驻一行字占地方，收进说明弹层 */}
+        <InfoPopover label={t('noteLabel')}>
+          <p className="text-content">{t('note', { count: RECENT_MATCH_LIMIT })}</p>
+        </InfoPopover>
       </div>
 
       {/* 表头把每局都要横着比的几项换成结算界面的图标：窄列放得下，玩家也认得出 */}
       <div
-        className={`mt-3 hidden px-4 pb-2 text-xs text-muted md:grid md:items-center md:gap-x-3 ${COLUMNS_CLASS}`}
+        className={`mt-3 px-4 pb-2 text-xs text-muted md:items-center md:gap-x-3 ${
+          hasRows ? 'hidden md:grid' : 'hidden'
+        } ${COLUMNS_CLASS}`}
       >
         <span />
+        <span className={`${HEAD_CELL} text-center`} title={t('columns.difficulty')}>
+          {t('columns.difficulty')}
+        </span>
+        <span className={`${HEAD_CELL} text-center`} title={t('columns.level')}>
+          {t('columns.level')}
+        </span>
         <span />
         <span className={HEAD_CELL}>{t('columns.hero')}</span>
-        <span className={HEAD_CELL} title={t('columns.result')}>
-          {t('columns.result')}
-        </span>
         <span className={HEAD_CELL} title={t('columns.duration')}>
           {t('columns.duration')}
         </span>
@@ -252,11 +286,13 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
           {Array.from({ length: SKELETON_ROWS }, (_, index) => (
             <li key={index} className={ROW_CLASS}>
               <span className="hidden md:block" />
+              <span className="h-4 w-12 shrink-0 animate-pulse rounded bg-line" />
+              <span className="hidden size-[23px] shrink-0 animate-pulse rounded-full bg-line md:block" />
               <span className="size-7 shrink-0 animate-pulse rounded-md bg-line" />
               <span className="min-w-0 flex-1">
                 <Skeleton>Keeper of the Light</Skeleton>
               </span>
-              <span className="md:col-start-10 md:text-right">
+              <span className="md:col-start-11 md:text-right">
                 <Skeleton>+000</Skeleton>
               </span>
             </li>
@@ -282,10 +318,18 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                       onClick={() => setOpenRow(open ? null : index)}
                       className={`${ROW_CLASS} transition-colors hover:bg-panel-soft`}
                     >
+                      {/* 胜负只用色条表示，文字留给读屏与悬停 */}
                       <span
+                        title={t(match.win ? 'win' : 'loss')}
                         className={`h-6 w-[3px] shrink-0 rounded-sm ${match.win ? 'bg-success' : 'bg-danger'}`}
-                        aria-hidden="true"
+                      >
+                        <span className="sr-only">{t(match.win ? 'win' : 'loss')}</span>
+                      </span>
+                      <DifficultyBadge
+                        difficulty={match.difficulty}
+                        customLabel={t('difficultyCustom')}
                       />
+                      <LevelRing level={match.level} locale={locale} />
                       <HeroIcon
                         heroName={match.heroName}
                         awakenLabel={match.awaken > 0 ? t('awaken') : undefined}
@@ -301,15 +345,11 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                             </span>
                           ) : null}
                         </span>
-                        {/* 手机把结果交给色条，时长与 K/D/A 挪到第二行 */}
+                        {/* 手机把结果交给色条，等级、时长与 K/D/A 挪到第二行 */}
                         <span className="text-[11px] tabular-nums text-faint md:hidden">
-                          {kda} · {formatDuration(match.durationSec)}
+                          {t('levelShort', { n: match.level })} · {kda} ·{' '}
+                          {formatDuration(match.durationSec)}
                         </span>
-                      </span>
-                      <span
-                        className={`${DESKTOP_ONLY} text-[13px] font-medium ${match.win ? 'text-success' : 'text-danger'}`}
-                      >
-                        {t(match.win ? 'win' : 'loss')}
                       </span>
                       <span className={`${DESKTOP_ONLY} text-[13px] tabular-nums text-content`}>
                         {formatDuration(match.durationSec)}
@@ -349,9 +389,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                             <DetailGroup key={group.title} {...group} />
                           ))}
                         </div>
-                        <p className="mt-3 border-t border-line pt-2 text-xs text-faint">
-                          {t('footer', { difficulty: match.difficulty, version: match.version })}
-                        </p>
                       </div>
                     ) : null}
                   </li>
