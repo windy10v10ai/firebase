@@ -21,7 +21,7 @@ export interface StatsLifetime {
   totalGoldEarned: number;
 }
 
-/** api 与 web 由不同 workflow 部署、非原子发布，切换期间 web 仍可能收到旧响应形状 */
+/** api 与 web 由不同 workflow 部署、非原子发布，两种响应形状都可能到达 */
 export interface LegacyAwakenedHero {
   heroName: string;
 }

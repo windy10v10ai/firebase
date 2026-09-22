@@ -102,7 +102,6 @@ export default function AwakenPage() {
   const awakenedNames = useMemo(
     () =>
       (loaded?.status === 'ready' ? loaded.info.awakenedHeroes ?? [] : []).map((a) =>
-        // api 切换到 string[] 后，api 与 web 分别部署、非原子发布，web 可能短暂仍收到旧的 { heroName } 形状
         typeof a === 'string' ? a : a.heroName,
       ),
     [loaded],
