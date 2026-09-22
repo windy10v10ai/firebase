@@ -130,20 +130,21 @@ export default function TodayCard({
                 Array.from({ length: ROUNDS_PER_DAY }, (_, index) => (
                   <li
                     key={index}
-                    className="box-pad flex gap-2.5 rounded-lg border border-line bg-control"
+                    className="box-pad flex flex-col gap-1.5 rounded-lg border border-line bg-control"
                   >
-                    <span
-                      className="size-7 shrink-0 animate-pulse rounded-md bg-line"
-                      aria-hidden="true"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex justify-end">
-                        <Skeleton>★★★ +000</Skeleton>
-                      </div>
-                      <p className="text-sm leading-relaxed">
-                        <Skeleton>本局击杀英雄达到 000 次</Skeleton>
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="size-7 shrink-0 animate-pulse rounded-md bg-line"
+                        aria-hidden="true"
+                      />
+                      <Skeleton>★★★</Skeleton>
+                      <span className="ml-auto text-sm">
+                        <Skeleton>+000 勇士积分</Skeleton>
+                      </span>
                     </div>
+                    <p className="text-sm leading-relaxed">
+                      <Skeleton>本局击杀英雄达到 000 次</Skeleton>
+                    </p>
                   </li>
                 ))}
           </ul>

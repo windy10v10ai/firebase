@@ -571,12 +571,12 @@
   },
   "dailyTask": {
     "title": "Daily Tasks",
-    "intro": "Three rounds a day, one task out of three each round. Complete them in game — the match must be won — and Battle Points are awarded on the end screen.",
+    "intro": "Three rounds a day, one task out of three each round.",
     "loading": "Loading daily tasks",
     "today": "Today",
     "todayPoint": "Battle Points today",
     "roundProgress": "{done} of {total} rounds done",
-    "roundTotal": "/ {total} rounds",
+    "roundTotal": "/ {total}",
     "round": "Round {round}",
     "refresh": "Refresh Tasks",
     "refreshing": "Refreshing",
@@ -588,6 +588,7 @@
     "history": "History",
     "historyEmpty": "No history yet. Completed tasks will show up here, day by day.",
     "reward": "+{n}",
+    "rewardFull": "+{n} Battle Points",
     "star": "{n} stars",
     "columns": {
       "date": "Date",

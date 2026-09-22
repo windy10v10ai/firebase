@@ -567,12 +567,12 @@
   },
   "dailyTask": {
     "title": "每日任务",
-    "intro": "每天 3 轮，每轮从 3 个任务里选 1 个。在游戏内完成，游戏胜利才算数，勇士积分在对局结算时发放。",
+    "intro": "每天 3 轮，每轮从 3 个任务里选 1 个。",
     "loading": "正在读取每日任务",
     "today": "今天",
     "todayPoint": "今日勇士积分",
     "roundProgress": "已完成 {done} / {total} 轮",
-    "roundTotal": "/ {total} 轮",
+    "roundTotal": "/ {total}",
     "round": "第 {round} 轮任务",
     "refresh": "刷新任务",
     "refreshing": "刷新中",
@@ -584,6 +584,7 @@
     "history": "历史",
     "historyEmpty": "还没有记录。完成任务后，这里会按天列出来。",
     "reward": "+{n}",
+    "rewardFull": "+{n} 勇士积分",
     "star": "{n} 星",
     "columns": {
       "date": "日期",
