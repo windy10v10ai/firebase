@@ -11,48 +11,60 @@ description: web/ 改动涉及页面行为时，用 Playwright 驱动无头 Chro
 
 1. 生产构建起服务：`cd web && npm run build && npm start`（不要用 dev server，左下角开发指示器会入镜）。**要登录态的页面是例外**，见下面「验证要登录的页面」
 2. 在 `web/.browser-verify/`（已被 `.gitignore` 排除，跑完不用清理）下写一次性驱动脚本，`require('../scripts/browser-verify')` 引入公共部分
-3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过，档位以那一节为准
+3. 按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「验证宽度」逐档过，档位以那一节为准；**每档中、英、俄三种语言都过**，见第 8 步
 4. 真实交互用 `page.click()` / `page.fill()`，不要 `eval el.value = ...`——React 受控输入的 `onChange` 不会被后者触发
 5. 每档用 `page.screenshot()` 存到 `web/.browser-verify/screenshots/`，后续贴 PR 时按 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」一节操作
 6. 每档检查 `withPage` 返回的 console 错误数组，非空就是回归。**`MISSING_MESSAGE` 要当回归看**——i18n key 缺失不会让页面崩，只会渲染成空白或 key 本身，肉眼扫截图看不出来，只有 console 里有
 7. 量到横向溢出时，把越界的元素也一并列出来（遍历 `getBoundingClientRect().right > innerWidth`），光有 `scrollWidth` 定位不到是谁撑的。**`opacity-0`、`visibility:hidden` 的元素照样占布局**，藏起来的浮层一样会把页面撑宽
-8. **改动碰到界面文案时，中、英、俄各过一遍**，不要只看默认语言。语言取自 `NEXT_LOCALE` cookie，没有就按 `Accept-Language` 判，见 [web/i18n/request.ts](../../../web/i18n/request.ts)：
+8. **网站标准支持中、英、俄三种语言，每次验证三种都过，不只是改了文案才过。** 两个理由：一种语言有文案、另一种缺 key 的情况很常见，只跑一种等于没测；**俄语文案最长**，同一个按钮、卡片标题、横排导航，中英文放得下俄语可能撑破，布局改动最容易在俄语上出问题。公共部分导出了 `LOCALES`（`['zh', 'en', 'ru']`），`withPage` 的第四个参数传语言，内部写 `NEXT_LOCALE` cookie——cookie 优先于 `Accept-Language`（见 [web/i18n/request.ts](../../../web/i18n/request.ts)），拍出来的语言不随本机设置变：
 
    ```js
-   const context = await browser.newContext({ viewport, locale: 'zh-CN' }); // 或 'en-US'、'ru-RU'
+   for (const locale of LOCALES) {
+     const errors = await withPage(browser, VIEWPORTS[375], async (page) => { /* ... */ }, locale);
+   }
    ```
 
-   无头 Chrome CLI 截图用 `--accept-lang=zh-CN`。一种语言有文案、另一种缺 key 的情况很常见，只跑一种等于没测
+   自己建 context 时同样写 cookie：`context.addCookies([{ name: 'NEXT_LOCALE', value: 'ru', domain: 'localhost', path: '/' }])`。无头 Chrome CLI 截图用 `--accept-lang=zh-CN` / `en-US` / `ru-RU` 分三次拍。**俄语里残留的英文不一定是漏译**：英雄名与技能说明是同步进来的游戏数据，目前只有中英两份；Battle Points、Member Points 这类词游戏俄文里本来就保留英文
 
 ## 示例
 
 ```js
 // web/.browser-verify/verify.js
 const path = require('path');
-const { VIEWPORTS, launchChrome, withPage, visibleText, hasHorizontalOverflow } = require('../scripts/browser-verify');
+
+const { VIEWPORTS, LOCALES, launchChrome, withPage, hasHorizontalOverflow } = require('../scripts/browser-verify');
 
 const BASE_URL = 'http://localhost:3000';
 
 (async () => {
   const browser = await launchChrome();
 
-  for (const name of Object.keys(VIEWPORTS)) { // 档位见 web/CLAUDE.md 的「验证宽度」
-    const errors = await withPage(browser, VIEWPORTS[name], async (page) => {
-      await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-      await page.screenshot({ path: path.join(__dirname, 'screenshots', `home-${name}.png`) });
+  for (const locale of LOCALES) {
+    for (const name of Object.keys(VIEWPORTS)) { // 档位见 web/CLAUDE.md 的「验证宽度」
+      const tag = `${locale}-${name}`;
+      const errors = await withPage(
+        browser,
+        VIEWPORTS[name],
+        async (page) => {
+          await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+          await page.screenshot({ path: path.join(__dirname, 'screenshots', `home-${tag}.png`) });
 
-      await page.getByRole('link', { name: /目标文案/ }).click();
-      await page.waitForLoadState('networkidle');
+          // 按 href 定位，不按文案：文案随语言变；加 :visible 跳过窄屏收起的横排导航
+          await page.locator('a[href="/launch"]:visible').first().click();
+          await page.waitForLoadState('networkidle');
 
-      const overflow = await hasHorizontalOverflow(page);
-      console.log(`[${name}] 横向溢出: ${overflow}`);
+          const overflow = await hasHorizontalOverflow(page);
+          console.log(`[${tag}] 横向溢出: ${overflow}`);
 
-      const text = await visibleText(page);
-      console.log(`[${name}] 包含预期文案: ${text.includes('预期文案')}`);
-    });
+          const lang = await page.evaluate(() => document.documentElement.lang);
+          console.log(`[${tag}] html lang: ${lang}`);
+        },
+        locale,
+      );
 
-    if (errors.length > 0) {
-      console.error(`[${name}] console 错误:`, errors);
+      if (errors.length > 0) {
+        console.error(`[${tag}] console 错误:`, errors);
+      }
     }
   }
 
@@ -135,7 +147,7 @@ await page.route('http://localhost:3001/**', async (route) => {
 
 - **测试玩家的字段要塞全**。页面会直接读 `matchCount.toLocaleString()` 这类字段，少一个就白屏，而报错只在 console 里
 - **`next dev` 会往 `web/CLAUDE.md` 末尾追加 `<!-- BEGIN:nextjs-agent-rules -->` 一段**。提交前检查，只删这一段，不要 `git checkout --` 整个文件
-- **登录态和未登录态都要过**。头部在两种状态下不是同一套元素，只测登录态会漏掉未登录才出现的布局问题
+- **登录态和未登录态都要过**。头部在两种状态下不是同一套元素，只测一种会漏掉另一种才出现的布局问题。**俄语已登录的 1024 是头部最挤的组合**：电脑档登录后多出 ID 文字与退出按钮，再叠上俄语最长的导航文案，只测未登录会漏掉
 - **横排导航在窄屏是 `hidden md:flex`**，元素还在 DOM 里。按文案取元素时会命中不可见的那一个，定位要限定到具体区域
 
 ## 把 PR 截图交给子代理
@@ -150,6 +162,7 @@ await page.route('http://localhost:3001/**', async (route) => {
 - **哪些进程不许碰**：已经跑着的 dev server、API、模拟器一律不重启不 kill，也不许再跑 `npm run start`（会撞端口，`run-p` 连带把兄弟进程杀掉）
 - **只在 `assets` 的 worktree 里 commit**，不许在主检出 commit 或切分支，推完把 worktree 删掉
 - **图片路径带 PR 编号和版本号**，重拍换新版本目录，理由见 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」
+- **中、英、俄三种语言都拍**，文件名带语言（`before-ru-home-375.png`），语言用 `NEXT_LOCALE` cookie 指定
 - **等长任务用前台 Bash 加大 timeout**（`timeout: 900000`），不要 `run_in_background`。子代理把等待丢到后台后会直接结束这一轮，要主会话再叫醒它，一来一回比直接等还慢
 
 验收归主会话：数文件个数、抽查几条 raw 链接的状态码、挑一两张图看内容对不对。**刚推完的 raw 链接可能 404**，那是 CDN 缓存，隔一会儿重试，不要当成漏传。
