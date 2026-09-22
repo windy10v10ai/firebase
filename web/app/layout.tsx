@@ -1,7 +1,7 @@
 import { Noto_Sans_SC } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getMessages } from 'next-intl/server';
 
 import Analytics from './components/Analytics';
 import Footer from './components/Footer';
@@ -56,7 +56,7 @@ async function requestOrigin(): Promise<string> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
-  const messages = (await import(`../messages/${locale}.json`)).default;
+  const messages = await getMessages();
   const cookieStore = await cookies();
   const initialUid = parsePlayerUid(cookieStore.get(PLAYER_UID_COOKIE)?.value);
   const initialProfile = parsePlayerProfileHint(

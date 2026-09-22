@@ -110,7 +110,7 @@ export default function Header() {
                   key={item.key}
                   href={item.href}
                   aria-current={isCurrent(item.href) ? 'page' : undefined}
-                  className="nav-top"
+                  className={`nav-top${'desktopOnly' in item ? ' hidden lg:inline' : ''}`}
                 >
                   {t(item.shortLabelKey)}
                 </Link>
