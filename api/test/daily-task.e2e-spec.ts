@@ -1,9 +1,9 @@
 import { INestApplication } from '@nestjs/common';
-import { getFirestore } from 'firebase-admin/firestore';
 
 import { DailyTaskSnapshotDto } from '../src/daily-task/dto/daily-task-snapshot.dto';
 import { PlayerDailyTask } from '../src/daily-task/entities/player-daily-task.entity';
 
+import { getTestFirestore } from './util/util-firestore';
 import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { createPlayer, getPlayer } from './util/util-player';
 
@@ -68,7 +68,7 @@ async function refreshDailyTask(app: INestApplication, steamId: number, dayId: s
 }
 
 async function readDailyTask(steamId: number): Promise<PlayerDailyTask | undefined> {
-  const snapshot = await getFirestore()
+  const snapshot = await getTestFirestore()
     .collection('PlayerDailyTasks')
     .doc(steamId.toString())
     .get();
@@ -145,7 +145,7 @@ describe('Daily task Phase1 (e2e)', () => {
     const steamId = 105610009;
     const dayId = '20260816';
     mockDate('2026-08-16T10:00:00.000Z');
-    await getFirestore()
+    await getTestFirestore()
       .collection('PlayerDailyTasks')
       .doc(steamId.toString())
       .set({
@@ -226,12 +226,17 @@ describe('Daily task Phase1 (e2e)', () => {
     const secondSnapshot = findSnapshot(secondStart.body, steamId);
     expect(secondSnapshot.dayId).toBe('20260817');
     expect(secondSnapshot.completedTasks).toEqual([]);
-    expect(secondSnapshot.history[0]).toEqual({
+    expect(secondSnapshot).not.toHaveProperty('history');
+    expect(secondSnapshot.candidates).toHaveLength(3);
+
+    const full = await get(app, `/api/daily-task/${steamId}`);
+    expect(full.status).toBe(200);
+    expect(full.body.candidates).toEqual(secondSnapshot.candidates);
+    expect(full.body.history[0]).toEqual({
       dayId: '20260816',
       tasks: [candidate],
       seasonPoint: candidate.rewardSeasonPoint,
     });
-    expect(secondSnapshot.candidates).toHaveLength(3);
   });
 
   it('drops stale-day records without blocking base points', async () => {
@@ -396,7 +401,7 @@ describe('Daily task Phase1 (e2e)', () => {
   it('does not spend a refresh once every round is done', async () => {
     const steamId = 105610013;
     mockDate('2026-08-16T10:00:00.000Z');
-    await getFirestore()
+    await getTestFirestore()
       .collection('PlayerDailyTasks')
       .doc(steamId.toString())
       .set({

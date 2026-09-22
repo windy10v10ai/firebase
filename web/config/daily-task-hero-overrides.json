@@ -1,0 +1,12 @@
+{
+  "npc_dota_hero_phantom_lancer": { "zh": "八云紫", "en": "Yukari Yakumo", "icon": true },
+  "npc_dota_hero_dark_seer": { "zh": "执剑泰斗", "en": "Sword Master", "icon": true },
+  "npc_dota_hero_brewmaster": { "zh": "开膛手杰克", "en": "Jack the Ripper", "icon": true },
+  "npc_dota_hero_chen": { "zh": "孙悟空", "en": "Goku", "icon": true },
+  "npc_dota_hero_visage": { "zh": "沉渊之剑", "en": "Abyss Sword", "icon": true },
+  "npc_dota_hero_meepo": { "zh": "初音未来", "en": "Miku", "icon": true },
+  "npc_dota_hero_broodmother": { "zh": "阿尔托莉雅・潘德拉贡", "en": "Artoria Pendragon", "icon": true },
+  "npc_dota_hero_pangolier": { "icon": true },
+  "npc_dota_hero_earthshaker": { "zh": "宇智波牛神" },
+  "npc_dota_hero_techies": { "zh": "茶神", "en": "hechahecha", "icon": true }
+}

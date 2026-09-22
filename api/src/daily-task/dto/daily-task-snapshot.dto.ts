@@ -42,6 +42,6 @@ export class DailyTaskSnapshotDto {
   /** 本轮剩余刷新次数 */
   @ApiProperty()
   refreshRemaining: number;
-  @ApiProperty({ type: [DailyTaskHistoryEntryDto] })
-  history: DailyTaskHistoryEntryDto[];
+  @ApiPropertyOptional({ type: [DailyTaskHistoryEntryDto] })
+  history?: DailyTaskHistoryEntryDto[];
 }

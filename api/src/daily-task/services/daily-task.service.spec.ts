@@ -147,26 +147,52 @@ describe('DailyTaskService', () => {
       })),
     });
 
-    const snapshot = await service.getSnapshot(STEAM_ID);
+    const snapshot = await service.getSnapshotWithHistory(STEAM_ID);
 
     expect(snapshot.dayId).toBe(TODAY);
     expect(snapshot.completedTasks).toEqual([]);
     expect(snapshot.todaySeasonPoint).toBe(0);
     expect(snapshot.history).toHaveLength(30);
-    expect(snapshot.history[0]).toEqual({
+    expect(snapshot.history?.[0]).toEqual({
       dayId: '20260815',
       tasks: [resolvedTask('general_kills', 2)],
       seasonPoint: 80,
     });
-    expect(snapshot.history[snapshot.history.length - 1]?.dayId).toBe('20260703');
+    expect(snapshot.history?.[29]?.dayId).toBe('20260703');
   });
 
   it('does not add an empty previous day to history', async () => {
     current = createDocument({ dayId: '20260815', completedTasks: [], history: [] });
 
-    const snapshot = await service.getSnapshot(STEAM_ID);
+    const snapshot = await service.getSnapshotWithHistory(STEAM_ID);
 
     expect(snapshot.history).toEqual([]);
+  });
+
+  it('omits history from the regular snapshot and drops unresolved history tasks from the full one', async () => {
+    current = createDocument({
+      history: [
+        {
+          dayId: '20260814',
+          tasks: [
+            { taskId: 'general_kills', star: 2 },
+            { taskId: 'removed_task', star: 1 },
+          ],
+          seasonPoint: 80,
+        },
+      ],
+    });
+
+    generationService.resolveCompletedTask.mockImplementation(
+      (task: { taskId: string; star: number }) =>
+        task.taskId === 'removed_task' ? undefined : resolvedTask(task.taskId, task.star),
+    );
+
+    expect(await service.getSnapshot(STEAM_ID)).not.toHaveProperty('history');
+    const full = await service.getSnapshotWithHistory(STEAM_ID);
+    expect(full.history).toEqual([
+      { dayId: '20260814', tasks: [resolvedTask('general_kills', 2)], seasonPoint: 80 },
+    ]);
   });
 
   it('omits unresolved tasks from the wire response without changing the stored round', async () => {
@@ -246,7 +272,8 @@ describe('DailyTaskService', () => {
     expect(snapshot.dayId).toBe(TODAY);
     expect(written?.refreshCount).toBe(0);
     expect(snapshot.refreshRemaining).toBe(1);
-    expect(snapshot.history[0].dayId).toBe('20260815');
+    expect(snapshot).not.toHaveProperty('history');
+    expect(written?.history[0].dayId).toBe('20260815');
   });
 
   it('restores the refresh quota when a round is completed', async () => {

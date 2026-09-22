@@ -12,6 +12,8 @@ import { ApiExcludeController } from '@nestjs/swagger';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { RefreshDailyTaskDto } from '../daily-task/dto/refresh-daily-task.dto';
+import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
 import { LocalHostService } from '../local-host/local-host.service';
@@ -32,6 +34,9 @@ import { buildProxySuccessHtml, validateRequestId } from './proxy-response.util'
 // 每个玩家拆成 game-start、player-info 两个并行请求，回来后按字段浅合并
 const PROXY_GAME_START_INCLUDE: PlayerInfoInclude[] = ['member', 'setting', 'statsLifetime'];
 
+// title 上限 4096，五天历史留出约三成余量给候选对象以后新增的字段
+const PROXY_DAILY_TASK_HISTORY_DAYS = 5;
+
 @ApiExcludeController()
 @AllowLocal()
 @AllowQueryKey()
@@ -43,6 +48,7 @@ export class ProxyController {
     private readonly analyticsService: AnalyticsService,
     private readonly playerInfoService: PlayerInfoService,
     private readonly localHostService: LocalHostService,
+    private readonly dailyTaskService: DailyTaskService,
   ) {}
 
   // 对应 GET /game/probe
@@ -75,6 +81,32 @@ export class ProxyController {
       PROXY_GAME_START_INCLUDE,
     );
     return buildProxySuccessHtml(requestId, result);
+  }
+
+  // 对应 GET /daily-task/:steamId。只回最近几天历史，今日部分开局时已下发，不重复占 title
+  @Get('daily-task')
+  async dailyTask(
+    @Query('requestId') requestId: string,
+    @Query('steamId', ParseIntPipe) steamId: number,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const { history = [] } = await this.dailyTaskService.getSnapshotWithHistory(steamId);
+    return buildProxySuccessHtml(requestId, {
+      steamId,
+      history: history.slice(0, PROXY_DAILY_TASK_HISTORY_DAYS),
+    });
+  }
+
+  // 对应 POST /daily-task/refresh
+  @Get('daily-task-refresh-post')
+  async dailyTaskRefreshPost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(RefreshDailyTaskDto, body);
+    const snapshot = await this.dailyTaskService.refresh(dto.steamId, dto.dayId);
+    return buildProxySuccessHtml(requestId, snapshot);
   }
 
   // 对应 GET /player/:steamId/info

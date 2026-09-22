@@ -465,7 +465,7 @@ describe('PlayerController (e2e)', () => {
     describe('边界条件', () => {
       it('steamIds超过10个应返回400', async () => {
         mockDate('2023-12-01T00:00:00.000Z');
-        const steamIds = Array.from({ length: 11 }, (_, i) => 200000001 + i);
+        const steamIds = Array.from({ length: 11 }, (_, i) => 100005001 + i);
 
         const result = await callGameStart(app, steamIds);
         expect(result.status).toEqual(400);

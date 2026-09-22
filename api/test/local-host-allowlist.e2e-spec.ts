@@ -7,6 +7,7 @@ import { createPlayer } from './util/util-player';
 const STEAM_ID = 310010001;
 const GAME_START_STEAM_ID = 310010002;
 const DAILY_TASK_STEAM_ID = 310010003;
+const CONDUCT_TARGET_STEAM_ID = 310010004;
 
 describe('本地 key 放行名单 (e2e)', () => {
   let app: INestApplication;
@@ -20,6 +21,7 @@ describe('本地 key 放行名单 (e2e)', () => {
       memberPointTotal: 5000,
       matchCount: 20,
     });
+    await createPlayer(app, { steamId: CONDUCT_TARGET_STEAM_ID, conductPoint: 100 });
   });
 
   afterAll(async () => {
@@ -94,6 +96,14 @@ describe('本地 key 放行名单 (e2e)', () => {
       expect(res.status).toBe(201);
     });
 
+    it('POST /api/player/conduct', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/player/conduct')
+        .set('x-api-key', localKey)
+        .send({ fromSteamId: STEAM_ID, toSteamId: CONDUCT_TARGET_STEAM_ID, type: 'commend' });
+      expect(res.status).toBe(201);
+    });
+
     it('GET /api/proxy/game-start（网页控件无法带请求头，走 query 的 apiKey）', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/proxy/game-start')
@@ -155,14 +165,6 @@ describe('本地 key 放行名单 (e2e)', () => {
     it('PUT /api/player/:steamId/hero-awakening/random', async () => {
       const res = await request(app.getHttpServer())
         .put(`/api/player/${STEAM_ID}/hero-awakening/random`)
-        .set('x-api-key', localKey)
-        .send({});
-      expect(res.status).toBe(401);
-    });
-
-    it('POST /api/player/conduct', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/api/player/conduct')
         .set('x-api-key', localKey)
         .send({});
       expect(res.status).toBe(401);

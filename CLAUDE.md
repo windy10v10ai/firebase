@@ -46,22 +46,24 @@
 
 面向玩家的文案用「勇士」这套说法，代码和数据库字段保留历史上的 `season`。两边不一致是有意的：改字段名要动 Firestore 的历史数据和游戏客户端，不值得。
 
-| 概念 | 中文文案 | 英文文案 | API 字段 |
-|---|---|---|---|
-| 勇士积分 | 勇士积分（可用 / 累计） | Battle Points (usable / total) | `seasonPointTotal`、`useableSeasonPoint` |
-| 勇士等级 | 勇士等级 | Battle Level | `seasonLevel` |
-| 会员积分 | 会员积分（可用 / 累计） | Member Points (usable / total) | `memberPointTotal`、`useableMemberPoint` |
-| 会员等级 | 会员等级 | Member Level | `memberLevel` |
+| 概念 | 中文文案 | 英文文案 | 俄文文案 | API 字段 |
+|---|---|---|---|---|
+| 勇士积分 | 勇士积分（可用 / 累计） | Battle Points (usable / total) | Battle Points（доступно / всего） | `seasonPointTotal`、`useableSeasonPoint` |
+| 勇士等级 | 勇士等级 | Battle Level | Battle Level | `seasonLevel` |
+| 会员积分 | 会员积分（可用 / 累计） | Member Points (usable / total) | Member Points（доступно / всего） | `memberPointTotal`、`useableMemberPoint` |
+| 会员等级 | 会员等级 | Member Level | Member Level | `memberLevel` |
+
+网站标准支持中、英、俄三种语言。俄文里这四个词保持英文，与 game 仓库的 `addon_russian.txt` 一致；其余俄文译法也先查那份文件。
 
 「赛季」是旧说法，新写的界面文案、设计文档一律不再用。`web/` 新建的 i18n key 与变量名用 `battle`，只有直接照抄 API 响应的类型定义保留 `season`——转换就发生在这一层。
 
 开局这件事有三个维度，各有各的词，不互相替代，与 game 侧一致：
 
-| 维度 | 中文文案 | 英文文案 |
-|---|---|---|
-| 玩家怎么开始 | 从游廊开局 / 从网站启动游戏 | Launched from the Arcade / Started from this site |
-| 这局连没连服务器 | 离线、离线模式 / 在线、在线模式 | Offline (mode) / Online (mode) |
-| 这局跑在谁的机器上 | 本地主机 / 服务器主机 | Local host / Dedicated server |
+| 维度 | 中文文案 | 英文文案 | 俄文文案 |
+|---|---|---|---|
+| 玩家怎么开始 | 从游廊开局 / 从网站启动游戏 | Launched from the Arcade / Started from this site | Запуск из аркады / Запуск через сайт |
+| 这局连没连服务器 | 离线、离线模式 / 在线、在线模式 | Offline (mode) / Online (mode) | Офлайн-режим / Онлайн-режим |
+| 这局跑在谁的机器上 | 本地主机 / 服务器主机 | Local host / Dedicated server | Локальный хост / Выделенный сервер |
 
 现在只有两种开局方式，第三个维度还没有区别：
 

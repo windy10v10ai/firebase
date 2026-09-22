@@ -21,7 +21,7 @@ describe('SteamProfileController (e2e)', () => {
   });
 
   it('Steam 查不到时返回 200 与空字段，而不是 404', async () => {
-    const steamId = 200000901;
+    const steamId = 300700001;
     const idToken = await createIdTokenForSteamId(steamId);
 
     const response = await request(app.getHttpServer())
