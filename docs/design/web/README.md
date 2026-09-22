@@ -33,6 +33,7 @@
 | 5 GA4 | #1122 | 网页接入 gtag，与游戏共用媒体资源、各一条数据流；服务端事件补来源与加点，见 [phase-5-ga4.md](phase-5-ga4.md) | 已完成 |
 | 6 会员剩余 | #1123 | 积分、支付宝二维码购买；连带把支付宝、爱发电、Ko-fi 的回调地址改到 `api.windy10v10ai.com`，见 [api-entry](../api-entry/README.md) | 未开始 |
 | 14 每日任务与 30 天历史 | 无 | `/profile/<steamId>/daily-task`：今天的任务与刷新入口、30 天记录；网站一律 30 天，见 [phase-14-daily-task.md](phase-14-daily-task.md) | 已完成 |
+| 16 排行榜 | 无 | `/leaderboard`：勇士积分前 500 名与「我的排名」，首页、菜单、个人主页各一个入口；game 侧的排行榜删除，见 [phase-16-leaderboard.md](phase-16-leaderboard.md) | 已完成 |
 
 ### 后续依赖
 

@@ -1,99 +1,87 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseFirestoreRepository } from 'fireorm';
-import { InjectRepository } from 'nestjs-fireorm';
+import { FireormService, InjectRepository } from 'nestjs-fireorm';
 
+import { SteamProfileApiService } from '../steam-profile/steam-profile.api.service';
 import { getUtcDayId } from '../util/date';
 
-import { PlayerRanking } from './entities/player-ranking.entity';
+import { PlayerRankDto, PlayerRankingDto } from './dto/player-ranking.dto';
+import { PlayerRanking, RankedPlayer } from './entities/player-ranking.entity';
 import { Player } from './entities/player.entity';
+
+const RANKING_SIZE = 500;
+// 计数按扫过的索引条目计费，每 1000 条一次读取；封顶让单次查询最多 10 次读取
+const RANK_COUNT_LIMIT = 10000;
+const PLAYER_COLLECTION = 'Players';
+const EXCLUDED_STEAM_IDS = ['424859328', '869192295', '338807313', '120461913'];
 
 @Injectable()
 export class PlayerRankingService {
-  // 排除的SteamId
-  private readonly excludeSteamIds = ['424859328', '869192295', '338807313', '120461913'];
-
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: BaseFirestoreRepository<Player>,
     @InjectRepository(PlayerRanking)
     private readonly playerRankingRepository: BaseFirestoreRepository<PlayerRanking>,
+    private readonly steamProfileApiService: SteamProfileApiService,
+    private readonly fireormService: FireormService,
   ) {}
 
-  /**
-   * 获取玩家排名信息
-   */
-  async getRanking(): Promise<PlayerRanking> {
-    const playerRanking = await this.getRankingToday();
-
-    if (playerRanking) {
-      return playerRanking;
-    } else {
-      return await this.calculateRanking();
-    }
-  }
-
-  async getRankingToday(): Promise<PlayerRanking> {
+  /** 取当天的勇士积分榜，当天第一次请求时生成快照 */
+  async getRanking(): Promise<PlayerRankingDto> {
     const id = getUtcDayId();
-    return await this.playerRankingRepository.findById(id);
+    const stored = await this.playerRankingRepository.findById(id);
+    const players = stored?.players ?? (await this.calculateRanking(id, Boolean(stored)));
+    return { date: id, players };
   }
 
-  async calculateRanking(): Promise<PlayerRanking> {
-    const playerRanking = new PlayerRanking();
-    playerRanking.id = getUtcDayId();
-    playerRanking.rankScores = {
-      top1000: 0,
-      top2000: 0,
-      top3000: 0,
-      top4000: 0,
-      top5000: 0,
-    };
+  /** 按累计勇士积分算玩家的实时名次 */
+  async getPlayerRank(steamId: string): Promise<PlayerRankDto> {
+    const player = await this.playerRepository.findById(steamId);
+    if (!player) {
+      throw new NotFoundException(`Player ${steamId} not found`);
+    }
 
-    // 获取前1000名玩家详细排名
+    // 排除名单不参与计数：最多差几名，不值得为它多查一次
+    const snapshot = await this.fireormService.firestore
+      .collection(PLAYER_COLLECTION)
+      .where('seasonPointTotal', '>', player.seasonPointTotal ?? 0)
+      .limit(RANK_COUNT_LIMIT)
+      .count()
+      .get();
+    const higher = snapshot.data().count;
+    return { rank: higher >= RANK_COUNT_LIMIT ? null : higher + 1 };
+  }
+
+  private async calculateRanking(id: string, hasLegacySnapshot: boolean): Promise<RankedPlayer[]> {
     const topPlayers = await this.playerRepository
       .orderByDescending('seasonPointTotal')
-      .limit(1000)
+      .limit(RANKING_SIZE + EXCLUDED_STEAM_IDS.length)
       .find();
-    playerRanking.topSteamIds = topPlayers
-      .filter((player) => !this.excludeSteamIds.includes(player.id))
-      .map((player) => player.id);
+    const steamIds = topPlayers
+      .map((player) => player.id)
+      .filter((steamId) => !EXCLUDED_STEAM_IDS.includes(steamId))
+      .slice(0, RANKING_SIZE);
 
-    // 如果没有玩家，返回空排名
-    if (topPlayers.length === 0) {
-      return await this.playerRankingRepository.create(playerRanking);
+    const summaries = await this.steamProfileApiService.fetchPlayerSummaries(steamIds.map(Number));
+    const players = steamIds.map((steamId) => {
+      const summary = summaries.get(Number(steamId));
+      return {
+        steamId,
+        personaName: summary?.personaName ?? null,
+        avatarUrl: summary?.avatarUrl ?? null,
+      };
+    });
+
+    // Steam 整体不通时不落库：快照一天只生成一次，存下来就是一整天没有昵称
+    if (steamIds.length > 0 && summaries.size === 0) {
+      return players;
     }
 
-    // 获取第1000名玩家的分数
-    playerRanking.rankScores.top1000 = topPlayers[topPlayers.length - 1].seasonPointTotal;
-
-    // 获取其他分段的分数
-    playerRanking.rankScores.top2000 = await this.getNextRankScore(
-      playerRanking.rankScores.top1000,
-    );
-    playerRanking.rankScores.top3000 = await this.getNextRankScore(
-      playerRanking.rankScores.top2000,
-    );
-    playerRanking.rankScores.top4000 = await this.getNextRankScore(
-      playerRanking.rankScores.top3000,
-    );
-    playerRanking.rankScores.top5000 = await this.getNextRankScore(
-      playerRanking.rankScores.top4000,
-    );
-
-    return await this.playerRankingRepository.create(playerRanking);
-  }
-
-  /**
-   * 获取下一个分段的分数
-   * @param prevScore 上一个分段的分数
-   * @param defaultScore 如果没有找到下一个分段的分数，返回0
-   */
-  private async getNextRankScore(prevScore: number): Promise<number> {
-    const players = await this.playerRepository
-      .whereLessThan('seasonPointTotal', prevScore)
-      .orderByDescending('seasonPointTotal')
-      .limit(1000)
-      .find();
-
-    return players.length > 0 ? players[players.length - 1].seasonPointTotal : 0;
+    if (hasLegacySnapshot) {
+      await this.playerRankingRepository.update({ id, players });
+    } else {
+      await this.playerRankingRepository.create({ id, players });
+    }
+    return players;
   }
 }

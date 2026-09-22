@@ -10,6 +10,8 @@
     "awakenFull": "Hero Awakening",
     "dailyTask": "Tasks",
     "dailyTaskFull": "Daily Tasks",
+    "leaderboard": "Leaderboard",
+    "leaderboardFull": "Leaderboard",
     "wiki": "Skills & Items",
     "wikiFull": "Skills & Items",
     "workshop": "Steam Workshop",
@@ -94,6 +96,10 @@
       "wiki": {
         "title": "Skills & Items",
         "description": "The abilities and items in the opening draft"
+      },
+      "leaderboard": {
+        "title": "Leaderboard",
+        "description": "Top 500 by Battle Points, and your rank"
       }
     }
   },
@@ -394,17 +400,18 @@
     "entries": {
       "property": {
         "title": "Attributes",
-        "description": "Spend points on permanent attributes",
         "badge": "Usable {count} points"
       },
       "awaken": {
         "title": "Hero Awakening",
-        "description": "Unlock heroes' awakening talents",
         "badge": "Awakened {awakened} / {total}"
       },
       "dailyTask": {
-        "title": "Daily Tasks",
-        "description": "Today's tasks and 30 days of history"
+        "title": "Daily Tasks"
+      },
+      "leaderboard": {
+        "title": "Leaderboard",
+        "badge": "Rank {rank}"
       }
     }
   },
@@ -652,6 +659,20 @@
     "failed": {
       "title": "Could not load",
       "description": "Daily tasks are unavailable right now. Please try again later."
+    }
+  },
+  "leaderboard": {
+    "title": "Battle Points Leaderboard",
+    "columns": {
+      "rank": "Rank",
+      "player": "Player"
+    },
+    "myRank": "My rank",
+    "loginPrompt": "Log in to see your rank",
+    "locateMe": "Jump to my position",
+    "failed": {
+      "title": "Failed to load the leaderboard",
+      "description": "Please refresh the page and try again."
     }
   },
   "ability": {

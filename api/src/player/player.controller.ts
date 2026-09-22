@@ -1,12 +1,14 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { AllowWeb } from '../util/auth/allow-web.decorator';
+import { Public } from '../util/auth/public.decorator';
 
 import { ConductPlayerDto } from './dto/conduct-player.dto';
+import { PlayerRankDto, PlayerRankingDto } from './dto/player-ranking.dto';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
-import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
@@ -26,11 +28,20 @@ export class PlayerController {
     private readonly playerGamePresetService: PlayerGamePresetService,
   ) {}
 
-  @AllowLocal()
+  // 榜单一天只变一次、人人看到的都一样，允许浏览器缓存
+  @Public()
   @Get('/ranking')
-  @ApiOperation({ summary: 'Get player rankings' })
-  getRanking(): Promise<PlayerRanking> {
+  @Header('Cache-Control', 'public, max-age=600')
+  @ApiOperation({ summary: 'Get top players by total battle points' })
+  getRanking(): Promise<PlayerRankingDto> {
     return this.playerRankingService.getRanking();
+  }
+
+  @AllowWeb()
+  @Get(':steamId/ranking')
+  @ApiOperation({ summary: 'Get live rank of a player by total battle points' })
+  getPlayerRank(@Param('steamId') steamId: string): Promise<PlayerRankDto> {
+    return this.playerRankingService.getPlayerRank(steamId);
   }
 
   @Get(':id/setting')

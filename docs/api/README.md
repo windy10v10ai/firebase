@@ -26,6 +26,7 @@ API 自己往外调的第三方服务：
 |---|---|---|---|
 | Steam OpenID | 登录回调的二次核对 | 无 | 无 |
 | Steam Web API `GetPlayerSummaries` | 玩家昵称与头像地址 | `STEAM_WEB_API_KEY` | Firestore `SteamProfiles`，正常 24 小时、取不到 1 小时 |
+| Steam Web API `GetPlayerSummaries`（批量） | 排行榜前 500 名的昵称与头像 | 同上 | 存进当天的排行榜快照，每天只查一次（100 人一批，共 5 次） |
 | 爱发电订单查询 | 补激活遗漏的订单 | `AFDIAN_API_TOKEN` | 无 |
 | GA4 Measurement Protocol | 服务端埋点 | `GA4_API_SECRET` | 无 |
 
