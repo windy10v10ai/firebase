@@ -1,4 +1,4 @@
-import { Check, Play } from 'lucide-react';
+import { Check, Play, Triangle, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
@@ -7,21 +7,21 @@ import Section from '../components/Section';
 import LaunchDialogFigure from './LaunchDialogFigure';
 
 interface Cell {
-  ok: boolean;
+  mark: 'yes' | 'partial' | 'no';
   noteKey?: string;
 }
 
 const COMPARE_ROWS: { labelKey: string; arcade: Cell; site: Cell }[] = [
   {
     labelKey: 'multiplayer',
-    arcade: { ok: true },
-    site: { ok: false, noteKey: 'multiplayerSite' },
+    arcade: { mark: 'yes' },
+    site: { mark: 'no', noteKey: 'multiplayerSite' },
   },
-  { labelKey: 'records', arcade: { ok: true }, site: { ok: true } },
+  { labelKey: 'records', arcade: { mark: 'yes' }, site: { mark: 'yes' } },
   {
     labelKey: 'stable',
-    arcade: { ok: false, noteKey: 'stableArcade' },
-    site: { ok: true },
+    arcade: { mark: 'partial', noteKey: 'stableArcade' },
+    site: { mark: 'yes' },
   },
 ];
 
@@ -43,28 +43,30 @@ const launchCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID
 export default function LaunchPage() {
   const t = useTranslations('launch');
 
-  const modeName = (chunks: React.ReactNode) => (
-    <b className="font-medium text-heading">{chunks}</b>
-  );
-
   const wait = (chunks: React.ReactNode) => <b className="font-medium text-warning">{chunks}</b>;
 
   // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把模式列挤到折行
   const renderCell = (cell: Cell) => (
     <span className="inline-flex items-center gap-2 text-left">
-      {cell.ok ? (
+      {cell.mark === 'yes' ? (
         <Check
           className="size-[18px] shrink-0 text-success md:size-5"
           strokeWidth={2.5}
           aria-label={t('compare.yes')}
         />
-      ) : (
-        <span
-          className="shrink-0 text-lg leading-5 text-faint md:text-xl"
+      ) : cell.mark === 'no' ? (
+        <X
+          className="size-[18px] shrink-0 text-danger md:size-5"
+          strokeWidth={2.5}
           aria-label={t('compare.no')}
-        >
-          —
-        </span>
+        />
+      ) : (
+        // 偶尔连不上不算大问题，用正文色而不是警示色，免得玩家以为这条路不能走
+        <Triangle
+          className="size-4 shrink-0 text-content md:size-[18px]"
+          strokeWidth={2.5}
+          aria-label={t('compare.partial')}
+        />
       )}
       {cell.noteKey ? (
         <span className="hidden text-sm text-muted md:inline">{t(`compare.${cell.noteKey}`)}</span>
@@ -77,15 +79,6 @@ export default function LaunchPage() {
       <h1 className="title-primary">{t('title')}</h1>
 
       <Section title={t('compare.title')}>
-        <div className="mb-5 space-y-2">
-          <p className="text-content">{t('compare.lead')}</p>
-          <p className="text-content text-pretty">
-            {t.rich('compare.leadArcade', { name: modeName })}
-          </p>
-          <p className="text-content text-pretty">
-            {t.rich('compare.leadSite', { name: modeName })}
-          </p>
-        </div>
         <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
           <table className="w-full table-fixed">
             <thead>
@@ -95,7 +88,7 @@ export default function LaunchPage() {
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.arcade')}
                   </span>
-                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
+                  <span className="mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5">
                     {t('compare.arcadeHint')}
                   </span>
                 </th>
@@ -103,7 +96,7 @@ export default function LaunchPage() {
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.site')}
                   </span>
-                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
+                  <span className="mt-1 inline-block rounded-full border border-line bg-panel-soft px-1.5 text-[10px] leading-4 font-normal text-muted md:px-2 md:text-xs md:leading-5">
                     {t('compare.siteHint')}
                   </span>
                 </th>
