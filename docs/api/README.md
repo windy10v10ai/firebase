@@ -11,7 +11,7 @@ API 是一个 NestJS 应用，部署成单个 Cloud Functions 函数 `client`（
 | 网站浏览器 | `windy10v10ai.com` | Cloudflare → App Hosting（`web/next.config.ts` 的 `/api` 转发）→ 函数 |
 | 支付宝回调 | `windy10v10ai.com` | 同上 |
 | 游戏服务器 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
-| 爱发电 / Ko-fi 回调 | `windy10v10ai.web.app` | Firebase Hosting → 函数 |
+| 爱发电 / Ko-fi 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
 - 网站的转发直接打函数自己的地址，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting
