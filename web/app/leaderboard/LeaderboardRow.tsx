@@ -10,7 +10,7 @@ interface LeaderboardRowProps {
   isMe: boolean;
 }
 
-// 前三名不用金银铜：金色在全站只表示会员，紫色只留给「自己」
+// 前三名不上勇士紫：紫色只留给「自己」那一行
 const TOP_RANK_CLASS =
   'inline-flex size-8 items-center justify-center rounded-lg border border-line-strong bg-panel-raised font-bold text-heading';
 
