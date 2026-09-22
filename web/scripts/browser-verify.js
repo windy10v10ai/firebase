@@ -7,13 +7,20 @@ const VIEWPORTS = {
   1280: { width: 1280, height: 900 },
 };
 
+// 网站标准支持的三种语言都要验；俄语文案最长，版面最容易被它撑坏
+const LOCALES = ['zh', 'en', 'ru'];
+
 // 复用系统 Chrome，跨平台不用摸索可执行文件路径
 async function launchChrome() {
   return chromium.launch({ channel: 'chrome', headless: true });
 }
 
-async function withPage(browser, viewport, fn) {
+async function withPage(browser, viewport, fn, locale) {
   const context = await browser.newContext({ viewport });
+  // 用 cookie 而不是 Accept-Language 指定语言：cookie 优先级最高，拍出来的语言不随本机设置变
+  if (locale) {
+    await context.addCookies([{ name: 'NEXT_LOCALE', value: locale, domain: 'localhost', path: '/' }]);
+  }
   const page = await context.newPage();
   const errors = [];
   page.on('console', (msg) => {
@@ -38,4 +45,4 @@ async function hasHorizontalOverflow(page) {
   return page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
 }
 
-module.exports = { VIEWPORTS, launchChrome, withPage, visibleText, hasHorizontalOverflow };
+module.exports = { VIEWPORTS, LOCALES, launchChrome, withPage, visibleText, hasHorizontalOverflow };
