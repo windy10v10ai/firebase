@@ -33,6 +33,7 @@ describe('PlayerConduct (e2e)', () => {
     '首次 %s：counter +1 conductPoint 变化',
     async (type, from, to, expectedPoint, expectedCommend, expectedReport) => {
       mockDate('2026-05-01T00:00:00.000Z');
+      await createPlayer(app, { steamId: from });
       await createPlayer(app, { steamId: to, conductPoint: 100 });
 
       const result = await conduct(app, from, to, type);
@@ -48,6 +49,7 @@ describe('PlayerConduct (e2e)', () => {
     mockDate('2026-05-01T00:00:00.000Z');
     const from = 200000021;
     const to = 200000022;
+    await createPlayer(app, { steamId: from });
     await createPlayer(app, { steamId: to, conductPoint: 100 });
 
     await conduct(app, from, to, ConductType.Commend);
@@ -62,6 +64,7 @@ describe('PlayerConduct (e2e)', () => {
     mockDate('2026-05-01T00:00:00.000Z');
     const from = 200000031;
     const to = 200000032;
+    await createPlayer(app, { steamId: from });
     await createPlayer(app, { steamId: to, conductPoint: 100 });
 
     // commend: 100 -> 102
@@ -79,6 +82,7 @@ describe('PlayerConduct (e2e)', () => {
     mockDate('2026-05-01T00:00:00.000Z');
     const from = 200000061;
     const to = 200000062;
+    await createPlayer(app, { steamId: from });
     await createPlayer(app, { steamId: to, conductPoint: 100 });
 
     await conduct(app, from, to, ConductType.Commend);
@@ -97,6 +101,14 @@ describe('PlayerConduct (e2e)', () => {
     expect(result.status).toEqual(400);
   });
 
+  it('发起人不存在 → 404', async () => {
+    mockDate('2026-05-01T00:00:00.000Z');
+    const to = 200000102;
+    await createPlayer(app, { steamId: to, conductPoint: 100 });
+    const result = await conduct(app, 200000101, to, ConductType.Commend);
+    expect(result.status).toEqual(404);
+  });
+
   it('target 不存在 → 404', async () => {
     mockDate('2026-05-01T00:00:00.000Z');
     const result = await conduct(app, 200000051, 200000052, ConductType.Commend);
@@ -108,6 +120,7 @@ describe('PlayerConduct (e2e)', () => {
     ['下限 0', ConductType.Report, 200000081, 200000082, 1, 0],
   ])('conductPoint clamp 到%s', async (_label, type, from, to, initial, expectedPoint) => {
     mockDate('2026-05-01T00:00:00.000Z');
+    await createPlayer(app, { steamId: from });
     await createPlayer(app, { steamId: to, conductPoint: initial });
     const result = await conduct(app, from, to, type);
     expect(result.status).toEqual(201);
@@ -118,6 +131,7 @@ describe('PlayerConduct (e2e)', () => {
     mockDate('2026-05-01T00:00:00.000Z');
     const from = 200000091;
     const to = 200000092;
+    await createPlayer(app, { steamId: from });
     await createPlayer(app, { steamId: to, conductPoint: 100 });
     await conduct(app, from, to, ConductType.Commend);
 
