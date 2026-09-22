@@ -9,6 +9,7 @@ import { Member, MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
+import { PlayerStatsRecentService } from '../player/player-stats-recent.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -64,6 +65,10 @@ describe('GameService', () => {
         {
           provide: PlayerStatsLifetimeService,
           useValue: { accumulate: jest.fn() },
+        },
+        {
+          provide: PlayerStatsRecentService,
+          useValue: { record: jest.fn() },
         },
         {
           provide: PlayerSettingService,
@@ -317,6 +322,7 @@ describe('GameService.addDailyMemberPoints', () => {
     const membersService = new MembersService(repository, playerService as never);
     const gameService = new GameService(
       playerService as never,
+      null,
       null,
       null,
       null,

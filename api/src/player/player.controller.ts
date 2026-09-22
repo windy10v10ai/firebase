@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Header, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Header,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AllowLocal } from '../util/auth/allow-local.decorator';
@@ -7,6 +18,7 @@ import { Public } from '../util/auth/public.decorator';
 
 import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { PlayerRankDto, PlayerRankingDto } from './dto/player-ranking.dto';
+import { PlayerStatsRecentResponse } from './dto/player-stats-recent.response';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
 import { PlayerSetting } from './entities/player-setting.entity';
@@ -15,6 +27,7 @@ import { PlayerConductService } from './player-conduct.service';
 import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
+import { PlayerStatsRecentService, RECENT_MATCH_LIMIT } from './player-stats-recent.service';
 import { PlayerService } from './player.service';
 
 @ApiTags('Player')
@@ -26,6 +39,7 @@ export class PlayerController {
     private readonly playerSettingService: PlayerSettingService,
     private readonly playerConductService: PlayerConductService,
     private readonly playerGamePresetService: PlayerGamePresetService,
+    private readonly playerStatsRecentService: PlayerStatsRecentService,
   ) {}
 
   // 榜单一天只变一次、人人看到的都一样，允许浏览器缓存
@@ -42,6 +56,20 @@ export class PlayerController {
   @ApiOperation({ summary: 'Get live rank of a player by total battle points' })
   getPlayerRank(@Param('steamId') steamId: string): Promise<PlayerRankDto> {
     return this.playerRankingService.getPlayerRank(steamId);
+  }
+
+  // 单独一条而不是并进 /:steamId/info：满员 50 场约 50 KB，挂在首屏依赖上会拖慢整页
+  @AllowWeb()
+  @Get(':steamId/stats/recent')
+  @ApiOperation({ summary: 'Get recent matches' })
+  async getStatsRecent(
+    @Param('steamId', ParseIntPipe) steamId: number,
+    @Query('limit', new DefaultValuePipe(RECENT_MATCH_LIMIT), ParseIntPipe) limit: number,
+  ): Promise<PlayerStatsRecentResponse> {
+    const stats = await this.playerStatsRecentService.findBySteamId(steamId);
+    // Firestore 只能整份取，limit 省的是这一跳到浏览器的字节
+    const take = Math.min(Math.max(limit, 1), RECENT_MATCH_LIMIT);
+    return { matches: (stats?.matches ?? []).slice(0, take) };
   }
 
   @Get(':id/setting')

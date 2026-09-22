@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 
 import { formatStatNumber } from '@/app/lib/format-stat-number';
-import { heroAsset } from '@/config/daily-task';
+import { heroLabel } from '@/config/heroes';
 
 import type { TaskCandidate } from '@/app/lib/daily-task';
 import type { ReactNode } from 'react';
@@ -22,12 +22,11 @@ export function useTaskText() {
   return (task: TaskCandidate): ReactNode => {
     const target = formatStatNumber(task.target, locale === 'zh');
     const scope = task.scope === 'personal_hero' ? 'hero' : 'general';
-    const hero = task.heroName ? heroAsset(task.heroName) : undefined;
-    const heroLabel = hero ? (locale === 'zh' ? hero.zh : hero.en) : '';
+    const hero = task.heroName ? heroLabel(task.heroName, locale) : '';
 
     return t.rich(`task.${scope}.${task.metric}`, {
       target,
-      hero: heroLabel,
+      hero,
       b: (chunks) => <b className="font-bold text-heading">{chunks}</b>,
     });
   };

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsInt,
   IsNotEmpty,
@@ -9,6 +10,7 @@ import {
   IsString,
   Matches,
   Max,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -53,6 +55,8 @@ export class DailyTaskResultDto {
   @Min(0)
   seasonPoint: number;
 }
+
+const ITEM_NAME_MAX_LENGTH = 64;
 
 export class GameEndPlayerDto {
   @ApiProperty({ default: 'npc_dota_hero_abaddon' })
@@ -125,6 +129,58 @@ export class GameEndPlayerDto {
   @IsNumber()
   @Min(0)
   roshanKills?: number;
+
+  /**
+   * 结算界面那一行的属性、出装与抽选技能，客户端下一版起发送，且只有真人玩家有。
+   * 上限用来兜住伪造的请求体，正常客户端碰不到。
+   */
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  strength?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  agility?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  intellect?: number;
+
+  /** 定长 6，下标即主物品栏槽位，空槽为空串 */
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsString({ each: true })
+  @MaxLength(ITEM_NAME_MAX_LENGTH, { each: true })
+  items?: string[];
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  neutralItem?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  neutralPassiveItem?: string;
+
+  /** 顺序为主动、被动 1、被动 2 */
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsString({ each: true })
+  @MaxLength(ITEM_NAME_MAX_LENGTH, { each: true })
+  abilities?: string[];
 
   @ApiProperty({ type: DailyTaskResultDto, required: false })
   @IsOptional()

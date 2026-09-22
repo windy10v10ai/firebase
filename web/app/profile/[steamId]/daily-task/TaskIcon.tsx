@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { heroAsset, heroIconPath } from '@/config/daily-task';
+import { heroAsset, heroIconPath } from '@/config/heroes';
 
 import type { TaskCandidate, TaskMetric } from '@/app/lib/daily-task';
 
