@@ -18,7 +18,7 @@ description: 写或改 docs/ 下任何文档之前必须先加载；也用于判
 | 某次批次/功能/迁移的具体设计（brainstorming 产出的 spec） | `docs/design/<主题>/<阶段>.md` | 是 | 批次完成后压成短文，见下 |
 | 某次实现的任务拆解（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已排除 | 随代码合入即失效，不需要留痕 |
 
-`<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`sql-migration`。`<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`。
+`<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`player-stats-recent`。`<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`。
 
 判断一份新文档该进哪一类，问：**这份内容会不会因为某次批次完成就失效？** 会失效 → `docs/design/`；不会、且描述的是系统现在的样子 → `docs/<模块>/`；只是任务清单、完成就扔 → `docs/superpowers/plans/`，不进 git。
 
