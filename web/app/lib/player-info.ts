@@ -21,7 +21,8 @@ export interface StatsLifetime {
   totalGoldEarned: number;
 }
 
-export interface AwakenedHero {
+/** api 与 web 由不同 workflow 部署、非原子发布，切换期间 web 仍可能收到旧响应形状 */
+export interface LegacyAwakenedHero {
   heroName: string;
 }
 
@@ -66,7 +67,7 @@ export interface PlayerInfo {
   member?: MemberInfo;
   statsLifetime?: StatsLifetime;
   properties?: PropertyItem[];
-  awakenedHeroes?: AwakenedHero[];
+  awakenedHeroes?: (string | LegacyAwakenedHero)[];
   checkIn?: CheckInStatus;
 }
 

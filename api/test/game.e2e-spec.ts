@@ -420,8 +420,7 @@ describe('PlayerController (e2e)', () => {
 
         const player = result.body.players.find((p: { id: string }) => p.id === steamId.toString());
         expect(player).toBeDefined();
-        expect(player.awakenedHeroes).toHaveLength(1);
-        expect(player.awakenedHeroes[0].heroName).toEqual('npc_dota_hero_axe');
+        expect(player.awakenedHeroes).toEqual(['npc_dota_hero_axe']);
       });
 
       it('验证 pointInfo 包含正确的会员积分信息', async () => {

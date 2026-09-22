@@ -4,7 +4,6 @@ import { MemberDto } from '../../members/dto/member.dto';
 import { PlayerSetting } from '../../player/entities/player-setting.entity';
 import { PlayerStatsLifetime } from '../../player/entities/player-stats-lifetime.entity';
 import { Player } from '../../player/entities/player.entity';
-import { HeroAwakeningItemDto } from '../../player-hero-awakening/dto/hero-awakening-item.dto';
 import { PlayerPropertyItemDto } from '../../player-property/dto/player-property-item.dto';
 
 import { PlayerCheckInDto } from './check-in-result.dto';
@@ -39,7 +38,7 @@ export class PlayerInfoDto extends Player {
   @ApiPropertyOptional()
   statsLifetime?: PlayerStatsLifetime;
   @ApiPropertyOptional()
-  awakenedHeroes?: HeroAwakeningItemDto[];
+  awakenedHeroes?: string[];
   @ApiPropertyOptional()
   checkIn?: PlayerCheckInDto;
 }

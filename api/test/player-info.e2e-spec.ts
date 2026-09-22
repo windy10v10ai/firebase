@@ -670,7 +670,7 @@ describe('PlayerInfoController (e2e)', () => {
   describe('PUT /api/player/:steamId/hero-awakening 觉醒英雄', () => {
     const validHeroName = 'npc_dota_hero_axe';
 
-    it('使用赛季积分觉醒成功，返回 awakenedHeroes 且不含积分字段', async () => {
+    it('使用赛季积分觉醒成功，返回 awakenedHeroes', async () => {
       const steamId = 200000701;
       await createPlayer(app, { steamId, seasonPointTotal: 10000, memberPointTotal: 0 });
 
@@ -678,10 +678,7 @@ describe('PlayerInfoController (e2e)', () => {
 
       expect(result.status).toEqual(200);
       const playerDto = result.body;
-      expect(playerDto.awakenedHeroes).toHaveLength(1);
-      expect(playerDto.awakenedHeroes[0].heroName).toEqual(validHeroName);
-      expect(playerDto.awakenedHeroes[0].usedSeasonPoint).toBeUndefined();
-      expect(playerDto.awakenedHeroes[0].usedMemberPoint).toBeUndefined();
+      expect(playerDto.awakenedHeroes).toEqual([validHeroName]);
       expect(playerDto.useableSeasonPoint).toEqual(2000);
     });
 
@@ -785,7 +782,7 @@ describe('PlayerInfoController (e2e)', () => {
       const result = await awakenHero(app, steamId, 'npc_dota_hero_abaddon', false);
 
       expect(result.status).toEqual(200);
-      const heroNames = result.body.awakenedHeroes.map((h: { heroName: string }) => h.heroName);
+      const heroNames = result.body.awakenedHeroes;
       expect(heroNames).toContain('npc_dota_hero_axe');
       expect(heroNames).toContain('npc_dota_hero_abaddon');
     });
