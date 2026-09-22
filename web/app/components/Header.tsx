@@ -2,6 +2,7 @@
 
 import {
   BookOpen,
+  CalendarCheck,
   CirclePlus,
   Crown,
   ExternalLink,
@@ -34,6 +35,7 @@ const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: strin
   profile: { Icon: UserRound, className: 'text-content' },
   property: { Icon: CirclePlus, className: 'text-feature-property' },
   awaken: { Icon: Sparkles, className: 'text-feature-awaken' },
+  dailyTask: { Icon: CalendarCheck, className: 'text-feature-daily' },
   membership: { Icon: Crown, className: 'text-member-strong' },
   wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
   // 启动游戏不属于任何一块玩家数据，用中性色

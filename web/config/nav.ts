@@ -12,6 +12,12 @@ export const SITE_NAV_ITEMS = [
   },
   { key: 'awaken', shortLabelKey: 'awaken', fullLabelKey: 'awakenFull', href: '/my/awaken' },
   {
+    key: 'dailyTask',
+    shortLabelKey: 'dailyTask',
+    fullLabelKey: 'dailyTaskFull',
+    href: '/my/daily-task',
+  },
+  {
     key: 'membership',
     shortLabelKey: 'membershipShort',
     fullLabelKey: 'membership',
