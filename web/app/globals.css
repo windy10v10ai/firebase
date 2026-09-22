@@ -16,7 +16,7 @@
   --color-muted: #8b8b93;
   --color-faint: #5d5d66;
 
-  /* 紫与金只表示两套货币：勇士一律紫、会员一律金，不拿来当交互色 */
+  /* 勇士一律紫、会员一律金，两者都不拿来当交互色 */
   --color-season: #a874ea;
   --color-season-strong: #9b5de0;
   --color-season-soft: rgba(155, 93, 224, 0.12);
@@ -60,6 +60,11 @@
 
   /* 折扣标签专用，不借用 danger：折扣不是危险，还要和绿色的限免标签一眼分开 */
   --color-discount: #ff6b6b;
+
+  /* 英雄等级圈，只用在近期战绩那一列：取值照搬游戏结算界面的 #HeroLevelLabel。
+     它是金色但与会员金无关，破例的理由见 docs/web/design-system.md「游戏语义色」 */
+  --color-hero-level: #e7d291;
+  --color-hero-level-border: rgba(231, 210, 145, 0.53);
 
   /* 游戏语义色，只用在技能提示框：取值照搬 Dota 本地化里的伤害类型色 */
   --color-dota-physical: #ae2f28;

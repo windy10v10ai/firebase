@@ -3,6 +3,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Header,
   Param,
   ParseIntPipe,
   Post,
@@ -13,12 +14,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { AllowWeb } from '../util/auth/allow-web.decorator';
+import { Public } from '../util/auth/public.decorator';
 
 import { ConductPlayerDto } from './dto/conduct-player.dto';
+import { PlayerRankDto, PlayerRankingDto } from './dto/player-ranking.dto';
 import { PlayerStatsRecentResponse } from './dto/player-stats-recent.response';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
-import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
@@ -40,11 +42,20 @@ export class PlayerController {
     private readonly playerStatsRecentService: PlayerStatsRecentService,
   ) {}
 
-  @AllowLocal()
+  // 榜单一天只变一次、人人看到的都一样，允许浏览器缓存
+  @Public()
   @Get('/ranking')
-  @ApiOperation({ summary: 'Get player rankings' })
-  getRanking(): Promise<PlayerRanking> {
+  @Header('Cache-Control', 'public, max-age=600')
+  @ApiOperation({ summary: 'Get top players by total battle points' })
+  getRanking(): Promise<PlayerRankingDto> {
     return this.playerRankingService.getRanking();
+  }
+
+  @AllowWeb()
+  @Get(':steamId/ranking')
+  @ApiOperation({ summary: 'Get live rank of a player by total battle points' })
+  getPlayerRank(@Param('steamId') steamId: string): Promise<PlayerRankDto> {
+    return this.playerRankingService.getPlayerRank(steamId);
   }
 
   // 单独一条而不是并进 /:steamId/info：满员 50 场约 50 KB，挂在首屏依赖上会拖慢整页

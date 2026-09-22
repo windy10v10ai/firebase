@@ -58,7 +58,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **请求不等登录态。** `apiFetch` 取 token 前已经 `await auth.authStateReady()`，页面不写「登录态恢复后再发请求」的判断
 - **加载中渲染真实布局，必有值的位置放骨架块。** 用 `app/components/ui/skeleton.tsx`，放在字段原位（`{value ?? <Skeleton />}`）。不写替换整页的占位组件：那是第二套布局，要手工与真实页面保持同尺寸，改一处就会跳
 - **可能本来就为空的位置不放骨架，只占位。** 如非会员的会员行：容器用 `min-h-*` 按行高留出空间，数据到了原地填入。骨架块预告「这里马上有内容」，内容可能不存在时会误导
-- **游戏图标与 lucide 线条图标不混用**，取值与「哪些指标该配图标」见 [docs/web/design-system.md](../docs/web/design-system.md) 第 6 节
+- **游戏图标与 lucide 线条图标不混用**，取值与「哪些指标该配图标」见 [docs/web/design-system.md](../docs/web/design-system.md) 第 7 节；金色只表示会员，唯一的例外是近期战绩的等级圈，见同一份文档第 6 节
 - **尺寸由容器定，不由内容定。** 高度可能随文案长度变化的行加 `truncate` 不折行，父级 flex 项加 `min-w-0`；图片放进固定尺寸的容器，没到或加载失败时显示兜底图标
 - **失败态可以整块替换。** 401 换成登录面板、403 / 404 换成说明，这是用户预期内的切换
 - **不加路由级 `loading.tsx`。** 它在跳转时显示整页 fallback，等于第二套布局

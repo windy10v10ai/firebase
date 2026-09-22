@@ -9,6 +9,7 @@ import {
   LogOut,
   Play,
   Sparkles,
+  Trophy,
   UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -38,6 +39,7 @@ const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: strin
   awaken: { Icon: Sparkles, className: 'text-feature-awaken' },
   dailyTask: { Icon: CalendarCheck, className: 'text-feature-daily' },
   membership: { Icon: Crown, className: 'text-member-strong' },
+  leaderboard: { Icon: Trophy, className: 'text-season' },
   wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
   // 启动游戏不属于任何一块玩家数据，用中性色
   launch: { Icon: Play, className: 'text-content' },
@@ -80,7 +82,7 @@ export default function Header() {
   }, [menuOpen]);
 
   const topRowNavItems = SITE_NAV_ITEMS.filter(
-    (item): item is typeof item & { href: string } => item.href !== null,
+    (item): item is typeof item & { href: string } => item.href !== null && !('menuOnly' in item),
   );
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
   // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上
