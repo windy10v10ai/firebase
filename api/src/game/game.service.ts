@@ -8,6 +8,7 @@ import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
+import { PlayerStatsRecentService } from '../player/player-stats-recent.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoService } from '../player-info/player-info.service';
@@ -23,6 +24,7 @@ export class GameService {
     private readonly dailyTaskService: DailyTaskService,
     private readonly analyticsService: AnalyticsService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
+    private readonly playerStatsRecentService: PlayerStatsRecentService,
     private readonly membersService: MembersService,
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
@@ -90,8 +92,7 @@ export class GameService {
   async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
     const players = gameEnd.players.filter((player) => player.steamId > 0);
     // 行为分只在组队局计算
-    // TODO: game 发布并保证必带 playerCount 后，去掉回退，统一用 gameEnd.playerCount 判定
-    const isParty = (gameEnd.playerCount ?? players.length) >= 2;
+    const isParty = gameEnd.playerCount >= 2;
 
     await Promise.all(
       players.map((player) =>
@@ -119,12 +120,13 @@ export class GameService {
   /** 累计报文中每个玩家的生涯统计。 */
   async recordPlayerStats(gameEnd: GameEndDto): Promise<void> {
     await Promise.all(
-      gameEnd.players.map((player) =>
+      gameEnd.players.flatMap((player) => [
         this.playerStatsLifetimeService.accumulate(player.steamId, player, {
           matchId: gameEnd.matchId,
           gameOptions: gameEnd.gameOptions,
         }),
-      ),
+        this.playerStatsRecentService.record(player, gameEnd),
+      ]),
     );
   }
 

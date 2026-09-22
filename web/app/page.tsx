@@ -26,11 +26,11 @@ export default function Home() {
 
       {auth.status === 'authenticated' ? <PlayerSummary uid={auth.uid} /> : <LoginBanner />}
 
-      <LaunchCard />
-
       <WorkshopCard />
 
       <PageCards />
+
+      <LaunchCard />
 
       <section className="space-y-6">
         {OTHER_LINKS.map((link) => (

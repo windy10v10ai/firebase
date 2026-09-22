@@ -1,0 +1,132 @@
+# 近期战绩（playerStatsRecent）
+
+> 对应 [#899](https://github.com/windy10v10ai/firebase/issues/899)。生涯累计战绩见 [#866](https://github.com/windy10v10ai/firebase/issues/866)，已上线。
+
+玩家打完一局，结算界面上的数据只在那一屏存在，关掉就没了。生涯战绩只有累计值，看不出最近状态。本批给每个玩家留最近 50 场的单场明细，在个人主页展示。
+
+## 边界
+
+本批只做 Firestore 存储与网页展示：
+
+- **存**：结算界面上玩家自己那一行的全部数据，加上对局本身的胜负、时长、难度与倍率
+- **显示**：个人主页新增一张「近期战绩」卡，一行五项
+- **存了但本批不显示**：物品与技能。网站没有物品图标和普通技能图标，配齐是独立的一批活；数据先存下来，不存的话这段时间的对局就永久缺这两项
+
+## 数据结构
+
+一个玩家一个文档，docId = steamId，单文档一个定长 50 的数组，新场次插到最前再截断。集合名由 fireorm 按 entity 类名推出来，与其他 entity 一样不显式写。
+
+```
+PlayerStatsRecent
+  matches: [
+    // 对局
+    matchId, endedAt, version, durationSec, win, difficulty,
+    multiplierRadiant, multiplierDire, towerPowerPct,
+    // 玩家
+    heroName, level, awaken, isDisconnected,
+    kills, deaths, assists, lastHits, totalGoldEarned,
+    heroDamage, damageTaken, healing, towerKills, stuns, roshanKills,
+    battlePoints,
+    // 游戏端发版后才有
+    strength, agility, intellect,           // 局末属性面板值
+    items,                                  // 定长 6，主物品栏，空槽为空串
+    neutralItem, neutralPassiveItem,
+    abilities,                              // [主动, 被动1, 被动2]
+  ]
+  updatedAt
+```
+
+实测一行 32 个字段、JSON 724 字节（旧客户端没有出装那几项时 489 字节），50 场满员不到 40 KB，距 Firestore 单文档 1 MB 上限有二十倍余量。体积压力真的出现时，最先砍的是三个倍率字段——刷分局已经被过滤掉，剩下的对局这三个值接近恒定。
+
+几个取值来源：
+
+- `endedAt` 用服务端收到结算的时间。游戏端不发时间戳，为此加一个字段不值得
+- `durationSec` 由报文的 `gameTimeMsec` 换算
+- `win` 由玩家的 `teamId` 与报文根上的 `winnerTeamId` 比出来。本地主机那条路每条请求只带一个玩家，但 `winnerTeamId` 在根上，照样算得出
+- `awaken` 沿用现有的 0/1 语义，觉醒的是英雄不是技能，战绩里只需要看出这个英雄是觉醒的
+
+## 写入
+
+挂在 `GameService.recordPlayerStats()`，与生涯战绩同一个调用点——在线与本地主机两条结算入口自动都覆盖到，不用分别改。
+
+三条约束：
+
+- **刷分局跳过**。直接复用 `shouldSkipStatsLifetimeForGameOptions`，与生涯战绩同一个口径。两份数据的入口不一致会让人无法解释为什么这局在战绩里有、在累计里没有
+- **单字段超上限只丢那个字段**。复用 `validateStatContribution` 的每局上限，异常值落回 0 并记日志，整场仍然记录。否则一个坏数值会让整局在战绩里凭空消失
+- **不按 matchId 去重**。控制台启动的对局引擎给的 matchId 恒为 `"0"`，拿它比对会把不同对局误判成重放。防重复由本地主机那条路已有的冷却窗口承担，与 [local-host.service.ts](../../../api/src/local-host/local-host.service.ts) 的现有做法一致
+- **不用事务**。读-改-写即可。一个玩家同一时刻只在一局游戏里，结算天然顺序发生；极端情况下两条请求撞在一起会丢一场记录，这个代价可以接受。规约见 [api/CLAUDE.md](../../../api/CLAUDE.md) 的「并发与一致性」
+
+## 索引
+
+`matches` 在 [firestore.indexes.json](../../../firestore.indexes.json) 的 `fieldOverrides` 里关掉了单字段索引。那份配置读不到装饰器，只能写死集合名，取 fireorm 推出来的复数形式。Firestore 默认给每个字段建索引、数组也不例外，而这个数组永远只按 docId 整份取、不参与任何查询。留着索引是白占存储，每次结算还要跟着更新索引条目。
+
+这是整块数组这个结构带来的唯一一处真实开销，也是唯一能直接关掉的。50 KB 的读写本身不额外花钱——Firestore 按文档次数计费而不按字节，函数与数据库同区、流量不计出口费。
+
+## 接口
+
+`GET /player/:steamId/stats/recent`，挂 `@AllowWeb()`，可见性与生涯战绩一致，不加身份判断——同一张个人主页上两份战绩一份公开一份不公开，解释不通。
+
+带 `limit` 参数，默认返回全部 50。Firestore 的读取粒度是整个文档，数组切片省不到读取侧；这个参数省的是 API 到浏览器那一跳，首屏请求 10 条就是 10 KB 而不是 50 KB。
+
+不并进 `/player/:steamId/info`：那个接口是个人主页的首屏依赖，50 KB 挂上去会拖慢整页。
+
+## 网页
+
+个人主页「战绩」卡下方新增「近期战绩」卡，自己发一次请求、独立骨架屏。默认 10 行，点「查看全部」展开到 50。
+
+电脑上一行九项：英雄、结果、时长、K/D/A、补刀、金钱、英雄伤害、勇士积分，左端一道胜负色条。手机排不下，只留英雄、K/D/A、时长与积分，结果交给色条。点开一行看这局剩下的数值，按战斗 / 发育 / 局末属性分三组，约 104px 高。
+
+三个决定：
+
+- **觉醒标在头像上，不做成标签**。觉醒的是英雄不是这一局，画成一圈紫环语义更准，且不占横向空间——原先「觉醒」「掉线」两个同形状标签排在一起，会被读成一对并列状态。掉线保留文字标签，它确实只属于这一局
+- **数据列一律 `minmax` 加权重，不写死宽度**。写死的那一版俄文「Поражение」会压到时长上；全给英雄名 `1fr` 又会把数字挤到右边、中间空一大片。表头再加一层 `truncate` 兜底，以后加语言不会再撞
+- **图标只上表头**，手机没有表头所以每行都带。哪些指标配图标、为什么不给补刀配，见 [docs/web/design-system.md](../../web/design-system.md) 第 6 节
+
+英雄头像与中英文名沿用每日任务那份清单，顺手从 `config/daily-task.ts` 挪进 `config/heroes.ts`：它本来就是通用英雄资源，挂在每日任务名下只是因为当时只有那一个消费方。清单覆盖 127 个英雄，与 api 侧 `hero-data.ts` 认的名字完全一致，查不到的退回内部名并留空头像。
+
+## 游戏端依赖
+
+属性、物品与技能要 game 仓库另开一个 PR 上报：服务端读 `hero:GetItemInSlot(0..5, 16, 17)` 拿主物品栏、中立物品与中立被动，技能从 `lottery_status` 取三个名字，力敏智与结算界面共用同一次读取。实现见 [windy10v10ai/game#2451](https://github.com/windy10v10ai/game/pull/2451)。
+
+本仓库不等它：DTO 把这几项声明成可选字段，游戏端没发版时它们就是空的，列表照常显示。那边发版后这边不用改代码，新场次自然带上。
+
+发版顺序也不用管。[settings.ts](../../../api/src/util/settings.ts) 的 ValidationPipe 没开 `whitelist` 与 `forbidNonWhitelisted`，新客户端带着旧 API 不认识的字段过来只会被忽略，不会 400。
+
+### 代发路径的字节预算
+
+游廊对局的结算走客户端代发，整条请求塞在 URL 里，所以新字段是要占预算的。单玩家一条请求实测：
+
+| | JSON | base64url | 整条 URL |
+|---|---|---|---|
+| 加字段前 | 713 | 951 | 1092 |
+| 加字段后（典型物品技能名） | 1049 | 1399 | 1540 |
+| 加字段后（全取最长名） | 1080 | 1440 | 1581 |
+
+**卡住的不是 game 仓库 README 里那个 4096**，那是响应标题的上限，这条路由的响应只有 `{"recorded":true}`。真正的约束在另一跳：请求 URL 由服务端经自定义游戏事件发给客户端，引擎对事件 payload 有上限，通常说是 2 KB，但仓库里没有实测记录。
+
+现网已经证明 1092 能过。涨到 1581 是没验证过的区间，约占 2 KB 的四分之三。
+
+**上线前必须用强制走代发的调试开关实测一次**：直连那条路没有这个事件跳转，测了说明不了问题，理由见 game 仓库 [src/vscripts/api/README.md](https://github.com/windy10v10ai/game/blob/develop/src/vscripts/api/README.md) 的「不能用直连结果推断代发」。
+
+真超了再降级，不提前优化：按路由裁剪掉代发报文里的这几项（做法同 `PROXY_GAME_START_INCLUDE`），或者把它们拆成第二条请求。
+
+## 不做
+
+- **不存全场十人的记分板**。本地主机那条路每条请求只带一个玩家，凑不齐全场；而在线局目前只能单人，同场另外九个都是电脑
+- **不存技能品阶**。多存一个数字能看出手气，但当前展示用不上
+- **不存行为分增减**。结算界面积分旁边那个 +13/-N 由游戏端算完就丢，没进报文。它只是 `battlePoints` 的一个来源拆解，当前行为分本身已经在个人主页上能看到，为拆解再改一轮游戏端不划算
+- **不加历史清理**。50 场封顶，文档大小恒定
+
+## 后续可能的扩展
+
+**长期历史交给 BigQuery。** 数组是展示缓存不是事实来源，第 51 场之前的数据现在会被截断丢弃。今后可以在结算时把完整明细同时写一份进 BigQuery 永久留存，个人主页仍然读 Firestore 保持毫秒级，全服基线、按英雄胜率、六维图这类聚合在 BQ 里算完预聚合写回 Firestore。仓库已经在用 firestore-bigquery-export 导 players 与 members，这条路是通的。
+
+分析查询不能放在请求路径上，理由见 [docs/api/README.md](../../api/README.md) 的「成本与延迟」。
+
+**物品与技能的展示** 数据已经在存，图标也齐了——Dota 把物品与技能图标全部公开在 CDN 上（`dota_react/items/<名>.png` 与 `abilities/<名>.png`），和英雄头像同一个下载脚本能拿。剩下的是展示位置与交互，另开一批。
+
+## 未采用
+
+- **Firestore 子集合（一场一文档）**。给得了分页与任意范围查询、历史不截断，但个人主页从 1 次读变成 10 到 50 次读。50 场封顶就不需要分页，长期历史由 BigQuery 接，剩下的好处付不起这个读取费。原本还有「matchId 当 docId 自带幂等」这条，被 matchId 恒为 0 打掉了
+- **Cloud SQL**。能力最强，但月成本从约 ¥1,800 涨到 ¥4,200，且 ORM、Schema、迁移三步都还没做，是个跨多批次的基础设施项目，不该由这一个功能来付首付
+- **BigQuery 直接作为主页数据源**。冷查询 1–3 秒，Cloud Run 按请求墙钟计费，单请求 CPU 计费会翻二十倍

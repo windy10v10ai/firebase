@@ -6,20 +6,20 @@ import { fileURLToPath } from 'node:url';
 import { resolveDotaVersion, resolveGameRepo } from './awaken-source.mjs';
 
 /**
- * 取每日任务要用的英雄小地图头像与中英文名，产出清单 config/daily-task-heroes.json。
+ * 取英雄小地图头像与中英文名，产出清单 config/heroes.json。
  *
- * 跑法：cd web && npm run daily-task:heroes
+ * 跑法：cd web && npm run heroes
  */
 
 const WEB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.resolve(WEB, '..');
 const TASKS_CONFIG = path.join(REPO, 'api/src/daily-task/config/tasks.ts');
 const OUT_DIR = path.join(WEB, 'public/heroes');
-const MANIFEST = path.join(WEB, 'config/daily-task-heroes.json');
+const MANIFEST = path.join(WEB, 'config/heroes.json');
 // game 仓库把这些内部英雄名换了皮（改了模型/名字），Dota 官方数据里查到的还是原版，
-// 换皮的名字/头像收在这张表和同目录 daily-task-hero-overrides/ 下，逐条覆盖官方数据
-const OVERRIDES_FILE = path.join(WEB, 'config/daily-task-hero-overrides.json');
-const OVERRIDE_ICON_DIR = path.join(WEB, 'config/daily-task-hero-overrides');
+// 换皮的名字/头像收在这张表和同目录 hero-overrides/ 下，逐条覆盖官方数据
+const OVERRIDES_FILE = path.join(WEB, 'config/hero-overrides.json');
+const OVERRIDE_ICON_DIR = path.join(WEB, 'config/hero-overrides');
 
 const ICON_CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons';
 

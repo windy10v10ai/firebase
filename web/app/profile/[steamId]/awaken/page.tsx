@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import LaunchNotice from '@/app/components/LaunchNotice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import {
@@ -100,7 +99,7 @@ export default function AwakenPage() {
   }, [steamId]);
 
   const awakenedNames = useMemo(
-    () => (loaded?.status === 'ready' ? loaded.info.awakenedHeroes ?? [] : []).map((a) => a.heroName),
+    () => (loaded?.status === 'ready' ? loaded.info.awakenedHeroes ?? [] : []),
     [loaded],
   );
 
@@ -183,8 +182,6 @@ export default function AwakenPage() {
         <h1 className="title-primary">{t('title')}</h1>
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
-
-      <LaunchNotice subject="awaken" />
 
       <section className="card-container card-pad">
         <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>

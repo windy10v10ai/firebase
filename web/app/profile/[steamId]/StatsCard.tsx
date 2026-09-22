@@ -65,10 +65,7 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
 
   return (
     <section className="card-container card-pad @container space-y-6">
-      <div className="space-y-1.5">
-        <h2 className="title-secondary">{t('title')}</h2>
-        <p className="text-sm text-muted">{t('offlineNote')}</p>
-      </div>
+      <h2 className="title-secondary">{t('title')}</h2>
       <dl className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
         {overview.map(({ label, value }) => (
           <div key={label} className="box-pad rounded-[10px] border border-line bg-panel-soft">

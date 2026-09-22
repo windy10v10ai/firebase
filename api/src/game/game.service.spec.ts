@@ -9,6 +9,7 @@ import { Member, MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerSettingService } from '../player/player-setting.service';
 import { PlayerStatsLifetimeService } from '../player/player-stats-lifetime.service';
+import { PlayerStatsRecentService } from '../player/player-stats-recent.service';
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoService } from '../player-info/player-info.service';
 import { PlayerPropertyService } from '../player-property/player-property.service';
@@ -66,6 +67,10 @@ describe('GameService', () => {
           useValue: { accumulate: jest.fn() },
         },
         {
+          provide: PlayerStatsRecentService,
+          useValue: { record: jest.fn() },
+        },
+        {
           provide: PlayerSettingService,
           useValue: {},
         },
@@ -92,17 +97,17 @@ describe('GameService', () => {
 
   describe('recordGameEnd 组队判定', () => {
     const player = { steamId: 1001, teamId: 2, battlePoints: 10, isDisconnected: false };
-    const build = (playerCount?: number) =>
+    const build = (playerCount: number) =>
       ({ winnerTeamId: 2, players: [player], playerCount }) as unknown as GameEndDto;
 
-    it('报文带 playerCount 时按它判定，单玩家报文也能算组队局', async () => {
+    it('单玩家报文也能算组队局', async () => {
       await service.recordGameEnd(build(4));
 
       expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1001, true, 10, false, true);
     });
 
-    it('没带 playerCount 时按报文里的真人数判定', async () => {
-      await service.recordGameEnd(build());
+    it('全场只有一个真人时不算组队局', async () => {
+      await service.recordGameEnd(build(1));
 
       expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1001, true, 10, false, false);
     });
@@ -317,6 +322,7 @@ describe('GameService.addDailyMemberPoints', () => {
     const membersService = new MembersService(repository, playerService as never);
     const gameService = new GameService(
       playerService as never,
+      null,
       null,
       null,
       null,

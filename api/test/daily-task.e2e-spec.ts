@@ -56,6 +56,7 @@ function gameEndPayload(players: ReturnType<typeof gameEndPlayer>[]) {
       towerPowerPct: 100,
     },
     players,
+    playerCount: players.filter((player) => player.steamId > 0).length,
   };
 }
 

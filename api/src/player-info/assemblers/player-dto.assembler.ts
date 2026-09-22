@@ -68,7 +68,7 @@ export class PlayerDtoAssembler {
       dto.statsLifetime = statsLifetime ?? undefined;
     }
     if (include.includes('heroAwakening')) {
-      dto.awakenedHeroes = (heroAwakenings ?? []).map(({ heroName }) => ({ heroName }));
+      dto.awakenedHeroes = (heroAwakenings ?? []).map(({ heroName }) => heroName);
     }
 
     return dto;

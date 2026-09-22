@@ -65,6 +65,7 @@ function createGameEndDto(overrides: Partial<GameEndDto> = {}): GameEndDto {
     },
     winnerTeamId: 2,
     gameTimeMsec: 1_000,
+    playerCount: 1,
     players: [createPlayerDto()],
     ...overrides,
   };

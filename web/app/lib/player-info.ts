@@ -21,10 +21,6 @@ export interface StatsLifetime {
   totalGoldEarned: number;
 }
 
-export interface AwakenedHero {
-  heroName: string;
-}
-
 export interface CheckInPoints {
   dailyPoint: number;
   catchUpDays: number;
@@ -66,7 +62,7 @@ export interface PlayerInfo {
   member?: MemberInfo;
   statsLifetime?: StatsLifetime;
   properties?: PropertyItem[];
-  awakenedHeroes?: AwakenedHero[];
+  awakenedHeroes?: string[];
   checkIn?: CheckInStatus;
 }
 
