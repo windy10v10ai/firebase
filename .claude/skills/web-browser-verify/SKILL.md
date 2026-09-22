@@ -149,6 +149,7 @@ await page.route('http://localhost:3001/**', async (route) => {
 - **`next dev` 会往 `web/CLAUDE.md` 末尾追加 `<!-- BEGIN:nextjs-agent-rules -->` 一段**。提交前检查，只删这一段，不要 `git checkout --` 整个文件
 - **登录态和未登录态都要过**。头部在两种状态下不是同一套元素，只测一种会漏掉另一种才出现的布局问题。**俄语已登录的 1024 是头部最挤的组合**：电脑档登录后多出 ID 文字与退出按钮，再叠上俄语最长的导航文案，只测未登录会漏掉
 - **横排导航在窄屏是 `hidden md:flex`**，元素还在 DOM 里。按文案取元素时会命中不可见的那一个，定位要限定到具体区域
+- **驱动脚本一律写成 `.js`，不要写 `.cjs`**：`eslint-config-next` 只给 `.js/.jsx/.ts/.tsx` 注册 `import` 插件，`web/` 下多一个 `.cjs`（哪怕在被 `.gitignore` 排除的 `.browser-verify/` 里）会让 `npm run lint` 整个挂掉，报的是「找不到 import 插件」这种与文件无关的配置错，很难联想到是临时脚本引起的
 
 ## 把 PR 截图交给子代理
 
