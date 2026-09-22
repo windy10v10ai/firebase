@@ -1,4 +1,4 @@
-import { Check, Play } from 'lucide-react';
+import { Check, Play, Triangle, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
@@ -7,24 +7,22 @@ import Section from '../components/Section';
 import LaunchDialogFigure from './LaunchDialogFigure';
 
 interface Cell {
-  ok: boolean;
+  mark: 'yes' | 'partial' | 'no';
   noteKey?: string;
 }
 
-const COMPARE_ROWS: { labelKey: string; offline: Cell; online: Cell }[] = [
+const COMPARE_ROWS: { labelKey: string; arcade: Cell; site: Cell }[] = [
   {
     labelKey: 'multiplayer',
-    offline: { ok: true },
-    online: { ok: false, noteKey: 'multiplayerOnline' },
+    arcade: { mark: 'yes' },
+    site: { mark: 'no', noteKey: 'multiplayerSite' },
   },
+  { labelKey: 'records', arcade: { mark: 'yes' }, site: { mark: 'yes' } },
   {
-    labelKey: 'latestData',
-    offline: { ok: false, noteKey: 'latestDataOffline' },
-    online: { ok: true },
+    labelKey: 'stable',
+    arcade: { mark: 'partial', noteKey: 'stableArcade' },
+    site: { mark: 'yes' },
   },
-  { labelKey: 'points', offline: { ok: false }, online: { ok: true } },
-  { labelKey: 'checkIn', offline: { ok: false }, online: { ok: true } },
-  { labelKey: 'refresh', offline: { ok: false }, online: { ok: true } },
 ];
 
 const CUSTOM_GAME_ID = '2307479570';
@@ -45,28 +43,30 @@ const launchCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID
 export default function LaunchPage() {
   const t = useTranslations('launch');
 
-  const modeName = (chunks: React.ReactNode) => (
-    <b className="font-medium text-heading">{chunks}</b>
-  );
-
   const wait = (chunks: React.ReactNode) => <b className="font-medium text-warning">{chunks}</b>;
 
   // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把模式列挤到折行
   const renderCell = (cell: Cell) => (
     <span className="inline-flex items-center gap-2 text-left">
-      {cell.ok ? (
+      {cell.mark === 'yes' ? (
         <Check
           className="size-[18px] shrink-0 text-success md:size-5"
           strokeWidth={2.5}
           aria-label={t('compare.yes')}
         />
-      ) : (
-        <span
-          className="shrink-0 text-lg leading-5 text-faint md:text-xl"
+      ) : cell.mark === 'no' ? (
+        <X
+          className="size-[18px] shrink-0 text-danger md:size-5"
+          strokeWidth={2.5}
           aria-label={t('compare.no')}
-        >
-          —
-        </span>
+        />
+      ) : (
+        // 偶尔连不上不算大问题，用正文色而不是警示色，免得玩家以为这条路不能走
+        <Triangle
+          className="size-4 shrink-0 text-content md:size-[18px]"
+          strokeWidth={2.5}
+          aria-label={t('compare.partial')}
+        />
       )}
       {cell.noteKey ? (
         <span className="hidden text-sm text-muted md:inline">{t(`compare.${cell.noteKey}`)}</span>
@@ -77,6 +77,56 @@ export default function LaunchPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="title-primary">{t('title')}</h1>
+
+      <Section title={t('compare.title')}>
+        <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
+          <table className="w-full table-fixed">
+            <thead>
+              <tr className="border-b border-line bg-panel-raised">
+                <th className="px-2 py-3 md:p-4" />
+                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
+                  <span className="block text-sm font-bold text-heading md:text-lg">
+                    {t('compare.arcade')}
+                  </span>
+                  <span className="mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5">
+                    {t('compare.arcadeHint')}
+                  </span>
+                </th>
+                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
+                  <span className="block text-sm font-bold text-heading md:text-lg">
+                    {t('compare.site')}
+                  </span>
+                  <span className="mt-1 inline-block rounded-full border border-line bg-panel-soft px-1.5 text-[10px] leading-4 font-normal text-muted md:px-2 md:text-xs md:leading-5">
+                    {t('compare.siteHint')}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_ROWS.map((row, index) => (
+                <tr
+                  key={row.labelKey}
+                  className={`border-b border-line last:border-b-0 ${
+                    index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'
+                  }`}
+                >
+                  <th
+                    scope="row"
+                    className="px-2 py-3 text-left align-middle text-[13px] leading-[19px] font-medium text-heading md:p-4 md:text-base md:leading-6"
+                  >
+                    {t(`compare.${row.labelKey}`)}
+                  </th>
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.arcade)}</td>
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.site)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-[13px] leading-[19px] text-muted md:text-sm md:leading-5">
+          {t('compare.noteOffline')}
+        </p>
+      </Section>
 
       <Section title={t('site.title')}>
         <p className="text-content text-pretty">
@@ -140,66 +190,6 @@ export default function LaunchPage() {
         <p className="mt-5 text-content text-pretty">
           <span className="font-medium text-heading">3.</span> {t.rich('dialogs.step3', { wait })}
         </p>
-      </Section>
-
-      <Section title={t('compare.title')}>
-        <div className="mb-5 space-y-2">
-          <p className="text-content">{t('compare.lead')}</p>
-          <p className="text-content text-pretty">
-            {t.rich('compare.leadOffline', { name: modeName })}
-          </p>
-          <p className="text-content text-pretty">
-            {t.rich('compare.leadOnline', { name: modeName })}
-          </p>
-        </div>
-        <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
-          <table className="w-full table-fixed">
-            <thead>
-              <tr className="border-b border-line bg-panel-raised">
-                <th className="px-2 py-3 md:p-4" />
-                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
-                  <span className="block text-sm font-bold text-heading md:text-lg">
-                    {t('compare.offline')}
-                  </span>
-                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
-                    {t('compare.offlineHint')}
-                  </span>
-                </th>
-                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
-                  <span className="block text-sm font-bold text-heading md:text-lg">
-                    {t('compare.online')}
-                  </span>
-                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
-                    {t('compare.onlineHint')}
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARE_ROWS.map((row, index) => (
-                <tr
-                  key={row.labelKey}
-                  className={`border-b border-line last:border-b-0 ${
-                    index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'
-                  }`}
-                >
-                  <th
-                    scope="row"
-                    className="px-2 py-3 text-left align-middle text-[13px] leading-[19px] font-medium text-heading md:p-4 md:text-base md:leading-6"
-                  >
-                    {t(`compare.${row.labelKey}`)}
-                  </th>
-                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.offline)}</td>
-                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.online)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 space-y-1.5 text-[13px] leading-[19px] text-muted md:text-sm md:leading-5">
-          <p>{t('compare.noteModes')}</p>
-          <p>{t('compare.noteTiming')}</p>
-        </div>
       </Section>
 
       <Section title={t('website.title')}>
