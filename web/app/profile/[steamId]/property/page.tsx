@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
-import LaunchNotice from '@/app/components/LaunchNotice';
 import { ApiError } from '@/app/lib/api';
 import {
   fetchPlayerProperties,
@@ -157,8 +156,6 @@ export default function PropertyPage() {
         <h1 className="title-primary">{t('title')}</h1>
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
-
-      <LaunchNotice subject="property" />
 
       <PointsCard
         steamId={steamId}

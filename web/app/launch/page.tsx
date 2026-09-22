@@ -11,20 +11,18 @@ interface Cell {
   noteKey?: string;
 }
 
-const COMPARE_ROWS: { labelKey: string; offline: Cell; online: Cell }[] = [
+const COMPARE_ROWS: { labelKey: string; arcade: Cell; site: Cell }[] = [
   {
     labelKey: 'multiplayer',
-    offline: { ok: true },
-    online: { ok: false, noteKey: 'multiplayerOnline' },
+    arcade: { ok: true },
+    site: { ok: false, noteKey: 'multiplayerSite' },
   },
+  { labelKey: 'records', arcade: { ok: true }, site: { ok: true } },
   {
-    labelKey: 'latestData',
-    offline: { ok: false, noteKey: 'latestDataOffline' },
-    online: { ok: true },
+    labelKey: 'stable',
+    arcade: { ok: false, noteKey: 'stableArcade' },
+    site: { ok: true },
   },
-  { labelKey: 'points', offline: { ok: false }, online: { ok: true } },
-  { labelKey: 'checkIn', offline: { ok: false }, online: { ok: true } },
-  { labelKey: 'refresh', offline: { ok: false }, online: { ok: true } },
 ];
 
 const CUSTOM_GAME_ID = '2307479570';
@@ -77,6 +75,65 @@ export default function LaunchPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="title-primary">{t('title')}</h1>
+
+      <Section title={t('compare.title')}>
+        <div className="mb-5 space-y-2">
+          <p className="text-content">{t('compare.lead')}</p>
+          <p className="text-content text-pretty">
+            {t.rich('compare.leadArcade', { name: modeName })}
+          </p>
+          <p className="text-content text-pretty">
+            {t.rich('compare.leadSite', { name: modeName })}
+          </p>
+        </div>
+        <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
+          <table className="w-full table-fixed">
+            <thead>
+              <tr className="border-b border-line bg-panel-raised">
+                <th className="px-2 py-3 md:p-4" />
+                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
+                  <span className="block text-sm font-bold text-heading md:text-lg">
+                    {t('compare.arcade')}
+                  </span>
+                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
+                    {t('compare.arcadeHint')}
+                  </span>
+                </th>
+                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
+                  <span className="block text-sm font-bold text-heading md:text-lg">
+                    {t('compare.site')}
+                  </span>
+                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
+                    {t('compare.siteHint')}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_ROWS.map((row, index) => (
+                <tr
+                  key={row.labelKey}
+                  className={`border-b border-line last:border-b-0 ${
+                    index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'
+                  }`}
+                >
+                  <th
+                    scope="row"
+                    className="px-2 py-3 text-left align-middle text-[13px] leading-[19px] font-medium text-heading md:p-4 md:text-base md:leading-6"
+                  >
+                    {t(`compare.${row.labelKey}`)}
+                  </th>
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.arcade)}</td>
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.site)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-[13px] leading-[19px] text-muted md:text-sm md:leading-5">
+          {t('compare.noteOffline')}
+        </p>
+      </Section>
 
       <Section title={t('site.title')}>
         <p className="text-content text-pretty">
@@ -140,66 +197,6 @@ export default function LaunchPage() {
         <p className="mt-5 text-content text-pretty">
           <span className="font-medium text-heading">3.</span> {t.rich('dialogs.step3', { wait })}
         </p>
-      </Section>
-
-      <Section title={t('compare.title')}>
-        <div className="mb-5 space-y-2">
-          <p className="text-content">{t('compare.lead')}</p>
-          <p className="text-content text-pretty">
-            {t.rich('compare.leadOffline', { name: modeName })}
-          </p>
-          <p className="text-content text-pretty">
-            {t.rich('compare.leadOnline', { name: modeName })}
-          </p>
-        </div>
-        <div className="w-full overflow-hidden rounded-[10px] border border-line bg-panel">
-          <table className="w-full table-fixed">
-            <thead>
-              <tr className="border-b border-line bg-panel-raised">
-                <th className="px-2 py-3 md:p-4" />
-                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
-                  <span className="block text-sm font-bold text-heading md:text-lg">
-                    {t('compare.offline')}
-                  </span>
-                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
-                    {t('compare.offlineHint')}
-                  </span>
-                </th>
-                <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
-                  <span className="block text-sm font-bold text-heading md:text-lg">
-                    {t('compare.online')}
-                  </span>
-                  <span className="block text-[10px] leading-[15px] font-normal text-muted md:text-[13px] md:leading-5">
-                    {t('compare.onlineHint')}
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARE_ROWS.map((row, index) => (
-                <tr
-                  key={row.labelKey}
-                  className={`border-b border-line last:border-b-0 ${
-                    index % 2 === 0 ? 'bg-panel' : 'bg-panel-soft'
-                  }`}
-                >
-                  <th
-                    scope="row"
-                    className="px-2 py-3 text-left align-middle text-[13px] leading-[19px] font-medium text-heading md:p-4 md:text-base md:leading-6"
-                  >
-                    {t(`compare.${row.labelKey}`)}
-                  </th>
-                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.offline)}</td>
-                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.online)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 space-y-1.5 text-[13px] leading-[19px] text-muted md:text-sm md:leading-5">
-          <p>{t('compare.noteModes')}</p>
-          <p>{t('compare.noteTiming')}</p>
-        </div>
       </Section>
 
       <Section title={t('website.title')}>
