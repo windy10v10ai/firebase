@@ -39,6 +39,7 @@ function buildGameEnd(players: GameEndPlayerDto[]): GameEndDto {
     },
     winnerTeamId: 2,
     gameTimeMsec: 1000,
+    playerCount: players.filter((player) => player.steamId > 0).length,
     players,
   } as GameEndDto;
 }

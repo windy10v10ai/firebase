@@ -149,10 +149,9 @@ export class GameEndDto extends EventBaseDto {
   players: GameEndPlayerDto[];
   @ApiProperty()
   countryCode?: string;
-  /** 全场真人数。代发请求每条只带一个玩家，凑不出全场人数，由客户端另带；未传时按 players 里的真人数算 */
-  @ApiProperty({ required: false })
-  @IsOptional()
+  /** 全场真人数。代发请求每条只带一个玩家，凑不出全场人数，只能由客户端另带 */
+  @ApiProperty()
   @IsInt()
   @Min(1)
-  playerCount?: number;
+  playerCount: number;
 }

@@ -77,6 +77,7 @@ describe('ProxyController (e2e)', () => {
       difficulty: 5,
       winnerTeamId: 2,
       gameTimeMsec: 900000,
+      playerCount: 1,
       gameOptions: {
         multiplierRadiant: 1,
         multiplierDire: 1,

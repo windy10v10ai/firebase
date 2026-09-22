@@ -132,6 +132,8 @@ function createGameEndPayload(options: GameEndPayloadOptions = {}) {
     version: 'v4.05',
     winnerTeamId: options.winnerTeamId ?? 2,
     players: (options.players ?? []).map(createGameEndPlayer),
+    // 空 players 只出现在这里的夹具里，真实报文至少有一个真人
+    playerCount: Math.max(1, (options.players ?? []).filter((player) => player.steamId > 0).length),
     gameTimeMsec: 900000,
     gameOptions: defaultGameOptions,
     difficulty: 5,
@@ -657,6 +659,7 @@ describe('PlayerController (e2e)', () => {
         matchId: '8000000001',
         version: 'v4.05',
         winnerTeamId: 2,
+        playerCount: 1,
         players: [
           {
             isDisconnected: false,
@@ -732,6 +735,7 @@ describe('PlayerController (e2e)', () => {
         matchId: '8000000001',
         version: 'v4.05',
         winnerTeamId: 2,
+        playerCount: 3,
         players: [
           {
             isDisconnected: false,

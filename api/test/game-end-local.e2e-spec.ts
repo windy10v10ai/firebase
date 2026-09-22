@@ -66,6 +66,7 @@ function createGameEndLocalPayload(options: GameEndLocalPayloadOptions) {
     version: 'v4.05',
     winnerTeamId: 2,
     players: options.players.map(createGameEndLocalPlayer),
+    playerCount: options.players.filter((player) => player.steamId > 0).length,
     gameTimeMsec: 900000,
     gameOptions: defaultGameOptions,
     difficulty: 5,
