@@ -32,15 +32,13 @@
 | 13 网站签到 | #1214 | 游戏内发不出请求，会员每日积分停发；新增签到接口把发放接过来，首页与个人主页各加一个入口，接口形状为勇士积分预留，见 [phase-13-check-in.md](phase-13-check-in.md) | 已完成 |
 | 5 GA4 | #1122 | 网页接入 gtag，与游戏共用媒体资源、各一条数据流；服务端事件补来源与加点，见 [phase-5-ga4.md](phase-5-ga4.md) | 已完成 |
 | 6 会员剩余 | #1123 | 积分、支付宝二维码购买；连带把支付宝、爱发电、Ko-fi 的回调地址改到 `api.windy10v10ai.com`，见 [api-entry](../api-entry/README.md) | 未开始 |
-| 14 每日任务与 30 天历史 | 无 | `/profile/<steamId>/daily-task`：今天的任务状态与 30 天历史；游廊的离线局受代发通道 4096 字符上限只能看 5 天，网站一律 30 天，见 [phase-14-daily-task.md](phase-14-daily-task.md) | 未开始 |
+| 14 每日任务与 30 天历史 | 无 | `/profile/<steamId>/daily-task`：今天的任务与刷新入口、30 天记录；网站一律 30 天，见 [phase-14-daily-task.md](phase-14-daily-task.md) | 已完成 |
 
 ### 后续依赖
 
 **勇士积分签到**另开批次，本批的接口已经落地，它不再有阻塞；要做的事见 [phase-13-check-in.md](phase-13-check-in.md) 的「后续事项」。
 
 剩下的 **6 会员剩余**不依赖别的批次，随时可以插队。
-
-**14 每日任务**卡在游戏侧：它依赖的 `GET /daily-task/{steamId}` 在 [game#2435](https://github.com/windy10v10ai/game/issues/2435) 的阶段 3.5，还没实现。整个页面只依赖这一条，接口一到位就能做。
 
 `/wiki/*` 的技能与物品页仍未排期，菜单项靠 `config/nav.ts` 里 `href` 为 `null` 隐藏着。
 

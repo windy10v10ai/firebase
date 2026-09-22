@@ -1,6 +1,6 @@
 'use client';
 
-import { CirclePlus, Sparkles } from 'lucide-react';
+import { CalendarCheck, CirclePlus, Sparkles } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -145,6 +145,14 @@ export default function ProfilePage() {
             )
           }
           href={playerPagePath(steamId, 'awaken')}
+        />
+        {/* 不给这张卡加标签：轮次要多发一次每日任务的请求，而那条 GET 会写库 */}
+        <FeatureEntryCard
+          tone="dailyTask"
+          Icon={CalendarCheck}
+          title={t('entries.dailyTask.title')}
+          description={t('entries.dailyTask.description')}
+          href={playerPagePath(steamId, 'daily-task')}
         />
       </div>
       <div className="lg:col-span-3">
