@@ -23,7 +23,7 @@ const player = {
   towerKills: 0,
 };
 
-const BASE = { matchId: '1', version: 'v1', difficulty: 0 };
+const BASE = { matchId: '1', version: 'v1', difficulty: 0, playerCount: 1 };
 
 function encode(value: unknown): string {
   return Buffer.from(JSON.stringify(value), 'utf8').toString('base64url');

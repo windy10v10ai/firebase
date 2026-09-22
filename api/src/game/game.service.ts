@@ -90,8 +90,7 @@ export class GameService {
   async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
     const players = gameEnd.players.filter((player) => player.steamId > 0);
     // 行为分只在组队局计算
-    // TODO: game 发布并保证必带 playerCount 后，去掉回退，统一用 gameEnd.playerCount 判定
-    const isParty = (gameEnd.playerCount ?? players.length) >= 2;
+    const isParty = gameEnd.playerCount >= 2;
 
     await Promise.all(
       players.map((player) =>
