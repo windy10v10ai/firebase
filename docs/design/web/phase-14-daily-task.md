@@ -28,4 +28,4 @@
 
 ## 后续事项
 
-- 任务池加英雄后要重跑 `npm run daily-task:heroes`，清单与图片才会跟上
+- 任务池加英雄后要重跑 `npm run heroes`，清单与图片才会跟上
