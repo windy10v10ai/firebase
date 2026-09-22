@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
-import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
@@ -41,7 +40,6 @@ export class PlayerInfoController {
     private readonly playerPropertyService: PlayerPropertyService,
     private readonly playerService: PlayerService,
     private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
-    private readonly localHostService: LocalHostService,
     private readonly membersService: MembersService,
   ) {}
 
@@ -71,32 +69,7 @@ export class PlayerInfoController {
     @CurrentServerType() serverType: SERVER_TYPE,
     @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<PlayerInfoDto> {
-    const isLocal = serverType === SERVER_TYPE.LOCAL;
-    if (isLocal) {
-      const withinLimit = await this.localHostService.checkMemberPointLimit(
-        dto.steamId,
-        dto.memberPoint,
-        origin,
-      );
-      // 客户端不管成功失败都会刷新玩家数据，碰到每日上限回报错只会换来一次重试
-      if (!withinLimit) {
-        return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
-      }
-    }
-
-    await this.playerService.useMemberPoint(dto, serverType);
-
-    // 扣分失败会先抛出，所以记账放在成功之后，失败不占额度
-    if (isLocal) {
-      await this.localHostService.recordMemberPointUsage(
-        dto.steamId,
-        dto.memberPoint,
-        dto.reason,
-        origin,
-      );
-    }
-
-    return this.playerInfoService.findPlayerInfoBySteamId(dto.steamId, []);
+    return this.playerInfoService.useMemberPoint(dto, serverType, origin);
   }
 
   @AllowWeb()

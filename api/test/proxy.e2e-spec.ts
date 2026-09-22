@@ -137,4 +137,74 @@ describe('ProxyController (e2e)', () => {
       expect(res.text).toContain('ERR:bad_request');
     });
   });
+
+  describe('玩家写入', () => {
+    const steamId = 310030004;
+    const targetSteamId = 310030005;
+    const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+    const send = (path: string, query: object) =>
+      request(app.getHttpServer())
+        .get(`/api/proxy/${path}`)
+        .query({ ...query, apiKey: localKey });
+
+    beforeAll(async () => {
+      await createPlayer(app, { steamId, memberPointTotal: 5000 });
+      await createPlayer(app, { steamId: targetSteamId, conductPoint: 100 });
+    });
+
+    it('player-setting-put 按 query 里的 steamId 写入并回传设置', async () => {
+      const res = await send('player-setting-put', {
+        requestId: 'p_4_1',
+        steamId,
+        body: encode({
+          isRememberAbilityKey: true,
+          activeAbilityKey: 'F',
+          activeAbilityQuickCast: true,
+        }),
+      });
+
+      expect(JSON.parse(decodeProxyTitle(res.text).data)).toMatchObject({
+        id: String(steamId),
+        activeAbilityKey: 'F',
+        activeAbilityQuickCast: true,
+      });
+    });
+
+    it('player-game-preset-put 写入按地图的预设', async () => {
+      const res = await send('player-game-preset-put', {
+        requestId: 'p_4_2',
+        steamId,
+        body: encode({ map: 'dota', remember: true, difficulty: 3 }),
+      });
+
+      expect(JSON.parse(decodeProxyTitle(res.text).data).gamePresetDota).toEqual({ difficulty: 3 });
+    });
+
+    it('player-member-points-use-post 扣分，且和原路由一样受本地限额约束', async () => {
+      const used = await send('player-member-points-use-post', {
+        requestId: 'p_4_3',
+        body: encode({ steamId, memberPoint: 10, reason: 'lottery' }),
+      });
+      const player = JSON.parse(decodeProxyTitle(used.text).data);
+      expect(player.useableMemberPoint).toBe(player.memberPointTotal - 10);
+
+      const overCap = await send('player-member-points-use-post', {
+        requestId: 'p_4_4',
+        body: encode({ steamId, memberPoint: 51, reason: 'lottery' }),
+      });
+      expect(overCap.text).toContain('ERR:bad_request');
+    });
+
+    it('player-conduct-post 给目标加行为分', async () => {
+      const res = await send('player-conduct-post', {
+        requestId: 'p_4_5',
+        body: encode({ fromSteamId: steamId, toSteamId: targetSteamId, type: 'commend' }),
+      });
+
+      expect(JSON.parse(decodeProxyTitle(res.text).data)).toMatchObject({
+        id: String(targetSteamId),
+        conductPoint: 102,
+      });
+    });
+  });
 });

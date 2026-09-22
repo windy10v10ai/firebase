@@ -31,7 +31,7 @@
 | 12 配色与控件 | 无 | 网站主色、功能色、品牌色与按钮体系，最终规范见 [docs/web/design-system.md](../../web/design-system.md)；取舍过程见 [phase-12-color-system.md](phase-12-color-system.md)、[phase-12-controls.md](phase-12-controls.md)（含登录等待、头部退出） | 已完成 |
 | 13 网站签到 | #1214 | 游戏内发不出请求，会员每日积分停发；新增签到接口把发放接过来，首页与个人主页各加一个入口，接口形状为勇士积分预留，见 [phase-13-check-in.md](phase-13-check-in.md) | 已完成 |
 | 5 GA4 | #1122 | 网页接入 gtag，与游戏共用媒体资源、各一条数据流；服务端事件补来源与加点，见 [phase-5-ga4.md](phase-5-ga4.md) | 已完成 |
-| 6 会员剩余 | #1123 | 积分、支付宝二维码购买；连带把支付宝、爱发电、Ko-fi 的回调地址改到 `api.windy10v10ai.com`，见 [api-entry](../api-entry/README.md) | 未开始 |
+| 6 会员剩余 | #1123 | 积分、支付宝二维码购买；连带把支付宝的回调地址改到 `api.windy10v10ai.com`，见 [api-entry](../api-entry/README.md) | 未开始 |
 | 14 每日任务与 30 天历史 | 无 | `/profile/<steamId>/daily-task`：今天的任务与刷新入口、30 天记录；网站一律 30 天，见 [phase-14-daily-task.md](phase-14-daily-task.md) | 已完成 |
 | 16 排行榜 | 无 | `/leaderboard`：勇士积分前 500 名与「我的排名」，首页、菜单、个人主页各一个入口；game 侧的排行榜删除，见 [phase-16-leaderboard.md](phase-16-leaderboard.md) | 已完成 |
 

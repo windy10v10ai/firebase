@@ -22,8 +22,7 @@
 
 ## 后续事项
 
-三个收款平台的回调仍在原来的域名上，搬迁交给[批次 6 会员剩余](../web/README.md)——那个批次本来就要下真实订单，回调通不通当场能验，不必为验证单独下单。
+爱发电与 Ko-fi 的回调已经搬到 `api.windy10v10ai.com`，支付宝那条还在 `windy10v10ai.com`，搬迁交给[批次 6 会员剩余](../web/README.md)——那个批次本来就要下真实订单，回调通不通当场能验，不必为验证单独下单。
 
 - **支付宝**从 `windy10v10ai.com` 改到 `api.windy10v10ai.com`：先确认 notify URL 是支付宝控制台的应用网关生效还是请求参数生效，再改 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL` 与控制台（沙箱、生产各一处）。`docs/design/alipay-payment/README.md` 里「代码里不再读取 `ALIPAY_NOTIFY_URL`」与代码矛盾，一并修掉
-- **爱发电与 Ko-fi** 从 `windy10v10ai.web.app` 改到 `api.windy10v10ai.com`：两个平台的控制台各改一处 webhook 地址。它们现在的路更短，爱发电还有每 30 分钟的对账兜底，可以排在支付宝之后
 - **支付宝回调没有任何兜底**：`getOrderStatus` 只读本地订单状态，定时对账只覆盖爱发电。回调丢了就是玩家付钱不到账且无告警，补兜底另开

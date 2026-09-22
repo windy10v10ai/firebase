@@ -19,6 +19,9 @@ function createController(services: { gameService?: object; dailyTaskService?: o
     {} as never,
     {} as never,
     (services.dailyTaskService ?? {}) as never,
+    {} as never,
+    {} as never,
+    {} as never,
   );
 }
 
