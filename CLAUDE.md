@@ -125,7 +125,7 @@
 | 设计文档（brainstorming 产出的 spec，某次批次/功能的具体设计） | `docs/design/<主题>/<阶段>.md` | 是 |
 | 实施计划（writing-plans 产出的 plan） | `docs/superpowers/plans/YYYY-MM-DD-<名字>.md` | 否，`.gitignore` 已覆盖 `docs/superpowers/` |
 
-- `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`sql-migration`
+- `<主题>`：kebab-case，一个长期方向一个目录，如 `local-host`、`web`、`player-stats-recent`
 - `<阶段>`：该主题下的阶段或子步骤，如 `phase-1-backend.md`
 
 框架性文档写**外部设计与架构**：玩家看到什么、各部分怎么搭、为什么这样定、放弃了什么。写代码时照着做的约束（「做 X，不做 Y」）写进对应目录的 `CLAUDE.md`，只写规约本身并链接回框架性文档里的理由，不在两边各写一份。判断一句话放哪：违反它是「这次改动做错了」，进 `CLAUDE.md`；是「系统的结构变了」，进框架性文档。

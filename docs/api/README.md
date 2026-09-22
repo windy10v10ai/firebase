@@ -1,6 +1,6 @@
 # API 架构
 
-API 是一个 NestJS 应用，部署成单个 Cloud Functions 函数 `client`（asia-northeast1）。本文只写对外的形状：谁从哪个域名进来、API 自己往外调什么。开发命令、测试与代码规约见 [api/CLAUDE.md](../../api/CLAUDE.md)。
+API 是一个 NestJS 应用，部署成单个 Cloud Functions 函数 `client`（asia-northeast1）。本文只写对外的形状：谁从哪个域名进来、API 自己往外调什么，以及计费与延迟上绕不开的约束。开发命令、测试与代码规约见 [api/CLAUDE.md](../../api/CLAUDE.md)。
 
 ## 对外入口
 
@@ -52,3 +52,12 @@ API 自己往外调的第三方服务：
 - **结算按玩家拆成自包含请求**：网址装不下整场数据，一局 N 个真人就是 N 条请求，每条 `players` 恰好一人，服务端无状态、不按 `matchId` 去重。限额与冷却照常逐人生效，是本地主机结算唯一的防线，所以不绕开 `LocalHostService.recordGameEnd`
 - **代发结算只发按玩家的 GA4 事件**（`gameEndPlayerBot`），不发整场的 `gameEndMatch`：它一个事件装着全场数据，单玩家请求凑不齐，接受断供。单玩家请求凑不出全场人数，由客户端在报文里另带 `playerCount`，`player_count` 与行为分的组队判定（`isParty`）都优先读它，未传时按报文里的真人数算。这条路径没有机器人条目，是已知偏差。限额记录里的 `ipActivity` 记的是代发玩家的 IP，同一局所有玩家会是同一个值
 - **代理路由不是原路由的转发**：字段集与错误语义都可以不同，如 `/proxy/player-info` 查无此人返回空对象而不是 404。名字表达的是取哪条原路由的数据，改原路由不会自动改到它
+
+## 成本与延迟
+
+函数跑在 Cloud Run 上，计费方式是**「分配的 vCPU × 请求全时长」**，不看 CPU 实际利用率，等 I/O 的时间照样计费。这条决定了下面几件事。
+
+- **逐玩家的操作一律并发**。Firestore 一次往返 30–80 ms，十个玩家串行就是 800 ms，其中 CPU 真正在干活的不到 10 ms，剩下全是花钱买来的等待。`Promise.all` 把它压到一次往返的时间，同一个接口的 CPU 计费降一个数量级
+- **慢查询不能放进请求路径**。BigQuery 冷查询要 1–3 秒，同步调一次，这个请求的 CPU 计费就是普通 Firestore 请求的二十倍。分析类查询走 Cloud Scheduler 加 BigQuery Scheduled Query 预聚合，结果写回 Firestore，接口只读 Firestore
+- **Firestore 没有服务端 GROUP BY**，聚合只能把文档全拉到内存里算，读次数随数据量线性涨。需要真聚合的场景同样走预聚合，不要留全表扫描的接口
+- **不要调 `cpu` 与 `concurrency`**。`concurrency > 1` 要求 `cpu ≥ 1`；把 `cpu` 降到 1 以下会强制 `concurrency = 1`，I/O 密集场景下反而更贵。`api/index.ts` 用的是默认值（1 vCPU、并发 80），多个等 I/O 的请求共享同一个实例的计费，对这类负载就是最优解
