@@ -63,6 +63,20 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 改动涉及加载过程时，浏览器验证要量 CLS：Playwright 里用 `PerformanceObserver` 收 `layout-shift`，首屏到数据加载完应接近 0；再用禁用 JS 的 context 打开，确认首帧 HTML 已经是最终结构。
 
+## 多语言
+
+理由见 [docs/web/README.md](../docs/web/README.md) 第 4 节「多语言」。
+
+- **网站标准支持中文、英文、俄语三种语言**：新增或改动界面文案时，`messages/zh.json`、`en.json`、`ru.json` 在同一个 PR 里一起改，三份的 key 保持一致。回落英文只用于接入一种新语言的过渡期，不是日常新增文案少写一种语言的理由
+- **语言清单只写在 `i18n/locales.ts`**：代码、单字标记、母语名在同一处，新增语言改这一个数组，探测、cookie 校验、切换列表跟着变
+- **新语言可以只译一部分**，`messages/<locale>.json` 缺的 key 由 `i18n/messages.ts` 合并英文补上；**`messages/en.json` 必须齐全**，它是兜底的那一份，缺 key 就没有东西可回落
+- **组件里取语言用 `useLocale()`，cookie 名用 `LOCALE_COOKIE`**，不写字面量
+- **语言控件不得超过 44px 宽**，上限的来历见 [phase-2g-header-layout.md](../docs/design/web/phase-2g-header-layout.md)
+- **横排导航加项前先确认放得下**：768 最多四项，让位的项在 `config/nav.ts` 标 `desktopOnly`；新增语言要量 1024 已登录这一档，放不下六项就在 `i18n/locales.ts` 给它标 `compactNav`
+- **俄文译法先查 game 仓库的 `game/resource/addon_russian.txt`**，游戏里已有的说法照搬；游戏俄文里保持英文的专有名词（Battle Points、Member Points、Battle Level、Member Level）网站也不译
+- **俄文里带数量的句子用 ICU plural 写全 `one` / `few` / `many` / `other`**，英文原文没有 plural 也一样；传入的参数必须是数字，不能是 `toLocaleString()` 之后的字符串
+- **浏览器验证与 PR 截图三种语言都过**，不只是改了文案才过：缺 key 不会让页面崩，只在 console 的 `MISSING_MESSAGE` 里看得到；俄语文案最长，布局改动最容易在俄语上撑破
+
 ## 断点
 
 只用 `md:`（768）与 `lg:`（1024），不写 `sm:`、`xl:`、`2xl:`。三档各呈现什么、为什么这样分见 [docs/web/README.md](../docs/web/README.md) 第 4 节「屏幕档位」。
@@ -156,10 +170,10 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 |---|---|---|
 | 375 | 手机主流机型 | 头部元素是否接触或折行；表单能否完整填写并提交 |
 | 768 | 平板竖屏，也是头部由汉堡切回横排后最挤的一档 | 横排头部放不放得下；两列卡片与表单分栏有没有被挤压 |
-| 1024 | 电脑档起点，`lg:` 刚生效 | 三列卡片里的按钮文字是否溢出；头部 ID 文字与横排导航放不放得下 |
+| 1024 | 电脑档起点，`lg:` 刚生效 | 三列卡片里的按钮文字是否溢出；头部 ID 文字与横排导航放不放得下，俄语已登录最挤 |
 | 1280 | PC | 内容区居中与留白是否正常；与改动前是否一致 |
 
-每档确认三件事：无横向滚动、无元素超出视口、头部元素互不接触。用 `resize_window` 切宽度，用 `javascript_tool` 量 `document.documentElement.scrollWidth > innerWidth` 与元素的 `getBoundingClientRect()`，不要只靠肉眼看截图。
+每档中、英、俄三种语言都过，确认三件事：无横向滚动、无元素超出视口、头部元素互不接触。俄语文案最长，中英文放得下的按钮、卡片标题、横排导航，俄语可能撑破。用 `resize_window` 切宽度，用 `javascript_tool` 量 `document.documentElement.scrollWidth > innerWidth` 与元素的 `getBoundingClientRect()`，不要只靠肉眼看截图。
 
 **更宽的分辨率不用单独跑。** 外框在 1280 封顶（`max-w-7xl`），1280 以上只增加两侧留白，不会让任何元素被迫收缩，布局风险随宽度单调下降。
 
@@ -171,7 +185,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 「这个 PR 本来就不打算改外观」尤其不是免拍的理由：升级依赖、换构建器、改公共组件都可能带出非预期的差异，那种情况最需要留图。
 
-**拍哪些**：每个被这个 PR 碰到的页面，各拍一次「验证宽度」里的 375 与 1280。
+**拍哪些**：每个被这个 PR 碰到的页面，375 与 1280 两档 × 中、英、俄三种语言。一种语言有文案、另一种缺 key 的情况从截图上看不出来，几组图摆在一起才拦得住；俄语最长，布局问题多半先出在它身上。
 
 **前后没有差异时**：无头 Chrome 用同一组参数拍出来的图，页面没变就是逐字节相同的 PNG。`md5 -q` 比一下，相同就只贴一份图，把 md5 写进正文说明另一份一样——这比自算的哈希更有说服力，因为读者可以自己重拍一张对。
 
@@ -191,7 +205,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - `--virtual-time-budget=5000`：激活表单在 React 副作用跑完前渲染的是 `null`，截早了拍到空白页
 - `--hide-scrollbars`：否则窄屏图里多一条滚动条
 
-前后两张须使用同一组 `--window-size`，并且同一条命令、同一个 Chrome profile——无头 Chrome 的 `Accept-Language` 与浏览器里的不同，会拍出另一种语言的页面，只要前后一致就不影响对比。
+三种语言分三次拍，加 `--accept-lang=zh-CN` / `en-US` / `ru-RU` 指定；不加时无头 Chrome 的 `Accept-Language` 与浏览器里的不同，会拍出另一种语言的页面。前后两张须使用同一组 `--window-size` 与 `--accept-lang`，同一条命令、同一个 Chrome profile。用 Playwright 拍时按 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 第 8 步写 `NEXT_LOCALE` cookie。
 
 ### 「改动前」怎么来
 
@@ -237,5 +251,3 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 图片用 `<img src="..." width="...">` 控制宽度，`![]()` 语法无法限制尺寸。
 
 **拍图这一步可以派给子代理**，前提与指令写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「把 PR 截图交给子代理」。验收仍归主会话。
-
-**改动碰到界面文案时，中英文各拍一组。**一种语言有文案、另一种缺 key 的情况从截图上看不出来，两组图摆在一起才拦得住。

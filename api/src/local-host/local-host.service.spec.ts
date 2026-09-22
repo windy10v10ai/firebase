@@ -134,7 +134,7 @@ describe('LocalHostService', () => {
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
   });
 
-  it('20 分钟内重复结算（不同 matchId）拒绝', async () => {
+  it('冷却窗口内重复结算（不同 matchId）拒绝', async () => {
     const { service, playerService } = createService();
 
     await service.recordGameEnd(createGameEndDto({ matchId: 'match-1' }));

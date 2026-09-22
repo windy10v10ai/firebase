@@ -13,12 +13,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/app/lib/auth';
 import { EXTERNAL_LINKS } from '@/config/links';
 import { SITE_NAV_ITEMS } from '@/config/nav';
+import { LOCALES } from '@/i18n/locales';
 
 import AuthStatus from './AuthStatus';
 import GithubIcon from './GithubIcon';
@@ -45,6 +46,9 @@ const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: strin
 export default function Header() {
   const t = useTranslations('navigation');
   const tAuth = useTranslations('auth');
+  const locale = useLocale();
+  const compactNav = LOCALES.some((entry) => entry.code === locale && 'compactNav' in entry);
+  const desktopOnlyClass = compactNav ? ' hidden' : ' hidden lg:inline';
   const auth = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -110,7 +114,7 @@ export default function Header() {
                   key={item.key}
                   href={item.href}
                   aria-current={isCurrent(item.href) ? 'page' : undefined}
-                  className="nav-top"
+                  className={`nav-top${'desktopOnly' in item ? desktopOnlyClass : ''}`}
                 >
                   {t(item.shortLabelKey)}
                 </Link>
