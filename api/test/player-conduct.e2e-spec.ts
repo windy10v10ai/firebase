@@ -103,9 +103,10 @@ describe('PlayerConduct (e2e)', () => {
 
   it('发起人不存在 → 404', async () => {
     mockDate('2026-05-01T00:00:00.000Z');
-    const to = 200000102;
+    const to = 299999902;
     await createPlayer(app, { steamId: to, conductPoint: 100 });
-    const result = await conduct(app, 200000101, to, ConductType.Commend);
+    // 全部 e2e 共用一个模拟器，发起人必须取任何用例都不会建档的号，否则先跑的用例会把它建出来
+    const result = await conduct(app, 299999901, to, ConductType.Commend);
     expect(result.status).toEqual(404);
   });
 
