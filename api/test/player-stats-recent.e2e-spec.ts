@@ -15,6 +15,7 @@ function createGameEndPayload(steamId: number, matchId: string) {
     difficulty: 3,
     winnerTeamId: 2,
     gameTimeMsec: 1_800_000,
+    playerCount: 1,
     gameOptions: {
       multiplierRadiant: 1,
       multiplierDire: 2,
