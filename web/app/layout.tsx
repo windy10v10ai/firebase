@@ -13,6 +13,7 @@ import {
   parsePlayerProfileHint,
   parsePlayerUid,
 } from './lib/auth-hint';
+import { SITE_NAME, TITLE_TEMPLATE } from './lib/page-title';
 
 import './globals.css';
 
@@ -37,7 +38,7 @@ const notoSansSC = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: 'Windy10v10AI',
+  title: { default: SITE_NAME, template: TITLE_TEMPLATE },
   description: 'DOTA2 10v10 AI custom by windy',
   icons: {
     icon: '/favicon.webp',
