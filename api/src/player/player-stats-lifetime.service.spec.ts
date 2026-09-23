@@ -30,6 +30,8 @@ describe('PlayerStatsLifetimeService', () => {
       damageTaken: 1000,
       healing: 0,
       towerKills: 1,
+      stuns: 12,
+      roshanKills: 1,
       ...overrides,
     }) as GameEndPlayerDto;
 
@@ -65,6 +67,8 @@ describe('PlayerStatsLifetimeService', () => {
       healing: 10,
       towerKills: 10,
       totalGoldEarned: 10,
+      stuns: 10,
+      roshanKills: 10,
       updatedAt: new Date(),
     } as PlayerStatsLifetime);
 
@@ -93,6 +97,8 @@ describe('PlayerStatsLifetimeService', () => {
       healing: 0,
       towerKills: 0,
       totalGoldEarned: 0,
+      stuns: 0,
+      roshanKills: 0,
       updatedAt: new Date(),
     } as PlayerStatsLifetime);
 
@@ -157,6 +163,8 @@ describe('PlayerStatsLifetimeService', () => {
       healing: 1,
       towerKills: 1,
       totalGoldEarned: 1,
+      stuns: 1,
+      roshanKills: 1,
       updatedAt: new Date(),
     } as PlayerStatsLifetime);
 

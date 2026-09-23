@@ -58,6 +58,8 @@ export class PlayerStatsLifetimeService {
         healing: 0,
         towerKills: 0,
         totalGoldEarned: 0,
+        stuns: 0,
+        roshanKills: 0,
         updatedAt: new Date(),
       };
       this.applyPlayerStats(created, player, steamId, context.matchId);

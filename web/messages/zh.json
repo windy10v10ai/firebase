@@ -368,7 +368,9 @@
       "heroDamage": "英雄伤害",
       "damageTaken": "承受伤害",
       "healing": "治疗",
-      "towerKills": "推塔数"
+      "towerKills": "推塔数",
+      "stuns": "眩晕",
+      "roshanKills": "肉山击杀"
     },
     "recent": {
       "title": "近期战绩",
@@ -402,7 +404,7 @@
         "items": "物品",
         "abilities": "抽选技能"
       },
-      "stuns": "眩晕（秒）",
+      "stuns": "眩晕",
       "roshanKills": "肉山击杀",
       "strength": "力量",
       "agility": "敏捷",

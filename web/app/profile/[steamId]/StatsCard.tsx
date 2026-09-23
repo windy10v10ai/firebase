@@ -1,6 +1,6 @@
 'use client';
 
-import { Axe, Ghost, Handshake, Swords, TowerControl } from 'lucide-react';
+import { Axe, Ghost, Handshake, Skull, Swords, TowerControl, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import InfoPopover from '@/app/components/InfoPopover';
@@ -23,6 +23,8 @@ const LIFETIME_KEYS = [
   'damageTaken',
   'healing',
   'towerKills',
+  'stuns',
+  'roshanKills',
 ] as const satisfies readonly (keyof StatsLifetime)[];
 
 /** 图标与「近期战绩」「每日任务」共用同一个概念对同一个图标，不按卡各挑各的 */
@@ -39,6 +41,8 @@ const LIFETIME_ICON: Record<
   damageTaken: { kind: 'dota', src: GAME_ICON.damageTaken },
   healing: { kind: 'dota', src: GAME_ICON.healing },
   towerKills: { kind: 'lucide', Icon: TowerControl },
+  stuns: { kind: 'lucide', Icon: Zap },
+  roshanKills: { kind: 'lucide', Icon: Skull },
 };
 
 /** 击杀绿、死亡红，与近期战绩 K/D/A 同一套固定色 */
@@ -158,7 +162,9 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
                 {t(key)}
               </>
             ),
-            value: info ? (info.statsLifetime?.[key] ?? 0).toLocaleString() : null,
+            value: info
+              ? Math.round(info.statsLifetime?.[key] ?? 0).toLocaleString()
+              : null,
             valueClassName: LIFETIME_VALUE_CLASS[key],
           }))}
         />

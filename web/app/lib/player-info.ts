@@ -19,6 +19,8 @@ export interface StatsLifetime {
   healing: number;
   towerKills: number;
   totalGoldEarned: number;
+  stuns: number;
+  roshanKills: number;
 }
 
 export interface CheckInPoints {
