@@ -1,6 +1,9 @@
 import { useTranslations } from 'next-intl';
 
 import DataTable from '../../components/DataTable';
+import { pageTitle } from '../../lib/page-title';
+
+export const generateMetadata = pageTitle('disclosure', 'title');
 
 interface DisclosureItem {
   title: string;

@@ -3,8 +3,11 @@ import { useTranslations } from 'next-intl';
 
 import CopyIdButton from '../components/CopyIdButton';
 import Section from '../components/Section';
+import { pageTitle } from '../lib/page-title';
 
 import LaunchDialogFigure from './LaunchDialogFigure';
+
+export const generateMetadata = pageTitle('launch', 'title');
 
 interface Cell {
   mark: 'yes' | 'partial' | 'no';
