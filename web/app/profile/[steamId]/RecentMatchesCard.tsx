@@ -344,6 +344,7 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
               (match, index) => {
                 const open = openRow === index;
                 const groups = detailGroups(match);
+                const kda = `${match.kills} / ${match.deaths} / ${match.assists}`;
                 return (
                   <li key={index}>
                     <button
@@ -381,8 +382,8 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                         </span>
                         {/* 手机把结果交给色条，等级、时长与 K/D/A 挪到第二行 */}
                         <span className="text-[11px] tabular-nums text-faint md:hidden">
-                          {t('levelShort', { n: match.level })} · {match.kills} / {match.deaths} /{' '}
-                          {match.assists} · {formatDuration(match.durationSec)}
+                          {t('levelShort', { n: match.level })} · {kda} ·{' '}
+                          {formatDuration(match.durationSec)}
                         </span>
                       </span>
                       <span
