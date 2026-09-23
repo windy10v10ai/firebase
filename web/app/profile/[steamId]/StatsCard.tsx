@@ -1,13 +1,16 @@
 'use client';
 
+import { Axe, Ghost, Handshake, Swords, TowerControl } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import InfoPopover from '@/app/components/InfoPopover';
 import Skeleton from '@/app/components/ui/skeleton';
+import { GAME_ICON } from '@/config/game-icons';
 
 import StatList from './StatList';
 
 import type { PlayerInfo, StatsLifetime } from '@/app/lib/player-info';
+import type { LucideIcon } from 'lucide-react';
 
 
 const LIFETIME_KEYS = [
@@ -21,6 +24,38 @@ const LIFETIME_KEYS = [
   'healing',
   'towerKills',
 ] as const satisfies readonly (keyof StatsLifetime)[];
+
+/** 图标与「近期战绩」「每日任务」共用同一个概念对同一个图标，不按卡各挑各的 */
+const LIFETIME_ICON: Record<
+  (typeof LIFETIME_KEYS)[number],
+  { kind: 'dota'; src: string } | { kind: 'lucide'; Icon: LucideIcon }
+> = {
+  kills: { kind: 'lucide', Icon: Swords },
+  deaths: { kind: 'lucide', Icon: Ghost },
+  assists: { kind: 'lucide', Icon: Handshake },
+  lastHits: { kind: 'lucide', Icon: Axe },
+  totalGoldEarned: { kind: 'dota', src: GAME_ICON.gold },
+  heroDamage: { kind: 'dota', src: GAME_ICON.heroDamage },
+  damageTaken: { kind: 'dota', src: GAME_ICON.damageTaken },
+  healing: { kind: 'dota', src: GAME_ICON.healing },
+  towerKills: { kind: 'lucide', Icon: TowerControl },
+};
+
+/** 击杀绿、死亡红，与近期战绩 K/D/A 同一套固定色 */
+const LIFETIME_VALUE_CLASS: Partial<Record<(typeof LIFETIME_KEYS)[number], string>> = {
+  kills: 'text-success',
+  deaths: 'text-danger',
+};
+
+function LifetimeIcon({ statKey }: { statKey: (typeof LIFETIME_KEYS)[number] }) {
+  const entry = LIFETIME_ICON[statKey];
+  if (entry.kind === 'dota') {
+    // eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式
+    return <img src={entry.src} alt="" width={13} height={13} className="shrink-0 object-contain" />;
+  }
+  const Icon = entry.Icon;
+  return <Icon className="size-3.25 shrink-0" aria-hidden="true" />;
+}
 
 const CONDUCT_LOW_THRESHOLD = 60;
 const CONDUCT_WATCH_THRESHOLD = 80;
@@ -68,12 +103,15 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
       <h2 className="title-secondary">{t('title')}</h2>
       <dl className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
         {overview.map(({ label, value }) => (
-          <div key={label} className="box-pad rounded-[10px] border border-line bg-panel-soft">
+          <div
+            key={label}
+            className="flex items-center justify-between gap-3 box-pad rounded-[10px] border border-line bg-panel-soft"
+          >
             <dt className="text-sm text-muted">{label}</dt>
-            <dd className="mt-1 text-2xl font-bold tabular-nums text-heading">{value ?? <Skeleton />}</dd>
+            <dd className="text-2xl font-bold tabular-nums text-heading">{value ?? <Skeleton />}</dd>
           </div>
         ))}
-        <div className="box-pad rounded-[10px] border border-line bg-panel-soft">
+        <div className="flex items-center justify-between gap-3 box-pad rounded-[10px] border border-line bg-panel-soft">
           <dt className="flex items-center gap-1.5 text-sm text-muted">
             {t('conduct')}
             <InfoPopover label={t('conductInfo.ariaLabel')}>
@@ -103,7 +141,7 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
             </InfoPopover>
           </dt>
           <dd
-            className={`mt-1 text-2xl font-bold tabular-nums ${info ? (conductColorClass(info.conductPoint) ?? 'text-heading') : 'text-heading'}`}
+            className={`text-2xl font-bold tabular-nums ${info ? (conductColorClass(info.conductPoint) ?? 'text-heading') : 'text-heading'}`}
           >
             {info ? String(info.conductPoint) : <Skeleton />}
           </dd>
@@ -113,8 +151,15 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
         <h3 className="text-sm font-medium text-muted">{t('lifetime')}</h3>
         <StatList
           items={LIFETIME_KEYS.map((key) => ({
-            label: t(key),
+            key,
+            label: (
+              <>
+                <LifetimeIcon statKey={key} />
+                {t(key)}
+              </>
+            ),
             value: info ? (info.statsLifetime?.[key] ?? 0).toLocaleString() : null,
+            valueClassName: LIFETIME_VALUE_CLASS[key],
           }))}
         />
       </div>
