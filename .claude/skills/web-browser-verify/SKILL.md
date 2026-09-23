@@ -153,9 +153,9 @@ await page.route('http://localhost:3001/**', async (route) => {
 
 ## 把 PR 截图交给子代理
 
-拍 PR 截图（起基线、跑脚本、传 `assets` 分支、查链接）是机械劳动，可以派一个 sonnet 子代理去做，主会话省下的上下文用来看图和改文案。派之前主会话要先做完这两件事，否则子代理得自己摸索，反而更慢更容易出错：
+拍 PR 截图（跑脚本、传 `assets` 分支、查链接，要前后对比时还有起基线）是机械劳动，可以派一个 sonnet 子代理去做，主会话省下的上下文用来看图和改文案。派之前主会话要先做完这两件事，否则子代理得自己摸索，反而更慢更容易出错：
 
-- 本分支的服务、模拟器、测试数据、custom token 都就绪，基线目录也已经 `npm ci` 过，子代理只需要起基线那一个 server
+- 本分支的服务、模拟器、测试数据、custom token 都就绪；要前后对比时基线目录也已经 `npm ci` 过，子代理只需要起基线那一个 server
 - 驱动脚本已经在本分支跑通一遍，子代理只改输出目录
 
 指令里要写死这几条，不要让它自己发挥：
@@ -163,7 +163,7 @@ await page.route('http://localhost:3001/**', async (route) => {
 - **哪些进程不许碰**：已经跑着的 dev server、API、模拟器一律不重启不 kill，也不许再跑 `npm run start`（会撞端口，`run-p` 连带把兄弟进程杀掉）
 - **只在 `assets` 的 worktree 里 commit**，不许在主检出 commit 或切分支，推完把 worktree 删掉
 - **图片路径带 PR 编号和版本号**，重拍换新版本目录，理由见 [web/CLAUDE.md](../../../web/CLAUDE.md) 的「PR 截图」
-- **中、英、俄三种语言都拍**，文件名带语言（`before-ru-home-375.png`），语言用 `NEXT_LOCALE` cookie 指定
+- **中、英、俄三种语言都拍**，文件名带语言（`ru-home-375.png`，前后对比时加 `before-` / `after-` 前缀），语言用 `NEXT_LOCALE` cookie 指定
 - **等长任务用前台 Bash 加大 timeout**（`timeout: 900000`），不要 `run_in_background`。子代理把等待丢到后台后会直接结束这一轮，要主会话再叫醒它，一来一回比直接等还慢
 
 验收归主会话：数文件个数、抽查几条 raw 链接的状态码、挑一两张图看内容对不对。**刚推完的 raw 链接可能 404**，那是 CDN 缓存，隔一会儿重试，不要当成漏传。
