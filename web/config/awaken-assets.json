@@ -1,5 +1,6 @@
 {
   "art": {
+    "npc_dota_hero_bounty_hunter": "bounty_hunter.a8cac8de.webp",
     "npc_dota_hero_nyx_assassin": "nyx_assassin.29612b0f.webp",
     "npc_dota_hero_beastmaster": "beastmaster.32266deb.webp",
     "npc_dota_hero_earthshaker": "earthshaker.60372c69.webp",
@@ -40,6 +41,7 @@
     "npc_dota_hero_pudge": "pudge.f0968078.webp"
   },
   "icons": {
+    "bounty_hunter_track": "bounty_hunter_track.ee84d8d3.webp",
     "nyx_assassin_burrow": "nyx_assassin_burrow.a289b3f2.webp",
     "beastmaster_wild_axes": "beastmaster_wild_axes.b094b423.webp",
     "earthshaker_aftershock": "earthshaker_aftershock.5751a199.webp",

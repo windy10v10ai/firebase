@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "f9a9d9096f649add3e3733fbf5b7bb78d51b60d7",
+  gameCommit: "819b3a74902bb4493492de10059375242e10d312",
   dotaVersion: "7.41",
 } as const;
 
@@ -82,6 +82,17 @@ export interface AwakenHero {
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
 export const AWAKEN_HEROES: AwakenHero[] = [
   {
+    heroName: "npc_dota_hero_bounty_hunter",
+    abilityName: "bounty_hunter_track_awaken",
+    freeTrial: true,
+    art: "bounty_hunter.a8cac8de.webp",
+    icon: "bounty_hunter_track.ee84d8d3.webp",
+    name: { zh: "赏金猎人", en: "Bounty Hunter" },
+    title: { zh: "<font color='#d000ff'>追踪术 觉醒</font>", en: "<font color='#d000ff'>Track Awakened</font>" },
+    desc: { zh: "追踪一个敌方英雄，获得目标的真实视域，使目标受到的伤害增加，同时掌握目标当前携带的金钱数额。如果目标在被追踪期间死亡，赏金猎人和附近友方英雄都将获得若干金钱奖励。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内有敌方英雄时自动施放，优先追踪尚未被追踪的英雄。<br><font color='#d000ff'>觉醒强化：</font>追踪术施放后，对目标额外投出一枚当前等级的投掷飞镖。该飞镖无视施法距离、不触发冷却，消耗投掷飞镖的魔法值；未学习投掷飞镖或魔法不足时不投出。", en: "Tracks an enemy hero, granting True Sight of the target, increasing the damage they take and providing information on how much gold it is carrying. If the target dies, Bounty Hunter and nearby heroes collect a bonus bounty of gold.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, casts automatically whenever an enemy hero is within cast range, prioritizing heroes that are not yet tracked.<br><font color='#d000ff'>AWAKENED:</font> After Track is cast, Bounty Hunter also throws a Shuriken Toss of its current level at the target. This Shuriken ignores cast range and does not trigger its cooldown, but costs Shuriken Toss's mana. It is not thrown if Shuriken Toss is unlearned or mana is insufficient." },
+    ability: {"behavior":"autocast","targeting":"enemyHeroes","damageType":null,"piercesImmunity":"yes","dispellable":"no","values":[{"label":{"zh":"伤害加深：","en":"DAMAGE AMPLIFICATION:"},"levels":["8","12","16","20"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"自身金钱奖励：","en":"SELF BONUS GOLD:"},"levels":["80","160","240","320"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"友军金钱奖励：","en":"ALLIES BONUS GOLD:"},"levels":["80","160","240","320"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"持续时间：","en":"DURATION:"},"levels":["25"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["6","5","4","3"],"manaCost":["50"],"lore":null},
+  },
+  {
     heroName: "npc_dota_hero_nyx_assassin",
     abilityName: "special_bonus_unique_nyx_assassin_mobile_burrow_awaken",
     freeTrial: true,
@@ -150,7 +161,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: "npc_dota_hero_skywrath_mage",
     abilityName: "special_bonus_unique_skywrath_upgrade",
-    freeTrial: true,
+    freeTrial: false,
     art: "skywrath_mage.8939e556.webp",
     icon: "skywrath_mage_staff_of_the_scion.9b402db7.webp",
     name: { zh: "天怒法师", en: "Skywrath Mage" },
