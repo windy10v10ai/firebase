@@ -2,7 +2,6 @@ import { Body, Controller, Get, Header, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions/v2';
 
-import { LocalHostService } from '../local-host/local-host.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { Public } from '../util/auth/public.decorator';
@@ -19,10 +18,7 @@ import { QueryAlipayOrderDto } from './dto/query-alipay-order.dto';
 @ApiTags('Alipay')
 @Controller('alipay')
 export class AlipayController {
-  constructor(
-    private readonly alipayService: AlipayService,
-    private readonly localHostService: LocalHostService,
-  ) {}
+  constructor(private readonly alipayService: AlipayService) {}
 
   @AllowLocal()
   @Post('/order/create')
@@ -31,23 +27,7 @@ export class AlipayController {
     @CurrentServerType() serverType: SERVER_TYPE,
     @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<CreateAlipayOrderResponseDto> {
-    const isLocal = serverType === SERVER_TYPE.LOCAL;
-    if (isLocal) {
-      await this.localHostService.assertOrderWithinLimit(dto.steamId, origin);
-    }
-
-    logger.info('Alipay create order', {
-      steamId: dto.steamId,
-      productCode: dto.productCode,
-      serverType,
-    });
-    const response = await this.alipayService.createOrder(dto);
-
-    if (isLocal) {
-      await this.localHostService.recordOrder(dto.steamId, origin);
-    }
-
-    return response;
+    return this.alipayService.createOrder(dto, serverType, origin);
   }
 
   @AllowLocal()

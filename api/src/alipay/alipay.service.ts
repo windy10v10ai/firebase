@@ -7,6 +7,8 @@ import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.servic
 import { LocalHostService } from '../local-host/local-host.service';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
+import { ClientOrigin } from '../util/auth/client-origin.decorator';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { AlipayApiService } from './alipay.api.service';
 import {
@@ -39,7 +41,32 @@ export class AlipayService {
     private readonly localHostService: LocalHostService,
   ) {}
 
-  async createOrder(dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
+  /** 创建订单并返回收款二维码，本地主机来源先过每日下单次数限额。 */
+  async createOrder(
+    dto: CreateAlipayOrderDto,
+    serverType: SERVER_TYPE,
+    origin: ClientOrigin = {},
+  ): Promise<CreateAlipayOrderResponseDto> {
+    const isLocal = serverType === SERVER_TYPE.LOCAL;
+    if (isLocal) {
+      await this.localHostService.assertOrderWithinLimit(dto.steamId, origin);
+    }
+
+    logger.info('Alipay create order', {
+      steamId: dto.steamId,
+      productCode: dto.productCode,
+      serverType,
+    });
+    const response = await this.precreateOrder(dto);
+
+    if (isLocal) {
+      await this.localHostService.recordOrder(dto.steamId, origin);
+    }
+
+    return response;
+  }
+
+  private async precreateOrder(dto: CreateAlipayOrderDto): Promise<CreateAlipayOrderResponseDto> {
     const spec = ALIPAY_PRODUCT_TABLE[dto.productCode];
     if (!spec) {
       throw new BadRequestException(`Unknown productCode: ${dto.productCode}`);
