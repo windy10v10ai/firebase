@@ -72,6 +72,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **网站标准支持中文、英文、俄语三种语言**：新增或改动界面文案时，`messages/zh.json`、`en.json`、`ru.json` 在同一个 PR 里一起改，三份的 key 保持一致。回落英文只用于接入一种新语言的过渡期，不是日常新增文案少写一种语言的理由
 - **语言清单只写在 `i18n/locales.ts`**：代码、单字标记、母语名在同一处，新增语言改这一个数组，探测、cookie 校验、切换列表跟着变
 - **新语言可以只译一部分**，`messages/<locale>.json` 缺的 key 由 `i18n/messages.ts` 合并英文补上；**`messages/en.json` 必须齐全**，它是兜底的那一份，缺 key 就没有东西可回落
+- **新页面要设标签页标题**：页面名取自现有的 i18n key（通常是导航文案），用 `app/lib/page-title.ts` 的 `pageTitle(namespace, key)` 生成 `generateMetadata`，品牌后缀由模板拼接，不手写。客户端页面导不出 metadata，在同目录加一个只返回 `children` 的 `layout.tsx` 来挂。标题格式的理由见 [docs/web/README.md](../docs/web/README.md) 第 6 节
 - **组件里取语言用 `useLocale()`，cookie 名用 `LOCALE_COOKIE`**，不写字面量
 - **语言控件不得超过 44px 宽**，上限的来历见 [phase-2g-header-layout.md](../docs/design/web/phase-2g-header-layout.md)
 - **横排导航加项前先确认放得下**：768 最多四项，让位的项在 `config/nav.ts` 标 `desktopOnly`；新增语言要量 1024 已登录这一档，放不下六项就在 `i18n/locales.ts` 给它标 `compactNav`
@@ -112,6 +113,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 理由见 [docs/web/design-system.md](../docs/web/design-system.md)「可点击元素」。
 
+- **页头、页脚这类每页都有的站内 `Link` 写 `prefetch={false}`**，正文里的链接不用加。理由见 [docs/web/README.md](../docs/web/README.md) 第 4 节「渲染方式」
 - **能点的一律手型，靠 `globals.css` base 层的全局规则**，调用点不写 `cursor-pointer`。可点击的控件用 `<button>` 或 `<a>` / `Link`，不用 `<div onClick>`
 - **整张卡或整行是链接时，右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
 - **悬停描边随归属**：属于勇士的入口用 `hover:border-season-border`，属于会员的用 `hover:border-member-border`，其余用 `.card-hover`

@@ -14,6 +14,8 @@ export const PER_MATCH_MAX_DAMAGE_TAKEN = 100000000;
 export const PER_MATCH_MAX_HEALING = 100000000;
 export const PER_MATCH_MAX_TOWER_KILLS = 100;
 export const PER_MATCH_MAX_TOTAL_GOLD_EARNED = 100000000;
+export const PER_MATCH_MAX_STUNS = 10000;
+export const PER_MATCH_MAX_ROSHAN_KILLS = 100;
 
 export const STATS_LIFETIME_FIELDS = [
   'kills',
@@ -25,6 +27,8 @@ export const STATS_LIFETIME_FIELDS = [
   'healing',
   'towerKills',
   'totalGoldEarned',
+  'stuns',
+  'roshanKills',
 ] as const;
 
 export type StatsLifetimeField = (typeof STATS_LIFETIME_FIELDS)[number];
@@ -39,6 +43,8 @@ const FIELD_MAX_MAP: Record<StatsLifetimeField, number> = {
   healing: PER_MATCH_MAX_HEALING,
   towerKills: PER_MATCH_MAX_TOWER_KILLS,
   totalGoldEarned: PER_MATCH_MAX_TOTAL_GOLD_EARNED,
+  stuns: PER_MATCH_MAX_STUNS,
+  roshanKills: PER_MATCH_MAX_ROSHAN_KILLS,
 };
 
 export function shouldSkipStatsLifetimeForGameOptions(options?: GameEndGameOptionsDto): boolean {

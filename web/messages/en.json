@@ -372,7 +372,9 @@
       "heroDamage": "Hero Damage",
       "damageTaken": "Damage Taken",
       "healing": "Healing",
-      "towerKills": "Tower Kills"
+      "towerKills": "Tower Kills",
+      "stuns": "Stun Duration",
+      "roshanKills": "Roshan Kills"
     },
     "recent": {
       "title": "Recent Matches",
@@ -406,7 +408,7 @@
         "items": "Items",
         "abilities": "Drafted Abilities"
       },
-      "stuns": "Stun Duration (s)",
+      "stuns": "Stun Duration",
       "roshanKills": "Roshan Kills",
       "strength": "Strength",
       "agility": "Agility",

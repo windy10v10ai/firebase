@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Skull, TowerControl, Zap, type LucideIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -279,6 +279,14 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
     </>
   );
 
+  /** 没有手绘素材的概念用 lucide；与生涯数据、每日任务共用同一个概念对同一个图标 */
+  const withLucideIcon = (Icon: LucideIcon, text: string) => (
+    <>
+      <Icon className="size-3.25 shrink-0" aria-hidden="true" />
+      {text}
+    </>
+  );
+
   /** 列名缩写成 Слож.、LH 才放得下，全称收进提示里 */
   const headCell = (className: string, full: string, trigger: ReactNode) => (
     <InfoPopover label={full} compact className={className} trigger={trigger}>
@@ -306,7 +314,10 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
             label: withIcon(GAME_ICON.healing, tStats('healing')),
             value: match.healing.toLocaleString(locale),
           },
-          { label: t('stuns'), value: match.stuns.toFixed(1) },
+          {
+            label: withLucideIcon(Zap, t('stuns')),
+            value: Math.round(match.stuns).toLocaleString(locale),
+          },
         ],
       },
       {
@@ -317,8 +328,14 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
             label: withIcon(GAME_ICON.gold, tStats('totalGoldEarned')),
             value: match.totalGoldEarned.toLocaleString(locale),
           },
-          { label: tStats('towerKills'), value: match.towerKills.toLocaleString(locale) },
-          { label: t('roshanKills'), value: match.roshanKills.toLocaleString(locale) },
+          {
+            label: withLucideIcon(TowerControl, tStats('towerKills')),
+            value: match.towerKills.toLocaleString(locale),
+          },
+          {
+            label: withLucideIcon(Skull, t('roshanKills')),
+            value: match.roshanKills.toLocaleString(locale),
+          },
         ],
       },
     ];
