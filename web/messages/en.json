@@ -161,7 +161,7 @@
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",
       "stableArcade": "May occasionally fail",
-      "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded. The map updates two to three times a week.",
+      "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded.",
       "yes": "Yes",
       "no": "No",
       "partial": "Not always",

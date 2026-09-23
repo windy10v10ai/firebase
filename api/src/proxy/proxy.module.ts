@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AlipayModule } from '../alipay/alipay.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { DailyTaskModule } from '../daily-task/daily-task.module';
 import { GameModule } from '../game/game.module';
@@ -11,6 +12,7 @@ import { ProxyController } from './proxy.controller';
 
 @Module({
   imports: [
+    AlipayModule,
     AnalyticsModule,
     DailyTaskModule,
     GameModule,
