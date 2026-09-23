@@ -100,16 +100,24 @@ function readListed(file, pattern) {
   return [...text.matchAll(pattern)].map((m) => m[1]);
 }
 
+/** 逐字去掉尖括号及其间的内容：正则整段替换遇到嵌套或没配对的标签会留下半截 */
+function stripTags(raw) {
+  let out = '';
+  let inTag = false;
+  for (const ch of raw) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    else if (!inTag) out += ch;
+  }
+  return out.trim();
+}
+
 /** game 的本地化只收自定义与改名的条目，名字带颜色标签，去掉 */
 function readAddonNames(file) {
   const names = new Map();
   const text = fs.readFileSync(file, 'utf8');
   for (const m of text.matchAll(/"DOTA_Tooltip_ability_([a-z0-9_]+)"\s+"((?:[^"\\]|\\.)*)"/gi)) {
-    // 标签去完再清掉残留的尖括号：名字里本来就不会有，残留只可能来自没配对的标签
-    const label = m[2]
-      .replace(/<[^>]*>/g, '')
-      .replace(/[<>]/g, '')
-      .trim();
+    const label = stripTags(m[2]);
     if (label) names.set(m[1].toLowerCase(), label);
   }
   return names;
