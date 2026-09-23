@@ -1,0 +1,1442 @@
+{
+  "abaddon_borrowed_time": {
+    "icon": "abaddon_borrowed_time.b35a517f.webp",
+    "zh": "回光返照",
+    "en": "Borrowed Time",
+    "ru": "Borrowed Time"
+  },
+  "abaddon_frostmourne": {
+    "icon": "abaddon_frostmourne.3aecd503.webp",
+    "zh": "魔霭诅咒",
+    "en": "Curse of Avernus",
+    "ru": "Curse of Avernus"
+  },
+  "ability_charge_damage": {
+    "icon": "ability_charge_damage.c522ed06.webp",
+    "zh": "蝴蝶效应 · 青凝",
+    "en": "Butterfly Effect: Cyan",
+    "ru": null
+  },
+  "ability_fate_roulette": {
+    "icon": "ability_fate_roulette.d0fd5920.webp",
+    "zh": "命运轮盘",
+    "en": "Fate Roulette",
+    "ru": null
+  },
+  "ability_trigger_learned_skills": {
+    "icon": "ability_trigger_learned_skills.6d6de129.webp",
+    "zh": "蝴蝶效应 · 蓝武",
+    "en": "Butterfly Effect: Blue",
+    "ru": null
+  },
+  "ability_trigger_on_active": {
+    "icon": "ability_trigger_on_active.c22032fb.webp",
+    "zh": "蝴蝶效应 · 紫啸",
+    "en": "Butterfly Effect: Purple",
+    "ru": null
+  },
+  "ability_trigger_on_attacked": {
+    "icon": "ability_trigger_on_attacked.4c68fe23.webp",
+    "zh": "蝴蝶效应 · 金身",
+    "en": "Butterfly Effect: Gold",
+    "ru": null
+  },
+  "ability_trigger_on_cast": {
+    "icon": "ability_trigger_on_cast.a737420c.webp",
+    "zh": "蝴蝶效应 · 红魔",
+    "en": "Butterfly Effect: Red",
+    "ru": null
+  },
+  "ability_trigger_on_move": {
+    "icon": "ability_trigger_on_move.d2e088dd.webp",
+    "zh": "蝴蝶效应 · 橙影",
+    "en": "Butterfly Effect: Orange",
+    "ru": null
+  },
+  "ability_trigger_on_spell_reflect": {
+    "icon": "ability_trigger_on_spell_reflect.10166470.webp",
+    "zh": "蝴蝶效应 · 绿莲",
+    "en": "Butterfly Effect: Green",
+    "ru": null
+  },
+  "abyssal_underlord_atrophy_aura": {
+    "icon": "abyssal_underlord_atrophy_aura.49c297e1.webp",
+    "zh": "衰退光环",
+    "en": "Atrophy Aura",
+    "ru": "Atrophy Aura"
+  },
+  "abyssal_underlord_firestorm": {
+    "icon": "abyssal_underlord_firestorm.8aa131ee.webp",
+    "zh": "火焰风暴",
+    "en": "Firestorm",
+    "ru": "Firestorm"
+  },
+  "abyssal_underlord_firestorm2": {
+    "icon": null,
+    "zh": "火雨降临",
+    "en": "Firestorm Advent",
+    "ru": null
+  },
+  "abyssal_underlord_malice_aura": {
+    "icon": "abyssal_underlord_malice_aura.838ff1cc.webp",
+    "zh": "怨念光环",
+    "en": "Aura of Malice",
+    "ru": null
+  },
+  "alchemist_acid_spray": {
+    "icon": "alchemist_acid_spray.81a33831.webp",
+    "zh": "酸性喷雾",
+    "en": "Acid Spray",
+    "ru": "Acid Spray"
+  },
+  "alchemist_berserk_potion2": {
+    "icon": "alchemist_berserk_potion2.b04ce3c7.webp",
+    "zh": "狂暴药剂",
+    "en": "Berserk Potion",
+    "ru": null
+  },
+  "alchemist_chemical_rage": {
+    "icon": "alchemist_chemical_rage.e13316e7.webp",
+    "zh": "化学狂暴",
+    "en": "Chemical Rage",
+    "ru": "Chemical Rage"
+  },
+  "alchemist_goblins_greed2": {
+    "icon": "alchemist_goblins_greed2.974c7d00.webp",
+    "zh": "贪魔的贪婪",
+    "en": "Greevil's Greed",
+    "ru": "Greevil's Greed"
+  },
+  "ancient_apparition_bone_chill2": {
+    "icon": "ancient_apparition_bone_chill2.8fd1cfa7.webp",
+    "zh": "刺骨严寒",
+    "en": "Bone Chill",
+    "ru": null
+  },
+  "ancient_apparition_chilling_touch": {
+    "icon": "ancient_apparition_chilling_touch.5d0c0063.webp",
+    "zh": "极寒之触",
+    "en": "Chilling Touch",
+    "ru": "Chilling Touch"
+  },
+  "ancient_apparition_freezing_aura": {
+    "icon": "ancient_apparition_freezing_aura.98528df8.webp",
+    "zh": "极寒光环",
+    "en": "Bonechill Aura",
+    "ru": "Freezing aura"
+  },
+  "ancient_apparition_frost_orb": {
+    "icon": "ancient_apparition_frost_orb.f42526a1.webp",
+    "zh": "冰霜法球",
+    "en": "Frost Orb",
+    "ru": "Frost orb"
+  },
+  "ancient_apparition_ice_vortex": {
+    "icon": "ancient_apparition_ice_vortex.63ca68d2.webp",
+    "zh": "冰霜漩涡",
+    "en": "Ice Vortex",
+    "ru": "Ice Vortex"
+  },
+  "antimage_blink": {
+    "icon": "antimage_blink.1d85dbfa.webp",
+    "zh": "闪烁",
+    "en": "Blink",
+    "ru": "Blink"
+  },
+  "antimage_counterspell": {
+    "icon": "antimage_counterspell.1152bd82.webp",
+    "zh": "法术反制",
+    "en": "Counterspell",
+    "ru": "Counterspell"
+  },
+  "antimage_mana_break": {
+    "icon": "antimage_mana_break.d57aa65c.webp",
+    "zh": "法力损毁",
+    "en": "Mana Break",
+    "ru": "Mana Break"
+  },
+  "arc_warden_scepter2": {
+    "icon": "arc_warden_scepter2.8a396f6a.webp",
+    "zh": "人工神符",
+    "en": "Rune Forge",
+    "ru": "Artificial Rune"
+  },
+  "axe_berserkers_call": {
+    "icon": "axe_berserkers_call.45de436c.webp",
+    "zh": "狂战士之吼",
+    "en": "Berserker's Call",
+    "ru": "Berserker's Call"
+  },
+  "axe_counter_helix": {
+    "icon": "axe_counter_helix.26d5ecea.webp",
+    "zh": "反击螺旋",
+    "en": "Counter Helix",
+    "ru": "Counter Helix"
+  },
+  "axe_culling_blade": {
+    "icon": "axe_culling_blade.bc856821.webp",
+    "zh": "淘汰之刃",
+    "en": "Culling Blade",
+    "ru": "Culling Blade"
+  },
+  "axe_one_man_army2": {
+    "icon": null,
+    "zh": "一人之军",
+    "en": "One Man Army",
+    "ru": "One Man Army"
+  },
+  "batrider_firefly": {
+    "icon": "batrider_firefly.0f8f6e8c.webp",
+    "zh": "火焰飞行",
+    "en": "Firefly",
+    "ru": "Firefly"
+  },
+  "batrider_flaming_lasso": {
+    "icon": "batrider_flaming_lasso.105038fd.webp",
+    "zh": "燃烧枷锁",
+    "en": "Flaming Lasso",
+    "ru": "Flaming Lasso"
+  },
+  "batrider_smoldering_resin2": {
+    "icon": "batrider_smoldering_resin2.f25ce5fa.webp",
+    "zh": "闷烧树脂",
+    "en": "Smoldering Resin",
+    "ru": "Smoldering Resin"
+  },
+  "black_drake_magic_amplification_aura": {
+    "icon": null,
+    "zh": "魔法增强光环",
+    "en": "Magic Amplification Aura",
+    "ru": "Magic Amplification Aura"
+  },
+  "bloodseeker_blood_mist2": {
+    "icon": "bloodseeker_blood_mist2.ffdd1423.webp",
+    "zh": "血雾",
+    "en": "Blood Mist",
+    "ru": "blood mist"
+  },
+  "bloodseeker_bloodrage": {
+    "icon": "bloodseeker_bloodrage.be40b0bf.webp",
+    "zh": "血怒",
+    "en": "Bloodrage",
+    "ru": "Bloodrage"
+  },
+  "bloodseeker_rupture": {
+    "icon": "bloodseeker_rupture.430b847f.webp",
+    "zh": "割裂",
+    "en": "Rupture",
+    "ru": "Rupture"
+  },
+  "bloodseeker_sanguivore": {
+    "icon": "bloodseeker_sanguivore.6cb20870.webp",
+    "zh": "食血动物",
+    "en": "Sanguivore",
+    "ru": "Sanguivore"
+  },
+  "bloodseeker_thirst": {
+    "icon": "bloodseeker_thirst.84bc83a6.webp",
+    "zh": "焦渴",
+    "en": "Thirst",
+    "ru": "Thirst"
+  },
+  "bounty_hunter_cutpurse2": {
+    "icon": "bounty_hunter_cutpurse2.92e824c8.webp",
+    "zh": "妙手空空",
+    "en": "Cutpurse",
+    "ru": "Cutpurse"
+  },
+  "bounty_hunter_jinada": {
+    "icon": "bounty_hunter_jinada.9542d8f4.webp",
+    "zh": "忍术",
+    "en": "Jinada",
+    "ru": "Jinada"
+  },
+  "bounty_hunter_track": {
+    "icon": "bounty_hunter_track.92e824c8.webp",
+    "zh": "追踪术",
+    "en": "Track",
+    "ru": "Track"
+  },
+  "bounty_hunter_wind_walk": {
+    "icon": "bounty_hunter_wind_walk.ddc56496.webp",
+    "zh": "暗影步",
+    "en": "Shadow Walk",
+    "ru": "Shadow Walk"
+  },
+  "brewmaster_drunken_boxing": {
+    "icon": "brewmaster_drunken_boxing.0f674247.webp",
+    "zh": "醉拳",
+    "en": "Drunken Boxing",
+    "ru": "Drunken Boxing"
+  },
+  "brewmaster_fire_phase": {
+    "icon": "brewmaster_fire_phase.fa218ed1.webp",
+    "zh": "永久相位",
+    "en": "Permanent Phase",
+    "ru": "Permanent Phase"
+  },
+  "brewmaster_primal_split_lua": {
+    "icon": "brewmaster_primal_split_lua.92b594ea.webp",
+    "zh": "元素分离·改",
+    "en": "Primal Split MK2",
+    "ru": null
+  },
+  "centaur_double_edge": {
+    "icon": "centaur_double_edge.42c8902d.webp",
+    "zh": "双刃剑",
+    "en": "Double Edge",
+    "ru": "Double Edge"
+  },
+  "centaur_return": {
+    "icon": "centaur_return.f4da17b9.webp",
+    "zh": "反伤",
+    "en": "Retaliate",
+    "ru": "Retaliate"
+  },
+  "centaur_stampede": {
+    "icon": "centaur_stampede.7950a1a4.webp",
+    "zh": "奔袭冲撞",
+    "en": "Stampede",
+    "ru": "Stampede"
+  },
+  "centaur_sturdy": {
+    "icon": "centaur_sturdy.42c8902d.webp",
+    "zh": "不屈",
+    "en": "Sturdy",
+    "ru": "sturdy"
+  },
+  "chaos_knight_chaos_strike": {
+    "icon": "chaos_knight_chaos_strike.09aea406.webp",
+    "zh": "混沌一击",
+    "en": "Chaos Strike",
+    "ru": "Chaos Strike"
+  },
+  "chaos_knight_fundamental_forging": {
+    "icon": "chaos_knight_fundamental_forging.61c20d27.webp",
+    "zh": "基本法则锻造",
+    "en": "Fundamental Forging",
+    "ru": "Fundamental Forging"
+  },
+  "clinkz_burning_barrage2": {
+    "icon": "clinkz_burning_barrage2.5861f7e0.webp",
+    "zh": "炽烈火雨",
+    "en": "Burning Barrage",
+    "ru": "Burning Barrage"
+  },
+  "clinkz_infernal_shred2": {
+    "icon": "clinkz_infernal_shred2.16e8d834.webp",
+    "zh": "地狱之裂",
+    "en": "Infernal Shred",
+    "ru": null
+  },
+  "crystal_maiden_brilliance_aura": {
+    "icon": "crystal_maiden_brilliance_aura.110c4a50.webp",
+    "zh": "奥术光环",
+    "en": "Arcane Aura",
+    "ru": "Arcane Aura"
+  },
+  "crystal_maiden_crystal_nova": {
+    "icon": "crystal_maiden_crystal_nova.313bee8f.webp",
+    "zh": "冰霜新星",
+    "en": "Crystal Nova",
+    "ru": "Crystal Nova"
+  },
+  "crystal_maiden_freezing_field": {
+    "icon": "crystal_maiden_freezing_field.80d34568.webp",
+    "zh": "极寒领域",
+    "en": "Freezing Field",
+    "ru": "Freezing Field"
+  },
+  "crystal_maiden_frostbite": {
+    "icon": "crystal_maiden_frostbite.f966e3ad.webp",
+    "zh": "冰封禁制",
+    "en": "Frostbite",
+    "ru": "Frostbite"
+  },
+  "crystal_maiden_glacial_guard2": {
+    "icon": "crystal_maiden_glacial_guard2.ef7b7ea6.webp",
+    "zh": "冰川护体",
+    "en": "Glacial Guard",
+    "ru": null
+  },
+  "crystal_maiden_ice_explosion": {
+    "icon": "crystal_maiden_ice_explosion.70580eff.webp",
+    "zh": "冰爆",
+    "en": "Ice Explosion",
+    "ru": "ice_explosion"
+  },
+  "dark_seer_normal_punch2": {
+    "icon": "dark_seer_normal_punch2.e3e144f1.webp",
+    "zh": "普通一拳",
+    "en": "Normal Punch",
+    "ru": "Normal Punch"
+  },
+  "dark_seer_quick_wit2": {
+    "icon": "dark_seer_quick_wit2.f81f1da6.webp",
+    "zh": "才思敏捷",
+    "en": "Quick Wit",
+    "ru": "Quick Wit"
+  },
+  "dark_seer_vacuum": {
+    "icon": "dark_seer_vacuum.8f18b787.webp",
+    "zh": "真空",
+    "en": "Vacuum",
+    "ru": "Vacuum"
+  },
+  "dark_willow_bramble_maze": {
+    "icon": "dark_willow_bramble_maze.e775cedf.webp",
+    "zh": "荆棘迷宫",
+    "en": "Bramble Maze",
+    "ru": "Bramble Maze"
+  },
+  "dark_willow_shadow_realm": {
+    "icon": "dark_willow_shadow_realm.ff82bca7.webp",
+    "zh": "暗影之境",
+    "en": "Shadow Realm",
+    "ru": "Shadow Realm"
+  },
+  "dawnbreaker_luminosity": {
+    "icon": "dawnbreaker_luminosity.1b644ef6.webp",
+    "zh": "熠熠生辉",
+    "en": "Luminosity",
+    "ru": "Luminosity"
+  },
+  "dazzle_bad_juju": {
+    "icon": "dazzle_bad_juju.48836ecd.webp",
+    "zh": "邪能",
+    "en": "Bad Juju",
+    "ru": null
+  },
+  "dazzle_good_juju": {
+    "icon": "dazzle_good_juju.ef1f7e18.webp",
+    "zh": "善咒",
+    "en": "Good Juju",
+    "ru": null
+  },
+  "dazzle_rain_of_vermin": {
+    "icon": "dazzle_rain_of_vermin.9b24aea4.webp",
+    "zh": "诅咒之雨",
+    "en": "Rain of Vermin",
+    "ru": "dazzle_rain_of_vermin"
+  },
+  "dazzle_shadow_wave": {
+    "icon": "dazzle_shadow_wave.63f422d4.webp",
+    "zh": "暗影波",
+    "en": "Shadow Wave",
+    "ru": "Shadow Wave"
+  },
+  "death_prophet_witchcraft": {
+    "icon": "death_prophet_witchcraft.c23eab9d.webp",
+    "zh": "巫术精研",
+    "en": "Witchcraft",
+    "ru": "Witchcraft"
+  },
+  "doom_bringer_doom_awakened": {
+    "icon": "doom_bringer_doom_awakened.74515bca.webp",
+    "zh": "末日 觉醒",
+    "en": "Doom Awakened",
+    "ru": "Пробуждённый Doom"
+  },
+  "doom_bringer_infernal_blade": {
+    "icon": "doom_bringer_infernal_blade.ec1c318c.webp",
+    "zh": "阎刃",
+    "en": "Infernal Blade",
+    "ru": "Infernal Blade"
+  },
+  "dragon_knight_dragon_blood2": {
+    "icon": "dragon_knight_dragon_blood2.41e20317.webp",
+    "zh": "龙族血统",
+    "en": "Dragon Blood",
+    "ru": null
+  },
+  "drow_ranger_frost_arrows": {
+    "icon": "drow_ranger_frost_arrows.69ecd79d.webp",
+    "zh": "霜冻之箭",
+    "en": "Frost Arrows",
+    "ru": "Frost Arrows"
+  },
+  "drow_ranger_marksmanship": {
+    "icon": "drow_ranger_marksmanship.185c5be9.webp",
+    "zh": "射手天赋",
+    "en": "Marksmanship",
+    "ru": "Marksmanship"
+  },
+  "drow_ranger_trueshot": {
+    "icon": "drow_ranger_trueshot.af28773c.webp",
+    "zh": "精准光环",
+    "en": "Precision Aura",
+    "ru": "Precision Aura"
+  },
+  "earthshaker_aftershock": {
+    "icon": "earthshaker_aftershock.92e4b0e8.webp",
+    "zh": "余震",
+    "en": "Aftershock",
+    "ru": "Aftershock"
+  },
+  "earthshaker_echo_slam": {
+    "icon": "earthshaker_echo_slam.152b2e7b.webp",
+    "zh": "回音击",
+    "en": "Echo Slam",
+    "ru": "Echo Slam"
+  },
+  "earthshaker_enchant_totem": {
+    "icon": "earthshaker_enchant_totem.36c0e032.webp",
+    "zh": "强化图腾",
+    "en": "Enchant Totem",
+    "ru": "Enchant Totem"
+  },
+  "earthshaker_fissure": {
+    "icon": "earthshaker_fissure.68d6bd19.webp",
+    "zh": "沟壑",
+    "en": "Fissure",
+    "ru": "Fissure"
+  },
+  "elder_titan_earth_splitter": {
+    "icon": "elder_titan_earth_splitter.62c03f42.webp",
+    "zh": "裂地沟壑",
+    "en": "Earth Splitter",
+    "ru": "Earth Splitter"
+  },
+  "elder_titan_natural_order": {
+    "icon": "elder_titan_natural_order.be02033c.webp",
+    "zh": "自然秩序",
+    "en": "Natural Order",
+    "ru": "Natural Order"
+  },
+  "ember_spirit_sleight_of_fist": {
+    "icon": "ember_spirit_sleight_of_fist.051414e1.webp",
+    "zh": "无影拳",
+    "en": "Sleight of Fist",
+    "ru": "Sleight of Fist"
+  },
+  "enchantress_impetus": {
+    "icon": "enchantress_impetus.b320356b.webp",
+    "zh": "推进",
+    "en": "Impetus",
+    "ru": "Impetus"
+  },
+  "enchantress_untouchable": {
+    "icon": "enchantress_untouchable.77aa2260.webp",
+    "zh": "不可侵犯",
+    "en": "Untouchable",
+    "ru": "Untouchable"
+  },
+  "faceless_void_backtrack2": {
+    "icon": "faceless_void_backtrack2.5e8155df.webp",
+    "zh": "回到过去",
+    "en": "Backtrack",
+    "ru": "backtrack"
+  },
+  "faceless_void_chronosphere": {
+    "icon": "faceless_void_chronosphere.bd15b35f.webp",
+    "zh": "时间结界",
+    "en": "Chronosphere",
+    "ru": "Chronosphere"
+  },
+  "faceless_void_time_lock": {
+    "icon": "faceless_void_time_lock.038aa1f1.webp",
+    "zh": "时间锁定",
+    "en": "Time Lock",
+    "ru": "Time Lock"
+  },
+  "faceless_void_time_zone": {
+    "icon": "faceless_void_time_zone.c018efea.webp",
+    "zh": "逆转时空",
+    "en": "Time Zone",
+    "ru": "Time Zone"
+  },
+  "frostbitten_golem_time_warp_aura": {
+    "icon": null,
+    "zh": "时间扭曲光环",
+    "en": "Time Warp Aura",
+    "ru": "Time Warp Aura"
+  },
+  "furion_spirit_of_the_forest": {
+    "icon": "furion_spirit_of_the_forest.72bc2b6e.webp",
+    "zh": "丛林之魂",
+    "en": "Spirit of the Forest",
+    "ru": "Spirit of the Forest"
+  },
+  "furion_teleportation": {
+    "icon": "furion_teleportation.826efc42.webp",
+    "zh": "传送",
+    "en": "Teleportation",
+    "ru": "Teleportation"
+  },
+  "gyrocopter_afterburner": {
+    "icon": "gyrocopter_afterburner.23b7b569.webp",
+    "zh": "加力燃烧器",
+    "en": "Afterburner",
+    "ru": "Afterburner"
+  },
+  "gyrocopter_flak_cannon": {
+    "icon": "gyrocopter_flak_cannon.62501148.webp",
+    "zh": "高射火炮",
+    "en": "Flak Cannon",
+    "ru": "Flak Cannon"
+  },
+  "huskar_berserkers_blood": {
+    "icon": "huskar_berserkers_blood.609ada37.webp",
+    "zh": "狂战士之血",
+    "en": "Berserker's Blood",
+    "ru": "Berserker's Blood"
+  },
+  "imba_chaos_knight_phantasm": {
+    "icon": "imba_chaos_knight_phantasm.8836db2f.webp",
+    "zh": "混沌之军",
+    "en": "Army of Chaos",
+    "ru": null
+  },
+  "jakiro_double_trouble2": {
+    "icon": "jakiro_double_trouble2.ad2f355c.webp",
+    "zh": "天生一对",
+    "en": "Double Trouble",
+    "ru": "Double Trouble"
+  },
+  "jakiro_dual_breath": {
+    "icon": "jakiro_dual_breath.ad2f355c.webp",
+    "zh": "冰火交加",
+    "en": "Dual Breath",
+    "ru": "Dual Breath"
+  },
+  "jakiro_ice_path": {
+    "icon": "jakiro_ice_path.abab727e.webp",
+    "zh": "冰封路径",
+    "en": "Ice Path",
+    "ru": "Ice Path"
+  },
+  "jakiro_macropyre": {
+    "icon": "jakiro_macropyre.9ec53c9e.webp",
+    "zh": "烈焰焚身",
+    "en": "Macropyre",
+    "ru": "Macropyre"
+  },
+  "juggernaut_blade_dance": {
+    "icon": "juggernaut_blade_dance.b28ef73f.webp",
+    "zh": "剑舞",
+    "en": "Blade Dance",
+    "ru": "Blade Dance"
+  },
+  "juggernaut_blade_fury_custom": {
+    "icon": "juggernaut_blade_fury_custom.8502de55.webp",
+    "zh": "剑刃风暴 觉醒",
+    "en": "Blade Fury Awakened",
+    "ru": null
+  },
+  "juggernaut_omni_slash": {
+    "icon": "juggernaut_omni_slash.76725f28.webp",
+    "zh": "无敌斩",
+    "en": "Omnislash",
+    "ru": "Omnislash"
+  },
+  "kobold_taskmaster_speed_aura": {
+    "icon": "kobold_taskmaster_speed_aura.17a0cbd3.webp",
+    "zh": "速度光环",
+    "en": "Speed Aura",
+    "ru": "Speed Aura"
+  },
+  "kunkka_ghostship": {
+    "icon": "kunkka_ghostship.796af71b.webp",
+    "zh": "幽灵船",
+    "en": "Ghostship",
+    "ru": "Ghostship"
+  },
+  "kunkka_tidebringer": {
+    "icon": "kunkka_tidebringer.52af3c6a.webp",
+    "zh": "潮汐使者",
+    "en": "Tidebringer",
+    "ru": "Tidebringer"
+  },
+  "kunkka_torrent": {
+    "icon": "kunkka_torrent.8ef99360.webp",
+    "zh": "洪流",
+    "en": "Torrent",
+    "ru": "Torrent"
+  },
+  "legion_commander_duel": {
+    "icon": "legion_commander_duel.d2420fd4.webp",
+    "zh": "决斗",
+    "en": "Duel",
+    "ru": "Duel"
+  },
+  "legion_commander_moment_of_courage": {
+    "icon": "legion_commander_moment_of_courage.e73d76be.webp",
+    "zh": "勇气之霎",
+    "en": "Moment of Courage",
+    "ru": "Moment of Courage"
+  },
+  "legion_commander_outfight_them": {
+    "icon": "legion_commander_outfight_them.6793610d.webp",
+    "zh": "迎难而战！",
+    "en": "Outfight Them!",
+    "ru": "Outfight Them!"
+  },
+  "leshrac_defilement2": {
+    "icon": null,
+    "zh": "大肆污染",
+    "en": "Defilement",
+    "ru": null
+  },
+  "leshrac_split_earth": {
+    "icon": "leshrac_split_earth.31359094.webp",
+    "zh": "撕裂大地",
+    "en": "Split Earth",
+    "ru": "Split Earth"
+  },
+  "lich_chain_frost": {
+    "icon": "lich_chain_frost.1674e1c4.webp",
+    "zh": "连环霜冻",
+    "en": "Chain Frost",
+    "ru": "Chain Frost"
+  },
+  "lich_death_charge": {
+    "icon": "lich_death_charge.d9fa936b.webp",
+    "zh": "献身",
+    "en": "Sacrifice",
+    "ru": "Sacrifice"
+  },
+  "lich_frost_armor": {
+    "icon": "lich_frost_armor.26e73769.webp",
+    "zh": "霜冻护甲",
+    "en": "Ice Armor",
+    "ru": null
+  },
+  "life_stealer_rage": {
+    "icon": "life_stealer_rage.0c595388.webp",
+    "zh": "狂暴",
+    "en": "Rage",
+    "ru": "Rage"
+  },
+  "lina_fiery_soul": {
+    "icon": "lina_fiery_soul.b58a631c.webp",
+    "zh": "炽魂",
+    "en": "Fiery Soul",
+    "ru": "Fiery Soul"
+  },
+  "lina_flame_cloak2": {
+    "icon": "lina_flame_cloak2.d2b9d83a.webp",
+    "zh": "腾焰斗篷",
+    "en": "Flame Cloak",
+    "ru": "Flame Cloak"
+  },
+  "lina_light_strike_array": {
+    "icon": "lina_light_strike_array.06fc1793.webp",
+    "zh": "光击阵",
+    "en": "Light Strike Array",
+    "ru": "Light Strike Array"
+  },
+  "lion_finger_of_death": {
+    "icon": "lion_finger_of_death.fc9e6429.webp",
+    "zh": "死亡之指",
+    "en": "Finger of Death",
+    "ru": "Finger of Death"
+  },
+  "lion_impale": {
+    "icon": "lion_impale.ea6a73f1.webp",
+    "zh": "裂地尖刺",
+    "en": "Earth Spike",
+    "ru": "Earth Spike"
+  },
+  "luna_lunar_blessing": {
+    "icon": "luna_lunar_blessing.df0f0f7c.webp",
+    "zh": "月之祝福",
+    "en": "Lunar Blessing",
+    "ru": "Lunar Blessing"
+  },
+  "luna_moon_glaive": {
+    "icon": "luna_moon_glaive.8403b857.webp",
+    "zh": "月刃",
+    "en": "Moon Glaives",
+    "ru": "Moon Glaives"
+  },
+  "lycan_feral_impulse": {
+    "icon": "lycan_feral_impulse.cf289c5a.webp",
+    "zh": "野性驱使",
+    "en": "Feral Impulse",
+    "ru": "Feral Impulse"
+  },
+  "magnataur_empower": {
+    "icon": "magnataur_empower.a5b9dc01.webp",
+    "zh": "授予力量",
+    "en": "Empower",
+    "ru": "Empower"
+  },
+  "magnataur_reverse_polarity": {
+    "icon": "magnataur_reverse_polarity.baab073d.webp",
+    "zh": "两极反转",
+    "en": "Reverse Polarity",
+    "ru": "Reverse Polarity"
+  },
+  "magnataur_shockwave": {
+    "icon": "magnataur_shockwave.42577343.webp",
+    "zh": "震荡波",
+    "en": "Shockwave",
+    "ru": "Shockwave"
+  },
+  "magnataur_solid_core": {
+    "icon": "magnataur_solid_core.dce3c085.webp",
+    "zh": "坚固核心",
+    "en": "Solid Core",
+    "ru": "Solid Core"
+  },
+  "marci_bodyguard": {
+    "icon": "marci_bodyguard.ab1f0540.webp",
+    "zh": "护卫术",
+    "en": "Bodyguard",
+    "ru": "Bodyguard"
+  },
+  "marci_unleash": {
+    "icon": "marci_unleash.c6dfde20.webp",
+    "zh": "怒拳破",
+    "en": "Unleash",
+    "ru": "Unleash"
+  },
+  "mars_bulwark": {
+    "icon": "mars_bulwark.ab3cec5a.webp",
+    "zh": "护身甲盾",
+    "en": "Bulwark",
+    "ru": "Bulwark"
+  },
+  "mars_gods_rebuke": {
+    "icon": "mars_gods_rebuke.3bc4d6f3.webp",
+    "zh": "神之谴戒",
+    "en": "God's Rebuke",
+    "ru": "God's Rebuke"
+  },
+  "medusa_mana_shield": {
+    "icon": "medusa_mana_shield.e8e30117.webp",
+    "zh": "魔法盾",
+    "en": "Mana Shield",
+    "ru": "Mana Shield"
+  },
+  "medusa_split_shot": {
+    "icon": "medusa_split_shot.30246f55.webp",
+    "zh": "分裂箭",
+    "en": "Split Shot",
+    "ru": "Split Shot"
+  },
+  "medusa_stone_gaze": {
+    "icon": "medusa_stone_gaze.a829d08f.webp",
+    "zh": "石化凝视",
+    "en": "Stone Gaze",
+    "ru": "Stone Gaze"
+  },
+  "mirana_arrow": {
+    "icon": "mirana_arrow.ecf4bf2b.webp",
+    "zh": "月神之箭",
+    "en": "Sacred Arrow",
+    "ru": "Sacred Arrow"
+  },
+  "mirana_celestial_quiver": {
+    "icon": "mirana_celestial_quiver.8738c569.webp",
+    "zh": "天界箭袋",
+    "en": "Celestial Quiver",
+    "ru": "Celestial Quiver"
+  },
+  "mirana_starfall": {
+    "icon": "mirana_starfall.2f82549f.webp",
+    "zh": "群星风暴",
+    "en": "Starstorm",
+    "ru": "Starstorm"
+  },
+  "monkey_king_boundless_strike": {
+    "icon": "monkey_king_boundless_strike.4f07c19c.webp",
+    "zh": "棒击大地",
+    "en": "Boundless Strike",
+    "ru": "Boundless Strike"
+  },
+  "monkey_king_jingu_mastery": {
+    "icon": "monkey_king_jingu_mastery.37ddb90a.webp",
+    "zh": "如意棒法",
+    "en": "Jingu Mastery",
+    "ru": "Jingu Mastery"
+  },
+  "muerta_gunslinger": {
+    "icon": "muerta_gunslinger.5cb12729.webp",
+    "zh": "神枪在手",
+    "en": "Gunslinger",
+    "ru": "Gunslinger"
+  },
+  "muerta_supernatural": {
+    "icon": "muerta_supernatural.9ebe7964.webp",
+    "zh": "超自然",
+    "en": "Supernatural",
+    "ru": "Supernatural"
+  },
+  "necrolyte_heartstopper_aura": {
+    "icon": "necrolyte_heartstopper_aura.6d4f3021.webp",
+    "zh": "竭心光环",
+    "en": "Heartstopper Aura",
+    "ru": "Heartstopper Aura"
+  },
+  "necrolyte_reapers_scythe": {
+    "icon": "necrolyte_reapers_scythe.6c97cab7.webp",
+    "zh": "死神镰刀",
+    "en": "Reaper's Scythe",
+    "ru": "Reaper's Scythe"
+  },
+  "nevermore_dark_lord": {
+    "icon": "nevermore_dark_lord.d9211126.webp",
+    "zh": "魔王降临",
+    "en": "Presence of the Dark Lord",
+    "ru": "Presence of the Dark Lord"
+  },
+  "nevermore_necromastery": {
+    "icon": "nevermore_necromastery.7f9bb65b.webp",
+    "zh": "支配死灵",
+    "en": "Necromastery",
+    "ru": "Necromastery"
+  },
+  "night_stalker_hunter_in_the_night": {
+    "icon": "night_stalker_hunter_in_the_night.ac5fb634.webp",
+    "zh": "暗夜猎影",
+    "en": "Hunter in the Night",
+    "ru": "Hunter in the Night"
+  },
+  "nyx_assassin_neuro_sting": {
+    "icon": "nyx_assassin_neuro_sting.2f6c09f5.webp",
+    "zh": "法力燃烧",
+    "en": "Mana Burn",
+    "ru": "Mana Burn"
+  },
+  "obsidian_destroyer_objurgation": {
+    "icon": "obsidian_destroyer_objurgation.4342dd10.webp",
+    "zh": "责难",
+    "en": "Objurgation",
+    "ru": "Objurgation"
+  },
+  "ogre_magi_multicast_lua": {
+    "icon": "ogre_magi_multicast_lua.f43a0558.webp",
+    "zh": "多重施法（觉醒）",
+    "en": "Multicast (Awakened)",
+    "ru": null
+  },
+  "omniknight_degen_aura": {
+    "icon": "omniknight_degen_aura.b3e22c46.webp",
+    "zh": "退化光环",
+    "en": "Degen Aura",
+    "ru": "Degen Aura"
+  },
+  "omniknight_guardian_angel": {
+    "icon": "omniknight_guardian_angel.0cfe900a.webp",
+    "zh": "守护天使",
+    "en": "Guardian Angel",
+    "ru": "Guardian Angel"
+  },
+  "omniknight_hammer_of_purity": {
+    "icon": "omniknight_hammer_of_purity.b860770a.webp",
+    "zh": "纯洁之锤",
+    "en": "Hammer of Purity",
+    "ru": "Hammer of Purity"
+  },
+  "omniknight_repel": {
+    "icon": "omniknight_repel.c155b49b.webp",
+    "zh": "咸鱼恩赐",
+    "en": "Heavenly Grace",
+    "ru": null
+  },
+  "pangolier_fortune_favors_the_bold": {
+    "icon": "pangolier_fortune_favors_the_bold.bde54b1f.webp",
+    "zh": "天佑勇者",
+    "en": "Fortune Favors the Bold",
+    "ru": "Fortune Favors the Bold"
+  },
+  "pangolier_gyroshell": {
+    "icon": "pangolier_gyroshell.01b2bad8.webp",
+    "zh": "地雷滚滚",
+    "en": "Rolling Thunder",
+    "ru": "Rolling Thunder"
+  },
+  "pangolier_lucky_shot": {
+    "icon": "pangolier_lucky_shot.37d7b3af.webp",
+    "zh": "幸运一击",
+    "en": "Lucky Shot",
+    "ru": "Lucky Shot"
+  },
+  "phantom_assassin_blur": {
+    "icon": "phantom_assassin_blur.82f3b365.webp",
+    "zh": "魅影无形",
+    "en": "Blur",
+    "ru": "Blur"
+  },
+  "phantom_assassin_coup_de_grace": {
+    "icon": "phantom_assassin_coup_de_grace.31f083a6.webp",
+    "zh": "恩赐解脱",
+    "en": "Coup de Grace",
+    "ru": "Coup de Grace"
+  },
+  "phoenix_dying_light": {
+    "icon": "phoenix_dying_light.b4d034b4.webp",
+    "zh": "消逝之光",
+    "en": "Dying Light",
+    "ru": "Dying Light"
+  },
+  "primal_beast_colossal2": {
+    "icon": "primal_beast_colossal2.bf4ca1c4.webp",
+    "zh": "庞",
+    "en": "Colossal",
+    "ru": null
+  },
+  "primal_beast_trample": {
+    "icon": "primal_beast_trample.ae8f0794.webp",
+    "zh": "踏",
+    "en": "Trample",
+    "ru": "Trample"
+  },
+  "puck_dream_coil": {
+    "icon": "puck_dream_coil.92d19460.webp",
+    "zh": "梦境缠绕",
+    "en": "Dream Coil",
+    "ru": "Dream Coil"
+  },
+  "pudge_innate_graft_flesh": {
+    "icon": "pudge_innate_graft_flesh.8ba20459.webp",
+    "zh": "腐肉堆积",
+    "en": "Flesh Heap",
+    "ru": "Flesh Heap"
+  },
+  "pudge_meat_hook_lua": {
+    "icon": "pudge_meat_hook_lua.590255c3.webp",
+    "zh": "肉钩 觉醒",
+    "en": "Meat Hook Awakened",
+    "ru": null
+  },
+  "pugna_nether_blast": {
+    "icon": "pugna_nether_blast.42753db7.webp",
+    "zh": "幽冥爆轰",
+    "en": "Nether Blast",
+    "ru": "Nether Blast"
+  },
+  "queenofpain_sonic_wave": {
+    "icon": "queenofpain_sonic_wave.0bea6388.webp",
+    "zh": "超声冲击波",
+    "en": "Sonic Wave",
+    "ru": "Sonic Wave"
+  },
+  "rattletrap_rocket_flare": {
+    "icon": "rattletrap_rocket_flare.855a1672.webp",
+    "zh": "照明火箭",
+    "en": "Rocket Flare",
+    "ru": "Rocket Flare"
+  },
+  "razor_storm_surge": {
+    "icon": "razor_storm_surge.41143b57.webp",
+    "zh": "风暴涌动",
+    "en": "Storm Surge",
+    "ru": "Storm Surge"
+  },
+  "riki_backstab": {
+    "icon": "riki_backstab.37cc7eb7.webp",
+    "zh": "刀光谍影",
+    "en": "Cloak and Dagger",
+    "ru": "Cloak and Dagger"
+  },
+  "riki_innate_backstab": {
+    "icon": "riki_innate_backstab.81c83cea.webp",
+    "zh": "背刺",
+    "en": "Backstab",
+    "ru": "Backstab"
+  },
+  "ringmaster_tame_the_beasts": {
+    "icon": "ringmaster_tame_the_beasts.24434190.webp",
+    "zh": "驯兽术",
+    "en": "Tame the Beasts",
+    "ru": "Tame the Beasts"
+  },
+  "ringmaster_wheel": {
+    "icon": "ringmaster_wheel.655e7d02.webp",
+    "zh": "奇观轮",
+    "en": "Wheel of Wonder",
+    "ru": "Wheel of Wonder"
+  },
+  "rubick_arcane_supremacy": {
+    "icon": "rubick_arcane_supremacy.5656499a.webp",
+    "zh": "奥术至尊",
+    "en": "Arcane Supremacy",
+    "ru": "Arcane Supremacy"
+  },
+  "rubick_curiosity2": {
+    "icon": "rubick_curiosity2.ec5c0609.webp",
+    "zh": "奇心",
+    "en": "Curiosity",
+    "ru": null
+  },
+  "rubick_might_and_magus2": {
+    "icon": "rubick_might_and_magus2.18add27c.webp",
+    "zh": "力量与魔法",
+    "en": "Might and Magus",
+    "ru": null
+  },
+  "rubick_null_field": {
+    "icon": "rubick_null_field.5656499a.webp",
+    "zh": "失效力场",
+    "en": "Null Field",
+    "ru": null
+  },
+  "shadow_demon_menace": {
+    "icon": "shadow_demon_menace.8a88dd2e.webp",
+    "zh": "威胁",
+    "en": "Menace",
+    "ru": "Menace"
+  },
+  "shadow_shaman_mass_serpent_ward": {
+    "icon": "shadow_shaman_mass_serpent_ward.db3a5ef1.webp",
+    "zh": "群蛇守卫",
+    "en": "Mass Serpent Ward",
+    "ru": "Mass Serpent Ward"
+  },
+  "shadow_shaman_voodoo": {
+    "icon": "shadow_shaman_voodoo.aac69ae8.webp",
+    "zh": "妖术",
+    "en": "Hex",
+    "ru": "Hex"
+  },
+  "shredder_reactive_armor": {
+    "icon": "shredder_reactive_armor.1c632de0.webp",
+    "zh": "活性护甲",
+    "en": "Reactive Armor",
+    "ru": "Reactive Armor"
+  },
+  "shredder_whirling_death": {
+    "icon": "shredder_whirling_death.6a0e9de4.webp",
+    "zh": "死亡旋风",
+    "en": "Whirling Death",
+    "ru": "Whirling Death"
+  },
+  "silencer_brain_drain2": {
+    "icon": "silencer_brain_drain2.a2dc5e45.webp",
+    "zh": "默默受苦",
+    "en": "Suffer In Silence",
+    "ru": null
+  },
+  "silencer_glaives_of_wisdom": {
+    "icon": "silencer_glaives_of_wisdom.e8ff0fc6.webp",
+    "zh": "智慧之刃",
+    "en": "Glaives of Wisdom",
+    "ru": "Glaives of Wisdom"
+  },
+  "silencer_global_silence": {
+    "icon": "silencer_global_silence.a2dc5e45.webp",
+    "zh": "全领域静默",
+    "en": "Global Silence",
+    "ru": "Global Silence"
+  },
+  "skeleton_king_mortal_strike": {
+    "icon": "skeleton_king_mortal_strike.664a0bd2.webp",
+    "zh": "本命一击",
+    "en": "Mortal Strike",
+    "ru": "Mortal Strike"
+  },
+  "skywrath_mage_arcane_bolt": {
+    "icon": "skywrath_mage_arcane_bolt.f93e3377.webp",
+    "zh": "奥法鹰隼",
+    "en": "Arcane Bolt",
+    "ru": "Arcane Bolt"
+  },
+  "slardar_amplify_damage": {
+    "icon": "slardar_amplify_damage.3f8f5b89.webp",
+    "zh": "侵蚀雾霭",
+    "en": "Corrosive Haze",
+    "ru": "Corrosive Haze"
+  },
+  "slardar_bash": {
+    "icon": "slardar_bash.0cbb4243.webp",
+    "zh": "深海重击",
+    "en": "Bash of the Deep",
+    "ru": "Bash of the Deep"
+  },
+  "slark_essence_shift": {
+    "icon": "slark_essence_shift.d8a9f076.webp",
+    "zh": "能量转移",
+    "en": "Essence Shift",
+    "ru": "Essence Shift"
+  },
+  "slark_saltwater_shiv": {
+    "icon": "slark_saltwater_shiv.f3aa3795.webp",
+    "zh": "海浪短刀",
+    "en": "Saltwater Shiv",
+    "ru": "Saltwater Shiv"
+  },
+  "slark_shadow_dance": {
+    "icon": "slark_shadow_dance.a32adb1d.webp",
+    "zh": "暗影之舞",
+    "en": "Shadow Dance",
+    "ru": "Shadow Dance"
+  },
+  "sniper_headshot": {
+    "icon": "sniper_headshot.9d1638ec.webp",
+    "zh": "爆头",
+    "en": "Headshot",
+    "ru": "Headshot"
+  },
+  "sniper_keen_scope2": {
+    "icon": "sniper_keen_scope2.041a9873.webp",
+    "zh": "基恩瞄准镜",
+    "en": "Keen Scope",
+    "ru": null
+  },
+  "special_bonus_unique_sniper_assassinate_upgrade": {
+    "icon": "special_bonus_unique_sniper_assassinate_upgrade.3e56c791.webp",
+    "zh": "暗杀 觉醒",
+    "en": "Assassinate Awakened",
+    "ru": null
+  },
+  "spectre_desolate": {
+    "icon": "spectre_desolate.9281f6d8.webp",
+    "zh": "荒芜",
+    "en": "Desolate",
+    "ru": "Desolate"
+  },
+  "spectre_dispersion2": {
+    "icon": "spectre_dispersion2.3936658f.webp",
+    "zh": "折射（改）",
+    "en": "Dispersion (MK2)",
+    "ru": null
+  },
+  "spirit_breaker_greater_bash": {
+    "icon": "spirit_breaker_greater_bash.acebc15f.webp",
+    "zh": "巨力重击",
+    "en": "Greater Bash",
+    "ru": "Greater Bash"
+  },
+  "storm_spirit_ball_lightning": {
+    "icon": "storm_spirit_ball_lightning.b0b7c85d.webp",
+    "zh": "球状闪电",
+    "en": "Ball Lightning",
+    "ru": "Ball Lightning"
+  },
+  "sven_gods_strength": {
+    "icon": "sven_gods_strength.7fcc8bf6.webp",
+    "zh": "神之力量",
+    "en": "God's Strength",
+    "ru": "God's Strength"
+  },
+  "sven_great_cleave": {
+    "icon": "sven_great_cleave.d95c6083.webp",
+    "zh": "巨力挥舞",
+    "en": "Great Cleave",
+    "ru": "Great Cleave"
+  },
+  "sven_storm_bolt": {
+    "icon": "sven_storm_bolt.4326e579.webp",
+    "zh": "风暴之拳",
+    "en": "Storm Hammer",
+    "ru": "Storm Hammer"
+  },
+  "sven_wrath_of_god2": {
+    "icon": "sven_wrath_of_god2.b25e4c4a.webp",
+    "zh": "神之愤怒",
+    "en": "Wrath of God",
+    "ru": "Wrath of God"
+  },
+  "templar_assassin_meld": {
+    "icon": "templar_assassin_meld.316a04b0.webp",
+    "zh": "隐匿",
+    "en": "Meld",
+    "ru": "Meld"
+  },
+  "templar_assassin_psi_blades": {
+    "icon": "templar_assassin_psi_blades.18d72663.webp",
+    "zh": "灵能之刃",
+    "en": "Psi Blades",
+    "ru": "Psi Blades"
+  },
+  "templar_assassin_refraction": {
+    "icon": "templar_assassin_refraction.e455df7e.webp",
+    "zh": "折光",
+    "en": "Refraction",
+    "ru": "Refraction"
+  },
+  "tidehunter_anchor_smash": {
+    "icon": "tidehunter_anchor_smash.c4c4731a.webp",
+    "zh": "锚击",
+    "en": "Anchor Smash",
+    "ru": "Anchor Smash"
+  },
+  "tidehunter_kraken_shell": {
+    "icon": "tidehunter_kraken_shell.80fc2fbe.webp",
+    "zh": "海妖外壳",
+    "en": "Kraken Shell",
+    "ru": "Kraken Shell"
+  },
+  "tidehunter_ravage": {
+    "icon": "tidehunter_ravage.5de142df.webp",
+    "zh": "毁灭",
+    "en": "Ravage",
+    "ru": "Ravage"
+  },
+  "tinker_eureka2": {
+    "icon": "tinker_eureka2.38b3478b.webp",
+    "zh": "尤里卡！",
+    "en": "Eureka!",
+    "ru": null
+  },
+  "tinker_heat_seeking_missile": {
+    "icon": "tinker_heat_seeking_missile.0931b5fb.webp",
+    "zh": "热导飞弹",
+    "en": "Heat-Seeking Missile",
+    "ru": null
+  },
+  "tinker_rearm_lua": {
+    "icon": "tinker_rearm_lua.dde6823a.webp",
+    "zh": "再装填",
+    "en": "Rearm",
+    "ru": null
+  },
+  "tiny_grow": {
+    "icon": "tiny_grow.5c6609e1.webp",
+    "zh": "长大",
+    "en": "Grow",
+    "ru": "Grow"
+  },
+  "tiny_insurmountable": {
+    "icon": "tiny_insurmountable.fa472da9.webp",
+    "zh": "不可逾越",
+    "en": "Insurmountable",
+    "ru": "Insurmountable"
+  },
+  "treant_living_armor": {
+    "icon": "treant_living_armor.e6ebbbca.webp",
+    "zh": "活体护甲",
+    "en": "Living Armor",
+    "ru": "Living Armor"
+  },
+  "treant_natures_grasp": {
+    "icon": "treant_natures_grasp.0bff83d0.webp",
+    "zh": "自然卷握",
+    "en": "Nature's Grasp",
+    "ru": "Nature's Grasp"
+  },
+  "treant_overgrowth": {
+    "icon": "treant_overgrowth.1eed727a.webp",
+    "zh": "疯狂生长",
+    "en": "Overgrowth",
+    "ru": "Overgrowth"
+  },
+  "troll_warlord_fervor": {
+    "icon": "troll_warlord_fervor.75c66f1f.webp",
+    "zh": "热血战魂",
+    "en": "Fervor",
+    "ru": "Fervor"
+  },
+  "tusk_bitter_chill": {
+    "icon": "tusk_bitter_chill.dd458655.webp",
+    "zh": "严寒",
+    "en": "Bitter Chill",
+    "ru": "Bitter Chill"
+  },
+  "tusk_walrus_punch": {
+    "icon": "tusk_walrus_punch.88b70ea5.webp",
+    "zh": "海象神拳！",
+    "en": "Walrus PUNCH!",
+    "ru": "Walrus PUNCH!"
+  },
+  "undying_ceaseless_dirge": {
+    "icon": "undying_ceaseless_dirge.05767023.webp",
+    "zh": "挽歌犹唱",
+    "en": "Ceaseless Dirge",
+    "ru": "Ceaseless Dirge"
+  },
+  "undying_decay": {
+    "icon": "undying_decay.4d5573c2.webp",
+    "zh": "腐朽",
+    "en": "Decay",
+    "ru": "Decay"
+  },
+  "ursa_fury_swipes": {
+    "icon": "ursa_fury_swipes.93bf6d98.webp",
+    "zh": "怒意狂击",
+    "en": "Fury Swipes",
+    "ru": "Fury Swipes"
+  },
+  "ursa_maul2": {
+    "icon": "ursa_maul2.53fef14c.webp",
+    "zh": "暴烈之爪",
+    "en": "Maul",
+    "ru": "Maul"
+  },
+  "vengefulspirit_command_aura": {
+    "icon": "vengefulspirit_command_aura.5bf3d6ba.webp",
+    "zh": "复仇光环",
+    "en": "Vengeance Aura",
+    "ru": "Vengeance Aura"
+  },
+  "viper_corrosive_skin": {
+    "icon": "viper_corrosive_skin.1f331b3f.webp",
+    "zh": "腐蚀皮肤",
+    "en": "Corrosive Skin",
+    "ru": "Corrosive Skin"
+  },
+  "viper_poison_attack": {
+    "icon": "viper_poison_attack.0df6e52c.webp",
+    "zh": "毒性攻击",
+    "en": "Poison Attack",
+    "ru": "Poison Attack"
+  },
+  "visage_gravekeepers_cloak": {
+    "icon": "visage_gravekeepers_cloak.e2036081.webp",
+    "zh": "陵卫斗篷",
+    "en": "Gravekeeper's Cloak",
+    "ru": "Gravekeeper's Cloak"
+  },
+  "void_spirit_astral_step": {
+    "icon": "void_spirit_astral_step.42156387.webp",
+    "zh": "太虚之径",
+    "en": "Astral Step",
+    "ru": "Astral Step"
+  },
+  "weaver_geminate_attack": {
+    "icon": "weaver_geminate_attack.2ee7d947.webp",
+    "zh": "连击",
+    "en": "Geminate Attack",
+    "ru": "Geminate Attack"
+  },
+  "windrunner_whirlwind_custom": {
+    "icon": "windrunner_whirlwind_custom.02d88bf5.webp",
+    "zh": "旋风 觉醒",
+    "en": "Whirlwind Awakened",
+    "ru": null
+  },
+  "winter_wyvern_arctic_burn": {
+    "icon": "winter_wyvern_arctic_burn.14f0830e.webp",
+    "zh": "严寒烧灼",
+    "en": "Arctic Burn",
+    "ru": "Arctic Burn"
+  },
+  "winter_wyvern_winters_curse": {
+    "icon": "winter_wyvern_winters_curse.b5f94f19.webp",
+    "zh": "寒冬诅咒",
+    "en": "Winter's Curse",
+    "ru": "Winter's Curse"
+  },
+  "witch_doctor_death_ward": {
+    "icon": "witch_doctor_death_ward.3957c248.webp",
+    "zh": "死亡守卫",
+    "en": "Death Ward",
+    "ru": "Death Ward"
+  },
+  "witch_doctor_maledict": {
+    "icon": "witch_doctor_maledict.6895ef6c.webp",
+    "zh": "巫蛊咒术",
+    "en": "Maledict",
+    "ru": "Maledict"
+  },
+  "witch_doctor_paralyzing_cask": {
+    "icon": "witch_doctor_paralyzing_cask.f4a1d376.webp",
+    "zh": "麻痹药剂",
+    "en": "Paralyzing Cask",
+    "ru": "Paralyzing Cask"
+  },
+  "zuus_static_field": {
+    "icon": "zuus_static_field.c157c548.webp",
+    "zh": "静电场",
+    "en": "Static Field",
+    "ru": "Static Field"
+  },
+  "zuus_thundergods_wrath": {
+    "icon": "zuus_thundergods_wrath.7733a7d1.webp",
+    "zh": "雷神之怒",
+    "en": "Thundergod's Wrath",
+    "ru": "Thundergod's Wrath"
+  }
+}

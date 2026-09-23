@@ -402,13 +402,16 @@
       "groups": {
         "combat": "Combat",
         "growth": "Progress",
-        "attributes": "Final Attributes"
+        "attributes": "Final Attributes",
+        "items": "Items",
+        "abilities": "Drafted Abilities"
       },
       "stuns": "Stun Duration (s)",
       "roshanKills": "Roshan Kills",
       "strength": "Strength",
       "agility": "Agility",
       "intellect": "Intelligence",
+      "recipe": "{name} Recipe",
       "empty": "No matches recorded yet.",
       "failed": "Recent matches are unavailable right now. Please try again later.",
       "showAll": "Show all {count} matches",

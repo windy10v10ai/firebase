@@ -11,8 +11,17 @@ import {
   RECENT_MATCH_LIMIT,
   type RecentMatch,
 } from '@/app/lib/player-stats-recent';
+import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { GAME_ICON } from '@/config/game-icons';
 import { heroAsset, heroIconPath, heroLabel } from '@/config/heroes';
+import {
+  EMPTY_SLOT_ICON,
+  itemAsset,
+  itemIconPath,
+  itemLabel,
+  RECIPE_ICON,
+  recipeResult,
+} from '@/config/items';
 
 import type { ReactNode } from 'react';
 
@@ -130,6 +139,75 @@ function HeroIcon({ heroName, awakenLabel }: { heroName: string; awakenLabel?: s
   );
 }
 
+type SlotKind = 'item' | 'ability';
+
+// 照游戏结算界面画：近黑细边、不圆角；物品图原尺寸 88×64，按一半展示两倍屏正好不糊。
+// 中立槽也是方格，圆槽是局内 HUD 的样子，结算界面里没有
+const SLOT_BOX =
+  'flex shrink-0 items-center justify-center overflow-hidden border border-surface bg-surface';
+const SLOT_SIZE: Record<SlotKind, string> = { item: 'h-8 w-11', ability: 'size-8' };
+
+/** 空格也占位，六格一眼能看出这局有没有出满 */
+function LoadoutSlot({ kind, name, locale }: { kind: SlotKind; name?: string; locale: string }) {
+  const t = useTranslations('profile.recent');
+  const box = `${SLOT_BOX} ${SLOT_SIZE[kind]}`;
+  if (!name) {
+    // 技能没有空槽底图，画成和等级圈同样的凹陷
+    return kind === 'item' ? (
+      <span className={box} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
+        <img src={EMPTY_SLOT_ICON} alt="" className="size-full" />
+      </span>
+    ) : (
+      <span className={`${box} shadow-[inset_0_0_6px_rgba(0,0,0,0.9)]`} aria-hidden="true" />
+    );
+  }
+
+  let src: string | null;
+  let label: string;
+  const recipeOf = kind === 'item' ? recipeResult(name) : null;
+  if (recipeOf) {
+    src = RECIPE_ICON;
+    label = t('recipe', { name: itemLabel(recipeOf, locale) });
+  } else if (kind === 'item') {
+    const icon = itemAsset(name)?.icon;
+    src = icon ? itemIconPath(icon) : null;
+    label = itemLabel(name, locale);
+  } else {
+    const icon = abilityAsset(name)?.icon;
+    src = icon ? abilityIconPath(icon) : null;
+    label = abilityLabel(name, locale);
+  }
+
+  return (
+    <InfoPopover
+      label={label}
+      compact
+      className={`${box} transition-colors hover:border-line-strong`}
+      trigger={
+        src ? (
+          // eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式
+          <img src={src} alt="" className="size-full object-cover" />
+        ) : (
+          // 有东西但没图：和空槽区分开，名字仍在提示里
+          <span className="text-[13px] text-faint">?</span>
+        )
+      }
+    >
+      {label}
+    </InfoPopover>
+  );
+}
+
+function GroupTitle({ title, accentClass }: { title: string; accentClass: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`h-2.5 w-0.5 shrink-0 rounded-sm ${accentClass}`} aria-hidden="true" />
+      <span className="text-xs text-muted">{title}</span>
+    </div>
+  );
+}
+
 interface DetailItem {
   label: ReactNode;
   value: string;
@@ -148,10 +226,7 @@ function DetailGroup({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <div className="flex items-center gap-1.5">
-        <span className={`h-2.5 w-0.5 shrink-0 rounded-sm ${accentClass}`} aria-hidden="true" />
-        <span className="text-xs text-muted">{title}</span>
-      </div>
+      <GroupTitle title={title} accentClass={accentClass} />
       <dl className={`gap-x-7 gap-y-1.5 ${twoColumn ? 'grid md:grid-cols-2' : 'flex flex-col'}`}>
         {items.map((item) => (
           <div
@@ -434,6 +509,55 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                             <DetailGroup key={group.title} {...group} />
                           ))}
                         </div>
+                        {/* 出装与属性同批上报，旧场次整块不出现 */}
+                        {match.items ? (
+                          <div className="mt-4 flex flex-wrap gap-x-7 gap-y-4">
+                            <div className="flex flex-col gap-2">
+                              <GroupTitle title={t('groups.items')} accentClass="bg-line-strong" />
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                                <div className="flex gap-1">
+                                  {/* 物品栏位置固定，下标就是格子的身份 */}
+                                  {match.items.map((item, slot) => (
+                                    <LoadoutSlot
+                                      key={slot}
+                                      kind="item"
+                                      name={item}
+                                      locale={locale}
+                                    />
+                                  ))}
+                                </div>
+                                <div className="flex gap-1">
+                                  <LoadoutSlot
+                                    kind="item"
+                                    name={match.neutralItem}
+                                    locale={locale}
+                                  />
+                                  <LoadoutSlot
+                                    kind="item"
+                                    name={match.neutralPassiveItem}
+                                    locale={locale}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <GroupTitle
+                                title={t('groups.abilities')}
+                                accentClass="bg-line-strong"
+                              />
+                              <div className="flex gap-1">
+                                {(match.abilities ?? []).map((ability, slot) => (
+                                  <LoadoutSlot
+                                    key={slot}
+                                    kind="ability"
+                                    name={ability}
+                                    locale={locale}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     ) : null}
                   </li>
