@@ -105,7 +105,11 @@ function readAddonNames(file) {
   const names = new Map();
   const text = fs.readFileSync(file, 'utf8');
   for (const m of text.matchAll(/"DOTA_Tooltip_ability_([a-z0-9_]+)"\s+"((?:[^"\\]|\\.)*)"/gi)) {
-    const label = m[2].replace(/<[^>]*>/g, '').trim();
+    // 标签去完再清掉残留的尖括号：名字里本来就不会有，残留只可能来自没配对的标签
+    const label = m[2]
+      .replace(/<[^>]*>/g, '')
+      .replace(/[<>]/g, '')
+      .trim();
     if (label) names.set(m[1].toLowerCase(), label);
   }
   return names;
