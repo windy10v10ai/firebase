@@ -398,7 +398,9 @@
       "groups": {
         "combat": "战斗",
         "growth": "发育",
-        "attributes": "局末属性"
+        "attributes": "局末属性",
+        "items": "物品",
+        "abilities": "抽选技能"
       },
       "stuns": "眩晕（秒）",
       "roshanKills": "肉山击杀",

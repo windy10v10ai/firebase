@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "awaken:sync": "node scripts/awaken-sync.mjs",
     "awaken:images": "node scripts/awaken-images.mjs",
-    "heroes": "node scripts/heroes.mjs"
+    "heroes": "node scripts/heroes.mjs",
+    "items": "node scripts/items.mjs"
   },
   "dependencies": {
     "eslint-config-next": "16.3.5",

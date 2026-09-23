@@ -402,7 +402,9 @@
       "groups": {
         "combat": "Combat",
         "growth": "Progress",
-        "attributes": "Final Attributes"
+        "attributes": "Final Attributes",
+        "items": "Items",
+        "abilities": "Drafted Abilities"
       },
       "stuns": "Stun Duration (s)",
       "roshanKills": "Roshan Kills",

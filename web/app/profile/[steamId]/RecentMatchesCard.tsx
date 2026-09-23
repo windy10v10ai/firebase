@@ -11,8 +11,10 @@ import {
   RECENT_MATCH_LIMIT,
   type RecentMatch,
 } from '@/app/lib/player-stats-recent';
+import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { GAME_ICON } from '@/config/game-icons';
 import { heroAsset, heroIconPath, heroLabel } from '@/config/heroes';
+import { itemAsset, itemIconPath, itemLabel } from '@/config/items';
 
 import type { ReactNode } from 'react';
 
@@ -130,6 +132,54 @@ function HeroIcon({ heroName, awakenLabel }: { heroName: string; awakenLabel?: s
   );
 }
 
+type SlotShape = 'item' | 'neutral' | 'ability';
+
+const SLOT_CLASS: Record<SlotShape, string> = {
+  // 物品图原尺寸 88×64，按一半展示，两倍屏正好不糊
+  item: 'h-8 w-11 rounded',
+  // 游戏里中立物品放在圆槽，照着画才认得出是哪一格
+  neutral: 'size-8 rounded-full',
+  ability: 'size-8 rounded',
+};
+
+/** 空格也占位，六格一眼能看出这局有没有出满 */
+function LoadoutSlot({ shape, name, locale }: { shape: SlotShape; name?: string; locale: string }) {
+  const box = `flex shrink-0 overflow-hidden border border-line bg-control ${SLOT_CLASS[shape]}`;
+  if (!name) {
+    return <span className={box} aria-hidden="true" />;
+  }
+  const ability = shape === 'ability';
+  const icon = (ability ? abilityAsset(name) : itemAsset(name))?.icon;
+  const label = ability ? abilityLabel(name, locale) : itemLabel(name, locale);
+  const src = icon ? (ability ? abilityIconPath(icon) : itemIconPath(icon)) : null;
+  return (
+    <InfoPopover
+      label={label}
+      compact
+      className={`${box} transition-colors hover:border-line-strong`}
+      trigger={
+        src ? (
+          // eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式
+          <img src={src} alt="" className="size-full object-cover" />
+        ) : (
+          <span className="size-full" />
+        )
+      }
+    >
+      {label}
+    </InfoPopover>
+  );
+}
+
+function GroupTitle({ title, accentClass }: { title: string; accentClass: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`h-2.5 w-0.5 shrink-0 rounded-sm ${accentClass}`} aria-hidden="true" />
+      <span className="text-xs text-muted">{title}</span>
+    </div>
+  );
+}
+
 interface DetailItem {
   label: ReactNode;
   value: string;
@@ -148,10 +198,7 @@ function DetailGroup({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <div className="flex items-center gap-1.5">
-        <span className={`h-2.5 w-0.5 shrink-0 rounded-sm ${accentClass}`} aria-hidden="true" />
-        <span className="text-xs text-muted">{title}</span>
-      </div>
+      <GroupTitle title={title} accentClass={accentClass} />
       <dl className={`gap-x-7 gap-y-1.5 ${twoColumn ? 'grid md:grid-cols-2' : 'flex flex-col'}`}>
         {items.map((item) => (
           <div
@@ -434,6 +481,55 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                             <DetailGroup key={group.title} {...group} />
                           ))}
                         </div>
+                        {/* 出装与属性同批上报，旧场次整块不出现 */}
+                        {match.items ? (
+                          <div className="mt-4 flex flex-wrap gap-x-7 gap-y-4">
+                            <div className="flex flex-col gap-2">
+                              <GroupTitle title={t('groups.items')} accentClass="bg-line-strong" />
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                                <div className="flex gap-1">
+                                  {/* 物品栏位置固定，下标就是格子的身份 */}
+                                  {match.items.map((item, slot) => (
+                                    <LoadoutSlot
+                                      key={slot}
+                                      shape="item"
+                                      name={item}
+                                      locale={locale}
+                                    />
+                                  ))}
+                                </div>
+                                <div className="flex gap-1">
+                                  <LoadoutSlot
+                                    shape="neutral"
+                                    name={match.neutralItem}
+                                    locale={locale}
+                                  />
+                                  <LoadoutSlot
+                                    shape="neutral"
+                                    name={match.neutralPassiveItem}
+                                    locale={locale}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <GroupTitle
+                                title={t('groups.abilities')}
+                                accentClass="bg-line-strong"
+                              />
+                              <div className="flex gap-1">
+                                {(match.abilities ?? []).map((ability, slot) => (
+                                  <LoadoutSlot
+                                    key={slot}
+                                    shape="ability"
+                                    name={ability}
+                                    locale={locale}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     ) : null}
                   </li>
