@@ -3,7 +3,7 @@ import { apiFetch } from './api';
 /** 与 api 的 RECENT_MATCH_LIMIT 一致：后端只留这么多场 */
 export const RECENT_MATCH_LIMIT = 50;
 
-/** 一局里自己那一行。物品与技能后端已存，等图标方案定了再取 */
+/** 一局里自己那一行 */
 export interface RecentMatch {
   matchId: string;
   /** 服务端收到结算的时间，ISO 字符串 */
@@ -39,6 +39,12 @@ export interface RecentMatch {
   strength?: number;
   agility?: number;
   intellect?: number;
+  /** 六格物品栏，空格是空字符串；与属性同批加入，旧场次没有 */
+  items?: string[];
+  neutralItem?: string;
+  neutralPassiveItem?: string;
+  /** 抽选的主动、被动、第二被动，没抽的是空字符串 */
+  abilities?: string[];
 }
 
 export interface RecentMatches {

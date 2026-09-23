@@ -161,7 +161,7 @@
       "records": "最新数据、结算积分、每日任务",
       "stable": "连接稳定",
       "stableArcade": "偶尔连不上",
-      "noteOffline": "连不上服务器时是离线模式：会员、属性、觉醒沿用地图更新时的数据，积分与战绩不记录。地图每周更新两到三次。",
+      "noteOffline": "连不上服务器时是离线模式：会员、属性、觉醒沿用地图更新时的数据，积分与战绩不记录。",
       "yes": "支持",
       "no": "不支持",
       "partial": "偶尔不行",
@@ -383,6 +383,11 @@
         "lastHits": "补刀",
         "points": "勇士积分"
       },
+      "columnsFull": {
+        "difficulty": "难度",
+        "level": "英雄等级",
+        "duration": "对局时长"
+      },
       "win": "胜",
       "loss": "负",
       "difficultyCustom": "自定义",
@@ -393,13 +398,16 @@
       "groups": {
         "combat": "战斗",
         "growth": "发育",
-        "attributes": "局末属性"
+        "attributes": "局末属性",
+        "items": "物品",
+        "abilities": "抽选技能"
       },
       "stuns": "眩晕（秒）",
       "roshanKills": "肉山击杀",
       "strength": "力量",
       "agility": "敏捷",
       "intellect": "智力",
+      "recipe": "图纸（{name}）",
       "empty": "还没有记录的对局。",
       "failed": "近期战绩暂时取不到，稍后再试。",
       "showAll": "查看全部 {count} 场",

@@ -1,0 +1,2594 @@
+{
+  "item_abyssal_blade": {
+    "icon": "abyssal_blade.4482dc40.webp",
+    "zh": "深渊之刃",
+    "en": "Abyssal Blade",
+    "ru": "Abyssal Blade"
+  },
+  "item_abyssal_blade_v2": {
+    "icon": "abyssal_blade_v2.cf51be81.webp",
+    "zh": "一闪",
+    "en": "Flash",
+    "ru": null
+  },
+  "item_adi_king": {
+    "icon": "adi_king.c8f92bb8.webp",
+    "zh": "阿迪王",
+    "en": "Advanced Phase Boots",
+    "ru": null
+  },
+  "item_adi_king_plus": {
+    "icon": "adi_king_plus.67de2211.webp",
+    "zh": "阿迪王plus",
+    "en": "Advanced Phase Boots Plus",
+    "ru": null
+  },
+  "item_aegis": {
+    "icon": "aegis.9444690c.webp",
+    "zh": "不朽之守护",
+    "en": "Aegis of the Immortal",
+    "ru": "Aegis of the Immortal"
+  },
+  "item_aeon_disk": {
+    "icon": "aeon_disk.4ea87449.webp",
+    "zh": "永恒之盘",
+    "en": "Aeon Disk",
+    "ru": "Aeon Disk"
+  },
+  "item_aeon_pendant": {
+    "icon": "aeon_pendant.04fcb4a3.webp",
+    "zh": "咸鱼之王",
+    "en": "Aeon Pendant",
+    "ru": null
+  },
+  "item_aether_lens": {
+    "icon": "aether_lens.ce4f3156.webp",
+    "zh": "以太透镜",
+    "en": "Aether Lens",
+    "ru": "Aether Lens"
+  },
+  "item_aether_lens_2": {
+    "icon": "aether_lens_2.68131223.webp",
+    "zh": "以太透镜2",
+    "en": "Upgraded Aether Lens",
+    "ru": null
+  },
+  "item_aghanims_shard": {
+    "icon": "aghanims_shard.f010efaa.webp",
+    "zh": "阿哈利姆魔晶",
+    "en": "Aghanim's Shard",
+    "ru": "Aghanim's Shard"
+  },
+  "item_ancient_janggo": {
+    "icon": "ancient_janggo.31a68d25.webp",
+    "zh": "韧鼓",
+    "en": "Drum of Endurance",
+    "ru": "Drum of Endurance"
+  },
+  "item_angels_demise": {
+    "icon": "angels_demise.8eeb667f.webp",
+    "zh": "绝刃",
+    "en": "Khanda",
+    "ru": "Khanda"
+  },
+  "item_arcane_blink": {
+    "icon": "arcane_blink.2153bf2d.webp",
+    "zh": "爱因斯坦闪光",
+    "en": "Blink of Einstein",
+    "ru": "Arcane Blink"
+  },
+  "item_arcane_blink_2": {
+    "icon": "arcane_blink_2.60986ad8.webp",
+    "zh": "秘奥闪光",
+    "en": "Arcane Blink",
+    "ru": null
+  },
+  "item_arcane_boots": {
+    "icon": "arcane_boots.ab8970c4.webp",
+    "zh": "奥术鞋",
+    "en": "Arcane Boots",
+    "ru": "Arcane Boots"
+  },
+  "item_arcane_octarine_core": {
+    "icon": "arcane_octarine_core.18b2f94c.webp",
+    "zh": "奥术之心",
+    "en": "Arcane Core",
+    "ru": null
+  },
+  "item_arcane_ring": {
+    "icon": "arcane_ring.f2983820.webp",
+    "zh": "奥术指环",
+    "en": "Arcane Ring",
+    "ru": "Arcane Ring"
+  },
+  "item_armlet": {
+    "icon": "armlet.0a867d1e.webp",
+    "zh": "莫尔迪基安的臂章",
+    "en": "Armlet of Mordiggian",
+    "ru": "Armlet of Mordiggian"
+  },
+  "item_armlet_artifact": {
+    "icon": "armlet_artifact.7a29be6f.webp",
+    "zh": "神器·光暗臂章",
+    "en": "Artifact Armlet of Mordiggian",
+    "ru": null
+  },
+  "item_armlet_dark": {
+    "icon": "armlet_dark.0a2af53d.webp",
+    "zh": "暗影·臂章",
+    "en": "Dark Armlet of Mordiggian",
+    "ru": null
+  },
+  "item_armlet_light": {
+    "icon": "armlet_light.ea04bb8b.webp",
+    "zh": "圣光·臂章",
+    "en": "Light Armlet of Mordiggian",
+    "ru": null
+  },
+  "item_armlet_plus": {
+    "icon": "armlet_plus.b6c8a664.webp",
+    "zh": "小鸡臂章Plus",
+    "en": "Armlet of Mordiggian Plus",
+    "ru": null
+  },
+  "item_armlet_pro_max": {
+    "icon": "armlet_pro_max.e62d9a35.webp",
+    "zh": "小鸡臂章Pro Max",
+    "en": "Armlet of Mordiggian Plus Pro Max",
+    "ru": null
+  },
+  "item_ash_legion_shield": {
+    "icon": "ash_legion_shield.94a0a33e.webp",
+    "zh": "余烬军团战盾",
+    "en": "Ash Legion Shield",
+    "ru": "Ash Legion Shield"
+  },
+  "item_assault": {
+    "icon": "assault.9610e18c.webp",
+    "zh": "强袭胸甲",
+    "en": "Assault Cuirass",
+    "ru": "Assault Cuirass"
+  },
+  "item_awaken_stone": {
+    "icon": "awaken_stone.304eba8c.webp",
+    "zh": "觉醒石",
+    "en": "Awakening Stone",
+    "ru": null
+  },
+  "item_ballista": {
+    "icon": "ballista.2d84049f.webp",
+    "zh": "弩炮",
+    "en": "Ballista",
+    "ru": "Ballista"
+  },
+  "item_basher": {
+    "icon": "basher.a717a796.webp",
+    "zh": "碎颅锤",
+    "en": "Skull Basher",
+    "ru": "Skull Basher"
+  },
+  "item_beast_armor": {
+    "icon": "beast_armor.99661e13.webp",
+    "zh": "兽化甲",
+    "en": "Beast Armor",
+    "ru": null
+  },
+  "item_beast_shield": {
+    "icon": "beast_shield.94455679.webp",
+    "zh": "兽化盾",
+    "en": "Beast Shield",
+    "ru": null
+  },
+  "item_belt_of_strength": {
+    "icon": "belt_of_strength.95af2868.webp",
+    "zh": "力量腰带",
+    "en": "Belt of Strength",
+    "ru": "Belt of Strength"
+  },
+  "item_bfury": {
+    "icon": "bfury.21c49052.webp",
+    "zh": "狂战斧",
+    "en": "Battle Fury",
+    "ru": "Battle Fury"
+  },
+  "item_bfury_ultra": {
+    "icon": "bfury_ultra.d6aa291f.webp",
+    "zh": "救世狂战",
+    "en": "Worldcleaver",
+    "ru": null
+  },
+  "item_black_king_bar": {
+    "icon": "black_king_bar.2b6d0be6.webp",
+    "zh": "黑皇杖",
+    "en": "Black King Bar",
+    "ru": "Black King Bar"
+  },
+  "item_black_king_bar_2": {
+    "icon": "black_king_bar_2.7e4de4e8.webp",
+    "zh": "天神杖",
+    "en": "Upgraded Black King Bar",
+    "ru": null
+  },
+  "item_blade_mail": {
+    "icon": "blade_mail.12780fea.webp",
+    "zh": "刃甲",
+    "en": "Blade Mail",
+    "ru": "Blade Mail"
+  },
+  "item_blade_mail_2": {
+    "icon": "blade_mail_2.d76273d3.webp",
+    "zh": "刃甲2",
+    "en": "Upgraded Blade Mail",
+    "ru": null
+  },
+  "item_blade_of_alacrity": {
+    "icon": "blade_of_alacrity.833c39c2.webp",
+    "zh": "欢欣之刃",
+    "en": "Blade of Alacrity",
+    "ru": "Blade of Alacrity"
+  },
+  "item_blades_of_attack": {
+    "icon": "blades_of_attack.eebf9cc0.webp",
+    "zh": "攻击之爪",
+    "en": "Blades of Attack",
+    "ru": "Blades of Attack"
+  },
+  "item_blessing_of_dragon": {
+    "icon": "blessing_of_dragon.4c8237f6.webp",
+    "zh": "神龙",
+    "en": "Dragon's Blessing",
+    "ru": null
+  },
+  "item_blessing_of_dragon_1": {
+    "icon": "blessing_of_dragon_1.51c9618d.webp",
+    "zh": "神龙赐福·不死",
+    "en": "Dragon's Blessing of Immortality",
+    "ru": null
+  },
+  "item_blessing_of_dragon_2": {
+    "icon": "blessing_of_dragon_2.4a38e0fc.webp",
+    "zh": "神龙赐福·毁灭",
+    "en": "Dragon's Blessing of Destruction",
+    "ru": null
+  },
+  "item_blessing_of_dragon_3": {
+    "icon": "blessing_of_dragon_3.d5377fd9.webp",
+    "zh": "神龙赐福·时间",
+    "en": "Dragon's Blessing of Time",
+    "ru": null
+  },
+  "item_blessing_of_dragon_4": {
+    "icon": "blessing_of_dragon_4.2369bfb5.webp",
+    "zh": "神龙赐福·空间",
+    "en": "Dragon's Blessing of Space",
+    "ru": null
+  },
+  "item_blight_stone": {
+    "icon": "blight_stone.adb9d557.webp",
+    "zh": "枯萎之珠",
+    "en": "Orb of Blight",
+    "ru": "Orb of Blight"
+  },
+  "item_blink": {
+    "icon": "blink.e61f61fa.webp",
+    "zh": "闪烁匕首",
+    "en": "Blink Dagger",
+    "ru": "Blink Dagger"
+  },
+  "item_blitz_knuckles": {
+    "icon": "blitz_knuckles.342b7a72.webp",
+    "zh": "闪电指套",
+    "en": "Blitz Knuckles",
+    "ru": "Blitz Knuckles"
+  },
+  "item_blood_grenade": {
+    "icon": "blood_grenade.22848139.webp",
+    "zh": "血腥榴弹",
+    "en": "Blood Grenade",
+    "ru": "Blood Grenade"
+  },
+  "item_bloodstone": {
+    "icon": "bloodstone.21274268.webp",
+    "zh": "血精神石",
+    "en": "Godly Bloodstone",
+    "ru": "Bloodstone"
+  },
+  "item_bloodstone_v2": {
+    "icon": "bloodstone_v2.a53b7b55.webp",
+    "zh": "迷你血精石",
+    "en": "Mini Bloodstone",
+    "ru": null
+  },
+  "item_bloodthorn": {
+    "icon": "bloodthorn.eae886ba.webp",
+    "zh": "血棘",
+    "en": "Bloodthorn",
+    "ru": "Bloodthorn"
+  },
+  "item_bloodthorn_ultra": {
+    "icon": "bloodthorn_ultra.83afbc7f.webp",
+    "zh": "变态辣",
+    "en": "Ultra Bloodthorn",
+    "ru": null
+  },
+  "item_blue_fantasy": {
+    "icon": "blue_fantasy.706baee6.webp",
+    "zh": "苍蓝幻想",
+    "en": "Blue Fantasy",
+    "ru": null
+  },
+  "item_boots": {
+    "icon": "boots.6d3627dd.webp",
+    "zh": "速度之靴",
+    "en": "Boots of Speed",
+    "ru": "Boots of Speed"
+  },
+  "item_boots_of_bearing": {
+    "icon": "boots_of_bearing.c35f7eb6.webp",
+    "zh": "宽容之靴",
+    "en": "Boots of Bearing",
+    "ru": "Boots of Bearing"
+  },
+  "item_boots_of_bearing_2": {
+    "icon": "boots_of_bearing_2.f470b0c7.webp",
+    "zh": "神器·蹦迪之鞋",
+    "en": "Artifact: Boots of Bearing",
+    "ru": null
+  },
+  "item_boots_of_elves": {
+    "icon": "boots_of_elves.d90e7258.webp",
+    "zh": "精灵布带",
+    "en": "Band of Elvenskin",
+    "ru": "Band of Elvenskin"
+  },
+  "item_bottle": {
+    "icon": "bottle.d44a29c0.webp",
+    "zh": "魔瓶",
+    "en": "Bottle",
+    "ru": "Bottle"
+  },
+  "item_bracer": {
+    "icon": "bracer.d4aceac3.webp",
+    "zh": "护腕",
+    "en": "Bracer",
+    "ru": "Bracer"
+  },
+  "item_branches": {
+    "icon": "branches.0f34241d.webp",
+    "zh": "铁树枝干",
+    "en": "Iron Branch",
+    "ru": "Iron Branch"
+  },
+  "item_broadsword": {
+    "icon": "broadsword.847c3049.webp",
+    "zh": "阔剑",
+    "en": "Broadsword",
+    "ru": "Broadsword"
+  },
+  "item_broom_handle": {
+    "icon": "broom_handle.a306253c.webp",
+    "zh": "扫帚柄",
+    "en": "Broom Handle",
+    "ru": "Broom Handle"
+  },
+  "item_buckler": {
+    "icon": "buckler.15dbfff9.webp",
+    "zh": "玄冥盾牌",
+    "en": "Buckler",
+    "ru": "Buckler"
+  },
+  "item_butterfly": {
+    "icon": "butterfly.d6fb16d5.webp",
+    "zh": "蝴蝶",
+    "en": "Butterfly",
+    "ru": "Butterfly"
+  },
+  "item_candy_candy": {
+    "icon": "candy_candy.504f8ac4.webp",
+    "zh": "嘉心糖",
+    "en": "Diana Candy",
+    "ru": null
+  },
+  "item_ceremonial_robe": {
+    "icon": "ceremonial_robe.02529890.webp",
+    "zh": "祭礼长袍",
+    "en": "Ceremonial Robe",
+    "ru": "Ceremonial Robe"
+  },
+  "item_chainmail": {
+    "icon": "chainmail.b0d79e50.webp",
+    "zh": "锁子甲",
+    "en": "Chainmail",
+    "ru": "Chainmail"
+  },
+  "item_chasm_stone": {
+    "icon": "chasm_stone.4cfad4ca.webp",
+    "zh": "裂隙之石",
+    "en": "Chasm Stone",
+    "ru": "Chasm Stone"
+  },
+  "item_cheese": {
+    "icon": "cheese.d73de840.webp",
+    "zh": "奶酪",
+    "en": "Cheese",
+    "ru": "Cheese"
+  },
+  "item_chipped_vest": {
+    "icon": "chipped_vest.ae3d7791.webp",
+    "zh": "碎裂背心",
+    "en": "Chipped Vest",
+    "ru": "Chipped Vest"
+  },
+  "item_circlet": {
+    "icon": "circlet.776b2019.webp",
+    "zh": "圆环",
+    "en": "Circlet",
+    "ru": "Circlet"
+  },
+  "item_clarity": {
+    "icon": "clarity.eb41bf39.webp",
+    "zh": "净化药水",
+    "en": "Clarity",
+    "ru": "Clarity"
+  },
+  "item_claymore": {
+    "icon": "claymore.eb84d58e.webp",
+    "zh": "大剑",
+    "en": "Claymore",
+    "ru": "Claymore"
+  },
+  "item_cloak": {
+    "icon": "cloak.34d5b120.webp",
+    "zh": "抗魔斗篷",
+    "en": "Cloak",
+    "ru": "Cloak"
+  },
+  "item_cloak_of_flames": {
+    "icon": "cloak_of_flames.90dc6929.webp",
+    "zh": "火焰斗篷",
+    "en": "Cloak of Flames",
+    "ru": "Cloak of Flames"
+  },
+  "item_collector": {
+    "icon": "collector.f5055f00.webp",
+    "zh": "收纳符",
+    "en": "Item Collector",
+    "ru": null
+  },
+  "item_conjurers_catalyst": {
+    "icon": "conjurers_catalyst.4db30ead.webp",
+    "zh": "咒术师触媒",
+    "en": "Conjurer's Catalyst",
+    "ru": "Conjurer's Catalyst"
+  },
+  "item_consecrated_wraps": {
+    "icon": "consecrated_wraps.e7bda434.webp",
+    "zh": "圣化护服",
+    "en": "Consecrated Wraps",
+    "ru": "Consecrated Wraps"
+  },
+  "item_consecrated_wraps_2": {
+    "icon": "consecrated_wraps_2.dda0c91e.webp",
+    "zh": "神器·急支糖衣",
+    "en": "Artifact: Syrup-Coated Wraps",
+    "ru": null
+  },
+  "item_consumable_gem": {
+    "icon": "consumable_gem.d679387e.webp",
+    "zh": "幻影宝石",
+    "en": "Phantom Gem",
+    "ru": null
+  },
+  "item_crellas_crozier": {
+    "icon": "crellas_crozier.fc582491.webp",
+    "zh": "克莱拉牧杖",
+    "en": "Crella's Crozier",
+    "ru": "Crella's Crozier"
+  },
+  "item_crellas_crozier_2": {
+    "icon": "crellas_crozier_2.b5884f90.webp",
+    "zh": "神器·克莱拉的神化牧杖",
+    "en": "Artifact: Crella's Divine Crozier",
+    "ru": null
+  },
+  "item_crimson_guard": {
+    "icon": "crimson_guard.64500b53.webp",
+    "zh": "赤红甲",
+    "en": "Crimson Guard",
+    "ru": "Crimson Guard"
+  },
+  "item_crippling_crossbow": {
+    "icon": "crippling_crossbow.5a078c34.webp",
+    "zh": "致残之弩",
+    "en": "Crippling Crossbow",
+    "ru": "Crippling Crossbow"
+  },
+  "item_crown": {
+    "icon": "crown.c701244b.webp",
+    "zh": "王冠",
+    "en": "Crown",
+    "ru": "Crown"
+  },
+  "item_cyclone": {
+    "icon": "cyclone.5e4dce3f.webp",
+    "zh": "Eul的神圣法杖",
+    "en": "Eul's Scepter of Divinity",
+    "ru": "Eul's Scepter of Divinity"
+  },
+  "item_dagger_of_ristul": {
+    "icon": "dagger_of_ristul.0dc8281c.webp",
+    "zh": "瑞斯图尔尖匕",
+    "en": "Dagger of Ristul",
+    "ru": "Dagger of Ristul"
+  },
+  "item_dagon": {
+    "icon": "dagon.5b130486.webp",
+    "zh": "达贡之神力",
+    "en": "Dagon",
+    "ru": "Dagon"
+  },
+  "item_dagon_2": {
+    "icon": "dagon_2.f0d74b5e.webp",
+    "zh": "达贡之神力",
+    "en": "Dagon",
+    "ru": "Dagon"
+  },
+  "item_dagon_3": {
+    "icon": "dagon_3.e699f487.webp",
+    "zh": "达贡之神力",
+    "en": "Dagon",
+    "ru": "Dagon"
+  },
+  "item_dagon_4": {
+    "icon": "dagon_4.acd4d93f.webp",
+    "zh": "达贡之神力",
+    "en": "Dagon",
+    "ru": "Dagon"
+  },
+  "item_dagon_5": {
+    "icon": "dagon_5.5bbbc7e6.webp",
+    "zh": "达贡之神力",
+    "en": "Dagon",
+    "ru": "Dagon"
+  },
+  "item_dagon_ultra": {
+    "icon": "dagon_ultra.c0d90f8d.webp",
+    "zh": "神器·一瞬千击",
+    "en": "Artifact: Thousand Strikes",
+    "ru": null
+  },
+  "item_dandelion_amulet": {
+    "icon": "dandelion_amulet.f6292da3.webp",
+    "zh": "蒲公英护符",
+    "en": "Dandelion Amulet",
+    "ru": "Dandelion Amulet"
+  },
+  "item_dark_part": {
+    "icon": "dark_part.07e44878.webp",
+    "zh": "暗影组件",
+    "en": "Dark Part",
+    "ru": null
+  },
+  "item_defiant_shell": {
+    "icon": "defiant_shell.8dcb3288.webp",
+    "zh": "不羁甲壳",
+    "en": "Defiant Shell",
+    "ru": "Defiant Shell"
+  },
+  "item_demon_edge": {
+    "icon": "demon_edge.f095c2c5.webp",
+    "zh": "恶魔刀锋",
+    "en": "Demon Edge",
+    "ru": "Demon Edge"
+  },
+  "item_demonicon": {
+    "icon": "demonicon.d68ca121.webp",
+    "zh": "冥灵书",
+    "en": "Book of the Dead",
+    "ru": "Book of the Dead"
+  },
+  "item_desolator": {
+    "icon": "desolator.8e7be877.webp",
+    "zh": "黯灭",
+    "en": "Desolator",
+    "ru": "Desolator"
+  },
+  "item_desolator_2": {
+    "icon": "desolator_2.225c8312.webp",
+    "zh": "寂灭",
+    "en": "Stygian Desolator",
+    "ru": "Stygian Desolator"
+  },
+  "item_devastator": {
+    "icon": "devastator.0abb3d1d.webp",
+    "zh": "圣斧",
+    "en": "Parasma",
+    "ru": "Parasma"
+  },
+  "item_devastator_2": {
+    "icon": "devastator_2.f6bbf5b9.webp",
+    "zh": "神圣斧",
+    "en": "Sacred Parasma",
+    "ru": null
+  },
+  "item_dezun_bloodrite": {
+    "icon": "dezun_bloodrite.5fe686fb.webp",
+    "zh": "德尊血式",
+    "en": "Dezun Bloodrite",
+    "ru": "Dezun Bloodrite"
+  },
+  "item_diadem": {
+    "icon": "diadem.79986d9b.webp",
+    "zh": "宝冕",
+    "en": "Diadem",
+    "ru": "Diadem"
+  },
+  "item_diffusal_blade": {
+    "icon": "diffusal_blade.2523298a.webp",
+    "zh": "净魂之刃",
+    "en": "Diffusal Blade",
+    "ru": "Diffusal Blade"
+  },
+  "item_disperser": {
+    "icon": "disperser.af956fee.webp",
+    "zh": "散魂剑",
+    "en": "Disperser",
+    "ru": "Disperser"
+  },
+  "item_disperser_chaos": {
+    "icon": "disperser_chaos.469e07d6.webp",
+    "zh": "混沌·散魂剑",
+    "en": "Chaotic Disperser",
+    "ru": null
+  },
+  "item_divine_regalia": {
+    "icon": "divine_regalia.f6d3e263.webp",
+    "zh": "天赐华冠",
+    "en": "Divine Regalia",
+    "ru": "Divine Regalia"
+  },
+  "item_dodo_desolator": {
+    "icon": "dodo_desolator.9166d33e.webp",
+    "zh": "黯灭头",
+    "en": "Dodo Desolator",
+    "ru": null
+  },
+  "item_dormant_curio": {
+    "icon": "dormant_curio.7616e11d.webp",
+    "zh": "休眠珍品",
+    "en": "Dormant Curio",
+    "ru": "Dormant Curio"
+  },
+  "item_dracula_mask": {
+    "icon": "dracula_mask.6aa6f420.webp",
+    "zh": "生命之盔",
+    "en": "Dracula's Mask",
+    "ru": null
+  },
+  "item_dragon_ball_1": {
+    "icon": "dragon_ball_1.e3407721.webp",
+    "zh": "一星珠",
+    "en": "One-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_ball_2": {
+    "icon": "dragon_ball_2.2c6e58c0.webp",
+    "zh": "二星珠",
+    "en": "Two-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_ball_3": {
+    "icon": "dragon_ball_3.c41604c6.webp",
+    "zh": "三星珠",
+    "en": "Three-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_ball_4": {
+    "icon": "dragon_ball_4.4e697c55.webp",
+    "zh": "四星珠",
+    "en": "Four-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_ball_5": {
+    "icon": "dragon_ball_5.6196a5f6.webp",
+    "zh": "五星珠",
+    "en": "Five-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_ball_6": {
+    "icon": "dragon_ball_6.6beb55b1.webp",
+    "zh": "六星珠",
+    "en": "Six-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_ball_7": {
+    "icon": "dragon_ball_7.2813e0a6.webp",
+    "zh": "七星珠",
+    "en": "Seven-Star Dragon Ball",
+    "ru": null
+  },
+  "item_dragon_lance": {
+    "icon": "dragon_lance.229f6a03.webp",
+    "zh": "魔龙枪",
+    "en": "Dragon Lance",
+    "ru": "Dragon Lance"
+  },
+  "item_duelist_gloves": {
+    "icon": "duelist_gloves.edc0cc59.webp",
+    "zh": "决斗家手套",
+    "en": "Duelist Gloves",
+    "ru": "Duelist Gloves"
+  },
+  "item_dust": {
+    "icon": "dust.8c03b757.webp",
+    "zh": "显影之尘",
+    "en": "Dust of Appearance",
+    "ru": "Dust of Appearance"
+  },
+  "item_eagle": {
+    "icon": "eagle.7f429609.webp",
+    "zh": "鹰歌弓",
+    "en": "Eaglesong",
+    "ru": "Eaglesong"
+  },
+  "item_echo_sabre": {
+    "icon": "echo_sabre.0bfd54ca.webp",
+    "zh": "回音战刃",
+    "en": "Echo Sabre",
+    "ru": "Echo Sabre"
+  },
+  "item_echo_sabre_2": {
+    "icon": "echo_sabre_2.5ee08121.webp",
+    "zh": "音速战刃",
+    "en": "Upgraded Echo Sabre",
+    "ru": null
+  },
+  "item_eldwurms_edda": {
+    "icon": "eldwurms_edda.71cfe40a.webp",
+    "zh": "古龙诗集",
+    "en": "Eldwurm's Edda",
+    "ru": "Eldwurm's Edda"
+  },
+  "item_enchanted_mango": {
+    "icon": "enchanted_mango.a791638f.webp",
+    "zh": "魔法芒果",
+    "en": "Enchanted Mango",
+    "ru": "Enchanted Mango"
+  },
+  "item_enchanters_bauble": {
+    "icon": "enchanters_bauble.520f55dd.webp",
+    "zh": "附魔师之椟",
+    "en": "Enchanter's Bauble",
+    "ru": "Enchanter's Bauble"
+  },
+  "item_energy_booster": {
+    "icon": "energy_booster.58bbca20.webp",
+    "zh": "能量之球",
+    "en": "Energy Booster",
+    "ru": "Energy Booster"
+  },
+  "item_enhancement_alert": {
+    "icon": "enhancement_alert.5906c6e9.webp",
+    "zh": "警觉",
+    "en": "Alert",
+    "ru": "Alert"
+  },
+  "item_enhancement_audacious": {
+    "icon": "enhancement_audacious.e81298f2.webp",
+    "zh": "冒险",
+    "en": "Audacious",
+    "ru": "Audacious"
+  },
+  "item_enhancement_boundless": {
+    "icon": "enhancement_boundless.1bc54aa3.webp",
+    "zh": "无边",
+    "en": "Boundless",
+    "ru": "Boundless"
+  },
+  "item_enhancement_brawny": {
+    "icon": "enhancement_brawny.2875060e.webp",
+    "zh": "壮实",
+    "en": "Brawny",
+    "ru": "Brawny"
+  },
+  "item_enhancement_crude": {
+    "icon": "enhancement_crude.4815518a.webp",
+    "zh": "粗暴",
+    "en": "Crude",
+    "ru": "Crude"
+  },
+  "item_enhancement_dominant": {
+    "icon": "enhancement_dominant.6eb23ee1.webp",
+    "zh": "专横",
+    "en": "Dominant",
+    "ru": "Dominant"
+  },
+  "item_enhancement_evolved": {
+    "icon": "enhancement_evolved.ac72081f.webp",
+    "zh": "进化",
+    "en": "Evolved",
+    "ru": "Evolved"
+  },
+  "item_enhancement_feverish": {
+    "icon": "enhancement_feverish.9e2e4094.webp",
+    "zh": "狂热",
+    "en": "Feverish",
+    "ru": "Feverish"
+  },
+  "item_enhancement_fierce": {
+    "icon": "enhancement_fierce.11c604d7.webp",
+    "zh": "凶猛",
+    "en": "Fierce",
+    "ru": "Fierce"
+  },
+  "item_enhancement_fleetfooted": {
+    "icon": "enhancement_fleetfooted.fec70da5.webp",
+    "zh": "捷足",
+    "en": "Fleetfooted",
+    "ru": "Fleetfooted"
+  },
+  "item_enhancement_greedy": {
+    "icon": "enhancement_greedy.af46659a.webp",
+    "zh": "贪婪",
+    "en": "Greedy",
+    "ru": "Greedy"
+  },
+  "item_enhancement_hulking": {
+    "icon": "enhancement_hulking.6449f524.webp",
+    "zh": "笨重",
+    "en": "Hulking",
+    "ru": "Hulking"
+  },
+  "item_enhancement_keen_eyed": {
+    "icon": "enhancement_keen_eyed.bce948c2.webp",
+    "zh": "犀利",
+    "en": "Keen-eyed",
+    "ru": "Keen-eyed"
+  },
+  "item_enhancement_manic": {
+    "icon": "enhancement_manic.7e0affe2.webp",
+    "zh": "癫狂",
+    "en": "Manic",
+    "ru": "Manic"
+  },
+  "item_enhancement_mystical": {
+    "icon": "enhancement_mystical.77ede8e5.webp",
+    "zh": "神秘",
+    "en": "Mystical",
+    "ru": "Mystical"
+  },
+  "item_enhancement_nimble": {
+    "icon": "enhancement_nimble.8a4c300e.webp",
+    "zh": "轻快",
+    "en": "Nimble",
+    "ru": "Nimble"
+  },
+  "item_enhancement_quickened": {
+    "icon": "enhancement_quickened.bb25d3b9.webp",
+    "zh": "迅速",
+    "en": "Quickened",
+    "ru": "Quickened"
+  },
+  "item_enhancement_restorative": {
+    "icon": "enhancement_restorative.f9317e67.webp",
+    "zh": "滋补",
+    "en": "Restorative",
+    "ru": "Restorative"
+  },
+  "item_enhancement_thick": {
+    "icon": "enhancement_thick.6528e240.webp",
+    "zh": "厚重",
+    "en": "Thick",
+    "ru": "Thick"
+  },
+  "item_enhancement_timeless": {
+    "icon": "enhancement_timeless.b6610df1.webp",
+    "zh": "永恒",
+    "en": "Timeless",
+    "ru": "Timeless"
+  },
+  "item_enhancement_titanic": {
+    "icon": "enhancement_titanic.bd5a4586.webp",
+    "zh": "巨神",
+    "en": "Titanic",
+    "ru": "Titanic"
+  },
+  "item_enhancement_tough": {
+    "icon": "enhancement_tough.d16c6255.webp",
+    "zh": "坚强",
+    "en": "Tough",
+    "ru": "Tough"
+  },
+  "item_enhancement_vampiric": {
+    "icon": "enhancement_vampiric.b49dd11b.webp",
+    "zh": "吸血鬼",
+    "en": "Vampiric",
+    "ru": "Vampiric"
+  },
+  "item_enhancement_vast": {
+    "icon": "enhancement_vast.ae3427a3.webp",
+    "zh": "高远",
+    "en": "Vast",
+    "ru": "Vast"
+  },
+  "item_enhancement_vital": {
+    "icon": "enhancement_vital.198d83f2.webp",
+    "zh": "活力",
+    "en": "Vital",
+    "ru": "Vital"
+  },
+  "item_enhancement_wise": {
+    "icon": "enhancement_wise.d39b4e72.webp",
+    "zh": "睿智",
+    "en": "Wise",
+    "ru": "Wise"
+  },
+  "item_essence_distiller": {
+    "icon": "essence_distiller.1d57210c.webp",
+    "zh": "精之灵器",
+    "en": "Essence Distiller",
+    "ru": "Essence Distiller"
+  },
+  "item_essence_distiller_2": {
+    "icon": "essence_distiller_2.0962adcf.webp",
+    "zh": "神器·精灵圣宝",
+    "en": "Artifact: Sacred Spirit Distiller",
+    "ru": null
+  },
+  "item_essence_ring": {
+    "icon": "essence_ring.6020081c.webp",
+    "zh": "精华指环",
+    "en": "Essence Ring",
+    "ru": "Essence Ring"
+  },
+  "item_eternal_shroud_ultra": {
+    "icon": "eternal_shroud_ultra.7a848670.webp",
+    "zh": "法师泳衣",
+    "en": "Swimagicostume",
+    "ru": null
+  },
+  "item_ethereal_blade": {
+    "icon": "ethereal_blade.b1cee7d7.webp",
+    "zh": "虚灵之刃",
+    "en": "Ethereal Blade",
+    "ru": "Ethereal Blade"
+  },
+  "item_ex_machina": {
+    "icon": "ex_machina.c5dc4b19.webp",
+    "zh": "机械之心",
+    "en": "Ex Machina",
+    "ru": "Ex Machina"
+  },
+  "item_excalibur": {
+    "icon": "excalibur.06cee5c8.webp",
+    "zh": "EX咖喱棒",
+    "en": "Excalibur",
+    "ru": null
+  },
+  "item_faerie_fire": {
+    "icon": "faerie_fire.e56e54ea.webp",
+    "zh": "仙灵之火",
+    "en": "Faerie Fire",
+    "ru": "Faerie Fire"
+  },
+  "item_falcon_blade": {
+    "icon": "falcon_blade.f275c407.webp",
+    "zh": "猎鹰战刃",
+    "en": "Falcon Blade",
+    "ru": "Falcon Blade"
+  },
+  "item_fallen_sky": {
+    "icon": "fallen_sky.3697c26b.webp",
+    "zh": "天崩",
+    "en": "Fallen Sky",
+    "ru": "Fallen Sky"
+  },
+  "item_famango": {
+    "icon": "famango.ff30cb14.webp",
+    "zh": "疗伤莲花",
+    "en": "Healing Lotus",
+    "ru": "Healing Lotus"
+  },
+  "item_flask": {
+    "icon": "flask.72fd12dd.webp",
+    "zh": "治疗药膏",
+    "en": "Healing Salve",
+    "ru": "Healing Salve"
+  },
+  "item_flayers_bota": {
+    "icon": "flayers_bota.ab4f0520.webp",
+    "zh": "剥皮血囊",
+    "en": "Flayer's Bota",
+    "ru": "Flayer's Bota"
+  },
+  "item_fluffy_hat": {
+    "icon": "fluffy_hat.b7028b75.webp",
+    "zh": "毛毛帽",
+    "en": "Fluffy Hat",
+    "ru": "Fluffy Hat"
+  },
+  "item_foragers_health": {
+    "icon": "foragers_health.0daaaca8.webp",
+    "zh": "活力伞菌",
+    "en": "Vital Toadstool",
+    "ru": "Vital Toadstool"
+  },
+  "item_foragers_kit": {
+    "icon": "foragers_kit.b3d6166f.webp",
+    "zh": "采菌套具",
+    "en": "Forager's Kit",
+    "ru": "Forager's Kit"
+  },
+  "item_foragers_mana": {
+    "icon": "foragers_mana.224bc81c.webp",
+    "zh": "托莫干伞盖",
+    "en": "Tomo'kan Ringcap",
+    "ru": "Tomo'kan Ringcap"
+  },
+  "item_foragers_stats": {
+    "icon": "foragers_stats.915f3f12.webp",
+    "zh": "铁树坚果",
+    "en": "Ironwood Nut",
+    "ru": "Ironwood Nut"
+  },
+  "item_forbidden_blade": {
+    "icon": "forbidden_blade.6f5f4a5b.webp",
+    "zh": "禁忌战刃",
+    "en": "Forbidden Blade",
+    "ru": null
+  },
+  "item_forbidden_staff": {
+    "icon": "forbidden_staff.add3be26.webp",
+    "zh": "禁忌法锤",
+    "en": "Forbidden Staff",
+    "ru": null
+  },
+  "item_force_field_ultra": {
+    "icon": "force_field_ultra.34e98e80.webp",
+    "zh": "神器·天地同寿甲",
+    "en": "Artifact: Arcanist's Armor",
+    "ru": null
+  },
+  "item_force_staff": {
+    "icon": "force_staff.038e962b.webp",
+    "zh": "原力法杖",
+    "en": "Force Staff",
+    "ru": "Force Staff"
+  },
+  "item_force_staff_2": {
+    "icon": "force_staff_2.ed51588f.webp",
+    "zh": "风力法杖",
+    "en": "Wind Force Staff",
+    "ru": null
+  },
+  "item_force_staff_3": {
+    "icon": "force_staff_3.da9b3685.webp",
+    "zh": "黄金法杖",
+    "en": "Golden Force Staff",
+    "ru": null
+  },
+  "item_fusion_agile": {
+    "icon": "fusion_agile.ac238b61.webp",
+    "zh": "灵动符文",
+    "en": "Agile Rune",
+    "ru": null
+  },
+  "item_fusion_beast": {
+    "icon": "fusion_beast.7296df81.webp",
+    "zh": "兽化符文",
+    "en": "Beast Rune",
+    "ru": null
+  },
+  "item_fusion_brutal": {
+    "icon": "fusion_brutal.4f5bea88.webp",
+    "zh": "暴虐符文",
+    "en": "Brutal Rune",
+    "ru": null
+  },
+  "item_fusion_forbidden": {
+    "icon": "fusion_forbidden.c6abc067.webp",
+    "zh": "禁忌符文",
+    "en": "Forbidden Rune",
+    "ru": null
+  },
+  "item_fusion_hawkeye": {
+    "icon": "fusion_hawkeye.41634c82.webp",
+    "zh": "鹰眼符文",
+    "en": "Hawkeye Rune",
+    "ru": null
+  },
+  "item_fusion_life": {
+    "icon": "fusion_life.492e6586.webp",
+    "zh": "生命符文",
+    "en": "Life Rune",
+    "ru": null
+  },
+  "item_fusion_magic": {
+    "icon": "fusion_magic.2f4af320.webp",
+    "zh": "魔化符文",
+    "en": "Magic Rune",
+    "ru": null
+  },
+  "item_fusion_shadow": {
+    "icon": "fusion_shadow.af281cce.webp",
+    "zh": "暗影符文",
+    "en": "Shadow Rune",
+    "ru": null
+  },
+  "item_gale_guard": {
+    "icon": "gale_guard.4674cdc9.webp",
+    "zh": "烈风护体",
+    "en": "Gale Guard",
+    "ru": "Gale Guard"
+  },
+  "item_gauntlets": {
+    "icon": "gauntlets.c45fc1fc.webp",
+    "zh": "力量手套",
+    "en": "Gauntlets of Strength",
+    "ru": "Gauntlets of Strength"
+  },
+  "item_gem": {
+    "icon": "gem.4991db68.webp",
+    "zh": "真视宝石",
+    "en": "Gem of True Sight",
+    "ru": "Gem of True Sight"
+  },
+  "item_ghost": {
+    "icon": "ghost.f0f4df8a.webp",
+    "zh": "幽魂权杖",
+    "en": "Ghost Scepter",
+    "ru": "Ghost Scepter"
+  },
+  "item_giant_maul": {
+    "icon": "giant_maul.ceee8dc7.webp",
+    "zh": "巨人之槌",
+    "en": "Giant's Maul",
+    "ru": "Giant's Maul"
+  },
+  "item_giants_ring": {
+    "icon": "giants_ring.853d065e.webp",
+    "zh": "巨人之戒",
+    "en": "Giant's Ring",
+    "ru": "Giant's Ring"
+  },
+  "item_glimmer_cape": {
+    "icon": "glimmer_cape.4e219389.webp",
+    "zh": "微光披风",
+    "en": "Glimmer Cape",
+    "ru": "Glimmer Cape"
+  },
+  "item_gloves": {
+    "icon": "gloves.c7bdbb34.webp",
+    "zh": "加速手套",
+    "en": "Gloves of Haste",
+    "ru": "Gloves of Haste"
+  },
+  "item_great_famango": {
+    "icon": "great_famango.ce4ddf4f.webp",
+    "zh": "大疗伤莲花",
+    "en": "Great Healing Lotus",
+    "ru": "Great Healing Lotus"
+  },
+  "item_greater_crit": {
+    "icon": "greater_crit.4fdba3ec.webp",
+    "zh": "代达罗斯之殇",
+    "en": "Daedalus",
+    "ru": "Daedalus"
+  },
+  "item_greater_famango": {
+    "icon": "greater_famango.18ba7649.webp",
+    "zh": "巨大疗伤莲花",
+    "en": "Greater Healing Lotus",
+    "ru": "Greater Healing Lotus"
+  },
+  "item_guardian_greaves": {
+    "icon": "guardian_greaves.7d3df116.webp",
+    "zh": "卫士胫甲",
+    "en": "Guardian Greaves",
+    "ru": "Guardian Greaves"
+  },
+  "item_guardian_greaves_artifact": {
+    "icon": "guardian_greaves_artifact.3f5a7dd2.webp",
+    "zh": "神器·卫士胫甲",
+    "en": "Artifact Guardian Greaves",
+    "ru": null
+  },
+  "item_gungir": {
+    "icon": "gungir.1be0538b.webp",
+    "zh": "缚灵索",
+    "en": "Gleipnir",
+    "ru": "Gleipnir"
+  },
+  "item_gungir_2": {
+    "icon": "gungir_2.3790f704.webp",
+    "zh": "风暴之锤",
+    "en": "Advanced Gleipnir",
+    "ru": null
+  },
+  "item_gunpowder_gauntlets": {
+    "icon": "gunpowder_gauntlets.32102e5a.webp",
+    "zh": "火药手套",
+    "en": "Gunpowder Gauntlet",
+    "ru": "Gunpowder Gauntlet"
+  },
+  "item_hallowed_scepter": {
+    "icon": "hallowed_scepter.cdf17215.webp",
+    "zh": "仙云法杖",
+    "en": "Hallowed Scepter",
+    "ru": null
+  },
+  "item_hand_of_group": {
+    "icon": "hand_of_group.dda5686a.webp",
+    "zh": "团队之手",
+    "en": "Hand of Team",
+    "ru": null
+  },
+  "item_hand_of_midas": {
+    "icon": "hand_of_midas.49bb16a5.webp",
+    "zh": "迈达斯之手",
+    "en": "Hand of Midas",
+    "ru": "Hand of Midas"
+  },
+  "item_harmonizer": {
+    "icon": "harmonizer.3046342d.webp",
+    "zh": "协和",
+    "en": "Harmonizer",
+    "ru": "Harmonizer"
+  },
+  "item_harpoon": {
+    "icon": "harpoon.0edf21a4.webp",
+    "zh": "鱼叉",
+    "en": "Harpoon",
+    "ru": "Harpoon"
+  },
+  "item_havoc_hammer": {
+    "icon": "havoc_hammer.ba2b9bd3.webp",
+    "zh": "浩劫巨锤",
+    "en": "Havoc Hammer",
+    "ru": "Havoc Hammer"
+  },
+  "item_hawkeye_fighter": {
+    "icon": "hawkeye_fighter.2f45552c.webp",
+    "zh": "鹰眼战机",
+    "en": "Hawkeye Fighter",
+    "ru": null
+  },
+  "item_hawkeye_turret": {
+    "icon": "hawkeye_turret.66956090.webp",
+    "zh": "鹰眼炮台",
+    "en": "Hawkeye Turret",
+    "ru": null
+  },
+  "item_headdress": {
+    "icon": "headdress.f1094329.webp",
+    "zh": "恢复头巾",
+    "en": "Headdress",
+    "ru": "Headdress"
+  },
+  "item_heart": {
+    "icon": "heart.3645ba7b.webp",
+    "zh": "恐鳌之心",
+    "en": "Heart of Tarrasque",
+    "ru": "Heart of Tarrasque"
+  },
+  "item_heavens_halberd": {
+    "icon": "heavens_halberd.dbbe4989.webp",
+    "zh": "天堂之戟",
+    "en": "Heaven's Halberd",
+    "ru": "Heaven's Halberd"
+  },
+  "item_heavens_halberd_v2": {
+    "icon": "heavens_halberd_v2.48101093.webp",
+    "zh": "无锋战戟",
+    "en": "Heaven's Lament",
+    "ru": null
+  },
+  "item_heavy_blade": {
+    "icon": "heavy_blade.a67ac6fe.webp",
+    "zh": "行巫之祸",
+    "en": "Witchbane",
+    "ru": "Witchbane"
+  },
+  "item_helm_of_iron_will": {
+    "icon": "helm_of_iron_will.b186e735.webp",
+    "zh": "铁意头盔",
+    "en": "Helm of Iron Will",
+    "ru": "Helm of Iron Will"
+  },
+  "item_holy_locket": {
+    "icon": "holy_locket.c9699fee.webp",
+    "zh": "圣洁吊坠",
+    "en": "Holy Locket",
+    "ru": "Holy Locket"
+  },
+  "item_hurricane_pike": {
+    "icon": "hurricane_pike.4fe3b981.webp",
+    "zh": "飓风长戟",
+    "en": "Hurricane Pike",
+    "ru": "Hurricane Pike"
+  },
+  "item_hurricane_pike_2": {
+    "icon": "hurricane_pike_2.041028f1.webp",
+    "zh": "黄金魔龙枪 Ultimate",
+    "en": "Golden Hurricane Pike",
+    "ru": null
+  },
+  "item_hydras_breath": {
+    "icon": "hydras_breath.5f039f0f.webp",
+    "zh": "怪蛇之息",
+    "en": "Hydra's Breath",
+    "ru": "Hydra's Breath"
+  },
+  "item_hydras_breath_2": {
+    "icon": "hydras_breath_2.434012f8.webp",
+    "zh": "神器·千年毒蛟之息",
+    "en": "Artifact: Millennial Hydra's Breath",
+    "ru": null
+  },
+  "item_hyperstone": {
+    "icon": "hyperstone.dada05df.webp",
+    "zh": "振奋宝石",
+    "en": "Hyperstone",
+    "ru": "Hyperstone"
+  },
+  "item_idol_of_screeauk": {
+    "icon": "idol_of_screeauk.8151f615.webp",
+    "zh": "丝奎奥克神像",
+    "en": "Idol of Scree'auk",
+    "ru": "Idol of Scree'auk"
+  },
+  "item_imp_claw": {
+    "icon": "imp_claw.1bd1e916.webp",
+    "zh": "力量法则碎片",
+    "en": "Power Law Fragment",
+    "ru": "Imp Claw"
+  },
+  "item_infernal_desolator": {
+    "icon": "infernal_desolator.4958f805.webp",
+    "zh": "绝对破防之刃",
+    "en": "Infernal Desolator",
+    "ru": null
+  },
+  "item_infused_raindrop": {
+    "icon": "infused_raindrop.c95bafac.webp",
+    "zh": "凝魂之露",
+    "en": "Infused Raindrops",
+    "ru": "Infused Raindrops"
+  },
+  "item_insight_armor": {
+    "icon": "insight_armor.096b08f7.webp",
+    "zh": "洞察盔甲",
+    "en": "Armor of Insight",
+    "ru": null
+  },
+  "item_inventory_slot_unlock": {
+    "icon": "inventory_slot_unlock.15931ec6.webp",
+    "zh": "扩容之书",
+    "en": "Tome of Expansion",
+    "ru": null
+  },
+  "item_invis_sword": {
+    "icon": "invis_sword.edcbf196.webp",
+    "zh": "影刃",
+    "en": "Shadow Blade",
+    "ru": "Shadow Blade"
+  },
+  "item_javelin": {
+    "icon": "javelin.a4f0a733.webp",
+    "zh": "标枪",
+    "en": "Javelin",
+    "ru": "Javelin"
+  },
+  "item_jidi_pollen_bag": {
+    "icon": "jidi_pollen_bag.f918a782.webp",
+    "zh": "基迪花粉袋",
+    "en": "Jidi Pollen Bag",
+    "ru": "Jidi Pollen Bag"
+  },
+  "item_jump_jump_jump": {
+    "icon": "jump_jump_jump.0e43deca.webp",
+    "zh": "跳！跳！跳！刀",
+    "en": "Jump! Jump! Jump!",
+    "ru": null
+  },
+  "item_kaya": {
+    "icon": "kaya.9e0215fa.webp",
+    "zh": "慧光",
+    "en": "Kaya",
+    "ru": "Kaya"
+  },
+  "item_kaya_and_sange": {
+    "icon": "kaya_and_sange.1dc07cde.webp",
+    "zh": "散慧对剑",
+    "en": "Kaya and Sange",
+    "ru": "Kaya and Sange"
+  },
+  "item_kaya_and_sange_1": {
+    "icon": "kaya_and_sange_1.db1a65b4.webp",
+    "zh": "神器·散慧对剑",
+    "en": "Ultra Kaya and Sange",
+    "ru": null
+  },
+  "item_kobold_cup": {
+    "icon": "kobold_cup.04413fc9.webp",
+    "zh": "狗头人酒杯",
+    "en": "Kobold Cup",
+    "ru": "Kobold Cup"
+  },
+  "item_lesser_crit": {
+    "icon": "lesser_crit.4d5bceb3.webp",
+    "zh": "水晶剑",
+    "en": "Crystalys",
+    "ru": "Crystalys"
+  },
+  "item_lifesteal": {
+    "icon": "lifesteal.e179a4b5.webp",
+    "zh": "吸血面具",
+    "en": "Morbid Mask",
+    "ru": "Morbid Mask"
+  },
+  "item_light_part": {
+    "icon": "light_part.c0ba682b.webp",
+    "zh": "圣光组件",
+    "en": "Light Part",
+    "ru": null
+  },
+  "item_lotus_orb": {
+    "icon": "lotus_orb.41e8497a.webp",
+    "zh": "清莲宝珠",
+    "en": "Lotus Orb",
+    "ru": "Lotus Orb"
+  },
+  "item_maelstrom": {
+    "icon": "maelstrom.94af8a72.webp",
+    "zh": "漩涡",
+    "en": "Maelstrom",
+    "ru": "Maelstrom"
+  },
+  "item_mage_slayer": {
+    "icon": "mage_slayer.144edc4e.webp",
+    "zh": "法师克星",
+    "en": "Mage Slayer",
+    "ru": "Mage Slayer"
+  },
+  "item_magic_crit_blade": {
+    "icon": "magic_crit_blade.f65ad2b1.webp",
+    "zh": "魔龙狂舞",
+    "en": "Dragon Dance",
+    "ru": null
+  },
+  "item_magic_scepter": {
+    "icon": "magic_scepter.c7bb1215.webp",
+    "zh": "魔云法杖",
+    "en": "Magic Scepter",
+    "ru": null
+  },
+  "item_magic_stick": {
+    "icon": "magic_stick.7e8dd269.webp",
+    "zh": "魔棒",
+    "en": "Magic Stick",
+    "ru": "Magic Stick"
+  },
+  "item_magic_sword": {
+    "icon": "magic_sword.de9e286e.webp",
+    "zh": "魔渊剑",
+    "en": "Demonic Sword",
+    "ru": null
+  },
+  "item_magic_wand": {
+    "icon": "magic_wand.23f786ff.webp",
+    "zh": "魔杖",
+    "en": "Magic Wand",
+    "ru": "Magic Wand"
+  },
+  "item_magnifying_monocle": {
+    "icon": "magnifying_monocle.41e082b1.webp",
+    "zh": "放大单片镜",
+    "en": "Magnifying Monocle",
+    "ru": "Magnifying Monocle"
+  },
+  "item_mana_draught": {
+    "icon": "mana_draught.adf18129.webp",
+    "zh": "魔力药水",
+    "en": "Mana Draught",
+    "ru": "Mana Draught"
+  },
+  "item_manta": {
+    "icon": "manta.056f5da2.webp",
+    "zh": "幻影斧",
+    "en": "Manta Style",
+    "ru": "Manta Style"
+  },
+  "item_manta_1": {
+    "icon": "manta_1.ffd0c3f2.webp",
+    "zh": "幻身斧",
+    "en": "Upgraded Manta Style",
+    "ru": null
+  },
+  "item_manta_2": {
+    "icon": "manta_2.5f4d1f43.webp",
+    "zh": "相位斧",
+    "en": "Phase Axe",
+    "ru": null
+  },
+  "item_mantle": {
+    "icon": "mantle.ec968166.webp",
+    "zh": "智力斗篷",
+    "en": "Mantle of Intelligence",
+    "ru": "Mantle of Intelligence"
+  },
+  "item_mask_of_madness": {
+    "icon": "mask_of_madness.130d470d.webp",
+    "zh": "疯狂面具",
+    "en": "Mask of Madness",
+    "ru": "Mask of Madness"
+  },
+  "item_medallion_of_courage": {
+    "icon": "medallion_of_courage.d04f1f15.webp",
+    "zh": "勇气勋章",
+    "en": "Medallion of Courage",
+    "ru": "Medallion of Courage"
+  },
+  "item_mekansm": {
+    "icon": "mekansm.30015069.webp",
+    "zh": "梅肯斯姆",
+    "en": "Mekansm",
+    "ru": "Mekansm"
+  },
+  "item_metamorphic_mandible": {
+    "icon": "metamorphic_mandible.9ec00814.webp",
+    "zh": "变态上颚",
+    "en": "Metamorphic Mandible",
+    "ru": "Metamorphic Mandible"
+  },
+  "item_meteor_hammer": {
+    "icon": "meteor_hammer.9071694b.webp",
+    "zh": "陨星锤",
+    "en": "Meteor Hammer",
+    "ru": "Meteor Hammer"
+  },
+  "item_meteor_hammer_2": {
+    "icon": "meteor_hammer_2.df52f725.webp",
+    "zh": "星落",
+    "en": "Asteroid Hammer",
+    "ru": null
+  },
+  "item_minotaur_horn": {
+    "icon": "minotaur_horn.3c3c8d38.webp",
+    "zh": "恶牛角",
+    "en": "Minotaur Horn",
+    "ru": "Minotaur Horn"
+  },
+  "item_mirror_shield": {
+    "icon": "mirror_shield.e0a7d97d.webp",
+    "zh": "神镜盾",
+    "en": "Mirror Shield",
+    "ru": "Mirror Shield"
+  },
+  "item_misericorde": {
+    "icon": "misericorde.796ddfa3.webp",
+    "zh": "飞贼之刃",
+    "en": "Brigand's Blade",
+    "ru": "Brigand's Blade"
+  },
+  "item_mithril_hammer": {
+    "icon": "mithril_hammer.7e72021a.webp",
+    "zh": "秘银锤",
+    "en": "Mithril Hammer",
+    "ru": "Mithril Hammer"
+  },
+  "item_mjollnir": {
+    "icon": "mjollnir.64cc6e0e.webp",
+    "zh": "雷神之锤",
+    "en": "Mjollnir",
+    "ru": "Mjollnir"
+  },
+  "item_mjollnir_2": {
+    "icon": "mjollnir_2.090c5b3b.webp",
+    "zh": "神器·神雷锤",
+    "en": "Artifact: Divine Thunder Hammer",
+    "ru": null
+  },
+  "item_monkey_king_bar": {
+    "icon": "monkey_king_bar.c2ca38d1.webp",
+    "zh": "金箍棒",
+    "en": "Monkey King Bar",
+    "ru": "Monkey King Bar"
+  },
+  "item_monkey_king_bar_2": {
+    "icon": "monkey_king_bar_2.cb1bab49.webp",
+    "zh": "定海神针",
+    "en": "Ultra Monkey King Bar",
+    "ru": null
+  },
+  "item_moon_shard": {
+    "icon": "moon_shard.e13de1fc.webp",
+    "zh": "银月之晶",
+    "en": "Moon Shard",
+    "ru": "Moon Shard"
+  },
+  "item_moon_shard_datadriven": {
+    "icon": "moon_shard_datadriven.e13de1fc.webp",
+    "zh": "真·银月之晶",
+    "en": "Moon Shard",
+    "ru": null
+  },
+  "item_mysterious_hat": {
+    "icon": "mysterious_hat.8a852376.webp",
+    "zh": "仙灵饰品",
+    "en": "Fairy's Trinket",
+    "ru": "Fairy's Trinket"
+  },
+  "item_mystic_staff": {
+    "icon": "mystic_staff.75a016a7.webp",
+    "zh": "神秘法杖",
+    "en": "Mystic Staff",
+    "ru": "Mystic Staff"
+  },
+  "item_necronomicon_staff": {
+    "icon": "necronomicon_staff.091ca49c.webp",
+    "zh": "死灵法杖",
+    "en": "Necronomicon Staff",
+    "ru": null
+  },
+  "item_nemesis_curse": {
+    "icon": "nemesis_curse.444e3d24.webp",
+    "zh": "天诛之咒",
+    "en": "Nemesis Curse",
+    "ru": "Nemesis Curse"
+  },
+  "item_null_talisman": {
+    "icon": "null_talisman.30536f90.webp",
+    "zh": "空灵挂件",
+    "en": "Null Talisman",
+    "ru": "Null Talisman"
+  },
+  "item_nullifier": {
+    "icon": "nullifier.2a547d64.webp",
+    "zh": "否决坠饰",
+    "en": "Nullifier",
+    "ru": "Nullifier"
+  },
+  "item_oblivion_staff": {
+    "icon": "oblivion_staff.65a68785.webp",
+    "zh": "空明杖",
+    "en": "Oblivion Staff",
+    "ru": "Oblivion Staff"
+  },
+  "item_octarine_core": {
+    "icon": "octarine_core.8081e48d.webp",
+    "zh": "玲珑心",
+    "en": "Octarine Core",
+    "ru": "Octarine Core"
+  },
+  "item_ogre_axe": {
+    "icon": "ogre_axe.81325ffa.webp",
+    "zh": "食人魔之斧",
+    "en": "Ogre Axe",
+    "ru": "Ogre Axe"
+  },
+  "item_orb_of_corrosion": {
+    "icon": "orb_of_corrosion.76fc2864.webp",
+    "zh": "腐蚀之珠",
+    "en": "Orb of Corrosion",
+    "ru": "Orb of Corrosion"
+  },
+  "item_orb_of_destruction": {
+    "icon": "orb_of_destruction.33be7e39.webp",
+    "zh": "毁灭灵球",
+    "en": "Orb of Destruction",
+    "ru": "Orb of Destruction"
+  },
+  "item_orb_of_frost": {
+    "icon": "orb_of_frost.3f3ab2a4.webp",
+    "zh": "冰霜之珠",
+    "en": "Orb of Frost",
+    "ru": "Orb of Frost"
+  },
+  "item_orb_of_the_brine": {
+    "icon": "orb_of_the_brine.d8ec5b84.webp",
+    "zh": "苍洋魔珠",
+    "en": "Orb of the Brine",
+    "ru": null
+  },
+  "item_orb_of_venom": {
+    "icon": "orb_of_venom.0c8a7b0f.webp",
+    "zh": "淬毒之珠",
+    "en": "Orb of Venom",
+    "ru": "Orb of Venom"
+  },
+  "item_orchid": {
+    "icon": "orchid.e23b6669.webp",
+    "zh": "紫怨",
+    "en": "Orchid Malevolence",
+    "ru": "Orchid Malevolence"
+  },
+  "item_overwhelming_blink": {
+    "icon": "overwhelming_blink.e9973d8a.webp",
+    "zh": "盛势闪光",
+    "en": "Overwhelming Blink",
+    "ru": "Overwhelming Blink"
+  },
+  "item_overwhelming_blink_2": {
+    "icon": "overwhelming_blink_2.e9a649c9.webp",
+    "zh": "泰森闪光",
+    "en": "Tyson's Flash",
+    "ru": null
+  },
+  "item_paladin_sword": {
+    "icon": "paladin_sword.cab8658d.webp",
+    "zh": "骑士剑",
+    "en": "Paladin Sword",
+    "ru": "Paladin Sword"
+  },
+  "item_panic_button": {
+    "icon": "panic_button.bb5a26c4.webp",
+    "zh": "神妙明灯",
+    "en": "Magic Lamp",
+    "ru": "Magic Lamp"
+  },
+  "item_partisans_brand": {
+    "icon": "partisans_brand.c9bc8c8f.webp",
+    "zh": "天游烙印",
+    "en": "Partisan's Brand",
+    "ru": "Partisan's Brand"
+  },
+  "item_passive_skill_tome": {
+    "icon": "passive_skill_tome.214e4c55.webp",
+    "zh": "被动技能书",
+    "en": "Passive Skill Tome",
+    "ru": null
+  },
+  "item_pavise": {
+    "icon": "pavise.f3224fae.webp",
+    "zh": "长盾",
+    "en": "Pavise",
+    "ru": "Pavise"
+  },
+  "item_penta_edged_sword": {
+    "icon": "penta_edged_sword.dc445c86.webp",
+    "zh": "五锋长剑",
+    "en": "Penta-Edged Sword",
+    "ru": "Penta-Edged Sword"
+  },
+  "item_pers": {
+    "icon": "pers.fdb32d77.webp",
+    "zh": "坚韧球",
+    "en": "Perseverance",
+    "ru": "Perseverance"
+  },
+  "item_phase_boots": {
+    "icon": "phase_boots.e4c58ba0.webp",
+    "zh": "相位鞋",
+    "en": "Phase Boots",
+    "ru": "Phase Boots"
+  },
+  "item_phylactery": {
+    "icon": "phylactery.24108012.webp",
+    "zh": "灵匣",
+    "en": "Phylactery",
+    "ru": "Phylactery"
+  },
+  "item_pipe": {
+    "icon": "pipe.26267c1d.webp",
+    "zh": "洞察烟斗",
+    "en": "Pipe of Insight",
+    "ru": "Pipe of Insight"
+  },
+  "item_platemail": {
+    "icon": "platemail.1818e34d.webp",
+    "zh": "板甲",
+    "en": "Platemail",
+    "ru": "Platemail"
+  },
+  "item_point_booster": {
+    "icon": "point_booster.5497067d.webp",
+    "zh": "精气之球",
+    "en": "Point Booster",
+    "ru": "Point Booster"
+  },
+  "item_polliwog_charm": {
+    "icon": "polliwog_charm.8fc14e79.webp",
+    "zh": "蝌蚪护符",
+    "en": "Pollywog Charm",
+    "ru": "Pollywog Charm"
+  },
+  "item_poor_mans_shield": {
+    "icon": "poor_mans_shield.6bbff0c7.webp",
+    "zh": "穷鬼盾",
+    "en": "Poor Man's Shield",
+    "ru": "Poor Man's Shield"
+  },
+  "item_possessed_mask": {
+    "icon": "possessed_mask.310f64b6.webp",
+    "zh": "附魂面具",
+    "en": "Possessed Mask",
+    "ru": "Possessed Mask"
+  },
+  "item_power_treads": {
+    "icon": "power_treads.3bafe3fa.webp",
+    "zh": "动力鞋",
+    "en": "Power Treads",
+    "ru": "Power Treads"
+  },
+  "item_princes_knife": {
+    "icon": "princes_knife.e8568315.webp",
+    "zh": "亲王短刀",
+    "en": "Prince's Knife",
+    "ru": "Prince's Knife"
+  },
+  "item_prophets_pendulum": {
+    "icon": "prophets_pendulum.4440cc0e.webp",
+    "zh": "先知灵摆",
+    "en": "Prophet's Pendulum",
+    "ru": "Prophet's Pendulum"
+  },
+  "item_quelling_blade": {
+    "icon": "quelling_blade.442bf8f4.webp",
+    "zh": "压制之刃",
+    "en": "Quelling Blade",
+    "ru": "Quelling Blade"
+  },
+  "item_quelling_blade_2_datadriven": {
+    "icon": "quelling_blade_2_datadriven.ad0985f7.webp",
+    "zh": "毒瘤之刃",
+    "en": "Toxic Blade",
+    "ru": null
+  },
+  "item_radar_of_dragon": {
+    "icon": "radar_of_dragon.30a722a5.webp",
+    "zh": "龙珠雷达",
+    "en": "Dragon Ball Radar(NOT PURCHASEABLE!)",
+    "ru": null
+  },
+  "item_radiance": {
+    "icon": "radiance.0b07f1af.webp",
+    "zh": "辉耀",
+    "en": "Radiance",
+    "ru": "Radiance"
+  },
+  "item_radiance_2": {
+    "icon": "radiance_2.0076e803.webp",
+    "zh": "圣焰之光",
+    "en": "Fiery Radiance",
+    "ru": null
+  },
+  "item_rapier": {
+    "icon": "rapier.5ac4b9db.webp",
+    "zh": "圣剑",
+    "en": "Divine Rapier",
+    "ru": "Divine Rapier"
+  },
+  "item_rapier_ultra": {
+    "icon": "rapier_ultra.cc4987cf.webp",
+    "zh": "诅咒圣剑",
+    "en": "Cursed Rapier",
+    "ru": null
+  },
+  "item_rapier_ultra_bot": {
+    "icon": "rapier_ultra_bot.cc4987cf.webp",
+    "zh": "解放的诅咒圣剑",
+    "en": "Liberated Rapier",
+    "ru": null
+  },
+  "item_rattlecage": {
+    "icon": "rattlecage.5ded3294.webp",
+    "zh": "回响之笼",
+    "en": "Rattlecage",
+    "ru": "Rattlecage"
+  },
+  "item_reaver": {
+    "icon": "reaver.aa5e2b40.webp",
+    "zh": "掠夺者之斧",
+    "en": "Reaver",
+    "ru": "Reaver"
+  },
+  "item_refresh_core": {
+    "icon": "refresh_core.ee2c4899.webp",
+    "zh": "熔火核心",
+    "en": "Refresher Core",
+    "ru": null
+  },
+  "item_refresher": {
+    "icon": "refresher.6693322c.webp",
+    "zh": "刷新球",
+    "en": "Refresher Orb",
+    "ru": "Refresher Orb"
+  },
+  "item_refresher_shard": {
+    "icon": "refresher_shard.bf495ac4.webp",
+    "zh": "刷新球碎片",
+    "en": "Refresher Shard",
+    "ru": "Refresher Shard"
+  },
+  "item_relic": {
+    "icon": "relic.e4d71339.webp",
+    "zh": "圣者遗物",
+    "en": "Sacred Relic",
+    "ru": "Sacred Relic"
+  },
+  "item_repair_kit": {
+    "icon": "repair_kit.6bae8f5a.webp",
+    "zh": "维修器具",
+    "en": "Repair Kit",
+    "ru": "Repair Kit"
+  },
+  "item_revenants_brooch": {
+    "icon": "revenants_brooch.41a7efa9.webp",
+    "zh": "英灵胸针",
+    "en": "Revenant's Brooch",
+    "ru": "Revenant's Brooch"
+  },
+  "item_revenants_brooch_ultra": {
+    "icon": "revenants_brooch_ultra.a704e5c3.webp",
+    "zh": "神器·魔武双修",
+    "en": "Artifact: Revenant's Brooch",
+    "ru": null
+  },
+  "item_riftshadow_prism": {
+    "icon": "riftshadow_prism.765fbd02.webp",
+    "zh": "影墟棱晶",
+    "en": "Riftshadow Prism",
+    "ru": "Riftshadow Prism"
+  },
+  "item_ring_of_basilius": {
+    "icon": "ring_of_basilius.6d6013a9.webp",
+    "zh": "王者之戒",
+    "en": "Ring of Basilius",
+    "ru": "Ring of Basilius"
+  },
+  "item_ring_of_health": {
+    "icon": "ring_of_health.4da2098a.webp",
+    "zh": "治疗指环",
+    "en": "Ring of Health",
+    "ru": "Ring of Health"
+  },
+  "item_ring_of_protection": {
+    "icon": "ring_of_protection.55ed96c0.webp",
+    "zh": "守护指环",
+    "en": "Ring of Protection",
+    "ru": "Ring of Protection"
+  },
+  "item_ring_of_regen": {
+    "icon": "ring_of_regen.8551aef1.webp",
+    "zh": "回复戒指",
+    "en": "Ring of Regen",
+    "ru": "Ring of Regen"
+  },
+  "item_ring_of_tarrasque": {
+    "icon": "ring_of_tarrasque.c773e957.webp",
+    "zh": "恐鳌之戒",
+    "en": "Ring of Tarrasque",
+    "ru": "Ring of Tarrasque"
+  },
+  "item_robe": {
+    "icon": "robe.a9e6188a.webp",
+    "zh": "法师长袍",
+    "en": "Robe of the Magi",
+    "ru": "Robe of the Magi"
+  },
+  "item_rod_of_atos": {
+    "icon": "rod_of_atos.3d09f041.webp",
+    "zh": "阿托斯之棍",
+    "en": "Rod of Atos",
+    "ru": "Rod of Atos"
+  },
+  "item_roshans_banner": {
+    "icon": "roshans_banner.73a337f3.webp",
+    "zh": "肉山的战旗",
+    "en": "Roshan's Banner",
+    "ru": "Roshan's Banner"
+  },
+  "item_royal_jelly": {
+    "icon": "royal_jelly.e879ef09.webp",
+    "zh": "蜂王浆",
+    "en": "Royal Jelly",
+    "ru": "Royal Jelly"
+  },
+  "item_royale_with_cheese": {
+    "icon": "royale_with_cheese.58f411f7.webp",
+    "zh": "奶酪块",
+    "en": "Block of Cheese",
+    "ru": "Block of Cheese"
+  },
+  "item_rune_transmuter_advanced": {
+    "icon": "rune_transmuter_advanced.704e2d44.webp",
+    "zh": "转化石",
+    "en": "Advanced Rune Transmuter",
+    "ru": null
+  },
+  "item_rune_transmuter_random": {
+    "icon": "rune_transmuter_random.93447780.webp",
+    "zh": "洗炼石",
+    "en": "Rune Signer",
+    "ru": null
+  },
+  "item_sacred_six_vein": {
+    "icon": "sacred_six_vein.74effef5.webp",
+    "zh": "六脉神剑",
+    "en": "Legendary Hexad",
+    "ru": "Легендарная гексада"
+  },
+  "item_sacred_trident": {
+    "icon": "sacred_trident.2816f140.webp",
+    "zh": "三叉戟",
+    "en": "Holy Trinity",
+    "ru": "Священный трезубец"
+  },
+  "item_safety_bubble": {
+    "icon": "safety_bubble.6eb9aa0a.webp",
+    "zh": "安全泡泡",
+    "en": "Safety Bubble",
+    "ru": "Safety Bubble"
+  },
+  "item_saint_orb": {
+    "icon": "saint_orb.c8ba71c5.webp",
+    "zh": "圣女白莲",
+    "en": "Saint White Lotus",
+    "ru": null
+  },
+  "item_sange": {
+    "icon": "sange.068af7eb.webp",
+    "zh": "散华",
+    "en": "Sange",
+    "ru": "Sange"
+  },
+  "item_sange_and_yasha": {
+    "icon": "sange_and_yasha.92d673c6.webp",
+    "zh": "散夜对剑",
+    "en": "Sange and Yasha",
+    "ru": "Sange and Yasha"
+  },
+  "item_sange_and_yasha_1": {
+    "icon": "sange_and_yasha_1.61235111.webp",
+    "zh": "神器·散夜对剑",
+    "en": "Ultra Sange and Yasha",
+    "ru": null
+  },
+  "item_satanic": {
+    "icon": "satanic.93fe85de.webp",
+    "zh": "撒旦之邪力",
+    "en": "Satanic",
+    "ru": "Satanic"
+  },
+  "item_satanic_2": {
+    "icon": "satanic_2.8b018fa6.webp",
+    "zh": "真红·撒旦之邪力",
+    "en": "Upgraded Satanic",
+    "ru": null
+  },
+  "item_searing_signet": {
+    "icon": "searing_signet.1fd4b7d5.webp",
+    "zh": "炽热纹章",
+    "en": "Searing Signet",
+    "ru": "Searing Signet"
+  },
+  "item_seeds_of_serenity": {
+    "icon": "seeds_of_serenity.cc298882.webp",
+    "zh": "宁静种籽",
+    "en": "Seeds of Serenity",
+    "ru": "Seeds of Serenity"
+  },
+  "item_seer_stone": {
+    "icon": "seer_stone.85efec8d.webp",
+    "zh": "先哲之石",
+    "en": "Seer Stone",
+    "ru": "Seer Stone"
+  },
+  "item_serrated_shiv": {
+    "icon": "serrated_shiv.f993e17c.webp",
+    "zh": "锯齿短刀",
+    "en": "Serrated Shiv",
+    "ru": "Serrated Shiv"
+  },
+  "item_shadow_amulet": {
+    "icon": "shadow_amulet.0f50ac8d.webp",
+    "zh": "暗影护符",
+    "en": "Shadow Amulet",
+    "ru": "Shadow Amulet"
+  },
+  "item_shadow_impact": {
+    "icon": "shadow_impact.7ef7ae7e.webp",
+    "zh": "暗影法杖",
+    "en": "Shadow Staff",
+    "ru": null
+  },
+  "item_shadow_judgment": {
+    "icon": "shadow_judgment.d81b4d26.webp",
+    "zh": "暗影裁决",
+    "en": "Shadow Judgment",
+    "ru": null
+  },
+  "item_shawl": {
+    "icon": "shawl.d8f2cfb3.webp",
+    "zh": "披巾",
+    "en": "Shawl",
+    "ru": "Shawl"
+  },
+  "item_sheepstick": {
+    "icon": "sheepstick.f3896823.webp",
+    "zh": "邪恶镰刀",
+    "en": "Scythe of Vyse",
+    "ru": "Scythe of Vyse"
+  },
+  "item_shivas_guard": {
+    "icon": "shivas_guard.bfa5e048.webp",
+    "zh": "希瓦的守护",
+    "en": "Shiva's Guard",
+    "ru": "Shiva's Guard"
+  },
+  "item_shivas_guard_2": {
+    "icon": "shivas_guard_2.60f2ed91.webp",
+    "zh": "雅典娜的守护",
+    "en": "Athena's Guard",
+    "ru": null
+  },
+  "item_shotgun": {
+    "icon": "shotgun.c3ae9037.webp",
+    "zh": "双管霰弹枪",
+    "en": "Double-Barrel",
+    "ru": null
+  },
+  "item_shotgun_v2": {
+    "icon": "shotgun_v2.8ff069c2.webp",
+    "zh": "三管霰弹枪",
+    "en": "Bullet-Filled Shotgun",
+    "ru": null
+  },
+  "item_silver_edge": {
+    "icon": "silver_edge.6ffdfd58.webp",
+    "zh": "白银之锋",
+    "en": "Silver Edge",
+    "ru": "Silver Edge"
+  },
+  "item_silver_edge_2": {
+    "icon": "silver_edge_2.116bbc1c.webp",
+    "zh": "无敌之刃",
+    "en": "Edge of Lothar",
+    "ru": null
+  },
+  "item_six_paths_reincarnation_gun": {
+    "icon": "six_paths_reincarnation_gun.738fd653.webp",
+    "zh": "六道轮回枪",
+    "en": "Six Paths Reincarnation Gun",
+    "ru": null
+  },
+  "item_skadi": {
+    "icon": "skadi.d7598cc9.webp",
+    "zh": "斯嘉蒂之眼",
+    "en": "Eye of Skadi",
+    "ru": "Eye of Skadi"
+  },
+  "item_skadi_2": {
+    "icon": "skadi_2.a3cd19cf.webp",
+    "zh": "粘妈之眼",
+    "en": "Upgraded Eye of Skadi",
+    "ru": null
+  },
+  "item_skill_reset": {
+    "icon": "skill_reset.e8a94791.webp",
+    "zh": "技能洗点书",
+    "en": "Respec Tome",
+    "ru": null
+  },
+  "item_slippers": {
+    "icon": "slippers.a05d8c2e.webp",
+    "zh": "敏捷便鞋",
+    "en": "Slippers of Agility",
+    "ru": "Slippers of Agility"
+  },
+  "item_smoke_of_deceit": {
+    "icon": "smoke_of_deceit.29ca1fe8.webp",
+    "zh": "诡计之雾",
+    "en": "Smoke of Deceit",
+    "ru": "Smoke of Deceit"
+  },
+  "item_sobi_mask": {
+    "icon": "sobi_mask.7d66b678.webp",
+    "zh": "贤者面罩",
+    "en": "Sage's Mask",
+    "ru": "Sage's Mask"
+  },
+  "item_solar_crest": {
+    "icon": "solar_crest.3ad2764b.webp",
+    "zh": "炎阳纹章",
+    "en": "Solar Crest",
+    "ru": "Solar Crest"
+  },
+  "item_soul_booster": {
+    "icon": "soul_booster.271c6498.webp",
+    "zh": "振魂石",
+    "en": "Soul Booster",
+    "ru": "Soul Booster"
+  },
+  "item_soul_ring": {
+    "icon": "soul_ring.8e6a7d3c.webp",
+    "zh": "灵魂之戒",
+    "en": "Soul Ring",
+    "ru": "Soul Ring"
+  },
+  "item_soul_ring_1": {
+    "icon": "soul_ring_1.8e6a7d3c.webp",
+    "zh": "混沌·魂戒（娱乐道具）",
+    "en": "Chaotic Soul Ring",
+    "ru": null
+  },
+  "item_specialists_array": {
+    "icon": "specialists_array.c62788e9.webp",
+    "zh": "行家阵列",
+    "en": "Specialist's Array",
+    "ru": "Specialist's Array"
+  },
+  "item_spell_prism": {
+    "icon": "spell_prism.02c7cbf6.webp",
+    "zh": "法术棱镜",
+    "en": "Spell Prism",
+    "ru": "Spell Prism"
+  },
+  "item_spellslinger": {
+    "icon": "spellslinger.205647b7.webp",
+    "zh": "咏咒之坠",
+    "en": "Spellslinger",
+    "ru": "Spellslinger"
+  },
+  "item_sphere": {
+    "icon": "sphere.f055198d.webp",
+    "zh": "林肯法球",
+    "en": "Linken's Sphere",
+    "ru": "Linken's Sphere"
+  },
+  "item_sphere_2": {
+    "icon": "sphere_2.e59d6fdf.webp",
+    "zh": "真·林肯法球",
+    "en": "Upgraded Linken's Sphere",
+    "ru": null
+  },
+  "item_spider_legs": {
+    "icon": "spider_legs.01b400e1.webp",
+    "zh": "网虫腿",
+    "en": "Spider Legs",
+    "ru": "Spider Legs"
+  },
+  "item_spirit_vessel": {
+    "icon": "spirit_vessel.c28f767b.webp",
+    "zh": "魂之灵瓮",
+    "en": "Spirit Vessel",
+    "ru": "Spirit Vessel"
+  },
+  "item_splintmail": {
+    "icon": "splintmail.ffe5ac4d.webp",
+    "zh": "片甲",
+    "en": "Splintmail",
+    "ru": "Splintmail"
+  },
+  "item_staff_of_wizardry": {
+    "icon": "staff_of_wizardry.66e70714.webp",
+    "zh": "魔力法杖",
+    "en": "Staff of Wizardry",
+    "ru": "Staff of Wizardry"
+  },
+  "item_stonefeather_satchel": {
+    "icon": "stonefeather_satchel.fd67f79e.webp",
+    "zh": "石羽小包",
+    "en": "Stonefeather Satchel",
+    "ru": "Stonefeather Satchel"
+  },
+  "item_stormcrafter": {
+    "icon": "stormcrafter.598cd35c.webp",
+    "zh": "风暴宝器",
+    "en": "Stormcrafter",
+    "ru": "Stormcrafter"
+  },
+  "item_swift_blink": {
+    "icon": "swift_blink.e57f4f15.webp",
+    "zh": "迅疾闪光",
+    "en": "Swift Blink",
+    "ru": "Swift Blink"
+  },
+  "item_swift_blink_2": {
+    "icon": "swift_blink_2.a36c9a06.webp",
+    "zh": "博尔特闪光",
+    "en": "Blink of Bolt",
+    "ru": null
+  },
+  "item_swift_glove": {
+    "icon": "swift_glove.a2cb67e0.webp",
+    "zh": "无限手套",
+    "en": "Swift Glove",
+    "ru": null
+  },
+  "item_switchable_crit_blade": {
+    "icon": "switchable_crit_blade.8c4482c6.webp",
+    "zh": "归海一刀",
+    "en": "Guihai Blade",
+    "ru": null
+  },
+  "item_talisman_of_evasion": {
+    "icon": "talisman_of_evasion.526400d2.webp",
+    "zh": "闪避护符",
+    "en": "Talisman of Evasion",
+    "ru": "Talisman of Evasion"
+  },
+  "item_tango": {
+    "icon": "tango.a06bd70e.webp",
+    "zh": "树之祭祀",
+    "en": "Tango",
+    "ru": "Tango"
+  },
+  "item_tiara_of_selemene": {
+    "icon": "tiara_of_selemene.4247169d.webp",
+    "zh": "赛莉蒙妮之冠",
+    "en": "Tiara of Selemene",
+    "ru": "Tiara of Selemene"
+  },
+  "item_time_gem": {
+    "icon": "time_gem.8ba2a80a.webp",
+    "zh": "时间宝石",
+    "en": "Time Gem",
+    "ru": null
+  },
+  "item_tome_of_ability_reset": {
+    "icon": "tome_of_ability_reset.51e25d7b.webp",
+    "zh": "能力重置书",
+    "en": "Ability Reset Tome",
+    "ru": null
+  },
+  "item_tome_of_agility": {
+    "icon": "tome_of_agility.12e77fd5.webp",
+    "zh": "敏捷之书",
+    "en": "Tome of Agility",
+    "ru": null
+  },
+  "item_tome_of_intelligence": {
+    "icon": "tome_of_intelligence.712723e3.webp",
+    "zh": "智力之书",
+    "en": "Tome of Intelligence",
+    "ru": null
+  },
+  "item_tome_of_knowledge": {
+    "icon": "tome_of_knowledge.ac60cf27.webp",
+    "zh": "知识之书",
+    "en": "Tome of Knowledge",
+    "ru": "Tome of Knowledge"
+  },
+  "item_tome_of_luoshu": {
+    "icon": "tome_of_luoshu.59f41b74.webp",
+    "zh": "洛书",
+    "en": "Tome of Luoshu",
+    "ru": null
+  },
+  "item_tome_of_strength": {
+    "icon": "tome_of_strength.a3a7575e.webp",
+    "zh": "力量之书",
+    "en": "Tome of Strength",
+    "ru": null
+  },
+  "item_tpscroll": {
+    "icon": "tpscroll.29e590b0.webp",
+    "zh": "回城卷轴",
+    "en": "Town Portal Scroll",
+    "ru": "Town Portal Scroll"
+  },
+  "item_tranquil_boots": {
+    "icon": "tranquil_boots.3525b309.webp",
+    "zh": "静谧之鞋",
+    "en": "Tranquil Boots",
+    "ru": "Tranquil Boots"
+  },
+  "item_travel_boots": {
+    "icon": "travel_boots.31d00f90.webp",
+    "zh": "远行鞋",
+    "en": "Boots of Travel",
+    "ru": "Boots of Travel"
+  },
+  "item_trickster_cloak": {
+    "icon": "trickster_cloak.24da053f.webp",
+    "zh": "欺诈师斗篷",
+    "en": "Trickster Cloak",
+    "ru": "Trickster Cloak"
+  },
+  "item_ultimate_orb": {
+    "icon": "ultimate_orb.c623cf7d.webp",
+    "zh": "极限法球",
+    "en": "Ultimate Orb",
+    "ru": "Ultimate Orb"
+  },
+  "item_ultimate_scepter": {
+    "icon": "ultimate_scepter.4f93cb32.webp",
+    "zh": "阿哈利姆神杖",
+    "en": "Aghanim's Scepter",
+    "ru": "Aghanim's Scepter"
+  },
+  "item_ultimate_scepter_2": {
+    "icon": "ultimate_scepter_2.33b9b81e.webp",
+    "zh": "真·阿哈利姆神杖",
+    "en": "Aghanim's Regalia",
+    "ru": "Aghanim's Blessing"
+  },
+  "item_undying_heart": {
+    "icon": "undying_heart.05b08f99.webp",
+    "zh": "不朽之心",
+    "en": "Undying Heart",
+    "ru": null
+  },
+  "item_unrelenting_eye": {
+    "icon": "unrelenting_eye.287ba612.webp",
+    "zh": "不屈之眼",
+    "en": "Unrelenting Eye",
+    "ru": "Unrelenting Eye"
+  },
+  "item_urn_of_shadows": {
+    "icon": "urn_of_shadows.1333d29c.webp",
+    "zh": "影之灵龛",
+    "en": "Urn of Shadows",
+    "ru": "Urn of Shadows"
+  },
+  "item_vanguard": {
+    "icon": "vanguard.1d20ffc9.webp",
+    "zh": "先锋盾",
+    "en": "Vanguard",
+    "ru": "Vanguard"
+  },
+  "item_veil_of_discord": {
+    "icon": "veil_of_discord.5ab2e5d9.webp",
+    "zh": "纷争面纱",
+    "en": "Veil of Discord",
+    "ru": "Veil of Discord"
+  },
+  "item_veil_of_discord_2": {
+    "icon": "veil_of_discord_2.9242e6c1.webp",
+    "zh": "赫拉的神秘面纱",
+    "en": "Upgraded Veil of Discord",
+    "ru": null
+  },
+  "item_vitality_booster": {
+    "icon": "vitality_booster.2f12b739.webp",
+    "zh": "活力之球",
+    "en": "Vitality Booster",
+    "ru": "Vitality Booster"
+  },
+  "item_vladmir": {
+    "icon": "vladmir.0466bee2.webp",
+    "zh": "弗拉迪米尔的祭品",
+    "en": "Vladmir's Offering",
+    "ru": "Vladmir's Offering"
+  },
+  "item_vladmir_2": {
+    "icon": "vladmir_2.b5c5299a.webp",
+    "zh": "强袭祭品",
+    "en": "Vladmir's Assault Cuirass",
+    "ru": null
+  },
+  "item_void_stone": {
+    "icon": "void_stone.811d4cfc.webp",
+    "zh": "虚无宝石",
+    "en": "Void Stone",
+    "ru": "Void Stone"
+  },
+  "item_voodoo_mask": {
+    "icon": "voodoo_mask.d4e19213.webp",
+    "zh": "巫毒面具",
+    "en": "Voodoo Mask",
+    "ru": "Voodoo Mask"
+  },
+  "item_ward_observer": {
+    "icon": "ward_observer.671e0cc3.webp",
+    "zh": "侦察守卫",
+    "en": "Observer Ward",
+    "ru": "Observer Ward"
+  },
+  "item_ward_sentry": {
+    "icon": "ward_sentry.4109acb7.webp",
+    "zh": "岗哨守卫",
+    "en": "Sentry Ward",
+    "ru": "Sentry Ward"
+  },
+  "item_wasp_callous": {
+    "icon": "wasp_callous.798ace77.webp",
+    "zh": "大核荣耀冷酷",
+    "en": "Callous Wasp",
+    "ru": null
+  },
+  "item_wasp_despotic": {
+    "icon": "wasp_despotic.758ae4ef.webp",
+    "zh": "大核荣耀暴虐",
+    "en": "Despotic Wasp",
+    "ru": null
+  },
+  "item_wasp_golden": {
+    "icon": "wasp_golden.dcdc5aaa.webp",
+    "zh": "黄金大核荣耀",
+    "en": "Golden Wasp",
+    "ru": null
+  },
+  "item_weighted_dice": {
+    "icon": "weighted_dice.d20ebb9a.webp",
+    "zh": "加重骰子",
+    "en": "Weighted Dice",
+    "ru": "Weighted Dice"
+  },
+  "item_wind_lace": {
+    "icon": "wind_lace.8c5ae895.webp",
+    "zh": "风灵之纹",
+    "en": "Wind Lace",
+    "ru": "Wind Lace"
+  },
+  "item_wind_waker": {
+    "icon": "wind_waker.8d67258e.webp",
+    "zh": "风之杖",
+    "en": "Wind Waker",
+    "ru": "Wind Waker"
+  },
+  "item_wings_of_haste": {
+    "icon": "wings_of_haste.771304d4.webp",
+    "zh": "急速之翼",
+    "en": "Wings of Haste",
+    "ru": null
+  },
+  "item_wish_1": {
+    "icon": "wish_1.97948e0b.webp",
+    "zh": "愿望1",
+    "en": "Wish 1",
+    "ru": null
+  },
+  "item_wish_2": {
+    "icon": "wish_2.97948e0b.webp",
+    "zh": "愿望2",
+    "en": "Wish 2",
+    "ru": null
+  },
+  "item_wish_3": {
+    "icon": "wish_3.97948e0b.webp",
+    "zh": "愿望3",
+    "en": "Wish 3",
+    "ru": null
+  },
+  "item_wish_4": {
+    "icon": "wish_4.97948e0b.webp",
+    "zh": "愿望4",
+    "en": "Wish 4",
+    "ru": null
+  },
+  "item_witch_blade": {
+    "icon": "witch_blade.05507cb6.webp",
+    "zh": "巫师之刃",
+    "en": "Witch Blade",
+    "ru": "Witch Blade"
+  },
+  "item_withered_spring": {
+    "icon": "withered_spring.606a340e.webp",
+    "zh": "生命之心",
+    "en": "Withered Spring",
+    "ru": null
+  },
+  "item_wizard_hat": {
+    "icon": "wizard_hat.67278055.webp",
+    "zh": "巫师帽",
+    "en": "Wizard Hat",
+    "ru": "Wizard Hat"
+  },
+  "item_wraith_band": {
+    "icon": "wraith_band.b0a23664.webp",
+    "zh": "怨灵系带",
+    "en": "Wraith Band",
+    "ru": "Wraith Band"
+  },
+  "item_yasha": {
+    "icon": "yasha.97541b84.webp",
+    "zh": "夜叉",
+    "en": "Yasha",
+    "ru": "Yasha"
+  },
+  "item_yasha_and_kaya": {
+    "icon": "yasha_and_kaya.a8bba1f4.webp",
+    "zh": "慧夜对剑",
+    "en": "Yasha and Kaya",
+    "ru": "Yasha and Kaya"
+  },
+  "item_yasha_and_kaya_1": {
+    "icon": "yasha_and_kaya_1.8bdcd278.webp",
+    "zh": "神器·慧夜对剑",
+    "en": "Ultra Yasha and Kaya",
+    "ru": null
+  }
+}

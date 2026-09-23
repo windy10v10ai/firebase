@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 
+import { AlipayService } from '../alipay/alipay.service';
+import { CreateAlipayOrderDto } from '../alipay/dto/create-alipay-order.dto';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { RefreshDailyTaskDto } from '../daily-task/dto/refresh-daily-task.dto';
@@ -59,6 +61,7 @@ export class ProxyController {
     private readonly playerSettingService: PlayerSettingService,
     private readonly playerGamePresetService: PlayerGamePresetService,
     private readonly playerConductService: PlayerConductService,
+    private readonly alipayService: AlipayService,
   ) {}
 
   // 对应 GET /game/probe
@@ -205,6 +208,34 @@ export class ProxyController {
     const dto = await decodeProxyBody(ConductPlayerDto, body);
     const player = await this.playerConductService.conduct(dto);
     return buildProxySuccessHtml(requestId, player);
+  }
+
+  // 对应 POST /alipay/order/create
+  @Get('alipay-order-create-post')
+  async alipayOrderCreatePost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+    @CurrentServerType() serverType: SERVER_TYPE,
+    @CurrentClientOrigin() origin: ClientOrigin,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(CreateAlipayOrderDto, body);
+    const order = await this.alipayService.createOrder(dto, serverType, origin);
+    return buildProxySuccessHtml(requestId, order);
+  }
+
+  // 对应 GET /alipay/order/query
+  @Get('alipay-order-query')
+  async alipayOrderQuery(
+    @Query('requestId') requestId: string,
+    @Query('outTradeNo') outTradeNo: string,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    if (!outTradeNo) {
+      throw new BadRequestException();
+    }
+    const status = await this.alipayService.getOrderStatus(outTradeNo);
+    return buildProxySuccessHtml(requestId, status);
   }
 
   private async findPlayerInfoOrUndefined(

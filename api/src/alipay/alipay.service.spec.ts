@@ -7,6 +7,7 @@ import { LocalHostService } from '../local-host/local-host.service';
 import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { AlipayApiService } from './alipay.api.service';
 import {
@@ -134,9 +135,10 @@ describe('AlipayService', () => {
       productCode: AlipayProductCode.MEMBER_PREMIUM,
       quantity: 1,
     };
+    const create = (dto: CreateAlipayOrderDto) => service.createOrder(dto, SERVER_TYPE.WINDY);
 
     it('单份会员：金额 ¥28.00、subject 用 subjectUnit', async () => {
-      const res = await service.createOrder(baseDto);
+      const res = await create(baseDto);
 
       expect(res.totalAmount).toBe('28.00');
       expect(res.subject).toBe(ALIPAY_PRODUCT_TABLE[AlipayProductCode.MEMBER_PREMIUM].subjectUnit);
@@ -146,7 +148,7 @@ describe('AlipayService', () => {
     });
 
     it('3月会员：适用9折阶梯价 ¥80.40、subject 追加月数', async () => {
-      const res = await service.createOrder({ ...baseDto, quantity: 3 });
+      const res = await create({ ...baseDto, quantity: 3 });
 
       expect(res.totalAmount).toBe('80.40');
       expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} 3个月`);
@@ -157,17 +159,17 @@ describe('AlipayService', () => {
       [24, '2年'],
       [36, '3年'],
     ])('会员 quantity=%i 显示 %s', async (quantity, label) => {
-      const res = await service.createOrder({ ...baseDto, quantity });
+      const res = await create({ ...baseDto, quantity });
       expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} ${label}`);
     });
 
     it('会员 quantity=13（非 12 倍数）仍按月显示', async () => {
-      const res = await service.createOrder({ ...baseDto, quantity: 13 });
+      const res = await create({ ...baseDto, quantity: 13 });
       expect(res.subject).toBe(`${ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit} 13个月`);
     });
 
     it('多份积分：subject 追加 N 份（区别于会员的"个月"）', async () => {
-      const res = await service.createOrder({
+      const res = await create({
         steamId: 1,
         productCode: AlipayProductCode.POINTS_TIER1,
         quantity: 2,
@@ -179,7 +181,7 @@ describe('AlipayService', () => {
 
     it('quantity 缺省时按 1 处理', async () => {
       const { quantity: _q, ...dtoWithoutQuantity } = baseDto;
-      const res = await service.createOrder(dtoWithoutQuantity as CreateAlipayOrderDto);
+      const res = await create(dtoWithoutQuantity as CreateAlipayOrderDto);
 
       expect(res.totalAmount).toBe('28.00');
       expect(res.subject).toBe(ALIPAY_PRODUCT_TABLE.MEMBER_PREMIUM.subjectUnit);
@@ -187,7 +189,7 @@ describe('AlipayService', () => {
 
     it('未知 productCode 抛 BadRequestException', async () => {
       await expect(
-        service.createOrder({
+        create({
           ...baseDto,
           productCode: 'NOT_A_REAL_CODE' as AlipayProductCode,
         }),
@@ -214,20 +216,20 @@ describe('AlipayService', () => {
         return entity;
       });
 
-      await service.createOrder(baseDto);
+      await create(baseDto);
 
       expect(callOrder).toEqual(['create', 'precreate', 'update']);
     });
 
     it('outTradeNo 在并发场景仍然唯一（10 次同 steamId 无重复）', async () => {
       const ids = await Promise.all(
-        Array.from({ length: 10 }, () => service.createOrder(baseDto).then((r) => r.outTradeNo)),
+        Array.from({ length: 10 }, () => create(baseDto).then((r) => r.outTradeNo)),
       );
       expect(new Set(ids).size).toBe(ids.length);
     });
 
     it('落库实体包含价格分单位与 quantity', async () => {
-      await service.createOrder({ ...baseDto, quantity: 2 });
+      await create({ ...baseDto, quantity: 2 });
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -243,7 +245,7 @@ describe('AlipayService', () => {
 
     it('qrCodeExpiresAt = now + 2h', async () => {
       const before = Date.now();
-      const res = await service.createOrder(baseDto);
+      const res = await create(baseDto);
       const after = Date.now();
       const expiresMs = new Date(res.expiresAt).getTime();
 

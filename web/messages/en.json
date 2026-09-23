@@ -161,7 +161,7 @@
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",
       "stableArcade": "May occasionally fail",
-      "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded. The map updates two to three times a week.",
+      "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded.",
       "yes": "Yes",
       "no": "No",
       "partial": "Not always",
@@ -387,6 +387,11 @@
         "lastHits": "LH",
         "points": "Battle Points"
       },
+      "columnsFull": {
+        "difficulty": "Difficulty",
+        "level": "Hero Level",
+        "duration": "Match Duration"
+      },
       "win": "Win",
       "loss": "Loss",
       "difficultyCustom": "Custom",
@@ -397,13 +402,16 @@
       "groups": {
         "combat": "Combat",
         "growth": "Progress",
-        "attributes": "Final Attributes"
+        "attributes": "Final Attributes",
+        "items": "Items",
+        "abilities": "Drafted Abilities"
       },
       "stuns": "Stun Duration (s)",
       "roshanKills": "Roshan Kills",
       "strength": "Strength",
       "agility": "Agility",
       "intellect": "Intelligence",
+      "recipe": "{name} Recipe",
       "empty": "No matches recorded yet.",
       "failed": "Recent matches are unavailable right now. Please try again later.",
       "showAll": "Show all {count} matches",

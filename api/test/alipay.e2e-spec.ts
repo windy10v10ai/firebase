@@ -36,6 +36,8 @@ const STEAM_IDS = {
   WEBHOOK_IDEMPOTENT: 300010012,
   LOCAL_ORDER_CAP: 300010013,
   LOCAL_ORDER_RESET: 300010014,
+  PROXY_CREATE_QUERY: 300010015,
+  PROXY_ORDER_CAP: 300010016,
 } as const;
 
 describe('AlipayController (e2e)', () => {
@@ -379,6 +381,59 @@ describe('AlipayController (e2e)', () => {
       const afterPaid = await createOrderWithLocalKey(steamId);
 
       expect(afterPaid.status).toBe(201);
+    });
+  });
+
+  describe('代发路由', () => {
+    const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+    const proxy = (path: string, query: object) =>
+      request(app.getHttpServer())
+        .get(`/api/proxy/${path}`)
+        .query({ ...query, apiKey: getLocalApiKey() });
+    const titleData = (html: string) => html.match(/<title>[^|]*\|(.*)<\/title>/)![1];
+    const proxyCreate = (steamId: number, requestId: string) =>
+      proxy('alipay-order-create-post', {
+        requestId,
+        body: encode({ steamId, productCode: AlipayProductCode.MEMBER_PREMIUM }),
+      });
+
+    it('alipay-order-create-post 建单，alipay-order-query 查到 WAITING', async () => {
+      const created = JSON.parse(
+        titleData((await proxyCreate(STEAM_IDS.PROXY_CREATE_QUERY, 'p_5_1')).text),
+      );
+      expect(created).toMatchObject({ totalAmount: '28.00' });
+      expect(precreateMock).toHaveBeenCalledTimes(1);
+
+      const queried = await proxy('alipay-order-query', {
+        requestId: 'p_5_2',
+        outTradeNo: created.outTradeNo,
+      });
+
+      expect(JSON.parse(titleData(queried.text))).toEqual({
+        outTradeNo: created.outTradeNo,
+        status: AlipayTradeStatus.WAITING,
+      });
+    });
+
+    it('alipay-order-query 查无订单返回 ERR:not_found', async () => {
+      const res = await proxy('alipay-order-query', {
+        requestId: 'p_5_3',
+        outTradeNo: 'ali-0-0-none',
+      });
+
+      expect(titleData(res.text)).toBe('ERR:not_found');
+    });
+
+    it('alipay-order-create-post 与原路由共用本地下单次数限额', async () => {
+      const steamId = STEAM_IDS.PROXY_ORDER_CAP;
+      for (let i = 0; i < 10; i++) {
+        const ok = await createOrderWithLocalKey(steamId);
+        expect(ok.status).toBe(201);
+      }
+
+      const rejected = await proxyCreate(steamId, 'p_5_4');
+
+      expect(titleData(rejected.text)).toBe('ERR:bad_request');
     });
   });
 });
