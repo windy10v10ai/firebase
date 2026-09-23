@@ -103,7 +103,12 @@ export default function Header() {
       <nav className="mx-auto max-w-7xl px-4 py-4">
         {/* 行高由账号位的 36px 控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
         <div className="flex min-h-9 justify-between items-center gap-3">
-          <Link href="/" className="text-xl font-bold text-heading link-hover whitespace-nowrap">
+          {/* 每页都常驻的链接不预取：页面全是动态渲染，每次预取都是一次函数调用，按页面浏览量成倍放大 */}
+          <Link
+            href="/"
+            prefetch={false}
+            className="text-xl font-bold text-heading link-hover whitespace-nowrap"
+          >
             {/* 1024 以下一律收短：全名加五个站内项在 768 会把右侧控件挤出屏幕 */}
             <span className="lg:hidden">{t('homeShort')}</span>
             <span className="hidden lg:inline">{t('home')}</span>
@@ -114,6 +119,7 @@ export default function Header() {
                 <Link
                   key={item.key}
                   href={item.href}
+                  prefetch={false}
                   aria-current={isCurrent(item.href) ? 'page' : undefined}
                   className={`nav-top${'desktopOnly' in item ? desktopOnlyClass : ''}`}
                 >
@@ -179,6 +185,7 @@ export default function Header() {
                 <Link
                   key={item.key}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => setMenuOpen(false)}
                   aria-current={isCurrent(item.href) ? 'page' : undefined}
                   className="nav-menu-item"

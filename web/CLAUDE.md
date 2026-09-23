@@ -112,6 +112,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 理由见 [docs/web/design-system.md](../docs/web/design-system.md)「可点击元素」。
 
+- **页头、页脚这类每页都有的站内 `Link` 写 `prefetch={false}`**，正文里的链接不用加。理由见 [docs/web/README.md](../docs/web/README.md) 第 4 节「渲染方式」
 - **能点的一律手型，靠 `globals.css` base 层的全局规则**，调用点不写 `cursor-pointer`。可点击的控件用 `<button>` 或 `<a>` / `Link`，不用 `<div onClick>`
 - **整张卡或整行是链接时，右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
 - **悬停描边随归属**：属于勇士的入口用 `hover:border-season-border`，属于会员的用 `hover:border-member-border`，其余用 `.card-hover`

@@ -24,10 +24,11 @@ export default async function Footer() {
                 {t(link.labelKey)}
               </a>
             ))}
-            <Link href="/launch" className="text-content link-hover">
+            {/* 常驻链接不预取：页面全是动态渲染，每次预取都是一次函数调用 */}
+            <Link href="/launch" prefetch={false} className="text-content link-hover">
               {t('launch')}
             </Link>
-            <Link href="/legal/disclosure" className="text-content link-hover">
+            <Link href="/legal/disclosure" prefetch={false} className="text-content link-hover">
               {t('disclosure')}
             </Link>
           </div>
