@@ -407,6 +407,7 @@
       "strength": "力量",
       "agility": "敏捷",
       "intellect": "智力",
+      "recipe": "图纸（{name}）",
       "empty": "还没有记录的对局。",
       "failed": "近期战绩暂时取不到，稍后再试。",
       "showAll": "查看全部 {count} 场",

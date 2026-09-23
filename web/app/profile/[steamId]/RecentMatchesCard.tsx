@@ -14,7 +14,14 @@ import {
 import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { GAME_ICON } from '@/config/game-icons';
 import { heroAsset, heroIconPath, heroLabel } from '@/config/heroes';
-import { itemAsset, itemIconPath, itemLabel } from '@/config/items';
+import {
+  EMPTY_SLOT_ICON,
+  itemAsset,
+  itemIconPath,
+  itemLabel,
+  RECIPE_ICON,
+  recipeResult,
+} from '@/config/items';
 
 import type { ReactNode } from 'react';
 
@@ -132,26 +139,46 @@ function HeroIcon({ heroName, awakenLabel }: { heroName: string; awakenLabel?: s
   );
 }
 
-type SlotShape = 'item' | 'neutral' | 'ability';
+type SlotKind = 'item' | 'ability';
 
-const SLOT_CLASS: Record<SlotShape, string> = {
-  // 物品图原尺寸 88×64，按一半展示，两倍屏正好不糊
-  item: 'h-8 w-11 rounded',
-  // 游戏里中立物品放在圆槽，照着画才认得出是哪一格
-  neutral: 'size-8 rounded-full',
-  ability: 'size-8 rounded',
-};
+// 照游戏结算界面画：近黑细边、不圆角；物品图原尺寸 88×64，按一半展示两倍屏正好不糊。
+// 中立槽也是方格，圆槽是局内 HUD 的样子，结算界面里没有
+const SLOT_BOX =
+  'flex shrink-0 items-center justify-center overflow-hidden border border-surface bg-surface';
+const SLOT_SIZE: Record<SlotKind, string> = { item: 'h-8 w-11', ability: 'size-8' };
 
 /** 空格也占位，六格一眼能看出这局有没有出满 */
-function LoadoutSlot({ shape, name, locale }: { shape: SlotShape; name?: string; locale: string }) {
-  const box = `flex shrink-0 overflow-hidden border border-line bg-control ${SLOT_CLASS[shape]}`;
+function LoadoutSlot({ kind, name, locale }: { kind: SlotKind; name?: string; locale: string }) {
+  const t = useTranslations('profile.recent');
+  const box = `${SLOT_BOX} ${SLOT_SIZE[kind]}`;
   if (!name) {
-    return <span className={box} aria-hidden="true" />;
+    // 技能没有空槽底图，画成和等级圈同样的凹陷
+    return kind === 'item' ? (
+      <span className={box} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
+        <img src={EMPTY_SLOT_ICON} alt="" className="size-full" />
+      </span>
+    ) : (
+      <span className={`${box} shadow-[inset_0_0_6px_rgba(0,0,0,0.9)]`} aria-hidden="true" />
+    );
   }
-  const ability = shape === 'ability';
-  const icon = (ability ? abilityAsset(name) : itemAsset(name))?.icon;
-  const label = ability ? abilityLabel(name, locale) : itemLabel(name, locale);
-  const src = icon ? (ability ? abilityIconPath(icon) : itemIconPath(icon)) : null;
+
+  let src: string | null;
+  let label: string;
+  const recipeOf = kind === 'item' ? recipeResult(name) : null;
+  if (recipeOf) {
+    src = RECIPE_ICON;
+    label = t('recipe', { name: itemLabel(recipeOf, locale) });
+  } else if (kind === 'item') {
+    const icon = itemAsset(name)?.icon;
+    src = icon ? itemIconPath(icon) : null;
+    label = itemLabel(name, locale);
+  } else {
+    const icon = abilityAsset(name)?.icon;
+    src = icon ? abilityIconPath(icon) : null;
+    label = abilityLabel(name, locale);
+  }
+
   return (
     <InfoPopover
       label={label}
@@ -162,7 +189,8 @@ function LoadoutSlot({ shape, name, locale }: { shape: SlotShape; name?: string;
           // eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式
           <img src={src} alt="" className="size-full object-cover" />
         ) : (
-          <span className="size-full" />
+          // 有东西但没图：和空槽区分开，名字仍在提示里
+          <span className="text-[13px] text-faint">?</span>
         )
       }
     >
@@ -492,7 +520,7 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                                   {match.items.map((item, slot) => (
                                     <LoadoutSlot
                                       key={slot}
-                                      shape="item"
+                                      kind="item"
                                       name={item}
                                       locale={locale}
                                     />
@@ -500,12 +528,12 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                                 </div>
                                 <div className="flex gap-1">
                                   <LoadoutSlot
-                                    shape="neutral"
+                                    kind="item"
                                     name={match.neutralItem}
                                     locale={locale}
                                   />
                                   <LoadoutSlot
-                                    shape="neutral"
+                                    kind="item"
                                     name={match.neutralPassiveItem}
                                     locale={locale}
                                   />
@@ -521,7 +549,7 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                                 {(match.abilities ?? []).map((ability, slot) => (
                                   <LoadoutSlot
                                     key={slot}
-                                    shape="ability"
+                                    kind="ability"
                                     name={ability}
                                     locale={locale}
                                   />

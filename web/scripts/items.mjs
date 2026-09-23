@@ -243,6 +243,39 @@ async function buildManifest({
   if (missing.length) console.log(`缺：${missing.join('、')}`);
 }
 
+/**
+ * 物品栏的通用图：空槽底图与通用配方图，照游戏结算界面画空格和配方。
+ * 不进物品清单，那份按物品索引，图鉴列物品时不该列出这两张。
+ */
+async function buildSlotAssets(sharp) {
+  const outDir = path.join(WEB, 'public/item-slots');
+  const manifestFile = path.join(WEB, 'config/item-slots.json');
+  const previous = fs.existsSync(manifestFile)
+    ? JSON.parse(fs.readFileSync(manifestFile, 'utf8'))
+    : {};
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const manifest = {};
+  for (const [key, cdnName] of Object.entries({ empty: 'emptyitembg', recipe: 'recipe' })) {
+    const kept = previous[key];
+    if (kept && fs.existsSync(path.join(outDir, kept))) {
+      manifest[key] = kept;
+      continue;
+    }
+    const raw = await fetchPng(`${CDN}/items/${cdnName}.png`);
+    if (!raw) throw new Error(`CDN 上取不到 ${cdnName}.png`);
+    const buf = await sharp(raw).resize(88, 64, { fit: 'cover' }).webp({ quality: 82 }).toBuffer();
+    manifest[key] = `${cdnName}.${hash8(buf)}.webp`;
+    fs.writeFileSync(path.join(outDir, manifest[key]), buf);
+  }
+  fs.writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
+
+  const keep = new Set(Object.values(manifest));
+  for (const file of fs.readdirSync(outDir)) {
+    if (!keep.has(file)) fs.unlinkSync(path.join(outDir, file));
+  }
+}
+
 /** 能留在物品栏里的物品：商店在售、中立掉落、合成产物、神器，加上玩家真买过的 */
 function collectItems(npc, scripts, kv, dotaNames, csvFile) {
   const names = new Set([
@@ -282,6 +315,8 @@ async function main() {
   for (const [locale, language] of Object.entries(LANGUAGES)) {
     addon[locale] = readAddonNames(path.join(resource, `addon_${language}.txt`));
   }
+
+  await buildSlotAssets(sharp);
 
   const itemKv = readKvDir(npc, ITEM_KV_FILES);
   const itemNames = await readDotaNames('item');
