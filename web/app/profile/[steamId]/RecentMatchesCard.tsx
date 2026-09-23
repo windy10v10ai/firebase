@@ -314,7 +314,10 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
             label: withIcon(GAME_ICON.healing, tStats('healing')),
             value: match.healing.toLocaleString(locale),
           },
-          { label: withLucideIcon(Zap, t('stuns')), value: match.stuns.toFixed(1) },
+          {
+            label: withLucideIcon(Zap, t('stuns')),
+            value: Math.round(match.stuns).toLocaleString(locale),
+          },
         ],
       },
       {

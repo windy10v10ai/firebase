@@ -24,5 +24,9 @@ export class PlayerStatsLifetime {
   @ApiProperty()
   totalGoldEarned: number;
   @ApiProperty()
+  stuns: number;
+  @ApiProperty()
+  roshanKills: number;
+  @ApiProperty()
   updatedAt: Date;
 }
