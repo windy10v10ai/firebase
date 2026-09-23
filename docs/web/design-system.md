@@ -198,17 +198,17 @@
 
 ## 7. 游戏图标
 
-`public/icons/` 下那几张是从游戏包里取出来的手绘图标，与结算界面用的是同一批文件。它们和 `lucide` 的线条图标不是一套视觉语言，**同一张卡里只能出现其中一种**。
+`public/icons/` 下那几张是从游戏包里取出来的手绘图标，与结算界面用的是同一批文件；没有手绘素材的概念用 `lucide` 线条图标补齐。两套视觉语言可以出现在同一张卡里，**但同一个概念不管出现在哪个画面，图标都要一样**——新增图标前先搜一遍现有代码里这个概念有没有已经在用的图标，有就复用，没有再挑新的。
 
-| 名字 | 表示 |
+| 概念 | 图标 |
 |---|---|
-| `battle-point` | 勇士积分（紫），游戏内 `battlepass/pts_earned` |
-| `gold` | 金钱，来自 Dota 公开 CDN |
-| `hero-damage` / `damage-taken` | 英雄伤害 / 承受伤害 |
-| `healing` | 治疗 |
-| `strength` / `agility` / `intellect` / `universal` | 力 / 敏 / 智 / 全属性 |
+| 勇士积分 | `public/icons/battle-point.png`，游戏内 `battlepass/pts_earned` |
+| 金钱 | `public/icons/gold.png`，来自 Dota 公开 CDN |
+| 英雄伤害 / 承受伤害 | `public/icons/hero-damage.png` / `damage-taken.png` |
+| 治疗 | `public/icons/healing.png` |
+| 力 / 敏 / 智 / 全属性 | `public/icons/strength.png` / `agility.png` / `intellect.png` / `universal.png` |
+| 击杀 / 助攻 / 补刀 / 推塔 / 眩晕时长 / 肉山击杀 | lucide `swords` / `handshake` / `axe` / `tower-control` / `zap` / `skull`，取值见 `daily-task/TaskIcon.tsx` 的 `METRIC_ICON` |
 
-- **只给每局都要横着比的指标配图标**，其余用文字。这条分界照抄游戏内结算界面：它只给上面这些配了图，补刀、推塔、等级一律是字。一局只看一次的指标，中文两个字比图标直白，也不比图标占地方
 - **图标上表头，不上每一行**：同一个符号在十行里重复是噪音，表头出现一次加上列对齐已经说明归属。没有表头的窄屏例外——那一列数字只能靠图标说明自己是什么
 - **图标要带 `alt`**，值就是它顶替掉的那个列名；纯装饰（旁边已有文字）时 `alt` 留空
 - 新增图标先裁掉四周全透明的边再入库，不缩放不改像素；从 CDN 取的图另外缩到 48px 以内
