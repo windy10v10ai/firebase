@@ -116,6 +116,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **整张卡或整行是链接时，右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
 - **悬停描边随归属**：属于勇士的入口用 `hover:border-season-border`，属于会员的用 `hover:border-member-border`，其余用 `.card-hover`
 - **整行链接里子元素各自写了文字颜色时，外层的 `link-hover` 看不出变化**。这种链接改用 `group`，在子元素上写 `group-hover:`
+- **需要解释的地方用 `InfoPopover`，不散写原生 `title`**：它在有鼠标时悬停展开、触屏点击展开。触发元素可以换成被解释的东西自己（表头图标、缩写列名），命中区撑满整格；短提示传 `compact`。`title` 只留给被 `truncate` 截断的文字与装饰图片的替代文本，理由见 [docs/web/design-system.md](../docs/web/design-system.md)「提示与说明」
 
 ## 颜色
 

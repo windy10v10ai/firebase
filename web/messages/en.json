@@ -387,6 +387,11 @@
         "lastHits": "LH",
         "points": "Battle Points"
       },
+      "columnsFull": {
+        "difficulty": "Difficulty",
+        "level": "Hero Level",
+        "duration": "Match Duration"
+      },
       "win": "Win",
       "loss": "Loss",
       "difficultyCustom": "Custom",
