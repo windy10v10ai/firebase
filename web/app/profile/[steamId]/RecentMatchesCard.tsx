@@ -217,17 +217,15 @@ function DetailGroup({
   title,
   accentClass,
   items,
-  twoColumn = false,
 }: {
   title: string;
   accentClass: string;
   items: DetailItem[];
-  twoColumn?: boolean;
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <GroupTitle title={title} accentClass={accentClass} />
-      <dl className={`gap-x-7 gap-y-1.5 ${twoColumn ? 'grid md:grid-cols-2' : 'flex flex-col'}`}>
+      <dl className="flex flex-col gap-y-1.5">
         {items.map((item) => (
           <div
             key={item.value + String(item.label)}
@@ -295,7 +293,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
       {
         title: t('groups.combat'),
         accentClass: 'bg-danger',
-        twoColumn: true,
         items: [
           {
             label: withIcon(GAME_ICON.heroDamage, tStats('heroDamage')),
@@ -315,7 +312,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
       {
         title: t('groups.growth'),
         accentClass: 'bg-member-strong',
-        twoColumn: false,
         items: [
           {
             label: withIcon(GAME_ICON.gold, tStats('totalGoldEarned')),
@@ -332,7 +328,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
       groups.push({
         title: t('groups.attributes'),
         accentClass: 'bg-feature-awaken',
-        twoColumn: false,
         items: [
           {
             label: withIcon(GAME_ICON.strength, t('strength')),
@@ -496,68 +491,71 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                       />
                     </button>
                     {open ? (
-                      <div className="border-t border-line bg-panel-soft px-3 py-3 md:px-4">
-                        {/* 战斗项目最多，独占两份宽度并在组内分两列，三组高度才齐平，右侧也不留空 */}
+                      <div className="@container border-t border-line bg-panel-soft px-3 py-3 md:px-4">
+                        {/* 出装一行要 400 多像素，并排后三组数据变窄会挤断俄文标签，所以按面板宽度决定放右侧还是下方 */}
                         <div
                           className={`grid gap-x-7 gap-y-4 ${
                             groups.length === 3
-                              ? 'md:grid-cols-[2fr_1fr_1fr]'
-                              : 'md:grid-cols-[2fr_1fr]'
+                              ? 'md:grid-cols-3 @6xl:grid-cols-[repeat(3,minmax(0,1fr))_auto]'
+                              : 'md:grid-cols-2'
                           }`}
                         >
                           {groups.map((group) => (
                             <DetailGroup key={group.title} {...group} />
                           ))}
-                        </div>
-                        {/* 出装与属性同批上报，旧场次整块不出现 */}
-                        {match.items ? (
-                          <div className="mt-4 flex flex-wrap gap-x-7 gap-y-4">
-                            <div className="flex flex-col gap-2">
-                              <GroupTitle title={t('groups.items')} accentClass="bg-line-strong" />
-                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                          {/* 出装与属性同批上报，旧场次整块不出现 */}
+                          {match.items ? (
+                            <div className="flex flex-wrap gap-x-7 gap-y-4 col-span-full @6xl:col-span-1 @6xl:flex-col @6xl:flex-nowrap @6xl:gap-y-3 @6xl:border-l @6xl:border-line @6xl:pl-7">
+                              <div className="flex flex-col gap-2">
+                                <GroupTitle
+                                  title={t('groups.items')}
+                                  accentClass="bg-line-strong"
+                                />
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                                  <div className="flex gap-1">
+                                    {/* 物品栏位置固定，下标就是格子的身份 */}
+                                    {match.items.map((item, slot) => (
+                                      <LoadoutSlot
+                                        key={slot}
+                                        kind="item"
+                                        name={item}
+                                        locale={locale}
+                                      />
+                                    ))}
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <LoadoutSlot
+                                      kind="item"
+                                      name={match.neutralItem}
+                                      locale={locale}
+                                    />
+                                    <LoadoutSlot
+                                      kind="item"
+                                      name={match.neutralPassiveItem}
+                                      locale={locale}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <GroupTitle
+                                  title={t('groups.abilities')}
+                                  accentClass="bg-line-strong"
+                                />
                                 <div className="flex gap-1">
-                                  {/* 物品栏位置固定，下标就是格子的身份 */}
-                                  {match.items.map((item, slot) => (
+                                  {(match.abilities ?? []).map((ability, slot) => (
                                     <LoadoutSlot
                                       key={slot}
-                                      kind="item"
-                                      name={item}
+                                      kind="ability"
+                                      name={ability}
                                       locale={locale}
                                     />
                                   ))}
                                 </div>
-                                <div className="flex gap-1">
-                                  <LoadoutSlot
-                                    kind="item"
-                                    name={match.neutralItem}
-                                    locale={locale}
-                                  />
-                                  <LoadoutSlot
-                                    kind="item"
-                                    name={match.neutralPassiveItem}
-                                    locale={locale}
-                                  />
-                                </div>
                               </div>
                             </div>
-                            <div className="flex flex-col gap-2">
-                              <GroupTitle
-                                title={t('groups.abilities')}
-                                accentClass="bg-line-strong"
-                              />
-                              <div className="flex gap-1">
-                                {(match.abilities ?? []).map((ability, slot) => (
-                                  <LoadoutSlot
-                                    key={slot}
-                                    kind="ability"
-                                    name={ability}
-                                    locale={locale}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        ) : null}
+                          ) : null}
+                        </div>
                       </div>
                     ) : null}
                   </li>
