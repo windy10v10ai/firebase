@@ -178,10 +178,7 @@ export default function AwakenPage() {
           {t('loading')}
         </p>
       )}
-      <div className="space-y-1.5">
-        <h1 className="title-primary">{t('title')}</h1>
-        <p className="text-sm text-muted">{t('intro')}</p>
-      </div>
+      <h1 className="title-primary">{t('title')}</h1>
 
       <section className="card-container card-pad">
         <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>
