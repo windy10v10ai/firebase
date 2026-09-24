@@ -185,7 +185,7 @@ export class GameService {
   async giveEventReward(steamIds: number[], serverType: SERVER_TYPE): Promise<PointInfoDto[]> {
     const pointInfoDtos: PointInfoDto[] = [];
 
-    // FIXME 活动每次需要更新
+    // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：起止时间与积分
     const startTime = new Date('2026-09-24T00:00:00.000Z');
     const endTime = new Date('2026-10-09T23:59:59.999Z');
     const seasonRewardPoint = 5000;
@@ -201,7 +201,7 @@ export class GameService {
     const rewardResults = await this.eventRewardsService.getRewardResults(steamIds);
 
     for (const rewardResult of rewardResults) {
-      // FIXME 活动每次需要更新
+      // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：领取字段与提示文案
       if (now >= startTime && now <= endTime && !rewardResult.result?.midAutumn2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: seasonRewardPoint,
