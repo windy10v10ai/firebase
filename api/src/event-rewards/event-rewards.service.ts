@@ -35,7 +35,7 @@ export class EventRewardsService {
         id,
         steamId,
         // FIXME 活动每次需要更新
-        compensation20260912: true,
+        midAutumn2026: true,
       });
     } else {
       // update
