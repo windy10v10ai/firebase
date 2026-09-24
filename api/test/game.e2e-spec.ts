@@ -3,6 +3,7 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
+import { getTestFirestore } from './util/util-firestore';
 import {
   get,
   getAnimeApiKey,
@@ -550,6 +551,21 @@ describe('PlayerController (e2e)', () => {
         const player2 = await getPlayer(app, steamId);
         expect(player2.seasonPointTotal).toEqual(5000);
         expect(player2.memberPointTotal).toEqual(0);
+      });
+
+      it('windy主机 已有往期活动记录 第二次登录 不重复获得积分', async () => {
+        const steamId = 100000907;
+        mockDate('2026-09-25T00:00:00.000Z');
+        await getTestFirestore()
+          .collection('EventRewards')
+          .doc(steamId.toString())
+          .set({ id: steamId.toString(), steamId, newYear2026: true });
+
+        await callGameStartAsWindyHost(app, [steamId]);
+        await callGameStartAsWindyHost(app, [steamId]);
+
+        const player = await getPlayer(app, steamId);
+        expect(player.seasonPointTotal).toEqual(5000);
       });
 
       it('windy主机 活动期间外 不获得活动积分', async () => {
