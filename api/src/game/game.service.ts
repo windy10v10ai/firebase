@@ -186,8 +186,8 @@ export class GameService {
     const pointInfoDtos: PointInfoDto[] = [];
 
     // FIXME 活动每次需要更新
-    const startTime = new Date('2026-09-12T00:00:00.000Z');
-    const endTime = new Date('2026-09-19T23:59:59.999Z');
+    const startTime = new Date('2026-09-24T00:00:00.000Z');
+    const endTime = new Date('2026-10-09T23:59:59.999Z');
     const seasonRewardPoint = 5000;
 
     const now = new Date();
@@ -202,7 +202,7 @@ export class GameService {
 
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新
-      if (now >= startTime && now <= endTime && !rewardResult.result?.compensation20260912) {
+      if (now >= startTime && now <= endTime && !rewardResult.result?.midAutumn2026) {
         await this.playerService.upsertAddPoint(rewardResult.steamId, {
           seasonPointTotal: seasonRewardPoint,
         });
@@ -210,8 +210,8 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '服务器故障补偿',
-            en: 'Server Outage Compensation',
+            cn: '中秋国庆快乐',
+            en: 'Mid-Autumn Festival Bonus!',
           },
           seasonPoint: seasonRewardPoint,
         });
