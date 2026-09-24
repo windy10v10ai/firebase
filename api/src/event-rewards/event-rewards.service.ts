@@ -40,7 +40,7 @@ export class EventRewardsService {
     } else {
       // update
       // FIXME 活动每次需要更新
-      eventReward.compensation20260912 = true;
+      eventReward.midAutumn2026 = true;
       await this.eventRewardsRepository.update(eventReward);
     }
   }
