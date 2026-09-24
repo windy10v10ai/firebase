@@ -503,7 +503,7 @@ describe('PlayerController (e2e)', () => {
     describe('事件奖励', () => {
       it('windy主机 活动期间内首次登录 获得活动积分', async () => {
         const steamId = 100000901;
-        // 活动期间: 2026-09-24 ~ 2026-10-08
+        // 活动期间: 2026-09-24 ~ 2026-10-09
         mockDate('2026-09-25T00:00:00.000Z');
 
         const result = await callGameStartAsWindyHost(app, [steamId]);
@@ -555,7 +555,7 @@ describe('PlayerController (e2e)', () => {
       it('windy主机 活动期间外 不获得活动积分', async () => {
         const steamId = 100000903;
         // 活动期间外
-        mockDate('2026-10-09T00:00:00.000Z');
+        mockDate('2026-10-10T00:00:00.000Z');
 
         const result = await callGameStartAsWindyHost(app, [steamId]);
         expect(result.status).toEqual(200);

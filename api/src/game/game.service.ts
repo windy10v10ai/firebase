@@ -187,7 +187,7 @@ export class GameService {
 
     // FIXME 活动每次需要更新
     const startTime = new Date('2026-09-24T00:00:00.000Z');
-    const endTime = new Date('2026-10-08T23:59:59.999Z');
+    const endTime = new Date('2026-10-09T23:59:59.999Z');
     const seasonRewardPoint = 5000;
 
     const now = new Date();
@@ -210,7 +210,7 @@ export class GameService {
         pointInfoDtos.push({
           steamId: rewardResult.steamId,
           title: {
-            cn: '中秋国庆快乐！',
+            cn: '中秋国庆快乐',
             en: 'Mid-Autumn Festival Bonus!',
           },
           seasonPoint: seasonRewardPoint,

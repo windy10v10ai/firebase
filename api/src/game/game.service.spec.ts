@@ -245,7 +245,7 @@ describe('GameService', () => {
         {
           steamId,
           title: {
-            cn: '中秋国庆快乐！',
+            cn: '中秋国庆快乐',
             en: 'Mid-Autumn Festival Bonus!',
           },
           seasonPoint: 5000,
@@ -266,7 +266,7 @@ describe('GameService', () => {
         {
           steamId,
           title: {
-            cn: '中秋国庆快乐！',
+            cn: '中秋国庆快乐',
             en: 'Mid-Autumn Festival Bonus!',
           },
           seasonPoint: 5000,
@@ -285,7 +285,7 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间外 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-10-09T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-10T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
