@@ -549,7 +549,6 @@
   },
   "awaken": {
     "title": "Hero Awakening",
-    "intro": "Unlock a hero’s awakened ability permanently with Battle Points or Member Points.",
     "loading": "Loading awakenings",
     "unlock": "Awaken",
     "unlocked": "Awakened",
@@ -559,10 +558,10 @@
       "title": "Permanent Awaken",
       "colon": ": ",
       "directLabel": "Specific Hero",
-      "direct": "spend <b>8000</b> <season>usable Battle Points</season>, or <b>4000</b> <member>usable Member Points</member>, to permanently awaken a chosen hero.",
+      "direct": "<b>8000</b> <season>usable Battle Points</season> or <b>4000</b> <member>usable Member Points</member> to awaken a chosen hero.",
       "randomLabel": "Random Draw",
-      "random": "half price, spend <b>4000</b> <season>usable Battle Points</season>, or <b>2000</b> <member>usable Member Points</member>, to awaken one of 3 randomly drawn heroes.",
-      "note": "Only spends usable points: usable points go down, but total points only ever go up and never lower your Battle/Member Level or attribute points. Permanent and irreversible — even if the awakened ability is buffed, nerfed, or reworked later, the hero’s awakening still applies."
+      "random": "half price, <b>4000</b> <season>usable Battle Points</season> or <b>2000</b> <member>usable Member Points</member> to pick 1 of 3 random heroes.",
+      "note": "Only usable points are spent; total points and levels stay. Awakening is permanent and irreversible, even if the ability changes in later patches."
     },
     "stats": {
       "awakened": "Awakened",
