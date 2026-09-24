@@ -34,12 +34,12 @@ export class EventRewardsService {
       await this.eventRewardsRepository.create({
         id,
         steamId,
-        // FIXME 活动每次需要更新
+        // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：新玩家的领取字段
         midAutumn2026: true,
       });
     } else {
       // update
-      // FIXME 活动每次需要更新
+      // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：已有记录玩家的领取字段
       eventReward.midAutumn2026 = true;
       await this.eventRewardsRepository.update(eventReward);
     }

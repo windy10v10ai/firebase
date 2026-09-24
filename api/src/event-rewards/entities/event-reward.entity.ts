@@ -30,5 +30,6 @@ export class EventReward {
   aoeBonusProperty2026?: boolean; // 新属性 AOE Bonus 上线奖励：5000勇士积分
   awaken20260802?: boolean; // 觉醒活动奖励（8/2-8/9，登录发放）：2000会员积分
   compensation20260912?: boolean; // 服务器故障补偿（9/12-9/19，登录发放）：5000勇士积分
+  // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：新增领取字段
   midAutumn2026?: boolean; // 中秋国庆活动（9/24-10/9，登录发放）：5000勇士积分
 }

@@ -3,6 +3,7 @@ import request from 'supertest';
 
 import { MemberLevel } from '../src/members/entities/members.entity';
 
+import { getTestFirestore } from './util/util-firestore';
 import {
   get,
   getAnimeApiKey,
@@ -12,7 +13,6 @@ import {
   post,
   restoreDate,
 } from './util/util-http';
-import { getTestFirestore } from './util/util-firestore';
 import { addMember } from './util/util-member';
 import {
   addPlayerProperty,
