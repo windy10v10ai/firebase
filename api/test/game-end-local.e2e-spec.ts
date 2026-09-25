@@ -127,6 +127,23 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(statsLifetime?.kills).toBe(5);
   });
 
+  it('旧版游戏不带 playerCount：照常结算', async () => {
+    const steamId = 105620021;
+    mockDate('2026-08-16T01:00:00.000Z');
+    await createPlayer(app, { steamId, matchCount: 20 });
+    const { playerCount: _playerCount, ...payload } = createGameEndLocalPayload({
+      matchId: '9100000021',
+      players: [{ steamId, battlePoints: 200 }],
+    });
+
+    const result = await postAsLocalHost(app, payload);
+
+    expect(result.status).toBe(201);
+    const player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(200);
+    expect(player.matchCount).toBe(21);
+  });
+
   it('官方 key 也能走本地结算：拿到的是更严格的那套，没有损失', async () => {
     const steamId = 105620002;
     mockDate('2026-08-16T01:00:00.000Z');
