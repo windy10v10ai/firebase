@@ -42,6 +42,8 @@ API 自己往外调的第三方服务：
 - **装饰器是加法，不是排他**：不挂任何装饰器的路由，官方服务器的 key 就能调；`@AllowWeb()` 额外放行网页，`@AllowLocal()` 额外放行打包进地图、随时可能泄露的本地主机 key。所以路由本身不代表来源，要区分来源取 `@CurrentServerType()`
 - **归属校验只看路由参数 `:steamId`，不看请求体**。所以同一个动作给网站开放时，要新开一条把 steamId 放在路径上的路由，而不是给收 body 的那条补 `@AllowWeb()`——后者等于任何登录玩家都能操作别人的账号。每日任务的刷新就是这样分成两条：游戏内用 `POST /daily-task/refresh`（body 带 steamId，`@AllowLocal()`），网站用 `POST /daily-task/:steamId/refresh`（`@AllowWeb()`）
 - **`GET /daily-task/:steamId` 有写库副作用**：跨天归档是取快照时懒触发的，纯读会漏掉「昨天打完、今天还没开过游戏」这一段。由此网站来访就会给从没开过局的人建一个空文档，**「有每日任务文档」不等于「这人打过游戏」**，别拿它当活跃口径
+- **游戏端新增的请求体字段，后端一律按选填接收并给出兜底**：玩家不重启 Dota 就一直跑旧版地图，旧版会持续好几天。改成必填等于让旧版的请求整条 400，结算这类接口会直接丢分
+- **请求体校验失败记一行 warn 日志**（`request validation failed`，带不合格的字段路径、`version` 与报文里的 steamId）：游戏端只知道请求失败、看不到原因，HTTP 日志里也没有请求体
 - 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由同上一节最后一条；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
 
@@ -71,7 +73,7 @@ API 自己往外调的第三方服务：
 - **不保留原来的斜杠分段**，因为路径参数一律挪进 query（网址由游戏服务端拼好，客户端只负责加载），留着斜杠会让人以为参数还在路径上
 - **非 GET 的原路由加方法小写后缀，请求体 base64url 放进 query 的 `body`**：`POST /game/end/local` → `/proxy/game-end-local-post`。解码后走原路由同一套 DTO 校验
 - **结算按玩家拆成自包含请求**：网址装不下整场数据，一局 N 个真人就是 N 条请求，每条 `players` 恰好一人，服务端无状态、不按 `matchId` 去重。限额与冷却照常逐人生效，是本地主机结算唯一的防线，所以不绕开 `LocalHostService.recordGameEnd`
-- **代发结算只发按玩家的 GA4 事件**（`gameEndPlayerBot`），不发整场的 `gameEndMatch`：它一个事件装着全场数据，单玩家请求凑不齐，接受断供。单玩家请求凑不出全场人数，由客户端在报文里另带 `playerCount`，`player_count` 与行为分的组队判定（`isParty`）都优先读它，未传时按报文里的真人数算。这条路径没有机器人条目，是已知偏差。限额记录里的 `ipActivity` 记的是代发玩家的 IP，同一局所有玩家会是同一个值
+- **代发结算只发按玩家的 GA4 事件**（`gameEndPlayerBot`），不发整场的 `gameEndMatch`：它一个事件装着全场数据，单玩家请求凑不齐，接受断供。单玩家请求凑不出全场人数，由客户端在报文里另带 `playerCount`，`player_count` 与行为分的组队判定（`isParty`）都读它，未传时按 1 算。这条路径没有机器人条目，是已知偏差。限额记录里的 `ipActivity` 记的是代发玩家的 IP，同一局所有玩家会是同一个值
 - **原路由路径里的参数改走 query**：`PUT /player/:id/setting` → `/proxy/player-setting-put?steamId=…&body=…`
 - **只接原路由已经 `@AllowLocal()` 的写入**：代理 controller 整体放行本地 key、直接调 service，绕得过原路由的认证。花积分的属性加点与重置、觉醒解锁与随机只认网页登录态，不进代理。原路由在 controller 里做的本地来源限制（如会员积分的每日限额）要先下沉到 service，两条路径调同一个方法
 - **代理路由不是原路由的转发**：字段集与错误语义都可以不同，如 `/proxy/player-info` 查无此人返回空对象而不是 404。名字表达的是取哪条原路由的数据，改原路由不会自动改到它
