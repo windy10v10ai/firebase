@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "819b3a74902bb4493492de10059375242e10d312",
+  gameCommit: "d5e457d1758bce2589c7fd08dde8add8bf3fb2f6",
   dotaVersion: "7.41",
 } as const;
 
@@ -90,7 +90,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "赏金猎人", en: "Bounty Hunter" },
     title: { zh: "<font color='#d000ff'>追踪术 觉醒</font>", en: "<font color='#d000ff'>Track Awakened</font>" },
     desc: { zh: "追踪一个敌方英雄，获得目标的真实视域，使目标受到的伤害增加，同时掌握目标当前携带的金钱数额。如果目标在被追踪期间死亡，赏金猎人和附近友方英雄都将获得若干金钱奖励。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内有敌方英雄时自动施放，优先追踪尚未被追踪的英雄。<br><font color='#d000ff'>觉醒强化：</font>追踪术施放后，对目标额外投出一枚当前等级的投掷飞镖。该飞镖无视施法距离、不触发冷却，消耗投掷飞镖的魔法值；未学习投掷飞镖或魔法不足时不投出。", en: "Tracks an enemy hero, granting True Sight of the target, increasing the damage they take and providing information on how much gold it is carrying. If the target dies, Bounty Hunter and nearby heroes collect a bonus bounty of gold.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, casts automatically whenever an enemy hero is within cast range, prioritizing heroes that are not yet tracked.<br><font color='#d000ff'>AWAKENED:</font> After Track is cast, Bounty Hunter also throws a Shuriken Toss of its current level at the target. This Shuriken ignores cast range and does not trigger its cooldown, but costs Shuriken Toss's mana. It is not thrown if Shuriken Toss is unlearned or mana is insufficient." },
-    ability: {"behavior":"autocast","targeting":"enemyHeroes","damageType":null,"piercesImmunity":"yes","dispellable":"no","values":[{"label":{"zh":"伤害加深：","en":"DAMAGE AMPLIFICATION:"},"levels":["8","12","16","20"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"自身金钱奖励：","en":"SELF BONUS GOLD:"},"levels":["80","160","240","320"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"友军金钱奖励：","en":"ALLIES BONUS GOLD:"},"levels":["80","160","240","320"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"持续时间：","en":"DURATION:"},"levels":["25"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["6","5","4","3"],"manaCost":["50"],"lore":null},
+    ability: {"behavior":"autocast","targeting":"enemyHeroes","damageType":null,"piercesImmunity":"yes","dispellable":"soft","values":[{"label":{"zh":"伤害加深：","en":"DAMAGE AMPLIFICATION:"},"levels":["8","12","16","20"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"自身金钱奖励：","en":"SELF BONUS GOLD:"},"levels":["80","160","240","320"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"友军金钱奖励：","en":"ALLIES BONUS GOLD:"},"levels":["80","160","240","320"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"持续时间：","en":"DURATION:"},"levels":["25"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["6","5","4","3"],"manaCost":["50"],"lore":null},
   },
   {
     heroName: "npc_dota_hero_nyx_assassin",
@@ -464,7 +464,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "瘟疫法师", en: "Necrophos" },
     title: { zh: "<font color='#d000ff'>竭心光环 觉醒</font>", en: "<font color='#d000ff'>Heartstopper Aura Awakened</font>" },
     desc: { zh: "死灵法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><font color='#d000ff'>造成的伤害可以被技能增强。</font>", en: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font>" },
-    ability: {"behavior":"aura","targeting":"enemy","damageType":"magical","piercesImmunity":"yes","dispellable":null,"values":[{"label":{"zh":"作用范围：","en":"Radius:"},"levels":["700"],"percent":false,"aoe":true,"spellAmp":false},{"label":{"zh":"每秒最大生命值伤害：","en":"Max Health Damage per Second:"},"levels":["0.6","0.9","1.2","1.5","1.8"],"percent":true,"aoe":false,"spellAmp":true}],"cooldown":null,"manaCost":null,"lore":null},
+    ability: {"behavior":"aura","targeting":"enemy","damageType":"magical","piercesImmunity":"yes","dispellable":"no","values":[{"label":{"zh":"作用范围：","en":"Radius:"},"levels":["700"],"percent":false,"aoe":true,"spellAmp":false},{"label":{"zh":"每秒最大生命值伤害：","en":"Max Health Damage per Second:"},"levels":["0.6","0.9","1.2","1.5","1.8"],"percent":true,"aoe":false,"spellAmp":true}],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
     heroName: "npc_dota_hero_axe",
@@ -508,7 +508,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     name: { zh: "帕吉", en: "Pudge" },
     title: { zh: "<font color='#d000ff'>肉钩 觉醒</font>", en: "<font color='#d000ff'>Meat Hook Awakened</font>" },
     desc: { zh: "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。", en: "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed." },
-    ability: {"behavior":"autocast","targeting":null,"damageType":"pure","piercesImmunity":"yes","dispellable":null,"values":[{"label":{"zh":"伤害：","en":"DAMAGE:"},"levels":["150","220","290","360","430"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"钩子速度：","en":"HOOK SPEED:"},"levels":["2100","2400","2700","3000","3300"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"基础施法距离：","en":"BASE CAST RANGE:"},"levels":["1800","2100","2400","2700","3000"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["14","13","12","11","10"],"manaCost":["110","120","130","140","150"],"lore":null},
+    ability: {"behavior":"autocast","targeting":null,"damageType":"pure","piercesImmunity":"yes","dispellable":null,"values":[{"label":{"zh":"伤害：","en":"DAMAGE:"},"levels":["150","220","290","360","430"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"钩子速度：","en":"HOOK SPEED:"},"levels":["2100","2400","2700","3000","3300"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"基础施法距离：","en":"BASE CAST RANGE:"},"levels":["1800","2100","2400","2700","3000"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["14","13","12","11","10"],"manaCost":["120"],"lore":null},
   },
 ];
 
