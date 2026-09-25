@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
-import { GameEndDto, getPlayerCount } from '../analytics/dto/game-end-dto';
+import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
@@ -92,7 +92,7 @@ export class GameService {
   async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
     const players = gameEnd.players.filter((player) => player.steamId > 0);
     // 行为分只在组队局计算
-    const isParty = getPlayerCount(gameEnd) >= 2;
+    const isParty = gameEnd.playerCount >= 2;
 
     await Promise.all(
       players.map((player) =>

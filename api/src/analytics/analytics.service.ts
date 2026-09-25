@@ -5,11 +5,7 @@ import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.servic
 
 import { PurchaseEvent } from './analytics.purchase.service';
 import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
-import {
-  GameEndDto as GameEndMatchDto,
-  GameEndPlayerDto,
-  getPlayerCount,
-} from './dto/game-end-dto';
+import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
 
 export interface Event {
   name: string;
@@ -86,7 +82,6 @@ export class AnalyticsService {
 
   // ------------------------ 通过game end API调用 ------------------------
   async gameEndPlayerBot(gameEnd: GameEndMatchDto, serverType: SERVER_TYPE) {
-    const playerCount = getPlayerCount(gameEnd);
     await Promise.all(
       gameEnd.players.map(async (player) => {
         const eventName = player.steamId === 0 ? 'game_end_bot' : 'game_end_player';
@@ -100,7 +95,7 @@ export class AnalyticsService {
           engagement_time_msec,
           difficulty: gameEnd.difficulty,
           version: gameEnd.version,
-          player_count: playerCount,
+          player_count: gameEnd.playerCount,
           is_winner: gameEnd.winnerTeamId === player.teamId,
           win_metrics: gameEnd.winnerTeamId === player.teamId,
           team_id: player.teamId,

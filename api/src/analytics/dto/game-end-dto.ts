@@ -205,15 +205,9 @@ export class GameEndDto extends EventBaseDto {
   players: GameEndPlayerDto[];
   @ApiProperty()
   countryCode?: string;
-  /** 全场真人数。代发请求每条只带一个玩家，凑不出全场人数，由客户端另带；旧版游戏不发送，按 players 里的真人数算 */
-  @ApiProperty({ required: false })
-  @IsOptional()
+  /** 全场真人数。代发请求每条只带一个玩家，凑不出全场人数，由客户端另带；旧版游戏不发送，按单人局算 */
+  @ApiProperty({ required: false, default: 1 })
   @IsInt()
   @Min(1)
-  playerCount?: number;
-}
-
-/** 报文里的全场真人数，旧版游戏没带时按 players 里的真人数算。 */
-export function getPlayerCount(gameEnd: Pick<GameEndDto, 'playerCount' | 'players'>): number {
-  return gameEnd.playerCount ?? gameEnd.players.filter((player) => player.steamId > 0).length;
+  playerCount: number = 1;
 }
