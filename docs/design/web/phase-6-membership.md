@@ -53,4 +53,4 @@
 
 ## 后续事项
 
-- 实现 PR 正文开头放复选框提醒：到支付宝开放平台把回调地址改成 `api.windy10v10ai.com`（沙箱、生产各一处）。代码侧下单请求带的 `notify_url` 取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，同一个 PR 里一起改
+- 回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，实现 PR 里改成 `api.windy10v10ai.com`。支付宝开放平台后台的回调地址只是兜底，实现 PR 正文开头放复选框提醒到后台同步改（沙箱、生产各一处）
