@@ -1,6 +1,6 @@
 # 批次 6：会员页（状态与购买）
 
-> 状态：设计已定，待实现。跟踪 issue [#1123](https://github.com/windy10v10ai/firebase/issues/1123)。总体规划见 [README.md](README.md)；购买区用品牌色的例外见 [design-system.md](../../web/design-system.md)「品牌色」。
+> 状态：已实现，待合并。长期决定见 [docs/web/README.md](../../web/README.md) 第 3 节「会员页」。跟踪 issue [#1123](https://github.com/windy10v10ai/firebase/issues/1123)。总体规划见 [README.md](README.md)；购买区用品牌色的例外见 [design-system.md](../../web/design-system.md)「品牌色」。
 
 `/membership` 目前只有权益介绍和爱发电、Ko-fi 两个订阅外链。游戏内的会员页已经能看会员状态、用支付宝扫码买会员和会员积分。这一批把那套搬到网站，网站成为买会员的第二入口。
 

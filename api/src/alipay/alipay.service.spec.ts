@@ -69,7 +69,11 @@ describe('AlipayService', () => {
         },
         {
           provide: LocalHostService,
-          useValue: { resetOrderCount: jest.fn().mockResolvedValue(undefined) },
+          useValue: {
+            resetOrderCount: jest.fn().mockResolvedValue(undefined),
+            assertOrderWithinLimit: jest.fn().mockResolvedValue(undefined),
+            recordOrder: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();
@@ -136,6 +140,20 @@ describe('AlipayService', () => {
       quantity: 1,
     };
     const create = (dto: CreateAlipayOrderDto) => service.createOrder(dto, SERVER_TYPE.WINDY);
+
+    it('网站来源与本地来源一样先过下单次数限额，成功后记一次', async () => {
+      await service.createOrder(baseDto, SERVER_TYPE.WEB);
+
+      expect(localHostService.assertOrderWithinLimit).toHaveBeenCalledWith(baseDto.steamId, {});
+      expect(localHostService.recordOrder).toHaveBeenCalledWith(baseDto.steamId, {});
+    });
+
+    it('游戏服务器来源不计下单次数', async () => {
+      await create(baseDto);
+
+      expect(localHostService.assertOrderWithinLimit).not.toHaveBeenCalled();
+      expect(localHostService.recordOrder).not.toHaveBeenCalled();
+    });
 
     it('单份会员：金额 ¥28.00、subject 用 subjectUnit', async () => {
       const res = await create(baseDto);

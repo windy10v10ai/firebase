@@ -9,13 +9,12 @@ API 是一个 NestJS 应用，部署成单个 Cloud Functions 函数 `client`（
 | 来源 | 入口域名 | 经过 |
 |---|---|---|
 | 网站浏览器 | `windy10v10ai.com` | Cloudflare → App Hosting（`web/next.config.ts` 的 `/api` 转发）→ 函数 |
-| 支付宝回调 | `windy10v10ai.com` | 同上 |
 | 游戏服务器 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
-| 爱发电 / Ko-fi 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
+| 支付宝 / 爱发电 / Ko-fi 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
 - 网站的转发直接打函数自己的地址，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting
-- **改 `API_ORIGIN` 会同时改掉支付宝回调的路径**，要连收款一起验。支付宝的回调地址由 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL` 决定；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
+- 支付宝的回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，开放平台后台配的只是兜底；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
 - **只有直连 API 域名的请求带着玩家自己的来源信息。**经网站域名转发进来的，边缘看到的是转发服务器的地址，`cf-connecting-ip` 与 `cf-ipcountry` 不代表玩家。依赖真实来源的功能只能挂在直连的那条路上
 
 ## 对外依赖
@@ -57,7 +56,7 @@ API 自己往外调的第三方服务：
 | 每日结算获得的勇士积分 | 5000 | 同上，不做部分发放 |
 | 单笔消耗会员积分 | 50 | 400 |
 | 每日消耗会员积分 | 2000 | 200，但不扣分 |
-| 每日创建支付宝订单 | 10 次 | 400；支付成功时清零当日计数 |
+| 每日创建支付宝订单 | 10 次，网站来源（`WEB`）也计入同一份 | 400；支付成功时清零当日计数 |
 
 - **每日累计超限返回 200 而不是 400**：客户端不管成功失败都会刷新玩家数据，报错只换来一次无意义的重试。单笔超限是另一回事，正常玩法碰不到，只可能来自伪造或客户端 bug，所以照常报 400
 - **三个当日计数共用一个 `dailyDate`**，日期对不上时必须一起归零，写回统一走 `LocalHostService` 里唯一那个写入口：只更新自己那一个再把日期推到今天，会把另外两个昨天的数字算成今天的

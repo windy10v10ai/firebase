@@ -21,7 +21,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **`API_ORIGIN` 不带 `NEXT_PUBLIC_` 前缀**：它只是转发目的地，页面代码不该拿到 API 域名。要进客户端包的变量（`NEXT_PUBLIC_FIREBASE_*`）仍必须带前缀，否则静默为 undefined
 - **`.env.local` 不能进 git**。它在 `next build` 时同样生效，一旦提交，App Hosting 的生产构建会被本地值覆盖。需要共享的本地配置写进 `.env.development`
 - **初始化 Firebase SDK 只用 `NEXT_PUBLIC_FIREBASE_*`，不要用 App Hosting 注入的 `FIREBASE_WEBAPP_CONFIG`**。那份配置由 Firebase 服务端生成，字段跟着项目资源走，含有本站用不到也无法控制的值（如已废弃的 `databaseURL`），本地也拿不到同一份
-- **`next.config.ts` 的 `/api` 转发不是开发便利设施**：游戏客户端与支付宝回调也走它，删掉会断掉收款。入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
+- **`next.config.ts` 的 `/api` 转发不是开发便利设施**：网站的所有接口请求都走它。入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
 
 网站不放密钥：浏览器拿得到的值按定义都是公开的（Firebase Web SDK 配置、GA4 measurement ID 皆然）。真需要服务端密钥时走 App Hosting 的 secret 绑定，不进文件。
 
