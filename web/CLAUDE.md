@@ -38,6 +38,10 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **登录态变化时设 user_id**，只在 `AuthProvider` 那一处维护，退出时传 `null`
 - **测量 ID 读 `NEXT_PUBLIC_GA_MEASUREMENT_ID`**，留空即不加载 gtag。它是公开值，按上面「本地开发」的规约可以进 git
 
+## 界面文案
+
+- **只告诉玩家怎么做，不解释为什么这样设计**：平台限制、技术原因、方案取舍不进界面文案。写「付款时请在留言里填写你的 Dota2 好友 ID」，不写「Ko-fi 带不了 ID，所以请……」；理由留在设计文档与 PR
+
 ## 文案里的开局方式
 
 理由见 [docs/web/README.md](../docs/web/README.md) 的「开局方式与命名」，取值见[根目录 CLAUDE.md](../CLAUDE.md) 的「用语」。
