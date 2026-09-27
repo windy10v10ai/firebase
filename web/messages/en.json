@@ -105,72 +105,45 @@
   },
   "launch": {
     "title": "Start the game",
-    "difficulty": {
-      "dota": "N1–N5",
-      "hard": "N6–N8",
-      "custom": "Custom difficulty"
-    },
-    "site": {
-      "title": "Start the game from this site (backup)",
-      "lead": "Use this when a game launched from the Arcade can't reach the server. Solo only.",
-      "warning": "You must quit Dota 2 first."
-    },
-    "dialogs": {
-      "title": "What happens after you click",
-      "step1": "Your browser asks whether to open Steam. Choose \"Open Steam\".",
-      "step2": "Steam shows the launch parameters for this game. Choose \"Continue\".",
-      "step2Hint": "This prompt appears inside Steam. If you do not see it, open Steam.",
-      "step3": "<wait>Please wait ten or twenty seconds</wait> while Steam and Dota 2 open.",
-      "browser": {
-        "title": "Open Steam?",
-        "body": "This site wants to open this application.",
-        "confirm": "Open Steam",
-        "cancel": "Cancel"
-      },
-      "steam": {
-        "title": "Launching Game with Custom Parameters",
-        "body": "Dota 2 is attempting to launch with the optional parameters displayed below.",
-        "note": "If you did not request this launch or do not understand these options, select \"Cancel\".",
-        "confirm": "Continue",
-        "cancel": "Cancel"
-      }
-    },
-    "console": {
-      "title": "Launch from the console",
-      "intro": "Works the same as the links above, just typed by hand. Use it if clicking a link does nothing.",
-      "steps": [
-        "In Dota 2 settings, search for \"console\" and tick Enable Console",
-        "In the hotkey settings, bind a key to Console",
-        "Back at the Dota 2 main menu, press that key to open the console",
-        "Pick the difficulty you want and enter one of the commands below in the console"
-      ],
-      "copy": "Copy",
-      "copied": "Copied"
-    },
-    "homeCard": {
-      "title": "How to start the game",
-      "body": "Just launch from the Arcade: multiplayer works and the game reads your latest data. If it occasionally can't reach the server, start the game from this site instead."
-    },
     "compare": {
-      "title": "The two ways to start",
-      "arcade": "From the Arcade",
-      "arcadeHint": "Main",
-      "site": "From this site",
-      "siteHint": "Backup",
-      "multiplayerSite": "Solo only",
+      "title": "Two ways to start",
+      "arcade": "Arcade",
+      "arcadeHint": "Multiplayer",
+      "launcher": "Launcher",
+      "launcherHint": "Solo",
+      "multiplayer": "Multiplayer",
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",
       "stableArcade": "May occasionally fail",
+      "smooth": "Smooth late game",
       "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded.",
       "yes": "Yes",
       "no": "No",
-      "partial": "Not always",
-      "multiplayer": "Multiplayer"
+      "partial": "Not always"
+    },
+    "launcher": {
+      "name": "Windy10v10AI Launcher",
+      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play.",
+      "download": "Download launcher",
+      "browserPrompt": "Browser says it isn't commonly downloaded: choose <mark>Keep</mark>",
+      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
+    },
+    "smartScreen": {
+      "title": "Windows protected your PC",
+      "moreInfo": "More info",
+      "app": "App:",
+      "publisher": "Publisher: Unknown publisher",
+      "runAnyway": "Run anyway",
+      "dontRun": "Don't run"
     },
     "website": {
       "title": "Attributes and awakenings happen on this site only",
       "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. Changes apply from your next game.",
       "checkIn": "The daily check-in can be claimed here, and it is also claimed automatically when you start a game."
+    },
+    "homeCard": {
+      "title": "How to start the game",
+      "body": "Just launch from the Arcade: multiplayer works. Playing solo and want a smoother late game? Download the launcher."
     }
   },
   "membership": {
