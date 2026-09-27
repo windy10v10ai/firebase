@@ -23,6 +23,14 @@ const config: NextConfig = {
         source: '/dota/:file*',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
+      // 启动器同理，文件名带版本号；保存名固定，直接打开下载地址也存成同一个名字
+      {
+        source: '/downloads/:file*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'Content-Disposition', value: 'attachment; filename="Windy10v10AI.exe"' },
+        ],
+      },
     ];
   },
   // /offline 这个地址随上一版说明页发出去过，游戏内与帖子里都可能还留着
