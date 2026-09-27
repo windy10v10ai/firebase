@@ -237,8 +237,8 @@
         "action": "Retry"
       },
       "rateLimited": {
-        "title": "Daily order limit reached",
-        "hint": "Please come back tomorrow, or use another payment method"
+        "title": "Too many unpaid orders",
+        "hint": "Please try again tomorrow, or use another payment method"
       }
     }
   },
