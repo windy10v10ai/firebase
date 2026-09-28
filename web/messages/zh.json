@@ -125,6 +125,7 @@
       "name": "Windy10v10AI 启动器",
       "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏。",
       "download": "下载启动器",
+      "openSource": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
       "browserPrompt": "浏览器提示「不常下载」：选「<mark>保留</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
     },

@@ -125,6 +125,7 @@
       "name": "Windy10v10AI Launcher",
       "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play.",
       "download": "Download launcher",
+      "openSource": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake. Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
       "browserPrompt": "Browser says it isn't commonly downloaded: choose <mark>Keep</mark>",
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
     },
