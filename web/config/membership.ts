@@ -86,13 +86,17 @@ const AFDIAN_MEMBER_BASE_URL =
 
 export const KOFI_MEMBER_URL = 'https://ko-fi.com/post/Membership-Z8Z01CDJLU';
 
-// 备注带上 ID，爱发电的回调按它自动激活，玩家不用自己填
-export function afdianMemberUrl(steamId: string) {
-  return `${AFDIAN_MEMBER_BASE_URL}&remark=${steamId}`;
+// 备注带上 ID，爱发电的回调按它自动激活，玩家不用自己填；未登录时不带，玩家在留言里自己填
+function withRemark(url: string, steamId: string | null) {
+  return steamId ? `${url}&remark=${steamId}` : url;
 }
 
-export function afdianPointsUrl(tier: PointsTier, steamId: string) {
-  return `${tier.afdianBaseUrl}&remark=${steamId}`;
+export function afdianMemberUrl(steamId: string | null) {
+  return withRemark(AFDIAN_MEMBER_BASE_URL, steamId);
+}
+
+export function afdianPointsUrl(tier: PointsTier, steamId: string | null) {
+  return withRemark(tier.afdianBaseUrl, steamId);
 }
 
 export const PLATFORM_ICONS: Record<PaymentPlatform, string> = {

@@ -149,16 +149,14 @@ export default function MembershipPage() {
         ))}
       </p>
 
-      {uid ? (
-        <AlipayPayDialog
-          key={payKey}
-          steamId={uid}
-          request={payRequest}
-          paidExpireDate={paidExpireDate}
-          onPaid={onPaid}
-          onClose={onClosePay}
-        />
-      ) : null}
+      <AlipayPayDialog
+        key={payKey}
+        steamId={uid}
+        request={payRequest}
+        paidExpireDate={paidExpireDate}
+        onPaid={onPaid}
+        onClose={onClosePay}
+      />
     </div>
   );
 }

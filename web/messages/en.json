@@ -188,7 +188,8 @@
       "alipay": {
         "name": "Alipay",
         "desc": "Scan to Pay in CNY",
-        "note": "Pick a plan to get a QR code, scan it with Alipay, and it activates automatically"
+        "note": "Pick a plan to get a QR code, scan it with Alipay, and it activates automatically",
+        "noteGuest": "Log in, then pick a plan to get a QR code and pay with Alipay. It activates automatically"
       },
       "afdian": {
         "name": "Afdian",
@@ -197,10 +198,11 @@
       },
       "kofi": {
         "name": "Ko-fi",
-        "desc": "Global users · Pay in USD",
-        "note": "When paying, put your Dota2 Friend ID in the message:"
+        "desc": "Global users · Pay in USD"
       }
     },
+    "idNote": "When paying, put your Dota2 Friend ID in the message:",
+    "idLogin": "Log in to see your ID",
     "forgotId": "Forgot to include your ID? ",
     "manualActivate": "Activate manually",
     "member": {
@@ -221,6 +223,7 @@
     },
     "pay": {
       "title": "Pay with Alipay",
+      "loginHint": "Log in with Steam to get the QR code",
       "close": "Close",
       "cancel": "Cancel",
       "done": "Done",
