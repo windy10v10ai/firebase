@@ -9,8 +9,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyTitle("Windy10v10AI")]
-[assembly: System.Reflection.AssemblyVersion("0.3.1.0")]
+[assembly: System.Reflection.AssemblyTitle("Windy10v10AI Launcher")]
+[assembly: System.Reflection.AssemblyProduct("Windy10v10AI Launcher")]
+[assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
+[assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
+[assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
+[assembly: System.Reflection.AssemblyVersion("0.3.2.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.3.2.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -38,7 +43,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.3.1";
+        const string Version = "0.3.2";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -379,6 +384,7 @@ namespace Windy10v10AI.Launcher
                 logFile = Path.Combine(install.Game, @"dota\dedicated.log");
                 if (File.Exists(logFile)) File.Delete(logFile);
 
+                // Minimized, not hidden: hiding another process's window gets the launcher flagged as a trojan by Defender
                 server = Process.Start(new ProcessStartInfo
                 {
                     FileName = install.Exe,
@@ -386,9 +392,8 @@ namespace Windy10v10AI.Launcher
                     Arguments = "-dedicated -console -allow_no_lobby_connect -ip 127.0.0.1 -port " + Port +
                         " -con_logfile dedicated.log +sv_hibernate_when_empty 0 +dota_quit_after_game 0" +
                         " \"+map " + map + " gamemode=15 customgamemode=" + id + " nomapvalidation=1\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Minimized,
                 });
 
                 WaitForMap(map);
@@ -441,12 +446,7 @@ namespace Windy10v10AI.Launcher
             {
                 if (stopping) throw new OperationCanceledException();
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
-                NativeMethods.HideWindowsOf(server.Id);
-                if (ReadShared(logFile).Contains(ready))
-                {
-                    NativeMethods.HideWindowsOf(server.Id);
-                    return;
-                }
+                if (ReadShared(logFile).Contains(ready)) return;
                 var waited = (DateTime.Now - started).TotalSeconds;
                 if (waited > TimeoutSeconds) throw new LaunchError(Strings.Timeout, true);
                 if (waited > SlowSeconds && !slowShown)
@@ -466,7 +466,6 @@ namespace Windy10v10AI.Launcher
             {
                 Thread.Sleep(3000);
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
-                NativeMethods.HideWindowsOf(serverId);
                 var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count;
                 if (clients > 0) seen = true;
                 else if (seen) break;
@@ -608,31 +607,5 @@ namespace Windy10v10AI.Launcher
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool CreateHardLink(string fileName, string existingFileName, IntPtr securityAttributes);
-
-        delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr param);
-
-        [DllImport("user32.dll")]
-        static extern bool EnumWindows(EnumWindowsProc callback, IntPtr param);
-
-        [DllImport("user32.dll")]
-        static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
-
-        [DllImport("user32.dll")]
-        static extern bool IsWindowVisible(IntPtr hwnd);
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hwnd, int command);
-
-        // The dedicated server opens its own console window regardless of how the process is started
-        public static void HideWindowsOf(int pid)
-        {
-            EnumWindows((hwnd, param) =>
-            {
-                uint owner;
-                GetWindowThreadProcessId(hwnd, out owner);
-                if (owner == pid && IsWindowVisible(hwnd)) ShowWindow(hwnd, 0);
-                return true;
-            }, IntPtr.Zero);
-        }
     }
 }
