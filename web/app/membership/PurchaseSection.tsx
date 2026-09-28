@@ -119,7 +119,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
     <Tier
       key={tier.months}
       topBar={style.topBar}
-      className="h-[72px] items-center justify-between gap-3 px-4 lg:h-[84px]"
+      className="h-[72px] items-center px-4 lg:h-[104px]"
       action={{
         onClick: () =>
           onAlipay({
@@ -130,20 +130,19 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
           }),
       }}
     >
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-base font-extrabold md:text-lg lg:text-xl">
+      {/* 电脑档四列卡片太窄，月数单独占一行，原价仍在现价正上方 */}
+      <span className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5">
+        <span className="col-start-1 row-start-1 truncate text-base font-extrabold md:text-lg lg:col-span-2 lg:text-xl">
           {t('member.months', { count: tier.months })}
         </span>
-        <span className="truncate text-xs text-muted lg:text-[13px]">
+        <span className="col-start-1 row-start-2 truncate text-xs text-muted lg:text-[13px]">
           {t('member.total', { amount: money(tier.total) })}
         </span>
-      </span>
-      <span className="flex shrink-0 flex-col items-end gap-0.5">
-        <s className="text-xs whitespace-nowrap text-muted">
+        <s className="col-start-2 row-start-1 justify-self-end text-xs whitespace-nowrap text-muted lg:row-start-2">
           {money(AFDIAN_MEMBER_PRICE)}
           {perMonth}
         </s>
-        <span className="flex items-center gap-1.5 whitespace-nowrap">
+        <span className="col-start-2 row-start-2 flex items-center gap-1.5 justify-self-end whitespace-nowrap lg:col-span-2 lg:col-start-1 lg:row-start-3">
           <span className={DISCOUNT_CLASS}>-{tier.discountPercent}%</span>
           <span className="text-base font-bold md:text-lg lg:text-xl">{money(tier.pricePerMonth)}</span>
           <span className="text-xs text-muted">{perMonth}</span>
@@ -155,7 +154,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
   const externalMemberTier = (href: string, price: string, label: string) => (
     <Tier
       topBar={style.topBar}
-      className="h-[72px] items-center gap-4 px-4 lg:h-[84px]"
+      className="h-[72px] items-center gap-4 px-4 lg:h-[104px]"
       action={{ href }}
     >
       <span className="text-lg font-extrabold whitespace-nowrap lg:text-xl">
@@ -173,12 +172,16 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
   );
 
   const pointsTier = (tier: PointsTier) => {
-    const pointsLabel = (
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-base font-extrabold text-member md:text-lg lg:text-xl">
-          {tier.points.toLocaleString()}
+    // 手机与电脑档卡片放不下图、积分数与价格三列，积分数单独占一行；平板是通栏，放得下
+    const pointsBody = (price: ReactNode) => (
+      <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-0.5 lg:gap-y-1">
+        <span className="col-span-2 flex min-w-0 flex-row items-baseline gap-1.5 md:col-span-1 md:flex-col md:items-start md:gap-0.5 lg:col-span-2 lg:flex-row lg:items-baseline lg:gap-1.5">
+          <span className="truncate text-base font-extrabold text-member md:text-lg lg:text-xl">
+            {tier.points.toLocaleString()}
+          </span>
+          <span className="truncate text-xs text-muted">{t('points.unit')}</span>
         </span>
-        <span className="truncate text-xs text-muted">{t('points.unit')}</span>
+        <span className="col-span-2 justify-self-end md:col-span-1 lg:col-span-2">{price}</span>
       </span>
     );
     const image = (
@@ -213,14 +216,15 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
           }}
         >
           {image}
-          {pointsLabel}
-          <span className="flex shrink-0 flex-col items-end gap-0.5">
-            <s className="text-xs whitespace-nowrap text-muted">{money(tier.afdianPrice)}</s>
-            <span className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className={DISCOUNT_CLASS}>{t('points.save', { amount: money(saved) })}</span>
-              <span className="text-base font-bold lg:text-lg">{money(tier.alipayPrice)}</span>
-            </span>
-          </span>
+          {pointsBody(
+            <span className="flex flex-col items-end gap-0.5">
+              <s className="text-xs whitespace-nowrap text-muted">{money(tier.afdianPrice)}</s>
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className={DISCOUNT_CLASS}>{t('points.save', { amount: money(saved) })}</span>
+                <span className="text-base font-bold lg:text-lg">{money(tier.alipayPrice)}</span>
+              </span>
+            </span>,
+          )}
         </Tier>
       );
     }
@@ -230,11 +234,12 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
     return (
       <Tier key={tier.points} {...shared} action={{ href }}>
         {image}
-        {pointsLabel}
-        <span className="flex items-center gap-2 whitespace-nowrap">
-          <span className="text-base font-bold lg:text-lg">{money(price)}</span>
-          <ExternalLink className="size-4 text-muted" aria-hidden="true" />
-        </span>
+        {pointsBody(
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <span className="text-base font-bold lg:text-lg">{money(price)}</span>
+            <ExternalLink className="size-4 text-muted" aria-hidden="true" />
+          </span>,
+        )}
       </Tier>
     );
   };
@@ -298,7 +303,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
                   {t(`platforms.${key}.name`)}
                 </span>
                 <span
-                  className={`hidden truncate text-[13px] md:block ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}
+                  className={`hidden text-[13px] leading-tight md:line-clamp-2 ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}
                 >
                   {t(`platforms.${key}.desc`)}
                 </span>
