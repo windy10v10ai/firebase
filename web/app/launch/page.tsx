@@ -162,20 +162,23 @@ export default function LaunchPage() {
           </div>
         </div>
 
-        <div className="mt-5 space-y-3 border-t border-line pt-5">
+        <div className="mt-5 border-t border-line pt-5">
           <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
+            {t('launcher.suspicious')}
+            <br />
             {t.rich('launcher.openSource', { github })}
           </p>
-          <p className="text-[15px] font-bold text-heading md:text-base">
-            {t.rich('launcher.browserPrompt', { mark })}
-          </p>
-          <p className="text-[15px] font-bold text-heading md:text-base">
-            {t.rich('launcher.windowsPrompt', { mark })}
-          </p>
-        </div>
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
-          <SmartScreenFigure step={1} />
-          <SmartScreenFigure step={2} />
+          {/* 宽屏按列排，两条标题同在第一行，示意图顶边才对齐 */}
+          <div className="mt-5 grid gap-x-5 gap-y-3 md:grid-flow-col md:grid-cols-2 md:grid-rows-[auto_auto]">
+            <p className="text-[15px] font-bold text-heading md:text-base">
+              {t.rich('launcher.browserPrompt', { mark })}
+            </p>
+            <SmartScreenFigure kind="browser" />
+            <p className="mt-3 text-[15px] font-bold text-heading md:mt-0 md:text-base">
+              {t.rich('launcher.windowsPrompt', { mark })}
+            </p>
+            <SmartScreenFigure kind="windows" />
+          </div>
         </div>
       </Section>
 
