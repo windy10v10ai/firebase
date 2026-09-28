@@ -17,6 +17,7 @@ jobs:
     outputs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
+      launcher: ${{ steps.filter.outputs.launcher }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -30,6 +31,7 @@ jobs:
         run: |
           api=false
           web=false
+          launcher=false
 
           while IFS= read -r file; do
             case "$file" in
@@ -39,7 +41,15 @@ jobs:
               web/*)
                 web=true
                 ;;
-              .github/workflows/ci.yml|.nvmrc|.prettierrc|firebase.json|package.json|package-lock.json)
+              launcher/*)
+                launcher=true
+                ;;
+              .github/workflows/ci.yml)
+                api=true
+                web=true
+                launcher=true
+                ;;
+              .nvmrc|.prettierrc|firebase.json|package.json|package-lock.json)
                 api=true
                 web=true
                 ;;
@@ -48,6 +58,7 @@ jobs:
 
           echo "api=$api" >> "$GITHUB_OUTPUT"
           echo "web=$web" >> "$GITHUB_OUTPUT"
+          echo "launcher=$launcher" >> "$GITHUB_OUTPUT"
 
   api-quality:
     needs: changes
@@ -132,9 +143,20 @@ jobs:
       - name: Build
         run: npm run build
 
+  launcher-build:
+    needs: changes
+    if: needs.changes.outputs.launcher == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build
+        run: launcher\build.cmd
+        shell: cmd
+
   ci:
     if: ${{ always() }}
-    needs: [changes, api-quality, api-e2e, web-quality]
+    needs: [changes, api-quality, api-e2e, web-quality, launcher-build]
     runs-on: ubuntu-latest
     steps:
       - name: Verify required jobs
@@ -145,6 +167,8 @@ jobs:
           API_QUALITY_RESULT: ${{ needs.api-quality.result }}
           API_E2E_RESULT: ${{ needs.api-e2e.result }}
           WEB_QUALITY_RESULT: ${{ needs.web-quality.result }}
+          LAUNCHER_CHANGED: ${{ needs.changes.outputs.launcher }}
+          LAUNCHER_BUILD_RESULT: ${{ needs.launcher-build.result }}
         run: |
           [[ "$CHANGES_RESULT" == "success" ]]
 
@@ -162,3 +186,4 @@ jobs:
           check_result "$API_CHANGED" "$API_QUALITY_RESULT"
           check_result "$API_CHANGED" "$API_E2E_RESULT"
           check_result "$WEB_CHANGED" "$WEB_QUALITY_RESULT"
+          check_result "$LAUNCHER_CHANGED" "$LAUNCHER_BUILD_RESULT"
