@@ -1,10 +1,16 @@
 import { Check, Download, Triangle, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import GithubIcon from '../components/GithubIcon';
 import Section from '../components/Section';
 import { pageTitle } from '../lib/page-title';
 
-import { LAUNCHER_FILE_NAME, LAUNCHER_URL, LAUNCHER_VERSION } from './launcher';
+import {
+  LAUNCHER_FILE_NAME,
+  LAUNCHER_SOURCE_URL,
+  LAUNCHER_URL,
+  LAUNCHER_VERSION,
+} from './launcher';
 import SmartScreenFigure from './SmartScreenFigure';
 
 export const generateMetadata = pageTitle('launch', 'title');
@@ -33,6 +39,18 @@ export default function LaunchPage() {
   const t = useTranslations('launch');
 
   const mark = (chunks: React.ReactNode) => <span className="text-warning">{chunks}</span>;
+  // 不换行：窄屏时图标和文字被拆到两行，读起来像两样东西
+  const github = (chunks: React.ReactNode) => (
+    <a
+      href={LAUNCHER_SOURCE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="link-inline whitespace-nowrap"
+    >
+      <GithubIcon className="mr-1 inline-block size-4 align-[-0.125em]" />
+      {chunks}
+    </a>
+  );
 
   // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把列挤到折行
   const renderCell = (cell: Cell) => (
@@ -145,6 +163,9 @@ export default function LaunchPage() {
         </div>
 
         <div className="mt-5 space-y-3 border-t border-line pt-5">
+          <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
+            {t.rich('launcher.openSource', { github })}
+          </p>
           <p className="text-[15px] font-bold text-heading md:text-base">
             {t.rich('launcher.browserPrompt', { mark })}
           </p>
