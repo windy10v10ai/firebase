@@ -28,7 +28,7 @@ namespace Windy10v10AI.Launcher
         public static string SlowHint { get { return Pick("比平时慢一些，仍在启动中…", "Taking longer than usual, still starting...", "Дольше обычного, запуск продолжается…"); } }
         public static string ClosingDota { get { return Pick("正在关闭 Dota 2…", "Closing Dota 2...", "Закрываем Dota 2…"); } }
         public static string InGame { get { return Pick("游戏中", "In game", "В игре"); } }
-        public static string InGameHint { get { return Pick("关闭 Dota 2 后服务器会自动关闭", "The server stops when you close Dota 2", "Сервер остановится после закрытия Dota 2"); } }
+        public static string InGameHint { get { return Pick("服务器窗口在任务栏最小化运行，请勿关闭；关闭 Dota 2 后会自动关闭", "Server runs minimized in the taskbar. Keep it open; it stops with Dota 2.", "Сервер свёрнут на панели задач, не закрывайте его."); } }
         public static string Cancel { get { return Pick("取消", "Cancel", "Отмена"); } }
         public static string StopServer { get { return Pick("关闭服务器", "Stop server", "Остановить сервер"); } }
 
