@@ -18,10 +18,7 @@
 
 - 不把游戏服务器从 `api.windy10v10ai.com` 搬走：它不经过 Next，没有收益
 - 不改 CORS 白名单
-- 不给支付宝补对账兜底：见后续事项
 
 ## 后续事项
 
-支付宝的回调随[批次 6 会员页](../web/phase-6-membership.md)搬到了 `api.windy10v10ai.com`，三个收款平台的回调现在都走 API 子域。
-
-- **支付宝回调没有任何兜底**：`getOrderStatus` 只读本地订单状态，定时对账只覆盖爱发电。回调丢了就是玩家付钱不到账且无告警，补兜底另开
+- **支付宝回调没有兜底**：回调丢了就是玩家付钱不到账且无告警，做法见 [alipay-payment](../alipay-payment/README.md) 的后续事项
