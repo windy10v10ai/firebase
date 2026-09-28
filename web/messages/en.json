@@ -202,7 +202,7 @@
       }
     },
     "idNote": "When paying, put your Dota2 Friend ID in the message:",
-    "idLogin": "Log in to see your ID",
+    "idNoteGuest": "When paying, put your Dota2 Friend ID in the message. Log in to see it",
     "forgotId": "Forgot to include your ID? ",
     "manualActivate": "Activate manually",
     "member": {

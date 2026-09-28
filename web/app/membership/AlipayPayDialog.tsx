@@ -193,12 +193,9 @@ export default function AlipayPayDialog({
         <>
           {subjectRow(null, false)}
           <p className="text-center text-content">{t('loginHint')}</p>
-          <div className="flex justify-center">
+          <div className="flex justify-center pb-2">
             <SteamLoginButton size="large" />
           </div>
-          <Button variant="secondary" className="w-full" onClick={onClose}>
-            {t('cancel')}
-          </Button>
         </>
       );
     }

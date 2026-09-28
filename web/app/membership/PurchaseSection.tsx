@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useState, type ReactNode } from 'react';
 
 import CopyIdButton from '@/app/components/CopyIdButton';
+import SteamLoginButton from '@/app/components/SteamLoginButton';
 import {
   AFDIAN_MEMBER_PRICE,
   ALIPAY_MEMBER_TIERS,
@@ -29,7 +30,6 @@ import type { AlipayRequest } from './AlipayPayDialog';
 interface PurchaseSectionProps {
   /** 未登录时为 null：支付宝档位点了提示登录，爱发电、Ko-fi 照常跳转 */
   steamId: string | null;
-  loginHref: string;
   onAlipay: (request: AlipayRequest) => void;
 }
 
@@ -95,7 +95,7 @@ function Tier({ topBar, className, action, children }: TierProps) {
   );
 }
 
-export default function PurchaseSection({ steamId, loginHref, onAlipay }: PurchaseSectionProps) {
+export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionProps) {
   const t = useTranslations('membership');
   const tIdentity = useTranslations('profile.identity');
   const locale = useLocale();
@@ -241,28 +241,22 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
 
   // 爱发电登录后链接自带 ID，其余情况都要玩家自己在留言里填 ID
   const asksForId = platform === 'kofi' || (platform === 'afdian' && !steamId);
-  const noteContent = asksForId ? (
+  const noteContent = !steamId ? (
+    t(asksForId ? 'idNoteGuest' : 'platforms.alipay.noteGuest')
+  ) : asksForId ? (
     <>
       {t('idNote')}
-      {steamId ? (
-        <span className="inline-flex items-center gap-1 font-bold text-heading">
-          {steamId}
-          <CopyIdButton
-            value={steamId}
-            tooltip={tIdentity('copyId.tooltip')}
-            copiedLabel={tIdentity('copyId.copied')}
-          />
-        </span>
-      ) : (
-        <a href={loginHref} className={`font-bold hover:brightness-125 ${style.link}`}>
-          {t('idLogin')}
-        </a>
-      )}
+      <span className="inline-flex items-center gap-1 font-bold text-heading">
+        {steamId}
+        <CopyIdButton
+          value={steamId}
+          tooltip={tIdentity('copyId.tooltip')}
+          copiedLabel={tIdentity('copyId.copied')}
+        />
+      </span>
     </>
-  ) : platform === 'alipay' ? (
-    t(steamId ? 'platforms.alipay.note' : 'platforms.alipay.noteGuest')
   ) : (
-    t('platforms.afdian.note')
+    t(`platforms.${platform === 'alipay' ? 'alipay' : 'afdian'}.note`)
   );
 
   const manualActivate = (href: string) => (
@@ -319,8 +313,15 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
         className={`flex flex-col gap-1 rounded-lg border px-4 py-3 text-sm text-content lg:h-12 lg:flex-row lg:items-center lg:gap-3 lg:py-0 ${style.note}`}
       >
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">{noteContent}</span>
-        {platform === 'afdian' ? manualActivate('/regist/afdian') : null}
-        {platform === 'kofi' ? manualActivate('/regist/kofi') : null}
+        {!steamId ? (
+          <span className="self-start lg:ms-auto lg:self-auto">
+            <SteamLoginButton />
+          </span>
+        ) : platform === 'afdian' ? (
+          manualActivate('/regist/afdian')
+        ) : platform === 'kofi' ? (
+          manualActivate('/regist/kofi')
+        ) : null}
       </div>
 
       <div className="mt-2 flex flex-col gap-3">

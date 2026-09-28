@@ -202,7 +202,7 @@
       }
     },
     "idNote": "付款时请在留言里填写你的 Dota2 好友 ID：",
-    "idLogin": "登录查看我的 ID",
+    "idNoteGuest": "付款时请在留言里填写你的 Dota2 好友 ID，登录即可查看",
     "forgotId": "付款时忘记填 ID？",
     "manualActivate": "手动激活",
     "member": {
