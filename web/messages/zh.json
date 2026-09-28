@@ -105,72 +105,45 @@
   },
   "launch": {
     "title": "启动游戏",
-    "difficulty": {
-      "dota": "N1 ~ N5",
-      "hard": "N6 ~ N8",
-      "custom": "自定义难度"
-    },
-    "site": {
-      "title": "从网站启动游戏（备用）",
-      "lead": "从游廊开局连不上服务器时使用。只能单人。",
-      "warning": "必须退出 Dota 2 再执行。"
-    },
-    "dialogs": {
-      "title": "点了之后会发生什么",
-      "step1": "浏览器问要不要打开 Steam，选「打开 Steam」。",
-      "step2": "Steam 显示这次的启动参数，选「继续」。",
-      "step2Hint": "这个提示在 Steam 窗口里。没看到就点开 Steam。",
-      "step3": "<wait>请耐心等待十几秒</wait>，Steam 和 Dota 2 会依次打开。",
-      "browser": {
-        "title": "要打开 Steam 吗？",
-        "body": "有个网站想打开此应用。",
-        "confirm": "打开Steam",
-        "cancel": "取消"
-      },
-      "steam": {
-        "title": "用自定义参数启动游戏",
-        "body": "Dota 2 正在试图用下方显示的可选参数启动。",
-        "note": "如果您未请求本次启动或不理解这些选项，选择「取消」。",
-        "confirm": "继续",
-        "cancel": "取消"
-      }
-    },
-    "console": {
-      "title": "用控制台启动",
-      "intro": "和上面的链接效果一样，只是改成手动输入命令。链接点了没反应时再用。",
-      "steps": [
-        "在 Dota 2 设置里搜「控制台」，勾上「启用控制台」",
-        "在快捷键设置里，给「控制台」设一个快捷键",
-        "回到 Dota 2 主界面，按快捷键打开控制台",
-        "按想玩的难度，选择下方一条命令输入控制台"
-      ],
-      "copy": "复制",
-      "copied": "已复制"
-    },
-    "homeCard": {
-      "title": "开局方式",
-      "body": "从游廊开局即可，支持多人，读取最新数据。偶尔连不上服务器时，可以从网站启动游戏。"
-    },
     "compare": {
-      "title": "两种开局方式",
-      "arcade": "从游廊开局",
-      "arcadeHint": "推荐",
-      "site": "从网站启动",
-      "siteHint": "备用",
-      "multiplayerSite": "只能单人",
+      "title": "两种启动方式",
+      "arcade": "游廊",
+      "arcadeHint": "联机",
+      "launcher": "启动器",
+      "launcherHint": "单人",
+      "multiplayer": "多人联机",
       "records": "最新数据、结算积分、每日任务",
       "stable": "连接稳定",
       "stableArcade": "偶尔连不上",
+      "smooth": "后期流畅",
       "noteOffline": "连不上服务器时是离线模式：会员、属性、觉醒沿用地图更新时的数据，积分与战绩不记录。",
       "yes": "支持",
       "no": "不支持",
-      "partial": "偶尔不行",
-      "multiplayer": "多人联机"
+      "partial": "偶尔不行"
+    },
+    "launcher": {
+      "name": "Windy10v10AI 启动器",
+      "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏。",
+      "download": "下载启动器",
+      "browserPrompt": "浏览器提示「不常下载」：选「<mark>保留</mark>」",
+      "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
+    },
+    "smartScreen": {
+      "title": "Windows 已保护你的电脑",
+      "moreInfo": "更多信息",
+      "app": "应用：",
+      "publisher": "发布者：未知发布者",
+      "runAnyway": "仍要运行",
+      "dontRun": "不运行"
     },
     "website": {
       "title": "加点和觉醒只能在网站上操作",
       "body": "为了保护玩家数据安全，属性加点、重置属性、英雄觉醒只能在网站上操作，游戏内的加点、觉醒按钮会跳转到网站。改完下一局生效。",
       "checkIn": "每日签到可以在网站上领，开局时也会自动领取。"
+    },
+    "homeCard": {
+      "title": "开局方式",
+      "body": "从游廊开局即可，支持多人。一个人玩、想要后期更流畅，可以下载启动器。"
     }
   },
   "membership": {

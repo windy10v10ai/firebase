@@ -1,11 +1,11 @@
-import { Check, Play, Triangle, X } from 'lucide-react';
+import { Check, Download, Triangle, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import CopyIdButton from '../components/CopyIdButton';
 import Section from '../components/Section';
 import { pageTitle } from '../lib/page-title';
 
-import LaunchDialogFigure from './LaunchDialogFigure';
+import { LAUNCHER_FILE_NAME, LAUNCHER_URL, LAUNCHER_VERSION } from './launcher';
+import SmartScreenFigure from './SmartScreenFigure';
 
 export const generateMetadata = pageTitle('launch', 'title');
 
@@ -14,41 +14,27 @@ interface Cell {
   noteKey?: string;
 }
 
-const COMPARE_ROWS: { labelKey: string; arcade: Cell; site: Cell }[] = [
-  {
-    labelKey: 'multiplayer',
-    arcade: { mark: 'yes' },
-    site: { mark: 'no', noteKey: 'multiplayerSite' },
-  },
-  { labelKey: 'records', arcade: { mark: 'yes' }, site: { mark: 'yes' } },
+const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
+  { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'no' } },
+  { labelKey: 'records', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
   {
     labelKey: 'stable',
     arcade: { mark: 'partial', noteKey: 'stableArcade' },
-    site: { mark: 'yes' },
+    launcher: { mark: 'yes' },
   },
+  { labelKey: 'smooth', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
 ];
 
-const CUSTOM_GAME_ID = '2307479570';
-
-// 三张地图对应三个难度档，地图名让玩家自己填等于多一步出错机会
-const LAUNCH_MODES = [
-  { key: 'dota', name: 'Dota', map: 'dota' },
-  { key: 'hard', name: 'Hard', map: 'hard' },
-  { key: 'custom', name: 'Custom', map: 'custom' },
-];
-
-// steam://run 的启动参数整段要编码，+ 与空格原样传过去 Steam 收到的是空参数
-const launchUrl = (map: string) =>
-  `steam://run/570//%2Bdota_launch_custom_game%20${CUSTOM_GAME_ID}%20${map}/`;
-
-const launchCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID} ${map}`;
+// 两列各适合一种玩法，不分主次，所以徽章同色
+const HINT_CLASS =
+  'mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5';
 
 export default function LaunchPage() {
   const t = useTranslations('launch');
 
-  const wait = (chunks: React.ReactNode) => <b className="font-medium text-warning">{chunks}</b>;
+  const mark = (chunks: React.ReactNode) => <span className="text-warning">{chunks}</span>;
 
-  // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把模式列挤到折行
+  // 能不能用一眼看完，所以正文只留符号；窄屏再加字会把列挤到折行
   const renderCell = (cell: Cell) => (
     <span className="inline-flex items-center gap-2 text-left">
       {cell.mark === 'yes' ? (
@@ -64,7 +50,7 @@ export default function LaunchPage() {
           aria-label={t('compare.no')}
         />
       ) : (
-        // 偶尔连不上不算大问题，用正文色而不是警示色，免得玩家以为这条路不能走
+        // 有时不行不算大问题，用正文色而不是警示色，免得玩家以为这条路不能走
         <Triangle
           className="size-4 shrink-0 text-content md:size-[18px]"
           strokeWidth={2.5}
@@ -91,17 +77,13 @@ export default function LaunchPage() {
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.arcade')}
                   </span>
-                  <span className="mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5">
-                    {t('compare.arcadeHint')}
-                  </span>
+                  <span className={HINT_CLASS}>{t('compare.arcadeHint')}</span>
                 </th>
                 <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
                   <span className="block text-sm font-bold text-heading md:text-lg">
-                    {t('compare.site')}
+                    {t('compare.launcher')}
                   </span>
-                  <span className="mt-1 inline-block rounded-full border border-line bg-panel-soft px-1.5 text-[10px] leading-4 font-normal text-muted md:px-2 md:text-xs md:leading-5">
-                    {t('compare.siteHint')}
-                  </span>
+                  <span className={HINT_CLASS}>{t('compare.launcherHint')}</span>
                 </th>
               </tr>
             </thead>
@@ -120,7 +102,7 @@ export default function LaunchPage() {
                     {t(`compare.${row.labelKey}`)}
                   </th>
                   <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.arcade)}</td>
-                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.site)}</td>
+                  <td className="px-1.5 py-3 text-center md:p-4">{renderCell(row.launcher)}</td>
                 </tr>
               ))}
             </tbody>
@@ -131,109 +113,54 @@ export default function LaunchPage() {
         </p>
       </Section>
 
-      <Section title={t('site.title')}>
-        <p className="text-content text-pretty">
-          {t('site.lead')} <span className="font-medium text-warning">{t('site.warning')}</span>
-        </p>
-        <div className="mt-4 grid gap-5 md:grid-cols-3">
-          {LAUNCH_MODES.map((mode) => (
-            <a
-              key={mode.key}
-              href={launchUrl(mode.map)}
-              className="card-hover group box-pad flex items-center gap-3 rounded-[10px] border border-line-strong bg-panel-soft"
-            >
-              {/* 蓝色只出现在这个徽章上：三块卡面同时铺满主色会刺眼，也压过上面那句警告 */}
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary shadow-[0_6px_16px_-8px_var(--color-primary-glow)] transition-colors group-hover:bg-primary-hover">
-                <Play
-                  className="size-4 translate-x-px text-white"
-                  fill="currentColor"
-                  aria-hidden="true"
-                />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[17px] font-bold text-heading">
-                  {t(`difficulty.${mode.key}`)}
-                </span>
-                <span className="block text-xs text-muted">{mode.name}</span>
-              </span>
+      <Section>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-5">
+          <div className="flex min-w-0 flex-1 items-center gap-3 md:gap-5">
+            {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
+            <img
+              src="/images/launcher.webp"
+              alt=""
+              width={72}
+              height={72}
+              className="size-14 shrink-0 rounded-[8px] md:size-[72px]"
+            />
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-heading md:text-[22px]">
+                {t('launcher.name')}
+              </h2>
+              <p className="mt-1 text-[13px] leading-[19px] text-content text-pretty md:text-[15px] md:leading-[22px]">
+                {t('launcher.lead')}
+              </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 flex-col items-stretch gap-2 md:items-center">
+            <a href={LAUNCHER_URL} download={LAUNCHER_FILE_NAME} className="btn-primary">
+              <Download className="size-[18px]" aria-hidden="true" />
+              {t('launcher.download')}
             </a>
-          ))}
+            <span className="text-center text-xs text-muted">
+              {LAUNCHER_FILE_NAME} · v{LAUNCHER_VERSION}
+            </span>
+          </div>
         </div>
-      </Section>
 
-      <Section title={t('dialogs.title')}>
-        <div className="grid gap-5 md:grid-cols-2">
-          <div className="space-y-2.5">
-            <p className="text-content text-pretty">
-              <span className="font-medium text-heading">1.</span> {t('dialogs.step1')}
-            </p>
-            <LaunchDialogFigure
-              pill
-              title={t('dialogs.browser.title')}
-              body={t('dialogs.browser.body')}
-              confirm={t('dialogs.browser.confirm')}
-              cancel={t('dialogs.browser.cancel')}
-            />
-          </div>
-          <div className="space-y-2.5">
-            <p className="text-content text-pretty">
-              <span className="font-medium text-heading">2.</span> {t('dialogs.step2')}
-            </p>
-            <LaunchDialogFigure
-              title={t('dialogs.steam.title')}
-              body={t('dialogs.steam.body')}
-              params={`+${launchCommand('hard')}`}
-              note={t('dialogs.steam.note')}
-              confirm={t('dialogs.steam.confirm')}
-              cancel={t('dialogs.steam.cancel')}
-            />
-            <p className="text-sm text-warning text-pretty">{t('dialogs.step2Hint')}</p>
-          </div>
+        <div className="mt-5 space-y-3 border-t border-line pt-5">
+          <p className="text-[15px] font-bold text-heading md:text-base">
+            {t.rich('launcher.browserPrompt', { mark })}
+          </p>
+          <p className="text-[15px] font-bold text-heading md:text-base">
+            {t.rich('launcher.windowsPrompt', { mark })}
+          </p>
         </div>
-        <p className="mt-5 text-content text-pretty">
-          <span className="font-medium text-heading">3.</span> {t.rich('dialogs.step3', { wait })}
-        </p>
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <SmartScreenFigure step={1} />
+          <SmartScreenFigure step={2} />
+        </div>
       </Section>
 
       <Section title={t('website.title')}>
         <p className="text-content text-pretty">{t('website.body')}</p>
         <p className="mt-2 text-content text-pretty">{t('website.checkIn')}</p>
-      </Section>
-
-      <Section title={t('console.title')}>
-        <p className="text-content text-pretty">{t('console.intro')}</p>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-content marker:text-muted">
-          {t.raw('console.steps').map((step: string) => (
-            <li key={step} className="pl-1">
-              {step}
-            </li>
-          ))}
-        </ol>
-        <div className="mt-4 space-y-2">
-          {LAUNCH_MODES.map((mode) => (
-            <div
-              key={mode.key}
-              className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
-            >
-              <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
-                <span className="text-[15px] font-medium text-heading">
-                  {t(`difficulty.${mode.key}`)}
-                </span>
-                <span className="text-[13px] text-muted">{mode.name}</span>
-              </span>
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <code className="min-w-0 flex-1 font-mono text-sm break-all text-heading">
-                  {launchCommand(mode.map)}
-                </code>
-                <CopyIdButton
-                  value={launchCommand(mode.map)}
-                  tooltip={t('console.copy')}
-                  copiedLabel={t('console.copied')}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
       </Section>
     </div>
   );
