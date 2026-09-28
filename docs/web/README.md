@@ -165,7 +165,7 @@ Dota 2 7.41f 起，游廊里开的游戏服务端发不出网络请求，改由�
 
 **Steam 昵称与头像单独发一个 `GET /player/:steamId/steam-profile`，与上面那次并行。** 它要向 Steam 取数，快慢不受我们控制，混进 `info` 会让整页跟着等；两个请求互不阻塞，谁先到谁先显示。
 
-**近期战绩也单独发一个 `GET /player/:steamId/stats/recent`，由那张卡自己发、自己的骨架屏。** 它满员 50 场约 50 KB，并进 `info` 就是首屏多驮 50 KB；它又在页面最下方，晚到几百毫秒玩家看不出来。数据结构与取舍见 [docs/design/player-stats-recent/README.md](../design/player-stats-recent/README.md)。
+**近期战绩也单独发一个 `GET /player/:steamId/stats/recent`，由那张卡自己发、自己的骨架屏。** 它满员 50 场约 50 KB，并进 `info` 就是首屏多驮 50 KB；它又在页面最下方，晚到几百毫秒玩家看不出来。取舍见 [docs/design/player-stats-recent/README.md](../design/player-stats-recent/README.md)。
 
 **名次也单独发一个 `GET /player/:steamId/ranking`。** 它要在库里数人数，比读玩家数据慢；取失败时排行榜卡照常能点，只是不带标签。
 
@@ -199,7 +199,7 @@ Dota 2 7.41f 起，游廊里开的游戏服务端发不出网络请求，改由�
 
 成排的条目卡按屏幕档位定列数：手机 1 列、平板 2 列、电脑 3 列。单卡宽度因此保持在手机单列时的附近（约 320–490px），宽屏上不被拉长。
 
-**这条只管装文字内容的条目卡。**图墙（觉醒页那种立绘方块）另按自己的尺寸定列数，仍然只用三档，取值见 [phase-3b-awaken-page.md](../design/web/phase-3b-awaken-page.md)。
+**这条只管装文字内容的条目卡。**图墙（觉醒页那种立绘方块）另按自己的尺寸定列数，仍然只用三档：手机 2 列、平板 4 列、电脑 6 列。
 
 ### 屏幕档位
 
