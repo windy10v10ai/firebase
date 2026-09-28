@@ -158,10 +158,7 @@ export default function LaunchPage() {
               {t('launcher.download')}
             </a>
             <span className="text-center text-xs text-muted">
-              {LAUNCHER_FILE_NAME} · v{LAUNCHER_VERSION} ·{' '}
-              <Link href="/launch/code-signing" className="link-hover underline">
-                {t('launcher.codeSigning')}
-              </Link>
+              {LAUNCHER_FILE_NAME} · v{LAUNCHER_VERSION}
             </span>
           </div>
         </div>
@@ -183,6 +180,13 @@ export default function LaunchPage() {
             </p>
             <SmartScreenFigure kind="windows" />
           </div>
+          {/* SignPath 要求下载页写明签名来源 */}
+          <p className="mt-5 text-xs text-muted text-pretty">
+            {t('launcher.signing')}{' '}
+            <Link href="/launch/code-signing" className="link-hover underline">
+              {t('launcher.codeSigning')}
+            </Link>
+          </p>
         </div>
       </Section>
 

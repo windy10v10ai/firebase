@@ -128,6 +128,7 @@
       "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
       "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
       "codeSigning": "签名政策",
+      "signing": "代码签名：正在申请 SignPath.io 为开源项目免费提供的签名，证书由 SignPath Foundation 签发。",
       "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
     },
