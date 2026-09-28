@@ -20,18 +20,28 @@ jobs:
 
       - uses: actions/checkout@v7
 
-      - name: Build
-        run: launcher\build.cmd
-        shell: cmd
-
-      - name: Read version and hash
+      # 自我更新只认版本号，同号换 exe 时已更新的玩家收不到，所以不比线上新就不编译
+      - name: Require a version newer than live
         id: meta
         shell: pwsh
         run: |
           $version = [regex]::Match((Get-Content launcher/src/Launcher.cs -Raw), 'const string Version = "([^"]+)"').Groups[1].Value
-          $sha = (Get-FileHash launcher/dist/Windy10v10AI.exe -Algorithm SHA256).Hash.ToLower()
+          $live = (Invoke-RestMethod https://api.windy10v10ai.com/api/launcher/version).version
+          if ([version]$version -le [version]$live) {
+            "::error::Launcher version $version is not newer than live $live. Bump Version in launcher/src/Launcher.cs first."
+            exit 1
+          }
           "version=$version" >> $env:GITHUB_OUTPUT
-          "### Windy10v10AI $version`n`nsha256: ``$sha``" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Build
+        run: launcher\build.cmd
+        shell: cmd
+
+      - name: Write hash to summary
+        shell: pwsh
+        run: |
+          $sha = (Get-FileHash launcher/dist/Windy10v10AI.exe -Algorithm SHA256).Hash.ToLower()
+          "### Windy10v10AI ${{ steps.meta.outputs.version }}`n`nsha256: ``$sha``" >> $env:GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v7
         with:

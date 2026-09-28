@@ -37,13 +37,13 @@ launcher\build.cmd
 
 exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分两个 PR：
 
-1. 代码 PR：改启动器的 PR 可以先合进 `develop` 攒着，不会发布。决定发版时，在最后一个代码 PR（或单独一个小 PR）里改 `src/Launcher.cs` 的 `Version`、`AssemblyVersion` 与 `AssemblyFileVersion`，合进 `develop`。
-2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`，其他分支会直接失败），下载产物（`gh run download <run-id>`）。发布的 exe 必须来自这里，不用本机编译的。
+1. 代码 PR：每个改启动器的 PR 都同时升 `src/Launcher.cs` 的 `Version`、`AssemblyVersion` 与 `AssemblyFileVersion`（修 bug 升第三位，新增玩家可见功能升第二位），合进 `develop`。可以攒几个再发版，没发布的版本号跳过即可。
+2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。其他分支、或版本号不比线上新时会直接失败。发布的 exe 必须来自这里，不用本机编译的。
 3. 发版 PR：
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。
 
-同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。版本号发布后不再复用：自我更新按版本号判断，同号换 exe 时已更新的玩家收不到。
+同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。
 
 合并 Release PR 前，确认 `web/public/downloads/` 里只有自己这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。

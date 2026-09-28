@@ -116,7 +116,7 @@
 |---|---|---|
 | `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 | [api/CLAUDE.md](api/CLAUDE.md) |
 | `web/` | Next.js 前端 | [web/CLAUDE.md](web/CLAUDE.md) |
-| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/README.md](launcher/README.md) |
+| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；每个改 `launcher/` 的 PR 都同时升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/README.md](launcher/README.md) |
 | `extensions/` | Firebase BigQuery export 配置 | — |
 
 ### 文档目录
