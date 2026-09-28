@@ -1,0 +1,50 @@
+name: Launcher release build
+
+# 官网发布的 exe 取自这里的产物，保证它能追溯到仓库里的某次提交
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      # 功能分支是 squash 合并的，从它编译的 exe 对应的提交不在 develop 历史里，无法追溯
+      - name: Require develop
+        if: github.ref != 'refs/heads/develop'
+        run: |
+          echo "::error::Release builds must run on develop"
+          exit 1
+
+      - uses: actions/checkout@v7
+
+      # 自我更新只认版本号，同号换 exe 时已更新的玩家收不到，所以不比线上新就不编译
+      - name: Require a version newer than live
+        id: meta
+        shell: pwsh
+        run: |
+          $version = [regex]::Match((Get-Content launcher/src/Launcher.cs -Raw), 'const string Version = "([^"]+)"').Groups[1].Value
+          $live = (Invoke-RestMethod https://api.windy10v10ai.com/api/launcher/version).version
+          if ([version]$version -le [version]$live) {
+            "::error::Launcher version $version is not newer than live $live. Bump Version in launcher/src/Launcher.cs first."
+            exit 1
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build
+        run: launcher\build.cmd
+        shell: cmd
+
+      - name: Write hash to summary
+        shell: pwsh
+        run: |
+          $sha = (Get-FileHash launcher/dist/Windy10v10AI.exe -Algorithm SHA256).Hash.ToLower()
+          "### Windy10v10AI ${{ steps.meta.outputs.version }}`n`nsha256: ``$sha``" >> $env:GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Windy10v10AI-${{ steps.meta.outputs.version }}
+          path: launcher/dist/Windy10v10AI.exe
+          if-no-files-found: error

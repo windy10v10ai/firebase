@@ -127,6 +127,7 @@
       "download": "下载启动器",
       "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
       "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
+      "codeSigning": "签名政策",
       "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
     },
@@ -255,6 +256,35 @@
   },
   "footer": {
     "copyright": "© 2025 Windy10v10ai. 保留所有权利。"
+  },
+  "codeSigning": {
+    "title": "启动器代码签名政策",
+    "intro": "这里说明 Windy10v10AI 启动器（Windy10v10AI.exe）从哪里来、由谁发布、会不会传输你的数据。",
+    "build": {
+      "title": "构建与发布",
+      "source": "源码以 GPL-3.0 公开在 <source>GitHub</source>。",
+      "ci": "发布的 exe 由 GitHub Actions 的 <workflow>构建工作流</workflow>从 develop 分支的公开源码编译，不使用本地编译的版本。",
+      "download": "唯一的下载地址是本站<launch>启动游戏</launch>页，启动器的自动更新也从这里下载。"
+    },
+    "signing": {
+      "title": "代码签名",
+      "body": "我们正在申请 SignPath Foundation 的免费开源代码签名。通过后，发布的 exe 由 SignPath.io 签名，证书由 SignPath Foundation 签发。"
+    },
+    "team": {
+      "title": "团队与角色",
+      "body": "启动器由 <maintainer>windy</maintainer> 一人维护，负责编写代码、审核改动并批准每一次发布。"
+    },
+    "changes": {
+      "title": "对电脑的改动与卸载",
+      "files": "启动器不修改 Dota 2 原有文件。它会在 Dota 2 安装目录新增地图目录 game/dota_addons/地图ID/（指向创意工坊地图文件的硬链接）和专用服日志 game/dota/dedicated.log；自动更新时只替换启动器自己的 exe。",
+      "uninstall": "启动器是单个 exe，无需安装。卸载时删掉 exe 即可；如需彻底清理，再删掉上面的地图目录和日志。"
+    },
+    "privacy": {
+      "title": "隐私",
+      "map": "检查地图是否最新时，会向 Steam Web API 和本站 API 查询创意工坊地图的版本。",
+      "update": "检查启动器更新时，会向本站 API 查询最新版本；只有你点击「更新」后才会下载新版。",
+      "data": "启动器不收集、不上传你的个人信息、游戏数据或电脑上的文件。"
+    }
   },
   "disclosure": {
     "title": "商业披露",
