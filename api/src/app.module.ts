@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
 import { GameModule } from './game/game.module';
 import { KofiModule } from './kofi/kofi.module';
+import { LauncherModule } from './launcher/launcher.module';
 import { MembersModule } from './members/members.module';
 import { PlayerModule } from './player/player.module';
 import { PlayerInfoModule } from './player-info/player-info.module';
@@ -57,6 +58,7 @@ export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'win
     SecretModule,
     SteamProfileModule,
     ProxyModule,
+    LauncherModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
