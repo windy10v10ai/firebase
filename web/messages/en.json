@@ -274,6 +274,11 @@
       "title": "Team and roles",
       "body": "The launcher is maintained by <maintainer>windy</maintainer> alone, who writes the code, reviews changes and approves every release."
     },
+    "changes": {
+      "title": "Changes to your computer and uninstalling",
+      "files": "The launcher does not modify any original Dota 2 files. It adds a map folder game/dota_addons/(map ID)/ (a hard link to the Workshop map file) and a server log game/dota/dedicated.log inside the Dota 2 install. Updates only replace the launcher's own exe.",
+      "uninstall": "The launcher is a single exe and needs no installation. To uninstall, delete the exe. To remove everything, also delete the map folder and log above."
+    },
     "privacy": {
       "title": "Privacy",
       "map": "To check whether the map is up to date, it asks the Steam Web API and this site's API for the Workshop map version.",

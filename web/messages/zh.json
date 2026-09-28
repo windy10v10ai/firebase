@@ -274,6 +274,11 @@
       "title": "团队与角色",
       "body": "启动器由 <maintainer>windy</maintainer> 一人维护，负责编写代码、审核改动并批准每一次发布。"
     },
+    "changes": {
+      "title": "对电脑的改动与卸载",
+      "files": "启动器不修改 Dota 2 原有文件。它会在 Dota 2 安装目录新增地图目录 game/dota_addons/地图ID/（指向创意工坊地图文件的硬链接）和专用服日志 game/dota/dedicated.log；自动更新时只替换启动器自己的 exe。",
+      "uninstall": "启动器是单个 exe，无需安装。卸载时删掉 exe 即可；如需彻底清理，再删掉上面的地图目录和日志。"
+    },
     "privacy": {
       "title": "隐私",
       "map": "检查地图是否最新时，会向 Steam Web API 和本站 API 查询创意工坊地图的版本。",
