@@ -56,7 +56,8 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex = '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello|proxy).*';
+    const regex =
+      '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello|proxy|launcher).*';
     callServerWithRegex(regex, req, res);
   },
 );
