@@ -128,6 +128,7 @@
       "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
       "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
       "codeSigning": "Signing policy",
+      "signing": "Code signing: we are applying for free open source code signing by SignPath.io, with a certificate by SignPath Foundation.",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
     },
