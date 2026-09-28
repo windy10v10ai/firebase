@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useState, type ReactNode } from 'react';
 
 import CopyIdButton from '@/app/components/CopyIdButton';
+import SteamLoginButton from '@/app/components/SteamLoginButton';
 import {
   AFDIAN_MEMBER_PRICE,
   ALIPAY_MEMBER_TIERS,
@@ -27,9 +28,8 @@ import {
 import type { AlipayRequest } from './AlipayPayDialog';
 
 interface PurchaseSectionProps {
-  /** 未登录时为 null，档位点了先去登录 */
+  /** 未登录时为 null：支付宝档位点了提示登录，爱发电、Ko-fi 照常跳转 */
   steamId: string | null;
-  loginHref: string;
   onAlipay: (request: AlipayRequest) => void;
 }
 
@@ -71,25 +71,16 @@ const TIER_CLASS =
   'flex w-full min-w-0 rounded-xl border border-line border-t-[3px] bg-panel-soft text-start text-heading transition-colors hover:border-x-link-border hover:border-b-link-border hover:bg-control-hover';
 
 interface TierProps {
-  steamId: string | null;
-  loginHref: string;
   topBar: string;
   className: string;
-  /** 已登录时的行为：支付宝开弹窗，其他平台新窗口跳转 */
+  /** 支付宝开弹窗，其他平台新窗口跳转 */
   action: { onClick: () => void } | { href: string };
   children: ReactNode;
 }
 
-/** 档位本身就是付款入口；未登录时一律先去登录，登录完回到本页 */
-function Tier({ steamId, loginHref, topBar, className, action, children }: TierProps) {
+/** 档位本身就是付款入口 */
+function Tier({ topBar, className, action, children }: TierProps) {
   const classes = `${TIER_CLASS} ${topBar} ${className}`;
-  if (!steamId) {
-    return (
-      <a href={loginHref} className={classes}>
-        {children}
-      </a>
-    );
-  }
   if ('href' in action) {
     return (
       <a href={action.href} target="_blank" rel="noopener noreferrer" className={classes}>
@@ -104,7 +95,7 @@ function Tier({ steamId, loginHref, topBar, className, action, children }: TierP
   );
 }
 
-export default function PurchaseSection({ steamId, loginHref, onAlipay }: PurchaseSectionProps) {
+export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionProps) {
   const t = useTranslations('membership');
   const tIdentity = useTranslations('profile.identity');
   const locale = useLocale();
@@ -127,10 +118,8 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
   const alipayMemberTier = (tier: MemberTier) => (
     <Tier
       key={tier.months}
-      steamId={steamId}
-      loginHref={loginHref}
       topBar={style.topBar}
-      className="h-[72px] items-center justify-between gap-3 px-4 lg:h-[84px]"
+      className="h-[72px] items-center px-4 lg:h-[104px]"
       action={{
         onClick: () =>
           onAlipay({
@@ -141,20 +130,19 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
           }),
       }}
     >
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-base font-extrabold md:text-lg lg:text-xl">
+      {/* 电脑档四列卡片太窄，月数单独占一行，原价仍在现价正上方 */}
+      <span className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5">
+        <span className="col-start-1 row-start-1 truncate text-base font-extrabold md:text-lg lg:col-span-2 lg:text-xl">
           {t('member.months', { count: tier.months })}
         </span>
-        <span className="truncate text-xs text-muted lg:text-[13px]">
+        <span className="col-start-1 row-start-2 truncate text-xs text-muted lg:text-[13px]">
           {t('member.total', { amount: money(tier.total) })}
         </span>
-      </span>
-      <span className="flex shrink-0 flex-col items-end gap-0.5">
-        <s className="text-xs whitespace-nowrap text-muted">
+        <s className="col-start-2 row-start-1 justify-self-end text-xs whitespace-nowrap text-muted lg:row-start-2">
           {money(AFDIAN_MEMBER_PRICE)}
           {perMonth}
         </s>
-        <span className="flex items-center gap-1.5 whitespace-nowrap">
+        <span className="col-start-2 row-start-2 flex items-center gap-1.5 justify-self-end whitespace-nowrap lg:col-span-2 lg:col-start-1 lg:row-start-3">
           <span className={DISCOUNT_CLASS}>-{tier.discountPercent}%</span>
           <span className="text-base font-bold md:text-lg lg:text-xl">{money(tier.pricePerMonth)}</span>
           <span className="text-xs text-muted">{perMonth}</span>
@@ -165,10 +153,8 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
 
   const externalMemberTier = (href: string, price: string, label: string) => (
     <Tier
-      steamId={steamId}
-      loginHref={loginHref}
       topBar={style.topBar}
-      className="h-[72px] items-center gap-4 px-4 lg:h-[84px]"
+      className="h-[72px] items-center gap-4 px-4 lg:h-[104px]"
       action={{ href }}
     >
       <span className="text-lg font-extrabold whitespace-nowrap lg:text-xl">
@@ -186,12 +172,16 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
   );
 
   const pointsTier = (tier: PointsTier) => {
-    const pointsLabel = (
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-base font-extrabold text-member md:text-lg lg:text-xl">
-          {tier.points.toLocaleString()}
+    // 手机与电脑档卡片放不下图、积分数与价格三列，积分数单独占一行；平板是通栏，放得下
+    const pointsBody = (price: ReactNode) => (
+      <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-0.5 lg:gap-y-1">
+        <span className="col-span-2 flex min-w-0 flex-row items-baseline gap-1.5 md:col-span-1 md:flex-col md:items-start md:gap-0.5 lg:col-span-2 lg:flex-row lg:items-baseline lg:gap-1.5">
+          <span className="truncate text-base font-extrabold text-member md:text-lg lg:text-xl">
+            {tier.points.toLocaleString()}
+          </span>
+          <span className="truncate text-xs text-muted">{t('points.unit')}</span>
         </span>
-        <span className="truncate text-xs text-muted">{t('points.unit')}</span>
+        <span className="col-span-2 justify-self-end md:col-span-1 lg:col-span-2">{price}</span>
       </span>
     );
     const image = (
@@ -204,8 +194,6 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
       />
     );
     const shared = {
-      steamId,
-      loginHref,
       topBar: style.topBar,
       className: 'h-20 items-center gap-2.5 ps-1.5 pe-4 lg:h-24',
     };
@@ -228,31 +216,53 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
           }}
         >
           {image}
-          {pointsLabel}
-          <span className="flex shrink-0 flex-col items-end gap-0.5">
-            <s className="text-xs whitespace-nowrap text-muted">{money(tier.afdianPrice)}</s>
-            <span className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className={DISCOUNT_CLASS}>{t('points.save', { amount: money(saved) })}</span>
-              <span className="text-base font-bold lg:text-lg">{money(tier.alipayPrice)}</span>
-            </span>
-          </span>
+          {pointsBody(
+            <span className="flex flex-col items-end gap-0.5">
+              <s className="text-xs whitespace-nowrap text-muted">{money(tier.afdianPrice)}</s>
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className={DISCOUNT_CLASS}>{t('points.save', { amount: money(saved) })}</span>
+                <span className="text-base font-bold lg:text-lg">{money(tier.alipayPrice)}</span>
+              </span>
+            </span>,
+          )}
         </Tier>
       );
     }
 
-    const href = platform === 'afdian' && steamId ? afdianPointsUrl(tier, steamId) : tier.kofiUrl;
+    const href = platform === 'afdian' ? afdianPointsUrl(tier, steamId) : tier.kofiUrl;
     const price = platform === 'afdian' ? tier.afdianPrice : tier.kofiPrice;
     return (
       <Tier key={tier.points} {...shared} action={{ href }}>
         {image}
-        {pointsLabel}
-        <span className="flex items-center gap-2 whitespace-nowrap">
-          <span className="text-base font-bold lg:text-lg">{money(price)}</span>
-          <ExternalLink className="size-4 text-muted" aria-hidden="true" />
-        </span>
+        {pointsBody(
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <span className="text-base font-bold lg:text-lg">{money(price)}</span>
+            <ExternalLink className="size-4 text-muted" aria-hidden="true" />
+          </span>,
+        )}
       </Tier>
     );
   };
+
+  // 爱发电登录后链接自带 ID，其余情况都要玩家自己在留言里填 ID
+  const asksForId = platform === 'kofi' || (platform === 'afdian' && !steamId);
+  const noteContent = !steamId ? (
+    t(asksForId ? 'idNoteGuest' : 'platforms.alipay.noteGuest')
+  ) : asksForId ? (
+    <>
+      {t('idNote')}
+      <span className="inline-flex items-center gap-1 font-bold text-heading">
+        {steamId}
+        <CopyIdButton
+          value={steamId}
+          tooltip={tIdentity('copyId.tooltip')}
+          copiedLabel={tIdentity('copyId.copied')}
+        />
+      </span>
+    </>
+  ) : (
+    t(`platforms.${platform === 'alipay' ? 'alipay' : 'afdian'}.note`)
+  );
 
   const manualActivate = (href: string) => (
     <span className="text-[13px] text-muted lg:ms-auto">
@@ -293,7 +303,7 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
                   {t(`platforms.${key}.name`)}
                 </span>
                 <span
-                  className={`hidden truncate text-[13px] md:block ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}
+                  className={`hidden text-[13px] leading-tight md:line-clamp-2 ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}
                 >
                   {t(`platforms.${key}.desc`)}
                 </span>
@@ -307,21 +317,16 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
       <div
         className={`flex flex-col gap-1 rounded-lg border px-4 py-3 text-sm text-content lg:h-12 lg:flex-row lg:items-center lg:gap-3 lg:py-0 ${style.note}`}
       >
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {t(`platforms.${platform}.note`)}
-          {platform === 'kofi' && steamId ? (
-            <span className="inline-flex items-center gap-1 font-bold text-heading">
-              {steamId}
-              <CopyIdButton
-                value={steamId}
-                tooltip={tIdentity('copyId.tooltip')}
-                copiedLabel={tIdentity('copyId.copied')}
-              />
-            </span>
-          ) : null}
-        </span>
-        {platform === 'afdian' ? manualActivate('/regist/afdian') : null}
-        {platform === 'kofi' ? manualActivate('/regist/kofi') : null}
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">{noteContent}</span>
+        {!steamId ? (
+          <span className="self-start lg:ms-auto lg:self-auto">
+            <SteamLoginButton />
+          </span>
+        ) : platform === 'afdian' ? (
+          manualActivate('/regist/afdian')
+        ) : platform === 'kofi' ? (
+          manualActivate('/regist/kofi')
+        ) : null}
       </div>
 
       <div className="mt-2 flex flex-col gap-3">
@@ -332,7 +337,7 @@ export default function PurchaseSection({ steamId, loginHref, onAlipay }: Purcha
           </div>
         ) : platform === 'afdian' ? (
           externalMemberTier(
-            steamId ? afdianMemberUrl(steamId) : loginHref,
+            afdianMemberUrl(steamId),
             AFDIAN_MEMBER_PRICE,
             t('member.subscribeAfdian'),
           )

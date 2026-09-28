@@ -128,11 +128,7 @@ export default function MembershipPage() {
         </div>
       </Section>
 
-      <PurchaseSection
-        steamId={uid}
-        loginHref={auth.loginUrl('/membership')}
-        onAlipay={openPay}
-      />
+      <PurchaseSection steamId={uid} onAlipay={openPay} />
 
       <p className="text-muted text-sm text-center">
         {t('membership.manualActive.prompt')}
@@ -149,16 +145,14 @@ export default function MembershipPage() {
         ))}
       </p>
 
-      {uid ? (
-        <AlipayPayDialog
-          key={payKey}
-          steamId={uid}
-          request={payRequest}
-          paidExpireDate={paidExpireDate}
-          onPaid={onPaid}
-          onClose={onClosePay}
-        />
-      ) : null}
+      <AlipayPayDialog
+        key={payKey}
+        steamId={uid}
+        request={payRequest}
+        paidExpireDate={paidExpireDate}
+        onPaid={onPaid}
+        onClose={onClosePay}
+      />
     </div>
   );
 }

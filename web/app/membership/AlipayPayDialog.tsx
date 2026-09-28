@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import QRCode from 'qrcode';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
+import SteamLoginButton from '@/app/components/SteamLoginButton';
 import Button from '@/app/components/ui/button';
 import Skeleton from '@/app/components/ui/skeleton';
 import { createAlipayOrder, queryAlipayOrder } from '@/app/lib/alipay';
@@ -44,7 +45,8 @@ async function placeOrder(steamId: string, target: AlipayRequest): Promise<PaySt
 }
 
 interface AlipayPayDialogProps {
-  steamId: string;
+  /** 未登录时为 null：不下单，弹窗里提示登录 */
+  steamId: string | null;
   request: AlipayRequest | null;
   /** 付款成功后的会员到期日，由页面重新取玩家信息后传回；还没取到时为 null */
   paidExpireDate: string | null;
@@ -84,6 +86,9 @@ export default function AlipayPayDialog({
 
   // 进入「生成中」由调用方负责：打开弹窗时组件是新挂载的，初值就是它
   const settle = useCallback((target: AlipayRequest) => {
+    if (!steamId) {
+      return;
+    }
     const current = ++attempt.current;
     placeOrder(steamId, target).then((next) => {
       if (current === attempt.current) {
@@ -182,6 +187,17 @@ export default function AlipayPayDialog({
   const body = (() => {
     if (!request) {
       return null;
+    }
+    if (!steamId) {
+      return (
+        <>
+          {subjectRow(null, false)}
+          <p className="text-center text-content">{t('loginHint')}</p>
+          <div className="flex justify-center pb-2">
+            <SteamLoginButton size="large" />
+          </div>
+        </>
+      );
     }
     switch (state.step) {
       case 'creating':
