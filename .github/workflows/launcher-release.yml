@@ -1,0 +1,33 @@
+name: Launcher release build
+
+# 官网发布的 exe 取自这里的产物，保证它能追溯到仓库里的某次提交
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build
+        run: launcher\build.cmd
+        shell: cmd
+
+      - name: Read version and hash
+        id: meta
+        shell: pwsh
+        run: |
+          $version = [regex]::Match((Get-Content launcher/src/Launcher.cs -Raw), 'const string Version = "([^"]+)"').Groups[1].Value
+          $sha = (Get-FileHash launcher/dist/Windy10v10AI.exe -Algorithm SHA256).Hash.ToLower()
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "### Windy10v10AI $version`n`nsha256: ``$sha``" >> $env:GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Windy10v10AI-${{ steps.meta.outputs.version }}
+          path: launcher/dist/Windy10v10AI.exe
+          if-no-files-found: error

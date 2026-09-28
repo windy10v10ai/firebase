@@ -127,6 +127,7 @@
       "download": "Download launcher",
       "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
       "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
+      "codeSigning": "Signing policy",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
     },
@@ -255,6 +256,30 @@
   },
   "footer": {
     "copyright": "© 2025 Windy10v10ai. All rights reserved."
+  },
+  "codeSigning": {
+    "title": "Launcher code signing policy",
+    "intro": "This page explains where the Windy10v10AI launcher (Windy10v10AI.exe) comes from, who publishes it, and whether it sends any of your data.",
+    "build": {
+      "title": "Build and release",
+      "source": "The source code is public on <source>GitHub</source> under GPL-3.0.",
+      "ci": "Released exe files are compiled from the public source by the GitHub Actions <workflow>build workflow</workflow>, never from a local build.",
+      "download": "The only download location is the <launch>Start the game</launch> page on this site. The launcher also updates itself from here."
+    },
+    "signing": {
+      "title": "Code signing",
+      "body": "We are applying for free open source code signing from SignPath Foundation. Once approved, released exe files will be signed by SignPath.io with a certificate issued by SignPath Foundation."
+    },
+    "team": {
+      "title": "Team and roles",
+      "body": "The launcher is maintained by <maintainer>windy</maintainer> alone, who writes the code, reviews changes and approves every release."
+    },
+    "privacy": {
+      "title": "Privacy",
+      "map": "To check whether the map is up to date, it asks the Steam Web API and this site's API for the Workshop map version.",
+      "update": "To check for launcher updates, it asks this site's API for the latest version. A new version is downloaded only after you click \"Update\".",
+      "data": "The launcher does not collect or upload your personal information, game data or files on your computer."
+    }
   },
   "disclosure": {
     "title": "Business Disclosure",

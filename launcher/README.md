@@ -35,9 +35,10 @@ launcher\build.cmd
 
 exe 放在官网 `/launch` 下载页。代码改动与发版在同一个 PR 里完成：
 
-1. 改 `src/Launcher.cs` 的 `Version` 与 `AssemblyVersion`，运行 `launcher\build.cmd`。
-2. 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
-3. 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
-4. 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（PowerShell `(Get-FileHash <exe>).Hash.ToLower()`）。抄错时 api 单测会失败。
+1. 改 `src/Launcher.cs` 的 `Version`、`AssemblyVersion` 与 `AssemblyFileVersion`，推送分支。
+2. 在该分支运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref <分支>`），下载产物（`gh run download <run-id>`）。发布的 exe 必须来自这里，不用本机编译的，签名政策承诺 exe 由 GitHub Actions 从源码编译。
+3. 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
+4. 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
+5. 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（PowerShell `(Get-FileHash <exe>).Hash.ToLower()`）。抄错时 api 单测会失败。
 
 合并 Release PR 前，确认 `web/public/downloads/` 里只有自己这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。

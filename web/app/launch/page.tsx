@@ -1,4 +1,5 @@
 import { Check, Download, Triangle, X } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import GithubIcon from '../components/GithubIcon';
@@ -157,7 +158,10 @@ export default function LaunchPage() {
               {t('launcher.download')}
             </a>
             <span className="text-center text-xs text-muted">
-              {LAUNCHER_FILE_NAME} · v{LAUNCHER_VERSION}
+              {LAUNCHER_FILE_NAME} · v{LAUNCHER_VERSION} ·{' '}
+              <Link href="/launch/code-signing" className="link-hover underline">
+                {t('launcher.codeSigning')}
+              </Link>
             </span>
           </div>
         </div>
