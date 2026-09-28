@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { logger } from 'firebase-functions/v2';
 
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { AllowWeb } from '../util/auth/allow-web.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { Public } from '../util/auth/public.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
@@ -21,6 +22,8 @@ export class AlipayController {
   constructor(private readonly alipayService: AlipayService) {}
 
   @AllowLocal()
+  // 不校验 steamId 是不是本人：替别人下单等于送礼，钱由下单的人付
+  @AllowWeb()
   @Post('/order/create')
   async createOrder(
     @Body() dto: CreateAlipayOrderDto,
@@ -31,6 +34,7 @@ export class AlipayController {
   }
 
   @AllowLocal()
+  @AllowWeb()
   @Get('/order/query')
   async queryOrder(@Query() dto: QueryAlipayOrderDto): Promise<QueryAlipayOrderResponseDto> {
     return this.alipayService.getOrderStatus(dto.outTradeNo);

@@ -88,6 +88,11 @@ export function fetchPlayerInfo(steamId: string) {
   return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member,statsLifetime,heroAwakening`);
 }
 
+/** 会员页要的数据：会员状态与会员积分 */
+export function fetchPlayerMember(steamId: string) {
+  return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member`);
+}
+
 /** 属性页要的数据，等级与可用积分本来就在响应里，一次请求够了 */
 export function fetchPlayerProperties(steamId: string) {
   return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=property`);

@@ -226,7 +226,7 @@ const sdk = new AlipaySdk({
 ```
 
 封装方法：
-- `precreate(outTradeNo, amountYuan, subject): Promise<{ qrCode }>`（notify_url 在支付宝开放平台应用网关里配置，不在请求参数里传）
+- `precreate(outTradeNo, amountYuan, subject): Promise<{ qrCode }>`（请求参数带 `notify_url`，取自 `ALIPAY_NOTIFY_URL`）
 - `query(outTradeNo): Promise<TradeQueryResult>`
 - `cancel(outTradeNo): Promise<void>`
 - `verifyNotifySign(params: Record<string,string>): boolean`（用 SDK 的 `checkNotifySign`）
@@ -245,8 +245,9 @@ ALIPAY_PUBLIC_KEY = 'ALIPAY_PUBLIC_KEY',            // 支付宝公钥 PEM
 
 非 secret 配置（走 `.env.${ENVIRONMENT}` + ConfigModule）：
 - `ALIPAY_ENV=sandbox|prod`
+- `ALIPAY_NOTIFY_URL`：生产为 `https://api.windy10v10ai.com/api/alipay/webhook`
 
-> notify URL 全程在支付宝开放平台「应用网关」里配置（沙箱/生产各自一个），代码里不再读取 `ALIPAY_NOTIFY_URL` 环境变量；本地联调若需收回调用 ngrok 暴露后改控制台即可。
+> 回调地址以下单请求带的 `notify_url` 为准，取自 `ALIPAY_NOTIFY_URL`；支付宝开放平台「应用网关」里配的（沙箱/生产各一个）只是兜底。本地联调若需收回调，用 ngrok 暴露后改 `api/.env.local`。
 
 [index.ts:34](api/index.ts) 的 `commonSecrets` 数组在 prod 分支增加 3 个 `defineSecret(...)`。
 

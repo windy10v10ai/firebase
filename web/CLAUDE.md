@@ -21,7 +21,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **`API_ORIGIN` 不带 `NEXT_PUBLIC_` 前缀**：它只是转发目的地，页面代码不该拿到 API 域名。要进客户端包的变量（`NEXT_PUBLIC_FIREBASE_*`）仍必须带前缀，否则静默为 undefined
 - **`.env.local` 不能进 git**。它在 `next build` 时同样生效，一旦提交，App Hosting 的生产构建会被本地值覆盖。需要共享的本地配置写进 `.env.development`
 - **初始化 Firebase SDK 只用 `NEXT_PUBLIC_FIREBASE_*`，不要用 App Hosting 注入的 `FIREBASE_WEBAPP_CONFIG`**。那份配置由 Firebase 服务端生成，字段跟着项目资源走，含有本站用不到也无法控制的值（如已废弃的 `databaseURL`），本地也拿不到同一份
-- **`next.config.ts` 的 `/api` 转发不是开发便利设施**：游戏客户端与支付宝回调也走它，删掉会断掉收款。入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
+- **`next.config.ts` 的 `/api` 转发不是开发便利设施**：网站的所有接口请求都走它。入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
 
 网站不放密钥：浏览器拿得到的值按定义都是公开的（Firebase Web SDK 配置、GA4 measurement ID 皆然）。真需要服务端密钥时走 App Hosting 的 secret 绑定，不进文件。
 
@@ -37,6 +37,10 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **不用 `firebase/analytics`（`getAnalytics`、`logEvent`）**：它初始化时要多取一次远端配置，等于多一个可能到不了的域名；我们只需要 gtag 发事件这一件事
 - **登录态变化时设 user_id**，只在 `AuthProvider` 那一处维护，退出时传 `null`
 - **测量 ID 读 `NEXT_PUBLIC_GA_MEASUREMENT_ID`**，留空即不加载 gtag。它是公开值，按上面「本地开发」的规约可以进 git
+
+## 界面文案
+
+- **只告诉玩家怎么做，不解释为什么这样设计**：平台限制、技术原因、方案取舍不进界面文案。写「付款时请在留言里填写你的 Dota2 好友 ID」，不写「Ko-fi 带不了 ID，所以请……」；理由留在设计文档与 PR
 
 ## 文案里的开局方式
 
@@ -128,7 +132,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **紫（`season`）与金（`member`）只表示勇士与会员两套货币**，不用于交互反馈或通用按钮
 - **交互反馈用主色标记档 `link` 系列**：链接、当前页标记、焦点框、转圈、`.card-hover` 都是它
 - **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
-- **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
+- **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停；会员页购买区的平台标签、说明条与档位顶条是唯一例外，见 design-system.md「品牌色」。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
 - **折扣标签用 `discount`，不用 `danger`**，形状与限免标签一致，见 design-system.md「状态色」
 
 ## 按钮

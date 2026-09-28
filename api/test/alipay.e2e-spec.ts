@@ -10,6 +10,7 @@ import { AppModule } from '../src/app.module';
 import { MemberLevel } from '../src/members/entities/members.entity';
 import { AppGlobalSettings } from '../src/util/settings';
 
+import { createIdTokenForSteamId } from './util/util-auth';
 import { getLocalApiKey } from './util/util-http';
 import { createPlayer, getMemberDto, getPlayer } from './util/util-player';
 
@@ -38,6 +39,8 @@ const STEAM_IDS = {
   LOCAL_ORDER_RESET: 300010014,
   PROXY_CREATE_QUERY: 300010015,
   PROXY_ORDER_CAP: 300010016,
+  WEB_CREATE_QUERY: 300010017,
+  WEB_ORDER_CAP: 300010018,
 } as const;
 
 describe('AlipayController (e2e)', () => {
@@ -381,6 +384,46 @@ describe('AlipayController (e2e)', () => {
       const afterPaid = await createOrderWithLocalKey(steamId);
 
       expect(afterPaid.status).toBe(201);
+    });
+  });
+
+  describe('网站来源', () => {
+    const createOrderWithBearer = (idToken: string, steamId: number) =>
+      request(app.getHttpServer())
+        .post(`${prefixPath}/order/create`)
+        .set('Authorization', `Bearer ${idToken}`)
+        .send({ steamId, productCode: AlipayProductCode.MEMBER_PREMIUM, quantity: 3 });
+
+    it('登录玩家可以下单并查单', async () => {
+      const steamId = STEAM_IDS.WEB_CREATE_QUERY;
+      const idToken = await createIdTokenForSteamId(steamId);
+
+      const created = await createOrderWithBearer(idToken, steamId);
+      expect(created.status).toBe(201);
+      expect(created.body).toMatchObject({ totalAmount: '80.40' });
+
+      const queried = await request(app.getHttpServer())
+        .get(`${prefixPath}/order/query`)
+        .set('Authorization', `Bearer ${idToken}`)
+        .query({ outTradeNo: created.body.outTradeNo });
+
+      expect(queried.status).toBe(200);
+      expect(queried.body).toEqual({
+        outTradeNo: created.body.outTradeNo,
+        status: AlipayTradeStatus.WAITING,
+      });
+    });
+
+    it('与本地来源共用下单次数限额', async () => {
+      const steamId = STEAM_IDS.WEB_ORDER_CAP;
+      for (let i = 0; i < 10; i++) {
+        const ok = await createOrderWithLocalKey(steamId);
+        expect(ok.status).toBe(201);
+      }
+
+      const rejected = await createOrderWithBearer(await createIdTokenForSteamId(steamId), steamId);
+
+      expect(rejected.status).toBe(400);
     });
   });
 
