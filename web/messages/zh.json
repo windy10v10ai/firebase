@@ -263,7 +263,7 @@
     "build": {
       "title": "构建与发布",
       "source": "源码以 GPL-3.0 公开在 <source>GitHub</source>。",
-      "ci": "发布的 exe 由 GitHub Actions 的 <workflow>构建工作流</workflow>从公开源码编译，不使用本地编译的版本。",
+      "ci": "发布的 exe 由 GitHub Actions 的 <workflow>构建工作流</workflow>从 develop 分支的公开源码编译，不使用本地编译的版本。",
       "download": "唯一的下载地址是本站<launch>启动游戏</launch>页，启动器的自动更新也从这里下载。"
     },
     "signing": {

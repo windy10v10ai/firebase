@@ -263,7 +263,7 @@
     "build": {
       "title": "Build and release",
       "source": "The source code is public on <source>GitHub</source> under GPL-3.0.",
-      "ci": "Released exe files are compiled from the public source by the GitHub Actions <workflow>build workflow</workflow>, never from a local build.",
+      "ci": "Released exe files are compiled from the public source on the develop branch by the GitHub Actions <workflow>build workflow</workflow>, never from a local build.",
       "download": "The only download location is the <launch>Start the game</launch> page on this site. The launcher also updates itself from here."
     },
     "signing": {
