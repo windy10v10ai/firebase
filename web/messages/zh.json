@@ -125,8 +125,16 @@
       "name": "Windy10v10AI 启动器",
       "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏。",
       "download": "下载启动器",
-      "browserPrompt": "浏览器提示「不常下载」：选「<mark>保留</mark>」",
+      "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
+      "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
+      "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
+    },
+    "browserBlock": {
+      "blocked": "已阻止可疑下载操作",
+      "warning": "此文件不常被下载，可能具有危险性",
+      "delete": "从下载记录中删除",
+      "keep": "下载可疑文件"
     },
     "smartScreen": {
       "title": "Windows 已保护你的电脑",
@@ -158,20 +166,91 @@
       "🛡️ 复活时间减少5秒，买活CD缩短至2分钟",
       "🎮 开局抽选的 主动/被动技能 各可刷新一次"
     ],
-    "afdian": {
-      "title": "爱发电",
-      "price": "￥29.8/月",
-      "subscribe": "前往爱发电订阅"
-    },
-    "kofi": {
-      "title": "Ko-fi",
-      "price": "$4/月",
-      "subscribe": "前往 Ko-fi 订阅"
-    },
     "manualActive": {
       "prompt": "购买会员时忘记留言Dota2好友ID，没有自动激活？手动激活：",
       "afdian": "爱发电",
       "kofi": "Ko-fi"
+    },
+    "platformLabel": "付款方式",
+    "status": {
+      "loginTitle": "登录后查看会员状态",
+      "loginDescription": "登录后才能购买会员与会员积分",
+      "none": "未开通会员",
+      "noneDescription": "开通后享有下方全部权益",
+      "premium": "高级会员",
+      "normal": "普通会员",
+      "expired": "会员已过期",
+      "expireDate": "有效期至 {date}",
+      "expiredOn": "已于 {date} 到期",
+      "friendId": "Dota2 好友 ID"
+    },
+    "platforms": {
+      "alipay": {
+        "name": "支付宝",
+        "desc": "最优惠 · 扫码即付",
+        "note": "点档位出二维码，用支付宝扫码付款，付完自动到账",
+        "noteGuest": "登录后点档位出二维码，用支付宝扫码付款，付完自动到账"
+      },
+      "afdian": {
+        "name": "爱发电",
+        "desc": "更多支付方式 · 人民币支付",
+        "note": "点档位跳转到爱发电付款，付完自动到账"
+      },
+      "kofi": {
+        "name": "Ko-fi",
+        "desc": "海外用户 · 美元支付"
+      }
+    },
+    "idNote": "付款时请在留言里填写你的 Dota2 好友 ID：",
+    "idNoteGuest": "付款时请在留言里填写你的 Dota2 好友 ID，登录即可查看",
+    "forgotId": "付款时忘记填 ID？",
+    "manualActivate": "手动激活",
+    "member": {
+      "title": "开通高级会员",
+      "subtitle": "一次买得越多，每月越便宜",
+      "monthly": "按月订阅",
+      "months": "{count} 个月",
+      "total": "共 {amount}",
+      "perMonth": "/月",
+      "subscribeAfdian": "前往爱发电订阅",
+      "subscribeKofi": "前往 Ko-fi 订阅"
+    },
+    "points": {
+      "title": "购买会员积分",
+      "subtitle": "已有会员？用积分快速提升会员等级、升级属性",
+      "unit": "积分",
+      "save": "省 {amount}"
+    },
+    "pay": {
+      "title": "支付宝扫码支付",
+      "loginHint": "登录后即可扫码付款",
+      "close": "关闭",
+      "cancel": "取消",
+      "done": "完成",
+      "qrAlt": "支付宝付款二维码",
+      "memberSubject": "高级会员 · {months}",
+      "pointsSubject": "会员积分 · {points}",
+      "creating": "正在生成二维码",
+      "waiting": "等待付款",
+      "waitingHint": "打开支付宝「扫一扫」，二维码 2 小时内有效",
+      "waitingHintMobile": "用另一台手机的支付宝扫码，或截图后在支付宝「扫一扫」里从相册识别",
+      "memberPaid": "已开通 <em>{months}</em> 高级会员",
+      "paidExpire": "有效期至",
+      "pointsPaid": "<em>{points}</em> 会员积分已到账",
+      "expired": {
+        "title": "二维码已过期",
+        "hint": "这笔订单已关闭，没有扣款。重新生成一张即可",
+        "action": "重新生成二维码"
+      },
+      "failed": {
+        "title": "下单失败",
+        "hint": "网络出了点问题，请稍后再试",
+        "action": "重试"
+      },
+      "rateLimited": {
+        "title": "未付款的订单太多了",
+        "hint": "请明天再试，或换用其他付款方式"
+      }
     }
   },
   "footer": {

@@ -41,14 +41,15 @@ export class AlipayService {
     private readonly localHostService: LocalHostService,
   ) {}
 
-  /** 创建订单并返回收款二维码，本地主机来源先过每日下单次数限额。 */
+  /** 创建订单并返回收款二维码，本地主机与网站来源先过每日下单次数限额。 */
   async createOrder(
     dto: CreateAlipayOrderDto,
     serverType: SERVER_TYPE,
     origin: ClientOrigin = {},
   ): Promise<CreateAlipayOrderResponseDto> {
-    const isLocal = serverType === SERVER_TYPE.LOCAL;
-    if (isLocal) {
+    // 两个来源共用同一份当日次数，换个入口不能多下单
+    const isLimited = serverType === SERVER_TYPE.LOCAL || serverType === SERVER_TYPE.WEB;
+    if (isLimited) {
       await this.localHostService.assertOrderWithinLimit(dto.steamId, origin);
     }
 
@@ -59,7 +60,7 @@ export class AlipayService {
     });
     const response = await this.precreateOrder(dto);
 
-    if (isLocal) {
+    if (isLimited) {
       await this.localHostService.recordOrder(dto.steamId, origin);
     }
 

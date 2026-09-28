@@ -125,8 +125,16 @@
       "name": "Windy10v10AI Launcher",
       "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play.",
       "download": "Download launcher",
-      "browserPrompt": "Browser says it isn't commonly downloaded: choose <mark>Keep</mark>",
+      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
+      "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
+      "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
+    },
+    "browserBlock": {
+      "blocked": "Suspicious download blocked",
+      "warning": "This file isn't commonly downloaded and may be dangerous",
+      "delete": "Delete from history",
+      "keep": "Download suspicious file"
     },
     "smartScreen": {
       "title": "Windows protected your PC",
@@ -158,20 +166,91 @@
       "🛡️ Respawn time reduced by 5 seconds, buyback cooldown reduced to 2 minutes",
       "🎮 One free reroll each for the starting active and passive skill draft"
     ],
-    "afdian": {
-      "title": "Afdian",
-      "price": "CN¥29.8/month",
-      "subscribe": "Subscribe on Afdian"
-    },
-    "kofi": {
-      "title": "Ko-fi",
-      "price": "US$4/month",
-      "subscribe": "Subscribe on Ko-fi"
-    },
     "manualActive": {
       "prompt": "Forgot to leave your Dota2 friend ID when subscribing, so membership was not activated automatically? Activate manually:",
       "afdian": "Afdian",
       "kofi": "Ko-fi"
+    },
+    "platformLabel": "Payment method",
+    "status": {
+      "loginTitle": "Log in to see your membership",
+      "loginDescription": "Log in to buy a membership or Member Points",
+      "none": "No membership",
+      "noneDescription": "Subscribe to unlock all the benefits below",
+      "premium": "Premium Member",
+      "normal": "Member",
+      "expired": "Membership expired",
+      "expireDate": "Valid until {date}",
+      "expiredOn": "Expired on {date}",
+      "friendId": "Dota2 Friend ID"
+    },
+    "platforms": {
+      "alipay": {
+        "name": "Alipay",
+        "desc": "Scan to Pay in CNY",
+        "note": "Pick a plan to get a QR code, scan it with Alipay, and it activates automatically",
+        "noteGuest": "Log in, then pick a plan to get a QR code and pay with Alipay. It activates automatically"
+      },
+      "afdian": {
+        "name": "Afdian",
+        "desc": "More payment options · CNY",
+        "note": "Pick a plan to pay on Afdian, and it activates automatically"
+      },
+      "kofi": {
+        "name": "Ko-fi",
+        "desc": "Global users · Pay in USD"
+      }
+    },
+    "idNote": "When paying, put your Dota2 Friend ID in the message:",
+    "idNoteGuest": "When paying, put your Dota2 Friend ID in the message. Log in to see it",
+    "forgotId": "Forgot to include your ID? ",
+    "manualActivate": "Activate manually",
+    "member": {
+      "title": "Premium Membership",
+      "subtitle": "The longer the plan, the less per month",
+      "monthly": "Monthly subscription",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "total": "{amount} total",
+      "perMonth": "/mo",
+      "subscribeAfdian": "Subscribe on Afdian",
+      "subscribeKofi": "Subscribe on Ko-fi"
+    },
+    "points": {
+      "title": "Buy Member Points",
+      "subtitle": "Already a member? Use points to raise your Member Level and upgrade attributes",
+      "unit": "points",
+      "save": "Save {amount}"
+    },
+    "pay": {
+      "title": "Pay with Alipay",
+      "loginHint": "Log in with Steam to get the QR code",
+      "close": "Close",
+      "cancel": "Cancel",
+      "done": "Done",
+      "qrAlt": "Alipay payment QR code",
+      "memberSubject": "Premium Membership · {months}",
+      "pointsSubject": "Member Points · {points}",
+      "creating": "Generating QR code",
+      "waiting": "Waiting for payment",
+      "waitingHint": "Open Alipay and use Scan. The QR code is valid for 2 hours",
+      "waitingHintMobile": "Scan with Alipay on another phone, or take a screenshot and pick it from the album in Alipay Scan",
+      "memberPaid": "<em>{months}</em> of Premium activated",
+      "paidExpire": "Valid until",
+      "pointsPaid": "<em>{points}</em> Member Points received",
+      "expired": {
+        "title": "QR code expired",
+        "hint": "This order was closed and nothing was charged. Generate a new one to continue",
+        "action": "Generate new QR code"
+      },
+      "failed": {
+        "title": "Order failed",
+        "hint": "Something went wrong with the network. Please try again later",
+        "action": "Retry"
+      },
+      "rateLimited": {
+        "title": "Too many unpaid orders",
+        "hint": "Please try again tomorrow, or use another payment method"
+      }
     }
   },
   "footer": {

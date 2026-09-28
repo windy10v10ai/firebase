@@ -50,9 +50,11 @@
   --color-feature-wiki: #e28d4f;
   --color-feature-wiki-soft: rgba(226, 141, 79, 0.12);
 
-  /* 品牌色只上各平台自己的标识（平台名、图标），不上按钮、描边、悬停：它们与站内的紫、蓝、绿同色系 */
+  /* 品牌色只上各平台自己的标识（平台名、图标），不上按钮、描边、悬停：它们与站内的紫、蓝、绿同色系。
+     会员页购买区是唯一例外，整块只属于选中的平台，见 docs/web/design-system.md「品牌色」 */
   --color-afdian: #946ce6;
   --color-kofi: #29abe0;
+  --color-alipay: #1677ff;
 
   --color-success: #7fd47f;
   --color-warning: #f5a623;

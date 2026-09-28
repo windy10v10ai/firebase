@@ -2,16 +2,19 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { MEMBERSHIP_AFDIAN_LINK, MEMBERSHIP_KOFI_LINK } from '@/config/links';
+import { useAuth } from '@/app/lib/auth';
+import { fetchPlayerMember, type PlayerInfo } from '@/app/lib/player-info';
 
 import Section from '../components/Section';
 
-import PlatformCard from './PlatformCard';
+import AlipayPayDialog, { type AlipayRequest } from './AlipayPayDialog';
+import MemberStatusCard from './MemberStatusCard';
+import PurchaseSection from './PurchaseSection';
 
 // emoji 的字形画得比排版宽度宽，紧跟其后的汉字会被压住，所以让 emoji 单独占一列
-const LEADING_EMOJI = /^(\p{Extended_Pictographic}\uFE0F?)\s*/u;
+const LEADING_EMOJI = /^(\p{Extended_Pictographic}️?)\s*/u;
 
 function splitLeadingEmoji(text: string): [string | null, string] {
   const matched = text.match(LEADING_EMOJI);
@@ -31,6 +34,9 @@ const MANUAL_ACTIVE_LINKS = [
   },
 ];
 
+// 带上请求时用的 uid，换号登录时旧结果立刻失效
+type MemberResult = { uid: string; info: PlayerInfo | null };
+
 function EmojiLead({ text }: { text: string }) {
   const [emoji, rest] = splitLeadingEmoji(text);
   if (!emoji) {
@@ -48,9 +54,58 @@ function EmojiLead({ text }: { text: string }) {
 
 export default function MembershipPage() {
   const t = useTranslations();
+  const auth = useAuth();
+  const uid = auth.status === 'authenticated' ? auth.uid : null;
+  const [result, setResult] = useState<MemberResult | null>(null);
+  const [payRequest, setPayRequest] = useState<AlipayRequest | null>(null);
+  const [payKey, setPayKey] = useState(0);
+  const [paidExpireDate, setPaidExpireDate] = useState<string | null>(null);
+
+  const loadMember = useCallback((steamId: string) => {
+    // 没有玩家记录或取失败都按「没有会员、积分为零」显示，页面照常能买
+    return fetchPlayerMember(steamId)
+      .then((info) => {
+        setResult({ uid: steamId, info });
+        return info;
+      })
+      .catch(() => {
+        setResult({ uid: steamId, info: null });
+        return null;
+      });
+  }, []);
+
+  useEffect(() => {
+    if (uid) {
+      loadMember(uid);
+    }
+  }, [uid, loadMember]);
+
+  const info = result && result.uid === uid ? result.info : undefined;
+
+  const onPaid = useCallback(() => {
+    if (uid) {
+      loadMember(uid).then((fresh) => setPaidExpireDate(fresh?.member?.expireDateString ?? null));
+    }
+  }, [uid, loadMember]);
+
+  const openPay = useCallback((request: AlipayRequest) => {
+    setPayKey((key) => key + 1);
+    setPayRequest(request);
+  }, []);
+
+  const onClosePay = useCallback(() => {
+    setPayRequest(null);
+    setPaidExpireDate(null);
+  }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 lg:space-y-8">
+      {uid ? (
+        <MemberStatusCard authenticated steamId={uid} info={info} />
+      ) : (
+        <MemberStatusCard authenticated={false} />
+      )}
+
       <Section title={t('membership.title')} titleClassName="text-member-strong">
         <div className="space-y-6">
           <p className="text-content text-lg text-center">
@@ -73,24 +128,7 @@ export default function MembershipPage() {
         </div>
       </Section>
 
-      <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto">
-        <PlatformCard
-          title={t('membership.afdian.title')}
-          price={t('membership.afdian.price')}
-          subscribeText={t('membership.afdian.subscribe')}
-          href={MEMBERSHIP_AFDIAN_LINK}
-          titleClassName="text-afdian"
-          buttonClassName="btn-primary"
-        />
-        <PlatformCard
-          title={t('membership.kofi.title')}
-          price={t('membership.kofi.price')}
-          subscribeText={t('membership.kofi.subscribe')}
-          href={MEMBERSHIP_KOFI_LINK}
-          titleClassName="text-kofi"
-          buttonClassName="btn-primary"
-        />
-      </div>
+      <PurchaseSection steamId={uid} onAlipay={openPay} />
 
       <p className="text-muted text-sm text-center">
         {t('membership.manualActive.prompt')}
@@ -106,6 +144,15 @@ export default function MembershipPage() {
           </React.Fragment>
         ))}
       </p>
+
+      <AlipayPayDialog
+        key={payKey}
+        steamId={uid}
+        request={payRequest}
+        paidExpireDate={paidExpireDate}
+        onPaid={onPaid}
+        onClose={onClosePay}
+      />
     </div>
   );
 }
