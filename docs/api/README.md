@@ -1,6 +1,6 @@
 # API 架构
 
-API 是一个 NestJS 应用，部署成单个 Cloud Functions 函数 `client`（asia-northeast1）。本文只写对外的形状：谁从哪个域名进来、API 自己往外调什么，以及计费与延迟上绕不开的约束。开发命令、测试与代码规约见 [api/CLAUDE.md](../../api/CLAUDE.md)。
+API 是一个 NestJS 应用，部署在第二代 Cloud Functions（Node.js 24，asia-northeast1），运行时由根目录的 `firebase.json` 指定。本文只写对外的形状：谁从哪个域名进来、API 自己往外调什么，以及计费与延迟上绕不开的约束。开发命令、测试与代码规约见 [api/CLAUDE.md](../../api/CLAUDE.md)。
 
 ## 对外入口
 
