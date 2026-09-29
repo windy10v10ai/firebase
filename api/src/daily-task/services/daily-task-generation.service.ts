@@ -71,17 +71,25 @@ export class DailyTaskGenerationService {
     const heroPool = this.heroTasks.filter((task) => !completed.has(task.id));
 
     const general = this.pickGeneral(generalPool, seed, 'general');
-    const hero = this.pick(heroPool, seed, 'hero');
+    // 同一轮内任务类型互不相同，避免通用任务与英雄任务考核同一件事。
+    const hero = this.pick(
+      heroPool.filter((task) => task.metric !== general.metric),
+      seed,
+      'hero',
+    );
+    const usedMetrics = new Set([general.metric, hero.metric]);
     const useGeneralForThird = this.hash(`${seed}:third-scope`) % 2 === 0;
 
     const third = useGeneralForThird
       ? this.pickGeneral(
-          generalPool.filter((task) => task.id !== general.id),
+          generalPool.filter((task) => !usedMetrics.has(task.metric)),
           seed,
           'third-general',
         )
       : this.pick(
-          heroPool.filter((task) => task.heroName !== hero.heroName),
+          heroPool.filter(
+            (task) => task.heroName !== hero.heroName && !usedMetrics.has(task.metric),
+          ),
           seed,
           'third-hero',
         );
