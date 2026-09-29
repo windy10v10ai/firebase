@@ -238,13 +238,15 @@ feature/<issue-id>-<short-kebab-summary>
 
 **不要在 `develop` 分支上直接修改/commit 任何文件**——包括 brainstorming/writing-plans 等 skill 产出的设计文档、实施计划。一旦确定要写文件（即使只是 `docs/design/` 下的草稿），先按上述规则切好 feature/fix/chore 分支，再开始改动。
 
-**本地没有其他进行中的改动时，直接在当前 checkout 上切分支修改**，不需要建 worktree。只有本地已有未提交的改动或另一个分支正在进行时，才用 worktree 隔离，避免互相污染。
+动手前先检查 `git status --short`、`git branch --show-current` 和 `git worktree list`。**当前 checkout 干净且没有其他会话或进行中的分支占用时，直接在这里切新工作分支**；当前在 `develop` 就从 `develop` 切，不要仅因为可能存在别的会话而建 worktree。
+
+当前在已合并的旧分支时，先核实对应 PR 已合并、本地 HEAD 与 PR 的末尾提交一致，且没有未提交的改动；再切回 `develop`、删除旧本地分支并切新分支。远端显示 `gone` 不等于已合并；squash merge 后，`git branch --merged` 也不一定列出旧分支。
+
+只有当前 checkout 有未提交改动、未合并分支仍在使用，或确有其他会话共用这个 checkout 时，才用 worktree 隔离。
 
 ### 一个仓库多个会话
 
-多个会话共用同一份本地仓库时，各会话用 `git worktree add` 而非切换主检出的分支来隔离工作，避免互相覆盖对方的工作区。
-
-**主检出当前在哪个分支，不由自己决定。**动手前先看 `git branch --show-current`：不是自己要的分支就不要 `git checkout` 切过去，另一个会话可能正在那上面干活。要操作别的分支，`git worktree add` 到 scratchpad 里去。
+确有多个会话共用同一份本地仓库时，各会话用 worktree 隔离，不切换另一个会话正在使用的 checkout 或分支，避免互相覆盖工作区。
 
 **只提交自己负责的文件。**`git commit` 前先 `git status`，确认没把别人的改动一起带进来。
 
