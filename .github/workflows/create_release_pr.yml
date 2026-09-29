@@ -6,6 +6,7 @@ on:
       - develop
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -55,3 +56,21 @@ jobs:
           token: ${{ secrets.WINDY_PR_PAT }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: merge
+
+      # bot 建 PR 触发的 CI 会一直等待批准，PR 合并时被记为失败；转 ready 后已有正常的 CI，删掉这条
+      - name: Delete CI run awaiting approval
+        if: steps.check_pr.outputs.pr_exists == ''
+        run: |
+          for _ in $(seq 12); do
+            run_ids=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?branch=develop&event=pull_request&status=action_required&head_sha=$(git rev-parse HEAD)" \
+              --jq '.workflow_runs[] | select(.triggering_actor.login == "github-actions[bot]") | .id')
+            if [ -n "$run_ids" ]; then
+              for id in $run_ids; do
+                gh api -X DELETE "repos/${{ github.repository }}/actions/runs/$id"
+              done
+              exit 0
+            fi
+            sleep 5
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
