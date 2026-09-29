@@ -4,7 +4,7 @@
   "private": true,
   "description": "Save windy 10v10ai data in cloud.",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0 <25.0.0"
   },
   "scripts": {
     "build": "run-p build:*",
