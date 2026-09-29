@@ -52,7 +52,7 @@ distribution exception and notes on prior MIT releases in
 ### Need
 
 - Java
-- Node v22
+- Node v24
   - Recommend install node use [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 
 ```bash
@@ -155,6 +155,8 @@ A push is skipped entirely when every changed file sits in a path that cannot af
 ### Deploy with Firebase App Hosting
 
 The Next.js site under `web/` is built and rolled out by App Hosting itself, not by any workflow in this repository. Backend `prod` tracks `main`, `dev` tracks `develop`, and both use `web` as their root directory.
+
+Set the Node.js runtime to 24 in Firebase console → App Hosting → each backend → Settings before rolling out this version. The backend runtime is managed outside this repository and must match `web/package.json`'s Node engine range.
 
 Both skip a push whose changes all fall outside the site. **The path list is not stored in this repository** — it belongs to the backend's rollout policy, so change it in Firebase console → App Hosting → the backend → deployment settings → ignored paths:
 
