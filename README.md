@@ -156,7 +156,7 @@ A push is skipped entirely when every changed file sits in a path that cannot af
 
 The Next.js site under `web/` is built and rolled out by App Hosting itself, not by any workflow in this repository. Backend `prod` tracks `main`, `dev` tracks `develop`, and both use `web` as their root directory.
 
-Set the Node.js runtime to 24 in Firebase console → App Hosting → each backend → Settings before rolling out this version. The backend runtime is managed outside this repository and must match `web/package.json`'s Node engine range.
+The current App Hosting backends have no versioned runtime selected (`Not Specified`). App Hosting therefore uses the versionless `nodejs` runtime, and the Node.js buildpack selects Node 24 from `web/package.json`'s `engines.node` on the next rollout. No console change is needed for this upgrade while both backends remain `Not Specified`. After merging into `develop`, check the `dev` build log for Node 24 and verify the rollout before promoting to `main`; then check the `prod` rollout. If a backend is later pinned to a versioned runtime, set it to `nodejs24` before deploying code that requires Node 24. `Not Specified` disables automatic base image updates (ABIU).
 
 Both skip a push whose changes all fall outside the site. **The path list is not stored in this repository** — it belongs to the backend's rollout policy, so change it in Firebase console → App Hosting → the backend → deployment settings → ignored paths:
 
