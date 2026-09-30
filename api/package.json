@@ -26,6 +26,7 @@
     "export:snapshot": "ts-node scripts/offline-snapshot/export-player-snapshot.ts"
   },
   "dependencies": {
+    "@google-cloud/bigquery": "^9.1.0",
     "@nestjs/common": "^11.1.27",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.9",

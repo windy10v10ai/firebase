@@ -3,6 +3,8 @@ import { logger } from 'firebase-functions';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { BigQueryService } from '../bigquery/bigquery.service';
+import { GameEndRecordContext } from '../bigquery/game-end-rows';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member } from '../members/entities/members.entity';
@@ -29,6 +31,7 @@ export class GameService {
     private readonly eventRewardsService: EventRewardsService,
     private readonly secretService: SecretService,
     private readonly playerInfoService: PlayerInfoService,
+    private readonly bigQueryService: BigQueryService,
   ) {}
 
   /**
@@ -89,7 +92,7 @@ export class GameService {
   }
 
   /** 正式结算：累加每个玩家的战绩与积分，并记录每日任务。 */
-  async recordGameEnd(gameEnd: GameEndDto): Promise<void> {
+  async recordGameEnd(gameEnd: GameEndDto, gameId: string): Promise<void> {
     const players = gameEnd.players.filter((player) => player.steamId > 0);
     // 行为分只在组队局计算
     const isParty = gameEnd.playerCount >= 2;
@@ -102,6 +105,7 @@ export class GameService {
           player.battlePoints,
           player.isDisconnected,
           isParty,
+          gameId,
         ),
       ),
     );
@@ -117,17 +121,18 @@ export class GameService {
     ]);
   }
 
-  /** 累计报文中每个玩家的生涯统计。 */
-  async recordPlayerStats(gameEnd: GameEndDto): Promise<void> {
-    await Promise.all(
-      gameEnd.players.flatMap((player) => [
+  /** 累计报文中每个玩家的生涯统计，并把单局明细写入 BigQuery。 */
+  async recordPlayerStats(gameEnd: GameEndDto, context: GameEndRecordContext): Promise<void> {
+    await Promise.all([
+      this.bigQueryService.recordGameEnd(gameEnd, context),
+      ...gameEnd.players.flatMap((player) => [
         this.playerStatsLifetimeService.accumulate(player.steamId, player, {
           matchId: gameEnd.matchId,
           gameOptions: gameEnd.gameOptions,
         }),
         this.playerStatsRecentService.record(player, gameEnd),
       ]),
-    );
+    ]);
   }
 
   getOK(): string {
@@ -203,9 +208,11 @@ export class GameService {
     for (const rewardResult of rewardResults) {
       // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：领取字段与提示文案
       if (now >= startTime && now <= endTime && !rewardResult.result?.midAutumn2026) {
-        await this.playerService.upsertAddPoint(rewardResult.steamId, {
-          seasonPointTotal: seasonRewardPoint,
-        });
+        await this.playerService.upsertAddPoint(
+          rewardResult.steamId,
+          { seasonPointTotal: seasonRewardPoint },
+          { reason: 'event_reward' },
+        );
         await this.eventRewardsService.setReward(rewardResult.steamId);
         pointInfoDtos.push({
           steamId: rewardResult.steamId,

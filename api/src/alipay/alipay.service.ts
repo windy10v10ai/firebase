@@ -210,11 +210,10 @@ export class AlipayService {
     }
     const reward = spec.reward;
     if (reward.kind === 'member') {
-      await this.membersService.createMember({
-        steamId: order.steamId,
-        month: order.quantity,
-        level: reward.level,
-      });
+      await this.membersService.createMember(
+        { steamId: order.steamId, month: order.quantity, level: reward.level },
+        { reason: 'alipay_member', ref: order.outTradeNo },
+      );
       logger.info('[Alipay] 奖励发放成功 - 会员', {
         outTradeNo: order.outTradeNo,
         steamId: order.steamId,
@@ -225,9 +224,11 @@ export class AlipayService {
       });
     } else {
       const points = reward.points * order.quantity;
-      await this.playerService.upsertAddPoint(order.steamId, {
-        memberPointTotal: points,
-      });
+      await this.playerService.upsertAddPoint(
+        order.steamId,
+        { memberPointTotal: points },
+        { reason: 'alipay_points', ref: order.outTradeNo },
+      );
       logger.info('[Alipay] 奖励发放成功 - 积分', {
         outTradeNo: order.outTradeNo,
         steamId: order.steamId,

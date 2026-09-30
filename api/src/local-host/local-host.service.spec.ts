@@ -5,6 +5,8 @@ import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 import { COOLDOWN_MS, LocalHostService } from './local-host.service';
 
+const GAME_ID = 'game-id';
+
 function getUtcMidnightForTest(): Date {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
@@ -96,9 +98,9 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService();
     const gameEnd = createGameEndDto();
 
-    await service.recordGameEnd(gameEnd);
+    await service.recordGameEnd(gameEnd, GAME_ID);
 
-    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1, true, 200, false, false);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1, true, 200, false, false, GAME_ID);
     expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(gameEnd.players);
   });
 
@@ -106,7 +108,7 @@ describe('LocalHostService', () => {
     const { service, playerService } = createService();
     const gameEnd = createGameEndDto({ players: [createPlayerDto({ steamId: 0 })] });
 
-    await service.recordGameEnd(gameEnd);
+    await service.recordGameEnd(gameEnd, GAME_ID);
 
     expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
   });
@@ -115,7 +117,7 @@ describe('LocalHostService', () => {
     const { service, playerService, dailyTaskService } = createService({ 1: undefined });
     const gameEnd = createGameEndDto();
 
-    await service.recordGameEnd(gameEnd);
+    await service.recordGameEnd(gameEnd, GAME_ID);
 
     expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
@@ -129,7 +131,7 @@ describe('LocalHostService', () => {
       players: [createPlayerDto({ steamId: 1 }), createPlayerDto({ steamId: 2 })],
     });
 
-    await service.recordGameEnd(gameEnd);
+    await service.recordGameEnd(gameEnd, GAME_ID);
 
     expect(playerService.upsertGameEnd).not.toHaveBeenCalled();
     expect(dailyTaskService.recordGameEnd).not.toHaveBeenCalled();
@@ -138,8 +140,8 @@ describe('LocalHostService', () => {
   it('冷却窗口内重复结算（不同 matchId）拒绝', async () => {
     const { service, playerService } = createService();
 
-    await service.recordGameEnd(createGameEndDto({ matchId: 'match-1' }));
-    await service.recordGameEnd(createGameEndDto({ matchId: 'match-2' }));
+    await service.recordGameEnd(createGameEndDto({ matchId: 'match-1' }), GAME_ID);
+    await service.recordGameEnd(createGameEndDto({ matchId: 'match-2' }), GAME_ID);
 
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
   });
@@ -149,9 +151,9 @@ describe('LocalHostService', () => {
     try {
       const { service, playerService } = createService();
 
-      await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
+      await service.recordGameEnd(createGameEndDto({ matchId: '0' }), GAME_ID);
       jest.advanceTimersByTime(COOLDOWN_MS + 1);
-      await service.recordGameEnd(createGameEndDto({ matchId: '0' }));
+      await service.recordGameEnd(createGameEndDto({ matchId: '0' }), GAME_ID);
 
       expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(2);
     } finally {
@@ -172,6 +174,7 @@ describe('LocalHostService', () => {
             matchId: `match-${i}`,
             players: [createPlayerDto({ battlePoints: 800 })],
           }),
+          GAME_ID,
         );
         jest.advanceTimersByTime(COOLDOWN_MS + 1);
       }
@@ -180,6 +183,7 @@ describe('LocalHostService', () => {
           matchId: 'match-10',
           players: [createPlayerDto({ battlePoints: 800 })],
         }),
+        GAME_ID,
       );
 
       expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(10);
@@ -201,7 +205,7 @@ describe('LocalHostService', () => {
         dailyCreatedOrderCount: 9,
       });
 
-      await service.recordGameEnd(createGameEndDto());
+      await service.recordGameEnd(createGameEndDto(), GAME_ID);
 
       const saved = store.get('1');
       expect(saved?.dailyGameEndSeasonPoint).toBe(200);
@@ -244,7 +248,7 @@ describe('LocalHostService', () => {
         ],
       });
 
-      await service.recordGameEnd(gameEnd);
+      await service.recordGameEnd(gameEnd, GAME_ID);
 
       const saved = store.get('1');
       expect(saved?.dailyDate).toEqual(new Date('2026-09-02T00:00:00.000Z'));
@@ -317,7 +321,7 @@ describe('LocalHostService', () => {
     it('结算累加次数与勇士积分，并记下国家', async () => {
       const { service, store } = createService();
 
-      await service.recordGameEnd(createGameEndDto(), origin);
+      await service.recordGameEnd(createGameEndDto(), GAME_ID, origin);
 
       expect(store.get('1')?.ipActivity).toEqual([
         expect.objectContaining({
@@ -334,7 +338,7 @@ describe('LocalHostService', () => {
     it('同一来源的消耗累加到同一条，不新增条目', async () => {
       const { service, store } = createService();
 
-      await service.recordGameEnd(createGameEndDto(), origin);
+      await service.recordGameEnd(createGameEndDto(), GAME_ID, origin);
       await service.recordMemberPointUsage(1, 20, 'lottery', origin);
 
       const activity = store.get('1')?.ipActivity;

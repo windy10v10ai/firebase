@@ -135,7 +135,11 @@ export class LocalHostService {
   ) {}
 
   /** 记录本地对局，返回这场比赛是否计入。 */
-  async recordGameEnd(gameEnd: GameEndDto, origin: ClientOrigin = {}): Promise<boolean> {
+  async recordGameEnd(
+    gameEnd: GameEndDto,
+    gameId: string,
+    origin: ClientOrigin = {},
+  ): Promise<boolean> {
     // 每个玩家要读限流记录和玩家档案各一次，10 人局顺序检查就是 20 次往返
     const qualifiedPlayers = gameEnd.players.filter((player) => player.steamId > 0);
     const checks = await Promise.all(
@@ -156,7 +160,9 @@ export class LocalHostService {
       return false;
     }
 
-    await Promise.all(checks.map((check) => this.savePlayerGameEnd(check, gameEnd, origin)));
+    await Promise.all(
+      checks.map((check) => this.savePlayerGameEnd(check, gameEnd, gameId, origin)),
+    );
 
     await this.dailyTaskService.recordGameEnd(gameEnd.players);
     return true;
@@ -331,6 +337,7 @@ export class LocalHostService {
   private async savePlayerGameEnd(
     check: PlayerCheck,
     gameEnd: GameEndDto,
+    gameId: string,
     origin: ClientOrigin,
   ): Promise<void> {
     const counters = { ...check.counters };
@@ -350,6 +357,7 @@ export class LocalHostService {
       check.battlePoints,
       check.player.isDisconnected,
       false,
+      gameId,
     );
     logger.info('game/end/local: recorded', {
       matchId: gameEnd.matchId,

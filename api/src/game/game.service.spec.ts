@@ -3,6 +3,7 @@ import { BaseFirestoreRepository } from 'fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { BigQueryService } from '../bigquery/bigquery.service';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { Member, MemberLevel } from '../members/entities/members.entity';
@@ -24,6 +25,7 @@ describe('GameService', () => {
   let eventRewardsService: jest.Mocked<EventRewardsService>;
   let analyticsService: jest.Mocked<AnalyticsService>;
   let playerStatsLifetimeService: jest.Mocked<PlayerStatsLifetimeService>;
+  let bigQueryService: jest.Mocked<BigQueryService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -84,6 +86,10 @@ describe('GameService', () => {
           provide: PlayerInfoService,
           useValue: { findPlayerInfoBySteamIds: jest.fn() },
         },
+        {
+          provide: BigQueryService,
+          useValue: { recordGameEnd: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -93,6 +99,7 @@ describe('GameService', () => {
     eventRewardsService = moduleRef.get(EventRewardsService);
     analyticsService = moduleRef.get(AnalyticsService);
     playerStatsLifetimeService = moduleRef.get(PlayerStatsLifetimeService);
+    bigQueryService = moduleRef.get(BigQueryService);
   });
 
   describe('recordGameEnd 组队判定', () => {
@@ -101,15 +108,29 @@ describe('GameService', () => {
       ({ winnerTeamId: 2, players: [player], playerCount }) as unknown as GameEndDto;
 
     it('单玩家报文也能算组队局', async () => {
-      await service.recordGameEnd(build(4));
+      await service.recordGameEnd(build(4), 'game-id');
 
-      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1001, true, 10, false, true);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(
+        1001,
+        true,
+        10,
+        false,
+        true,
+        'game-id',
+      );
     });
 
     it('全场只有一个真人时不算组队局', async () => {
-      await service.recordGameEnd(build(1));
+      await service.recordGameEnd(build(1), 'game-id');
 
-      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1001, true, 10, false, false);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(
+        1001,
+        true,
+        10,
+        false,
+        false,
+        'game-id',
+      );
     });
   });
 
@@ -120,9 +141,11 @@ describe('GameService', () => {
       players: [{ steamId: 1001 }, { steamId: 1002 }],
     } as unknown as GameEndDto;
 
-    it('recordPlayerStats 逐玩家累计生涯统计，不发对局级事件', async () => {
-      await service.recordPlayerStats(gameEnd);
+    it('recordPlayerStats 逐玩家累计生涯统计并写入 BigQuery，不发对局级事件', async () => {
+      const context = { gameId: 'game-id', serverType: SERVER_TYPE.LOCAL, route: 'local' as const };
+      await service.recordPlayerStats(gameEnd, context);
 
+      expect(bigQueryService.recordGameEnd).toHaveBeenCalledWith(gameEnd, context);
       expect(playerStatsLifetimeService.accumulate).toHaveBeenCalledWith(1002, gameEnd.players[1], {
         matchId: '1',
         gameOptions: gameEnd.gameOptions,
@@ -237,9 +260,13 @@ describe('GameService', () => {
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        seasonPointTotal: 5000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          seasonPointTotal: 5000,
+        },
+        { reason: 'event_reward' },
+      );
       expect(eventRewardsService.setReward).toHaveBeenCalledWith(steamId);
       expect(result).toEqual([
         {
@@ -259,9 +286,13 @@ describe('GameService', () => {
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        seasonPointTotal: 5000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          seasonPointTotal: 5000,
+        },
+        { reason: 'event_reward' },
+      );
       expect(result).toEqual([
         {
           steamId,
@@ -330,6 +361,7 @@ describe('GameService.addDailyMemberPoints', () => {
       null,
       null,
       null,
+      null,
     );
     return { gameService, playerService, read: () => store };
   }
@@ -353,7 +385,11 @@ describe('GameService.addDailyMemberPoints', () => {
 
     const pointInfo = await gameService.addDailyMemberPoints([read()]);
 
-    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(1, { memberPointTotal: 400 });
+    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+      1,
+      { memberPointTotal: 400 },
+      { reason: 'member_daily' },
+    );
     expect(read().lastDailyDate).toEqual(new Date('2026-08-10T00:00:00Z'));
     expect(pointInfo).toEqual([
       expect.objectContaining({ steamId: 1, memberPoint: 100 }),

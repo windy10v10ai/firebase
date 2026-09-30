@@ -23,7 +23,7 @@ export class AdminController {
 
   @Post('/member')
   createMember(@Body() createMemberDto: CreateMemberDto) {
-    return this.membersService.createMember(createMemberDto);
+    return this.membersService.createMember(createMemberDto, { reason: 'admin_member' });
   }
 
   @Get('/afdian/order/fail')

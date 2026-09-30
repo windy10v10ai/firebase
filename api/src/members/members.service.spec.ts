@@ -271,7 +271,11 @@ describe('MembersService.checkIn', () => {
     const result = await service.checkIn(1);
 
     expect(result).toEqual({ dailyPoint: 100, catchUpDays: 0, catchUpPoint: 0 });
-    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(1, { memberPointTotal: 100 });
+    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+      1,
+      { memberPointTotal: 100 },
+      { reason: 'member_daily' },
+    );
     expect(read().lastDailyDate).toEqual(new Date('2026-08-10T00:00:00Z'));
   });
 
@@ -287,7 +291,11 @@ describe('MembersService.checkIn', () => {
     const result = await service.checkIn(1);
 
     expect(result).toEqual({ dailyPoint: 100, catchUpDays: 3, catchUpPoint: 300 });
-    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(1, { memberPointTotal: 400 });
+    expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+      1,
+      { memberPointTotal: 400 },
+      { reason: 'member_daily' },
+    );
   });
 
   it('当日重复签到：不加分也不再写签到日', async () => {
