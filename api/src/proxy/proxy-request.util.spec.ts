@@ -44,10 +44,10 @@ describe('decodeProxyBody', () => {
   it('含中文与 URL 不安全字符的内容也能往返', async () => {
     const dto = await decodeProxyBody(
       GameEndDto,
-      encode({ ...BASE, players: [{ ...player, heroName: '勇士>?/+' }] }),
+      encode({ ...BASE, version: '勇士>?/+', players: [player] }),
     );
 
-    expect(dto.players[0].heroName).toBe('勇士>?/+');
+    expect(dto.version).toBe('勇士>?/+');
   });
 
   it.each([

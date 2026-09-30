@@ -22,6 +22,7 @@ const localApiKey = getLocalApiKey();
 interface GameEndLocalPlayerOptions {
   steamId: number;
   battlePoints?: number;
+  heroName?: string;
   dailyTask?: { dayId: string; taskId: string; star: number; seasonPoint: number };
 }
 
@@ -42,7 +43,7 @@ function createGameEndLocalPlayer(options: GameEndLocalPlayerOptions) {
     towerKills: 1,
     totalGoldEarned: 10000,
     battlePoints: options.battlePoints ?? 100,
-    heroName: 'npc_dota_hero_medusa',
+    heroName: options.heroName ?? 'npc_dota_hero_medusa',
     ...(options.dailyTask ? { dailyTask: options.dailyTask } : {}),
   };
 }
@@ -125,6 +126,36 @@ describe('POST /api/game/end/local (e2e)', () => {
 
     const statsLifetime = await getPlayerStatsLifetime(app, steamId);
     expect(statsLifetime?.kills).toBe(5);
+  });
+
+  it('英雄名不在英雄表里：返回 400，积分、战绩与冷却都不写', async () => {
+    const steamId = 105620030;
+    mockDate('2026-08-16T01:00:00.000Z');
+    await createPlayer(app, { steamId, matchCount: 20 });
+
+    const rejected = await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000030',
+        players: [{ steamId, battlePoints: 200, heroName: 'npc_dota_hero_zeus' }],
+      }),
+    );
+
+    expect(rejected.status).toBe(400);
+    const player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(0);
+    expect(player.matchCount).toBe(20);
+    expect(await getPlayerStatsLifetime(app, steamId)).toBeFalsy();
+
+    const accepted = await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000031',
+        players: [{ steamId, battlePoints: 200, heroName: 'npc_dota_hero_zuus' }],
+      }),
+    );
+    expect(accepted.status).toBe(201);
+    expect((await getPlayer(app, steamId)).seasonPointTotal).toBe(200);
   });
 
   it('旧版游戏不带 playerCount：照常结算', async () => {

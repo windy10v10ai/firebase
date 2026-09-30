@@ -25,7 +25,6 @@ import {
 
 import type { ReactNode } from 'react';
 
-const COLLAPSED_ROWS = 10;
 const SKELETON_ROWS = 3;
 
 // 表头与每一行是各自独立的网格，只要有一条轨道按内容伸缩，两边算出来的宽度就不一样、整行错开，
@@ -245,7 +244,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   const tStats = useTranslations('profile.stats');
   const locale = useLocale();
   const [result, setResult] = useState<LoadResult | null>(null);
-  const [expanded, setExpanded] = useState(false);
   const [openRow, setOpenRow] = useState<number | null>(null);
 
   useEffect(() => {
@@ -424,174 +422,143 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
       ) : loaded.matches.length === 0 ? (
         <p className="px-3 pt-2 pb-4 text-sm text-muted md:px-4">{t('empty')}</p>
       ) : (
-        <>
-          <ul>
-            {/* 展开只是加长同一份列表，下标就是这一行的身份；matchId 控制台开局恒为 0，当不了 key */}
-            {(expanded ? loaded.matches : loaded.matches.slice(0, COLLAPSED_ROWS)).map(
-              (match, index) => {
-                const open = openRow === index;
-                const groups = detailGroups(match);
-                const kda = `${match.kills} / ${match.deaths} / ${match.assists}`;
-                return (
-                  <li key={index}>
-                    <button
-                      type="button"
-                      aria-expanded={open}
-                      onClick={() => setOpenRow(open ? null : index)}
-                      className={`${ROW_CLASS} transition-colors hover:bg-panel-soft`}
+        <ul>
+          {/* 列表只随整次加载替换，下标就是这一行的身份；matchId 控制台开局恒为 0，当不了 key */}
+          {loaded.matches.map((match, index) => {
+            const open = openRow === index;
+            const groups = detailGroups(match);
+            const kda = `${match.kills} / ${match.deaths} / ${match.assists}`;
+            return (
+              <li key={index}>
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  onClick={() => setOpenRow(open ? null : index)}
+                  className={`${ROW_CLASS} transition-colors hover:bg-panel-soft`}
+                >
+                  {/* 胜负只用色条表示，文字留给读屏与悬停 */}
+                  <span
+                    title={t(match.win ? 'win' : 'loss')}
+                    className={`h-6 w-[3px] shrink-0 rounded-sm ${match.win ? 'bg-success' : 'bg-danger'}`}
+                  >
+                    <span className="sr-only">{t(match.win ? 'win' : 'loss')}</span>
+                  </span>
+                  <DifficultyBadge
+                    difficulty={match.difficulty}
+                    customLabel={t('difficultyCustom')}
+                  />
+                  <LevelRing level={match.level} locale={locale} />
+                  <HeroIcon
+                    heroName={match.heroName}
+                    awakenLabel={match.awaken > 0 ? t('awaken') : undefined}
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="truncate text-sm text-heading">
+                        {heroLabel(match.heroName, locale)}
+                      </span>
+                      {match.isDisconnected ? (
+                        <span className="shrink-0 rounded bg-control px-1.5 py-px text-[11px] text-muted">
+                          {t('disconnected')}
+                        </span>
+                      ) : null}
+                    </span>
+                    {/* 手机把结果交给色条，等级、时长与 K/D/A 挪到第二行 */}
+                    <span className="text-[11px] tabular-nums text-faint md:hidden">
+                      {t('levelShort', { n: match.level })} · {kda} ·{' '}
+                      {formatDuration(match.durationSec)}
+                    </span>
+                  </span>
+                  <span
+                    className={`${DESKTOP_ONLY} text-right text-[13px] tabular-nums text-content`}
+                  >
+                    {formatDuration(match.durationSec)}
+                  </span>
+                  <Kda kills={match.kills} deaths={match.deaths} assists={match.assists} />
+                  <span className={`${DESKTOP_ONLY} ${NUMBER_CELL}`}>
+                    {match.lastHits.toLocaleString(locale)}
+                  </span>
+                  <span className={`${DESKTOP_ONLY} ${NUMBER_CELL}`}>
+                    {compact(match.totalGoldEarned, locale)}
+                  </span>
+                  <span className={`${DESKTOP_ONLY} ${NUMBER_CELL}`}>
+                    {compact(match.heroDamage, locale)}
+                  </span>
+                  <span className={`${WIDE_ONLY} ${NUMBER_CELL}`}>
+                    {compact(match.damageTaken, locale)}
+                  </span>
+                  <span className="flex shrink-0 items-center justify-end gap-1 text-sm font-bold tabular-nums text-season">
+                    {/* 手机没有表头，那一列数字只能靠图标说明自己是什么 */}
+                    <span className="md:hidden">
+                      <GameIcon src={GAME_ICON.battlePoint} label={t('columns.points')} size={13} />
+                    </span>
+                    {t('points', { n: match.battlePoints })}
+                  </span>
+                  <ChevronDown
+                    className={`hidden size-4 shrink-0 text-faint transition-transform md:block ${open ? 'rotate-180' : ''}`}
+                    aria-hidden="true"
+                  />
+                </button>
+                {open ? (
+                  <div className="@container border-t border-line bg-panel-soft px-3 py-3 md:px-4">
+                    {/* 出装一行要 400 多像素，并排后三组数据变窄会挤断俄文标签，所以按面板宽度决定放右侧还是下方 */}
+                    <div
+                      className={`grid gap-x-7 gap-y-4 ${
+                        groups.length === 3
+                          ? 'md:grid-cols-3 @6xl:grid-cols-[repeat(3,minmax(0,1fr))_auto]'
+                          : 'md:grid-cols-2'
+                      }`}
                     >
-                      {/* 胜负只用色条表示，文字留给读屏与悬停 */}
-                      <span
-                        title={t(match.win ? 'win' : 'loss')}
-                        className={`h-6 w-[3px] shrink-0 rounded-sm ${match.win ? 'bg-success' : 'bg-danger'}`}
-                      >
-                        <span className="sr-only">{t(match.win ? 'win' : 'loss')}</span>
-                      </span>
-                      <DifficultyBadge
-                        difficulty={match.difficulty}
-                        customLabel={t('difficultyCustom')}
-                      />
-                      <LevelRing level={match.level} locale={locale} />
-                      <HeroIcon
-                        heroName={match.heroName}
-                        awakenLabel={match.awaken > 0 ? t('awaken') : undefined}
-                      />
-                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="flex min-w-0 items-center gap-1.5">
-                          <span className="truncate text-sm text-heading">
-                            {heroLabel(match.heroName, locale)}
-                          </span>
-                          {match.isDisconnected ? (
-                            <span className="shrink-0 rounded bg-control px-1.5 py-px text-[11px] text-muted">
-                              {t('disconnected')}
-                            </span>
-                          ) : null}
-                        </span>
-                        {/* 手机把结果交给色条，等级、时长与 K/D/A 挪到第二行 */}
-                        <span className="text-[11px] tabular-nums text-faint md:hidden">
-                          {t('levelShort', { n: match.level })} · {kda} ·{' '}
-                          {formatDuration(match.durationSec)}
-                        </span>
-                      </span>
-                      <span
-                        className={`${DESKTOP_ONLY} text-right text-[13px] tabular-nums text-content`}
-                      >
-                        {formatDuration(match.durationSec)}
-                      </span>
-                      <Kda kills={match.kills} deaths={match.deaths} assists={match.assists} />
-                      <span className={`${DESKTOP_ONLY} ${NUMBER_CELL}`}>
-                        {match.lastHits.toLocaleString(locale)}
-                      </span>
-                      <span className={`${DESKTOP_ONLY} ${NUMBER_CELL}`}>
-                        {compact(match.totalGoldEarned, locale)}
-                      </span>
-                      <span className={`${DESKTOP_ONLY} ${NUMBER_CELL}`}>
-                        {compact(match.heroDamage, locale)}
-                      </span>
-                      <span className={`${WIDE_ONLY} ${NUMBER_CELL}`}>
-                        {compact(match.damageTaken, locale)}
-                      </span>
-                      <span className="flex shrink-0 items-center justify-end gap-1 text-sm font-bold tabular-nums text-season">
-                        {/* 手机没有表头，那一列数字只能靠图标说明自己是什么 */}
-                        <span className="md:hidden">
-                          <GameIcon
-                            src={GAME_ICON.battlePoint}
-                            label={t('columns.points')}
-                            size={13}
-                          />
-                        </span>
-                        {t('points', { n: match.battlePoints })}
-                      </span>
-                      <ChevronDown
-                        className={`hidden size-4 shrink-0 text-faint transition-transform md:block ${open ? 'rotate-180' : ''}`}
-                        aria-hidden="true"
-                      />
-                    </button>
-                    {open ? (
-                      <div className="@container border-t border-line bg-panel-soft px-3 py-3 md:px-4">
-                        {/* 出装一行要 400 多像素，并排后三组数据变窄会挤断俄文标签，所以按面板宽度决定放右侧还是下方 */}
-                        <div
-                          className={`grid gap-x-7 gap-y-4 ${
-                            groups.length === 3
-                              ? 'md:grid-cols-3 @6xl:grid-cols-[repeat(3,minmax(0,1fr))_auto]'
-                              : 'md:grid-cols-2'
-                          }`}
-                        >
-                          {groups.map((group) => (
-                            <DetailGroup key={group.title} {...group} />
-                          ))}
-                          {/* 出装与属性同批上报，旧场次整块不出现 */}
-                          {match.items ? (
-                            <div className="flex flex-wrap gap-x-7 gap-y-4 col-span-full @6xl:col-span-1 @6xl:flex-col @6xl:flex-nowrap @6xl:gap-y-3 @6xl:border-l @6xl:border-line @6xl:pl-7">
-                              <div className="flex flex-col gap-2">
-                                <GroupTitle
-                                  title={t('groups.items')}
-                                  accentClass="bg-line-strong"
-                                />
-                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                                  <div className="flex gap-1">
-                                    {/* 物品栏位置固定，下标就是格子的身份 */}
-                                    {match.items.map((item, slot) => (
-                                      <LoadoutSlot
-                                        key={slot}
-                                        kind="item"
-                                        name={item}
-                                        locale={locale}
-                                      />
-                                    ))}
-                                  </div>
-                                  <div className="flex gap-1">
-                                    <LoadoutSlot
-                                      kind="item"
-                                      name={match.neutralItem}
-                                      locale={locale}
-                                    />
-                                    <LoadoutSlot
-                                      kind="item"
-                                      name={match.neutralPassiveItem}
-                                      locale={locale}
-                                    />
-                                  </div>
-                                </div>
+                      {groups.map((group) => (
+                        <DetailGroup key={group.title} {...group} />
+                      ))}
+                      {/* 出装与属性同批上报，旧场次整块不出现 */}
+                      {match.items ? (
+                        <div className="flex flex-wrap gap-x-7 gap-y-4 col-span-full @6xl:col-span-1 @6xl:flex-col @6xl:flex-nowrap @6xl:gap-y-3 @6xl:border-l @6xl:border-line @6xl:pl-7">
+                          <div className="flex flex-col gap-2">
+                            <GroupTitle title={t('groups.items')} accentClass="bg-line-strong" />
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                              <div className="flex gap-1">
+                                {/* 物品栏位置固定，下标就是格子的身份 */}
+                                {match.items.map((item, slot) => (
+                                  <LoadoutSlot key={slot} kind="item" name={item} locale={locale} />
+                                ))}
                               </div>
-                              <div className="flex flex-col gap-2">
-                                <GroupTitle
-                                  title={t('groups.abilities')}
-                                  accentClass="bg-line-strong"
+                              <div className="flex gap-1">
+                                <LoadoutSlot kind="item" name={match.neutralItem} locale={locale} />
+                                <LoadoutSlot
+                                  kind="item"
+                                  name={match.neutralPassiveItem}
+                                  locale={locale}
                                 />
-                                <div className="flex gap-1">
-                                  {(match.abilities ?? []).map((ability, slot) => (
-                                    <LoadoutSlot
-                                      key={slot}
-                                      kind="ability"
-                                      name={ability}
-                                      locale={locale}
-                                    />
-                                  ))}
-                                </div>
                               </div>
                             </div>
-                          ) : null}
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <GroupTitle
+                              title={t('groups.abilities')}
+                              accentClass="bg-line-strong"
+                            />
+                            <div className="flex gap-1">
+                              {(match.abilities ?? []).map((ability, slot) => (
+                                <LoadoutSlot
+                                  key={slot}
+                                  kind="ability"
+                                  name={ability}
+                                  locale={locale}
+                                />
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
-                  </li>
-                );
-              },
-            )}
-          </ul>
-          {loaded.matches.length > COLLAPSED_ROWS ? (
-            <div className="border-t border-line px-3 py-2 text-center md:px-4">
-              <button
-                type="button"
-                onClick={() => setExpanded(!expanded)}
-                className="link-hover text-sm"
-              >
-                {t(expanded ? 'collapse' : 'showAll', { count: loaded.matches.length })}
-              </button>
-            </div>
-          ) : null}
-        </>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </section>
   );

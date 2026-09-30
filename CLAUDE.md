@@ -96,7 +96,7 @@
 - **「A 原来是 X，现在改成 Y」这类对比句式一律整句删除**，不管内容是否属实、措辞是否已经改得足够技术化。只要结构上是在拿过去和现在做对比，就是在叙述变更过程而非陈述设计事实
 - 「为什么某方案没有采用」这类逐项列举，属于 PR 描述或设计文档的职责
 
-写完自查是否出现这些词：**原来 / 之前 / 沿用 / 本次 / 此次 / 这里 / 改为 / 额外**——出现即说明在叙述过程，删掉重写或整句删除。
+写完自查是否出现这些词：**原来 / 之前 / 沿用 / 本次 / 此次 / 这里 / 改为 / 额外**，英文注释对应 **previously / used to / now / instead / no longer / this change / here**——出现即说明在叙述过程，删掉重写或整句删除。
 
 写：
 
@@ -116,7 +116,7 @@
 |---|---|---|
 | `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 | [api/CLAUDE.md](api/CLAUDE.md) |
 | `web/` | Next.js 前端 | [web/CLAUDE.md](web/CLAUDE.md) |
-| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；每个改 `launcher/` 的 PR 都同时升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/README.md](launcher/README.md) |
+| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；每个改 `launcher/` 的 PR 都同时升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/CLAUDE.md](launcher/CLAUDE.md) |
 | `extensions/` | Firebase BigQuery export 配置 | — |
 
 ### 文档目录
@@ -254,12 +254,23 @@ feature/<issue-id>-<short-kebab-summary>
 
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
 
-1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md) 与 [web/CLAUDE.md](web/CLAUDE.md) 的「校验」一节
-2. 加载 design-docs 技能检查文档：本次改动带来的长期有效决定已写进 `docs/<模块>/README.md`；涉及的批次设计文档如已完成，已按技能瘦身。没有需要改的也要过一遍这一步
-3. `git push -u origin <branch-name>`
-4. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。正文写法见下一节
-5. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
-6. 没有自动建 PR 的 workflow，push 之后必须显式执行第 4 步
+1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md)、[web/CLAUDE.md](web/CLAUDE.md) 与 [launcher/CLAUDE.md](launcher/CLAUDE.md) 的「校验」一节
+2. 逐条读 `git diff develop...` 里新增和改动的注释，按「注释规约」自查：有没有写进具体场景、复述代码流程、把推测写成事实。Codex review 最常指出的就是这一类
+3. 加载 design-docs 技能检查文档：本次改动带来的长期有效决定已写进 `docs/<模块>/README.md`；涉及的批次设计文档如已完成，已按技能瘦身。没有需要改的也要过一遍这一步
+4. `git push -u origin <branch-name>`
+5. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。正文写法见下一节
+6. 等 Codex 自动 review 出结果，处理完再向用户汇报，见下方「处理 PR 评论」
+7. 不要在未明确要求时执行本地 `merge`/`push --force` 到 `develop`
+8. 没有自动建 PR 的 workflow，push 之后必须显式执行第 5 步
+
+### 处理 PR 评论
+
+建 PR 后 Codex 会自动 review 一次，通常 5 分钟内出结果：没有意见时给 PR 点 👍（`repos/windy10v10ai/firebase/issues/<N>/reactions`），有意见时提交 review 并在代码行上留评论（`pulls/<N>/reviews`、`pulls/<N>/comments`），账号都是 `chatgpt-codex-connector[bot]`。
+
+- **不等用户提醒**：建完 PR 就轮询这几个接口，最多等 15 分钟；有的 PR 它不会给任何反应，超时就在汇报里说明没等到
+- **逐条判断，不照单全收**：合理的直接改，重跑校验后推送，在该评论下回复改了什么并附提交号；不合理的回复理由，不改
+- 评论暴露出规约写得不清楚时，在同一个 PR 里把规约补上
+- 用户或其他人留的评论同样处理
 
 ### 小改动搭车
 
