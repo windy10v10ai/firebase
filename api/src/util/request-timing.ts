@@ -37,7 +37,7 @@ export function requestTimingMiddleware(req: Request, res: Response, next: NextF
       return;
     }
     logger.info('request timing', {
-      // 用路由模板而不是实际路径，路径参数里的 steamId 会把同一个接口拆成无数组
+      // 按路由模板记录，同一个接口才能聚合成一组
       route: `${req.method} ${req.baseUrl}${req.route?.path ?? req.path}`,
       status: res.statusCode,
       totalMs: Math.round(performance.now() - startedAt),
