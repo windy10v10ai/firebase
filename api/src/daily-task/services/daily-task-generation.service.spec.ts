@@ -69,6 +69,16 @@ describe('DailyTaskGenerationService', () => {
     }
   });
 
+  it('never repeats a task metric within a round, even with two completed tasks', () => {
+    for (let steamId = 1; steamId <= 300; steamId++) {
+      for (const completed of [[], ['general_kills', 'general_last_hits']]) {
+        const candidates = service.generateCandidates('20260816', steamId, 1, 0, completed);
+
+        expect(new Set(candidates.map((candidate) => candidate.metric)).size).toBe(3);
+      }
+    }
+  });
+
   it('produces both possible scope compositions and all star permutations', () => {
     const scopeCompositions = new Set<string>();
     const starPermutations = new Set<string>();

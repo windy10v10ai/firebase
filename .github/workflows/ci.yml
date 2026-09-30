@@ -155,7 +155,7 @@ jobs:
         shell: cmd
 
   ci:
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     needs: [changes, api-quality, api-e2e, web-quality, launcher-build]
     runs-on: ubuntu-latest
     steps:
