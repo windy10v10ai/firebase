@@ -8,8 +8,14 @@ import { Player } from '../player/entities/player.entity';
 
 import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
 import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
+import {
+  StatsBaselineFilter,
+  StatsBaselineRow,
+  buildStatsBaselineQuery,
+} from './stats-baseline-query';
 
 const BIGQUERY_PROJECT_ID = 'windy10v10ai';
+const BIGQUERY_LOCATION = 'asia-northeast1';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
 const POINT_HISTORY_TABLE = 'point_history';
 // 分析写入不能拖住业务请求直到函数超时，上限要远小于函数超时
@@ -38,9 +44,27 @@ export class BigQueryService {
     );
   }
 
+  /** 按难度汇总全体玩家的六边形基准；未连 BigQuery 时返回 null。 */
+  async queryStatsBaseline(filter: StatsBaselineFilter): Promise<StatsBaselineRow[] | null> {
+    if (!this.isEnabled()) {
+      return null;
+    }
+    const table = `${BIGQUERY_PROJECT_ID}.${this.datasetId}.${GAME_END_PLAYERS_TABLE}`;
+    const [rows] = await this.client.query({
+      query: buildStatsBaselineQuery(table),
+      params: filter,
+      location: BIGQUERY_LOCATION,
+    });
+    return rows as StatsBaselineRow[];
+  }
+
+  private isEnabled(): boolean {
+    return process.env.NODE_ENV !== 'test' && Boolean(this.datasetId);
+  }
+
   // 分析数据按 best-effort 写入：任何失败只记日志，不能让结算或支付跟着失败
   private async insert(tableId: string, rows: Record<string, unknown>[]): Promise<void> {
-    if (process.env.NODE_ENV === 'test' || !this.datasetId || rows.length === 0) {
+    if (!this.isEnabled() || rows.length === 0) {
       return;
     }
 

@@ -1,6 +1,6 @@
 # 第 1 阶段：战绩与积分记录写入 BigQuery
 
-> 状态：代码已完成，生产数据集待建。长期规范见 [docs/api/README.md](../../api/README.md)「分析数据」，插件升级另见 [#1327](https://github.com/windy10v10ai/firebase/issues/1327)。
+> 状态：已完成。长期规范见 [docs/api/README.md](../../api/README.md)「分析数据」，插件升级另见 [#1327](https://github.com/windy10v10ai/firebase/issues/1327)。
 
 GA4 的字段数与长度有上限、存的是事件格式；Firestore 只有累计值与最近 50 场；插件同步的是文档快照。三者做跨局统计都要先转换。本阶段由 API 在结算与积分变动时直接写原始数据进 BigQuery，只负责存，统计与展示放到后续阶段。
 
@@ -26,5 +26,5 @@ GA4 的字段数与长度有上限、存的是事件格式；Firestore 只有累
 
 ## 后续事项
 
-- 上线前执行 `bash bigquery/create-tables.sh game_data` 建生产数据集，未建时写入只会报错日志。函数的运行时服务账号是项目 Editor，不用另开权限
-- 第 2 阶段：全体平均值的预先汇总、六边形图与综合评分、按时间段与难度的积分统计
+- 第 2 阶段：全体基准与六边形图，见 [phase-2-radar.md](phase-2-radar.md)
+- 积分排行榜：以积分记录为数据源，另开阶段

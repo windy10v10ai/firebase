@@ -2,11 +2,13 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 import { createIdTokenForSteamId } from './util/util-auth';
+import { getTestFirestore } from './util/util-firestore';
 import { get, initTest, post } from './util/util-http';
 import { createPlayer } from './util/util-player';
 
 const gameEndUrl = '/api/game/end';
 const recentUrl = (steamId: number) => `/api/player/${steamId}/stats/recent`;
+const radarUrl = (steamId: number) => `/api/player/${steamId}/stats/radar`;
 
 function createGameEndPayload(steamId: number, matchId: string) {
   return {
@@ -149,5 +151,33 @@ describe('PlayerStatsRecent (e2e)', () => {
     const response = await get(app, recentUrl(steamId)).expect(200);
 
     expect(response.body.matches).toEqual([]);
+  });
+
+  // 基准只能由定时任务查 BigQuery 生成，测试环境不连 BigQuery，只能直写
+  it('六边形接口按近期场次计数，局数不够时不返回图', async () => {
+    const steamId = 200001204;
+    await getTestFirestore()
+      .collection('StatsBaselines')
+      .doc('latest')
+      .set({
+        difficulties: {
+          '3': {
+            sampleCount: 500,
+            damage: 100,
+            gold: 300,
+            participation: 0.2,
+            survival: 0.1,
+            tank: 30,
+            push: 1,
+          },
+        },
+        updatedAt: new Date(),
+      });
+    await createPlayer(app, { steamId });
+    await post(app, gameEndUrl, createGameEndPayload(steamId, 'e2e-radar-1')).expect(201);
+
+    const response = await get(app, radarUrl(steamId)).expect(200);
+
+    expect(response.body).toEqual({ matchCount: 1, minMatchCount: 10, radar: null });
   });
 });

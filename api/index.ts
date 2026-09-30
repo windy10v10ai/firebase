@@ -1,3 +1,4 @@
+import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
@@ -7,8 +8,9 @@ import { onRequest } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/scheduler';
 
-import { AppModule } from './src/app.module';
 import { AfdianService } from './src/afdian/afdian.service';
+import { AppModule } from './src/app.module';
+import { PlayerStatsRadarService } from './src/player/player-stats-radar.service';
 import { SECRET } from './src/util/secret/secret.service';
 import { AppGlobalSettings } from './src/util/settings';
 
@@ -111,5 +113,37 @@ export const scheduledOrderCheck = onSchedule(
       logger.warn(`Active trade nos: ${result.activeTradeNos}`);
     }
     logger.info('Schedule function finished', result);
+  },
+);
+
+// 按频率分函数而不是按任务分，每天一次的任务都进这个列表，免得每加一项就多一个函数和调度任务
+const DAILY_JOBS: { name: string; run: (app: INestApplication) => Promise<unknown> }[] = [
+  { name: 'statsBaseline', run: (app) => app.get(PlayerStatsRadarService).refreshBaseline() },
+];
+
+export const dailyJobs = onSchedule(
+  {
+    schedule: 'every day 04:00',
+    timeZone: 'Asia/Shanghai',
+    region: 'asia-northeast1',
+    minInstances: 0,
+    maxInstances: 1,
+    timeoutSeconds: 540,
+    secrets: commonSecrets,
+  },
+  async () => {
+    const app = await promiseApplicationReady;
+    for (const job of DAILY_JOBS) {
+      // 一项失败不能挡住后面的任务
+      try {
+        const result = await job.run(app);
+        logger.info('Daily job finished', { job: job.name, result });
+      } catch (err) {
+        logger.error('Daily job failed', {
+          job: job.name,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
   },
 );
