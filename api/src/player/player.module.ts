@@ -11,11 +11,13 @@ import { PlayerSetting } from './entities/player-setting.entity';
 import { PlayerStatsLifetime } from './entities/player-stats-lifetime.entity';
 import { PlayerStatsRecent } from './entities/player-stats-recent.entity';
 import { Player } from './entities/player.entity';
+import { StatsBaseline } from './entities/stats-baseline.entity';
 import { PlayerConductService } from './player-conduct.service';
 import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
 import { PlayerStatsLifetimeService } from './player-stats-lifetime.service';
+import { PlayerStatsRadarService } from './player-stats-radar.service';
 import { PlayerStatsRecentService } from './player-stats-recent.service';
 import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
@@ -29,6 +31,7 @@ import { PlayerService } from './player.service';
       PlayerConduct,
       PlayerStatsLifetime,
       PlayerStatsRecent,
+      StatsBaseline,
     ]),
     AnalyticsModule,
     BigQueryModule,
@@ -42,6 +45,7 @@ import { PlayerService } from './player.service';
     PlayerConductService,
     PlayerStatsLifetimeService,
     PlayerStatsRecentService,
+    PlayerStatsRadarService,
     PlayerGamePresetService,
   ],
   exports: [
@@ -51,6 +55,7 @@ import { PlayerService } from './player.service';
     PlayerConductService,
     PlayerStatsLifetimeService,
     PlayerStatsRecentService,
+    PlayerStatsRadarService,
     PlayerGamePresetService,
   ],
 })
