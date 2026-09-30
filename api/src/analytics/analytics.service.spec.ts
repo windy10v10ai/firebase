@@ -1,5 +1,3 @@
-import { logger } from 'firebase-functions/v2';
-
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { AnalyticsService } from './analytics.service';
@@ -162,32 +160,5 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     expect(firstEvent.params.point_daily_task).toBe(80);
     expect(secondEvent.params.points).toBe(120);
     expect(secondEvent.params.point_daily_task).toBe(0);
-  });
-});
-
-describe('AnalyticsService 英雄表未收录的英雄', () => {
-  afterEach(() => jest.restoreAllMocks());
-
-  it('照常上报并记 warn，不抛错', async () => {
-    const service = new AnalyticsService(null);
-    const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
-    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
-    const gameEnd = buildGameEnd([buildPlayer({ heroName: 'npc_dota_hero_unknown' })]);
-
-    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.TEST);
-    await service.gameEndMatch(gameEnd, SERVER_TYPE.TEST);
-
-    const playerEvent = sendEventSpy.mock.calls[0][1] as unknown as {
-      params: { hero_name_cn: string };
-    };
-    const matchEvent = sendEventSpy.mock.calls[1][1] as unknown as {
-      params: { player_1: string };
-    };
-    expect(playerEvent.params.hero_name_cn).toBe('npc_dota_hero_unknown');
-    expect(JSON.parse(matchEvent.params.player_1).hi).toBe(0);
-    expect(warnSpy).toHaveBeenCalledWith(
-      '[Analytics] unknown hero name',
-      expect.objectContaining({ heroName: 'npc_dota_hero_unknown' }),
-    );
   });
 });

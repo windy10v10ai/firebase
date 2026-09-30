@@ -4,7 +4,7 @@ import { logger } from 'firebase-functions/v2';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { PurchaseEvent } from './analytics.purchase.service';
-import { FindHeroId, FindHeroNameChinese } from './data/hero-data';
+import { GetHeroId, GetHeroNameChinese } from './data/hero-data';
 import { GameEndDto as GameEndMatchDto, GameEndPlayerDto } from './dto/game-end-dto';
 
 export interface Event {
@@ -88,14 +88,6 @@ export class AnalyticsService {
         // 机器人不纳入互动时间统计
         const engagement_time_msec = player.steamId === 0 ? undefined : gameEnd.gameTimeMsec;
         const dailyTaskPoints = player.dailyTask?.seasonPoint ?? 0;
-        // 上报发生在积分与战绩落库之后，英雄表没收录的英雄不能让已完成的结算返回失败
-        const heroNameChinese = FindHeroNameChinese(player.heroName);
-        if (heroNameChinese === undefined) {
-          logger.warn('[Analytics] unknown hero name', {
-            heroName: player.heroName,
-            matchId: gameEnd.matchId,
-          });
-        }
 
         const event = await this.buildEvent(eventName, player.steamId, gameEnd.matchId, {
           steam_id: player.steamId,
@@ -108,7 +100,7 @@ export class AnalyticsService {
           win_metrics: gameEnd.winnerTeamId === player.teamId,
           team_id: player.teamId,
           hero_name: player.heroName,
-          hero_name_cn: heroNameChinese ?? player.heroName,
+          hero_name_cn: GetHeroNameChinese(player.heroName),
           // 包含行为分等奖励，不包含每日任务积分；每日任务积分单独统计
           points: player.battlePoints - dailyTaskPoints,
           point_daily_task: dailyTaskPoints,
@@ -181,7 +173,7 @@ export class AnalyticsService {
 
   private buildPlayerJson(player: GameEndPlayerDto) {
     const playerObject = {
-      hi: FindHeroId(player.heroName) ?? 0,
+      hi: GetHeroId(player.heroName),
       si: player.steamId,
       ti: player.teamId,
       dc: player.isDisconnected ? 1 : 0,

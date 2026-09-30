@@ -16,16 +16,6 @@ export function GetHeroId(heroName: string): number {
   return heroId;
 }
 
-/** 查英雄编号，查不到返回 undefined。 */
-export function FindHeroId(heroName: string): number | undefined {
-  return heroNameToIdMap.get(heroName);
-}
-
-/** 查英雄中文名，查不到返回 undefined。 */
-export function FindHeroNameChinese(heroName: string): string | undefined {
-  return heroNameToChineseMap.get(heroName);
-}
-
 export function GetHeroNameChinese(heroName: string): string {
   const heroNameChinese = heroNameToChineseMap.get(heroName);
   if (heroNameChinese === undefined) {
