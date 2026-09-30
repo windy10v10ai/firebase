@@ -111,10 +111,18 @@ export class GameService {
 
   /** 上报对局级 GA4 事件（整场与按玩家），与结算规则无关。 */
   async recordMatchAnalytics(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
-    await Promise.all([
-      this.analyticsService.gameEndMatch(gameEnd, serverType),
-      this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
-    ]);
+    // 结算已经落库，上报出错时向游戏返回失败只会引来重发，而重发会被冷却拒绝
+    try {
+      await Promise.all([
+        this.analyticsService.gameEndMatch(gameEnd, serverType),
+        this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+      ]);
+    } catch (err) {
+      logger.error('[Analytics] game end events failed', {
+        matchId: gameEnd.matchId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   /** 累计报文中每个玩家的生涯统计。 */
