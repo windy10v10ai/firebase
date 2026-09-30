@@ -1,0 +1,20 @@
+description: API 各接口的请求耗时，来自 client 函数的 Cloud Run 请求日志
+filter: resource.type="cloud_run_revision" AND resource.labels.service_name="client" AND log_id("run.googleapis.com/requests")
+valueExtractor: EXTRACT(httpRequest.latency)
+labelExtractors:
+  method: EXTRACT(httpRequest.requestMethod)
+  path: REGEXP_EXTRACT(httpRequest.requestUrl, "/api/((?:[a-z-]+/)*[a-z-]+)")
+  subpath: REGEXP_EXTRACT(httpRequest.requestUrl, "/api/[a-z/-]+/[0-9]+/([a-z/-]*[a-z-])")
+metricDescriptor:
+  metricKind: DELTA
+  valueType: DISTRIBUTION
+  unit: s
+  labels:
+  - key: method
+  - key: path
+  - key: subpath
+bucketOptions:
+  exponentialBuckets:
+    numFiniteBuckets: 64
+    growthFactor: 1.2
+    scale: 0.001

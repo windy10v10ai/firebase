@@ -129,8 +129,8 @@ export const dailyJobs = onSchedule(
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
-    // 定时函数允许的上限，只按实际运行时间计费，任务变多时不用再调
-    timeoutSeconds: 1800,
+    // SDK 把定时函数按事件函数校验，540 是能过部署的上限；只按实际运行时间计费，任务变多时不用再调
+    timeoutSeconds: 540,
     secrets: commonSecrets,
   },
   async () => {
