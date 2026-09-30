@@ -4,6 +4,8 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
+import { BigQueryService } from '../bigquery/bigquery.service';
+import { PointChangeSource } from '../bigquery/point-ledger-rows';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';
@@ -20,6 +22,7 @@ export class PlayerService {
     private readonly playerRepository: BaseFirestoreRepository<Player>,
     private readonly analyticsService: AnalyticsService,
     private readonly playerConductService: PlayerConductService,
+    private readonly bigQueryService: BigQueryService,
   ) {}
 
   /**
@@ -52,6 +55,7 @@ export class PlayerService {
     battlePoints: number,
     isDisconnect: boolean,
     calculateConductPoint: boolean,
+    gameId: string,
   ): Promise<void> {
     const normalizedPoints = this.normalizeBattlePoints(battlePoints);
     if (normalizedPoints !== battlePoints) {
@@ -87,6 +91,12 @@ export class PlayerService {
     }
 
     await this.playerRepository.update(player);
+    await this.bigQueryService.recordPointChange(
+      steamId,
+      { seasonPointTotal: normalizedPoints },
+      player,
+      { reason: 'game_end', ref: gameId },
+    );
   }
 
   // 仅供测试初始化使用，生产代码不应调用；matchCount 的正常变动走 upsertGameEnd。
@@ -134,7 +144,11 @@ export class PlayerService {
     return await this.playerRepository.update(player);
   }
 
-  async upsertAddPoint(steamId: number, updatePlayerDto: UpdatePlayerDto) {
+  async upsertAddPoint(
+    steamId: number,
+    updatePlayerDto: UpdatePlayerDto,
+    source: PointChangeSource,
+  ) {
     const player = await this.getOrNewPlayerBySteamId(steamId);
 
     if (updatePlayerDto.memberPointTotal) {
@@ -149,7 +163,9 @@ export class PlayerService {
     if (updatePlayerDto.usedSeasonPoint) {
       player.usedSeasonPoint = (player.usedSeasonPoint ?? 0) + updatePlayerDto.usedSeasonPoint;
     }
-    return await this.playerRepository.update(player);
+    const updated = await this.playerRepository.update(player);
+    await this.bigQueryService.recordPointChange(steamId, updatePlayerDto, player, source);
+    return updated;
   }
 
   async useMemberPoint(dto: UsePlayerMemberPointsDto, serverType: SERVER_TYPE): Promise<Player> {
@@ -170,6 +186,12 @@ export class PlayerService {
 
     player.usedMemberPoint = (player.usedMemberPoint ?? 0) + memberPoint;
     await this.playerRepository.update(player);
+    await this.bigQueryService.recordPointChange(
+      dto.steamId,
+      { usedMemberPoint: memberPoint },
+      player,
+      { reason: dto.reason },
+    );
     await this.analyticsService.playerUsePoint(
       dto.steamId,
       memberPoint,

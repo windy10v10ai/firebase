@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { BigQueryModule } from '../bigquery/bigquery.module';
 import { DailyTaskModule } from '../daily-task/daily-task.module';
 import { EventRewardsModule } from '../event-rewards/event-rewards.module';
 import { LocalHostModule } from '../local-host/local-host.module';
@@ -18,6 +19,7 @@ import { GameService } from './game.service';
     PlayerInfoModule,
     EventRewardsModule,
     AnalyticsModule,
+    BigQueryModule,
     DailyTaskModule,
     LocalHostModule,
   ],

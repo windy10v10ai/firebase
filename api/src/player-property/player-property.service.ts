@@ -146,7 +146,11 @@ export class PlayerPropertyService {
       if (useableMemberPoint < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.upsertAddPoint(steamId, { usedMemberPoint: cost });
+      await this.playerService.upsertAddPoint(
+        steamId,
+        { usedMemberPoint: cost },
+        { reason: RESET_PROPERTY_REASON },
+      );
       await this.analyticsService.playerUsePoint(
         steamId,
         cost,
@@ -160,7 +164,11 @@ export class PlayerPropertyService {
       if (useableSeasonPoint < cost) {
         throw new BadRequestException();
       }
-      await this.playerService.upsertAddPoint(steamId, { usedSeasonPoint: cost });
+      await this.playerService.upsertAddPoint(
+        steamId,
+        { usedSeasonPoint: cost },
+        { reason: RESET_PROPERTY_REASON },
+      );
       await this.analyticsService.playerUsePoint(
         steamId,
         cost,

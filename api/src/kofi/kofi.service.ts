@@ -148,17 +148,18 @@ export class KofiService {
     // 检查是否是首次订阅,如果是则额外获得1000积分
     const isFirstSubscription = kofi.isFirstSubscriptionPayment;
     if (isFirstSubscription) {
-      await this.playerService.upsertAddPoint(kofi.steamId, {
-        memberPointTotal: 1000,
-      });
+      await this.playerService.upsertAddPoint(
+        kofi.steamId,
+        { memberPointTotal: 1000 },
+        { reason: 'kofi_first_subscription', ref: kofi.kofiTransactionId },
+      );
     }
 
     // 创建会员
-    await this.membersService.createMember({
-      steamId: kofi.steamId,
-      month,
-      level: MemberLevel.PREMIUM,
-    });
+    await this.membersService.createMember(
+      { steamId: kofi.steamId, month, level: MemberLevel.PREMIUM },
+      { reason: 'kofi_member', ref: kofi.kofiTransactionId },
+    );
 
     return true;
   }
@@ -191,9 +192,11 @@ export class KofiService {
     }
 
     // 更新玩家积分
-    await this.playerService.upsertAddPoint(kofi.steamId, {
-      memberPointTotal: totalPoints,
-    });
+    await this.playerService.upsertAddPoint(
+      kofi.steamId,
+      { memberPointTotal: totalPoints },
+      { reason: 'kofi_points', ref: kofi.kofiTransactionId },
+    );
 
     return true;
   }

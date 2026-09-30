@@ -7,6 +7,7 @@ import {
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { PointChangeSource } from '../bigquery/point-ledger-rows';
 import { PlayerService } from '../player/player.service';
 
 import { CreateMemberDto } from './dto/create-member.dto';
@@ -38,7 +39,7 @@ export class MembersService {
     private readonly playerService: PlayerService,
   ) {}
 
-  async createMember(createMemberDto: CreateMemberDto) {
+  async createMember(createMemberDto: CreateMemberDto, source: PointChangeSource) {
     if (createMemberDto.month <= 0) {
       throw new BadRequestException('Month must be greater than 0');
     }
@@ -46,9 +47,11 @@ export class MembersService {
       createMemberDto.level == MemberLevel.NORMAL
         ? NORMAL_MEMBER_MONTHLY_POINT
         : PREMIUM_MEMBER_MONTHLY_POINT;
-    const player = await this.playerService.upsertAddPoint(createMemberDto.steamId, {
-      memberPointTotal: memberPointPerMonth * createMemberDto.month,
-    });
+    const player = await this.playerService.upsertAddPoint(
+      createMemberDto.steamId,
+      { memberPointTotal: memberPointPerMonth * createMemberDto.month },
+      source,
+    );
 
     const member =
       createMemberDto.level == MemberLevel.NORMAL
@@ -296,7 +299,11 @@ export class MembersService {
     const points = this.getCheckInPoints(member);
     const total = points.dailyPoint + points.catchUpPoint;
     if (total > 0) {
-      await this.playerService.upsertAddPoint(member.steamId, { memberPointTotal: total });
+      await this.playerService.upsertAddPoint(
+        member.steamId,
+        { memberPointTotal: total },
+        { reason: 'member_daily' },
+      );
       await this.updateMemberLastDailyDate(member);
     }
     return points;
