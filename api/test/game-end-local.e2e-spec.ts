@@ -158,23 +158,6 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect((await getPlayer(app, steamId)).seasonPointTotal).toBe(200);
   });
 
-  it('小数积分四舍五入后入账', async () => {
-    const steamId = 105620032;
-    mockDate('2026-08-16T01:00:00.000Z');
-    await createPlayer(app, { steamId });
-
-    const result = await postAsLocalHost(
-      app,
-      createGameEndLocalPayload({
-        matchId: '9100000032',
-        players: [{ steamId, battlePoints: 120.6 }],
-      }),
-    );
-
-    expect(result.status).toBe(201);
-    expect((await getPlayer(app, steamId)).seasonPointTotal).toBe(121);
-  });
-
   it('旧版游戏不带 playerCount：照常结算', async () => {
     const steamId = 105620021;
     mockDate('2026-08-16T01:00:00.000Z');

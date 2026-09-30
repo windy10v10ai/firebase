@@ -110,7 +110,7 @@ export class PlayerService {
     if (!Number.isFinite(battlePoints)) {
       return 0;
     }
-    return Math.min(MAX_BATTLE_POINTS_PER_MATCH, Math.max(0, Math.round(battlePoints)));
+    return Math.min(MAX_BATTLE_POINTS_PER_MATCH, Math.max(0, battlePoints));
   }
 
   async findBySteamId(steamId: number): Promise<Player> {
@@ -150,28 +150,21 @@ export class PlayerService {
     source: PointChangeSource,
   ) {
     const player = await this.getOrNewPlayerBySteamId(steamId);
-    // 积分只按整数入账，换算出来的积分可能带浮点误差；积分记录的变动量与余额也因此能逐行对上
-    const delta: UpdatePlayerDto = {
-      memberPointTotal: Math.round(updatePlayerDto.memberPointTotal ?? 0),
-      seasonPointTotal: Math.round(updatePlayerDto.seasonPointTotal ?? 0),
-      usedMemberPoint: Math.round(updatePlayerDto.usedMemberPoint ?? 0),
-      usedSeasonPoint: Math.round(updatePlayerDto.usedSeasonPoint ?? 0),
-    };
 
-    if (delta.memberPointTotal) {
-      player.memberPointTotal = (player.memberPointTotal ?? 0) + delta.memberPointTotal;
+    if (updatePlayerDto.memberPointTotal) {
+      player.memberPointTotal = (player.memberPointTotal ?? 0) + updatePlayerDto.memberPointTotal;
     }
-    if (delta.seasonPointTotal) {
-      player.seasonPointTotal = (player.seasonPointTotal ?? 0) + delta.seasonPointTotal;
+    if (updatePlayerDto.seasonPointTotal) {
+      player.seasonPointTotal = (player.seasonPointTotal ?? 0) + updatePlayerDto.seasonPointTotal;
     }
-    if (delta.usedMemberPoint) {
-      player.usedMemberPoint = (player.usedMemberPoint ?? 0) + delta.usedMemberPoint;
+    if (updatePlayerDto.usedMemberPoint) {
+      player.usedMemberPoint = (player.usedMemberPoint ?? 0) + updatePlayerDto.usedMemberPoint;
     }
-    if (delta.usedSeasonPoint) {
-      player.usedSeasonPoint = (player.usedSeasonPoint ?? 0) + delta.usedSeasonPoint;
+    if (updatePlayerDto.usedSeasonPoint) {
+      player.usedSeasonPoint = (player.usedSeasonPoint ?? 0) + updatePlayerDto.usedSeasonPoint;
     }
     const updated = await this.playerRepository.update(player);
-    await this.bigQueryService.recordPointChange(steamId, delta, player, source);
+    await this.bigQueryService.recordPointChange(steamId, updatePlayerDto, player, source);
     return updated;
   }
 
