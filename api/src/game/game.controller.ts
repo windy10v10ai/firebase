@@ -8,6 +8,7 @@ import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assemble
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
+import { timeStep } from '../util/request-timing';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
@@ -57,9 +58,9 @@ export class GameController {
     @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<string> {
     const context = createGameEndRecordContext(serverType, 'official');
-    await this.gameService.recordGameEnd(gameEnd, context.gameId);
-    await this.gameService.recordPlayerStats(gameEnd, context);
-    await this.gameService.recordMatchAnalytics(gameEnd, serverType);
+    await timeStep('recordGameEnd', () => this.gameService.recordGameEnd(gameEnd, context.gameId));
+    await timeStep('playerStats', () => this.gameService.recordPlayerStats(gameEnd, context));
+    await timeStep('ga4GameEnd', () => this.gameService.recordMatchAnalytics(gameEnd, serverType));
     return this.gameService.getOK();
   }
 
@@ -74,10 +75,14 @@ export class GameController {
     @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<string> {
     const context = createGameEndRecordContext(serverType, 'local');
-    const recorded = await this.localHostService.recordGameEnd(gameEnd, context.gameId, origin);
+    const recorded = await timeStep('recordGameEnd', () =>
+      this.localHostService.recordGameEnd(gameEnd, context.gameId, origin),
+    );
     if (recorded) {
-      await this.gameService.recordPlayerStats(gameEnd, context);
-      await this.gameService.recordMatchAnalytics(gameEnd, serverType);
+      await timeStep('playerStats', () => this.gameService.recordPlayerStats(gameEnd, context));
+      await timeStep('ga4GameEnd', () =>
+        this.gameService.recordMatchAnalytics(gameEnd, serverType),
+      );
     }
     return this.gameService.getOK();
   }

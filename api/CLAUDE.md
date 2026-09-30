@@ -66,6 +66,13 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - 改了 CORS、鉴权、响应格式这类会影响网站页面行为的东西，最终验证要在浏览器里实际操作页面，做法见 [web/CLAUDE.md](../web/CLAUDE.md) 的「浏览器验证」
 - **网站域名的 `/api` 转发驮着支付宝回调**：`ALIPAY_NOTIFY_URL` 指向 `windy10v10ai.com`，请求经 `web/next.config.ts` 的 rewrite 进函数。改那条 rewrite 的目的地要连收款一起验，入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
 
+## 分段计时
+
+要看某个接口内部哪一步慢，用 `timeStep(name, fn)`（[request-timing.ts](src/util/request-timing.ts)）包它的一级步骤，不接 OTel、不自己写计时日志。理由与查法见 [docs/api/README.md](../docs/api/README.md) 的「延迟监控」。
+
+- **只包一级步骤**，逐玩家的 `Promise.all` 整组包一次，不要包进循环里：日志按名字聚合，同名步骤重复出现就分不清是哪一次
+- **步骤名跨接口复用**：做同一件事的步骤在不同路由下用同一个名字（如三条结算路径都叫 `recordGameEnd`），路由已经在日志里区分
+
 ## 命名与文件名
 
 通用命名规则见根目录 [CLAUDE.md](../CLAUDE.md) 的「命名规范」。本目录额外遵守：
