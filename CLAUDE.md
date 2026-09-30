@@ -116,7 +116,7 @@
 |---|---|---|
 | `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 | [api/CLAUDE.md](api/CLAUDE.md) |
 | `web/` | Next.js 前端 | [web/CLAUDE.md](web/CLAUDE.md) |
-| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；每个改 `launcher/` 的 PR 都同时升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/README.md](launcher/README.md) |
+| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；每个改 `launcher/` 的 PR 都同时升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/CLAUDE.md](launcher/CLAUDE.md) |
 | `extensions/` | Firebase BigQuery export 配置 | — |
 
 ### 文档目录
@@ -254,7 +254,7 @@ feature/<issue-id>-<short-kebab-summary>
 
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
 
-1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md) 与 [web/CLAUDE.md](web/CLAUDE.md) 的「校验」一节
+1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md)、[web/CLAUDE.md](web/CLAUDE.md) 与 [launcher/CLAUDE.md](launcher/CLAUDE.md) 的「校验」一节
 2. 加载 design-docs 技能检查文档：本次改动带来的长期有效决定已写进 `docs/<模块>/README.md`；涉及的批次设计文档如已完成，已按技能瘦身。没有需要改的也要过一遍这一步
 3. `git push -u origin <branch-name>`
 4. `gh pr create`，base 为 `develop`，不需要审批的小改动也走这个流程。正文写法见下一节
