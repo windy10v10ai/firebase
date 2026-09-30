@@ -2,6 +2,7 @@
 // Built with the .NET Framework 4 compiler that ships with Windows, so the language level is C# 5.
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -14,8 +15,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.3.2.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.3.2.0")]
+[assembly: System.Reflection.AssemblyVersion("0.3.3.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.3.3.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -43,12 +44,13 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.3.2";
+        const string Version = "0.3.3";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
         const int SlowSeconds = 60;
         const int TimeoutSeconds = 180;
+        const int ErrorAccessDenied = 5;
 
         static readonly string[] MapKeys = { "dota", "hard", "custom" };
 
@@ -374,7 +376,8 @@ namespace Windy10v10AI.Launcher
                 {
                     UI(() => status.Text = Strings.ClosingDota);
                     foreach (var p in running) KillQuietly(p);
-                    foreach (var p in running) p.WaitForExit(15000);
+                    foreach (var p in running) WaitQuietly(p);
+                    if (DotaProcesses().Count > 0) throw new LaunchError(Strings.DotaNotClosed, false);
                     UI(() => status.Text = Strings.Starting);
                 }
 
@@ -385,7 +388,7 @@ namespace Windy10v10AI.Launcher
                 if (File.Exists(logFile)) File.Delete(logFile);
 
                 // Minimized, not hidden: hiding another process's window gets the launcher flagged as a trojan by Defender
-                server = Process.Start(new ProcessStartInfo
+                server = StartDota(new ProcessStartInfo
                 {
                     FileName = install.Exe,
                     WorkingDirectory = install.Game,
@@ -399,7 +402,7 @@ namespace Windy10v10AI.Launcher
                 WaitForMap(map);
 
                 // Launching the exe directly avoids Steam's confirmation dialog for custom launch arguments
-                Process.Start(new ProcessStartInfo
+                StartDota(new ProcessStartInfo
                 {
                     FileName = install.Exe,
                     WorkingDirectory = install.Game,
@@ -588,6 +591,31 @@ namespace Windy10v10AI.Launcher
             catch (Exception)
             {
                 // Already gone or not ours to kill; nothing else to do
+            }
+        }
+
+        static void WaitQuietly(Process process)
+        {
+            try
+            {
+                process.WaitForExit(15000);
+            }
+            catch (Exception)
+            {
+                // Not ours to wait on; nothing else to do
+            }
+        }
+
+        static Process StartDota(ProcessStartInfo info)
+        {
+            try
+            {
+                return Process.Start(info);
+            }
+            catch (Win32Exception error)
+            {
+                if (error.NativeErrorCode == ErrorAccessDenied) throw new LaunchError(Strings.DotaBlocked, false);
+                throw;
             }
         }
 
