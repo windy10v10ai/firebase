@@ -130,9 +130,25 @@ API 自己往外调的第三方服务：
 
 延迟都从日志里算，不接 OpenTelemetry / Cloud Trace。当前各接口 p99 都在一秒内，要回答的只是「哪个接口、哪一步慢」「上线前后变了没有」；OTel 在这个部署形态下拿不到 Firestore 的 gRPC 与内置 `fetch` 的子调用、响应后 CPU 限速会丢数据，还给每次冷启动加 150–300 ms。出现日志解释不了的慢问题再重新评估。
 
-- **接口级**：Cloud Run 给每个请求自动记一条 `run.googleapis.com/requests` 日志，带耗时与版本号。日志指标 `api_request_latency` 从中按接口、版本分组，看板[「API 延迟」](https://console.cloud.google.com/monitoring/dashboards/builder/a65b3812-85dd-49a6-911f-5c1ea58e0188?project=windy10v10ai)画 p50/p95/p99，部署前后的跳变看曲线或用顶部的版本号过滤器对比，不需要代码
-- **步骤级**：重点接口里的一级步骤用 `timeStep` 包起来，请求结束时写一条 `request timing` 日志（路由模板、总耗时、各步耗时）。只有包过步骤的请求才写，看板上用 Log Analytics 的 SQL 按「步骤 × 版本」算 p95。目前接入开局与三条结算路径，别的接口要查慢时再包
-- **能看多久**：`_Default` 日志桶保留 30 天，更早的版本无法对比
+- **接口级**：Cloud Run 给每个请求自动记一条 `run.googleapis.com/requests` 日志，带耗时与版本号，不需要代码。日志指标 `api_request_latency` 从中抽出按接口分组的耗时分布
+- **步骤级**：重点接口里的一级步骤用 `timeStep` 包起来，请求结束时写一条 `request timing` 日志（路由模板、总耗时、各步耗时）。只有包过步骤的请求才写。目前接入开局与三条结算路径，别的接口要查慢时再包
+- **能看多久**：`_Default` 日志桶保留 30 天，已开启 Log Analytics，可以用 SQL 查
+
+看板[「API 延迟」](https://console.cloud.google.com/monitoring/dashboards/builder/a65b3812-85dd-49a6-911f-5c1ea58e0188?project=windy10v10ai)从上到下：调用最多的接口（rpm）、延迟最高的接口（p50 与 p95 各一张）、开局与结算的各步骤耗时、各接口汇总表（错误率、次数、rpm、请求与耗时占比、p50/p95/p99、4xx/5xx）。代发路由并入原路由统计，选线与窗口的取值理由写在生成脚本里。另外两个口径：
+
+- **p50 代替平均值**：平均值会被冷启动这类单次离群拉高
+- **上线前后对比看部署时间点前后的曲线高度**：线图用固定窗口平滑，部署后的变化要过一个窗口才完全显现；汇总表与步骤图按看板时间范围统计，切到部署前后各一段即可
+
+看板配置不在控制台里手改，由 [api/scripts/monitoring/api-latency-dashboard.ts](../../api/scripts/monitoring/api-latency-dashboard.ts) 从映射表生成，新增代发路由或计时步骤时在那里的表里加一行，再在 `api/` 下同步：
+
+```bash
+ID=a65b3812-85dd-49a6-911f-5c1ea58e0188
+ETAG=$(gcloud monitoring dashboards describe $ID --project windy10v10ai --format='value(etag)')
+npx ts-node scripts/monitoring/api-latency-dashboard.ts "$ETAG" > /tmp/api-latency-dashboard.json
+gcloud monitoring dashboards update $ID --config-from-file=/tmp/api-latency-dashboard.json --project windy10v10ai
+```
+
+日志指标的定义存在同目录的 `api-request-latency.metric.yaml`，改了用 `gcloud logging metrics update api_request_latency --config-from-file=...` 同步。命令行查延迟的方法见 [debug-evidence](../../.claude/skills/debug-evidence/SKILL.md) 技能的「查延迟」。
 
 ## 一致性
 

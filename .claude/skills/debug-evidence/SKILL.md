@@ -1,6 +1,6 @@
 ---
 name: debug-evidence
-description: 排查本仓库的 bug 时加载——线上偶发故障、本地跑不通、登录链路异常。包含 Cloud Logging 生产日志的查询方式与日志字段形状、把两类日志对齐判读的方法、本地走真实 Steam 登录复现的做法，以及判断故障落在浏览器侧还是 API 侧的判据。
+description: 排查本仓库的 bug 时加载——线上偶发故障、本地跑不通、登录链路异常、接口变慢。包含 Cloud Logging 生产日志的查询方式与日志字段形状、把两类日志对齐判读的方法、本地走真实 Steam 登录复现的做法，以及判断故障落在浏览器侧还是 API 侧的判据，按接口、按处理步骤查延迟与部署后检查错误和性能的命令。
 ---
 
 # 排查证据从哪来
@@ -54,6 +54,50 @@ gcloud logging read 'httpRequest.requestUrl=~"路由片段"' --project windy10v1
 | 无 | 5xx | 后端抛了未捕获异常，查 `severity>=ERROR` |
 
 换登录态与刷新 token 要连 Google，这两条请求经本站域名转发出去（见 [docs/web/README.md](../../../docs/web/README.md) 的鉴权一节）。第一行那种形状优先怀疑这条转发链路。
+
+## 查延迟
+
+先看看板[「API 延迟」](https://console.cloud.google.com/monitoring/dashboards/builder/a65b3812-85dd-49a6-911f-5c1ea58e0188?project=windy10v10ai)，各图口径见 [docs/api/README.md](../../../docs/api/README.md) 的「延迟监控」。看板里的 Log Analytics SQL 没有可从命令行调用的接口，命令行只能用下面三种。
+
+**按接口、按版本的分位数**，读日志指标 `api_request_latency`（只有指标建立之后的数据）：
+
+```bash
+T=$(gcloud auth print-access-token)
+curl -s -G -H "Authorization: Bearer $T" "https://monitoring.googleapis.com/v3/projects/windy10v10ai/timeSeries"   --data-urlencode 'filter=metric.type="logging.googleapis.com/user/api_request_latency"'   --data-urlencode "interval.startTime=$(date -u -d '-60 min' +%Y-%m-%dT%H:%M:%SZ)"   --data-urlencode "interval.endTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)"   --data-urlencode "aggregation.alignmentPeriod=3600s" --data-urlencode "aggregation.perSeriesAligner=ALIGN_DELTA"   --data-urlencode "aggregation.crossSeriesReducer=REDUCE_PERCENTILE_95"   --data-urlencode "aggregation.groupByFields=metric.label.path"   --data-urlencode "aggregation.groupByFields=metric.label.subpath"   --data-urlencode "aggregation.groupByFields=resource.label.revision_name"
+```
+
+值的单位是秒。标签 `path` 是 `/api/` 之后、第一个纯数字段之前的部分，`subpath` 是数字段之后的部分，`GET /player/:steamId/info` 记为 `path=player`、`subpath=info`。代发路由在指标里仍是 `proxy/...`，没有合并。
+
+**某一步的耗时**，读分段计时日志。字段是 `jsonPayload.route`（路由模板）、`totalMs`、`steps`（`[{name, ms}]`，顺序即执行顺序）：
+
+```bash
+gcloud logging read 'jsonPayload.message="request timing"' --project windy10v10ai --freshness=1d --limit=2000 --format=json
+```
+
+只有包过 `timeStep` 的接口有这条日志。
+
+**指标建立之前、或要按请求明细分析**，直接拉请求日志的 `httpRequest.latency`，本地按路径归并后算分位数：
+
+```bash
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="client" AND log_id("run.googleapis.com/requests")'   --project windy10v10ai --freshness=1d --limit=20000   --format='csv[no-heading](timestamp,httpRequest.requestMethod,httpRequest.requestUrl,httpRequest.latency,httpRequest.status,resource.labels.revision_name)'
+```
+
+一小时约三千条，`--limit` 到上限时时间跨度会短于 `--freshness`，按实际首尾时间算。URL 里的 steamId 要先替换掉再分组。
+
+看板与日志指标的配置由 `api/scripts/monitoring/` 生成，改之前先向用户确认。
+
+### 部署后检查
+
+新版本名从部署完成后的 `gcloud run revisions list --service client --region asia-northeast1 --project windy10v10ai --limit 2` 取。先查错误，再查延迟，都按 `revision_name` 与上一个版本对比：
+
+```bash
+# 各版本的请求数按状态码分组；新版本 5xx 或 4xx 的比例明显高于旧版本就是回归
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="client" AND log_id("run.googleapis.com/requests") AND timestamp>="<部署完成时间>"'   --project windy10v10ai --limit 5000 --format='value(resource.labels.revision_name,httpRequest.status)' | awk '{print $1, substr($2,1,1)"xx"}' | sort | uniq -c
+# 未捕获异常与 logger.error
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="client" AND severity>=ERROR AND timestamp>="<部署完成时间>"'   --project windy10v10ai --limit 50 --format='value(timestamp,resource.labels.revision_name,jsonPayload.message,textPayload)'
+```
+
+延迟用上面第一条命令把 `interval` 设成部署后的时段、按 `revision_name` 分组，与部署前同样长度的时段比较。冷启动会拉高新版本前几分钟的分位数，部署后至少等十五分钟再下结论；流量随时段起伏，比较时两边的请求量要接近。新接口或改过的接口还要确认它的请求确实到了新版本、状态码符合预期，分段计时日志也在写。
 
 ## 本地复现真实 Steam 登录链路
 
