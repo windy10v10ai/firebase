@@ -18,6 +18,7 @@ import { Public } from '../util/auth/public.decorator';
 
 import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { PlayerRankDto, PlayerRankingDto } from './dto/player-ranking.dto';
+import { PlayerStatsRadarResponse } from './dto/player-stats-radar.response';
 import { PlayerStatsRecentResponse } from './dto/player-stats-recent.response';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
@@ -27,6 +28,7 @@ import { PlayerConductService } from './player-conduct.service';
 import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
 import { PlayerSettingService } from './player-setting.service';
+import { PlayerStatsRadarService } from './player-stats-radar.service';
 import { PlayerStatsRecentService, RECENT_MATCH_LIMIT } from './player-stats-recent.service';
 import { PlayerService } from './player.service';
 
@@ -40,6 +42,7 @@ export class PlayerController {
     private readonly playerConductService: PlayerConductService,
     private readonly playerGamePresetService: PlayerGamePresetService,
     private readonly playerStatsRecentService: PlayerStatsRecentService,
+    private readonly playerStatsRadarService: PlayerStatsRadarService,
   ) {}
 
   // 榜单一天只变一次、人人看到的都一样，允许浏览器缓存
@@ -70,6 +73,15 @@ export class PlayerController {
     // Firestore 只能整份取，limit 省的是这一跳到浏览器的字节
     const take = Math.min(Math.max(limit, 1), RECENT_MATCH_LIMIT);
     return { matches: (stats?.matches ?? []).slice(0, take) };
+  }
+
+  @AllowWeb()
+  @Get(':steamId/stats/radar')
+  @ApiOperation({ summary: 'Get radar chart scores compared with the difficulty baseline' })
+  getStatsRadar(
+    @Param('steamId', ParseIntPipe) steamId: number,
+  ): Promise<PlayerStatsRadarResponse> {
+    return this.playerStatsRadarService.getRadar(steamId);
   }
 
   @Get(':id/setting')
