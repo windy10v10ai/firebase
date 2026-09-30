@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -14,6 +15,8 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+
+import { HERO_NAMES } from '../data/hero-data';
 
 import { EventBaseDto } from './event-base-dto';
 
@@ -59,7 +62,9 @@ export class DailyTaskResultDto {
 const ITEM_NAME_MAX_LENGTH = 64;
 
 export class GameEndPlayerDto {
+  // 英雄名随游戏端同步更新，查不到说明报文有误，要在写入任何结算数据之前拒绝
   @ApiProperty({ default: 'npc_dota_hero_abaddon' })
+  @IsIn(HERO_NAMES, { message: 'heroName must be a known hero' })
   heroName: string;
   @ApiProperty()
   steamId: number;

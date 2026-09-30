@@ -156,6 +156,8 @@ const heroNameToIdMap = new Map<string, number>([
   ['npc_dota_hero_largo', 127],
 ]);
 
+export const HERO_NAMES: readonly string[] = [...heroNameToIdMap.keys()];
+
 const heroNameToChineseMap = new Map<string, string>([
   ['npc_dota_hero_abaddon', '亚巴顿'],
   ['npc_dota_hero_alchemist', '炼金术士'],
