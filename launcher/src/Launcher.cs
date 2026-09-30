@@ -50,6 +50,7 @@ namespace Windy10v10AI.Launcher
         const int Port = 27015;
         const int SlowSeconds = 60;
         const int TimeoutSeconds = 180;
+        const int ErrorAccessDenied = 5;
 
         static readonly string[] MapKeys = { "dota", "hard", "custom" };
 
@@ -601,7 +602,7 @@ namespace Windy10v10AI.Launcher
             }
             catch (Exception)
             {
-                // A Dota started with higher privileges cannot be waited on; the caller rechecks whether it is still running
+                // Not ours to wait on; nothing else to do
             }
         }
 
@@ -613,8 +614,7 @@ namespace Windy10v10AI.Launcher
             }
             catch (Win32Exception error)
             {
-                // Access denied when starting Dota comes from security software blocking the launch, and the raw message tells players nothing
-                if (error.NativeErrorCode == 5) throw new LaunchError(Strings.DotaBlocked, false);
+                if (error.NativeErrorCode == ErrorAccessDenied) throw new LaunchError(Strings.DotaBlocked, false);
                 throw;
             }
         }
