@@ -25,19 +25,27 @@ function collectInvalidFields(errors: ValidationError[], prefix = ''): string[] 
 }
 
 // 游戏服务器只知道请求失败，看不到原因；不在后端记一笔，报文哪个字段不合格就无从查起
+export function logValidationFailure(
+  errors: ValidationError[],
+  context: Record<string, unknown> = {},
+): void {
+  const target = errors[0]?.target as { version?: unknown; players?: unknown } | undefined;
+  const steamIds = Array.isArray(target?.players)
+    ? target.players.map((player) => player?.steamId).filter((steamId) => steamId > 0)
+    : undefined;
+  logger.warn('request validation failed', {
+    ...context,
+    fields: collectInvalidFields(errors),
+    version: target?.version,
+    steamIds,
+  });
+}
+
 class LoggedValidationPipe extends ValidationPipe {
   createExceptionFactory() {
     const createException = super.createExceptionFactory();
     return (errors: ValidationError[]) => {
-      const target = errors[0]?.target as { version?: unknown; players?: unknown } | undefined;
-      const steamIds = Array.isArray(target?.players)
-        ? target.players.map((player) => player?.steamId).filter((steamId) => steamId > 0)
-        : undefined;
-      logger.warn('request validation failed', {
-        fields: collectInvalidFields(errors),
-        version: target?.version,
-        steamIds,
-      });
+      logValidationFailure(errors);
       return createException(errors);
     };
   }

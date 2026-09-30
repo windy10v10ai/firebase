@@ -387,11 +387,14 @@ describe('AlipayService', () => {
       const result = await service.handleWebhook(buildNotify());
 
       expect(result).toBe('success');
-      expect(membersService.createMember).toHaveBeenCalledWith({
-        steamId: 123,
-        month: 1,
-        level: MemberLevel.PREMIUM,
-      });
+      expect(membersService.createMember).toHaveBeenCalledWith(
+        {
+          steamId: 123,
+          month: 1,
+          level: MemberLevel.PREMIUM,
+        },
+        { reason: 'alipay_member', ref: expect.any(String) },
+      );
       expect(playerService.upsertAddPoint).not.toHaveBeenCalled();
     });
 
@@ -405,11 +408,14 @@ describe('AlipayService', () => {
 
       await service.handleWebhook(buildNotify({ total_amount: '80.40' }));
 
-      expect(membersService.createMember).toHaveBeenCalledWith({
-        steamId: 123,
-        month: 3,
-        level: MemberLevel.PREMIUM,
-      });
+      expect(membersService.createMember).toHaveBeenCalledWith(
+        {
+          steamId: 123,
+          month: 3,
+          level: MemberLevel.PREMIUM,
+        },
+        { reason: 'alipay_member', ref: expect.any(String) },
+      );
     });
 
     it('积分订单：调 upsertAddPoint(reward.points * quantity)', async () => {
@@ -422,9 +428,13 @@ describe('AlipayService', () => {
 
       await service.handleWebhook(buildNotify({ total_amount: '156.00' }));
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(123, {
-        memberPointTotal: 8000, // 4000 * 2
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        123,
+        {
+          memberPointTotal: 8000, // 4000 * 2
+        },
+        { reason: 'alipay_points', ref: expect.any(String) },
+      );
       expect(membersService.createMember).not.toHaveBeenCalled();
     });
 
@@ -443,6 +453,7 @@ describe('AlipayService', () => {
         expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
           123,
           expect.objectContaining({ memberPointTotal: points }),
+          expect.objectContaining({ reason: 'alipay_points' }),
         );
       },
     );

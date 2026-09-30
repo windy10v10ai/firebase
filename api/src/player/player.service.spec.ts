@@ -10,12 +10,14 @@ describe('PlayerService', () => {
     };
     const analyticsService = {};
     const playerConductService = {};
+    const bigQueryService = { recordPointChange: jest.fn() };
     const service = new PlayerService(
       playerRepository as never,
       analyticsService as never,
       playerConductService as never,
+      bigQueryService as never,
     );
-    return { service, playerRepository };
+    return { service, playerRepository, bigQueryService };
   }
 
   describe('normalizeBattlePoints', () => {
@@ -35,18 +37,24 @@ describe('PlayerService', () => {
   });
 
   describe('upsertGameEnd', () => {
-    it('adds normalized battle points to the player', async () => {
-      const { service, playerRepository } = createService({
+    it('adds normalized battle points to the player and records them in the point history', async () => {
+      const { service, playerRepository, bigQueryService } = createService({
         matchCount: 0,
         winCount: 0,
         disconnectCount: 0,
         seasonPointTotal: 1_000,
       });
 
-      await service.upsertGameEnd(steamId, false, 580, false, false);
+      await service.upsertGameEnd(steamId, false, 580, false, false, 'game-id');
 
       const savedPlayer = playerRepository.update.mock.calls[0][0];
       expect(savedPlayer.seasonPointTotal).toBe(1_500);
+      expect(bigQueryService.recordPointChange).toHaveBeenCalledWith(
+        steamId,
+        { seasonPointTotal: 500 },
+        savedPlayer,
+        { reason: 'game_end', ref: 'game-id' },
+      );
     });
   });
 
@@ -59,7 +67,7 @@ describe('PlayerService', () => {
         conductPoint: 80,
       });
 
-      await service.upsertGameEnd(steamId, true, 300, false, false);
+      await service.upsertGameEnd(steamId, true, 300, false, false, 'game-id');
 
       const savedPlayer = playerRepository.update.mock.calls[0][0];
       expect(savedPlayer.seasonPointTotal).toBe(1_300);
@@ -75,7 +83,7 @@ describe('PlayerService', () => {
         disconnectCount: 1,
       });
 
-      await service.upsertGameEnd(steamId, false, 0, true, false);
+      await service.upsertGameEnd(steamId, false, 0, true, false, 'game-id');
 
       const savedPlayer = playerRepository.update.mock.calls[0][0];
       expect(savedPlayer.matchCount).toBe(21);
@@ -86,7 +94,7 @@ describe('PlayerService', () => {
     it('玩家不存在时直接返回，不调用 update', async () => {
       const { service, playerRepository } = createService(null);
 
-      await service.upsertGameEnd(steamId, true, 300, false, false);
+      await service.upsertGameEnd(steamId, true, 300, false, false, 'game-id');
 
       expect(playerRepository.update).not.toHaveBeenCalled();
     });
