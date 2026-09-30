@@ -1,8 +1,8 @@
 import { Player } from '../player/entities/player.entity';
 
-import { buildPointLedgerRows } from './point-ledger-rows';
+import { buildPointHistoryRows } from './point-history-rows';
 
-describe('buildPointLedgerRows', () => {
+describe('buildPointHistoryRows', () => {
   const createdAt = new Date('2026-09-30T00:00:00Z');
   const after = {
     seasonPointTotal: 1_500,
@@ -11,8 +11,8 @@ describe('buildPointLedgerRows', () => {
     usedMemberPoint: 1_000,
   } as Player;
 
-  it('每个有变动的字段一行，余额取对应积分类型的累计与已用', () => {
-    const rows = buildPointLedgerRows(
+  it('每种有变动的积分一行，获得与花掉分列，余额取写入后的累计与已用', () => {
+    const rows = buildPointHistoryRows(
       123,
       { memberPointTotal: 1_000, usedSeasonPoint: 200, seasonPointTotal: 0 },
       after,
@@ -25,8 +25,8 @@ describe('buildPointLedgerRows', () => {
         created_at: '2026-09-30T00:00:00.000Z',
         steam_id: 123,
         point_type: 'battle',
-        field: 'used',
-        delta: 200,
+        added: 0,
+        used: 200,
         total_after: 1_500,
         used_after: 200,
         reason: 'kofi_points',
@@ -36,8 +36,8 @@ describe('buildPointLedgerRows', () => {
         created_at: '2026-09-30T00:00:00.000Z',
         steam_id: 123,
         point_type: 'member',
-        field: 'total',
-        delta: 1_000,
+        added: 1_000,
+        used: 0,
         total_after: 3_000,
         used_after: 1_000,
         reason: 'kofi_points',

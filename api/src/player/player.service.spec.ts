@@ -37,7 +37,7 @@ describe('PlayerService', () => {
   });
 
   describe('upsertGameEnd', () => {
-    it('adds normalized battle points to the player and records them in the ledger', async () => {
+    it('adds normalized battle points to the player and records them in the point history', async () => {
       const { service, playerRepository, bigQueryService } = createService({
         matchCount: 0,
         winCount: 0,

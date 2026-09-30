@@ -7,7 +7,7 @@ import {
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { PointChangeSource } from '../bigquery/point-ledger-rows';
+import { PointChangeSource } from '../bigquery/point-history-rows';
 import { PlayerService } from '../player/player.service';
 
 import { CreateMemberDto } from './dto/create-member.dto';

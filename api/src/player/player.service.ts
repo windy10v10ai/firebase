@@ -5,7 +5,7 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { AnalyticsService } from '../analytics/analytics.service';
 import { BigQueryService } from '../bigquery/bigquery.service';
-import { PointChangeSource } from '../bigquery/point-ledger-rows';
+import { PointChangeSource } from '../bigquery/point-history-rows';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { UpdatePlayerDto } from './dto/update-player.dto';

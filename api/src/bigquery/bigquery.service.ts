@@ -7,11 +7,11 @@ import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
 
 import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
-import { PointChangeSource, buildPointLedgerRows } from './point-ledger-rows';
+import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
 
 const BIGQUERY_PROJECT_ID = 'windy10v10ai';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
-const POINT_LEDGER_TABLE = 'point_ledger';
+const POINT_HISTORY_TABLE = 'point_history';
 
 @Injectable()
 export class BigQueryService {
@@ -23,7 +23,7 @@ export class BigQueryService {
     await this.insert(GAME_END_PLAYERS_TABLE, buildGameEndRows(gameEnd, context, new Date()));
   }
 
-  /** 把一次积分变动写入积分流水表。 */
+  /** 把一次积分变动写入积分记录表。 */
   async recordPointChange(
     steamId: number,
     delta: UpdatePlayerDto,
@@ -31,8 +31,8 @@ export class BigQueryService {
     source: PointChangeSource,
   ): Promise<void> {
     await this.insert(
-      POINT_LEDGER_TABLE,
-      buildPointLedgerRows(steamId, delta, after, source, new Date()),
+      POINT_HISTORY_TABLE,
+      buildPointHistoryRows(steamId, delta, after, source, new Date()),
     );
   }
 

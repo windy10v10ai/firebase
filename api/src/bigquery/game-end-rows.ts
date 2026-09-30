@@ -11,7 +11,7 @@ export interface GameEndRecordContext {
   route: GameEndRoute;
 }
 
-/** 每次结算生成一个 gameId，同一次结算的战绩行与积分流水共用它。 */
+/** 每次结算生成一个 gameId，同一次结算的战绩行与积分记录共用它。 */
 export function createGameEndRecordContext(
   serverType: SERVER_TYPE,
   route: GameEndRoute,

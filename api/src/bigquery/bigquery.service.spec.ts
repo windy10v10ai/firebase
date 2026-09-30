@@ -24,15 +24,17 @@ describe('BigQueryService', () => {
 
   const after = { seasonPointTotal: 100, memberPointTotal: 0 } as Player;
 
-  it('写入配置的数据集与积分流水表', async () => {
+  it('写入配置的数据集与积分记录表', async () => {
     const insert = jest.fn().mockResolvedValue([{}]);
     const { service, dataset, table } = createService(insert);
 
     await service.recordPointChange(1, { seasonPointTotal: 100 }, after, { reason: 'game_end' });
 
     expect(dataset).toHaveBeenCalledWith('game_data_dev');
-    expect(table).toHaveBeenCalledWith('point_ledger');
-    expect(insert).toHaveBeenCalledWith([expect.objectContaining({ steam_id: 1, delta: 100 })]);
+    expect(table).toHaveBeenCalledWith('point_history');
+    expect(insert).toHaveBeenCalledWith([
+      expect.objectContaining({ steam_id: 1, added: 100, used: 0 }),
+    ]);
   });
 
   it('写入失败只记日志，不向调用方抛错', async () => {
@@ -45,7 +47,7 @@ describe('BigQueryService', () => {
     ).resolves.toBeUndefined();
     expect(errorSpy).toHaveBeenCalledWith(
       '[BigQuery] insert failed',
-      expect.objectContaining({ tableId: 'point_ledger', error: 'boom' }),
+      expect.objectContaining({ tableId: 'point_history', error: 'boom' }),
     );
   });
 
