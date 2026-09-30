@@ -45,4 +45,16 @@ describe('buildPointHistoryRows', () => {
       },
     ]);
   });
+
+  it('小数积分取整后写入，避免整行被 INT64 列拒绝', () => {
+    const [row] = buildPointHistoryRows(
+      123,
+      { seasonPointTotal: 120.6 },
+      { seasonPointTotal: 1_120.6 } as Player,
+      { reason: 'game_end' },
+      createdAt,
+    );
+
+    expect(row).toMatchObject({ added: 121, total_after: 1_121, used: 0, used_after: 0 });
+  });
 });

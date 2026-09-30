@@ -12,7 +12,7 @@ import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
 const BIGQUERY_PROJECT_ID = 'windy10v10ai';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
 const POINT_HISTORY_TABLE = 'point_history';
-// 支付回调发奖之后才把订单标成已处理，写入卡到函数超时会让平台重发回调、重复发奖，所以上限要远小于函数超时
+// 分析写入不能拖住业务请求直到函数超时，上限要远小于函数超时
 const INSERT_TIMEOUT_MS = 2000;
 
 @Injectable()
