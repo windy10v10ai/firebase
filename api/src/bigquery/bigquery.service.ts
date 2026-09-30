@@ -12,6 +12,8 @@ import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
 const BIGQUERY_PROJECT_ID = 'windy10v10ai';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
 const POINT_HISTORY_TABLE = 'point_history';
+// 支付回调发奖之后才把订单标成已处理，写入卡到函数超时会让平台重发回调、重复发奖，所以上限要远小于函数超时
+const INSERT_TIMEOUT_MS = 2000;
 
 @Injectable()
 export class BigQueryService {
@@ -42,8 +44,18 @@ export class BigQueryService {
       return;
     }
 
+    let timer: NodeJS.Timeout | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`timed out after ${INSERT_TIMEOUT_MS} ms`)),
+        INSERT_TIMEOUT_MS,
+      );
+    });
     try {
-      await this.client.dataset(this.datasetId).table(tableId).insert(rows);
+      await Promise.race([
+        this.client.dataset(this.datasetId).table(tableId).insert(rows),
+        timeout,
+      ]);
     } catch (err) {
       logger.error('[BigQuery] insert failed', {
         tableId,
@@ -52,6 +64,8 @@ export class BigQueryService {
         // 部分失败时 SDK 把每行的原因放在 errors 里，只有 message 看不出是哪一列不合法
         rowErrors: JSON.stringify((err as { errors?: unknown }).errors ?? []).slice(0, 2000),
       });
+    } finally {
+      clearTimeout(timer);
     }
   }
 }

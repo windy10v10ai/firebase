@@ -51,6 +51,24 @@ describe('BigQueryService', () => {
     );
   });
 
+  it('写入卡住时 2 秒后放弃，只记日志', async () => {
+    jest.useFakeTimers();
+    const { service } = createService(jest.fn().mockReturnValue(new Promise(() => undefined)));
+    const errorSpy = jest.spyOn(logger, 'error').mockImplementation(() => undefined);
+
+    const pending = service.recordPointChange(1, { seasonPointTotal: 100 }, after, {
+      reason: 'game_end',
+    });
+    await jest.advanceTimersByTimeAsync(2000);
+
+    await expect(pending).resolves.toBeUndefined();
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[BigQuery] insert failed',
+      expect.objectContaining({ error: 'timed out after 2000 ms' }),
+    );
+    jest.useRealTimers();
+  });
+
   it('没有配置数据集时不写入', async () => {
     const insert = jest.fn();
     const { service } = createService(insert);
