@@ -123,12 +123,14 @@ const DAILY_JOBS: { name: string; run: (app: INestApplication) => Promise<unknow
 
 export const dailyJobs = onSchedule(
   {
-    schedule: 'every day 04:00',
-    timeZone: 'Asia/Shanghai',
+    // 与每日任务、排行榜的换日时刻对齐，按天切分的汇总都以 UTC 日为界
+    schedule: 'every day 00:00',
+    timeZone: 'Etc/UTC',
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 1,
-    timeoutSeconds: 540,
+    // 定时函数允许的上限，只按实际运行时间计费，任务变多时不用再调
+    timeoutSeconds: 1800,
     secrets: commonSecrets,
   },
   async () => {
