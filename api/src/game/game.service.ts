@@ -14,6 +14,7 @@ import { PlayerStatsRecentService } from '../player/player-stats-recent.service'
 import { PlayerService } from '../player/player.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoService } from '../player-info/player-info.service';
+import { timeStep } from '../util/request-timing';
 import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.service';
 
 import { GA4ConfigDto } from './dto/ga4-config.dto';
@@ -50,26 +51,38 @@ export class GameService {
     const pointInfo: PointInfoDto[] = [];
 
     // 创建新玩家，更新最后游戏时间
-    await Promise.all(steamIds.map((steamId) => this.upsertPlayerInfo(steamId)));
+    await timeStep('upsertPlayers', () =>
+      Promise.all(steamIds.map((steamId) => this.upsertPlayerInfo(steamId))),
+    );
 
     // 获取活动奖励
-    const eventRewardInfo = await this.giveEventReward(steamIds, serverType);
+    const eventRewardInfo = await timeStep('eventReward', () =>
+      this.giveEventReward(steamIds, serverType),
+    );
     pointInfo.push(...eventRewardInfo);
 
     // 获取会员 添加每日会员积分
-    const members = await this.membersService.findBySteamIds(steamIds);
+    const members = await timeStep('findMembers', () =>
+      this.membersService.findBySteamIds(steamIds),
+    );
     // 添加每日会员积分
-    const memberDailyPointInfo = await this.addDailyMemberPoints(members);
+    const memberDailyPointInfo = await timeStep('memberDailyPoints', () =>
+      this.addDailyMemberPoints(members),
+    );
     pointInfo.push(...memberDailyPointInfo);
 
     // ----------------- 以下为统计数据 -----------------
     // 统计数据发送至GA4
     const isLocal = serverType === SERVER_TYPE.LOCAL;
-    await this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType, version);
+    await timeStep('ga4GameStart', () =>
+      this.analyticsService.gameStart(steamIds, matchId, isLocal, serverType, version),
+    );
 
     // ----------------- 以下为返回数据 -----------------
     const steamIdsStr = steamIds.map((id) => id.toString());
-    const players = await this.playerInfoService.findPlayerInfoBySteamIds(steamIdsStr, include);
+    const players = await timeStep('playerInfo', () =>
+      this.playerInfoService.findPlayerInfoBySteamIds(steamIdsStr, include),
+    );
 
     // 构建响应对象
     const response: GameStart = {
@@ -77,7 +90,9 @@ export class GameService {
       pointInfo,
     };
 
-    const dailyTasks = await this.dailyTaskService.getSnapshots(steamIds);
+    const dailyTasks = await timeStep('dailyTasks', () =>
+      this.dailyTaskService.getSnapshots(steamIds),
+    );
     if (dailyTasks.length > 0) {
       response.dailyTasks = dailyTasks;
     }

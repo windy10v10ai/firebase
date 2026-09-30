@@ -109,6 +109,14 @@ API 自己往外调的第三方服务：
 - **Firestore 没有服务端 GROUP BY**，聚合只能把文档全拉到内存里算，读次数随数据量线性涨。需要真聚合的场景同样走预聚合，不要留全表扫描的接口
 - **不要调 `cpu` 与 `concurrency`**。`concurrency > 1` 要求 `cpu ≥ 1`；把 `cpu` 降到 1 以下会强制 `concurrency = 1`，I/O 密集场景下反而更贵。`api/index.ts` 用的是默认值（1 vCPU、并发 80），多个等 I/O 的请求共享同一个实例的计费，对这类负载就是最优解
 
+### 延迟监控
+
+延迟都从日志里算，不接 OpenTelemetry / Cloud Trace。当前各接口 p99 都在一秒内，要回答的只是「哪个接口、哪一步慢」「上线前后变了没有」；OTel 在这个部署形态下拿不到 Firestore 的 gRPC 与内置 `fetch` 的子调用、响应后 CPU 限速会丢数据，还给每次冷启动加 150–300 ms。出现日志解释不了的慢问题再重新评估。
+
+- **接口级**：Cloud Run 给每个请求自动记一条 `run.googleapis.com/requests` 日志，带耗时与版本号。日志指标 `api_request_latency` 从中按接口、版本分组，看板[「API 延迟」](https://console.cloud.google.com/monitoring/dashboards/builder/a65b3812-85dd-49a6-911f-5c1ea58e0188?project=windy10v10ai)画 p50/p95/p99，部署前后的跳变看曲线或用顶部的版本号过滤器对比，不需要代码
+- **步骤级**：重点接口里的一级步骤用 `timeStep` 包起来，请求结束时写一条 `request timing` 日志（路由模板、总耗时、各步耗时）。只有包过步骤的请求才写，看板上用 Log Analytics 的 SQL 按「步骤 × 版本」算 p95。目前接入开局与三条结算路径，别的接口要查慢时再包
+- **能看多久**：`_Default` 日志桶保留 30 天，更早的版本无法对比
+
 ## 一致性
 
 系统对两类数据给的保证不一样，这是有意的。

@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { logger } from 'firebase-functions';
 
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 
@@ -64,9 +65,19 @@ describe('decodeProxyBody', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
-  it('玩家字段校验不通过（负数）抛 BadRequestException', async () => {
+  it('玩家字段校验不通过（负数）抛 BadRequestException，并记下不合格的字段', async () => {
+    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
     await expect(
       decodeProxyBody(GameEndDto, encode({ ...BASE, players: [{ ...player, kills: -1 }] })),
     ).rejects.toThrow(BadRequestException);
+
+    expect(warnSpy).toHaveBeenCalledWith('request validation failed', {
+      proxyDto: 'GameEndDto',
+      fields: ['players.0.kills'],
+      version: 'v1',
+      steamIds: [1001],
+    });
+    warnSpy.mockRestore();
   });
 });
