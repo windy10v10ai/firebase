@@ -33,6 +33,7 @@ import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { AllowQueryKey } from '../util/auth/allow-query-key.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
+import { timeStep } from '../util/request-timing';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { ProxyExceptionFilter } from './proxy-exception.filter';
@@ -150,10 +151,14 @@ export class ProxyController {
     if (gameEnd.players.length !== 1) {
       throw new BadRequestException();
     }
-    const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
+    const recorded = await timeStep('recordGameEnd', () =>
+      this.localHostService.recordGameEnd(gameEnd, origin),
+    );
     if (recorded) {
-      await this.gameService.recordPlayerStats(gameEnd);
-      await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
+      await timeStep('playerStats', () => this.gameService.recordPlayerStats(gameEnd));
+      await timeStep('ga4GameEnd', () =>
+        this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+      );
     }
     return buildProxySuccessHtml(requestId, { recorded });
   }

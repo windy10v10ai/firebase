@@ -3,6 +3,8 @@ import { Reflector } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
 import { logger } from 'firebase-functions';
 
+import { requestTimingMiddleware } from './request-timing';
+
 // 网站页面可能出现的来源。既是 CORS 白名单，也是 Steam 回调地址的白名单——能调 API 的
 // 站点和能承载登录页的站点是同一批。游戏客户端的请求不带 Origin，cors 中间件原样放过
 export const SITE_ORIGIN_WHITELIST = [
@@ -42,6 +44,7 @@ class LoggedValidationPipe extends ValidationPipe {
 }
 
 export function AppGlobalSettings(app: INestApplication) {
+  app.use(requestTimingMiddleware);
   app.enableCors({
     origin: SITE_ORIGIN_WHITELIST,
     allowedHeaders: ['Authorization', 'Content-Type'],
