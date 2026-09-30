@@ -63,9 +63,13 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 8000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedSeasonPoint: 8000,
+        },
+        { reason: 'hero_awakening' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         8000,
@@ -83,9 +87,13 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, true, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedMemberPoint: 4000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedMemberPoint: 4000,
+        },
+        { reason: 'hero_awakening' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         4000,
@@ -162,9 +170,13 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 4000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedSeasonPoint: 4000,
+        },
+        { reason: 'hero_awakening_random' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         4000,
@@ -187,9 +199,13 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, true, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedMemberPoint: 2000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedMemberPoint: 2000,
+        },
+        { reason: 'hero_awakening_random' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         2000,
@@ -212,9 +228,13 @@ describe('PlayerHeroAwakeningService', () => {
 
       await service.awaken(steamId, validHeroName, false, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 8000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedSeasonPoint: 8000,
+        },
+        { reason: 'hero_awakening' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         8000,

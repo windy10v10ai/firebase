@@ -2,6 +2,7 @@ import { Body, Controller, Get, ParseArrayPipe, ParseIntPipe, Post, Query } from
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { createGameEndRecordContext } from '../bigquery/game-end-rows';
 import { LocalHostService } from '../local-host/local-host.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
@@ -55,8 +56,9 @@ export class GameController {
     @Body() gameEnd: GameEndDto,
     @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<string> {
-    await this.gameService.recordGameEnd(gameEnd);
-    await this.gameService.recordPlayerStats(gameEnd);
+    const context = createGameEndRecordContext(serverType, 'official');
+    await this.gameService.recordGameEnd(gameEnd, context.gameId);
+    await this.gameService.recordPlayerStats(gameEnd, context);
     await this.gameService.recordMatchAnalytics(gameEnd, serverType);
     return this.gameService.getOK();
   }
@@ -71,9 +73,10 @@ export class GameController {
     @CurrentServerType() serverType: SERVER_TYPE,
     @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<string> {
-    const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
+    const context = createGameEndRecordContext(serverType, 'local');
+    const recorded = await this.localHostService.recordGameEnd(gameEnd, context.gameId, origin);
     if (recorded) {
-      await this.gameService.recordPlayerStats(gameEnd);
+      await this.gameService.recordPlayerStats(gameEnd, context);
       await this.gameService.recordMatchAnalytics(gameEnd, serverType);
     }
     return this.gameService.getOK();

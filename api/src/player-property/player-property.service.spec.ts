@@ -73,9 +73,13 @@ describe('PlayerPropertyService', () => {
 
       await service.reset(steamId, true, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedMemberPoint: 1000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedMemberPoint: 1000,
+        },
+        { reason: 'reset_property' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         1000,
@@ -105,9 +109,13 @@ describe('PlayerPropertyService', () => {
 
       await service.reset(steamId, false, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 2000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedSeasonPoint: 2000,
+        },
+        { reason: 'reset_property' },
+      );
       expect(analyticsService.playerUsePoint).toHaveBeenCalledWith(
         steamId,
         2000,
@@ -125,9 +133,13 @@ describe('PlayerPropertyService', () => {
 
       await service.reset(steamId, false, SERVER_TYPE.WEB);
 
-      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(steamId, {
-        usedSeasonPoint: 2000,
-      });
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        steamId,
+        {
+          usedSeasonPoint: 2000,
+        },
+        { reason: 'reset_property' },
+      );
     });
 
     it('使用赛季积分重置：总积分充足但可用积分不足应报错', async () => {

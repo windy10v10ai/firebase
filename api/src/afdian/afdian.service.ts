@@ -246,11 +246,10 @@ export class AfdianService {
       if (month <= 0) {
         return false;
       }
-      await this.membersService.createMember({
-        steamId,
-        month,
-        level: MemberLevel.NORMAL,
-      });
+      await this.membersService.createMember(
+        { steamId, month, level: MemberLevel.NORMAL },
+        { reason: 'afdian_member', ref: orderDto.out_trade_no },
+      );
       return true;
     }
 
@@ -260,11 +259,10 @@ export class AfdianService {
       if (month <= 0) {
         return false;
       }
-      await this.membersService.createMember({
-        steamId,
-        month,
-        level: MemberLevel.PREMIUM,
-      });
+      await this.membersService.createMember(
+        { steamId, month, level: MemberLevel.PREMIUM },
+        { reason: 'afdian_member', ref: orderDto.out_trade_no },
+      );
       return true;
     }
 
@@ -291,9 +289,11 @@ export class AfdianService {
 
     // 更新玩家积分
     const addPoint = planPoint * goodsCount;
-    await this.playerService.upsertAddPoint(steamId, {
-      memberPointTotal: addPoint,
-    });
+    await this.playerService.upsertAddPoint(
+      steamId,
+      { memberPointTotal: addPoint },
+      { reason: 'afdian_points', ref: orderDto.out_trade_no },
+    );
     return true;
   }
 

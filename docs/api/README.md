@@ -30,6 +30,7 @@ API 自己往外调的第三方服务：
 | Steam Web API `GetPublishedFileDetails` | 启动器检测工坊地图是否最新 | 无 | 每个函数实例内存 60 秒，响应带 `Cache-Control: max-age=60` |
 | 爱发电订单查询 | 补激活遗漏的订单 | `AFDIAN_API_TOKEN` | 无 |
 | GA4 Measurement Protocol | 服务端埋点 | `GA4_API_SECRET` | 无 |
+| BigQuery 流式写入 | 战绩明细与积分记录，见「分析数据」 | 函数的运行时服务账号 | 无 |
 
 两条只对 Steam Web API 成立、但必须守住的规矩：
 
@@ -81,6 +82,23 @@ API 自己往外调的第三方服务：
 - **只接原路由已经 `@AllowLocal()` 的写入**：代理 controller 整体放行本地 key、直接调 service，绕得过原路由的认证。花积分的属性加点与重置、觉醒解锁与随机只认网页登录态，不进代理。原路由在 controller 里做的本地来源限制（如会员积分的每日限额）要先下沉到 service，两条路径调同一个方法
 - **代理路由不是原路由的转发**：字段集与错误语义都可以不同，如 `/proxy/player-info` 查无此人返回空对象而不是 404。名字表达的是取哪条原路由的数据，改原路由不会自动改到它
 - **title 上限 4096，随天数增长的字段不进开局包**：`/game/start` 与 `POST /daily-task/refresh` 的每日任务快照都不带 `history`（30 天可到 17000 字符），历史由 `GET /daily-task/:steamId` 单独取，它回带 30 天历史的完整快照，网站每日任务页也用它。代发版 `/proxy/daily-task` 只回最近 5 天历史、不含今日字段（开局时已下发），5 天实测标题 2723 字符，留约三成余量。取快照才会触发跨天归档，所以这条 GET 有写库副作用，不能改成纯读。超限时 `buildProxySuccessHtml` 记 warn 日志（`[Proxy] title too long`）
+
+## 分析数据（BigQuery）
+
+跨局统计、长期分析、积分核对都以 BigQuery 数据集 `game_data`（`asia-northeast1`）为准。GA4 只用来看用户趋势，`firestore_export` 是插件同步的文档快照，两者都不作为分析的原始数据。
+
+| 表 | 一行是什么 | 分区 / 聚类 |
+|---|---|---|
+| `game_end_players` | 一次结算里的一个玩家，电脑也写（`steam_id` 为 0） | `ended_at` 按天 / `steam_id`、`difficulty`、`hero_name` |
+| `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
+
+- **只在结算被接受后写入**：重复发送的请求由本地主机结算的冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
+- **`game_id` 由服务端给每次结算生成**：用启动器开局时 `match_id` 恒为 `"0"`，不能用来区分不同的局。结算加分的那条积分记录，`ref` 就是这个 `game_id`，支付类的积分记录 `ref` 是订单号
+- **每行带一份原始报文（`raw`，JSON 列）**：游戏端新加的字段先落在这里，需要时再建列
+- **写入是 best-effort**：失败只记 `[BigQuery] insert failed` 日志，结算和支付照常完成。所以积分记录只用来查，充值核对的兜底仍是 `firestore_export`
+- **生产数据不设过期**。本地开发写同一项目里的 `game_data_dev`，分区保留 30 天；测试与 CI 不连 BigQuery。数据集由 `BIGQUERY_DATASET` 指定，未设置时不写
+- **接口不直接查这里**：展示用的统计先预先算好、写回 Firestore，见下一节
+- 表结构与建表脚本在仓库根目录的 `bigquery/`，改表先改那里的 SQL
 
 ## 成本与延迟
 

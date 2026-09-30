@@ -14,6 +14,7 @@ import { AlipayService } from '../alipay/alipay.service';
 import { CreateAlipayOrderDto } from '../alipay/dto/create-alipay-order.dto';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { createGameEndRecordContext } from '../bigquery/game-end-rows';
 import { RefreshDailyTaskDto } from '../daily-task/dto/refresh-daily-task.dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { ProbeResponse } from '../game/dto/probe.response';
@@ -150,9 +151,10 @@ export class ProxyController {
     if (gameEnd.players.length !== 1) {
       throw new BadRequestException();
     }
-    const recorded = await this.localHostService.recordGameEnd(gameEnd, origin);
+    const context = createGameEndRecordContext(serverType, 'proxy');
+    const recorded = await this.localHostService.recordGameEnd(gameEnd, context.gameId, origin);
     if (recorded) {
-      await this.gameService.recordPlayerStats(gameEnd);
+      await this.gameService.recordPlayerStats(gameEnd, context);
       await this.analyticsService.gameEndPlayerBot(gameEnd, serverType);
     }
     return buildProxySuccessHtml(requestId, { recorded });

@@ -28,12 +28,16 @@ export async function createPlayer(
   params: createPlayerParams,
 ): Promise<void> {
   const playerService = app.get(PlayerService);
-  await playerService.upsertAddPoint(params.steamId, {
-    seasonPointTotal: params.seasonPointTotal,
-    memberPointTotal: params.memberPointTotal,
-    usedSeasonPoint: params.usedSeasonPoint,
-    usedMemberPoint: params.usedMemberPoint,
-  });
+  await playerService.upsertAddPoint(
+    params.steamId,
+    {
+      seasonPointTotal: params.seasonPointTotal,
+      memberPointTotal: params.memberPointTotal,
+      usedSeasonPoint: params.usedSeasonPoint,
+      usedMemberPoint: params.usedMemberPoint,
+    },
+    { reason: 'test_seed' },
+  );
   if (params.conductPoint !== undefined) {
     await playerService.setConductPoint(params.steamId, params.conductPoint);
   }
