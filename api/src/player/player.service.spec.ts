@@ -27,6 +27,7 @@ describe('PlayerService', () => {
       { battlePoints: -1, expected: 0 },
       { battlePoints: 0, expected: 0 },
       { battlePoints: 250, expected: 250 },
+      { battlePoints: 120.6, expected: 121 },
       { battlePoints: 500, expected: 500 },
       { battlePoints: 580, expected: 500 },
     ])('normalizes $battlePoints to $expected', ({ battlePoints, expected }) => {
@@ -97,6 +98,31 @@ describe('PlayerService', () => {
       await service.upsertGameEnd(steamId, true, 300, false, false, 'game-id');
 
       expect(playerRepository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('upsertAddPoint', () => {
+    it('积分取整后入账，积分记录拿到同一份整数变动量', async () => {
+      const { service, playerRepository, bigQueryService } = createService({
+        memberPointTotal: 1_000,
+      });
+
+      await service.upsertAddPoint(
+        steamId,
+        { memberPointTotal: 1100.0000000000002 },
+        {
+          reason: 'kofi_member',
+        },
+      );
+
+      const savedPlayer = playerRepository.update.mock.calls[0][0];
+      expect(savedPlayer.memberPointTotal).toBe(2_100);
+      expect(bigQueryService.recordPointChange).toHaveBeenCalledWith(
+        steamId,
+        expect.objectContaining({ memberPointTotal: 1_100 }),
+        savedPlayer,
+        { reason: 'kofi_member' },
+      );
     });
   });
 
