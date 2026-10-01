@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PlayerStatsRadar {
-  /** 100 为同难度平均水平 */
+  /** 六项的平均 */
   @ApiProperty()
   score: number;
-  /** 以下各项 1 为同难度平均 */
+  /** 以下各项是在同难度玩家中的百分位，0–100，50 为中位 */
   @ApiProperty()
   damage: number;
   @ApiProperty()

@@ -350,7 +350,7 @@ describe('GameService.addDailyMemberPoints', () => {
       }),
     } as unknown as BaseFirestoreRepository<Member>;
     const playerService = { upsertAddPoint: jest.fn(async () => undefined) };
-    const membersService = new MembersService(repository, playerService as never);
+    const membersService = new MembersService(repository, playerService as never, null);
     const gameService = new GameService(
       playerService as never,
       null,

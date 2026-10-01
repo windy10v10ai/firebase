@@ -3,31 +3,32 @@ export interface StatsBaselineFilter {
   maxMultiplierRadiant: number;
   maxMultiplierDire: number;
   minRespawnTimePct: number;
+  quantileSteps: number;
 }
 
 export interface StatsBaselineRow {
   difficulty: number;
   sample_count: number;
-  damage: number;
-  gold: number;
-  participation: number;
-  survival: number;
-  tank: number;
-  push: number;
+  damage: number[];
+  gold: number[];
+  participation: number[];
+  survival: number[];
+  tank: number[];
+  push: number[];
 }
 
-/** 按难度求真人玩家的各项平均，口径与个人六边形逐项对应。 */
+/** 按难度求真人玩家各项的分位点，口径与个人六边形逐项对应。 */
 export function buildStatsBaselineQuery(table: string): string {
   return `
 SELECT
   difficulty,
   COUNT(*) AS sample_count,
-  AVG(hero_damage / minutes) AS damage,
-  AVG(total_gold_earned / minutes) AS gold,
-  AVG((kills + assists) / minutes) AS participation,
-  AVG(deaths / minutes) AS survival,
-  AVG(damage_taken / minutes) AS tank,
-  AVG(tower_kills) AS push
+  APPROX_QUANTILES(hero_damage / minutes, @quantileSteps) AS damage,
+  APPROX_QUANTILES(total_gold_earned / minutes, @quantileSteps) AS gold,
+  APPROX_QUANTILES((kills + assists) / minutes, @quantileSteps) AS participation,
+  APPROX_QUANTILES(deaths / minutes, @quantileSteps) AS survival,
+  APPROX_QUANTILES(damage_taken / minutes, @quantileSteps) AS tank,
+  APPROX_QUANTILES(tower_kills, @quantileSteps) AS push
 FROM (
   SELECT *, game_time_msec / 60000 AS minutes
   FROM \`${table}\`
