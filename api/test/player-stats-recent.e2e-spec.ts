@@ -156,19 +156,22 @@ describe('PlayerStatsRecent (e2e)', () => {
   // 基准只能由定时任务查 BigQuery 生成，测试环境不连 BigQuery，只能直写
   it('六边形接口按近期场次计数，局数不够时不返回图', async () => {
     const steamId = 200001204;
+    const quantiles = Array.from({ length: 21 }, (_, i) => i);
     await getTestFirestore()
-      .collection('StatsBaselines')
-      .doc('latest')
+      .collection('DailyStats')
+      .doc('radarBaseline')
       .set({
-        difficulties: {
-          '3': {
-            sampleCount: 500,
-            damage: 100,
-            gold: 300,
-            participation: 0.2,
-            survival: 0.1,
-            tank: 30,
-            push: 1,
+        data: {
+          difficulties: {
+            '3': {
+              sampleCount: 500,
+              damage: quantiles,
+              gold: quantiles,
+              participation: quantiles,
+              survival: quantiles,
+              tank: quantiles,
+              push: quantiles,
+            },
           },
         },
         updatedAt: new Date(),

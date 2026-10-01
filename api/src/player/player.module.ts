@@ -3,6 +3,7 @@ import { FireormModule } from 'nestjs-fireorm';
 
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { BigQueryModule } from '../bigquery/bigquery.module';
+import { DailyStatsModule } from '../daily-stats/daily-stats.module';
 import { SteamProfileModule } from '../steam-profile/steam-profile.module';
 
 import { PlayerConduct } from './entities/player-conduct.entity';
@@ -11,7 +12,6 @@ import { PlayerSetting } from './entities/player-setting.entity';
 import { PlayerStatsLifetime } from './entities/player-stats-lifetime.entity';
 import { PlayerStatsRecent } from './entities/player-stats-recent.entity';
 import { Player } from './entities/player.entity';
-import { StatsBaseline } from './entities/stats-baseline.entity';
 import { PlayerConductService } from './player-conduct.service';
 import { PlayerGamePresetService } from './player-game-preset.service';
 import { PlayerRankingService } from './player-ranking.service';
@@ -31,10 +31,10 @@ import { PlayerService } from './player.service';
       PlayerConduct,
       PlayerStatsLifetime,
       PlayerStatsRecent,
-      StatsBaseline,
     ]),
     AnalyticsModule,
     BigQueryModule,
+    DailyStatsModule,
     SteamProfileModule,
   ],
   controllers: [PlayerController],

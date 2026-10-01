@@ -7,7 +7,7 @@ export type RadarAxis = (typeof RADAR_AXES)[number];
 interface RadarAxisDefinition {
   value: (match: PlayerStatsRecentMatch) => number;
   perMinute: boolean;
-  // 越少越好的项用基准除以玩家，图上仍是越大越好
+  // 越少越好的项把百分位反过来，图上仍是越大越好
   inverse: boolean;
 }
 
@@ -23,8 +23,8 @@ export const RADAR_AXIS_DEFINITIONS: Record<RadarAxis, RadarAxisDefinition> = {
 
 /** 基准统计的时间窗，版本改动后基准要能跟着变 */
 export const STATS_BASELINE_WINDOW_DAYS = 30;
-// 样本太少的难度，平均值被个别局左右，比出来的分数没有意义
+// 样本太少的难度，分位点被个别局左右，算出来的百分位没有意义
 export const STATS_BASELINE_MIN_SAMPLES = 100;
+// 分位点太疏分不出高低，太密会让基准文档变大
+export const STATS_BASELINE_QUANTILE_STEPS = 20;
 export const RADAR_MIN_MATCHES = 10;
-// 单局的比值封顶，免得一局爆发把整张图撑满
-export const RADAR_RATIO_CAP = 2;
