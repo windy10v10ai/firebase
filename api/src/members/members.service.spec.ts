@@ -14,7 +14,7 @@ function buildMember(overrides: Partial<Member> = {}): Member {
 }
 
 describe('MembersService.getCheckInPoints', () => {
-  const service = new MembersService(null, null);
+  const service = new MembersService(null, null, null);
 
   afterEach(() => {
     jest.useRealTimers();
@@ -177,7 +177,7 @@ describe('MembersService.updateMemberExpireDate', () => {
 
   it('全新会员：new 一个完整对象，periodStartDate = baseDate', async () => {
     const repository = createFakeRepository(undefined);
-    const service = new MembersService(repository, null);
+    const service = new MembersService(repository, null, null);
     const baseDate = new Date('2026-08-01T00:00:00Z');
 
     await service.updateMemberExpireDate(null, 999, baseDate, 31, MemberLevel.NORMAL, true);
@@ -197,7 +197,7 @@ describe('MembersService.updateMemberExpireDate', () => {
       periodStartDate: new Date('2026-07-01T00:00:00Z'),
     });
     const repository = createFakeRepository(existMember);
-    const service = new MembersService(repository, null);
+    const service = new MembersService(repository, null, null);
 
     await service.updateMemberExpireDate(
       existMember,
@@ -225,7 +225,7 @@ describe('MembersService.updateMemberExpireDate', () => {
       periodStartDate: new Date('2026-06-01T00:00:00Z'),
     });
     const repository = createFakeRepository(existMember);
-    const service = new MembersService(repository, null);
+    const service = new MembersService(repository, null, null);
     const baseDate = new Date('2026-08-01T00:00:00Z');
 
     await service.updateMemberExpireDate(existMember, 999, baseDate, 31, MemberLevel.NORMAL, true);
@@ -251,7 +251,7 @@ describe('MembersService.checkIn', () => {
       }),
     } as unknown as BaseFirestoreRepository<Member>;
     const playerService = { upsertAddPoint: jest.fn(async () => undefined) };
-    const service = new MembersService(repository, playerService as never);
+    const service = new MembersService(repository, playerService as never, null);
     return { service, repository, playerService, read: () => store };
   }
 
