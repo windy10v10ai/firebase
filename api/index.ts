@@ -118,7 +118,7 @@ export const scheduledOrderCheck = onSchedule(
 
 // 按频率分函数而不是按任务分，每天一次的任务都进这个列表，免得每加一项就多一个函数和调度任务
 const DAILY_JOBS: { name: string; run: (app: INestApplication) => Promise<unknown> }[] = [
-  { name: 'statsBaseline', run: (app) => app.get(PlayerStatsRadarService).refreshBaseline() },
+  { name: 'radarBaseline', run: (app) => app.get(PlayerStatsRadarService).refreshBaseline() },
 ];
 
 export const dailyJobs = onSchedule(

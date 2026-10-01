@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
-import { BaseFirestoreRepository } from 'fireorm';
-import { InjectRepository } from 'nestjs-fireorm';
 
 import { BigQueryService } from '../bigquery/bigquery.service';
+import { DailyStatsService } from '../daily-stats/daily-stats.service';
 
 import { PlayerStatsRadar, PlayerStatsRadarResponse } from './dto/player-stats-radar.response';
 import { PlayerStatsRecentMatch } from './entities/player-stats-recent.entity';
-import { DifficultyBaseline, StatsBaseline } from './entities/stats-baseline.entity';
+import { DifficultyBaseline } from './entities/radar-baseline';
 import {
   STATS_LIFETIME_MAX_DIRE_MULTIPLIER,
   STATS_LIFETIME_MAX_RADIANT_MULTIPLIER,
@@ -17,20 +16,17 @@ import {
   RADAR_AXES,
   RADAR_AXIS_DEFINITIONS,
   RADAR_MIN_MATCHES,
-  RADAR_RATIO_CAP,
   RadarAxis,
   STATS_BASELINE_MIN_SAMPLES,
+  STATS_BASELINE_QUANTILE_STEPS,
   STATS_BASELINE_WINDOW_DAYS,
 } from './player-stats-radar.constants';
 import { PlayerStatsRecentService } from './player-stats-recent.service';
 
-const STATS_BASELINE_DOC_ID = 'latest';
-
 @Injectable()
 export class PlayerStatsRadarService {
   constructor(
-    @InjectRepository(StatsBaseline)
-    private readonly baselineRepository: BaseFirestoreRepository<StatsBaseline>,
+    private readonly dailyStatsService: DailyStatsService,
     private readonly bigQueryService: BigQueryService,
     private readonly playerStatsRecentService: PlayerStatsRecentService,
   ) {}
@@ -43,6 +39,7 @@ export class PlayerStatsRadarService {
       maxMultiplierRadiant: STATS_LIFETIME_MAX_RADIANT_MULTIPLIER,
       maxMultiplierDire: STATS_LIFETIME_MAX_DIRE_MULTIPLIER,
       minRespawnTimePct: STATS_LIFETIME_MIN_RESPAWN_TIME_PCT,
+      quantileSteps: STATS_BASELINE_QUANTILE_STEPS,
     });
     if (!rows) {
       return null;
@@ -64,19 +61,15 @@ export class PlayerStatsRadarService {
       };
     }
 
-    await this.baselineRepository.create({
-      id: STATS_BASELINE_DOC_ID,
-      difficulties,
-      updatedAt: new Date(),
-    });
+    await this.dailyStatsService.save('radarBaseline', { difficulties });
     return { difficulties: Object.keys(difficulties).length };
   }
 
-  /** 拿玩家最近的场次和同难度的全体基准比，算出六边形各项与综合评分。 */
+  /** 拿玩家最近的场次逐局算出在同难度玩家中的百分位，得出六边形各项与综合评分。 */
   async getRadar(steamId: number): Promise<PlayerStatsRadarResponse> {
     const [recent, baseline] = await Promise.all([
       this.playerStatsRecentService.findBySteamId(steamId),
-      this.baselineRepository.findById(STATS_BASELINE_DOC_ID),
+      this.dailyStatsService.get('radarBaseline'),
     ]);
     if (!baseline) {
       logger.warn('[StatsRadar] baseline missing');
@@ -102,8 +95,8 @@ export function buildRadar(
     for (const axis of RADAR_AXES) {
       const { value, perMinute, inverse } = RADAR_AXIS_DEFINITIONS[axis];
       const own = perMinute ? value(match) / minutes : value(match);
-      const ratio = inverse ? base[axis] / own : own / base[axis];
-      sums[axis] += Math.min(ratio, RADAR_RATIO_CAP);
+      const percentile = percentileOf(own, base[axis]);
+      sums[axis] += inverse ? 100 - percentile : percentile;
     }
     matchCount++;
   }
@@ -113,13 +106,36 @@ export function buildRadar(
   }
 
   const axes = Object.fromEntries(
-    RADAR_AXES.map((axis) => [axis, round2(sums[axis] / matchCount)]),
+    RADAR_AXES.map((axis) => [axis, Math.round(sums[axis] / matchCount)]),
   ) as Record<RadarAxis, number>;
-  const average = RADAR_AXES.reduce((total, axis) => total + sums[axis], 0) / RADAR_AXES.length;
-  const radar: PlayerStatsRadar = { score: Math.round((average / matchCount) * 100), ...axes };
+  const total = RADAR_AXES.reduce((acc, axis) => acc + sums[axis], 0);
+  const radar: PlayerStatsRadar = {
+    score: Math.round(total / RADAR_AXES.length / matchCount),
+    ...axes,
+  };
   return { matchCount, minMatchCount: RADAR_MIN_MATCHES, radar };
 }
 
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
+/** 在等距分位点上线性插值，求一个值在全体中的百分位（0–100）。 */
+export function percentileOf(value: number, quantiles: number[]): number {
+  const last = quantiles.length - 1;
+  const step = 100 / last;
+  // 整数项常有多个分位点同值，落在这一段时取中间，免得同样的表现得分偏高或偏低
+  const first = quantiles.findIndex((q) => q >= value);
+  if (first === -1) {
+    return 100;
+  }
+  if (quantiles[first] === value) {
+    let end = first;
+    while (end < last && quantiles[end + 1] === value) {
+      end++;
+    }
+    return ((first + end) / 2) * step;
+  }
+  if (first === 0) {
+    return 0;
+  }
+  const low = quantiles[first - 1];
+  const high = quantiles[first];
+  return (first - 1 + (value - low) / (high - low)) * step;
 }
