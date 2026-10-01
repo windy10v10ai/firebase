@@ -3,10 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { CreateMemberDto } from '../members/dto/create-member.dto';
+import { MemberDto } from '../members/dto/member.dto';
+import { Member } from '../members/entities/members.entity';
 import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
 
 import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
+import { buildMemberHistoryRow } from './member-history-rows';
 import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
 import {
   StatsBaselineFilter,
@@ -18,6 +22,7 @@ const BIGQUERY_PROJECT_ID = 'windy10v10ai';
 const BIGQUERY_LOCATION = 'asia-northeast1';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
 const POINT_HISTORY_TABLE = 'point_history';
+const MEMBER_HISTORY_TABLE = 'member_history';
 // 分析写入不能拖住业务请求直到函数超时，上限要远小于函数超时
 const INSERT_TIMEOUT_MS = 2000;
 
@@ -42,6 +47,18 @@ export class BigQueryService {
       POINT_HISTORY_TABLE,
       buildPointHistoryRows(steamId, delta, after, source, new Date()),
     );
+  }
+
+  /** 把一次开通或续费会员写入会员记录表。 */
+  async recordMemberChange(
+    purchase: CreateMemberDto,
+    before: Member | undefined,
+    after: MemberDto,
+    source: PointChangeSource,
+  ): Promise<void> {
+    await this.insert(MEMBER_HISTORY_TABLE, [
+      buildMemberHistoryRow(purchase, before, after, source, new Date()),
+    ]);
   }
 
   /** 按难度汇总全体玩家的六边形基准；未连 BigQuery 时返回 null。 */

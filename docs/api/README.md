@@ -91,11 +91,12 @@ API 自己往外调的第三方服务：
 |---|---|---|
 | `game_end_players` | 一次结算里的一个玩家，电脑也写（`steam_id` 为 0） | `ended_at` 按天 / `steam_id`、`difficulty`、`hero_name` |
 | `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
+| `member_history` | 一次开通或续费会员，写入前后的等级与到期日都留下 | `created_at` 按天 / `steam_id` |
 
 - **只在结算被接受后写入**：重复发送的请求由本地主机结算的冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
 - **`game_id` 由服务端给每次结算生成**：用启动器开局时 `match_id` 恒为 `"0"`，不能用来区分不同的局。结算加分的那条积分记录，`ref` 就是这个 `game_id`，支付类的积分记录 `ref` 是订单号
 - **每行带一份原始报文（`raw`，JSON 列）**：游戏端新加的字段先落在这里，需要时再建列
-- **写入是 best-effort**：失败只记 `[BigQuery] insert failed` 日志，结算和支付照常完成。所以积分记录只用来查，充值核对的兜底仍是 `firestore_export`
+- **写入是 best-effort**：失败只记 `[BigQuery] insert failed` 日志，结算和支付照常完成。所以积分与会员记录只用来查，充值核对的兜底仍是 `firestore_export`。插件停服前要撤掉，先让这两张表与它并行跑一段时间，见 [#1327](https://github.com/windy10v10ai/firebase/issues/1327)
 - **生产数据不设过期**。本地开发写同一项目里的 `game_data_dev`，分区保留 30 天；测试与 CI 不连 BigQuery。数据集由 `BIGQUERY_DATASET` 指定，未设置时不写
 - **接口不直接查这里**：展示用的统计先预先算好、写回 Firestore，见「预先汇总」
 - 表结构与建表脚本在仓库根目录的 `bigquery/`，改表先改那里的 SQL

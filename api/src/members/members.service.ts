@@ -7,6 +7,7 @@ import {
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
+import { BigQueryService } from '../bigquery/bigquery.service';
 import { PointChangeSource } from '../bigquery/point-history-rows';
 import { PlayerService } from '../player/player.service';
 
@@ -37,6 +38,7 @@ export class MembersService {
     @InjectRepository(Member)
     private readonly membersRepository: BaseFirestoreRepository<Member>,
     private readonly playerService: PlayerService,
+    private readonly bigQueryService: BigQueryService,
   ) {}
 
   async createMember(createMemberDto: CreateMemberDto, source: PointChangeSource) {
@@ -47,6 +49,7 @@ export class MembersService {
       createMemberDto.level == MemberLevel.NORMAL
         ? NORMAL_MEMBER_MONTHLY_POINT
         : PREMIUM_MEMBER_MONTHLY_POINT;
+    const before = await this.findOne(createMemberDto.steamId);
     const player = await this.playerService.upsertAddPoint(
       createMemberDto.steamId,
       { memberPointTotal: memberPointPerMonth * createMemberDto.month },
@@ -57,6 +60,7 @@ export class MembersService {
       createMemberDto.level == MemberLevel.NORMAL
         ? await this.addNormalMember(createMemberDto.steamId, createMemberDto.month)
         : await this.addPremiumMember(createMemberDto.steamId, createMemberDto.month);
+    await this.bigQueryService.recordMemberChange(createMemberDto, before, member, source);
     return {
       player,
       member,
