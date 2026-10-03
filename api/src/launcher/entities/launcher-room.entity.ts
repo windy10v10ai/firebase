@@ -8,6 +8,8 @@ export class LauncherRoom {
   roomId: string;
   hostToken: string;
   hostSteamId: number;
+  hostPersonaName?: string;
+  hostAvatarUrl?: string;
   hostCandidates: string[];
   hostUpnp: boolean;
   hostPublicIp: boolean;

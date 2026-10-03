@@ -8,6 +8,8 @@ export class LauncherRoomJoin {
   roomId: string;
   joinToken: string;
   steamId: number;
+  personaName?: string;
+  avatarUrl?: string;
   candidates: string[];
   upnp: boolean;
   launcherVersion: string;

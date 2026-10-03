@@ -11,12 +11,14 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { BigQueryService } from '../bigquery/bigquery.service';
+import { SteamProfileService } from '../steam-profile/steam-profile.service';
 
 import {
   HostRoomDto,
   HostRoomResponse,
   JoinRoomDto,
   JoinRoomResponse,
+  LauncherProfileDto,
 } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
 import { LauncherRoom } from './entities/launcher-room.entity';
@@ -37,6 +39,7 @@ export class LauncherRoomService {
     @InjectRepository(LauncherRoomJoin)
     private readonly joinRepository: BaseFirestoreRepository<LauncherRoomJoin>,
     private readonly bigQueryService: BigQueryService,
+    private readonly steamProfileService: SteamProfileService,
   ) {}
 
   /** 房主开房、轮询新的加入请求或在开局时关房。 */
@@ -69,10 +72,14 @@ export class LauncherRoomService {
     return {
       code: room.id,
       token: room.hostToken,
+      personaName: room.hostPersonaName,
+      avatarUrl: room.hostAvatarUrl,
       joins: joins.map((join) => ({
         joinId: join.id,
         joinToken: join.joinToken,
         candidates: join.candidates,
+        personaName: join.personaName,
+        avatarUrl: join.avatarUrl,
       })),
     };
   }
@@ -92,12 +99,15 @@ export class LauncherRoomService {
       throw new ConflictException({ code: 'version_mismatch' });
     }
 
+    const profile = await this.findProfile(dto.steamId);
     const join = await this.joinRepository.create({
       id: randomUUID(),
       roomCode: room.id,
       roomId: room.roomId,
       joinToken: newToken(),
       steamId: dto.steamId,
+      personaName: profile.personaName,
+      avatarUrl: profile.avatarUrl,
       candidates: dto.candidates,
       upnp: dto.upnp,
       launcherVersion: dto.launcherVersion,
@@ -105,18 +115,27 @@ export class LauncherRoomService {
       createdAt: now,
       expireAt: expireAt(now),
     });
-    return { joinId: join.id, joinToken: join.joinToken, hostCandidates: room.hostCandidates };
+    return {
+      joinId: join.id,
+      joinToken: join.joinToken,
+      hostCandidates: room.hostCandidates,
+      host: { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
+      self: profile,
+    };
   }
 
   private async open(dto: HostRoomDto, now: Date, country?: string): Promise<HostRoomResponse> {
     if (dto.candidates.length === 0) {
       throw new BadRequestException('candidates must not be empty');
     }
+    const profile = await this.findProfile(dto.steamId);
     const room = await this.roomRepository.create({
       id: await this.newCode(now),
       roomId: randomUUID(),
       hostToken: newToken(),
       hostSteamId: dto.steamId,
+      hostPersonaName: profile.personaName,
+      hostAvatarUrl: profile.avatarUrl,
       hostCandidates: dto.candidates,
       hostUpnp: dto.upnp,
       hostPublicIp: dto.publicIp,
@@ -127,7 +146,7 @@ export class LauncherRoomService {
       expireAt: expireAt(now),
     });
     await this.bigQueryService.recordRoomCreated(room, dto.launcherVersion, country);
-    return { code: room.id, token: room.hostToken, joins: [] };
+    return { code: room.id, token: room.hostToken, ...profile, joins: [] };
   }
 
   // 码已被还在用的房间占着就换一个；先查再写不上事务，同一瞬间撞码的概率可以忽略
@@ -141,6 +160,22 @@ export class LauncherRoomService {
       if (!existing || now.getTime() - existing.createdAt.getTime() > RECORD_TTL_MS) {
         return code;
       }
+    }
+  }
+
+  // 昵称头像只用于启动器里的玩家列表，取不到时照常开房、加入
+  private async findProfile(steamId: number): Promise<LauncherProfileDto> {
+    if (!steamId) {
+      return {};
+    }
+    try {
+      const profile = await this.steamProfileService.findBySteamId(steamId);
+      return {
+        personaName: profile.personaName ?? undefined,
+        avatarUrl: profile.avatarUrl ?? undefined,
+      };
+    } catch {
+      return {};
     }
   }
 

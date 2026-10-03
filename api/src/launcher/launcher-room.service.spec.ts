@@ -54,10 +54,18 @@ describe('LauncherRoomService', () => {
     rooms = memoryRepository<LauncherRoom>();
     joins = memoryRepository<LauncherRoomJoin>();
     bigQuery = { recordRoomCreated: jest.fn(), recordJoinResult: jest.fn() };
+    const steamProfile = {
+      findBySteamId: jest.fn(async (steamId: number) => ({
+        steamId: `${steamId}`,
+        personaName: steamId === 2002 ? 'CalmDown!' : null,
+        avatarUrl: null,
+      })),
+    };
     service = new LauncherRoomService(
       rooms as never,
       joins as never,
       bigQuery as unknown as BigQueryService,
+      steamProfile as never,
     );
   });
 
@@ -97,8 +105,15 @@ describe('LauncherRoomService', () => {
 
     expect(joined.hostCandidates).toEqual(HOST.candidates);
     expect(polled.joins).toEqual([
-      { joinId: joined.joinId, joinToken: joined.joinToken, candidates: JOINER.candidates },
+      {
+        joinId: joined.joinId,
+        joinToken: joined.joinToken,
+        candidates: JOINER.candidates,
+        personaName: 'CalmDown!',
+        avatarUrl: undefined,
+      },
     ]);
+    expect(joined.self.personaName).toEqual('CalmDown!');
   });
 
   it('超过 30 秒的加入请求不再返回给房主', async () => {

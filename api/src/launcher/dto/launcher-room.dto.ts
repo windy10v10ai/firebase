@@ -94,7 +94,14 @@ export class HostRoomDto extends LauncherPeerDto {
 
 export class JoinRoomDto extends LauncherPeerDto {}
 
-export class PendingJoinDto {
+export class LauncherProfileDto {
+  @ApiPropertyOptional({ description: 'Steam 昵称，取不到时省略' })
+  personaName?: string;
+  @ApiPropertyOptional({ description: 'Steam 头像地址，取不到时省略' })
+  avatarUrl?: string;
+}
+
+export class PendingJoinDto extends LauncherProfileDto {
   @ApiProperty()
   joinId: string;
   @ApiProperty()
@@ -103,7 +110,7 @@ export class PendingJoinDto {
   candidates: string[];
 }
 
-export class HostRoomResponse {
+export class HostRoomResponse extends LauncherProfileDto {
   @ApiProperty()
   code: string;
   @ApiProperty()
@@ -119,4 +126,8 @@ export class JoinRoomResponse {
   joinToken: string;
   @ApiProperty({ type: [String] })
   hostCandidates: string[];
+  @ApiProperty({ type: LauncherProfileDto })
+  host: LauncherProfileDto;
+  @ApiProperty({ type: LauncherProfileDto, description: '加入者自己' })
+  self: LauncherProfileDto;
 }
