@@ -98,6 +98,7 @@ namespace Windy10v10AI.Launcher
         public static string Player { get { return Pick("玩家", "Player", "Игрок"); } }
         public static string StatusConnecting { get { return Pick("连接中…", "Connecting...", "Подключение…"); } }
         public static string StatusLoading { get { return Pick("已连通，正在载入", "Connected, loading", "Подключён, загрузка"); } }
+        public static string StatusHostLoading { get { return Pick("正在载入", "Loading", "Загрузка"); } }
         public static string StatusInGame { get { return Pick("已进入游戏", "In game", "В игре"); } }
         public static string StatusFailed { get { return Pick("连接失败", "Could not connect", "Не удалось подключиться"); } }
         public static string StatusLeft { get { return Pick("已离开", "Left", "Вышел"); } }

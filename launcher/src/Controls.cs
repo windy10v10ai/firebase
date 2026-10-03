@@ -527,6 +527,7 @@ namespace Windy10v10AI.Launcher
         void DrawPlayer(Graphics g, RosterEntry player, Rectangle rect)
         {
             var s = DpiScale;
+            var name = string.IsNullOrEmpty(player.Name) ? Strings.Player : player.Name;
             using (var path = Theme.Rounded(rect, 6 * s))
             using (var brush = new SolidBrush(Card)) g.FillPath(brush, path);
 
@@ -539,7 +540,8 @@ namespace Windy10v10AI.Launcher
                 case PlayerStatus.Connecting:
                     dot = statusColor = ring = Theme.Warning; text = Strings.StatusConnecting; fade = 190; dashed = true; break;
                 case PlayerStatus.Loading:
-                    dot = ring = Loading; statusColor = LoadingText; text = Strings.StatusLoading; break;
+                    // The host has no route to establish, so its own row only loads
+                    dot = ring = Loading; statusColor = LoadingText; text = player.IsHost ? Strings.StatusHostLoading : Strings.StatusLoading; break;
                 case PlayerStatus.Failed:
                     dot = Theme.Error; statusColor = ErrorText; nameColor = Theme.Muted; text = Strings.StatusFailed; fade = 100; break;
                 case PlayerStatus.Left:
@@ -576,7 +578,7 @@ namespace Windy10v10AI.Launcher
                 {
                     var tint = Tints[(int)(Math.Abs(player.SteamId) % Tints.Length)];
                     using (var brush = new SolidBrush(Color.FromArgb(fade, tint))) g.FillPath(brush, circle);
-                    var initial = string.IsNullOrEmpty(player.Name) ? "?" : player.Name.Substring(0, 1).ToUpperInvariant();
+                    var initial = name.Substring(0, 1).ToUpperInvariant();
                     using (var font = new Font(Theme.FontName, 8.25f, FontStyle.Bold))
                     {
                         TextRenderer.DrawText(g, initial, font, Rectangle.Round(inner), Theme.Background,
@@ -587,26 +589,67 @@ namespace Windy10v10AI.Launcher
 
             var left = (int)(avatar.Right + 8 * s);
             var tag = player.IsHost ? Strings.TagHost : (player.SteamId != 0 && player.SteamId == me ? Strings.TagMe : null);
+            const TextFormatFlags measure = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
+            const TextFormatFlags flat = measure | TextFormatFlags.Left | TextFormatFlags.EndEllipsis;
             using (var nameFont = new Font(Theme.FontName, 9f))
             using (var tagFont = new Font(Theme.FontName, 7f))
             using (var statusFont = new Font(Theme.FontName, 7.5f))
             {
-                var tagWidth = tag == null ? 0 : TextRenderer.MeasureText(tag, tagFont).Width + (int)(4 * s);
-                var nameWidth = rect.Right - left - (int)(8 * s) - (tag == null ? 0 : tagWidth + (int)(5 * s));
-                var nameRect = new Rectangle(left, rect.Y + (int)(4 * s), nameWidth, (int)(18 * s));
-                TextRenderer.DrawText(g, player.Name ?? Strings.Player, nameFont, nameRect, nameColor,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                // The CJK font's line box is taller than its point size, so both lines are measured and centred as one block
+                var nameSize = TextRenderer.MeasureText(g, name, nameFont, Size.Empty, measure);
+                var statusSize = TextRenderer.MeasureText(g, text, statusFont, Size.Empty, measure);
+                var top = rect.Y + (rect.Height - nameSize.Height - statusSize.Height) / 2;
+                var tagSize = tag == null ? Size.Empty : TextRenderer.MeasureText(g, tag, tagFont, Size.Empty, measure);
+                var tagWidth = tag == null ? 0 : tagSize.Width + (int)(8 * s);
+                var nameWidth = Math.Min(nameSize.Width, rect.Right - left - (int)(8 * s) - (tag == null ? 0 : tagWidth + (int)(5 * s)));
+                TextRenderer.DrawText(g, name, nameFont, new Rectangle(left, top, nameWidth, nameSize.Height), nameColor, flat);
                 if (tag != null)
                 {
-                    var measured = Math.Min(nameWidth, TextRenderer.MeasureText(player.Name ?? Strings.Player, nameFont).Width);
-                    var tagRect = new Rectangle(left + measured + (int)(5 * s), nameRect.Y + (int)(2 * s), tagWidth, (int)(14 * s));
-                    using (var pen = new Pen(TagBorder, Math.Max(1f, s))) g.DrawRectangle(pen, tagRect);
-                    TextRenderer.DrawText(g, tag, tagFont, tagRect, TagText, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    var tagRect = new RectangleF(left + nameWidth + 5 * s, top + (nameSize.Height - tagSize.Height - 2 * s) / 2, tagWidth, tagSize.Height + 2 * s);
+                    using (var path = Theme.Rounded(tagRect, 3 * s))
+                    using (var pen = new Pen(TagBorder, Math.Max(1f, s))) g.DrawPath(pen, path);
+                    TextRenderer.DrawText(g, tag, tagFont, new Point((int)(tagRect.X + 4 * s), (int)(tagRect.Y + s)), TagText, TextFormatFlags.NoPadding);
                 }
-                var dy = rect.Y + (int)(26 * s);
-                using (var brush = new SolidBrush(dot)) g.FillEllipse(brush, left, dy - 3 * s, 7 * s, 7 * s);
-                TextRenderer.DrawText(g, text, statusFont, new Rectangle(left + (int)(11 * s), dy - (int)(7 * s), rect.Right - left - (int)(19 * s), (int)(15 * s)), statusColor,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                var statusTop = top + nameSize.Height;
+                var d7 = 7 * s;
+                using (var brush = new SolidBrush(dot)) g.FillEllipse(brush, left, statusTop + (statusSize.Height - d7) / 2, d7, d7);
+                TextRenderer.DrawText(g, text, statusFont, new Rectangle(left + (int)(11 * s), statusTop, rect.Right - left - (int)(19 * s), statusSize.Height), statusColor, flat);
+            }
+        }
+    }
+
+    // The room code in a box sized to match the copy button beside it, characters spaced so it reads aloud easily
+    class CodeDisplay : PaintedControl
+    {
+        string code = "";
+
+        public string Code
+        {
+            get { return code; }
+            set { code = value ?? ""; Invalidate(); }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 6 * s))
+            using (var brush = new SolidBrush(Theme.Panel))
+            using (var pen = new Pen(Theme.Border, Math.Max(1f, s)))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(pen, path);
+            }
+            if (code.Length == 0) return;
+            using (var font = new Font("Consolas", 15f))
+            {
+                var cell = (Width - 24 * s) / code.Length;
+                for (var i = 0; i < code.Length; i++)
+                {
+                    var rect = new Rectangle((int)(12 * s + i * cell), 0, (int)cell, Height);
+                    TextRenderer.DrawText(g, code.Substring(i, 1), font, rect, Theme.Text,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                }
             }
         }
     }

@@ -79,7 +79,7 @@ namespace Windy10v10AI.Launcher
         readonly Label joinPrompt = new Label();
         readonly Label joinHint = new Label();
         readonly TextBox codeBox = new TextBox();
-        readonly TextBox hostCode = new TextBox();
+        readonly CodeDisplay hostCode = new CodeDisplay();
         readonly PlayerList players = new PlayerList();
         readonly InfoCard mapCard = new InfoCard();
         readonly System.Windows.Forms.Timer rosterTimer = new System.Windows.Forms.Timer { Interval = 1000 };
@@ -199,7 +199,7 @@ namespace Windy10v10AI.Launcher
             joinPrompt.Font = new Font(Theme.FontName, 9.75f);
             joinHint.Text = Strings.JoinHint;
             joinHint.ForeColor = Theme.Muted;
-            foreach (var box in new[] { codeBox, hostCode })
+            foreach (var box in new[] { codeBox })
             {
                 box.Font = new Font("Consolas", 16f);
                 box.MaxLength = 6;
@@ -209,7 +209,6 @@ namespace Windy10v10AI.Launcher
                 box.BorderStyle = BorderStyle.FixedSingle;
             }
             codeBox.KeyDown += (sender, e) => { if (e.KeyCode == Keys.Enter) OnJoinClick(); };
-            hostCode.ReadOnly = true;
             hostCode.Visible = false;
             joinButton.Text = Strings.Join;
             joinButton.MakePrimary();
@@ -287,8 +286,8 @@ namespace Windy10v10AI.Launcher
             var secondaryWidth = Math.Max(P(80), TextRenderer.MeasureText(secondary.Text, secondary.Font).Width + P(28));
             if (hostCode.Visible)
             {
-                hostCode.SetBounds(P(20), P(y + 24), P(130), P(34));
-                secondary.SetBounds(P(158), P(y + 24), secondaryWidth, hostCode.Height);
+                hostCode.SetBounds(P(20), P(y + 24), P(150), P(36));
+                secondary.SetBounds(P(178), P(y + 24), secondaryWidth, P(36));
                 hint.SetBounds(P(20), P(y + 64), P(440), P(20));
                 action.SetBounds(P(20), P(y + 88), actionWidth, P(30));
             }
@@ -547,7 +546,7 @@ namespace Windy10v10AI.Launcher
                     var shown = code;
                     UI(() =>
                     {
-                        hostCode.Text = shown;
+                        hostCode.Code = shown;
                         hostCode.Visible = true;
                         ShowPlayers(true);
                         ShowProgress(Strings.RoomCode, "", Strings.Cancel, false);
