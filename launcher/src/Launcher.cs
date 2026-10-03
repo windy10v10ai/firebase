@@ -57,7 +57,8 @@ namespace Windy10v10AI.Launcher
         readonly float scale;
         readonly PictureBox banner = new PictureBox();
         readonly Label subtitle = new Label();
-        readonly Label version = new Label();
+        readonly LinkLabel version = new LinkLabel();
+        readonly ToolTip tooltip = new ToolTip();
         readonly NoticeBar notice = new NoticeBar();
         readonly ModeButton[] modes = { new ModeButton(), new ModeButton(), new ModeButton() };
         readonly Label status = new Label();
@@ -103,10 +104,14 @@ namespace Windy10v10AI.Launcher
             subtitle.Text = Strings.Subtitle;
             subtitle.Font = new Font(Theme.FontName, 9.75f);
             subtitle.AutoEllipsis = true;
-            version.Text = "v" + Version;
-            version.ForeColor = Theme.Muted;
+            version.Text = "v" + Version + " ↗";
             version.Font = new Font(Theme.FontName, 8.25f);
+            version.LinkColor = Theme.Muted;
+            version.ActiveLinkColor = Theme.Text;
+            version.LinkBehavior = LinkBehavior.HoverUnderline;
             version.TextAlign = ContentAlignment.MiddleRight;
+            version.LinkClicked += delegate { OpenUrl(Updater.DownloadPage + "#changelog"); };
+            tooltip.SetToolTip(version, Strings.Changelog);
             notice.Visible = false;
             notice.Action.Click += delegate { if (noticeAction != null) noticeAction(); };
 
