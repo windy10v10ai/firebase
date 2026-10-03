@@ -17,7 +17,7 @@
 
 - 上传框藏在 `vt-ui-main-upload-form` 的 shadow DOM 里，`find` / `file_upload` 拿不到 ref。先用 `javascript_tool` 往 `document.body` 插一个带 `aria-label` 的 `<input type="file">`，`file_upload` 传给它，再用 `DataTransfer` 把文件赋给 shadow DOM 里的第二个 file input 并派发 `change`，页面会弹出「Confirm upload」，同样在 shadow DOM 里找到这个按钮调 `click()` 即开始扫描
 - 应用内置浏览器（`mcp__Claude_Browser__*`）没有 `file_upload`，本机文件进不了页面，只能请用户手动选文件
-- 扫描完成后页面跳到 `/gui/file/<sha256>`；结果在 shadow DOM 里，`get_page_text` 读不到，用 `javascript_tool` 递归拼 `shadowRoot` 的文本，取检出数与 Microsoft 一栏
+- 扫描完成后页面跳到 `/gui/file/<sha256>`，单次 `javascript_tool` 超过 45 秒会超时，等跳转要分几次轮询；结果在 shadow DOM 里，`get_page_text` 读不到，用 `javascript_tool` 递归拼 `shadowRoot` 的文本，取检出数与 Microsoft 一栏
 
 ## PR 截图
 
