@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { JoinPath } from '../launcher/dto/launcher-room.dto';
+import { LauncherRoomJoin } from '../launcher/entities/launcher-room-join.entity';
+import { LauncherRoom } from '../launcher/entities/launcher-room.entity';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
 import { MemberDto } from '../members/dto/member.dto';
 import { Member } from '../members/entities/members.entity';
@@ -10,6 +13,7 @@ import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
 
 import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
+import { buildJoinResultRow, buildRoomCreatedRow } from './launcher-room-rows';
 import { buildMemberHistoryRow } from './member-history-rows';
 import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
 import {
@@ -23,6 +27,7 @@ const BIGQUERY_LOCATION = 'asia-northeast1';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
 const POINT_HISTORY_TABLE = 'point_history';
 const MEMBER_HISTORY_TABLE = 'member_history';
+const LAUNCHER_ROOM_EVENTS_TABLE = 'launcher_room_events';
 // 分析写入不能拖住业务请求直到函数超时，上限要远小于函数超时
 const INSERT_TIMEOUT_MS = 2000;
 
@@ -58,6 +63,29 @@ export class BigQueryService {
   ): Promise<void> {
     await this.insert(MEMBER_HISTORY_TABLE, [
       buildMemberHistoryRow(purchase, before, after, source, new Date()),
+    ]);
+  }
+
+  /** 记录一次启动器开房。 */
+  async recordRoomCreated(
+    room: LauncherRoom,
+    launcherVersion: string,
+    country: string | undefined,
+  ): Promise<void> {
+    await this.insert(LAUNCHER_ROOM_EVENTS_TABLE, [
+      buildRoomCreatedRow(room, launcherVersion, country, new Date()),
+    ]);
+  }
+
+  /** 记录一次启动器加入的连接结果。 */
+  async recordJoinResult(
+    room: LauncherRoom,
+    join: LauncherRoomJoin,
+    path: JoinPath | undefined,
+    elapsedMs: number,
+  ): Promise<void> {
+    await this.insert(LAUNCHER_ROOM_EVENTS_TABLE, [
+      buildJoinResultRow(room, join, path, elapsedMs, new Date()),
     ]);
   }
 
