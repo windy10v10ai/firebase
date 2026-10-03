@@ -15,8 +15,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.3.3.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.3.3.0")]
+[assembly: System.Reflection.AssemblyVersion("0.3.4.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.3.4.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -44,7 +44,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.3.3";
+        const string Version = "0.3.4";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -401,12 +401,12 @@ namespace Windy10v10AI.Launcher
 
                 WaitForMap(map);
 
-                // Launching the exe directly avoids Steam's confirmation dialog for custom launch arguments
+                // A client started outside Steam fails VAC verification when it later joins an Arcade lobby;
+                // -applaunch goes through Steam without the confirmation dialog that steam://run shows
                 StartDota(new ProcessStartInfo
                 {
-                    FileName = install.Exe,
-                    WorkingDirectory = install.Game,
-                    Arguments = "-novid +connect 127.0.0.1:" + Port,
+                    FileName = Path.Combine(DotaInstall.SteamPath(), "steam.exe"),
+                    Arguments = "-applaunch 570 -novid +connect 127.0.0.1:" + Port,
                     UseShellExecute = false,
                 });
 
