@@ -6,7 +6,9 @@
 
 1. 找到 Steam 里的 Dota 2 和已订阅的地图，检查地图是否最新。
 2. 在后台启动专用服，等地图加载完成。
-3. 启动 Dota 2 并自动连进去；游戏退出后关闭专用服。
+3. 通过 Steam 启动 Dota 2 并自动连进去；游戏退出后关闭专用服。
+
+客户端用 `steam.exe -applaunch` 启动：直接运行 `dota2.exe` 会跳过 Steam 的会话验证，打完一局不退出 Dota 再从游廊开局时被 VAC 拦下；没用 `steam://run`，因为带参数时会弹 Steam 确认框。
 
 每次打开时查一次有没有新版本，有就在提示条上给出「更新」按钮，点击后下载、替换自己并重启。
 
@@ -39,7 +41,8 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
 
 1. 代码 PR：每个改启动器的 PR 都同时升 `src/Launcher.cs` 的 `Version`、`AssemblyVersion` 与 `AssemblyFileVersion`（修 bug 升第三位，新增玩家可见功能升第二位），合进 `develop`。可以攒几个再发版，没发布的版本号跳过即可。
 2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。其他分支、或版本号不比线上新时会直接失败。发布的 exe 必须来自这里，不用本机编译的。
-3. 发版 PR：
+3. 代码签名下来之前，每次发版都把这个 exe 上传到 [VirusTotal](https://www.virustotal.com/) 扫描，Microsoft 一栏必须是 Undetected，检出数写进发版 PR 的测试清单。Defender 报毒时玩家一下载就被隔离，其他引擎零星报毒可以接受。Microsoft 是机器学习判定，只改版本号这类小差异也可能翻转结果，所以扫的必须是要发布的那一个 exe；报毒时改动后重新编译、重扫，通过了才发。
+4. 发版 PR：
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。

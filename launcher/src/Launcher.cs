@@ -15,8 +15,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.3.3.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.3.3.0")]
+[assembly: System.Reflection.AssemblyVersion("0.3.4.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.3.4.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -44,7 +44,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.3.3";
+        const string Version = "0.3.4";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -57,7 +57,8 @@ namespace Windy10v10AI.Launcher
         readonly float scale;
         readonly PictureBox banner = new PictureBox();
         readonly Label subtitle = new Label();
-        readonly Label version = new Label();
+        readonly LinkLabel version = new LinkLabel();
+        readonly ToolTip tooltip = new ToolTip();
         readonly NoticeBar notice = new NoticeBar();
         readonly ModeButton[] modes = { new ModeButton(), new ModeButton(), new ModeButton() };
         readonly Label status = new Label();
@@ -103,10 +104,14 @@ namespace Windy10v10AI.Launcher
             subtitle.Text = Strings.Subtitle;
             subtitle.Font = new Font(Theme.FontName, 9.75f);
             subtitle.AutoEllipsis = true;
-            version.Text = "v" + Version;
-            version.ForeColor = Theme.Muted;
+            version.Text = "v" + Version + " ↗";
             version.Font = new Font(Theme.FontName, 8.25f);
+            version.LinkColor = Theme.Muted;
+            version.ActiveLinkColor = Theme.Text;
+            version.LinkBehavior = LinkBehavior.HoverUnderline;
             version.TextAlign = ContentAlignment.MiddleRight;
+            version.LinkClicked += delegate { OpenUrl(Updater.DownloadPage + "#changelog"); };
+            tooltip.SetToolTip(version, Strings.Changelog);
             notice.Visible = false;
             notice.Action.Click += delegate { if (noticeAction != null) noticeAction(); };
 
@@ -387,7 +392,6 @@ namespace Windy10v10AI.Launcher
                 logFile = Path.Combine(install.Game, @"dota\dedicated.log");
                 if (File.Exists(logFile)) File.Delete(logFile);
 
-                // Minimized, not hidden: hiding another process's window gets the launcher flagged as a trojan by Defender
                 server = StartDota(new ProcessStartInfo
                 {
                     FileName = install.Exe,
@@ -395,18 +399,19 @@ namespace Windy10v10AI.Launcher
                     Arguments = "-dedicated -console -allow_no_lobby_connect -ip 127.0.0.1 -port " + Port +
                         " -con_logfile dedicated.log +sv_hibernate_when_empty 0 +dota_quit_after_game 0" +
                         " \"+map " + map + " gamemode=15 customgamemode=" + id + " nomapvalidation=1\"",
-                    UseShellExecute = true,
-                    WindowStyle = ProcessWindowStyle.Minimized,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
                 });
 
                 WaitForMap(map);
 
-                // Launching the exe directly avoids Steam's confirmation dialog for custom launch arguments
+                // A client started outside Steam fails VAC verification when it later joins an Arcade lobby;
+                // -applaunch goes through Steam without the confirmation dialog that steam://run shows
                 StartDota(new ProcessStartInfo
                 {
-                    FileName = install.Exe,
-                    WorkingDirectory = install.Game,
-                    Arguments = "-novid +connect 127.0.0.1:" + Port,
+                    FileName = Path.Combine(DotaInstall.SteamPath(), "steam.exe"),
+                    Arguments = "-applaunch 570 -novid +connect 127.0.0.1:" + Port,
                     UseShellExecute = false,
                 });
 
@@ -449,7 +454,12 @@ namespace Windy10v10AI.Launcher
             {
                 if (stopping) throw new OperationCanceledException();
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
-                if (ReadShared(logFile).Contains(ready)) return;
+                NativeMethods.HideWindowsOf(server.Id);
+                if (ReadShared(logFile).Contains(ready))
+                {
+                    NativeMethods.HideWindowsOf(server.Id);
+                    return;
+                }
                 var waited = (DateTime.Now - started).TotalSeconds;
                 if (waited > TimeoutSeconds) throw new LaunchError(Strings.Timeout, true);
                 if (waited > SlowSeconds && !slowShown)
@@ -469,6 +479,7 @@ namespace Windy10v10AI.Launcher
             {
                 Thread.Sleep(3000);
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
+                NativeMethods.HideWindowsOf(serverId);
                 var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count;
                 if (clients > 0) seen = true;
                 else if (seen) break;
@@ -635,5 +646,32 @@ namespace Windy10v10AI.Launcher
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool CreateHardLink(string fileName, string existingFileName, IntPtr securityAttributes);
+
+        delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr param);
+
+        [DllImport("user32.dll")]
+        static extern bool EnumWindows(EnumWindowsProc callback, IntPtr param);
+
+        [DllImport("user32.dll")]
+        static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
+
+        [DllImport("user32.dll")]
+        static extern bool IsWindowVisible(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hwnd, int command);
+
+        // The dedicated server opens its own console window however it is started.
+        // Hiding another process's window has tripped Defender before, so every release is scanned first (README)
+        public static void HideWindowsOf(int pid)
+        {
+            EnumWindows((hwnd, param) =>
+            {
+                uint owner;
+                GetWindowThreadProcessId(hwnd, out owner);
+                if (owner == pid && IsWindowVisible(hwnd)) ShowWindow(hwnd, 0);
+                return true;
+            }, IntPtr.Zero);
+        }
     }
 }
