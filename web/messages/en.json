@@ -151,15 +151,14 @@
       "latest": "Latest",
       "entries": {
         "v0_3_4": [
-          "Fixed a VAC warning when starting an Arcade game after a launcher game without closing Dota 2",
+          "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game",
           "The server window no longer shows while you play",
-          "Shows what to do when antivirus blocks Dota 2 from starting",
-          "Click the version number in the top right to open this changelog"
+          "Bug fixes and improvements"
         ],
-        "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus and quarantining it"],
-        "v0_3_1": ["Old files are cleaned up after an automatic update"],
-        "v0_3_0": ["One-click update: when a new version is out, click to update and restart"],
-        "v0_2_1": ["Fixed an up-to-date map being reported as outdated"],
+        "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus"],
+        "v0_3_1": ["Bug fixes"],
+        "v0_3_0": ["One-click updates"],
+        "v0_2_1": ["Bug fixes"],
         "v0_2_0": [
           "First release: one click runs a local server and joins it for a smoother late game"
         ]

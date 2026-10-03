@@ -46,7 +46,7 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。
-   - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只写玩家感受得到的变化；跳过未发布的版本，它们的改动并进本版。启动器右上角的版本号链接到这一节。
+   - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只单独列对玩家影响大的主要变化，其余小修小改合成一句「修复了一些问题，优化了使用体验」，不逐条写技术细节；跳过未发布的版本，它们的改动并进本版。启动器右上角的版本号链接到这一节。
 
 同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。
 
