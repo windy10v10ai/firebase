@@ -412,6 +412,8 @@ namespace Windy10v10AI.Launcher
             var state = RefreshMapState();
             // An outdated map only warns, so an unfinished or failed version check does not block starting either
             if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing) return;
+            // Friends must run the same map version, and Steam rewriting the map mid-load stalls the server
+            if (modeBar.Selected == 1 && state == MapState.Outdated) return;
 
             if (DotaProcesses().Count > 0 &&
                 !ConfirmDialog.Ask(this, Strings.DotaRunningTitle, Strings.DotaRunningBody, Strings.CloseAndStart))
@@ -459,6 +461,7 @@ namespace Windy10v10AI.Launcher
                 Dictionary<string, object> hostBody = null;
                 if (room)
                 {
+                    UI(() => status.Text = Strings.OpeningRoom);
                     hostTunnel = new HostTunnel();
                     bool upnp, publicIp;
                     var candidates = hostTunnel.Gather(out upnp, out publicIp);
@@ -476,6 +479,15 @@ namespace Windy10v10AI.Launcher
                     }
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.Start();
+                    // The code is ready long before the server, so the host can share it while waiting
+                    var shown = code;
+                    UI(() =>
+                    {
+                        hostCode.Text = shown;
+                        hostCode.Visible = true;
+                        ShowProgress(Strings.RoomCode, "", Strings.Cancel, false);
+                        ShowSecondary(Strings.Copy, () => Clipboard.SetText(shown));
+                    });
                 }
 
                 logFile = Path.Combine(install.Game, @"dota\dedicated.log");
@@ -495,6 +507,7 @@ namespace Windy10v10AI.Launcher
                 });
 
                 WaitForMap(map);
+                UI(() => hint.Text = Strings.OpeningDota);
 
                 StartClient();
 
@@ -510,10 +523,9 @@ namespace Windy10v10AI.Launcher
                         ShowProgress(Strings.InGame, Strings.InGameHint, Strings.StopServer, false);
                         return;
                     }
-                    hostCode.Text = code;
-                    hostCode.Visible = true;
-                    ShowProgress(Strings.RoomCode, Strings.RoomHostingHint, Strings.StopServer, false);
-                    ShowSecondary(Strings.Copy, () => Clipboard.SetText(code));
+                    hint.Text = Strings.RoomHostingHint;
+                    action.Text = Strings.StopServer;
+                    Relayout();
                 });
                 if (code != null)
                 {
@@ -546,7 +558,6 @@ namespace Windy10v10AI.Launcher
         {
             var ready = "Host activate: Loading (" + map + ")";
             var started = DateTime.Now;
-            var slowShown = false;
             while (true)
             {
                 if (stopping) throw new OperationCanceledException();
@@ -559,11 +570,8 @@ namespace Windy10v10AI.Launcher
                 }
                 var waited = (DateTime.Now - started).TotalSeconds;
                 if (waited > TimeoutSeconds) throw new LaunchError(Strings.Timeout, true);
-                if (waited > SlowSeconds && !slowShown)
-                {
-                    slowShown = true;
-                    UI(() => hint.Text = Strings.SlowHint);
-                }
+                var text = string.Format(waited > SlowSeconds ? Strings.ServerSlow : Strings.ServerStarting, (int)waited);
+                UI(() => hint.Text = text);
                 Thread.Sleep(1000);
             }
         }

@@ -25,7 +25,10 @@ namespace Windy10v10AI.Launcher
         public static string Starting { get { return Pick("正在启动，请稍候…", "Starting, please wait...", "Запуск, подождите…"); } }
         public static string StartingSub { get { return Pick("启动中…", "Starting…", "Запуск…"); } }
         public static string StartingHint { get { return Pick("通常需要 30 秒到 1 分钟，完成后会自动打开 Dota 2", "Usually takes 30 seconds to a minute. Dota 2 opens when ready.", "Обычно это занимает до минуты. Dota 2 откроется автоматически."); } }
-        public static string SlowHint { get { return Pick("比平时慢一些，仍在启动中…", "Taking longer than usual, still starting...", "Дольше обычного, запуск продолжается…"); } }
+        public static string ServerStarting { get { return Pick("正在启动服务器，已等待 {0} 秒（通常 30 秒到 1 分钟）", "Starting the server, {0}s so far (usually 30-60s)", "Запуск сервера: {0} с (обычно 30–60 с)"); } }
+        public static string ServerSlow { get { return Pick("比平时慢，仍在启动服务器，已等待 {0} 秒", "Slower than usual, still starting the server: {0}s", "Дольше обычного, сервер ещё запускается: {0} с"); } }
+        public static string OpeningDota { get { return Pick("服务器已就绪，正在打开 Dota 2…", "Server ready, opening Dota 2...", "Сервер готов, открываем Dota 2…"); } }
+        public static string OpeningRoom { get { return Pick("正在创建联机房间…", "Creating the room...", "Создание комнаты…"); } }
         public static string ClosingDota { get { return Pick("正在关闭 Dota 2…", "Closing Dota 2...", "Закрываем Dota 2…"); } }
         public static string InGame { get { return Pick("游戏中", "In game", "В игре"); } }
         public static string InGameHint { get { return Pick("关闭 Dota 2 后服务器会自动关闭", "The server stops when you close Dota 2", "Сервер остановится после закрытия Dota 2"); } }
@@ -86,7 +89,7 @@ namespace Windy10v10AI.Launcher
         public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
         public static string Rejoin { get { return Pick("重新进入游戏", "Rejoin game", "Вернуться в игру"); } }
-        public static string HostLost { get { return Pick("与房主的连接已断开。", "Lost the connection to the host.", "Соединение с хостом потеряно."); } }
+        public static string HostLost { get { return Pick("房主已关闭游戏，或连接已断开。", "The host closed the game or the connection was lost.", "Хост закрыл игру, или соединение потеряно."); } }
 
         public static string DotaRunningTitle { get { return Pick("Dota 2 正在运行", "Dota 2 is running", "Dota 2 запущена"); } }
         public static string DotaRunningBody { get { return Pick("需要先关闭 Dota 2，再用本地服务器重新启动。正在进行的对局会断开。", "Dota 2 will be closed and restarted with the local server. Any match in progress will be disconnected.", "Dota 2 будет закрыта и перезапущена с локальным сервером. Текущий матч будет прерван."); } }

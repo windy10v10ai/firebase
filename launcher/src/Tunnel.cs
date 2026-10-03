@@ -15,6 +15,8 @@ namespace Windy10v10AI.Launcher
         public const byte Data = 3;
         public const byte Keepalive = 4;
         public const byte Select = 5;
+        // Sent when either side stops on purpose, so the other side does not wait for a timeout
+        public const byte Bye = 6;
     }
 
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
@@ -256,6 +258,13 @@ namespace Windy10v10AI.Launcher
 
         public override void Dispose()
         {
+            lock (sync)
+            {
+                foreach (var peer in peers.Values)
+                {
+                    for (var i = 0; i < 3; i++) SendTo(peer, Packet.Bye, new byte[0]);
+                }
+            }
             base.Dispose();
             lock (sync)
             {
@@ -403,6 +412,11 @@ namespace Windy10v10AI.Launcher
                     return;
                 }
                 if (host == null || !from.Equals(host)) return;
+                if (data[0] == Packet.Bye)
+                {
+                    Lost = true;
+                    return;
+                }
                 lastReceived = DateTime.UtcNow;
                 if (data[0] == Packet.Data && dota != null)
                 {
@@ -430,6 +444,13 @@ namespace Windy10v10AI.Launcher
 
         public override void Dispose()
         {
+            lock (sync)
+            {
+                if (host != null && !Closed)
+                {
+                    for (var i = 0; i < 3; i++) Send(Packet.Bye, new byte[0], host);
+                }
+            }
             base.Dispose();
             if (local != null) local.Close();
         }
