@@ -246,6 +246,8 @@ git add -A && git commit -m "Add screenshots for PR #<PR 编号>" && git push or
 
 用完 `git worktree remove <临时目录>/wt-assets --force` 清掉。
 
+**重拍后换新文件名**（如加 `-v2`）再改 PR 正文的链接，不要覆盖原文件：GitHub 按图片网址缓存 PR 里的图，同名覆盖后 PR 页面仍显示旧图。
+
 正文按 raw 链接引用，仓库是公开的，Markdown 可直接渲染：
 
 ```

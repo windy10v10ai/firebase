@@ -1,4 +1,5 @@
 interface SectionProps {
+  id?: string;
   title?: string;
   children: React.ReactNode;
   className?: string;
@@ -7,6 +8,7 @@ interface SectionProps {
 }
 
 export default function Section({
+  id,
   title,
   children,
   className = '',
@@ -14,7 +16,7 @@ export default function Section({
   titleClassName = '',
 }: SectionProps) {
   return (
-    <section className={`card-container card-pad ${className}`}>
+    <section id={id} className={`card-container card-pad ${className}`}>
       {title && <h2 className={`title-secondary mb-6 text-center ${titleClassName}`}>{title}</h2>}
       <div className={`max-w-3xl mx-auto ${containerClassName}`}>
         {children}
