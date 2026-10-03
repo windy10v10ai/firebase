@@ -146,10 +146,24 @@
       "runAnyway": "Run anyway",
       "dontRun": "Don't run"
     },
-    "website": {
-      "title": "Attributes and awakenings happen on this site only",
-      "body": "To keep player data safe, spending attribute points, resetting them and awakening heroes happen on this site only; the in-game buttons for attributes and awakening open this site. Changes apply from your next game.",
-      "checkIn": "The daily check-in can be claimed here, and it is also claimed automatically when you start a game."
+    "changelog": {
+      "title": "Changelog",
+      "latest": "Latest",
+      "entries": {
+        "v0_3_4": [
+          "Fixed a VAC warning when starting an Arcade game after a launcher game without closing Dota 2",
+          "The server window no longer shows while you play",
+          "Shows what to do when antivirus blocks Dota 2 from starting",
+          "Click the version number in the top right to open this changelog"
+        ],
+        "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus and quarantining it"],
+        "v0_3_1": ["Old files are cleaned up after an automatic update"],
+        "v0_3_0": ["One-click update: when a new version is out, click to update and restart"],
+        "v0_2_1": ["Fixed an up-to-date map being reported as outdated"],
+        "v0_2_0": [
+          "First release: one click runs a local server and joins it for a smoother late game"
+        ]
+      }
     },
     "homeCard": {
       "title": "How to start the game",
