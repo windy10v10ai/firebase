@@ -104,6 +104,8 @@ export class LauncherProfileDto {
 export class PendingJoinDto extends LauncherProfileDto {
   @ApiProperty()
   joinId: string;
+  @ApiProperty({ description: '加入者自报的 32 位账号 ID，房主用它对上专用服日志里进入游戏的玩家' })
+  steamId: number;
   @ApiProperty()
   joinToken: string;
   @ApiProperty({ type: [String] })

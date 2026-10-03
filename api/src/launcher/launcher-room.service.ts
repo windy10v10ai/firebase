@@ -77,6 +77,7 @@ export class LauncherRoomService {
       joins: joins.map((join) => ({
         joinId: join.id,
         joinToken: join.joinToken,
+        steamId: join.steamId,
         candidates: join.candidates,
         personaName: join.personaName,
         avatarUrl: join.avatarUrl,

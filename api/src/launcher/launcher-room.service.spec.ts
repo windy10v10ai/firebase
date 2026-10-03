@@ -108,6 +108,7 @@ describe('LauncherRoomService', () => {
       {
         joinId: joined.joinId,
         joinToken: joined.joinToken,
+        steamId: 2002,
         candidates: JOINER.candidates,
         personaName: 'CalmDown!',
         avatarUrl: undefined,
