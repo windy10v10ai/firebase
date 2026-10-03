@@ -70,8 +70,9 @@ namespace Windy10v10AI.Launcher
         public static string JoinRoom { get { return Pick("加入联机", "Join", "Присоединиться"); } }
         public static string HostIdle { get { return Pick("点击难度，创建联机主机", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
         public static string JoinPrompt { get { return Pick("输入房主发来的房间码", "Enter the room code from the host", "Введите код комнаты от хоста"); } }
-        public static string JoinHint { get { return Pick("难度由房主决定，连上后会自动打开 Dota 2", "The host picks the difficulty. Dota 2 opens once connected.", "Сложность выбирает хост. Dota 2 откроется после подключения."); } }
+        public static string JoinHint { get { return Pick("难度由房主决定。连上后会自动打开 Dota 2", "The host picks the difficulty. Dota 2 opens once connected.", "Сложность выбирает хост. Dota 2 откроется после подключения."); } }
         public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
+        public static string CodeExample { get { return Pick("例：Z82QCT", "e.g. Z82QCT", "Например: Z82QCT"); } }
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }

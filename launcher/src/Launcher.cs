@@ -78,7 +78,7 @@ namespace Windy10v10AI.Launcher
         readonly SegmentedBar modeBar = new SegmentedBar();
         readonly Label joinPrompt = new Label();
         readonly Label joinHint = new Label();
-        readonly TextBox codeBox = new TextBox();
+        readonly CodeInput codeBox = new CodeInput();
         readonly CodeDisplay hostCode = new CodeDisplay();
         readonly PlayerList players = new PlayerList();
         readonly InfoCard mapCard = new InfoCard();
@@ -199,16 +199,8 @@ namespace Windy10v10AI.Launcher
             joinPrompt.Font = new Font(Theme.FontName, 9.75f);
             joinHint.Text = Strings.JoinHint;
             joinHint.ForeColor = Theme.Muted;
-            foreach (var box in new[] { codeBox })
-            {
-                box.Font = new Font("Consolas", 16f);
-                box.MaxLength = 6;
-                box.CharacterCasing = CharacterCasing.Upper;
-                box.BackColor = Theme.Panel;
-                box.ForeColor = Theme.Text;
-                box.BorderStyle = BorderStyle.FixedSingle;
-            }
-            codeBox.KeyDown += (sender, e) => { if (e.KeyCode == Keys.Enter) OnJoinClick(); };
+            codeBox.Placeholder = Strings.CodeExample;
+            codeBox.Submit += delegate { OnJoinClick(); };
             hostCode.Visible = false;
             joinButton.Text = Strings.Join;
             joinButton.MakePrimary();
@@ -274,9 +266,9 @@ namespace Windy10v10AI.Launcher
             mapCard.SetBounds(P(20), P(y), P(440), P(118));
             for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
             joinPrompt.SetBounds(P(20), P(y), P(440), P(22));
-            codeBox.SetBounds(P(20), P(y + 26), P(330), P(34));
-            joinButton.SetBounds(P(360), P(y + 26), P(100), P(34));
-            joinHint.SetBounds(P(20), P(y + 66), P(440), P(18));
+            codeBox.SetBounds(P(20), P(y + 28), P(340), P(40));
+            joinButton.SetBounds(P(370), P(y + 28), P(90), P(40));
+            joinHint.SetBounds(P(20), P(y + 76), P(440), P(18));
             y += playersShown ? 180 : (cardShown ? 130 : 96);
             // Notices share the status area below the buttons so the window never shifts
             notice.SetBounds(P(20), P(y), P(440), P(52));
@@ -643,7 +635,7 @@ namespace Windy10v10AI.Launcher
         void OnJoinClick()
         {
             if (busy) return;
-            var code = codeBox.Text.Trim().ToUpperInvariant();
+            var code = codeBox.Code;
             if (code.Length != 6)
             {
                 ShowNotice(NoticeKind.Error, Strings.InvalidCode, false);

@@ -654,6 +654,111 @@ namespace Windy10v10AI.Launcher
         }
     }
 
+    // A painted box for typing the room code: a TextBox cannot round its border or space its letters
+    class CodeInput : PaintedControl
+    {
+        const int MaxLength = 6;
+        string code = "";
+        public string Placeholder = "";
+        public event EventHandler Submit;
+
+        public CodeInput()
+        {
+            SetStyle(ControlStyles.Selectable, true);
+            TabStop = true;
+            ImeMode = ImeMode.Disable;
+            Cursor = Cursors.IBeam;
+        }
+
+        public string Code
+        {
+            get { return code; }
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            Focus();
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+        protected override void OnLostFocus(EventArgs e) { Invalidate(); base.OnLostFocus(e); }
+        protected override void OnEnabledChanged(EventArgs e) { Invalidate(); base.OnEnabledChanged(e); }
+
+        protected override bool IsInputKey(Keys keyData)
+        {
+            return keyData == Keys.Back || base.IsInputKey(keyData);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && Submit != null) Submit(this, EventArgs.Empty);
+            else if (e.KeyCode == Keys.Back && code.Length > 0) Append(null, code.Length - 1);
+            else if (e.Control && e.KeyCode == Keys.V && Clipboard.ContainsText()) Append(Clipboard.GetText(), 0);
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            if (char.IsLetterOrDigit(e.KeyChar)) Append(e.KeyChar.ToString(), code.Length);
+            e.Handled = true;
+        }
+
+        // Pasted text keeps only letters and digits so a code copied with spaces or quotes still fits
+        void Append(string text, int keep)
+        {
+            var next = code.Substring(0, keep);
+            if (text != null)
+            {
+                foreach (var c in text.ToUpperInvariant())
+                {
+                    if (char.IsLetterOrDigit(c) && c < 128) next += c;
+                }
+            }
+            if (next.Length > MaxLength) next = next.Substring(0, MaxLength);
+            if (next == code) return;
+            code = next;
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            var border = Focused && Enabled ? Theme.Accent : Theme.Border;
+            using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 6 * s))
+            using (var brush = new SolidBrush(Theme.Panel))
+            using (var pen = new Pen(border, Math.Max(1f, s)))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(pen, path);
+            }
+            var left = 14 * s;
+            if (code.Length == 0)
+            {
+                using (var font = new Font(Theme.FontName, 10f))
+                {
+                    TextRenderer.DrawText(g, Placeholder, font, new Rectangle((int)left, 0, Width - (int)left, Height), Theme.Faint,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                }
+            }
+            var cell = 20 * s;
+            using (var font = new Font("Consolas", 15f))
+            {
+                for (var i = 0; i < code.Length; i++)
+                {
+                    TextRenderer.DrawText(g, code.Substring(i, 1), font, new Rectangle((int)(left + i * cell), 0, (int)cell, Height),
+                        Enabled ? Theme.Text : Theme.Muted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                }
+            }
+            if (Focused && Enabled && code.Length < MaxLength)
+            {
+                var x = left + code.Length * cell + (code.Length == 0 ? 0 : 2 * s);
+                using (var pen = new Pen(Theme.Text, Math.Max(1f, s))) g.DrawLine(pen, x, Height * 0.28f, x, Height * 0.72f);
+            }
+        }
+    }
+
     // Takes the place of the mode buttons when an online mode cannot start, with the one action that helps
     class InfoCard : PaintedControl
     {
