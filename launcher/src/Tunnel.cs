@@ -17,6 +17,8 @@ namespace Windy10v10AI.Launcher
         public const byte Select = 5;
         // Sent when either side stops on purpose, so the other side does not wait for a timeout
         public const byte Bye = 6;
+        // One player of the host's roster, so joiners see the same list as the host
+        public const byte Roster = 7;
     }
 
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
@@ -149,6 +151,8 @@ namespace Windy10v10AI.Launcher
 
         // joinId, the reported path or null when the handshake failed, and milliseconds taken
         public event Action<string, string, int> JoinFinished;
+        public event Action<string> JoinLeft;
+        public Func<List<RosterEntry>> RosterSource;
 
         public HostTunnel()
         {
@@ -157,10 +161,14 @@ namespace Windy10v10AI.Launcher
                 while (!Closed)
                 {
                     Thread.Sleep(2000);
+                    var source = RosterSource;
+                    var roster = source == null ? new List<RosterEntry>() : source();
                     lock (sync)
                     {
                         foreach (var peer in peers.Values)
                         {
+                            // Roster packets go out every two seconds, so they also keep the route open
+                            for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                         }
                     }
@@ -207,6 +215,11 @@ namespace Windy10v10AI.Launcher
                 if (data[0] == Packet.Select && data.Length == 2 && data[1] < PathType.Preference.Length && !paths.ContainsKey(owner))
                 {
                     paths[owner] = PathType.Preference[data[1]];
+                }
+                else if (data[0] == Packet.Bye)
+                {
+                    var left = JoinLeft;
+                    if (left != null) left(joinIds[owner]);
                 }
                 else if (data[0] == Packet.Data)
                 {
@@ -279,6 +292,7 @@ namespace Windy10v10AI.Launcher
         const int SettleMs = 300;
         // Gives up after this long without the host, which by then has most likely closed the game
         const int GiveUpMs = 90000;
+        const int QuietMs = 7000;
 
         readonly object sync = new object();
         readonly Dictionary<IPEndPoint, string> reached = new Dictionary<IPEndPoint, string>();
@@ -291,6 +305,10 @@ namespace Windy10v10AI.Launcher
         DateTime lastSent;
 
         public volatile bool Lost;
+        readonly Dictionary<int, RosterEntry> roster = new Dictionary<int, RosterEntry>();
+        int rosterCount = -1;
+        // Shown until the host's own list arrives
+        public List<RosterEntry> Placeholder = new List<RosterEntry>();
 
         // Returns the path type that connected, or null when nothing answered in the handshake window
         public string Connect(string joinToken, List<Candidate> hostCandidates)
@@ -336,6 +354,27 @@ namespace Windy10v10AI.Launcher
                 }
             }
             return null;
+        }
+
+        public List<RosterEntry> Roster()
+        {
+            lock (sync)
+            {
+                if (rosterCount < 0) return Placeholder;
+                var list = new List<RosterEntry>();
+                for (var i = 0; i < rosterCount; i++)
+                {
+                    RosterEntry entry;
+                    if (roster.TryGetValue(i, out entry)) list.Add(entry);
+                }
+                return list;
+            }
+        }
+
+        // The host sends its roster every two seconds, so missing a few rounds already means trouble
+        public bool Silent
+        {
+            get { lock (sync) return host != null && (DateTime.UtcNow - lastReceived).TotalMilliseconds > QuietMs; }
         }
 
         // Opens the local port Dota connects to and starts watching the link
@@ -418,6 +457,25 @@ namespace Windy10v10AI.Launcher
                     return;
                 }
                 lastReceived = DateTime.UtcNow;
+                if (data[0] == Packet.Roster)
+                {
+                    try
+                    {
+                        int index, count;
+                        var entry = RosterEntry.Decode(data, 1, out index, out count);
+                        if (count != rosterCount)
+                        {
+                            roster.Clear();
+                            rosterCount = count;
+                        }
+                        roster[index] = entry;
+                    }
+                    catch (Exception)
+                    {
+                        // A malformed entry is skipped; the next round replaces it
+                    }
+                    return;
+                }
                 if (data[0] == Packet.Data && dota != null)
                 {
                     try

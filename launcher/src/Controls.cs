@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
@@ -437,6 +438,240 @@ namespace Windy10v10AI.Launcher
                 var color = on ? Theme.Text : (Enabled ? Theme.Muted : Theme.Faint);
                 TextRenderer.DrawText(g, Items[i], Font, Rectangle.Round(rect), color,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            }
+        }
+    }
+
+    // Shows everyone in the room in two columns; the host builds the list and joiners receive it through the tunnel
+    class PlayerList : PaintedControl
+    {
+        static readonly Color Loading = ColorTranslator.FromHtml("#6aa9e9");
+        static readonly Color LoadingText = ColorTranslator.FromHtml("#9fc6ef");
+        static readonly Color ErrorText = ColorTranslator.FromHtml("#f0868a");
+        static readonly Color TagText = ColorTranslator.FromHtml("#f0a283");
+        static readonly Color TagBorder = ColorTranslator.FromHtml("#6b4a3a");
+        static readonly Color Card = ColorTranslator.FromHtml("#2a2420");
+        static readonly Color[] Tints = { ColorTranslator.FromHtml("#9ec7a8"), ColorTranslator.FromHtml("#a9c4e6"), ColorTranslator.FromHtml("#e8cf9a"), ColorTranslator.FromHtml("#c9b6e0"), ColorTranslator.FromHtml("#e6a6a6") };
+
+        List<RosterEntry> players = new List<RosterEntry>();
+        long me;
+        string banner;
+        int scroll;
+
+        public void SetPlayers(List<RosterEntry> list, long self, string warning)
+        {
+            players = list;
+            me = self;
+            banner = warning;
+            scroll = Math.Max(0, Math.Min(scroll, MaxScroll()));
+            Invalidate();
+        }
+
+        int Top0 { get { return (int)((banner == null ? 26 : 46) * DpiScale); } }
+        int RowHeight { get { return (int)(46 * DpiScale); } }
+
+        int MaxScroll()
+        {
+            var rows = (players.Count + 1) / 2;
+            return Math.Max(0, Top0 + rows * RowHeight - Height);
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            scroll = Math.Max(0, Math.Min(MaxScroll(), scroll - e.Delta / 3));
+            Invalidate();
+            base.OnMouseWheel(e);
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            // The list scrolls with the wheel only while it holds focus
+            Focus();
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 8 * s))
+            using (var brush = new SolidBrush(Theme.Panel))
+            using (var pen = new Pen(Theme.Border, Math.Max(1f, s)))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(pen, path);
+            }
+            using (var small = new Font(Theme.FontName, 8.25f))
+            {
+                var pad = (int)(10 * s);
+                TextRenderer.DrawText(g, Strings.PlayersInRoom, small, new Rectangle(pad, (int)(6 * s), Width / 2, (int)(16 * s)), Theme.Muted, TextFormatFlags.Left | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, string.Format(Strings.PlayerCount, players.Count), small, new Rectangle(Width / 2, (int)(6 * s), Width / 2 - pad, (int)(16 * s)), Theme.Muted, TextFormatFlags.Right | TextFormatFlags.NoPadding);
+                if (banner != null)
+                {
+                    TextRenderer.DrawText(g, banner, small, new Rectangle(pad, (int)(24 * s), Width - 2 * pad, (int)(16 * s)), Theme.Warning, TextFormatFlags.Left | TextFormatFlags.NoPadding);
+                }
+            }
+
+            var clip = new Rectangle(1, Top0, Width - 2, Height - Top0 - 2);
+            g.SetClip(clip);
+            var colWidth = (Width - (int)(26 * s)) / 2;
+            for (var i = 0; i < players.Count; i++)
+            {
+                var x = (int)(10 * s) + (i % 2) * (colWidth + (int)(6 * s));
+                var y = Top0 + (i / 2) * RowHeight - scroll;
+                DrawPlayer(g, players[i], new Rectangle(x, y, colWidth, (int)(40 * s)));
+            }
+            g.ResetClip();
+        }
+
+        void DrawPlayer(Graphics g, RosterEntry player, Rectangle rect)
+        {
+            var s = DpiScale;
+            using (var path = Theme.Rounded(rect, 6 * s))
+            using (var brush = new SolidBrush(Card)) g.FillPath(brush, path);
+
+            Color dot, statusColor, nameColor = Theme.Text, ring = Color.Empty;
+            string text;
+            var fade = 255;
+            var dashed = false;
+            switch (player.Status)
+            {
+                case PlayerStatus.Connecting:
+                    dot = statusColor = ring = Theme.Warning; text = Strings.StatusConnecting; fade = 190; dashed = true; break;
+                case PlayerStatus.Loading:
+                    dot = ring = Loading; statusColor = LoadingText; text = Strings.StatusLoading; break;
+                case PlayerStatus.Failed:
+                    dot = Theme.Error; statusColor = ErrorText; nameColor = Theme.Muted; text = Strings.StatusFailed; fade = 100; break;
+                case PlayerStatus.Left:
+                    dot = statusColor = nameColor = Theme.Faint; text = Strings.StatusLeft; fade = 90; break;
+                default:
+                    dot = Theme.Ok; statusColor = Theme.Muted; text = Strings.StatusInGame; break;
+            }
+
+            var d = 28 * s;
+            var avatar = new RectangleF(rect.X + 8 * s, rect.Y + (rect.Height - d) / 2, d, d);
+            if (ring != Color.Empty)
+            {
+                using (var pen = new Pen(ring, 2 * s))
+                {
+                    if (dashed) pen.DashPattern = new[] { 2f, 1.5f };
+                    g.DrawEllipse(pen, avatar);
+                }
+            }
+            var inner = RectangleF.Inflate(avatar, -3 * s, -3 * s);
+            var image = Avatars.Get(player.AvatarUrl);
+            using (var circle = new GraphicsPath())
+            {
+                circle.AddEllipse(inner);
+                if (image != null)
+                {
+                    g.SetClip(circle, CombineMode.Intersect);
+                    var attributes = new System.Drawing.Imaging.ImageAttributes();
+                    attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = fade / 255f });
+                    g.DrawImage(image, Rectangle.Round(inner), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                    g.ResetClip();
+                    g.SetClip(new Rectangle(1, Top0, Width - 2, Height - Top0 - 2));
+                }
+                else
+                {
+                    var tint = Tints[(int)(Math.Abs(player.SteamId) % Tints.Length)];
+                    using (var brush = new SolidBrush(Color.FromArgb(fade, tint))) g.FillPath(brush, circle);
+                    var initial = string.IsNullOrEmpty(player.Name) ? "?" : player.Name.Substring(0, 1).ToUpperInvariant();
+                    using (var font = new Font(Theme.FontName, 8.25f, FontStyle.Bold))
+                    {
+                        TextRenderer.DrawText(g, initial, font, Rectangle.Round(inner), Theme.Background,
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    }
+                }
+            }
+
+            var left = (int)(avatar.Right + 8 * s);
+            var tag = player.IsHost ? Strings.TagHost : (player.SteamId != 0 && player.SteamId == me ? Strings.TagMe : null);
+            using (var nameFont = new Font(Theme.FontName, 9f))
+            using (var tagFont = new Font(Theme.FontName, 7f))
+            using (var statusFont = new Font(Theme.FontName, 7.5f))
+            {
+                var tagWidth = tag == null ? 0 : TextRenderer.MeasureText(tag, tagFont).Width + (int)(4 * s);
+                var nameWidth = rect.Right - left - (int)(8 * s) - (tag == null ? 0 : tagWidth + (int)(5 * s));
+                var nameRect = new Rectangle(left, rect.Y + (int)(4 * s), nameWidth, (int)(18 * s));
+                TextRenderer.DrawText(g, player.Name ?? Strings.Player, nameFont, nameRect, nameColor,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                if (tag != null)
+                {
+                    var measured = Math.Min(nameWidth, TextRenderer.MeasureText(player.Name ?? Strings.Player, nameFont).Width);
+                    var tagRect = new Rectangle(left + measured + (int)(5 * s), nameRect.Y + (int)(2 * s), tagWidth, (int)(14 * s));
+                    using (var pen = new Pen(TagBorder, Math.Max(1f, s))) g.DrawRectangle(pen, tagRect);
+                    TextRenderer.DrawText(g, tag, tagFont, tagRect, TagText, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                }
+                var dy = rect.Y + (int)(26 * s);
+                using (var brush = new SolidBrush(dot)) g.FillEllipse(brush, left, dy - 3 * s, 7 * s, 7 * s);
+                TextRenderer.DrawText(g, text, statusFont, new Rectangle(left + (int)(11 * s), dy - (int)(7 * s), rect.Right - left - (int)(19 * s), (int)(15 * s)), statusColor,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+            }
+        }
+    }
+
+    // Takes the place of the mode buttons when an online mode cannot start, with the one action that helps
+    class InfoCard : PaintedControl
+    {
+        public readonly FlatButton Action = new FlatButton();
+        string title = "";
+        string body = "";
+
+        public InfoCard()
+        {
+            Action.MakePrimary();
+            Controls.Add(Action);
+        }
+
+        public void Show(string heading, string text, string action)
+        {
+            title = heading;
+            body = text;
+            Action.Text = action;
+            Action.Visible = true;
+            LayoutChildren();
+            Invalidate();
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            LayoutChildren();
+        }
+
+        void LayoutChildren()
+        {
+            var s = DpiScale;
+            var w = TextRenderer.MeasureText(Action.Text, Action.Font).Width + (int)(28 * s);
+            Action.SetBounds((int)(16 * s), Height - (int)(40 * s), w, (int)(30 * s));
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 8 * s))
+            using (var brush = new SolidBrush(Theme.Panel))
+            using (var pen = new Pen(Theme.WarningBorder, Math.Max(1f, s)))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(pen, path);
+            }
+            var cx = 24 * s;
+            var cy = 20 * s;
+            using (var pen = new Pen(Theme.Warning, 1.6f * s) { LineJoin = LineJoin.Round })
+            {
+                g.DrawPolygon(pen, new[] { new PointF(cx, cy - 7 * s), new PointF(cx + 8 * s, cy + 6 * s), new PointF(cx - 8 * s, cy + 6 * s) });
+                g.DrawLine(pen, cx, cy - 2 * s, cx, cy + 2 * s);
+            }
+            using (var titleFont = new Font(Theme.FontName, 10f, FontStyle.Bold))
+            using (var bodyFont = new Font(Theme.FontName, 8.5f))
+            {
+                TextRenderer.DrawText(g, title, titleFont, new Rectangle((int)(38 * s), (int)(10 * s), Width - (int)(50 * s), (int)(20 * s)), Theme.Text,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, body, bodyFont, new Rectangle((int)(16 * s), (int)(34 * s), Width - (int)(32 * s), Height - (int)(80 * s)), Theme.Muted,
+                    TextFormatFlags.Left | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
             }
         }
     }

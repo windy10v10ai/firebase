@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -79,6 +80,13 @@ namespace Windy10v10AI.Launcher
         readonly Label joinHint = new Label();
         readonly TextBox codeBox = new TextBox();
         readonly TextBox hostCode = new TextBox();
+        readonly PlayerList players = new PlayerList();
+        readonly InfoCard mapCard = new InfoCard();
+        readonly System.Windows.Forms.Timer rosterTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+        bool playersShown;
+        bool cardShown;
+        long selfId;
+        HostRoster hostRoster;
         readonly FlatButton joinButton = new FlatButton();
         readonly FlatButton secondary = new FlatButton();
         Action secondaryAction;
@@ -182,8 +190,11 @@ namespace Windy10v10AI.Launcher
             {
                 if (busy) return;
                 status.Text = IdleText();
+                RefreshMapState();
                 Relayout();
             };
+            mapCard.Action.Click += delegate { OpenUrl("steam://url/CommunityFilePage/" + MapId); };
+            rosterTimer.Tick += delegate { RefreshPlayers(); };
             joinPrompt.Text = Strings.JoinPrompt;
             joinPrompt.Font = new Font(Theme.FontName, 9.75f);
             joinHint.Text = Strings.JoinHint;
@@ -206,7 +217,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, divider, mapDot, mapLabel, devLink, testBox, modeBar, joinPrompt, joinHint, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, players, mapCard, divider, mapDot, mapLabel, devLink, testBox, modeBar, joinPrompt, joinHint, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -254,14 +265,20 @@ namespace Windy10v10AI.Launcher
             y += 48;
             // Joining needs no difficulty, so the code entry takes the place of the mode buttons
             var joining = modeBar.Selected == 2;
-            foreach (var mode in modes) mode.Visible = !joining;
-            joinPrompt.Visible = joinHint.Visible = codeBox.Visible = joinButton.Visible = joining;
+            // The player list and the map card take the place of the buttons below the mode bar
+            var replaced = playersShown || cardShown;
+            foreach (var mode in modes) mode.Visible = !joining && !replaced;
+            joinPrompt.Visible = joinHint.Visible = codeBox.Visible = joinButton.Visible = joining && !replaced;
+            players.Visible = playersShown;
+            mapCard.Visible = cardShown && !playersShown;
+            players.SetBounds(P(20), P(y), P(440), P(168));
+            mapCard.SetBounds(P(20), P(y), P(440), P(118));
             for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
             joinPrompt.SetBounds(P(20), P(y), P(440), P(22));
             codeBox.SetBounds(P(20), P(y + 26), P(330), P(34));
             joinButton.SetBounds(P(360), P(y + 26), P(100), P(34));
             joinHint.SetBounds(P(20), P(y + 66), P(440), P(18));
-            y += 96;
+            y += playersShown ? 180 : (cardShown ? 130 : 96);
             // Notices share the status area below the buttons so the window never shifts
             notice.SetBounds(P(20), P(y), P(440), P(52));
             status.Visible = !notice.Visible;
@@ -329,7 +346,8 @@ namespace Windy10v10AI.Launcher
                     break;
                 case MapState.Outdated:
                     SetFooter(Theme.Warning, Strings.MapOutdated);
-                    ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.OpenMapPage, () => OpenUrl("steam://url/CommunityFilePage/" + id));
+                    if (modeBar.Selected == 0) ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.OpenWorkshop, () => OpenUrl("steam://url/CommunityFilePage/" + id));
+                    else ShowIdleNotice();
                     break;
                 case MapState.Missing:
                     SetFooter(Theme.Error, Strings.MapMissing);
@@ -344,7 +362,45 @@ namespace Windy10v10AI.Launcher
                     ShowNotice(NoticeKind.Error, Strings.NoSteam, false);
                     break;
             }
+            UpdateMapCard(state);
             return state;
+        }
+
+        // Online play needs the latest map, so its tabs show why they cannot start as soon as they open
+        void UpdateMapCard(MapState state)
+        {
+            var show = !busy && modeBar.Selected != 0 && state == MapState.Outdated;
+            if (show) mapCard.Show(Strings.MapCardTitle, modeBar.Selected == 1 ? Strings.MapCardHost : Strings.MapCardJoin, Strings.OpenWorkshop);
+            if (show == cardShown) return;
+            cardShown = show;
+            if (!busy) status.Text = IdleText();
+            Relayout();
+        }
+
+        void RefreshPlayers()
+        {
+            var host = hostRoster;
+            var join = joinTunnel;
+            if (host != null) players.SetPlayers(host.Snapshot(), selfId, null);
+            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : null);
+        }
+
+        void ShowPlayers(bool show)
+        {
+            playersShown = show;
+            if (show)
+            {
+                RefreshPlayers();
+                rosterTimer.Start();
+            }
+            else rosterTimer.Stop();
+            Relayout();
+        }
+
+        static string Field(Dictionary<string, object> data, string key)
+        {
+            object value;
+            return data.TryGetValue(key, out value) ? value as string : null;
         }
 
         void SetFooter(Color dot, string text)
@@ -426,6 +482,7 @@ namespace Windy10v10AI.Launcher
             var id = MapId;
             var map = MapKeys[index];
             var room = modeBar.Selected == 1;
+            selfId = Net.SteamAccountId();
             busy = true;
             stopping = false;
             for (var i = 0; i < modes.Length; i++)
@@ -455,6 +512,7 @@ namespace Windy10v10AI.Launcher
                 }
 
                 if (stopping) throw new OperationCanceledException();
+                var manifest = install.InstalledManifest(id);
                 id = PrepareAddon(install, id);
 
                 string code = null, token = null;
@@ -465,11 +523,12 @@ namespace Windy10v10AI.Launcher
                     hostTunnel = new HostTunnel();
                     bool upnp, publicIp;
                     var candidates = hostTunnel.Gather(out upnp, out publicIp);
-                    hostBody = PeerBody(candidates, upnp);
+                    hostBody = PeerBody(candidates, upnp, manifest);
                     hostBody["publicIp"] = publicIp;
+                    Dictionary<string, object> opened;
                     try
                     {
-                        var opened = RoomApi.Host(hostBody);
+                        opened = RoomApi.Host(hostBody);
                         code = (string)opened["code"];
                         token = (string)opened["token"];
                     }
@@ -477,7 +536,12 @@ namespace Windy10v10AI.Launcher
                     {
                         throw new LaunchError(Strings.OpenRoomFailed, false);
                     }
+                    var roster = new HostRoster();
+                    roster.Add(new RosterEntry { SteamId = selfId, Key = "host", Name = Field(opened, "personaName"), AvatarUrl = Field(opened, "avatarUrl"), Status = PlayerStatus.Loading, IsHost = true });
+                    hostRoster = roster;
+                    hostTunnel.RosterSource = roster.Snapshot;
                     hostTunnel.JoinFinished += OnJoinFinished;
+                    hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
                     hostTunnel.Start();
                     // The code is ready long before the server, so the host can share it while waiting
                     var shown = code;
@@ -485,6 +549,7 @@ namespace Windy10v10AI.Launcher
                     {
                         hostCode.Text = shown;
                         hostCode.Visible = true;
+                        ShowPlayers(true);
                         ShowProgress(Strings.RoomCode, "", Strings.Cancel, false);
                         ShowSecondary(Strings.Copy, () => Clipboard.SetText(shown));
                     });
@@ -597,6 +662,7 @@ namespace Windy10v10AI.Launcher
             DotaInstall install;
             DotaInstall.Check(MapId, out install);
             var id = MapId;
+            selfId = Net.SteamAccountId();
             busy = true;
             stopping = false;
             foreach (var mode in modes)
@@ -620,12 +686,20 @@ namespace Windy10v10AI.Launcher
                 Dictionary<string, object> joined;
                 try
                 {
-                    joined = RoomApi.Join(code, PeerBody(candidates, upnp));
+                    joined = RoomApi.Join(code, PeerBody(candidates, upnp, install.InstalledManifest(id)));
                 }
                 catch (RoomError error)
                 {
-                    throw new LaunchError(JoinErrorText(error.Code), false);
+                    throw new LaunchError(JoinErrorText(error.Code, install, id), false);
                 }
+                var hostProfile = joined["host"] as Dictionary<string, object> ?? new Dictionary<string, object>();
+                var selfProfile = joined["self"] as Dictionary<string, object> ?? new Dictionary<string, object>();
+                tunnel.Placeholder = new List<RosterEntry>
+                {
+                    new RosterEntry { Name = Field(hostProfile, "personaName"), AvatarUrl = Field(hostProfile, "avatarUrl"), Status = PlayerStatus.Connecting, IsHost = true },
+                    new RosterEntry { SteamId = selfId, Name = Field(selfProfile, "personaName"), AvatarUrl = Field(selfProfile, "avatarUrl"), Status = PlayerStatus.Connecting },
+                };
+                UI(() => ShowPlayers(true));
                 tunnel.Start();
                 var hostCandidates = new List<Candidate>();
                 foreach (var text in (object[])joined["hostCandidates"]) hostCandidates.Add(Candidate.Parse((string)text));
@@ -702,6 +776,8 @@ namespace Windy10v10AI.Launcher
                     {
                         var joinId = (string)join["joinId"];
                         if (!seen.Add(joinId)) continue;
+                        var steamId = join.ContainsKey("steamId") ? Convert.ToInt64(join["steamId"]) : 0;
+                        hostRoster.Add(new RosterEntry { SteamId = steamId, Key = joinId, Name = Field(join, "personaName"), AvatarUrl = Field(join, "avatarUrl"), Status = PlayerStatus.Connecting });
                         var candidates = new List<Candidate>();
                         foreach (var text in (object[])join["candidates"]) candidates.Add(Candidate.Parse((string)text));
                         tunnel.AddJoin(joinId, (string)join["joinToken"], candidates);
@@ -721,12 +797,15 @@ namespace Windy10v10AI.Launcher
             var result = new Dictionary<string, object> { { "joinId", joinId }, { "elapsedMs", elapsedMs } };
             if (path != null) result["path"] = path;
             lock (joinResults) joinResults.Add(result);
+            var roster = hostRoster;
+            if (roster != null) roster.SetStatus(joinId, path != null ? PlayerStatus.Loading : PlayerStatus.Failed);
         }
 
-        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool upnp)
+        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool upnp, string mapVersion)
         {
             return new Dictionary<string, object>
             {
+                { "mapVersion", mapVersion },
                 { "steamId", Net.SteamAccountId() },
                 { "candidates", candidates.ConvertAll(c => c.ToString()) },
                 { "upnp", upnp },
@@ -735,10 +814,14 @@ namespace Windy10v10AI.Launcher
             };
         }
 
-        static string JoinErrorText(string code)
+        static string JoinErrorText(string code, DotaInstall install, string id)
         {
             switch (code)
             {
+                // A joiner with the latest map knows the host is the one behind
+                case "map_mismatch":
+                    DotaInstall checkedInstall;
+                    return DotaInstall.Check(id, out checkedInstall) == MapState.Ready ? Strings.MapHostOld : Strings.MapMismatch;
                 case "room_not_found": return Strings.RoomNotFound;
                 case "game_started": return Strings.GameStarted;
                 case "version_mismatch": return Strings.VersionMismatch;
@@ -770,6 +853,7 @@ namespace Windy10v10AI.Launcher
 
         string IdleText()
         {
+            if (cardShown) return "";
             if (modeBar.Selected == 1) return Strings.HostIdle;
             return modeBar.Selected == 2 ? "" : Strings.Idle;
         }
@@ -805,9 +889,18 @@ namespace Windy10v10AI.Launcher
         {
             var seen = false;
             var serverId = server.Id;
+            long logOffset = 0;
             while (!stopping)
             {
                 Thread.Sleep(3000);
+                var roster = hostRoster;
+                if (roster != null)
+                {
+                    foreach (Match match in Regex.Matches(ReadFrom(logFile, ref logOffset), @"Adding player SteamID (\d+)"))
+                    {
+                        roster.SetInGame(long.Parse(match.Groups[1].Value));
+                    }
+                }
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
                 NativeMethods.HideWindowsOf(serverId);
                 var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count;
@@ -836,6 +929,7 @@ namespace Windy10v10AI.Launcher
             if (s != null) KillQuietly(s);
             server = null;
             CloseTunnels();
+            hostRoster = null;
             UI(() =>
             {
                 busy = false;
@@ -848,6 +942,7 @@ namespace Windy10v10AI.Launcher
                 SetIdleControlsEnabled(true);
                 secondary.Visible = false;
                 hostCode.Visible = false;
+                ShowPlayers(false);
                 marquee.Visible = false;
                 hint.Visible = false;
                 action.Visible = false;
@@ -963,6 +1058,23 @@ namespace Windy10v10AI.Launcher
             {
                 if (error.NativeErrorCode == ErrorAccessDenied) throw new LaunchError(Strings.DotaBlocked, false);
                 throw;
+            }
+        }
+
+        // Reads only what the server appended since the last call; the log grows for the whole game
+        static string ReadFrom(string path, ref long offset)
+        {
+            if (!File.Exists(path)) return "";
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                if (stream.Length < offset) offset = 0;
+                stream.Seek(offset, SeekOrigin.Begin);
+                using (var reader = new StreamReader(stream))
+                {
+                    var text = reader.ReadToEnd();
+                    offset = stream.Length;
+                    return text;
+                }
             }
         }
 
