@@ -48,6 +48,7 @@ namespace Windy10v10AI.Launcher
         public static string DotaBlocked { get { return Pick("启动失败：Dota 2 没能启动，可能被杀毒软件拦截了。请在杀毒软件里把 Windy10v10AI.exe 加入信任，再试一次。", "Launch failed: Dota 2 could not start, possibly blocked by antivirus. Allow Windy10v10AI.exe in your antivirus, then try again.", "Не удалось запустить Dota 2 — возможно, её блокирует антивирус. Разрешите Windy10v10AI.exe в антивирусе и попробуйте снова."); } }
         public static string DotaNotClosed { get { return Pick("启动失败：没能关闭正在运行的 Dota 2。请在任务管理器里结束 dota2.exe，再试一次。", "Launch failed: could not close the running Dota 2. End dota2.exe in Task Manager, then try again.", "Не удалось закрыть запущенную Dota 2. Завершите dota2.exe в диспетчере задач и попробуйте снова."); } }
         public static string LaunchFailed { get { return Pick("启动失败：", "Launch failed: ", "Не удалось запустить: "); } }
+        public static string OpenMapPage { get { return Pick("打开地图页面", "Open map page", "Открыть страницу карты"); } }
         public static string Subscribe { get { return Pick("订阅地图", "Subscribe", "Подписаться"); } }
         public static string OpenLog { get { return Pick("打开日志", "Open log", "Открыть лог"); } }
 
@@ -61,13 +62,17 @@ namespace Windy10v10AI.Launcher
         public static string Developer { get { return Pick("开发选项", "Developer", "Для разработчиков"); } }
         public static string UseTestMap { get { return Pick("使用测试服", "Use test map", "Тестовая карта"); } }
 
-        public static string HostRoom { get { return Pick("联机开房", "Host a room", "Открыть комнату"); } }
+        public static string Solo { get { return Pick("单人游戏", "Single player", "Одиночная игра"); } }
+        public static string HostRoom { get { return Pick("联机主机", "Host", "Хост"); } }
+        public static string JoinRoom { get { return Pick("加入联机", "Join", "Присоединиться"); } }
+        public static string HostIdle { get { return Pick("点击难度，创建联机主机", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
+        public static string JoinPrompt { get { return Pick("输入房主发来的房间码", "Enter the room code from the host", "Введите код комнаты от хоста"); } }
+        public static string JoinHint { get { return Pick("难度由房主决定，连上后会自动打开 Dota 2", "The host picks the difficulty. Dota 2 opens once connected.", "Сложность выбирает хост. Dota 2 откроется после подключения."); } }
         public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
+        public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
-        public static string RoomHosting { get { return Pick("房间码 {0}", "Room code {0}", "Код комнаты {0}"); } }
         public static string RoomHostingHint { get { return Pick("把房间码发给朋友，人到齐后在游戏里点「锁定并开始」", "Send the code to your friends and start the game once everyone is in", "Отправьте код друзьям и начните игру, когда все зайдут"); } }
-        public static string CopyCode { get { return Pick("复制房间码", "Copy code", "Скопировать код"); } }
         public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
         public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
         public static string Connecting { get { return Pick("正在连接房主…", "Connecting to the host...", "Подключение к хосту…"); } }

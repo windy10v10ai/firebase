@@ -74,9 +74,11 @@ namespace Windy10v10AI.Launcher
         readonly Label mapLabel = new Label();
         readonly LinkLabel devLink = new LinkLabel();
         readonly ToggleBox testBox = new ToggleBox();
-        readonly ToggleBox roomBox = new ToggleBox();
-        readonly Label codeLabel = new Label();
+        readonly SegmentedBar modeBar = new SegmentedBar();
+        readonly Label joinPrompt = new Label();
+        readonly Label joinHint = new Label();
         readonly TextBox codeBox = new TextBox();
+        readonly TextBox hostCode = new TextBox();
         readonly FlatButton joinButton = new FlatButton();
         readonly FlatButton secondary = new FlatButton();
         Action secondaryAction;
@@ -175,22 +177,36 @@ namespace Windy10v10AI.Launcher
             testBox.Checked = true;
 #endif
 
-            roomBox.Text = Strings.HostRoom;
-            codeLabel.Text = Strings.RoomCode;
-            codeLabel.ForeColor = Theme.Muted;
-            codeLabel.TextAlign = ContentAlignment.MiddleRight;
-            codeBox.Font = new Font(Theme.FontName, 10f);
-            codeBox.MaxLength = 6;
-            codeBox.CharacterCasing = CharacterCasing.Upper;
-            codeBox.BackColor = Theme.Panel;
-            codeBox.ForeColor = Theme.Text;
-            codeBox.BorderStyle = BorderStyle.FixedSingle;
+            modeBar.Items = new[] { Strings.Solo, Strings.HostRoom, Strings.JoinRoom };
+            modeBar.SelectedChanged += delegate
+            {
+                if (busy) return;
+                status.Text = IdleText();
+                Relayout();
+            };
+            joinPrompt.Text = Strings.JoinPrompt;
+            joinPrompt.Font = new Font(Theme.FontName, 9.75f);
+            joinHint.Text = Strings.JoinHint;
+            joinHint.ForeColor = Theme.Muted;
+            foreach (var box in new[] { codeBox, hostCode })
+            {
+                box.Font = new Font("Consolas", 16f);
+                box.MaxLength = 6;
+                box.CharacterCasing = CharacterCasing.Upper;
+                box.BackColor = Theme.Panel;
+                box.ForeColor = Theme.Text;
+                box.BorderStyle = BorderStyle.FixedSingle;
+            }
+            codeBox.KeyDown += (sender, e) => { if (e.KeyCode == Keys.Enter) OnJoinClick(); };
+            hostCode.ReadOnly = true;
+            hostCode.Visible = false;
             joinButton.Text = Strings.Join;
+            joinButton.MakePrimary();
             joinButton.Click += delegate { OnJoinClick(); };
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, divider, mapDot, mapLabel, devLink, testBox, roomBox, codeLabel, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, divider, mapDot, mapLabel, devLink, testBox, modeBar, joinPrompt, joinHint, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -234,24 +250,39 @@ namespace Windy10v10AI.Launcher
             subtitle.SetBounds(P(20), P(132), P(370), P(22));
             version.SetBounds(P(390), P(132), P(70), P(22));
             var y = 162;
+            modeBar.SetBounds(P(20), P(y), P(440), P(36));
+            y += 48;
+            // Joining needs no difficulty, so the code entry takes the place of the mode buttons
+            var joining = modeBar.Selected == 2;
+            foreach (var mode in modes) mode.Visible = !joining;
+            joinPrompt.Visible = joinHint.Visible = codeBox.Visible = joinButton.Visible = joining;
             for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
+            joinPrompt.SetBounds(P(20), P(y), P(440), P(22));
+            codeBox.SetBounds(P(20), P(y + 26), P(330), P(34));
+            joinButton.SetBounds(P(360), P(y + 26), P(100), P(34));
+            joinHint.SetBounds(P(20), P(y + 66), P(440), P(18));
             y += 96;
-            roomBox.SetBounds(P(20), P(y + 4), roomBox.PreferredWidth + P(2), P(22));
-            codeLabel.SetBounds(P(200), P(y), P(86), P(30));
-            codeBox.SetBounds(P(290), P(y + 3), P(84), P(24));
-            joinButton.SetBounds(P(380), P(y), P(80), P(30));
-            y += 42;
             // Notices share the status area below the buttons so the window never shifts
             notice.SetBounds(P(20), P(y), P(440), P(52));
             status.Visible = !notice.Visible;
             status.SetBounds(P(20), P(y), P(440), P(20));
-            marquee.SetBounds(P(20), P(y + 26), P(440), P(4));
-            hint.SetBounds(P(20), P(y + 36), P(440), P(20));
             var actionWidth = Math.Max(P(80), TextRenderer.MeasureText(action.Text, action.Font).Width + P(28));
-            action.SetBounds(P(20), P(y + 62), actionWidth, P(30));
             var secondaryWidth = Math.Max(P(80), TextRenderer.MeasureText(secondary.Text, secondary.Font).Width + P(28));
-            secondary.SetBounds(P(20) + actionWidth + P(8), P(y + 62), secondaryWidth, P(30));
-            y += 104;
+            if (hostCode.Visible)
+            {
+                hostCode.SetBounds(P(20), P(y + 24), P(130), P(34));
+                secondary.SetBounds(P(158), P(y + 24), secondaryWidth, hostCode.Height);
+                hint.SetBounds(P(20), P(y + 64), P(440), P(20));
+                action.SetBounds(P(20), P(y + 88), actionWidth, P(30));
+            }
+            else
+            {
+                marquee.SetBounds(P(20), P(y + 26), P(440), P(4));
+                hint.SetBounds(P(20), P(y + 36), P(440), P(20));
+                action.SetBounds(P(20), P(y + 62), actionWidth, P(30));
+                secondary.SetBounds(P(20) + actionWidth + P(8), P(y + 62), secondaryWidth, P(30));
+            }
+            y += 124;
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
             mapDot.SetBounds(P(20), P(y + 16), P(8), P(8));
             mapLabel.SetBounds(P(34), P(y + 9), P(200), P(22));
@@ -280,7 +311,8 @@ namespace Windy10v10AI.Launcher
         MapState RefreshMapState()
         {
             DotaInstall install;
-            var state = DotaInstall.Check(MapId, out install);
+            var id = MapId;
+            var state = DotaInstall.Check(id, out install);
             switch (state)
             {
                 case MapState.Ready:
@@ -297,11 +329,10 @@ namespace Windy10v10AI.Launcher
                     break;
                 case MapState.Outdated:
                     SetFooter(Theme.Warning, Strings.MapOutdated);
-                    ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, false);
+                    ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.OpenMapPage, () => OpenUrl("steam://url/CommunityFilePage/" + id));
                     break;
                 case MapState.Missing:
                     SetFooter(Theme.Error, Strings.MapMissing);
-                    var id = MapId;
                     ShowNotice(NoticeKind.Error, Strings.NoMap, Strings.Subscribe, () => OpenUrl("steam://url/CommunityFilePage/" + id));
                     break;
                 case MapState.NoDota:
@@ -392,7 +423,7 @@ namespace Windy10v10AI.Launcher
             DotaInstall.Check(MapId, out install);
             var id = MapId;
             var map = MapKeys[index];
-            var room = roomBox.Checked;
+            var room = modeBar.Selected == 1;
             busy = true;
             stopping = false;
             for (var i = 0; i < modes.Length; i++)
@@ -479,8 +510,10 @@ namespace Windy10v10AI.Launcher
                         ShowProgress(Strings.InGame, Strings.InGameHint, Strings.StopServer, false);
                         return;
                     }
-                    ShowProgress(string.Format(Strings.RoomHosting, code), Strings.RoomHostingHint, Strings.StopServer, false);
-                    ShowSecondary(Strings.CopyCode, () => Clipboard.SetText(code));
+                    hostCode.Text = code;
+                    hostCode.Visible = true;
+                    ShowProgress(Strings.RoomCode, Strings.RoomHostingHint, Strings.StopServer, false);
+                    ShowSecondary(Strings.Copy, () => Clipboard.SetText(code));
                 });
                 if (code != null)
                 {
@@ -727,6 +760,12 @@ namespace Windy10v10AI.Launcher
             });
         }
 
+        string IdleText()
+        {
+            if (modeBar.Selected == 1) return Strings.HostIdle;
+            return modeBar.Selected == 2 ? "" : Strings.Idle;
+        }
+
         void ShowSecondary(string text, Action onClick)
         {
             secondary.Text = text;
@@ -737,7 +776,7 @@ namespace Windy10v10AI.Launcher
 
         void SetIdleControlsEnabled(bool enabled)
         {
-            foreach (var control in new Control[] { testBox, roomBox, codeBox, joinButton })
+            foreach (var control in new Control[] { testBox, modeBar, codeBox, joinButton })
             {
                 control.Enabled = enabled;
                 control.Invalidate();
@@ -800,10 +839,11 @@ namespace Windy10v10AI.Launcher
                 }
                 SetIdleControlsEnabled(true);
                 secondary.Visible = false;
+                hostCode.Visible = false;
                 marquee.Visible = false;
                 hint.Visible = false;
                 action.Visible = false;
-                status.Text = Strings.Idle;
+                status.Text = IdleText();
                 status.ForeColor = Theme.Muted;
                 if (error != null && !cancelled) ShowNotice(NoticeKind.Error, error, showLog && logFile != null && File.Exists(logFile));
                 else RefreshMapState();

@@ -352,6 +352,95 @@ namespace Windy10v10AI.Launcher
         }
     }
 
+    // Picks one of a few options; the chosen one gets the accent border the mode buttons use when active
+    class SegmentedBar : PaintedControl
+    {
+        public string[] Items = new string[0];
+        int selected;
+        int hover = -1;
+        public event EventHandler SelectedChanged;
+
+        public SegmentedBar()
+        {
+            Cursor = Cursors.Hand;
+            TabStop = true;
+            Font = new Font(Theme.FontName, 9.75f);
+        }
+
+        public int Selected
+        {
+            get { return selected; }
+            set
+            {
+                if (selected == value) return;
+                selected = value;
+                Invalidate();
+                if (SelectedChanged != null) SelectedChanged(this, EventArgs.Empty);
+            }
+        }
+
+        int IndexAt(int x)
+        {
+            return Math.Min(Items.Length - 1, Math.Max(0, x * Items.Length / Math.Max(1, Width)));
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e) { hover = IndexAt(e.X); Invalidate(); base.OnMouseMove(e); }
+        protected override void OnMouseLeave(EventArgs e) { hover = -1; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+        protected override void OnLostFocus(EventArgs e) { Invalidate(); base.OnLostFocus(e); }
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            if (Enabled) Selected = IndexAt(e.X);
+            base.OnMouseClick(e);
+        }
+
+        protected override bool IsInputKey(Keys keyData)
+        {
+            return keyData == Keys.Left || keyData == Keys.Right || base.IsInputKey(keyData);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (Enabled && e.KeyCode == Keys.Left && selected > 0) Selected = selected - 1;
+            if (Enabled && e.KeyCode == Keys.Right && selected < Items.Length - 1) Selected = selected + 1;
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            var outer = new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f);
+            using (var path = Theme.Rounded(outer, 8 * s))
+            using (var brush = new SolidBrush(Theme.Panel)) g.FillPath(brush, path);
+
+            var pad = 3 * s;
+            var gap = 4 * s;
+            var w = (Width - 2 * pad - gap * (Items.Length - 1)) / Items.Length;
+            for (var i = 0; i < Items.Length; i++)
+            {
+                var rect = new RectangleF(pad + i * (w + gap), pad, w, Height - 2 * pad - 1);
+                var on = i == selected;
+                if (on || (Enabled && i == hover))
+                {
+                    using (var path = Theme.Rounded(rect, 6 * s))
+                    using (var brush = new SolidBrush(on ? Theme.ActivePanel : Theme.PanelHover))
+                    {
+                        g.FillPath(brush, path);
+                        if (on || (Focused && ShowFocusCues && i == selected))
+                        {
+                            using (var pen = new Pen(Theme.Accent, Math.Max(1f, s))) g.DrawPath(pen, path);
+                        }
+                    }
+                }
+                var color = on ? Theme.Text : (Enabled ? Theme.Muted : Theme.Faint);
+                TextRenderer.DrawText(g, Items[i], Font, Rectangle.Round(rect), color,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            }
+        }
+    }
+
     class FlatButton : Button
     {
         public FlatButton()
