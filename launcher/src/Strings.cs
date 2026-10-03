@@ -61,6 +61,28 @@ namespace Windy10v10AI.Launcher
         public static string Developer { get { return Pick("开发选项", "Developer", "Для разработчиков"); } }
         public static string UseTestMap { get { return Pick("使用测试服", "Use test map", "Тестовая карта"); } }
 
+        public static string HostRoom { get { return Pick("联机开房", "Host a room", "Открыть комнату"); } }
+        public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
+        public static string Join { get { return Pick("加入", "Join", "Войти"); } }
+        public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
+        public static string RoomHosting { get { return Pick("房间码 {0}", "Room code {0}", "Код комнаты {0}"); } }
+        public static string RoomHostingHint { get { return Pick("把房间码发给朋友，人到齐后在游戏里点「锁定并开始」", "Send the code to your friends and start the game once everyone is in", "Отправьте код друзьям и начните игру, когда все зайдут"); } }
+        public static string CopyCode { get { return Pick("复制房间码", "Copy code", "Скопировать код"); } }
+        public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
+        public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
+        public static string Connecting { get { return Pick("正在连接房主…", "Connecting to the host...", "Подключение к хосту…"); } }
+        public static string ConnectingHint { get { return Pick("通常几秒内完成，最多需要 15 秒", "Usually takes a few seconds, at most 15", "Обычно несколько секунд, максимум 15"); } }
+        public static string RoomNotFound { get { return Pick("房间不存在或已关闭，请核对房间码。", "Room not found or already closed. Check the code.", "Комната не найдена или закрыта. Проверьте код."); } }
+        public static string GameStarted { get { return Pick("游戏已开始，无法加入。", "The game has already started.", "Игра уже началась."); } }
+        public static string VersionMismatch { get { return Pick("双方启动器版本不同，请都更新到最新版本。", "Your launcher versions differ. Both of you need the latest version.", "Версии лаунчера отличаются. Обновите лаунчер у обоих."); } }
+        public static string RoomNetwork { get { return Pick("连不上服务器，请检查网络后重试。", "Could not reach our server. Check your network and try again.", "Не удалось связаться с сервером. Проверьте сеть и попробуйте снова."); } }
+        public static string ConnectFailed { get { return Pick("连接失败：换一个人当房主试试，或者从游廊开局。", "Could not connect. Try with someone else as the host, or launch from the Arcade.", "Не удалось подключиться. Попробуйте другого хоста или запуск из аркады."); } }
+        public static string Joined { get { return Pick("已加入房间 {0}", "Joined room {0}", "Вы в комнате {0}"); } }
+        public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
+        public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
+        public static string Rejoin { get { return Pick("重新进入游戏", "Rejoin game", "Вернуться в игру"); } }
+        public static string HostLost { get { return Pick("与房主的连接已断开。", "Lost the connection to the host.", "Соединение с хостом потеряно."); } }
+
         public static string DotaRunningTitle { get { return Pick("Dota 2 正在运行", "Dota 2 is running", "Dota 2 запущена"); } }
         public static string DotaRunningBody { get { return Pick("需要先关闭 Dota 2，再用本地服务器重新启动。正在进行的对局会断开。", "Dota 2 will be closed and restarted with the local server. Any match in progress will be disconnected.", "Dota 2 будет закрыта и перезапущена с локальным сервером. Текущий матч будет прерван."); } }
         public static string CloseAndStart { get { return Pick("关闭并启动", "Close and start", "Закрыть и запустить"); } }
