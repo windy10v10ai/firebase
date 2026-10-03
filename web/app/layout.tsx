@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   title: { default: SITE_NAME, template: TITLE_TEMPLATE },
   description: 'DOTA2 10v10 AI custom by windy',
   icons: {
-    icon: '/favicon.webp',
+    icon: '/images/launcher.webp',
   },
 };
 

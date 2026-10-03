@@ -107,8 +107,10 @@ export default function Header() {
           <Link
             href="/"
             prefetch={false}
-            className="text-xl font-bold text-heading link-hover whitespace-nowrap"
+            className="flex items-center gap-2 text-xl font-bold text-heading link-hover whitespace-nowrap"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
+            <img src="/images/launcher.webp" alt="" width={32} height={32} className="size-8 shrink-0" />
             {/* 1024 以下一律收短：全名加五个站内项在 768 会把右侧控件挤出屏幕 */}
             <span className="lg:hidden">{t('homeShort')}</span>
             <span className="hidden lg:inline">{t('home')}</span>

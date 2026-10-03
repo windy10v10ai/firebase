@@ -28,7 +28,7 @@ namespace Windy10v10AI.Launcher
         public static string SlowHint { get { return Pick("比平时慢一些，仍在启动中…", "Taking longer than usual, still starting...", "Дольше обычного, запуск продолжается…"); } }
         public static string ClosingDota { get { return Pick("正在关闭 Dota 2…", "Closing Dota 2...", "Закрываем Dota 2…"); } }
         public static string InGame { get { return Pick("游戏中", "In game", "В игре"); } }
-        public static string InGameHint { get { return Pick("服务器窗口在任务栏最小化运行，请勿关闭；关闭 Dota 2 后会自动关闭", "Server runs minimized in the taskbar. Keep it open; it stops with Dota 2.", "Сервер свёрнут на панели задач, не закрывайте его."); } }
+        public static string InGameHint { get { return Pick("关闭 Dota 2 后服务器会自动关闭", "The server stops when you close Dota 2", "Сервер остановится после закрытия Dota 2"); } }
         public static string Cancel { get { return Pick("取消", "Cancel", "Отмена"); } }
         public static string StopServer { get { return Pick("关闭服务器", "Stop server", "Остановить сервер"); } }
 
@@ -56,6 +56,7 @@ namespace Windy10v10AI.Launcher
         public static string Updating { get { return Pick("正在下载新版本…", "Downloading the new version...", "Загрузка новой версии…"); } }
         public static string UpdateFailed { get { return Pick("自动更新失败，请到官网下载新版本。", "Update failed. Download the new version from our website.", "Не удалось обновить. Скачайте новую версию на сайте."); } }
         public static string OpenDownloadPage { get { return Pick("打开官网", "Open website", "Открыть сайт"); } }
+        public static string Changelog { get { return Pick("查看更新日志", "View changelog", "Список изменений"); } }
 
         public static string Developer { get { return Pick("开发选项", "Developer", "Для разработчиков"); } }
         public static string UseTestMap { get { return Pick("使用测试服", "Use test map", "Тестовая карта"); } }

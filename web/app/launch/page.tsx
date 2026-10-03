@@ -6,6 +6,7 @@ import GithubIcon from '../components/GithubIcon';
 import Section from '../components/Section';
 import { pageTitle } from '../lib/page-title';
 
+import { changelogKey, LAUNCHER_CHANGELOG } from './changelog';
 import {
   LAUNCHER_FILE_NAME,
   LAUNCHER_SOURCE_URL,
@@ -190,9 +191,31 @@ export default function LaunchPage() {
         </div>
       </Section>
 
-      <Section title={t('website.title')}>
-        <p className="text-content text-pretty">{t('website.body')}</p>
-        <p className="mt-2 text-content text-pretty">{t('website.checkIn')}</p>
+      {/* 启动器右上角的版本号链接到这个锚点 */}
+      <Section id="changelog" title={t('changelog.title')}>
+        {LAUNCHER_CHANGELOG.map(({ version, date }, index) => (
+          <article
+            key={version}
+            className="flex flex-col gap-2 border-t border-line py-5 first:border-t-0 first:pt-0 last:pb-0"
+          >
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h3 className="text-base font-bold text-heading tabular-nums md:text-lg">
+                v{version}
+              </h3>
+              <span className="text-sm text-muted tabular-nums">{date}</span>
+              {index === 0 && (
+                <span className="rounded-full border border-link-border bg-link/10 px-2.5 text-xs leading-5 font-medium text-link">
+                  {t('changelog.latest')}
+                </span>
+              )}
+            </div>
+            <ul className="list-disc pl-5 text-[15px] leading-[26px] text-content text-pretty">
+              {(t.raw(`changelog.entries.${changelogKey(version)}`) as string[]).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
       </Section>
     </div>
   );
