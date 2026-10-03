@@ -821,7 +821,7 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        // For local testing with the map built from the game repo instead of the Workshop one
+        // Lets a developer test against the map built from the game repo rather than the Workshop copy
         static string PrepareAddon(DotaInstall install, string id)
         {
             var local = Environment.GetEnvironmentVariable("WINDY_ADDON");
