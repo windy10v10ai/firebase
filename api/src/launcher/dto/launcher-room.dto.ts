@@ -14,7 +14,8 @@ import {
 } from 'class-validator';
 
 const MAX_CANDIDATES = 8;
-const CANDIDATE_PATTERN = /^\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
+// 类型前缀让加入者知道连通的是哪条路，房主才能上报 lan / upnp / punch
+const CANDIDATE_PATTERN = /^(lan|stun|upnp):\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 
 export const JOIN_PATHS = ['lan', 'upnp', 'punch'] as const;
 export type JoinPath = (typeof JOIN_PATHS)[number];
@@ -24,7 +25,10 @@ class LauncherPeerDto {
   @IsInt()
   steamId: number;
 
-  @ApiProperty({ description: '候选地址，IPv4:端口', type: [String] })
+  @ApiProperty({
+    description: '候选地址，类型:IPv4:端口，类型为 lan / stun / upnp',
+    type: [String],
+  })
   @IsArray()
   @ArrayMaxSize(MAX_CANDIDATES)
   @Matches(CANDIDATE_PATTERN, { each: true })

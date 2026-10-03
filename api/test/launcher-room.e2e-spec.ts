@@ -23,7 +23,7 @@ describe('LauncherRoom (e2e)', () => {
     const opened = await post(app, '/api/launcher/rooms/host', {
       ...peer,
       steamId: 300000001,
-      candidates: ['192.168.0.50:50000'],
+      candidates: ['lan:192.168.0.50:50000'],
       publicIp: false,
     });
     expect(opened.status).toEqual(201);
@@ -32,15 +32,15 @@ describe('LauncherRoom (e2e)', () => {
     const joined = await post(app, `/api/launcher/rooms/${code}/join`, {
       ...peer,
       steamId: 300000002,
-      candidates: ['192.168.0.13:50001'],
+      candidates: ['lan:192.168.0.13:50001'],
     });
     expect(joined.status).toEqual(201);
-    expect(joined.body.hostCandidates).toEqual(['192.168.0.50:50000']);
+    expect(joined.body.hostCandidates).toEqual(['lan:192.168.0.50:50000']);
 
     const polled = await post(app, '/api/launcher/rooms/host', {
       ...peer,
       steamId: 300000001,
-      candidates: ['192.168.0.50:50000'],
+      candidates: ['lan:192.168.0.50:50000'],
       publicIp: false,
       code,
       token,
@@ -53,7 +53,7 @@ describe('LauncherRoom (e2e)', () => {
     const late = await post(app, `/api/launcher/rooms/${code}/join`, {
       ...peer,
       steamId: 300000003,
-      candidates: ['192.168.0.14:50002'],
+      candidates: ['lan:192.168.0.14:50002'],
     });
     expect(late.status).toEqual(409);
     expect(late.body.code).toEqual('game_started');

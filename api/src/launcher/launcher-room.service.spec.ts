@@ -28,7 +28,7 @@ function memoryRepository<T extends { id: string }>() {
 
 const HOST: HostRoomDto = {
   steamId: 1001,
-  candidates: ['192.168.0.50:50000', '1.2.3.4:50000'],
+  candidates: ['lan:192.168.0.50:50000', 'stun:1.2.3.4:50000'],
   upnp: true,
   publicIp: false,
   protocolVersion: 1,
@@ -37,7 +37,7 @@ const HOST: HostRoomDto = {
 
 const JOINER: JoinRoomDto = {
   steamId: 2002,
-  candidates: ['192.168.0.13:50001'],
+  candidates: ['lan:192.168.0.13:50001'],
   upnp: false,
   protocolVersion: 1,
   launcherVersion: '0.3.5',
