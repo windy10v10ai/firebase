@@ -99,6 +99,10 @@ export class LauncherRoomService {
     if (room.protocolVersion !== dto.protocolVersion) {
       throw new ConflictException({ code: 'version_mismatch' });
     }
+    // 只在双方都读到版本时比较：读不到的一方照常放行，版本检查失败不该挡住联机
+    if (room.mapVersion && dto.mapVersion && room.mapVersion !== dto.mapVersion) {
+      throw new ConflictException({ code: 'map_mismatch' });
+    }
 
     const profile = await this.findProfile(dto.steamId);
     const join = await this.joinRepository.create({
@@ -141,6 +145,7 @@ export class LauncherRoomService {
       hostUpnp: dto.upnp,
       hostPublicIp: dto.publicIp,
       protocolVersion: dto.protocolVersion,
+      mapVersion: dto.mapVersion,
       started: false,
       lastSeenAt: now,
       createdAt: now,

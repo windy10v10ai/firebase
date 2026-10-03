@@ -14,6 +14,7 @@ export class LauncherRoom {
   hostUpnp: boolean;
   hostPublicIp: boolean;
   protocolVersion: number;
+  mapVersion?: string;
   /** 进入选英雄后不再接受加入 */
   started: boolean;
   lastSeenAt: Date;

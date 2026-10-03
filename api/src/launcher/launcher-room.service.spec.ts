@@ -180,11 +180,15 @@ describe('LauncherRoomService', () => {
     await expect(service.join(room.code, JOINER)).rejects.toThrow(NotFoundException);
   });
 
-  it('隧道协议版本不同拒绝加入', async () => {
-    const room = await service.host(HOST);
+  it('隧道协议或地图版本不同拒绝加入，读不到地图版本的一方放行', async () => {
+    const room = await service.host({ ...HOST, mapVersion: '111' });
 
     await expect(service.join(room.code, { ...JOINER, protocolVersion: 2 })).rejects.toThrow(
       ConflictException,
     );
+    await expect(service.join(room.code, { ...JOINER, mapVersion: '222' })).rejects.toThrow(
+      ConflictException,
+    );
+    await expect(service.join(room.code, JOINER)).resolves.toBeDefined();
   });
 });

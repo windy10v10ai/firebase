@@ -46,6 +46,11 @@ class LauncherPeerDto {
   @ApiProperty()
   @IsString()
   launcherVersion: string;
+
+  @ApiPropertyOptional({ description: '本机已安装地图的 manifest，双方都有且不同时拒绝加入' })
+  @IsOptional()
+  @IsString()
+  mapVersion?: string;
 }
 
 export class JoinResultDto {
