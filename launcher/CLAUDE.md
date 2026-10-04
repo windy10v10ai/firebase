@@ -4,7 +4,7 @@
 
 ## 版本号
 
-- 每个改 `launcher/` 的 PR 都升版本：`src/Launcher.cs` 的 `Version`、`AssemblyVersion`、`AssemblyFileVersion` 三处一致。修 bug 升第三位，新增玩家可见功能升第二位
+- 每个改 `launcher/` 的 PR 都升版本：`src/Launcher.cs` 的 `Version`、`AssemblyVersion`、`AssemblyFileVersion` 三处一致。修 bug 与小功能升第三位，明显改善玩家体验的新功能（如联机、公开房间）升第二位。拿不准时问用户
 - PR「概要」写明升级前后的版本与幅度，如「版本 0.3.2 → 0.3.3（修 bug，升第三位）」，review 时不用翻 diff 就能判断是小版本还是大版本
 
 ## 校验
