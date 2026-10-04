@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.4.1.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.4.1.0")]
+[assembly: System.Reflection.AssemblyVersion("0.4.2.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.4.2.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -48,7 +48,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.4.1";
+        const string Version = "0.4.2";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -88,6 +88,7 @@ namespace Windy10v10AI.Launcher
         readonly Panel mapDot = new Panel();
         readonly Label mapLabel = new Label();
         readonly LinkLabel devLink = new LinkLabel();
+        readonly LinkLabel feedbackLink = new LinkLabel();
         readonly ToggleBox testBox = new ToggleBox();
         readonly SegmentedBar modeBar = new SegmentedBar();
         readonly Label roomTypeLabel = new Label();
@@ -137,6 +138,11 @@ namespace Windy10v10AI.Launcher
         // Launch failures stay on screen until the player acts; map checks may replace any other notice
         bool stickyNotice;
         string logFile;
+        // The last launch failure, so a report started from its notice can carry it
+        FeedbackError failure;
+        string stage;
+        Exception failureCause;
+        readonly System.Windows.Forms.Timer thanksTimer = new System.Windows.Forms.Timer { Interval = 6000 };
         Release update;
         volatile bool stopping;
         bool busy;
@@ -213,6 +219,14 @@ namespace Windy10v10AI.Launcher
                 testBox.Visible = !testBox.Visible;
             };
 
+            feedbackLink.Text = Strings.Feedback;
+            feedbackLink.Font = new Font(Theme.FontName, 8.25f);
+            feedbackLink.LinkColor = Theme.Muted;
+            feedbackLink.ActiveLinkColor = Theme.Text;
+            feedbackLink.LinkBehavior = LinkBehavior.HoverUnderline;
+            feedbackLink.TextAlign = ContentAlignment.MiddleRight;
+            feedbackLink.LinkClicked += delegate { OpenFeedback(null); };
+
             testBox.Text = Strings.UseTestMap;
             testBox.Visible = false;
             testBox.CheckedChanged += delegate { RefreshMapState(); };
@@ -240,6 +254,13 @@ namespace Windy10v10AI.Launcher
             };
             mapCard.Action.Click += delegate { OpenUrl("steam://url/CommunityFilePage/" + MapId); };
             rosterTimer.Tick += delegate { RefreshPlayers(); };
+            thanksTimer.Tick += delegate
+            {
+                thanksTimer.Stop();
+                if (busy || status.Text != Strings.FeedbackThanks) return;
+                status.Text = IdleText();
+                status.ForeColor = Theme.Muted;
+            };
             players.Kick += KickPlayer;
 
             roomTypeLabel.Text = Strings.RoomType;
@@ -313,7 +334,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -437,7 +458,9 @@ namespace Windy10v10AI.Launcher
             var devWidth = TextRenderer.MeasureText(devLink.Text, devLink.Font).Width + P(4);
             devLink.SetBounds(P(460) - devWidth, P(y + 9), devWidth, P(22));
             var testWidth = testBox.PreferredWidth + P(2);
-            testBox.SetBounds(P(460) - devWidth - P(12) - testWidth, P(y + 9), testWidth, P(22));
+            var feedbackWidth = TextRenderer.MeasureText(feedbackLink.Text, feedbackLink.Font).Width + P(4);
+            feedbackLink.SetBounds(P(460) - devWidth - P(12) - feedbackWidth, P(y + 9), feedbackWidth, P(22));
+            testBox.SetBounds(feedbackLink.Left - P(12) - testWidth, P(y + 9), testWidth, P(22));
             ClientSize = new Size(P(480), P(y + 40));
         }
 
@@ -671,7 +694,7 @@ namespace Windy10v10AI.Launcher
 
         void ShowNotice(NoticeKind kind, string text, bool withLog)
         {
-            if (withLog) ShowNotice(kind, text, Strings.OpenLog, RevealLog);
+            if (withLog) ShowNotice(kind, text, Strings.ReportProblem, () => OpenFeedback(failure));
             else ShowNotice(kind, text, null, null);
             stickyNotice = withLog;
         }
@@ -755,6 +778,7 @@ namespace Windy10v10AI.Launcher
             }
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Starting, room ? Strings.RoomStartingHint : Strings.StartingHint, Strings.Cancel, true);
+            stage = room ? "host" : "solo";
             new Thread(() => Run(install, id, map, room)) { IsBackground = true }.Start();
         }
 
@@ -850,7 +874,7 @@ namespace Windy10v10AI.Launcher
                 WaitForMap(map);
                 UI(() => hint.Text = Strings.OpeningDota);
 
-                StartClient();
+                StartClient(install);
 
                 UI(() =>
                 {
@@ -873,10 +897,12 @@ namespace Windy10v10AI.Launcher
             }
             catch (LaunchError error)
             {
+                failureCause = error;
                 Finish(error.Message, error.ShowLog, error.Button, error.OnClick);
             }
             catch (Exception error)
             {
+                failureCause = error;
                 Finish(Strings.LaunchFailed + error.Message, logFile != null);
             }
         }
@@ -946,6 +972,7 @@ namespace Windy10v10AI.Launcher
             listTimer.Stop();
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Connecting, Strings.ConnectingHint, Strings.Cancel, true);
+            stage = "join";
             new Thread(() => RunJoin(install, id, code, source)) { IsBackground = true }.Start();
         }
 
@@ -1007,23 +1034,25 @@ namespace Windy10v10AI.Launcher
                 if (DotaProcesses().Count > 0) throw new LaunchError(Strings.DotaNotClosed, false);
                 PrepareAddon(install, id);
                 tunnel.Forward();
-                StartClient();
+                StartClient(install);
 
                 UI(() => ShowProgress(string.Format(Strings.Joined, code), Strings.JoinedHint, Strings.LeaveRoom, false));
-                WatchJoin(tunnel);
+                WatchJoin(tunnel, install);
             }
             catch (LaunchError error)
             {
+                failureCause = error;
                 Finish(error.Message, error.ShowLog, error.Button, error.OnClick);
             }
             catch (Exception error)
             {
+                failureCause = error;
                 Finish(Strings.LaunchFailed + error.Message, false);
             }
         }
 
         // The tunnel outlives Dota, so a joiner whose game closed can go back into the same match
-        void WatchJoin(JoinTunnel tunnel)
+        void WatchJoin(JoinTunnel tunnel, DotaInstall install)
         {
             bool? wasRunning = null;
             while (!stopping)
@@ -1037,7 +1066,7 @@ namespace Windy10v10AI.Launcher
                 UI(() =>
                 {
                     if (running) secondary.Visible = false;
-                    else ShowSecondary(Strings.Rejoin, StartClient);
+                    else ShowSecondary(Strings.Rejoin, () => StartClient(install));
                 });
             }
             Finish(null, false);
@@ -1208,14 +1237,23 @@ namespace Windy10v10AI.Launcher
 
         // A client started outside Steam fails VAC verification when it later joins an Arcade lobby;
         // -applaunch goes through Steam without the confirmation dialog that steam://run shows
-        static void StartClient()
+        static void StartClient(DotaInstall install)
         {
             var steam = DotaInstall.SteamExecutable();
             if (steam == null) throw new LaunchError(Strings.SteamClientMissing, false);
+            // A leftover log from the last game would be mistaken for this one's
+            try
+            {
+                var clientLog = Path.Combine(install.Game, @"dota\client.log");
+                if (File.Exists(clientLog)) File.Delete(clientLog);
+            }
+            catch (Exception)
+            {
+            }
             StartDota(new ProcessStartInfo
             {
                 FileName = steam,
-                Arguments = "-applaunch 570 -novid +connect 127.0.0.1:" + Port,
+                Arguments = "-applaunch 570 -novid -con_logfile client.log +connect 127.0.0.1:" + Port,
                 UseShellExecute = false,
             });
         }
@@ -1299,6 +1337,11 @@ namespace Windy10v10AI.Launcher
         void Finish(string error, bool showLog, string button, Action onClick)
         {
             var cancelled = stopping;
+            if (error != null && !cancelled)
+            {
+                failure = new FeedbackError { Message = error, Stage = stage, Detail = failureCause == null ? null : failureCause.ToString() };
+            }
+            failureCause = null;
             // Stops the poll thread first so a late poll cannot list the room again
             stopping = true;
             HideFromList();
@@ -1364,7 +1407,7 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        static void OpenUrl(string url)
+        internal static void OpenUrl(string url)
         {
             try
             {
@@ -1375,16 +1418,39 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        void RevealLog()
+        // Opens the feedback dialog; a launch failure passes its details along without showing them
+        void OpenFeedback(FeedbackError error)
         {
-            if (logFile == null || !File.Exists(logFile)) return;
-            try
+            DotaInstall install;
+            DotaInstall.Check(MapId, out install);
+            var context = new FeedbackContext
             {
-                Process.Start("explorer.exe", "/select,\"" + logFile + "\"");
-            }
-            catch (Exception)
+                LauncherVersion = Version,
+                MapVersion = InstalledMapVersion(),
+                Mode = modeBar.Selected,
+                GameDir = install == null ? null : install.Game,
+                Error = error,
+            };
+            using (var dialog = new FeedbackDialog(context))
             {
+                if (dialog.ShowDialog(this) == DialogResult.OK) ShowThanks();
             }
+        }
+
+        // Shares the idle status line, so it only appears when nothing else is using it
+        void ShowThanks()
+        {
+            if (busy) return;
+            if (notice.Visible && stickyNotice)
+            {
+                stickyNotice = false;
+                HideNotice();
+            }
+            if (notice.Visible) return;
+            status.Text = Strings.FeedbackThanks;
+            status.ForeColor = Theme.Ok;
+            thanksTimer.Stop();
+            thanksTimer.Start();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
