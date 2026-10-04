@@ -19,6 +19,8 @@ import {
   JoinRoomDto,
   JoinRoomResponse,
   LauncherProfileDto,
+  ListRoomsDto,
+  ListRoomsResponse,
 } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
 import { LauncherRoom } from './entities/launcher-room.entity';
@@ -32,6 +34,8 @@ export const PENDING_JOIN_MS = 30 * 1000;
 // 房间码一天后可以重新分配；记录多留几天，方便排查最近的房间
 const CODE_REUSE_MS = 24 * 60 * 60 * 1000;
 const RECORD_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+// 所有请求共用一份查询结果，Firestore 读取量不随看列表的人数增长
+export const ROOM_LIST_CACHE_MS = 3 * 1000;
 
 @Injectable()
 export class LauncherRoomService {
@@ -44,6 +48,9 @@ export class LauncherRoomService {
     private readonly steamProfileService: SteamProfileService,
   ) {}
 
+  // 放在实例上：函数实例处理完请求不会立刻销毁，实例回收或多开时只是多查一次
+  private aliveRoomsCache?: { fetchedAt: number; rooms: LauncherRoom[] };
+
   /** 房主开房、轮询新的加入请求或在开局时关房。 */
   async host(dto: HostRoomDto, country?: string): Promise<HostRoomResponse> {
     const now = new Date();
@@ -55,19 +62,21 @@ export class LauncherRoomService {
     if (!room) {
       throw new NotFoundException({ code: 'room_not_found' });
     }
+    // 不检查过期：房主停止轮询后再带对令牌轮询，房间以同一个码恢复
     if (room.hostToken !== dto.token) {
       throw new ForbiddenException();
     }
 
     for (const result of dto.results ?? []) {
       const join = await this.joinRepository.findById(result.joinId);
-      if (join?.roomId === room.roomId) {
+      if (join?.roomId === room.roomId && !join.probe) {
         await this.bigQueryService.recordJoinResult(room, join, result.path, result.elapsedMs);
       }
     }
 
     room.lastSeenAt = now;
     room.started = room.started || dto.started === true;
+    Object.assign(room, roomSettings(dto));
     await this.roomRepository.update(room);
 
     const joins = room.started ? [] : await this.findPendingJoins(room, now);
@@ -83,11 +92,12 @@ export class LauncherRoomService {
         candidates: join.candidates,
         personaName: join.personaName,
         avatarUrl: join.avatarUrl,
+        probe: join.probe === true,
       })),
     };
   }
 
-  /** 加入者凭房间码登记，立刻拿回房主的候选地址，不等房主轮询。 */
+  /** 加入者凭房间码登记或测试连通，立刻拿回房主的候选地址，不等房主轮询。 */
   async join(code: string, dto: JoinRoomDto, country?: string): Promise<JoinRoomResponse> {
     const now = new Date();
     const room = await this.roomRepository.findById(code.trim().toUpperCase());
@@ -98,6 +108,9 @@ export class LauncherRoomService {
     if (!room || now.getTime() - room.lastSeenAt.getTime() > ROOM_ALIVE_MS) {
       throw new NotFoundException({ code: 'room_not_found' });
     }
+    if (room.kickedSteamIds?.includes(dto.steamId)) {
+      throw new ForbiddenException({ code: 'kicked' });
+    }
     if (room.protocolVersion !== dto.protocolVersion) {
       throw new ConflictException({ code: 'version_mismatch' });
     }
@@ -105,8 +118,13 @@ export class LauncherRoomService {
     if (room.mapVersion && dto.mapVersion && room.mapVersion !== dto.mapVersion) {
       throw new ConflictException({ code: 'map_mismatch' });
     }
+    // 测试连通不占名额：满员的房间也要量出延迟，有人离开后才能直接加入
+    if (!dto.probe && room.maxPlayers && (room.playerCount ?? 0) >= room.maxPlayers) {
+      throw new ConflictException({ code: 'room_full' });
+    }
 
-    const profile = await this.findProfile(dto.steamId);
+    // 测试连通每次打开加入页对每个房间都发一次，省掉 Steam 资料查询
+    const profile = dto.probe ? {} : await this.findProfile(dto.steamId);
     const join = await this.joinRepository.create({
       id: randomUUID(),
       roomCode: room.id,
@@ -120,9 +138,19 @@ export class LauncherRoomService {
       symmetricNat: dto.symmetricNat,
       launcherVersion: dto.launcherVersion,
       country,
+      probe: dto.probe,
       createdAt: now,
       expireAt: expireAt(now),
     });
+    if (dto.probe) {
+      return {
+        joinId: join.id,
+        joinToken: join.joinToken,
+        hostCandidates: room.hostCandidates,
+        host: {},
+        self: {},
+      };
+    }
     return {
       joinId: join.id,
       joinToken: join.joinToken,
@@ -130,6 +158,44 @@ export class LauncherRoomService {
       host: { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
       self: profile,
     };
+  }
+
+  /** 列出请求者能加入的公开房间，不含候选地址与令牌。 */
+  async list(dto: ListRoomsDto): Promise<ListRoomsResponse> {
+    const now = Date.now();
+    const rooms = await this.findAliveRooms(now);
+    return {
+      rooms: rooms
+        .filter(
+          (room) =>
+            room.public === true &&
+            !room.started &&
+            now - room.lastSeenAt.getTime() <= ROOM_ALIVE_MS &&
+            room.protocolVersion === dto.protocolVersion &&
+            !(room.mapVersion && dto.mapVersion && room.mapVersion !== dto.mapVersion) &&
+            !room.kickedSteamIds?.includes(dto.steamId),
+        )
+        .map((room) => ({
+          code: room.id,
+          personaName: room.hostPersonaName,
+          avatarUrl: room.hostAvatarUrl,
+          map: room.map,
+          playerCount: room.playerCount,
+          maxPlayers: room.maxPlayers,
+        })),
+    };
+  }
+
+  // 只按心跳一个条件查，其余条件在内存里筛，不用建组合索引
+  private async findAliveRooms(now: number): Promise<LauncherRoom[]> {
+    if (this.aliveRoomsCache && now - this.aliveRoomsCache.fetchedAt < ROOM_LIST_CACHE_MS) {
+      return this.aliveRoomsCache.rooms;
+    }
+    const rooms = await this.roomRepository
+      .whereGreaterThan('lastSeenAt', new Date(now - ROOM_ALIVE_MS))
+      .find();
+    this.aliveRoomsCache = { fetchedAt: now, rooms };
+    return rooms;
   }
 
   private async open(dto: HostRoomDto, now: Date, country?: string): Promise<HostRoomResponse> {
@@ -151,6 +217,7 @@ export class LauncherRoomService {
       protocolVersion: dto.protocolVersion,
       mapVersion: dto.mapVersion,
       started: false,
+      ...roomSettings(dto),
       lastSeenAt: now,
       createdAt: now,
       expireAt: expireAt(now),
@@ -197,6 +264,20 @@ export class LauncherRoomService {
         join.roomId === room.roomId && now.getTime() - join.createdAt.getTime() <= PENDING_JOIN_MS,
     );
   }
+}
+
+// 只取房主这次带上的字段，没带的保留上次的值
+function roomSettings(dto: HostRoomDto): Partial<LauncherRoom> {
+  const settings: Partial<LauncherRoom> = {
+    public: dto.public,
+    maxPlayers: dto.maxPlayers,
+    map: dto.map,
+    playerCount: dto.playerCount,
+    kickedSteamIds: dto.kickedSteamIds,
+  };
+  return Object.fromEntries(
+    Object.entries(settings).filter(([, value]) => value !== undefined),
+  ) as Partial<LauncherRoom>;
 }
 
 function newToken(): string {

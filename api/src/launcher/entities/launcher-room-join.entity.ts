@@ -15,6 +15,8 @@ export class LauncherRoomJoin {
   symmetricNat?: boolean;
   launcherVersion: string;
   country?: string;
+  /** 测试连通：只量延迟不进游戏，不占名额、不计入加入统计 */
+  probe?: boolean;
   createdAt: Date;
   /** Firestore TTL 字段，只用于清理 */
   expireAt: Date;

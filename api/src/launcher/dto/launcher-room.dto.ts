@@ -9,11 +9,15 @@ import {
   IsOptional,
   IsString,
   Matches,
+  Max,
   Min,
   ValidateNested,
 } from 'class-validator';
 
+import { LAUNCHER_ROOM_MAPS, LauncherRoomMap } from '../entities/launcher-room.entity';
+
 const MAX_CANDIDATES = 8;
+const MAX_KICKED = 50;
 // 类型前缀让加入者知道连通的是哪条路，房主才能上报 lan / upnp / punch
 const CANDIDATE_PATTERN = /^(lan|stun|upnp):\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 
@@ -102,9 +106,60 @@ export class HostRoomDto extends LauncherPeerDto {
   @IsOptional()
   @IsBoolean()
   started?: boolean;
+
+  @ApiPropertyOptional({ description: '是否进房间列表，省略按私密处理' })
+  @IsOptional()
+  @IsBoolean()
+  public?: boolean;
+
+  @ApiPropertyOptional({ minimum: 2, maximum: 10 })
+  @IsOptional()
+  @IsInt()
+  @Min(2)
+  @Max(10)
+  maxPlayers?: number;
+
+  @ApiPropertyOptional({ enum: LAUNCHER_ROOM_MAPS })
+  @IsOptional()
+  @IsIn(LAUNCHER_ROOM_MAPS)
+  map?: LauncherRoomMap;
+
+  @ApiPropertyOptional({ description: '房里当前人数，含房主' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  playerCount?: number;
+
+  @ApiPropertyOptional({ description: '被移出的 32 位账号 ID，每次传完整名单', type: [Number] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_KICKED)
+  @IsInt({ each: true })
+  kickedSteamIds?: number[];
 }
 
-export class JoinRoomDto extends LauncherPeerDto {}
+export class JoinRoomDto extends LauncherPeerDto {
+  @ApiPropertyOptional({ description: '测试连通：只交换地址量延迟，不进游戏' })
+  @IsOptional()
+  @IsBoolean()
+  probe?: boolean;
+}
+
+export class ListRoomsDto {
+  @ApiProperty()
+  @IsInt()
+  steamId: number;
+
+  @ApiProperty()
+  @IsInt()
+  @Min(1)
+  protocolVersion: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  mapVersion?: string;
+}
 
 export class LauncherProfileDto {
   @ApiPropertyOptional({ description: 'Steam 昵称，取不到时省略' })
@@ -122,6 +177,8 @@ export class PendingJoinDto extends LauncherProfileDto {
   joinToken: string;
   @ApiProperty({ type: [String] })
   candidates: string[];
+  @ApiProperty({ description: '测试连通，打通后不加进玩家列表' })
+  probe: boolean;
 }
 
 export class HostRoomResponse extends LauncherProfileDto {
@@ -144,4 +201,20 @@ export class JoinRoomResponse {
   host: LauncherProfileDto;
   @ApiProperty({ type: LauncherProfileDto, description: '加入者自己' })
   self: LauncherProfileDto;
+}
+
+export class PublicRoomDto extends LauncherProfileDto {
+  @ApiProperty()
+  code: string;
+  @ApiPropertyOptional({ enum: LAUNCHER_ROOM_MAPS })
+  map?: LauncherRoomMap;
+  @ApiPropertyOptional()
+  playerCount?: number;
+  @ApiPropertyOptional()
+  maxPlayers?: number;
+}
+
+export class ListRoomsResponse {
+  @ApiProperty({ type: [PublicRoomDto] })
+  rooms: PublicRoomDto[];
 }
