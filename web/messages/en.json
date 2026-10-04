@@ -297,7 +297,8 @@
       "title": "Privacy",
       "map": "To check whether the map is up to date, it asks the Steam Web API and this site's API for the Workshop map version.",
       "update": "To check for launcher updates, it asks this site's API for the latest version. A new version is downloaded only after you click \"Update\".",
-      "data": "The launcher does not collect or upload your personal information, game data or files on your computer."
+      "online": "Only when you use \"Host\" or \"Join\": the launcher sends your Dota2 ID and the network address used to connect to this site's API, so the host and friends can find each other. Once connected, game data goes directly between your computers, not through our servers. These records are deleted automatically after 7 days.",
+      "data": "In single player, the launcher does not collect or upload your personal information, game data or files on your computer."
     }
   },
   "disclosure": {
