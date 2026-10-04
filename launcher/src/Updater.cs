@@ -19,7 +19,7 @@ namespace Windy10v10AI.Launcher
     // Replaces the running exe with the latest release published on our API
     static class Updater
     {
-        const string DirectApi = "https://api.windy10v10ai.com/api/launcher/";
+        public const string DirectApi = "https://api.windy10v10ai.com/api/launcher/";
         // Some networks in mainland China cannot reach our API directly, so they go through the same China proxy the game uses
         public const string RelayApi = "https://1491237865-7au6o0ylxt.ap-guangzhou.tencentscf.com/api/launcher/";
         public const string DownloadPage = "https://windy10v10ai.com/launch";
