@@ -287,18 +287,17 @@
     },
     "team": {
       "title": "Team and roles",
-      "body": "The launcher is maintained by <maintainer>windy</maintainer> alone, who writes the code, reviews changes and approves every release."
+      "body": "Only <maintainer>windy</maintainer> can publish the launcher, and windy reviews and approves every change and release to keep it safe."
     },
     "changes": {
-      "title": "Changes to your computer and uninstalling",
-      "files": "The launcher does not modify any original Dota 2 files. It adds a map folder game/dota_addons/(map ID)/ (a hard link to the Workshop map file) and a server log game/dota/dedicated.log inside the Dota 2 install. Updates only replace the launcher's own exe.",
-      "uninstall": "The launcher is a single exe and needs no installation. To uninstall, delete the exe. To remove everything, also delete the map folder and log above."
+      "title": "Changes to your computer",
+      "files": "The launcher does not modify any original Dota 2 files. It only adds the files needed to run the map.",
+      "settings": "It remembers your last choices and saves player avatars, so it opens faster next time."
     },
     "privacy": {
       "title": "Privacy",
-      "map": "To check whether the map is up to date, it asks the Steam Web API and this site's API for the Workshop map version.",
-      "update": "To check for launcher updates, it asks this site's API for the latest version. A new version is downloaded only after you click \"Update\".",
-      "online": "When playing online, the launcher sends your Dota2 ID and network address to this site's API to connect you with the host and friends. Records are deleted after 7 days.",
+      "update": "The launcher asks Steam and this site whether the map or the launcher has a new version. A new version is downloaded only after you click \"Update\".",
+      "online": "Single-player games share none of your information. When playing online, this site receives your Dota2 ID and network address, and deletes them after a week.",
       "data": "Other than that, the launcher does not collect or upload your personal information."
     }
   },
