@@ -59,7 +59,7 @@ export const client = onRequest(
   },
   async (req, res) => {
     const regex =
-      '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello|proxy|launcher).*';
+      '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello|proxy|launcher|feedback).*';
     callServerWithRegex(regex, req, res);
   },
 );
