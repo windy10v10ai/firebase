@@ -9,6 +9,7 @@ import {
   LauncherRoomService,
   PENDING_JOIN_MS,
   ROOM_ALIVE_MS,
+  ROOM_LIST_ALIVE_MS,
   ROOM_LIST_CACHE_MS,
 } from './launcher-room.service';
 
@@ -269,7 +270,7 @@ describe('LauncherRoomService', () => {
     const started = await service.host({ ...HOST, steamId: 3005, public: true });
     await service.host({ ...HOST, code: started.code, token: started.token, started: true });
     const stale = await service.host({ ...HOST, steamId: 3006, public: true });
-    rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - ROOM_ALIVE_MS - 1);
+    rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - ROOM_LIST_ALIVE_MS - 1);
 
     const res = await service.list({ steamId: 2002, protocolVersion: 1, mapVersion: '111' });
 
@@ -283,6 +284,7 @@ describe('LauncherRoomService', () => {
         maxPlayers: 10,
       },
     ]);
+    await expect(service.join(stale.code, JOINER)).resolves.toBeDefined();
   });
 
   it('列表结果缓存 3 秒，期间不再查 Firestore', async () => {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -19,6 +20,11 @@ namespace Windy10v10AI.Launcher
         public const byte Bye = 6;
         // One player of the host's roster, so joiners see the same list as the host
         public const byte Roster = 7;
+        // Tells a joiner the host removed it, so it stops reconnecting with a token the host has dropped
+        public const byte Kicked = 8;
+        // A timestamp and token the host echoes back unchanged, so the joiner measures the round trip on its own clock
+        public const byte Ping = 9;
+        public const byte Pong = 10;
     }
 
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
@@ -107,7 +113,6 @@ namespace Windy10v10AI.Launcher
         {
             return Encoding.ASCII.GetString(data, 1, data.Length - 1);
         }
-
         // Sends Hello to every candidate until done() says the handshake settled or the window ends
         protected void Burst(string token, List<Candidate> targets, Func<bool> done)
         {
@@ -134,10 +139,15 @@ namespace Windy10v10AI.Launcher
             public IPEndPoint Remote;
             public UdpClient Local;
             public DateTime LastSent;
+            public volatile bool Closed;
         }
+
+        // A probe only measures the route, and its token is forgotten shortly after so it cannot be used to play
+        const int ProbeLingerMs = 5000;
 
         readonly object sync = new object();
         readonly Dictionary<string, string> joinIds = new Dictionary<string, string>();
+        readonly HashSet<string> probes = new HashSet<string>();
         readonly Dictionary<string, string> paths = new Dictionary<string, string>();
         readonly Dictionary<IPEndPoint, string> verified = new Dictionary<IPEndPoint, string>();
         readonly Dictionary<string, Peer> peers = new Dictionary<string, Peer>();
@@ -169,22 +179,84 @@ namespace Windy10v10AI.Launcher
             }) { IsBackground = true }.Start();
         }
 
-        public void AddJoin(string joinId, string token, List<Candidate> candidates)
+        public void AddJoin(string joinId, string token, List<Candidate> candidates, bool probe)
         {
             lock (sync)
             {
                 if (joinIds.ContainsKey(token)) return;
                 joinIds[token] = joinId;
+                if (probe) probes.Add(token);
             }
             var started = DateTime.UtcNow;
             new Thread(() =>
             {
-                Burst(token, candidates, () => { lock (sync) return paths.ContainsKey(token); });
+                if (probe)
+                {
+                    Burst(token, candidates, () => { lock (sync) return verified.ContainsValue(token); });
+                    Thread.Sleep(ProbeLingerMs);
+                    lock (sync) Forget(token);
+                    return;
+                }
+                // A kicked joiner's token is gone, which also ends its handshake
+                Burst(token, candidates, () => { lock (sync) return paths.ContainsKey(token) || !joinIds.ContainsKey(token); });
                 string path;
-                lock (sync) paths.TryGetValue(token, out path);
+                bool kicked;
+                lock (sync)
+                {
+                    paths.TryGetValue(token, out path);
+                    kicked = !joinIds.ContainsKey(token);
+                }
                 var handler = JoinFinished;
-                if (handler != null && !Closed) handler(joinId, path == null ? null : PathType.Report(path), (int)(DateTime.UtcNow - started).TotalMilliseconds);
+                if (handler != null && !Closed && !kicked) handler(joinId, path == null ? null : PathType.Report(path), (int)(DateTime.UtcNow - started).TotalMilliseconds);
             }) { IsBackground = true }.Start();
+        }
+
+        // Tells the joiner it was removed and drops its session; its later packets come from an unknown token
+        public void Kick(string joinId)
+        {
+            lock (sync)
+            {
+                var tokens = new List<string>();
+                foreach (var pair in joinIds)
+                {
+                    if (pair.Value == joinId) tokens.Add(pair.Key);
+                }
+                foreach (var token in tokens)
+                {
+                    var targets = new List<IPEndPoint>();
+                    Peer peer;
+                    if (peers.TryGetValue(token, out peer) && peer.Remote != null) targets.Add(peer.Remote);
+                    foreach (var pair in verified)
+                    {
+                        if (pair.Value == token && !targets.Contains(pair.Key)) targets.Add(pair.Key);
+                    }
+                    // Sent a few times because a lost packet would leave the joiner reconnecting until it gives up
+                    foreach (var target in targets)
+                    {
+                        for (var i = 0; i < 3; i++) Send(Packet.Kicked, new byte[0], target);
+                    }
+                    if (peer != null)
+                    {
+                        peer.Closed = true;
+                        peer.Local.Close();
+                        peers.Remove(token);
+                    }
+                    Forget(token);
+                }
+            }
+        }
+
+        void Forget(string token)
+        {
+            joinIds.Remove(token);
+            probes.Remove(token);
+            paths.Remove(token);
+            var stale = new List<IPEndPoint>();
+            foreach (var pair in verified)
+            {
+                if (pair.Value == token) stale.Add(pair.Key);
+            }
+            foreach (var endPoint in stale) verified.Remove(endPoint);
         }
 
         protected override void OnPacket(byte[] data, IPEndPoint from)
@@ -202,6 +274,13 @@ namespace Windy10v10AI.Launcher
 
                 string owner;
                 if (!verified.TryGetValue(from, out owner)) return;
+                if (data[0] == Packet.Ping)
+                {
+                    Send(Packet.Pong, Payload(data), from);
+                    return;
+                }
+                // A probe never reaches the dedicated server
+                if (probes.Contains(owner)) return;
                 var peer = PeerOf(owner);
                 // The joiner may switch routes after a reconnect, so replies follow its latest packet
                 peer.Remote = from;
@@ -238,7 +317,7 @@ namespace Windy10v10AI.Launcher
             peers[token] = peer;
             new Thread(() =>
             {
-                while (!Closed)
+                while (!Closed && !peer.Closed)
                 {
                     try
                     {
@@ -248,7 +327,7 @@ namespace Windy10v10AI.Launcher
                     }
                     catch (Exception)
                     {
-                        if (Closed) return;
+                        if (Closed || peer.Closed) return;
                     }
                 }
             }) { IsBackground = true }.Start();
@@ -286,9 +365,18 @@ namespace Windy10v10AI.Launcher
         // Gives up after this long without the host, which by then has most likely closed the game
         const int GiveUpMs = 90000;
         const int QuietMs = 7000;
+        // The lowest of a few round trips, so one packet delayed by the first hole punch does not set the latency
+        const int PingSamples = 3;
+
+        class Probe
+        {
+            public int Samples;
+            public int Rtt = -1;
+        }
 
         readonly object sync = new object();
         readonly Dictionary<IPEndPoint, string> reached = new Dictionary<IPEndPoint, string>();
+        readonly Dictionary<string, Probe> probes = new Dictionary<string, Probe>();
         string token;
         List<Candidate> hosts;
         IPEndPoint host;
@@ -298,6 +386,7 @@ namespace Windy10v10AI.Launcher
         DateTime lastSent;
 
         public volatile bool Lost;
+        public volatile bool Kicked;
         readonly Dictionary<int, RosterEntry> roster = new Dictionary<int, RosterEntry>();
         int rosterCount = -1;
         // Shown until the host's own list arrives
@@ -306,9 +395,47 @@ namespace Windy10v10AI.Launcher
         // Returns the path type that connected, or null when nothing answered in the handshake window
         public string Connect(string joinToken, List<Candidate> hostCandidates)
         {
-            token = joinToken;
-            hosts = hostCandidates;
+            lock (sync)
+            {
+                token = joinToken;
+                hosts = hostCandidates;
+            }
             return Handshake();
+        }
+
+        // Measures the round trip to a room without joining it, or returns -1 when the host never answers.
+        // Probes share this socket with the later join, so the route a probe opened is the one the join uses
+        public int Measure(string probeToken, List<Candidate> hostCandidates)
+        {
+            var probe = new Probe();
+            lock (sync) probes[probeToken] = probe;
+            Burst(probeToken, hostCandidates, () => { lock (sync) return probe.Samples >= PingSamples; });
+            lock (sync)
+            {
+                probes.Remove(probeToken);
+                return probe.Rtt;
+            }
+        }
+
+        void SendPing(string probeToken, IPEndPoint to)
+        {
+            var stamp = BitConverter.GetBytes(Stopwatch.GetTimestamp());
+            var id = Encoding.ASCII.GetBytes(probeToken);
+            var payload = new byte[stamp.Length + id.Length];
+            Buffer.BlockCopy(stamp, 0, payload, 0, stamp.Length);
+            Buffer.BlockCopy(id, 0, payload, stamp.Length, id.Length);
+            Send(Packet.Ping, payload, to);
+        }
+
+        void OnPong(byte[] data)
+        {
+            if (data.Length < 9) return;
+            Probe probe;
+            if (!probes.TryGetValue(Encoding.ASCII.GetString(data, 9, data.Length - 9), out probe)) return;
+            var sent = BitConverter.ToInt64(data, 1);
+            var ms = (int)((Stopwatch.GetTimestamp() - sent) * 1000 / Stopwatch.Frequency);
+            probe.Samples++;
+            if (probe.Rtt < 0 || ms < probe.Rtt) probe.Rtt = ms;
         }
 
         string Handshake()
@@ -323,6 +450,7 @@ namespace Windy10v10AI.Launcher
             {
                 lock (sync)
                 {
+                    if (Kicked) return true;
                     if (reached.Count == 0) return false;
                     if (firstReach == DateTime.MaxValue) firstReach = DateTime.UtcNow;
                     return reached.ContainsValue(PathType.Lan) || (DateTime.UtcNow - firstReach).TotalMilliseconds >= SettleMs;
@@ -438,9 +566,27 @@ namespace Windy10v10AI.Launcher
             {
                 if (data[0] == Packet.Hello || data[0] == Packet.Ack)
                 {
-                    if (ReadToken(data) != token) return;
-                    if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(token), from);
-                    if (!reached.ContainsKey(from)) reached[from] = TypeOf(from);
+                    var received = ReadToken(data);
+                    var joining = token != null && received == token;
+                    if (!joining && !probes.ContainsKey(received)) return;
+                    if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(received), from);
+                    if (joining)
+                    {
+                        if (!reached.ContainsKey(from)) reached[from] = TypeOf(from);
+                    }
+                    // Every answer is followed by a ping, so the samples arrive within a few handshake rounds
+                    else SendPing(received, from);
+                    return;
+                }
+                if (data[0] == Packet.Pong)
+                {
+                    OnPong(data);
+                    return;
+                }
+                if (data[0] == Packet.Kicked && (from.Equals(host) || reached.ContainsKey(from)))
+                {
+                    Kicked = true;
+                    Lost = true;
                     return;
                 }
                 if (host == null || !from.Equals(host)) return;

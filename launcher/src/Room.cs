@@ -22,7 +22,7 @@ namespace Windy10v10AI.Launcher
     static class RoomApi
     {
         // Bumped whenever the tunnel packets change, so mismatched launchers fail with a clear message
-        public const int ProtocolVersion = 1;
+        public const int ProtocolVersion = 2;
         const int DirectTimeout = 4000;
         const int RelayTimeout = 8000;
 
@@ -39,6 +39,11 @@ namespace Windy10v10AI.Launcher
         public static Dictionary<string, object> Join(string code, Dictionary<string, object> body)
         {
             return Post(Uri.EscapeDataString(code.Trim().ToUpperInvariant()) + "/join", body);
+        }
+
+        public static Dictionary<string, object> List(Dictionary<string, object> body)
+        {
+            return Post("list", body);
         }
 
         static Dictionary<string, object> Post(string path, Dictionary<string, object> body)
