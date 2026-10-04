@@ -147,7 +147,7 @@ namespace Windy10v10AI.Launcher
         public static string QuitBody { get { return Pick("关闭启动器会同时关闭服务器，正在进行的游戏会断开。", "Closing the launcher also stops the server and ends the current game.", "Закрытие лаунчера остановит сервер и прервёт текущую игру."); } }
         public static string Close { get { return Pick("关闭", "Close", "Закрыть"); } }
 
-        public static string Feedback { get { return Pick("反馈问题 / 建议", "Report / Suggest", "Сообщить / Предложить"); } }
+        public static string Feedback { get { return Pick("反馈问题 / 建议", "Report / Suggest", "Отзыв"); } }
         public static string FeedbackTitle { get { return Pick("反馈 — Windy10v10AI", "Feedback — Windy10v10AI", "Отзыв — Windy10v10AI"); } }
         public static string TypeProblem { get { return Pick("报告问题", "Report a problem", "Сообщить о проблеме"); } }
         public static string TypeSuggestion { get { return Pick("提出建议", "Suggest an idea", "Предложить идею"); } }
