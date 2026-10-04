@@ -41,8 +41,6 @@ namespace Windy10v10AI.Launcher
         readonly Func<List<Candidate>, bool?, Dictionary<string, object>> peerBody;
         readonly object sync = new object();
         readonly List<RoomRow> rows = new List<RoomRow>();
-        // Each room is measured once per visit; refreshing only measures rooms that are new
-        readonly HashSet<string> probed = new HashSet<string>();
         readonly ManualResetEvent ready = new ManualResetEvent(false);
         JoinTunnel tunnel;
         List<Candidate> candidates;
@@ -109,9 +107,10 @@ namespace Windy10v10AI.Launcher
                     lock (sync)
                     {
                         Merge(fresh);
+                        // A row keeps its result while it stays listed, so only rooms that are new or came back are measured
                         foreach (var row in rows)
                         {
-                            if (row.Probe != ProbeState.Untested || row.Full || !probed.Add(row.Code)) continue;
+                            if (row.Probe != ProbeState.Untested || row.Full) continue;
                             row.Probe = ProbeState.Testing;
                             toProbe.Add(row.Code);
                         }

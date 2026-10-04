@@ -225,6 +225,7 @@ namespace Windy10v10AI.Launcher
             Settings.Load();
             modeBar.Items = new[] { Strings.Solo, Strings.HostRoom, Strings.JoinRoom };
             modeBar.Selected = Settings.Mode;
+            status.Text = IdleText();
             modeBar.SelectedChanged += delegate
             {
                 if (busy) return;
@@ -624,7 +625,7 @@ namespace Windy10v10AI.Launcher
         void ShowPause(bool show)
         {
             paused = show;
-            if (show) pauseBar.Show(NoticeKind.Warning, Strings.RoomPaused, Strings.KeepWaiting);
+            if (show) pauseBar.Show(NoticeKind.Warning, Strings.RoomClosed, Strings.Reopen);
             else pauseBar.Visible = false;
             Relayout();
         }
@@ -1049,6 +1050,7 @@ namespace Windy10v10AI.Launcher
                 var elapsed = DateTime.UtcNow - since;
                 if (elapsed >= PauseAfter())
                 {
+                    HideFromList();
                     UI(() => { if (busy && hostTunnel != null) ShowPause(true); });
                     return;
                 }
@@ -1102,6 +1104,26 @@ namespace Windy10v10AI.Launcher
                     started = false;
                     lock (joinResults) joinResults.AddRange(results);
                 }
+            }
+        }
+
+        // Without it the closed room stays listed until the API sees the polls stop, and browsers would find it unreachable
+        void HideFromList()
+        {
+            var roster = hostRoster;
+            if (roster == null || stopping) return;
+            var body = new Dictionary<string, object>(roomBody);
+            body["code"] = roomCode;
+            body["token"] = roomToken;
+            AddRoomState(body, roster.ActiveCount());
+            body["public"] = false;
+            try
+            {
+                RoomApi.Host(body);
+            }
+            catch (Exception)
+            {
+                // The room still drops out once the API sees the polls stop
             }
         }
 

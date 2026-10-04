@@ -69,7 +69,7 @@ namespace Windy10v10AI.Launcher
         public static string HostRoom { get { return Pick("联机主机", "Host", "Хост"); } }
         public static string JoinRoom { get { return Pick("加入联机", "Join", "Присоединиться"); } }
         public static string HostIdle { get { return Pick("点击难度，创建联机主机", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
-        public static string PrivatePrompt { get { return Pick("私密房间：输入房主发来的房间码", "Private room: enter the code from the host", "Закрытая комната: введите код от хоста"); } }
+        public static string PrivatePrompt { get { return Pick("好友房：输入房主发来的房间码", "Friends room: enter the code from the host", "Комната для друзей: введите код от хоста"); } }
         public static string PublicRooms { get { return Pick("公开房间", "Public rooms", "Открытые комнаты"); } }
         public static string RoomCount { get { return Pick("{0} 个", "{0}", "{0}"); } }
         public static string Refresh { get { return Pick("刷新", "Refresh", "Обновить"); } }
@@ -87,7 +87,7 @@ namespace Windy10v10AI.Launcher
         public static string NoRooms { get { return Pick("现在没有公开房间，可以自己开一个", "No public rooms right now. Host one yourself!", "Сейчас нет открытых комнат — создайте свою!"); } }
         public static string RoomType { get { return Pick("房间类型", "Room", "Комната"); } }
         public static string PublicRoom { get { return Pick("公开", "Public", "Открытая"); } }
-        public static string PrivateRoom { get { return Pick("私密", "Private", "Закрытая"); } }
+        public static string PrivateRoom { get { return Pick("好友", "Friends", "Для друзей"); } }
         public static string MaxPlayers { get { return Pick("人数上限", "Max players", "Лимит"); } }
         public static string PlayersOption { get { return Pick("{0} 人", "{0} players", "{0} чел."); } }
         public static string Kick { get { return Pick("移出", "Remove", "Удалить"); } }
@@ -96,8 +96,8 @@ namespace Windy10v10AI.Launcher
         public static string KickedJoin { get { return Pick("你已被房主移出，不能再加入这个房间。", "The host removed you, so you can't join this room again.", "Хост удалил вас, в эту комнату больше не войти."); } }
         public static string BackToList { get { return Pick("返回列表", "Back to list", "К списку"); } }
         public static string RoomFull { get { return Pick("房间已满，请加入别的房间。", "The room is full. Join another one.", "Комната заполнена. Выберите другую."); } }
-        public static string RoomPaused { get { return Pick("房间已暂停：开了 15 分钟还没开局", "Room paused: no game started after 15 minutes", "Комната приостановлена: игра не началась за 15 минут"); } }
-        public static string KeepWaiting { get { return Pick("继续等人", "Keep waiting", "Ждать дальше"); } }
+        public static string RoomClosed { get { return Pick("超过 15 分钟未开始，房间已关闭", "Not started within 15 minutes, so the room is closed", "Игра не началась за 15 минут, комната закрыта"); } }
+        public static string Reopen { get { return Pick("重新开放", "Reopen", "Открыть снова"); } }
         public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
         public static string CodeExample { get { return Pick("例：Z82QCT", "e.g. Z82QCT", "Например: Z82QCT"); } }
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
