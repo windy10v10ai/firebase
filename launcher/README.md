@@ -8,7 +8,7 @@
 2. 在后台启动专用服，等地图加载完成。
 3. 通过 Steam 启动 Dota 2 并自动连进去；游戏退出后关闭专用服。
 
-客户端用 `steam.exe -applaunch` 启动：直接运行 `dota2.exe` 会跳过 Steam 的会话验证，打完一局不退出 Dota 再从游廊开局时被 VAC 拦下；没用 `steam://run`，因为带参数时会弹 Steam 确认框。
+客户端用注册表记录的 Steam 客户端配合 `-applaunch` 启动，兼容 `steam.exe` 与 `steamchina.exe`：直接运行 `dota2.exe` 会跳过 Steam 的会话验证，打完一局不退出 Dota 再从游廊开局时被 VAC 拦下；没用 `steam://run`，因为带参数时会弹 Steam 确认框。
 
 每次打开时查一次有没有新版本，有就在提示条上给出「更新」按钮，点击后下载、替换自己并重启。
 

@@ -34,6 +34,22 @@ namespace Windy10v10AI.Launcher
             return steam == null ? null : steam.Replace('/', '\\');
         }
 
+        public static string SteamExecutable()
+        {
+            var registered = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamExe", null) as string;
+            return FindSteamExecutable(registered == null ? null : registered.Replace('/', '\\'), SteamPath());
+        }
+
+        internal static string FindSteamExecutable(string registeredExe, string steamPath)
+        {
+            if (registeredExe != null && File.Exists(registeredExe)) return registeredExe;
+            if (steamPath == null) return null;
+            var steam = Path.Combine(steamPath, "steam.exe");
+            if (File.Exists(steam)) return steam;
+            var steamChina = Path.Combine(steamPath, "steamchina.exe");
+            return File.Exists(steamChina) ? steamChina : null;
+        }
+
         // Dota may live in any Steam library, so every library listed by Steam is checked
         public static DotaInstall Find()
         {
