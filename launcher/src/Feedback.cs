@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -99,7 +100,7 @@ namespace Windy10v10AI.Launcher
                 { "type", draft.Type },
                 { "topics", draft.Topics.ToArray() },
                 { "launcherVersion", context.LauncherVersion },
-                { "windowsVersion", Environment.OSVersion.VersionString },
+                { "windowsVersion", WindowsVersion() },
             };
             var description = (draft.Description ?? "").Trim();
             if (description.Length > 0) body["description"] = description;
@@ -123,6 +124,26 @@ namespace Windy10v10AI.Launcher
                 if (client != null) body["clientLog"] = client;
             }
             return body;
+        }
+
+        // Without a supportedOS manifest entry Environment.OSVersion reports every newer Windows as 6.2
+        static string WindowsVersion()
+        {
+            try
+            {
+                const string key = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+                var build = Registry.GetValue(key, "CurrentBuild", null) as string;
+                if (!string.IsNullOrEmpty(build))
+                {
+                    var ubr = Registry.GetValue(key, "UBR", null);
+                    var display = Registry.GetValue(key, "DisplayVersion", null) as string;
+                    return "10.0." + build + (ubr == null ? "" : "." + ubr) + (string.IsNullOrEmpty(display) ? "" : " " + display);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return Environment.OSVersion.VersionString;
         }
 
         static string Clip(string text, int max)
