@@ -82,47 +82,64 @@ namespace Windy10v10AI.Launcher
             return result;
         }
 
-        // Asks public STUN servers which address our socket appears as; must run before the tunnel starts receiving
-        public static IPEndPoint Stun(UdpClient socket)
+        // Asks public STUN servers which address our socket appears as; must run before the tunnel starts receiving.
+        // A router that shows two servers different ports is a symmetric NAT, which hole punching cannot get through
+        public static IPEndPoint Stun(UdpClient socket, out bool? symmetric)
         {
+            symmetric = null;
             var oldTimeout = socket.Client.ReceiveTimeout;
             socket.Client.ReceiveTimeout = StunTimeout;
             try
             {
+                IPEndPoint first = null;
                 foreach (var server in StunServers)
                 {
-                    try
+                    var mapped = AskStun(socket, server);
+                    if (mapped == null) continue;
+                    if (first == null)
                     {
-                        var parts = server.Split(':');
-                        var addresses = Dns.GetHostAddresses(parts[0]);
-                        var target = Array.Find(addresses, a => a.AddressFamily == AddressFamily.InterNetwork);
-                        if (target == null) continue;
-                        var request = new byte[20];
-                        request[1] = 0x01;
-                        request[4] = 0x21; request[5] = 0x12; request[6] = 0xA4; request[7] = 0x42;
-                        var id = Guid.NewGuid().ToByteArray();
-                        Array.Copy(id, 0, request, 8, 12);
-                        socket.Send(request, request.Length, new IPEndPoint(target, int.Parse(parts[1])));
-                        var deadline = DateTime.UtcNow.AddMilliseconds(StunTimeout);
-                        while (DateTime.UtcNow < deadline)
-                        {
-                            var from = new IPEndPoint(IPAddress.Any, 0);
-                            var response = socket.Receive(ref from);
-                            var mapped = ParseStun(response, request);
-                            if (mapped != null) return mapped;
-                        }
+                        first = mapped;
+                        continue;
                     }
-                    catch (Exception)
-                    {
-                        // Next server; some are blocked in some regions
-                    }
+                    symmetric = !mapped.Equals(first);
+                    break;
                 }
-                return null;
+                return first;
             }
             finally
             {
                 socket.Client.ReceiveTimeout = oldTimeout;
             }
+        }
+
+        static IPEndPoint AskStun(UdpClient socket, string server)
+        {
+            try
+            {
+                var parts = server.Split(':');
+                var addresses = Dns.GetHostAddresses(parts[0]);
+                var target = Array.Find(addresses, a => a.AddressFamily == AddressFamily.InterNetwork);
+                if (target == null) return null;
+                var request = new byte[20];
+                request[1] = 0x01;
+                request[4] = 0x21; request[5] = 0x12; request[6] = 0xA4; request[7] = 0x42;
+                var id = Guid.NewGuid().ToByteArray();
+                Array.Copy(id, 0, request, 8, 12);
+                socket.Send(request, request.Length, new IPEndPoint(target, int.Parse(parts[1])));
+                var deadline = DateTime.UtcNow.AddMilliseconds(StunTimeout);
+                while (DateTime.UtcNow < deadline)
+                {
+                    var from = new IPEndPoint(IPAddress.Any, 0);
+                    var response = socket.Receive(ref from);
+                    var mapped = ParseStun(response, request);
+                    if (mapped != null) return mapped;
+                }
+            }
+            catch (Exception)
+            {
+                // Some servers are blocked in some regions
+            }
+            return null;
         }
 
         static IPEndPoint ParseStun(byte[] data, byte[] request)

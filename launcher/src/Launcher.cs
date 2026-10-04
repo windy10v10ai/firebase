@@ -514,7 +514,7 @@ namespace Windy10v10AI.Launcher
                     hostTunnel = new HostTunnel();
                     bool upnp, publicIp;
                     var candidates = hostTunnel.Gather(out upnp, out publicIp);
-                    hostBody = PeerBody(candidates, upnp, manifest);
+                    hostBody = PeerBody(candidates, upnp, hostTunnel.SymmetricNat, manifest);
                     hostBody["publicIp"] = publicIp;
                     Dictionary<string, object> opened;
                     try
@@ -677,7 +677,7 @@ namespace Windy10v10AI.Launcher
                 Dictionary<string, object> joined;
                 try
                 {
-                    joined = RoomApi.Join(code, PeerBody(candidates, upnp, install.InstalledManifest(id)));
+                    joined = RoomApi.Join(code, PeerBody(candidates, upnp, tunnel.SymmetricNat, install.InstalledManifest(id)));
                 }
                 catch (RoomError error)
                 {
@@ -792,7 +792,7 @@ namespace Windy10v10AI.Launcher
             if (roster != null) roster.SetStatus(joinId, path != null ? PlayerStatus.Loading : PlayerStatus.Failed);
         }
 
-        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool upnp, string mapVersion)
+        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool upnp, bool? symmetricNat, string mapVersion)
         {
             return new Dictionary<string, object>
             {
@@ -800,6 +800,7 @@ namespace Windy10v10AI.Launcher
                 { "steamId", Net.SteamAccountId() },
                 { "candidates", candidates.ConvertAll(c => c.ToString()) },
                 { "upnp", upnp },
+                { "symmetricNat", symmetricNat },
                 { "protocolVersion", RoomApi.ProtocolVersion },
                 { "launcherVersion", Version },
             };

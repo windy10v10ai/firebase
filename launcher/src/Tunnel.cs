@@ -47,13 +47,15 @@ namespace Windy10v10AI.Launcher
 
         int Port { get { return ((IPEndPoint)Socket.Client.LocalEndPoint).Port; } }
 
+        public bool? SymmetricNat;
+
         // Must run before Start, because STUN reads its answer from the same socket
         public List<Candidate> Gather(out bool upnp, out bool publicIp)
         {
             var list = new List<Candidate>();
             var lans = Net.LanAddresses();
             for (var i = 0; i < lans.Count && i < MaxLanCandidates; i++) list.Add(new Candidate(PathType.Lan, new IPEndPoint(lans[i], Port)));
-            var stun = Net.Stun(Socket);
+            var stun = Net.Stun(Socket, out SymmetricNat);
             if (stun != null) list.Add(new Candidate(PathType.Stun, stun));
             var external = lans.Count > 0 ? Net.MapUpnp(Port, lans[0]) : null;
             upnp = external != null;
