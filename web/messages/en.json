@@ -151,7 +151,7 @@
       "latest": "Latest",
       "entries": {
         "v0_4_1": [
-          "The public room list now shows how many games and players are in progress",
+          "Shows games and players in progress",
           "Bug fixes"
         ],
         "v0_4_0": [
@@ -161,9 +161,7 @@
           "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game"
         ],
         "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus"],
-        "v0_3_1": ["Bug fixes"],
         "v0_3_0": ["One-click updates"],
-        "v0_2_1": ["Bug fixes"],
         "v0_2_0": [
           "First release: one click runs a local server and joins it for a smoother late game"
         ]
