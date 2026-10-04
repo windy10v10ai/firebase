@@ -578,6 +578,9 @@ namespace Windy10v10AI.Launcher
             }
         }
 
+        // Zero when the limit is unknown, which shows the count alone
+        public int MaxPlayers;
+
         public void SetPlayers(List<RosterEntry> list, long self, string warning)
         {
             players = list;
@@ -625,7 +628,10 @@ namespace Windy10v10AI.Launcher
             {
                 var pad = (int)(10 * s);
                 TextRenderer.DrawText(g, Strings.PlayersInRoom, small, new Rectangle(pad, (int)(6 * s), Width / 2, (int)(16 * s)), Theme.Muted, TextFormatFlags.Left | TextFormatFlags.NoPadding);
-                TextRenderer.DrawText(g, string.Format(Strings.PlayerCount, players.Count), small, new Rectangle(Width / 2, (int)(6 * s), Width / 2 - pad, (int)(16 * s)), Theme.Muted, TextFormatFlags.Right | TextFormatFlags.NoPadding);
+                // Counts the same players the host reports to the list, so both read the same number
+                var active = players.FindAll(p => p.Status != PlayerStatus.Failed && p.Status != PlayerStatus.Left).Count;
+                var count = MaxPlayers > 0 ? active + " / " + MaxPlayers : string.Format(Strings.PlayerCount, active);
+                TextRenderer.DrawText(g, count, small, new Rectangle(Width / 2, (int)(6 * s), Width / 2 - pad, (int)(16 * s)), Theme.Muted, TextFormatFlags.Right | TextFormatFlags.NoPadding);
                 if (banner != null)
                 {
                     TextRenderer.DrawText(g, banner, small, new Rectangle(pad, (int)(24 * s), Width - 2 * pad, (int)(16 * s)), Theme.Warning, TextFormatFlags.Left | TextFormatFlags.NoPadding);

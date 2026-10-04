@@ -514,6 +514,7 @@ namespace Windy10v10AI.Launcher
             var join = joinTunnel;
             var symmetric = host != null ? hostSymmetric : joinSymmetric;
             var warning = symmetric == true ? Strings.SymmetricNat : null;
+            players.MaxPlayers = host != null ? Settings.MaxPlayers : 0;
             if (host != null) players.SetPlayers(host.Snapshot(), selfId, warning);
             else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : warning);
         }
