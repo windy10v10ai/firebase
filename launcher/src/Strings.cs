@@ -80,7 +80,6 @@ namespace Windy10v10AI.Launcher
         public static string ProbeLatency { get { return Pick("延迟 {0} ms", "Ping {0} ms", "Пинг {0} мс"); } }
         public static string ProbeTesting { get { return Pick("正在测试能否连通", "Testing the connection", "Проверяем соединение"); } }
         public static string ProbeFailed { get { return Pick("你的网络连不上这个房间", "Your network cannot reach this room", "Ваша сеть не может подключиться к этой комнате"); } }
-        public static string AllUnreachable { get { return Pick("你的网络暂时无法加入公开房间，将在后续版本解决", "Your network can't join public rooms yet. A later version will fix this.", "Ваша сеть пока не подключается к открытым комнатам — исправим позже."); } }
         public static string SymmetricNat { get { return Pick("你的网络类型可能无法联机，将在后续版本解决", "Your network type may not support online play. A later version will fix this.", "Ваш тип сети может не подходить для игры по сети — исправим позже."); } }
         public static string RoomsLoading { get { return Pick("正在获取房间列表…", "Loading rooms...", "Загрузка комнат…"); } }
         public static string RoomsFailed { get { return Pick("获取房间列表失败，请点「刷新」重试", "Could not load rooms. Press Refresh to try again.", "Не удалось загрузить комнаты. Нажмите «Обновить»."); } }

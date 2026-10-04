@@ -551,7 +551,6 @@ namespace Windy10v10AI.Launcher
             var state = rows.Count > 0 || source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
             string warning = null;
             if (source.SymmetricNat == true) warning = Strings.SymmetricNat;
-            else if (source.AllUnreachable) warning = Strings.AllUnreachable;
             roomList.SetRooms(rows, state, warning);
             roomsCount.Text = source.Loaded ? string.Format(Strings.RoomCount, rows.Count) : "";
         }
@@ -1108,11 +1107,12 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        // Without it the closed room stays listed until the API sees the polls stop, and browsers would find it unreachable
+        // Without it a closed room stays listed until the API sees the polls stop, and browsers would find it unreachable
         void HideFromList()
         {
             var roster = hostRoster;
-            if (roster == null || stopping) return;
+            // Without a code the request would open a new room instead
+            if (roster == null || roomCode == null || roomBody == null) return;
             var body = new Dictionary<string, object>(roomBody);
             body["code"] = roomCode;
             body["token"] = roomToken;
@@ -1294,7 +1294,9 @@ namespace Windy10v10AI.Launcher
         void Finish(string error, bool showLog, string button, Action onClick)
         {
             var cancelled = stopping;
+            // Stops the poll thread first so a late poll cannot list the room again
             stopping = true;
+            HideFromList();
             var s = server;
             if (s != null) KillQuietly(s);
             server = null;
@@ -1393,6 +1395,10 @@ namespace Windy10v10AI.Launcher
                 stopping = true;
                 KillQuietly(s);
             }
+            // Bounded so a slow network never holds the window open
+            var hide = new Thread(HideFromList) { IsBackground = true };
+            hide.Start();
+            hide.Join(3000);
             CloseTunnels();
             if (browser != null) browser.Dispose();
             base.OnFormClosing(e);

@@ -234,18 +234,6 @@ namespace Windy10v10AI.Launcher
             return 2;
         }
 
-        public bool AllUnreachable
-        {
-            get
-            {
-                lock (sync)
-                {
-                    var open = rows.FindAll(r => !r.Full);
-                    return open.Count > 0 && open.TrueForAll(r => r.Probe == ProbeState.Unreachable);
-                }
-            }
-        }
-
         // Hands the probing socket to a join, so the host already knows the address the join comes from.
         // Returns null when gathering failed and the join has to open its own
         public JoinTunnel TakeTunnel(out List<Candidate> gathered)
