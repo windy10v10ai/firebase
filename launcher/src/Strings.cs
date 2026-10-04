@@ -69,15 +69,43 @@ namespace Windy10v10AI.Launcher
         public static string HostRoom { get { return Pick("联机主机", "Host", "Хост"); } }
         public static string JoinRoom { get { return Pick("加入联机", "Join", "Присоединиться"); } }
         public static string HostIdle { get { return Pick("点击难度，创建联机主机", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
-        public static string JoinPrompt { get { return Pick("输入房主发来的房间码", "Enter the room code from the host", "Введите код комнаты от хоста"); } }
-        public static string JoinHint { get { return Pick("难度由房主决定。连上后会自动打开 Dota 2", "The host picks the difficulty. Dota 2 opens once connected.", "Сложность выбирает хост. Dota 2 откроется после подключения."); } }
+        public static string PrivatePrompt { get { return Pick("私密房间：输入房主发来的房间码", "Private room: enter the code from the host", "Закрытая комната: введите код от хоста"); } }
+        public static string PublicRooms { get { return Pick("公开房间", "Public rooms", "Открытые комнаты"); } }
+        public static string RoomCount { get { return Pick("{0} 个", "{0}", "{0}"); } }
+        public static string Refresh { get { return Pick("刷新", "Refresh", "Обновить"); } }
+        public static string ColumnMap { get { return Pick("地图", "Map", "Карта"); } }
+        public static string ColumnPlayers { get { return Pick("人数", "Players", "Игроки"); } }
+        public static string ColumnPing { get { return Pick("延迟", "Ping", "Пинг"); } }
+        public static string Full { get { return Pick("已满", "Full", "Мест нет"); } }
+        public static string ProbeLatency { get { return Pick("延迟 {0} ms", "Ping {0} ms", "Пинг {0} мс"); } }
+        public static string ProbeTesting { get { return Pick("正在测试能否连通", "Testing the connection", "Проверяем соединение"); } }
+        public static string ProbeFailed { get { return Pick("你的网络连不上这个房间", "Your network cannot reach this room", "Ваша сеть не может подключиться к этой комнате"); } }
+        public static string AllUnreachable { get { return Pick("你的网络暂时无法加入公开房间，将在后续版本解决", "Your network can't join public rooms yet. A later version will fix this.", "Ваша сеть пока не подключается к открытым комнатам — исправим позже."); } }
+        public static string SymmetricNat { get { return Pick("你的网络类型可能无法联机，将在后续版本解决", "Your network type may not support online play. A later version will fix this.", "Ваш тип сети может не подходить для игры по сети — исправим позже."); } }
+        public static string RoomsLoading { get { return Pick("正在获取房间列表…", "Loading rooms...", "Загрузка комнат…"); } }
+        public static string RoomsFailed { get { return Pick("获取房间列表失败，请点「刷新」重试", "Could not load rooms. Press Refresh to try again.", "Не удалось загрузить комнаты. Нажмите «Обновить»."); } }
+        public static string NoRooms { get { return Pick("现在没有公开房间，可以自己开一个", "No public rooms right now. Host one yourself!", "Сейчас нет открытых комнат — создайте свою!"); } }
+        public static string RoomType { get { return Pick("房间类型", "Room", "Комната"); } }
+        public static string PublicRoom { get { return Pick("公开", "Public", "Открытая"); } }
+        public static string PrivateRoom { get { return Pick("私密", "Private", "Закрытая"); } }
+        public static string MaxPlayers { get { return Pick("人数上限", "Max players", "Лимит"); } }
+        public static string PlayersOption { get { return Pick("{0} 人", "{0} players", "{0} чел."); } }
+        public static string Kick { get { return Pick("移出", "Remove", "Удалить"); } }
+        public static string KickConfirm { get { return Pick("移出 {0}？", "{0}?", "{0}?"); } }
+        public static string KickedByHost { get { return Pick("你已被房主移出房间。", "The host removed you from the room.", "Хост удалил вас из комнаты."); } }
+        public static string KickedJoin { get { return Pick("你已被房主移出，不能再加入这个房间。", "The host removed you, so you can't join this room again.", "Хост удалил вас, в эту комнату больше не войти."); } }
+        public static string BackToList { get { return Pick("返回列表", "Back to list", "К списку"); } }
+        public static string RoomFull { get { return Pick("房间已满，请加入别的房间。", "The room is full. Join another one.", "Комната заполнена. Выберите другую."); } }
+        public static string RoomPaused { get { return Pick("房间已暂停：开了 15 分钟还没开局", "Room paused: no game started after 15 minutes", "Комната приостановлена: игра не началась за 15 минут"); } }
+        public static string KeepWaiting { get { return Pick("继续等人", "Keep waiting", "Ждать дальше"); } }
         public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
         public static string CodeExample { get { return Pick("例：Z82QCT", "e.g. Z82QCT", "Например: Z82QCT"); } }
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
         public static string Paste { get { return Pick("粘贴", "Paste", "Вставить"); } }
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
-        public static string RoomHostingHint { get { return Pick("把房间码发给朋友，人到齐后在游戏里点「锁定并开始」", "Send the code to your friends and start the game once everyone is in", "Отправьте код друзьям и начните игру, когда все зайдут"); } }
+        public static string PublicHostingHint { get { return Pick("其他玩家能在列表里看到这个房间，也可以把房间码发给朋友，人到齐后在游戏里点「锁定并开始」", "Other players can find this room in the list, or send the code to friends. Start in game once everyone is in.", "Комнату видно в списке, можно и отправить код друзьям. Начните игру, когда все зайдут."); } }
+        public static string PrivateHostingHint { get { return Pick("不在列表里显示，只有拿到房间码的朋友能加入，人到齐后在游戏里点「锁定并开始」", "Hidden from the list; only friends with the code can join. Start in game once everyone is in.", "Комнаты нет в списке, войти можно только по коду. Начните игру, когда все зайдут."); } }
         public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
         public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
         public static string Connecting { get { return Pick("正在连接房主…", "Connecting to the host...", "Подключение к хосту…"); } }

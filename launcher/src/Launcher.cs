@@ -29,6 +29,7 @@ namespace Windy10v10AI.Launcher
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Updater.RemoveOld();
+            Avatars.RemoveUnused();
             Application.Run(new MainForm());
         }
     }
@@ -36,6 +37,8 @@ namespace Windy10v10AI.Launcher
     class LaunchError : Exception
     {
         public readonly bool ShowLog;
+        public string Button;
+        public Action OnClick;
 
         public LaunchError(string message, bool showLog) : base(message)
         {
@@ -55,9 +58,19 @@ namespace Windy10v10AI.Launcher
         // The game turns off its auto start when the dedicated server carries this name
         const string RoomHostname = "windy10v10ai-room";
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
-        const int RoomPollMs = 2000;
+        // Most friends join within minutes of the room opening, so polling is fast then and slower after
+        const int FastPollMs = 2000;
+        const int SlowPollMs = 5000;
+        const int FastPollMinutes = 5;
+        // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
+        const int PauseMinutes = 15;
+        const int ListRefreshMs = 30000;
+        // A join page left open in the background stops asking the API for the list
+        const int BrowseMinutes = 5;
+        const int ListHeight = 216;
 
         static readonly string[] MapKeys = { "dota", "hard", "custom" };
+        static readonly string[] MapNames = { "easy", "hard", "custom" };
 
         readonly float scale;
         readonly PictureBox banner = new PictureBox();
@@ -76,8 +89,20 @@ namespace Windy10v10AI.Launcher
         readonly LinkLabel devLink = new LinkLabel();
         readonly ToggleBox testBox = new ToggleBox();
         readonly SegmentedBar modeBar = new SegmentedBar();
-        readonly Label joinPrompt = new Label();
-        readonly Label joinHint = new Label();
+        readonly Label roomTypeLabel = new Label();
+        readonly SegmentedBar roomTypeBar = new SegmentedBar();
+        readonly Label maxLabel = new Label();
+        readonly FlatButton maxButton = new FlatButton();
+        readonly ContextMenuStrip maxMenu = new ContextMenuStrip();
+        readonly NoticeBar pauseBar = new NoticeBar();
+        readonly Label roomsTitle = new Label();
+        readonly Label roomsCount = new Label();
+        readonly FlatButton refresh = new FlatButton();
+        readonly RoomList roomList = new RoomList();
+        readonly System.Windows.Forms.Timer listTimer = new System.Windows.Forms.Timer { Interval = ListRefreshMs };
+        RoomBrowser browser;
+        DateTime browseSince;
+        readonly Label privatePrompt = new Label();
         readonly CodeInput codeBox = new CodeInput();
         readonly CodeDisplay hostCode = new CodeDisplay();
         readonly PlayerList players = new PlayerList();
@@ -93,6 +118,17 @@ namespace Windy10v10AI.Launcher
         HostTunnel hostTunnel;
         JoinTunnel joinTunnel;
         readonly List<Dictionary<string, object>> joinResults = new List<Dictionary<string, object>>();
+        // The room this launcher hosts; the poll thread reads them again when the host resumes a paused room
+        string roomCode;
+        string roomToken;
+        string roomMap;
+        Dictionary<string, object> roomBody;
+        readonly HashSet<string> seenJoins = new HashSet<string>();
+        readonly List<long> kicked = new List<long>();
+        bool paused;
+        bool hostingReady;
+        bool? hostSymmetric;
+        bool? joinSymmetric;
 
         readonly System.Windows.Forms.Timer mapPoll = new System.Windows.Forms.Timer { Interval = 5000 };
         Process server;
@@ -185,31 +221,97 @@ namespace Windy10v10AI.Launcher
             testBox.Checked = true;
 #endif
 
+            // Only the screen comes back; a room is never opened without a click
+            Settings.Load();
             modeBar.Items = new[] { Strings.Solo, Strings.HostRoom, Strings.JoinRoom };
+            modeBar.Selected = Settings.Mode;
             modeBar.SelectedChanged += delegate
             {
                 if (busy) return;
+                Settings.Mode = modeBar.Selected;
+                Settings.Save();
                 status.Text = IdleText();
                 RefreshMapState();
                 Relayout();
+                UpdateBrowsing();
                 if (modeBar.Selected == 2) codeBox.FillFromClipboard();
             };
             mapCard.Action.Click += delegate { OpenUrl("steam://url/CommunityFilePage/" + MapId); };
             rosterTimer.Tick += delegate { RefreshPlayers(); };
-            joinPrompt.Text = Strings.JoinPrompt;
-            joinPrompt.Font = new Font(Theme.FontName, 9.75f);
-            joinHint.Text = Strings.JoinHint;
-            joinHint.ForeColor = Theme.Muted;
+            players.Kick += KickPlayer;
+
+            roomTypeLabel.Text = Strings.RoomType;
+            maxLabel.Text = Strings.MaxPlayers;
+            foreach (var label in new[] { roomTypeLabel, maxLabel })
+            {
+                label.ForeColor = Theme.Muted;
+                label.TextAlign = ContentAlignment.MiddleLeft;
+            }
+            roomTypeBar.Font = new Font(Theme.FontName, 9f);
+            roomTypeBar.Items = new[] { Strings.PublicRoom, Strings.PrivateRoom };
+            roomTypeBar.Selected = Settings.PublicRoom ? 0 : 1;
+            roomTypeBar.SelectedChanged += delegate
+            {
+                Settings.PublicRoom = roomTypeBar.Selected == 0;
+                Settings.Save();
+                UpdateHostingHint();
+            };
+            maxButton.BackColor = Theme.Panel;
+            maxButton.TextAlign = ContentAlignment.MiddleCenter;
+            maxButton.Click += delegate { ShowMaxMenu(); };
+            maxMenu.Renderer = new ToolStripProfessionalRenderer(new DarkMenuColors());
+            maxMenu.ShowImageMargin = false;
+            maxMenu.ShowCheckMargin = true;
+            for (var n = Settings.MinPlayers; n <= Settings.PlayerLimit; n++)
+            {
+                var value = n;
+                var item = new ToolStripMenuItem(string.Format(Strings.PlayersOption, n)) { ForeColor = Theme.Text, Tag = n };
+                item.Click += delegate
+                {
+                    Settings.MaxPlayers = value;
+                    Settings.Save();
+                    UpdateMaxButton();
+                };
+                maxMenu.Items.Add(item);
+            }
+            UpdateMaxButton();
+            pauseBar.Visible = false;
+            pauseBar.Action.Click += delegate { ResumeRoom(); };
+
+            roomsTitle.Text = Strings.PublicRooms;
+            roomsTitle.Font = new Font(Theme.FontName, 10.5f, FontStyle.Bold);
+            roomsTitle.TextAlign = ContentAlignment.MiddleLeft;
+            roomsCount.ForeColor = Theme.Muted;
+            roomsCount.TextAlign = ContentAlignment.MiddleLeft;
+            refresh.Text = Strings.Refresh;
+            refresh.Click += delegate
+            {
+                if (browser == null) UpdateBrowsing();
+                else browser.Refresh();
+            };
+            roomList.JoinRoom += OnJoinClick;
+            listTimer.Tick += delegate
+            {
+                // Nobody is looking at a minimised, background or long-forgotten join page
+                if (browser == null || busy || WindowState == FormWindowState.Minimized || ActiveForm != this) return;
+                if ((DateTime.UtcNow - browseSince).TotalMinutes > BrowseMinutes) return;
+                browser.Refresh();
+            };
+            privatePrompt.Text = Strings.PrivatePrompt;
+            privatePrompt.ForeColor = Theme.Muted;
+            privatePrompt.TextAlign = ContentAlignment.MiddleLeft;
             codeBox.Placeholder = Strings.CodeExample;
-            codeBox.Submit += delegate { OnJoinClick(); };
+            codeBox.Submit += delegate { OnJoinClick(codeBox.Code); };
+            codeBox.CodeChanged += delegate { UpdateJoinButton(); };
             hostCode.Visible = false;
             joinButton.Text = Strings.Join;
             joinButton.MakePrimary();
-            joinButton.Click += delegate { OnJoinClick(); };
+            joinButton.Click += delegate { OnJoinClick(codeBox.Code); };
+            UpdateJoinButton();
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, players, mapCard, divider, mapDot, mapLabel, devLink, testBox, modeBar, joinPrompt, joinHint, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -223,6 +325,7 @@ namespace Windy10v10AI.Launcher
                 RefreshIdleMapState();
                 if (!busy && modeBar.Selected == 2) codeBox.FillFromClipboard();
             };
+            Shown += delegate { UpdateBrowsing(); };
             WorkshopLatest.Changed += delegate
             {
                 if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)RefreshIdleMapState);
@@ -259,22 +362,50 @@ namespace Windy10v10AI.Launcher
             var y = 162;
             modeBar.SetBounds(P(20), P(y), P(440), P(36));
             y += 48;
-            // Joining needs no difficulty, so the code entry takes the place of the mode buttons
+            // Room settings stay above the player list, because the host may change them while the room is open
+            var settings = modeBar.Selected == 1 && !cardShown;
+            roomTypeLabel.Visible = roomTypeBar.Visible = maxLabel.Visible = maxButton.Visible = settings;
+            if (settings)
+            {
+                var typeWidth = TextRenderer.MeasureText(roomTypeLabel.Text, roomTypeLabel.Font).Width + P(4);
+                roomTypeLabel.SetBounds(P(20), P(y), typeWidth, P(30));
+                var segment = Math.Max(TextRenderer.MeasureText(Strings.PublicRoom, roomTypeBar.Font).Width, TextRenderer.MeasureText(Strings.PrivateRoom, roomTypeBar.Font).Width) + P(20);
+                roomTypeBar.SetBounds(P(20) + typeWidth + P(6), P(y), Math.Max(P(140), 2 * segment + P(10)), P(30));
+                var maxWidth = Math.Max(P(84), TextRenderer.MeasureText(maxButton.Text, maxButton.Font).Width + P(24));
+                maxButton.SetBounds(P(460) - maxWidth, P(y), maxWidth, P(30));
+                var labelWidth = TextRenderer.MeasureText(maxLabel.Text, maxLabel.Font).Width + P(4);
+                maxLabel.SetBounds(maxButton.Left - P(6) - labelWidth, P(y), labelWidth, P(30));
+                y += 42;
+            }
+            // Joining needs no difficulty, so the room list takes the place of the mode buttons
             var joining = modeBar.Selected == 2;
             // The player list and the map card take the place of the buttons below the mode bar
             var replaced = playersShown || cardShown;
+            var browsing = joining && !replaced;
             foreach (var mode in modes) mode.Visible = !joining && !replaced;
-            joinPrompt.Visible = joinHint.Visible = codeBox.Visible = joinButton.Visible = joining && !replaced;
+            foreach (var control in new Control[] { roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton }) control.Visible = browsing;
             players.Visible = playersShown;
             mapCard.Visible = cardShown && !playersShown;
             players.SetBounds(P(20), P(y), P(440), P(168));
             mapCard.SetBounds(P(20), P(y), P(440), P(118));
             for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
-            joinPrompt.SetBounds(P(20), P(y), P(440), P(22));
-            codeBox.SetBounds(P(20), P(y + 28), P(340), P(40));
-            joinButton.SetBounds(P(370), P(y + 28), P(90), P(40));
-            joinHint.SetBounds(P(20), P(y + 76), P(440), P(18));
-            y += playersShown ? 180 : (cardShown ? 130 : 96);
+            var titleWidth = TextRenderer.MeasureText(roomsTitle.Text, roomsTitle.Font).Width + P(4);
+            roomsTitle.SetBounds(P(20), P(y), titleWidth, P(28));
+            roomsCount.SetBounds(P(20) + titleWidth + P(4), P(y), P(120), P(28));
+            var refreshWidth = Math.Max(P(64), TextRenderer.MeasureText(refresh.Text, refresh.Font).Width + P(24));
+            refresh.SetBounds(P(460) - refreshWidth, P(y), refreshWidth, P(28));
+            roomList.SetBounds(P(20), P(y + 34), P(440), P(ListHeight));
+            var below = y + 34 + ListHeight + 10;
+            privatePrompt.SetBounds(P(20), P(below), P(440), P(20));
+            codeBox.SetBounds(P(20), P(below + 22), P(350), P(36));
+            joinButton.SetBounds(P(378), P(below + 22), P(82), P(36));
+            y += playersShown ? 180 : (cardShown ? 130 : (browsing ? 34 + ListHeight + 10 + 22 + 36 + 12 : 96));
+            pauseBar.Visible = playersShown && paused;
+            if (pauseBar.Visible)
+            {
+                pauseBar.SetBounds(P(20), P(y), P(440), P(44));
+                y += 52;
+            }
             // Notices share the status area below the buttons so the window never shifts
             notice.SetBounds(P(20), P(y), P(440), P(52));
             status.Visible = !notice.Visible;
@@ -285,8 +416,9 @@ namespace Windy10v10AI.Launcher
             {
                 hostCode.SetBounds(P(20), P(y + 24), P(150), P(36));
                 secondary.SetBounds(P(178), P(y + 24), secondaryWidth, P(36));
-                hint.SetBounds(P(20), P(y + 64), P(440), P(20));
-                action.SetBounds(P(20), P(y + 88), actionWidth, P(30));
+                action.SetBounds(P(460) - actionWidth, P(y + 24), actionWidth, P(36));
+                // The hosting hint runs to two lines in every language
+                hint.SetBounds(P(20), P(y + 66), P(440), P(38));
             }
             else
             {
@@ -295,7 +427,8 @@ namespace Windy10v10AI.Launcher
                 action.SetBounds(P(20), P(y + 62), actionWidth, P(30));
                 secondary.SetBounds(P(20) + actionWidth + P(8), P(y + 62), secondaryWidth, P(30));
             }
-            y += 124;
+            // An idle join page only ever shows a notice in this area, so it needs less room than a launch in progress
+            y += browsing && !busy ? 60 : 124;
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
             mapDot.SetBounds(P(20), P(y + 16), P(8), P(8));
             mapLabel.SetBounds(P(34), P(y + 9), P(200), P(22));
@@ -371,14 +504,141 @@ namespace Windy10v10AI.Launcher
             cardShown = show;
             if (!busy) status.Text = IdleText();
             Relayout();
+            UpdateBrowsing();
         }
 
         void RefreshPlayers()
         {
             var host = hostRoster;
             var join = joinTunnel;
-            if (host != null) players.SetPlayers(host.Snapshot(), selfId, null);
-            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : null);
+            var symmetric = host != null ? hostSymmetric : joinSymmetric;
+            var warning = symmetric == true ? Strings.SymmetricNat : null;
+            if (host != null) players.SetPlayers(host.Snapshot(), selfId, warning);
+            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : warning);
+        }
+
+        // The list lives only while the join page is idle and visible, so each visit measures every room once
+        void UpdateBrowsing()
+        {
+            var wanted = !busy && modeBar.Selected == 2 && !cardShown;
+            if (wanted && browser == null)
+            {
+                var created = new RoomBrowser(ListBody, (candidates, symmetric) => PeerBody(candidates, symmetric, InstalledMapVersion()));
+                browser = created;
+                created.Changed += () => UI(() => { if (browser == created) UpdateRoomList(); });
+                roomList.SetRooms(new List<RoomRow>(), RoomList.ListState.Loading, null);
+                roomsCount.Text = "";
+                browseSince = DateTime.UtcNow;
+                created.Start();
+                created.Refresh();
+                listTimer.Start();
+            }
+            else if (!wanted && browser != null && !busy)
+            {
+                browser.Dispose();
+                browser = null;
+                listTimer.Stop();
+            }
+        }
+
+        void UpdateRoomList()
+        {
+            var source = browser;
+            if (source == null) return;
+            var rows = source.Snapshot();
+            var state = rows.Count > 0 || source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
+            string warning = null;
+            if (source.SymmetricNat == true) warning = Strings.SymmetricNat;
+            else if (source.AllUnreachable) warning = Strings.AllUnreachable;
+            roomList.SetRooms(rows, state, warning);
+            roomsCount.Text = source.Loaded ? string.Format(Strings.RoomCount, rows.Count) : "";
+        }
+
+        Dictionary<string, object> ListBody()
+        {
+            return new Dictionary<string, object>
+            {
+                { "steamId", Net.SteamAccountId() },
+                { "protocolVersion", RoomApi.ProtocolVersion },
+                { "mapVersion", InstalledMapVersion() },
+            };
+        }
+
+        string InstalledMapVersion()
+        {
+            DotaInstall install;
+            var id = MapId;
+            DotaInstall.Check(id, out install);
+            return install == null ? null : install.InstalledManifest(id);
+        }
+
+        void UpdateJoinButton()
+        {
+            var ready = !busy && codeBox.Code.Length == 6;
+            joinButton.Enabled = ready;
+            joinButton.BackColor = ready ? Theme.Accent : Theme.PanelHover;
+            joinButton.BorderColor = ready ? Theme.Accent : Theme.PanelHover;
+            joinButton.ForeColor = ready ? Color.White : Theme.Faint;
+        }
+
+        void UpdateMaxButton()
+        {
+            maxButton.Text = string.Format(Strings.PlayersOption, Settings.MaxPlayers) + "  ▾";
+            if (maxButton.Visible) Relayout();
+        }
+
+        // A limit below the players already in the room cannot be picked
+        void ShowMaxMenu()
+        {
+            var roster = hostRoster;
+            var inRoom = roster == null ? 0 : roster.ActiveCount();
+            foreach (ToolStripMenuItem item in maxMenu.Items)
+            {
+                var value = (int)item.Tag;
+                item.Checked = value == Settings.MaxPlayers;
+                item.Enabled = value >= inRoom;
+            }
+            maxMenu.Show(maxButton, new Point(0, maxButton.Height));
+        }
+
+        void UpdateHostingHint()
+        {
+            if (hostingReady) hint.Text = Settings.PublicRoom ? Strings.PublicHostingHint : Strings.PrivateHostingHint;
+        }
+
+        void KickPlayer(string key)
+        {
+            var roster = hostRoster;
+            var tunnel = hostTunnel;
+            if (roster == null || tunnel == null) return;
+            var entry = roster.Find(key);
+            if (entry != null && entry.SteamId != 0)
+            {
+                lock (kicked) kicked.Add(entry.SteamId);
+            }
+            tunnel.Kick(key);
+            roster.Remove(key);
+            RefreshPlayers();
+        }
+
+        void ShowPause(bool show)
+        {
+            paused = show;
+            if (show) pauseBar.Show(NoticeKind.Warning, Strings.RoomPaused, Strings.KeepWaiting);
+            else pauseBar.Visible = false;
+            Relayout();
+        }
+
+        void ResumeRoom()
+        {
+            if (!busy || !paused || hostTunnel == null) return;
+            ShowPause(false);
+            StartPolling();
+        }
+
+        void StartPolling()
+        {
+            new Thread(PollRoom) { IsBackground = true }.Start();
         }
 
         void ShowPlayers(bool show)
@@ -478,6 +738,7 @@ namespace Windy10v10AI.Launcher
             var id = MapId;
             var map = MapKeys[index];
             var room = modeBar.Selected == 1;
+            roomMap = MapNames[index];
             selfId = Net.SteamAccountId();
             busy = true;
             stopping = false;
@@ -521,10 +782,15 @@ namespace Windy10v10AI.Launcher
                     var candidates = hostTunnel.Gather(out publicIp);
                     hostBody = PeerBody(candidates, hostTunnel.SymmetricNat, manifest);
                     hostBody["publicIp"] = publicIp;
+                    hostSymmetric = hostTunnel.SymmetricNat;
+                    lock (seenJoins) seenJoins.Clear();
+                    lock (kicked) kicked.Clear();
                     Dictionary<string, object> opened;
                     try
                     {
-                        opened = RoomApi.Host(hostBody);
+                        var openBody = new Dictionary<string, object>(hostBody);
+                        AddRoomState(openBody, 1);
+                        opened = RoomApi.Host(openBody);
                         code = (string)opened["code"];
                         token = (string)opened["token"];
                     }
@@ -545,6 +811,7 @@ namespace Windy10v10AI.Launcher
                     {
                         hostCode.Code = shown;
                         hostCode.Visible = true;
+                        players.CanKick = true;
                         ShowPlayers(true);
                         ShowProgress(Strings.RoomCode, "", Strings.Cancel, false);
                         ShowSecondary(Strings.Copy, () => Clipboard.SetText(shown));
@@ -570,9 +837,10 @@ namespace Windy10v10AI.Launcher
                 // The code is shown as soon as the room opens, so friends may join while the server is still loading
                 if (code != null)
                 {
-                    var roomCode = code;
-                    var roomToken = token;
-                    new Thread(() => PollRoom(roomCode, roomToken, hostBody)) { IsBackground = true }.Start();
+                    roomCode = code;
+                    roomToken = token;
+                    roomBody = hostBody;
+                    StartPolling();
                 }
 
                 WaitForMap(map);
@@ -592,7 +860,8 @@ namespace Windy10v10AI.Launcher
                         ShowProgress(Strings.InGame, Strings.InGameHint, Strings.StopServer, false);
                         return;
                     }
-                    hint.Text = Strings.RoomHostingHint;
+                    hostingReady = true;
+                    UpdateHostingHint();
                     action.Text = Strings.StopServer;
                     Relayout();
                 });
@@ -600,7 +869,7 @@ namespace Windy10v10AI.Launcher
             }
             catch (LaunchError error)
             {
-                Finish(error.Message, error.ShowLog);
+                Finish(error.Message, error.ShowLog, error.Button, error.OnClick);
             }
             catch (Exception error)
             {
@@ -639,10 +908,9 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        void OnJoinClick()
+        void OnJoinClick(string code)
         {
             if (busy) return;
-            var code = codeBox.Code;
             if (code.Length != 6)
             {
                 ShowNotice(NoticeKind.Error, Strings.InvalidCode, false);
@@ -668,19 +936,37 @@ namespace Windy10v10AI.Launcher
                 mode.Dimmed = true;
                 mode.Invalidate();
             }
+            // The join takes over the socket the list probed with, so the browser is not closed with the page
+            var source = browser;
+            browser = null;
+            listTimer.Stop();
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Connecting, Strings.ConnectingHint, Strings.Cancel, true);
-            new Thread(() => RunJoin(install, id, code)) { IsBackground = true }.Start();
+            new Thread(() => RunJoin(install, id, code, source)) { IsBackground = true }.Start();
         }
 
-        void RunJoin(DotaInstall install, string id, string code)
+        void RunJoin(DotaInstall install, string id, string code, RoomBrowser source)
         {
             try
             {
-                var tunnel = new JoinTunnel();
+                JoinTunnel tunnel = null;
+                List<Candidate> candidates = null;
+                if (source != null)
+                {
+                    tunnel = source.TakeTunnel(out candidates);
+                    source.Dispose();
+                }
+                if (tunnel == null)
+                {
+                    tunnel = new JoinTunnel();
+                    joinTunnel = tunnel;
+                    bool publicIp;
+                    candidates = tunnel.Gather(out publicIp);
+                    tunnel.Start();
+                }
                 joinTunnel = tunnel;
-                bool publicIp;
-                var candidates = tunnel.Gather(out publicIp);
+                joinSymmetric = tunnel.SymmetricNat;
+                if (stopping) throw new OperationCanceledException();
                 Dictionary<string, object> joined;
                 try
                 {
@@ -688,7 +974,13 @@ namespace Windy10v10AI.Launcher
                 }
                 catch (RoomError error)
                 {
-                    throw new LaunchError(JoinErrorText(error.Code, install, id), false);
+                    var failure = new LaunchError(JoinErrorText(error.Code, install, id), false);
+                    if (error.Code == "kicked" || error.Code == "room_full")
+                    {
+                        failure.Button = Strings.BackToList;
+                        failure.OnClick = BackToList;
+                    }
+                    throw failure;
                 }
                 var hostProfile = joined["host"] as Dictionary<string, object> ?? new Dictionary<string, object>();
                 var selfProfile = joined["self"] as Dictionary<string, object> ?? new Dictionary<string, object>();
@@ -698,11 +990,11 @@ namespace Windy10v10AI.Launcher
                     new RosterEntry { SteamId = selfId, Name = Field(selfProfile, "personaName"), AvatarUrl = Field(selfProfile, "avatarUrl"), Status = PlayerStatus.Connecting },
                 };
                 UI(() => ShowPlayers(true));
-                tunnel.Start();
                 var hostCandidates = new List<Candidate>();
                 foreach (var text in (object[])joined["hostCandidates"]) hostCandidates.Add(Candidate.Parse((string)text));
                 var path = tunnel.Connect((string)joined["joinToken"], hostCandidates);
                 if (stopping) throw new OperationCanceledException();
+                if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (path == null) throw new LaunchError(Strings.ConnectFailed, false);
 
                 var running = DotaProcesses();
@@ -718,7 +1010,7 @@ namespace Windy10v10AI.Launcher
             }
             catch (LaunchError error)
             {
-                Finish(error.Message, error.ShowLog);
+                Finish(error.Message, error.ShowLog, error.Button, error.OnClick);
             }
             catch (Exception error)
             {
@@ -733,6 +1025,7 @@ namespace Windy10v10AI.Launcher
             while (!stopping)
             {
                 Thread.Sleep(2000);
+                if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (tunnel.Lost) throw new LaunchError(Strings.HostLost, false);
                 var running = DotaProcesses().Count > 0;
                 if (running == wasRunning) continue;
@@ -746,20 +1039,29 @@ namespace Windy10v10AI.Launcher
             Finish(null, false);
         }
 
-        void PollRoom(string code, string token, Dictionary<string, object> hostBody)
+        // The API answers the same room again once the host polls with its token, even after the room lapsed while paused
+        void PollRoom()
         {
-            var seen = new HashSet<string>();
+            var since = DateTime.UtcNow;
             var started = false;
             while (!stopping && !started)
             {
-                Thread.Sleep(RoomPollMs);
+                var elapsed = DateTime.UtcNow - since;
+                if (elapsed >= PauseAfter())
+                {
+                    UI(() => { if (busy && hostTunnel != null) ShowPause(true); });
+                    return;
+                }
+                Thread.Sleep(elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs);
                 var tunnel = hostTunnel;
-                if (tunnel == null) return;
+                var roster = hostRoster;
+                if (tunnel == null || roster == null || stopping) return;
                 started = ReadShared(logFile).Contains(HeroSelection);
-                var body = new Dictionary<string, object>(hostBody);
-                body["code"] = code;
-                body["token"] = token;
+                var body = new Dictionary<string, object>(roomBody);
+                body["code"] = roomCode;
+                body["token"] = roomToken;
                 body["started"] = started;
+                AddRoomState(body, roster.ActiveCount());
                 List<Dictionary<string, object>> results;
                 lock (joinResults)
                 {
@@ -773,12 +1075,25 @@ namespace Windy10v10AI.Launcher
                     foreach (Dictionary<string, object> join in (object[])answer["joins"])
                     {
                         var joinId = (string)join["joinId"];
-                        if (!seen.Add(joinId)) continue;
-                        var steamId = join.ContainsKey("steamId") ? Convert.ToInt64(join["steamId"]) : 0;
-                        hostRoster.Add(new RosterEntry { SteamId = steamId, Key = joinId, Name = Field(join, "personaName"), AvatarUrl = Field(join, "avatarUrl"), Status = PlayerStatus.Connecting });
+                        lock (seenJoins)
+                        {
+                            if (!seenJoins.Add(joinId)) continue;
+                        }
+                        var steamId = join.ContainsKey("steamId") && join["steamId"] != null ? Convert.ToInt64(join["steamId"]) : 0;
+                        object probeValue;
+                        // A probe only measures latency for someone browsing the list, so it never shows as a player
+                        var probe = join.TryGetValue("probe", out probeValue) && true.Equals(probeValue);
+                        if (!probe)
+                        {
+                            lock (kicked)
+                            {
+                                if (kicked.Contains(steamId)) continue;
+                            }
+                            roster.Add(new RosterEntry { SteamId = steamId, Key = joinId, Name = Field(join, "personaName"), AvatarUrl = Field(join, "avatarUrl"), Status = PlayerStatus.Connecting });
+                        }
                         var candidates = new List<Candidate>();
                         foreach (var text in (object[])join["candidates"]) candidates.Add(Candidate.Parse((string)text));
-                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates);
+                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates, probe);
                     }
                 }
                 catch (Exception)
@@ -788,6 +1103,30 @@ namespace Windy10v10AI.Launcher
                     lock (joinResults) joinResults.AddRange(results);
                 }
             }
+        }
+
+        // Sent with the opening request and every poll, so changes the host makes while the room is open reach the list
+        void AddRoomState(Dictionary<string, object> body, int playerCount)
+        {
+            body["public"] = Settings.PublicRoom;
+            body["maxPlayers"] = Settings.MaxPlayers;
+            body["map"] = roomMap;
+            body["playerCount"] = playerCount;
+            lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
+        }
+
+        // WINDY_ROOM_PAUSE_SECONDS shortens the pause so testers need not wait a quarter of an hour
+        static TimeSpan PauseAfter()
+        {
+            int seconds;
+            var text = Environment.GetEnvironmentVariable("WINDY_ROOM_PAUSE_SECONDS");
+            return int.TryParse(text, out seconds) && seconds > 0 ? TimeSpan.FromSeconds(seconds) : TimeSpan.FromMinutes(PauseMinutes);
+        }
+
+        void BackToList()
+        {
+            HideNotice();
+            if (browser != null) browser.Refresh();
         }
 
         void OnJoinFinished(string joinId, string path, int elapsedMs)
@@ -825,6 +1164,8 @@ namespace Windy10v10AI.Launcher
                 case "room_not_found": return Strings.RoomNotFound;
                 case "game_started": return Strings.GameStarted;
                 case "version_mismatch": return Strings.VersionMismatch;
+                case "kicked": return Strings.KickedJoin;
+                case "room_full": return Strings.RoomFull;
                 case "network": return Strings.RoomNetwork;
                 default: return Strings.LaunchFailed + code;
             }
@@ -868,11 +1209,12 @@ namespace Windy10v10AI.Launcher
 
         void SetIdleControlsEnabled(bool enabled)
         {
-            foreach (var control in new Control[] { testBox, modeBar, codeBox, joinButton })
+            foreach (var control in new Control[] { testBox, modeBar, codeBox, roomList, refresh })
             {
                 control.Enabled = enabled;
                 control.Invalidate();
             }
+            UpdateJoinButton();
         }
 
         void CloseTunnels()
@@ -923,6 +1265,11 @@ namespace Windy10v10AI.Launcher
         // Runs on the worker thread when a launch ends for any reason, and returns the window to its idle state
         void Finish(string error, bool showLog)
         {
+            Finish(error, showLog, null, null);
+        }
+
+        void Finish(string error, bool showLog, string button, Action onClick)
+        {
             var cancelled = stopping;
             stopping = true;
             var s = server;
@@ -942,14 +1289,22 @@ namespace Windy10v10AI.Launcher
                 SetIdleControlsEnabled(true);
                 secondary.Visible = false;
                 hostCode.Visible = false;
+                hostingReady = false;
+                players.CanKick = false;
+                hostSymmetric = joinSymmetric = null;
+                paused = false;
+                pauseBar.Visible = false;
                 ShowPlayers(false);
                 marquee.Visible = false;
                 hint.Visible = false;
                 action.Visible = false;
                 status.Text = IdleText();
                 status.ForeColor = Theme.Muted;
-                if (error != null && !cancelled) ShowNotice(NoticeKind.Error, error, showLog && logFile != null && File.Exists(logFile));
+                UpdateBrowsing();
+                if (error != null && !cancelled && button != null) ShowNotice(NoticeKind.Error, error, button, onClick);
+                else if (error != null && !cancelled) ShowNotice(NoticeKind.Error, error, showLog && logFile != null && File.Exists(logFile));
                 else RefreshMapState();
+                Relayout();
             });
         }
 
@@ -1016,6 +1371,7 @@ namespace Windy10v10AI.Launcher
                 KillQuietly(s);
             }
             CloseTunnels();
+            if (browser != null) browser.Dispose();
             base.OnFormClosing(e);
         }
 
