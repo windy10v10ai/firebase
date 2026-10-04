@@ -150,10 +150,11 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_4_0": [
+          "Added multiplayer: create public or friends rooms and join from the public room list"
+        ],
         "v0_3_4": [
-          "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game",
-          "The server window no longer shows while you play",
-          "Bug fixes and improvements"
+          "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game"
         ],
         "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus"],
         "v0_3_1": ["Bug fixes"],
