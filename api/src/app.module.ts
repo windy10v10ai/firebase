@@ -12,6 +12,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { EventRewardsModule } from './event-rewards/event-rewards.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { GameModule } from './game/game.module';
 import { KofiModule } from './kofi/kofi.module';
 import { LauncherModule } from './launcher/launcher.module';
@@ -59,6 +60,7 @@ export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'win
     SteamProfileModule,
     ProxyModule,
     LauncherModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
