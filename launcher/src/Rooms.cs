@@ -48,8 +48,6 @@ namespace Windy10v10AI.Launcher
         volatile bool disposed;
 
         public bool? SymmetricNat;
-        public int ActiveGames;
-        public int ActivePlayers;
         public bool Loaded;
         public bool LoadFailed;
         // Raised on worker threads
@@ -106,12 +104,9 @@ namespace Windy10v10AI.Launcher
                     var fresh = new List<RoomRow>();
                     foreach (Dictionary<string, object> room in (object[])answer["rooms"]) fresh.Add(Parse(room));
                     var toProbe = new List<string>();
-                    object value;
                     lock (sync)
                     {
                         Merge(fresh);
-                        ActiveGames = answer.TryGetValue("activeGames", out value) && value != null ? Convert.ToInt32(value) : 0;
-                        ActivePlayers = answer.TryGetValue("activePlayers", out value) && value != null ? Convert.ToInt32(value) : 0;
                         // A row keeps its result while it stays listed, so only rooms that are new or came back are measured
                         foreach (var row in rows)
                         {
