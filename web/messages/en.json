@@ -150,6 +150,10 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_4_1": [
+          "The public room list now shows how many games and players are in progress",
+          "Bug fixes"
+        ],
         "v0_4_0": [
           "Added multiplayer: create public or friends rooms and join from the public room list"
         ],
