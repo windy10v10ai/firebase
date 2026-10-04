@@ -19,6 +19,39 @@ describe('LauncherRoom (e2e)', () => {
     await app.close();
   });
 
+  it('列表汇总进行中的公开游戏', async () => {
+    const activityApp = await initTest();
+    try {
+      const opened = await post(activityApp, '/api/launcher/rooms/host', {
+        ...peer,
+        steamId: 300000010,
+        candidates: ['lan:192.168.0.50:50000'],
+        publicIp: false,
+        public: true,
+        playerCount: 2,
+      });
+      const { code, token } = opened.body;
+      await post(activityApp, '/api/launcher/rooms/host', {
+        ...peer,
+        steamId: 300000010,
+        candidates: ['lan:192.168.0.50:50000'],
+        publicIp: false,
+        code,
+        token,
+        started: true,
+        playerCount: 2,
+      });
+
+      const listed = await post(activityApp, '/api/launcher/rooms/list', {
+        steamId: 300000011,
+        protocolVersion: peer.protocolVersion,
+      });
+      expect(listed.body).toMatchObject({ rooms: [], activeGames: 1, activePlayers: 2 });
+    } finally {
+      await activityApp.close();
+    }
+  });
+
   it('开房、列表看到公开房间、加入、轮询取到加入请求、开局后拒绝加入', async () => {
     const opened = await post(app, '/api/launcher/rooms/host', {
       ...peer,
@@ -27,6 +60,7 @@ describe('LauncherRoom (e2e)', () => {
       publicIp: false,
       public: true,
       map: 'easy',
+      playerCount: 1,
     });
     expect(opened.status).toEqual(201);
     const { code, token } = opened.body;
@@ -55,6 +89,7 @@ describe('LauncherRoom (e2e)', () => {
       token,
       results: [{ joinId: joined.body.joinId, path: 'lan', elapsedMs: 300 }],
       started: true,
+      playerCount: 2,
     });
     expect(polled.status).toEqual(201);
     expect(polled.body.joins).toEqual([]);

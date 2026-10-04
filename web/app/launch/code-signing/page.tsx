@@ -51,13 +51,12 @@ export default function CodeSigningPage() {
       <Section title={t('changes.title')}>
         <ul className="list-disc space-y-2 pl-5 text-content text-pretty">
           <li>{t('changes.files')}</li>
-          <li>{t('changes.uninstall')}</li>
+          <li>{t('changes.settings')}</li>
         </ul>
       </Section>
 
       <Section title={t('privacy.title')}>
         <ul className="list-disc space-y-2 pl-5 text-content text-pretty">
-          <li>{t('privacy.map')}</li>
           <li>{t('privacy.update')}</li>
           <li>{t('privacy.online')}</li>
           <li>{t('privacy.data')}</li>

@@ -217,4 +217,8 @@ export class PublicRoomDto extends LauncherProfileDto {
 export class ListRoomsResponse {
   @ApiProperty({ type: [PublicRoomDto] })
   rooms: PublicRoomDto[];
+  @ApiProperty({ description: '仍在进行的公开游戏数' })
+  activeGames: number;
+  @ApiProperty({ description: '仍在进行的公开游戏玩家数' })
+  activePlayers: number;
 }

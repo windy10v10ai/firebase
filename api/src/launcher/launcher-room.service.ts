@@ -29,6 +29,9 @@ import { LauncherRoom } from './entities/launcher-room.entity';
 const ROOM_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 // 房主开局前每 2 秒轮询一次，留足网络抖动的余量才判定房间已关
 export const ROOM_ALIVE_MS = 2 * 60 * 1000;
+// 列表只容忍一次轮询整次失败，房主崩溃后房间很快从列表消失，凭码加入仍按上面的有效期
+export const ROOM_LIST_ALIVE_MS = 30 * 1000;
+export const ACTIVE_GAME_ALIVE_MS = 90 * 1000;
 // 加入者的握手窗口比它短，更早的加入请求已经失效
 export const PENDING_JOIN_MS = 30 * 1000;
 // 房间码一天后可以重新分配；记录多留几天，方便排查最近的房间
@@ -164,13 +167,19 @@ export class LauncherRoomService {
   async list(dto: ListRoomsDto): Promise<ListRoomsResponse> {
     const now = Date.now();
     const rooms = await this.findAliveRooms(now);
+    const activeRooms = rooms.filter(
+      (room) =>
+        room.public === true &&
+        room.started &&
+        now - room.lastSeenAt.getTime() <= ACTIVE_GAME_ALIVE_MS,
+    );
     return {
       rooms: rooms
         .filter(
           (room) =>
             room.public === true &&
             !room.started &&
-            now - room.lastSeenAt.getTime() <= ROOM_ALIVE_MS &&
+            now - room.lastSeenAt.getTime() <= ROOM_LIST_ALIVE_MS &&
             room.protocolVersion === dto.protocolVersion &&
             !(room.mapVersion && dto.mapVersion && room.mapVersion !== dto.mapVersion) &&
             !room.kickedSteamIds?.includes(dto.steamId),
@@ -183,6 +192,8 @@ export class LauncherRoomService {
           playerCount: room.playerCount,
           maxPlayers: room.maxPlayers,
         })),
+      activeGames: activeRooms.length,
+      activePlayers: activeRooms.reduce((total, room) => total + (room.playerCount ?? 0), 0),
     };
   }
 
@@ -192,7 +203,7 @@ export class LauncherRoomService {
       return this.aliveRoomsCache.rooms;
     }
     const rooms = await this.roomRepository
-      .whereGreaterThan('lastSeenAt', new Date(now - ROOM_ALIVE_MS))
+      .whereGreaterThan('lastSeenAt', new Date(now - ACTIVE_GAME_ALIVE_MS))
       .find();
     this.aliveRoomsCache = { fetchedAt: now, rooms };
     return rooms;
