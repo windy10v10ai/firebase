@@ -59,6 +59,7 @@ export default function CodeSigningPage() {
         <ul className="list-disc space-y-2 pl-5 text-content text-pretty">
           <li>{t('privacy.map')}</li>
           <li>{t('privacy.update')}</li>
+          <li>{t('privacy.online')}</li>
           <li>{t('privacy.data')}</li>
         </ul>
       </Section>

@@ -19,15 +19,24 @@ describe('LauncherRoom (e2e)', () => {
     await app.close();
   });
 
-  it('开房、加入、轮询取到加入请求、开局后拒绝加入', async () => {
+  it('开房、列表看到公开房间、加入、轮询取到加入请求、开局后拒绝加入', async () => {
     const opened = await post(app, '/api/launcher/rooms/host', {
       ...peer,
       steamId: 300000001,
       candidates: ['lan:192.168.0.50:50000'],
       publicIp: false,
+      public: true,
+      map: 'easy',
     });
     expect(opened.status).toEqual(201);
     const { code, token } = opened.body;
+
+    const listed = await post(app, '/api/launcher/rooms/list', {
+      steamId: 300000002,
+      protocolVersion: peer.protocolVersion,
+    });
+    expect(listed.status).toEqual(201);
+    expect(listed.body.rooms).toContainEqual(expect.objectContaining({ code, map: 'easy' }));
 
     const joined = await post(app, `/api/launcher/rooms/${code}/join`, {
       ...peer,

@@ -9,6 +9,8 @@ import {
   HostRoomResponse,
   JoinRoomDto,
   JoinRoomResponse,
+  ListRoomsDto,
+  ListRoomsResponse,
 } from './dto/launcher-room.dto';
 import { LauncherRoomService } from './launcher-room.service';
 
@@ -28,8 +30,15 @@ export class LauncherRoomController {
     return this.launcherRoomService.host(dto, origin.country);
   }
 
+  // 用 POST 是为了与开房、加入共用启动器的请求代码
+  @Post('list')
+  @ApiOperation({ summary: 'List public rooms the caller can join' })
+  list(@Body() dto: ListRoomsDto): Promise<ListRoomsResponse> {
+    return this.launcherRoomService.list(dto);
+  }
+
   @Post(':code/join')
-  @ApiOperation({ summary: 'Join a room by code and get the host candidates' })
+  @ApiOperation({ summary: 'Join a room by code, or probe it, and get the host candidates' })
   join(
     @Param('code') code: string,
     @Body() dto: JoinRoomDto,

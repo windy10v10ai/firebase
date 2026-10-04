@@ -49,6 +49,7 @@ API 自己往外调的第三方服务：
 - **`GET /api/launcher/workshop/:id` 是公开端点**：启动器是发给玩家的 exe，放进去的 key 等于公开。它只接受正式图与测试图两个工坊 ID，其余 404，免得被当成通用的 Steam 代理。启动器先直连 Steam，失败才来这里，所以海外玩家不经过我们的服务
 - **`GET /api/launcher/version` 与 `GET /api/launcher/download/:version` 是启动器自我更新用的公开端点**：版本号与 exe 哈希写死在代码里，查版本不读任何文件；下载只接受当前版本，由函数从官网取 exe、核对哈希后返回。两者都靠 CDN 缓存挡住重复请求，下载地址带版本号可以永久缓存，所以哈希不符时宁可失败也不返回。放在 API 下而不是只放官网，是因为国内代理只转发 `/api/`
 - **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，7 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
+- **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房主昵称头像、地图与人数，不含地址与令牌。整份候选房间在函数实例的内存里缓存 3 秒、所有请求共用，Firestore 只按心跳时间一个条件查，其余条件在内存里筛，不建组合索引。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由同上一节最后一条；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
 

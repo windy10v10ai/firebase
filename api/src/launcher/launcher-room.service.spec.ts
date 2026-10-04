@@ -5,7 +5,12 @@ import { BigQueryService } from '../bigquery/bigquery.service';
 import { HostRoomDto, JoinRoomDto } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
 import { LauncherRoom } from './entities/launcher-room.entity';
-import { LauncherRoomService, PENDING_JOIN_MS, ROOM_ALIVE_MS } from './launcher-room.service';
+import {
+  LauncherRoomService,
+  PENDING_JOIN_MS,
+  ROOM_ALIVE_MS,
+  ROOM_LIST_CACHE_MS,
+} from './launcher-room.service';
 
 function memoryRepository<T extends { id: string }>() {
   const docs = new Map<string, T>();
@@ -23,6 +28,9 @@ function memoryRepository<T extends { id: string }>() {
     whereEqualTo: (field: keyof T, value: unknown) => ({
       find: async () => [...docs.values()].filter((doc) => doc[field] === value),
     }),
+    whereGreaterThan: jest.fn((field: keyof T, value: Date) => ({
+      find: async () => [...docs.values()].filter((doc) => (doc[field] as Date) > value),
+    })),
   };
 }
 
@@ -114,6 +122,7 @@ describe('LauncherRoomService', () => {
         candidates: JOINER.candidates,
         personaName: 'CalmDown!',
         avatarUrl: undefined,
+        probe: false,
       },
     ]);
     expect(joined.self.personaName).toEqual('CalmDown!');
@@ -192,5 +201,100 @@ describe('LauncherRoomService', () => {
       ConflictException,
     );
     await expect(service.join(room.code, JOINER)).resolves.toBeDefined();
+  });
+
+  it('房主停止轮询超过 2 分钟后带对令牌轮询，房间以同一个码恢复', async () => {
+    const room = await service.host(HOST);
+    jest.advanceTimersByTime(ROOM_ALIVE_MS + 1);
+
+    const resumed = await service.host({ ...HOST, code: room.code, token: room.token });
+
+    expect(resumed.code).toEqual(room.code);
+    await expect(service.join(room.code, JOINER)).resolves.toBeDefined();
+  });
+
+  it('测试连通不查资料、不受满员限制，房主轮询拿到带标记的记录且不写统计', async () => {
+    const room = await service.host({ ...HOST, maxPlayers: 2, playerCount: 2 });
+
+    const probed = await service.join(room.code, { ...JOINER, probe: true });
+    const polled = await service.host({
+      ...HOST,
+      code: room.code,
+      token: room.token,
+      results: [{ joinId: probed.joinId, path: 'punch', elapsedMs: 800 }],
+    });
+
+    expect(probed).toEqual({
+      joinId: expect.any(String),
+      joinToken: expect.any(String),
+      hostCandidates: HOST.candidates,
+      host: {},
+      self: {},
+    });
+    expect(polled.joins).toEqual([expect.objectContaining({ joinId: probed.joinId, probe: true })]);
+    expect(bigQuery.recordJoinResult).not.toHaveBeenCalled();
+  });
+
+  it('被移出的人加入与测试连通都返回 403 kicked，满员时正式加入返回 409 room_full', async () => {
+    const room = await service.host({ ...HOST, maxPlayers: 4, playerCount: 3 });
+    await service.host({ ...HOST, code: room.code, token: room.token, kickedSteamIds: [2002] });
+
+    for (const dto of [JOINER, { ...JOINER, probe: true }]) {
+      await expect(service.join(room.code, dto)).rejects.toMatchObject({
+        status: 403,
+        response: { code: 'kicked' },
+      });
+    }
+    await expect(service.join(room.code, { ...JOINER, steamId: 3003 })).resolves.toBeDefined();
+    await service.host({ ...HOST, code: room.code, token: room.token, playerCount: 4 });
+    await expect(service.join(room.code, { ...JOINER, steamId: 3003 })).rejects.toMatchObject({
+      status: 409,
+      response: { code: 'room_full' },
+    });
+  });
+
+  it('列表只返回请求者能进的公开房间，不带地址与令牌', async () => {
+    const listed = await service.host({
+      ...HOST,
+      mapVersion: '111',
+      public: true,
+      map: 'hard',
+      playerCount: 3,
+      maxPlayers: 10,
+    });
+    await service.host({ ...HOST, steamId: 3001 });
+    await service.host({ ...HOST, steamId: 3002, public: true, protocolVersion: 2 });
+    await service.host({ ...HOST, steamId: 3003, public: true, mapVersion: '222' });
+    await service.host({ ...HOST, steamId: 3004, public: true, kickedSteamIds: [2002] });
+    const started = await service.host({ ...HOST, steamId: 3005, public: true });
+    await service.host({ ...HOST, code: started.code, token: started.token, started: true });
+    const stale = await service.host({ ...HOST, steamId: 3006, public: true });
+    rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - ROOM_ALIVE_MS - 1);
+
+    const res = await service.list({ steamId: 2002, protocolVersion: 1, mapVersion: '111' });
+
+    expect(res.rooms).toEqual([
+      {
+        code: listed.code,
+        personaName: undefined,
+        avatarUrl: undefined,
+        map: 'hard',
+        playerCount: 3,
+        maxPlayers: 10,
+      },
+    ]);
+  });
+
+  it('列表结果缓存 3 秒，期间不再查 Firestore', async () => {
+    const query = { steamId: 2002, protocolVersion: 1 };
+    await service.list(query);
+    await service.host({ ...HOST, public: true });
+
+    expect((await service.list(query)).rooms).toEqual([]);
+    expect(rooms.whereGreaterThan).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(ROOM_LIST_CACHE_MS);
+    expect((await service.list(query)).rooms).toHaveLength(1);
+    expect(rooms.whereGreaterThan).toHaveBeenCalledTimes(2);
   });
 });
