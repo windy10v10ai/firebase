@@ -3,7 +3,7 @@ import { gzipSync } from 'zlib';
 import { BadRequestException, HttpException } from '@nestjs/common';
 
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
-import { FeedbackQuota } from './entities/feedback-quota.entity';
+import { FeedbackRateLimit } from './entities/feedback-rate-limit.entity';
 import { FeedbackReport } from './entities/feedback-report.entity';
 import { FeedbackService, REPORTS_PER_HOUR, SITE_REPORTS_PER_DAY } from './feedback.service';
 
@@ -33,16 +33,16 @@ const PROBLEM: CreateFeedbackDto = {
 
 describe('FeedbackService', () => {
   let reports: ReturnType<typeof memoryRepository<FeedbackReport>>;
-  let quotas: ReturnType<typeof memoryRepository<FeedbackQuota>>;
+  let limits: ReturnType<typeof memoryRepository<FeedbackRateLimit>>;
   let storage: { save: jest.Mock };
   let service: FeedbackService;
 
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-10-04T12:00:00Z') });
     reports = memoryRepository<FeedbackReport>();
-    quotas = memoryRepository<FeedbackQuota>();
+    limits = memoryRepository<FeedbackRateLimit>();
     storage = { save: jest.fn(async (path: string) => `gs://bucket/${path}`) };
-    service = new FeedbackService(reports as never, quotas as never, storage as never);
+    service = new FeedbackService(reports as never, limits as never, storage as never);
   });
 
   afterEach(() => jest.useRealTimers());
@@ -72,8 +72,8 @@ describe('FeedbackService', () => {
     });
     expect(report.clientLog).toBeUndefined();
     expect(storage.save).toHaveBeenCalledWith(`2026-10-04/${report.id}/server.log.gz`, log);
-    expect(quotas.docs.get('2026-10-04_all')?.count).toBe(1);
-    expect(quotas.docs.get('2026-10-04_steam-1001')?.count).toBe(1);
+    expect(limits.docs.get('all')).toMatchObject({ dailyDate: '2026-10-04', dailyCount: 1 });
+    expect(limits.docs.get('steam-1001')).toMatchObject({ dailyDate: '2026-10-04', dailyCount: 1 });
   });
 
   it('提建议必须写描述，日志必须是 gzip', async () => {
@@ -96,18 +96,23 @@ describe('FeedbackService', () => {
 
     jest.advanceTimersByTime(60 * 60 * 1000 + 1);
     await service.create(anonymous, { ip: '1.2.3.4' });
-    expect(quotas.docs.get('2026-10-04_ip-1.2.3.4')?.count).toBe(REPORTS_PER_HOUR + 1);
+    expect(limits.docs.get('ip-1.2.3.4')?.dailyCount).toBe(REPORTS_PER_HOUR + 1);
   });
 
-  it('全站当天达到上限后谁都发不了', async () => {
-    quotas.docs.set('2026-10-04_all', {
-      id: '2026-10-04_all',
-      count: SITE_REPORTS_PER_DAY,
+  it('全站当天达到上限后谁都发不了，第二天归零', async () => {
+    limits.docs.set('all', {
+      id: 'all',
+      dailyDate: '2026-10-04',
+      dailyCount: SITE_REPORTS_PER_DAY,
       recent: [],
       expireAt: new Date(),
     });
     await expect(service.create(PROBLEM, {})).rejects.toMatchObject({
       message: 'daily_limit_reached',
     });
+
+    jest.setSystemTime(new Date('2026-10-05T00:00:01Z'));
+    await service.create(PROBLEM, {});
+    expect(limits.docs.get('all')).toMatchObject({ dailyDate: '2026-10-05', dailyCount: 1 });
   });
 });

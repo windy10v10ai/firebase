@@ -8,7 +8,7 @@ import { InjectRepository } from 'nestjs-fireorm';
 import { ClientOrigin } from '../util/auth/client-origin.decorator';
 
 import { CreateFeedbackDto, MAX_LOG_BYTES } from './dto/create-feedback.dto';
-import { FeedbackQuota } from './entities/feedback-quota.entity';
+import { FeedbackRateLimit } from './entities/feedback-rate-limit.entity';
 import { FeedbackReport } from './entities/feedback-report.entity';
 import { FeedbackLogStorageService } from './feedback-log-storage.service';
 
@@ -17,7 +17,8 @@ export const REPORTS_PER_DAY = 10;
 // Steam ID 能伪造，换着 ID 刷也只能刷到这个数，存储费用有上限
 export const SITE_REPORTS_PER_DAY = 500;
 const RETENTION_DAYS = 90;
-const QUOTA_RETENTION_DAYS = 2;
+const RATE_LIMIT_RETENTION_DAYS = 2;
+const SITE_RATE_LIMIT_ID = 'all';
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const GZIP_MAGIC = [0x1f, 0x8b];
@@ -27,8 +28,8 @@ export class FeedbackService {
   constructor(
     @InjectRepository(FeedbackReport)
     private readonly reportRepository: BaseFirestoreRepository<FeedbackReport>,
-    @InjectRepository(FeedbackQuota)
-    private readonly quotaRepository: BaseFirestoreRepository<FeedbackQuota>,
+    @InjectRepository(FeedbackRateLimit)
+    private readonly rateLimitRepository: BaseFirestoreRepository<FeedbackRateLimit>,
     private readonly logStorage: FeedbackLogStorageService,
   ) {}
 
@@ -44,18 +45,16 @@ export class FeedbackService {
     const now = new Date();
     const day = now.toISOString().slice(0, 10);
     // 国内代理转发的请求共用代理的 IP，所以优先按 Steam ID 计
-    const submitter = dto.steamId ? `steam-${dto.steamId}` : `ip-${origin.ip ?? 'unknown'}`;
-    const siteQuotaId = `${day}_all`;
-    const ownQuotaId = `${day}_${submitter}`;
-    const [siteQuota, ownQuota] = await Promise.all([
-      this.quotaRepository.findById(siteQuotaId),
-      this.quotaRepository.findById(ownQuotaId),
+    const ownId = dto.steamId ? `steam-${dto.steamId}` : `ip-${origin.ip ?? 'unknown'}`;
+    const [site, own] = await Promise.all([
+      this.rateLimitRepository.findById(SITE_RATE_LIMIT_ID),
+      this.rateLimitRepository.findById(ownId),
     ]);
-    if ((siteQuota?.count ?? 0) >= SITE_REPORTS_PER_DAY) {
+    if (todayCount(site, day) >= SITE_REPORTS_PER_DAY) {
       throw new HttpException('daily_limit_reached', HttpStatus.TOO_MANY_REQUESTS);
     }
-    const recent = (ownQuota?.recent ?? []).filter((at) => at > now.getTime() - HOUR_MS);
-    if ((ownQuota?.count ?? 0) >= REPORTS_PER_DAY || recent.length >= REPORTS_PER_HOUR) {
+    const recent = (own?.recent ?? []).filter((at) => at > now.getTime() - HOUR_MS);
+    if (todayCount(own, day) >= REPORTS_PER_DAY || recent.length >= REPORTS_PER_HOUR) {
       throw new HttpException('too_many_reports', HttpStatus.TOO_MANY_REQUESTS);
     }
 
@@ -86,10 +85,10 @@ export class FeedbackService {
       expireAt: new Date(now.getTime() + RETENTION_DAYS * DAY_MS),
     });
 
-    const quotaExpireAt = new Date(now.getTime() + QUOTA_RETENTION_DAYS * DAY_MS);
+    const expireAt = new Date(now.getTime() + RATE_LIMIT_RETENTION_DAYS * DAY_MS);
     await Promise.all([
-      this.saveQuota(siteQuotaId, siteQuota, [], quotaExpireAt),
-      this.saveQuota(ownQuotaId, ownQuota, [...recent, now.getTime()], quotaExpireAt),
+      this.countSubmission(SITE_RATE_LIMIT_ID, site, day, [], expireAt),
+      this.countSubmission(ownId, own, day, [...recent, now.getTime()], expireAt),
     ]);
 
     logger.info('feedback received', {
@@ -103,16 +102,27 @@ export class FeedbackService {
     });
   }
 
-  private async saveQuota(
+  private async countSubmission(
     id: string,
-    existing: FeedbackQuota | null,
+    existing: FeedbackRateLimit | null,
+    day: string,
     recent: number[],
     expireAt: Date,
   ): Promise<void> {
-    const quota = { id, count: (existing?.count ?? 0) + 1, recent, expireAt };
-    if (existing) await this.quotaRepository.update(quota);
-    else await this.quotaRepository.create(quota);
+    const limit = {
+      id,
+      dailyDate: day,
+      dailyCount: todayCount(existing, day) + 1,
+      recent,
+      expireAt,
+    };
+    if (existing) await this.rateLimitRepository.update(limit);
+    else await this.rateLimitRepository.create(limit);
   }
+}
+
+function todayCount(limit: FeedbackRateLimit | null, day: string): number {
+  return limit?.dailyDate === day ? limit.dailyCount : 0;
 }
 
 function decodeLog(base64?: string): Buffer | undefined {

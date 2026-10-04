@@ -25,7 +25,7 @@
       "indexes": []
     },
     {
-      "collectionGroup": "FeedbackQuotas",
+      "collectionGroup": "FeedbackRateLimits",
       "fieldPath": "expireAt",
       "ttl": true,
       "indexes": []
