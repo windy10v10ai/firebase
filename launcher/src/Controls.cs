@@ -468,7 +468,7 @@ namespace Windy10v10AI.Launcher
         }
 
         int Top0 { get { return (int)((banner == null ? 26 : 46) * DpiScale); } }
-        int RowHeight { get { return (int)(46 * DpiScale); } }
+        int RowHeight { get { return (int)(50 * DpiScale); } }
 
         int MaxScroll()
         {
@@ -519,7 +519,7 @@ namespace Windy10v10AI.Launcher
             {
                 var x = (int)(10 * s) + (i % 2) * (colWidth + (int)(6 * s));
                 var y = Top0 + (i / 2) * RowHeight - scroll;
-                DrawPlayer(g, players[i], new Rectangle(x, y, colWidth, (int)(40 * s)));
+                DrawPlayer(g, players[i], new Rectangle(x, y, colWidth, (int)(44 * s)));
             }
             g.ResetClip();
         }
@@ -550,7 +550,7 @@ namespace Windy10v10AI.Launcher
                     dot = Theme.Ok; statusColor = Theme.Muted; text = Strings.StatusInGame; break;
             }
 
-            var d = 28 * s;
+            var d = 38 * s;
             var avatar = new RectangleF(rect.X + 8 * s, rect.Y + (rect.Height - d) / 2, d, d);
             if (ring != Color.Empty)
             {
