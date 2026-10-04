@@ -47,14 +47,14 @@ namespace Windy10v10AI.Launcher
         public static string SteamClientMissing { get { return Pick("找不到 Steam 客户端。请打开 Steam 或蒸汽平台并等待更新完成，再重新开局。", "Steam could not be found. Open Steam and wait for it to finish updating, then try again.", "Steam не найден. Откройте Steam, дождитесь завершения обновления и попробуйте снова."); } }
         public static string NoDota { get { return Pick("没有找到 Dota 2，请先在 Steam 安装。", "Dota 2 was not found. Install it in Steam first.", "Dota 2 не найдена. Сначала установите её в Steam."); } }
         public static string NoMap { get { return Pick("没有找到地图，请先订阅 10v10 AI，等待 Steam 下载完成。", "Map not found. Subscribe to 10v10 AI and wait for Steam to download it.", "Карта не найдена. Подпишитесь на 10v10 AI и дождитесь загрузки в Steam."); } }
-        public static string Timeout { get { return Pick("启动失败：服务器没有按时启动完成。请再试一次；多次失败请点「反馈问题」告诉我们。", "Launch failed: the server did not start in time. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер не запустился вовремя. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить о проблеме»."); } }
-        public static string ServerExited { get { return Pick("服务器意外退出。请再试一次；多次失败请点「反馈问题」告诉我们。", "The server stopped unexpectedly. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер неожиданно остановился. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить о проблеме»."); } }
+        public static string Timeout { get { return Pick("启动失败：服务器没有按时启动完成。请再试一次；多次失败请点「反馈问题」告诉我们。", "Launch failed: the server did not start in time. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер не запустился вовремя. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить»."); } }
+        public static string ServerExited { get { return Pick("服务器意外退出。请再试一次；多次失败请点「反馈问题」告诉我们。", "The server stopped unexpectedly. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер неожиданно остановился. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить»."); } }
         public static string DotaBlocked { get { return Pick("启动失败：Dota 2 没能启动，可能被杀毒软件拦截了。请在杀毒软件里把 Windy10v10AI.exe 加入信任，再试一次。", "Launch failed: Dota 2 could not start, possibly blocked by antivirus. Allow Windy10v10AI.exe in your antivirus, then try again.", "Не удалось запустить Dota 2 — возможно, её блокирует антивирус. Разрешите Windy10v10AI.exe в антивирусе и попробуйте снова."); } }
         public static string DotaNotClosed { get { return Pick("启动失败：没能关闭正在运行的 Dota 2。请在任务管理器里结束 dota2.exe，再试一次。", "Launch failed: could not close the running Dota 2. End dota2.exe in Task Manager, then try again.", "Не удалось закрыть запущенную Dota 2. Завершите dota2.exe в диспетчере задач и попробуйте снова."); } }
         public static string LaunchFailed { get { return Pick("启动失败：", "Launch failed: ", "Не удалось запустить: "); } }
         public static string OpenWorkshop { get { return Pick("打开创意工坊", "Open Workshop", "Открыть Мастерскую"); } }
         public static string Subscribe { get { return Pick("订阅地图", "Subscribe", "Подписаться"); } }
-        public static string ReportProblem { get { return Pick("反馈问题", "Report problem", "Сообщить о проблеме"); } }
+        public static string ReportProblem { get { return Pick("反馈问题", "Report problem", "Сообщить"); } }
 
         public static string UpdateAvailable { get { return Pick("发现新版本 v{0}，更新后启动器会自动重启。", "Version {0} is available. The launcher restarts after updating.", "Доступна версия {0}. Лаунчер перезапустится после обновления."); } }
         public static string Update { get { return Pick("更新", "Update", "Обновить"); } }
@@ -147,7 +147,7 @@ namespace Windy10v10AI.Launcher
         public static string QuitBody { get { return Pick("关闭启动器会同时关闭服务器，正在进行的游戏会断开。", "Closing the launcher also stops the server and ends the current game.", "Закрытие лаунчера остановит сервер и прервёт текущую игру."); } }
         public static string Close { get { return Pick("关闭", "Close", "Закрыть"); } }
 
-        public static string Feedback { get { return Pick("反馈", "Feedback", "Отзыв"); } }
+        public static string Feedback { get { return Pick("反馈问题 / 建议", "Report / Suggest", "Сообщить / Предложить"); } }
         public static string FeedbackTitle { get { return Pick("反馈 — Windy10v10AI", "Feedback — Windy10v10AI", "Отзыв — Windy10v10AI"); } }
         public static string TypeProblem { get { return Pick("报告问题", "Report a problem", "Сообщить о проблеме"); } }
         public static string TypeSuggestion { get { return Pick("提出建议", "Suggest an idea", "Предложить идею"); } }
@@ -177,8 +177,8 @@ namespace Windy10v10AI.Launcher
         public static string SuggestionCue { get { return Pick("说说你的想法，比如想加什么功能、哪里太强或太弱", "Tell us your idea, e.g. a feature you want or something too strong or too weak", "Расскажите, что думаете: например, какую функцию добавить или что слишком сильное или слабое"); } }
         public static string AttachLog { get { return Pick("附带游戏日志", "Attach game logs", "Приложить игровые логи"); } }
         public static string AttachLogHint { get { return Pick("能帮我们更快找到并解决问题", "Helps us find and fix the problem faster", "Поможет быстрее решить проблему"); } }
-        public static string PrivacyNote { get { return Pick("只用于改进游戏 · ", "Only used to improve the game · ", "Только для улучшения игры · "); } }
-        public static string PrivacyLink { get { return Pick("隐私说明", "Privacy", "Конфиденциальность"); } }
+        public static string PrivacyNote { get { return Pick("发送即表示同意 ", "By sending, you agree to the ", "Отправляя, вы соглашаетесь с "); } }
+        public static string PrivacyLink { get { return Pick("隐私政策", "Privacy Policy", "политикой конфиденциальности"); } }
         public static string Send { get { return Pick("发送", "Send", "Отправить"); } }
         public static string Sending { get { return Pick("发送中…", "Sending...", "Отправка…"); } }
         public static string Resend { get { return Pick("重新发送", "Send again", "Отправить снова"); } }

@@ -247,6 +247,63 @@ namespace Windy10v10AI.Launcher
         }
     }
 
+    // Pill button with a speech bubble that opens the feedback dialog from the main window
+    class FeedbackButton : PaintedControl
+    {
+        bool hover;
+
+        public FeedbackButton()
+        {
+            Cursor = Cursors.Hand;
+            TabStop = true;
+            Font = new Font(Theme.FontName, 8.25f);
+        }
+
+        public int PreferredWidth
+        {
+            get { return TextRenderer.MeasureText(Text, Font).Width + (int)(38 * DpiScale); }
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { hover = true; Invalidate(); base.OnMouseEnter(e); }
+        protected override void OnMouseLeave(EventArgs e) { hover = false; Invalidate(); base.OnMouseLeave(e); }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) OnClick(EventArgs.Empty);
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            var rect = new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f);
+            using (var path = Theme.Rounded(rect, rect.Height / 2))
+            using (var brush = new SolidBrush(hover ? Theme.PanelHover : Theme.Panel))
+            using (var pen = new Pen(Theme.Border, Math.Max(1f, s)))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(pen, path);
+            }
+            var left = 11 * s;
+            var top = (Height - 10 * s) / 2 - 1.5f * s;
+            using (var pen = new Pen(Theme.Text, 1.5f * s) { LineJoin = System.Drawing.Drawing2D.LineJoin.Round })
+            {
+                var body = new RectangleF(left, top, 12 * s, 9 * s);
+                using (var path = Theme.Rounded(body, 2 * s)) g.DrawPath(pen, path);
+                g.DrawLines(pen, new[]
+                {
+                    new PointF(left + 2.5f * s, top + 9 * s),
+                    new PointF(left + 1.5f * s, top + 12 * s),
+                    new PointF(left + 5.5f * s, top + 9 * s),
+                });
+            }
+            var textLeft = (int)(29 * s);
+            TextRenderer.DrawText(g, Text, Font, new Rectangle(textLeft, 0, Width - textLeft, Height), Theme.Text,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
+        }
+    }
+
     // A toggle that reads as a pill; the dialog decides whether a click is allowed, because it enforces the limit
     class TopicChip : PaintedControl
     {
@@ -317,7 +374,7 @@ namespace Windy10v10AI.Launcher
     {
         const int MaxTopics = 2;
         const int MaxDescription = 1000;
-        const string PrivacyUrl = Updater.DownloadPage + "/code-signing";
+        const string PrivacyUrl = Updater.DownloadPage + "/code-signing#privacy";
         static readonly string[] TopicIds = { "hero", "ability", "item", "bot", "balance", "ui", "member", "lag", "launcher", "web" };
 
         readonly FeedbackContext context;

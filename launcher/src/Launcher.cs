@@ -88,7 +88,7 @@ namespace Windy10v10AI.Launcher
         readonly Panel mapDot = new Panel();
         readonly Label mapLabel = new Label();
         readonly LinkLabel devLink = new LinkLabel();
-        readonly LinkLabel feedbackLink = new LinkLabel();
+        readonly FeedbackButton feedbackLink = new FeedbackButton();
         readonly ToggleBox testBox = new ToggleBox();
         readonly SegmentedBar modeBar = new SegmentedBar();
         readonly Label roomTypeLabel = new Label();
@@ -207,6 +207,7 @@ namespace Windy10v10AI.Launcher
             mapLabel.ForeColor = Theme.Muted;
             mapLabel.Font = new Font(Theme.FontName, 9f);
             mapLabel.TextAlign = ContentAlignment.MiddleLeft;
+            mapLabel.AutoEllipsis = true;
 
             devLink.Text = Strings.Developer;
             devLink.Font = new Font(Theme.FontName, 8.25f);
@@ -220,12 +221,7 @@ namespace Windy10v10AI.Launcher
             };
 
             feedbackLink.Text = Strings.Feedback;
-            feedbackLink.Font = new Font(Theme.FontName, 8.25f);
-            feedbackLink.LinkColor = Theme.Muted;
-            feedbackLink.ActiveLinkColor = Theme.Text;
-            feedbackLink.LinkBehavior = LinkBehavior.HoverUnderline;
-            feedbackLink.TextAlign = ContentAlignment.MiddleRight;
-            feedbackLink.LinkClicked += delegate { OpenFeedback(null); };
+            feedbackLink.Click += delegate { OpenFeedback(null); };
 
             testBox.Text = Strings.UseTestMap;
             testBox.Visible = false;
@@ -454,13 +450,14 @@ namespace Windy10v10AI.Launcher
             y += browsing && !busy ? 60 : 124;
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
             mapDot.SetBounds(P(20), P(y + 16), P(8), P(8));
-            mapLabel.SetBounds(P(34), P(y + 9), P(200), P(22));
             var devWidth = TextRenderer.MeasureText(devLink.Text, devLink.Font).Width + P(4);
             devLink.SetBounds(P(460) - devWidth, P(y + 9), devWidth, P(22));
             var testWidth = testBox.PreferredWidth + P(2);
-            var feedbackWidth = TextRenderer.MeasureText(feedbackLink.Text, feedbackLink.Font).Width + P(4);
-            feedbackLink.SetBounds(P(460) - devWidth - P(12) - feedbackWidth, P(y + 9), feedbackWidth, P(22));
+            feedbackLink.SetBounds(P(460) - devWidth - P(12) - feedbackLink.PreferredWidth, P(y + 8), feedbackLink.PreferredWidth, P(24));
             testBox.SetBounds(feedbackLink.Left - P(12) - testWidth, P(y + 9), testWidth, P(22));
+            // The map status gives way to the buttons on the right in the longer languages
+            var rightEdge = testBox.Visible ? testBox.Left : feedbackLink.Left;
+            mapLabel.SetBounds(P(34), P(y + 9), Math.Min(P(200), rightEdge - P(34) - P(8)), P(22));
             ClientSize = new Size(P(480), P(y + 40));
         }
 
