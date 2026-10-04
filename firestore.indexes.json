@@ -5,6 +5,18 @@
       "collectionGroup": "PlayerStatsRecents",
       "fieldPath": "matches",
       "indexes": []
+    },
+    {
+      "collectionGroup": "LauncherRooms",
+      "fieldPath": "expireAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "LauncherRoomJoins",
+      "fieldPath": "expireAt",
+      "ttl": true,
+      "indexes": []
     }
   ]
 }
