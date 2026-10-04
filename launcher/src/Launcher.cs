@@ -567,6 +567,14 @@ namespace Windy10v10AI.Launcher
                     WindowStyle = ProcessWindowStyle.Hidden,
                 });
 
+                // The code is shown as soon as the room opens, so friends may join while the server is still loading
+                if (code != null)
+                {
+                    var roomCode = code;
+                    var roomToken = token;
+                    new Thread(() => PollRoom(roomCode, roomToken, hostBody)) { IsBackground = true }.Start();
+                }
+
                 WaitForMap(map);
                 UI(() => hint.Text = Strings.OpeningDota);
 
@@ -588,12 +596,6 @@ namespace Windy10v10AI.Launcher
                     action.Text = Strings.StopServer;
                     Relayout();
                 });
-                if (code != null)
-                {
-                    var roomCode = code;
-                    var roomToken = token;
-                    new Thread(() => PollRoom(roomCode, roomToken, hostBody)) { IsBackground = true }.Start();
-                }
                 WatchClient();
             }
             catch (LaunchError error)

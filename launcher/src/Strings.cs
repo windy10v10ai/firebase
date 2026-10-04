@@ -86,7 +86,7 @@ namespace Windy10v10AI.Launcher
         public static string GameStarted { get { return Pick("游戏已开始，无法加入。", "The game has already started.", "Игра уже началась."); } }
         public static string VersionMismatch { get { return Pick("双方启动器版本不同，请都更新到最新版本。", "Your launcher versions differ. Both of you need the latest version.", "Версии лаунчера отличаются. Обновите лаунчер у обоих."); } }
         public static string RoomNetwork { get { return Pick("连不上服务器，请检查网络后重试。", "Could not reach our server. Check your network and try again.", "Не удалось связаться с сервером. Проверьте сеть и попробуйте снова."); } }
-        public static string ConnectFailed { get { return Pick("连接失败：换一个人当房主试试，或者从游廊开局。", "Could not connect. Try with someone else as the host, or launch from the Arcade.", "Не удалось подключиться. Попробуйте другого хоста или запуск из аркады."); } }
+        public static string ConnectFailed { get { return Pick("因为网络问题，目前无法连接。请进入别的主机，或更换网络环境后再试。", "Could not connect because of a network problem. Join another host, or try again on a different network.", "Не удалось подключиться из-за проблем с сетью. Присоединитесь к другому хосту или попробуйте другую сеть."); } }
         public static string Joined { get { return Pick("已加入房间 {0}", "Joined room {0}", "Вы в комнате {0}"); } }
         public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
