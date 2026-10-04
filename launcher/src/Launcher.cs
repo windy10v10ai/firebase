@@ -61,6 +61,7 @@ namespace Windy10v10AI.Launcher
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
+        const int GamePollMs = 30000;
         const int FastPollMinutes = 5;
         // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
         const int PauseMinutes = 15;
@@ -392,9 +393,9 @@ namespace Windy10v10AI.Launcher
             for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
             var titleWidth = TextRenderer.MeasureText(roomsTitle.Text, roomsTitle.Font).Width + P(4);
             roomsTitle.SetBounds(P(20), P(y), titleWidth, P(28));
-            roomsCount.SetBounds(P(20) + titleWidth + P(4), P(y), P(120), P(28));
             var refreshWidth = Math.Max(P(64), TextRenderer.MeasureText(refresh.Text, refresh.Font).Width + P(24));
             refresh.SetBounds(P(460) - refreshWidth, P(y), refreshWidth, P(28));
+            roomsCount.SetBounds(P(20) + titleWidth + P(4), P(y), refresh.Left - (P(20) + titleWidth + P(12)), P(28));
             roomList.SetBounds(P(20), P(y + 34), P(440), P(ListHeight));
             var below = y + 34 + ListHeight + 10;
             privatePrompt.SetBounds(P(20), P(below), P(440), P(20));
@@ -552,7 +553,9 @@ namespace Windy10v10AI.Launcher
             string warning = null;
             if (source.SymmetricNat == true) warning = Strings.SymmetricNat;
             roomList.SetRooms(rows, state, warning);
-            roomsCount.Text = source.Loaded ? string.Format(Strings.RoomCount, rows.Count) : "";
+            roomsCount.Text = source.Loaded
+                ? (source.ActiveGames > 0 ? string.Format(Strings.ActiveGames, source.ActiveGames, source.ActivePlayers) : string.Format(Strings.RoomCount, rows.Count))
+                : "";
         }
 
         Dictionary<string, object> ListBody()
@@ -1045,24 +1048,24 @@ namespace Windy10v10AI.Launcher
         {
             var since = DateTime.UtcNow;
             var started = false;
-            while (!stopping && !started)
+            while (!stopping)
             {
                 var elapsed = DateTime.UtcNow - since;
-                if (elapsed >= PauseAfter())
+                if (!started && elapsed >= PauseAfter())
                 {
                     HideFromList();
                     UI(() => { if (busy && hostTunnel != null) ShowPause(true); });
                     return;
                 }
-                Thread.Sleep(elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs);
+                Thread.Sleep(started ? GamePollMs : (elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs));
                 var tunnel = hostTunnel;
                 var roster = hostRoster;
                 if (tunnel == null || roster == null || stopping) return;
-                started = ReadShared(logFile).Contains(HeroSelection);
+                var startedNow = started || ReadShared(logFile).Contains(HeroSelection);
                 var body = new Dictionary<string, object>(roomBody);
                 body["code"] = roomCode;
                 body["token"] = roomToken;
-                body["started"] = started;
+                body["started"] = startedNow;
                 AddRoomState(body, roster.ActiveCount());
                 List<Dictionary<string, object>> results;
                 lock (joinResults)
@@ -1074,6 +1077,7 @@ namespace Windy10v10AI.Launcher
                 try
                 {
                     var answer = RoomApi.Host(body);
+                    started = startedNow;
                     foreach (Dictionary<string, object> join in (object[])answer["joins"])
                     {
                         var joinId = (string)join["joinId"];
@@ -1101,7 +1105,6 @@ namespace Windy10v10AI.Launcher
                 catch (Exception)
                 {
                     // Polling resumes on the next tick; the start notice and results are sent again then
-                    started = false;
                     lock (joinResults) joinResults.AddRange(results);
                 }
             }
