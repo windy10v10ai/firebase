@@ -568,8 +568,11 @@ namespace Windy10v10AI.Launcher
                 if (image != null)
                 {
                     g.SetClip(circle, CombineMode.Intersect);
+                    // Steam's picture is several times larger than the circle, and the default filter blurs a shrink that big
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     var attributes = new System.Drawing.Imaging.ImageAttributes();
                     attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = fade / 255f });
+                    attributes.SetWrapMode(WrapMode.TileFlipXY);
                     g.DrawImage(image, Rectangle.Round(inner), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
                     g.ResetClip();
                     g.SetClip(new Rectangle(1, Top0, Width - 2, Height - Top0 - 2));
@@ -658,6 +661,7 @@ namespace Windy10v10AI.Launcher
     class CodeInput : PaintedControl
     {
         const int MaxLength = 6;
+        const string Alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
         string code = "";
         public string Placeholder = "";
         public event EventHandler Submit;
@@ -668,6 +672,42 @@ namespace Windy10v10AI.Launcher
             TabStop = true;
             ImeMode = ImeMode.Disable;
             Cursor = Cursors.IBeam;
+            var menu = new ContextMenuStrip();
+            menu.Items.Add(Strings.Paste, null, delegate { Paste(); });
+            ContextMenuStrip = menu;
+        }
+
+        void Paste()
+        {
+            try
+            {
+                if (Clipboard.ContainsText()) Append(Clipboard.GetText(), 0);
+            }
+            catch (Exception)
+            {
+                // Another program may hold the clipboard open
+            }
+        }
+
+        // Friends copy the code from a chat app, so an empty box takes it from the clipboard when it is clearly a room code
+        public void FillFromClipboard()
+        {
+            if (code.Length > 0) return;
+            try
+            {
+                if (!Clipboard.ContainsText()) return;
+                var text = Clipboard.GetText().Trim().ToUpperInvariant();
+                if (text.Length != MaxLength) return;
+                foreach (var c in text)
+                {
+                    if (Alphabet.IndexOf(c) < 0) return;
+                }
+                code = text;
+                Invalidate();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public string Code
@@ -694,7 +734,7 @@ namespace Windy10v10AI.Launcher
         {
             if (e.KeyCode == Keys.Enter && Submit != null) Submit(this, EventArgs.Empty);
             else if (e.KeyCode == Keys.Back && code.Length > 0) Append(null, code.Length - 1);
-            else if (e.Control && e.KeyCode == Keys.V && Clipboard.ContainsText()) Append(Clipboard.GetText(), 0);
+            else if ((e.Control && e.KeyCode == Keys.V) || (e.Shift && e.KeyCode == Keys.Insert)) Paste();
             base.OnKeyDown(e);
         }
 

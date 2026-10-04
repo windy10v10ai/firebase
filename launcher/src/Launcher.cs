@@ -192,6 +192,7 @@ namespace Windy10v10AI.Launcher
                 status.Text = IdleText();
                 RefreshMapState();
                 Relayout();
+                if (modeBar.Selected == 2) codeBox.FillFromClipboard();
             };
             mapCard.Action.Click += delegate { OpenUrl("steam://url/CommunityFilePage/" + MapId); };
             rosterTimer.Tick += delegate { RefreshPlayers(); };
@@ -217,7 +218,11 @@ namespace Windy10v10AI.Launcher
             // Players often subscribe or wait for Steam while the launcher is open, so idle state keeps itself current
             mapPoll.Tick += delegate { RefreshIdleMapState(); };
             mapPoll.Start();
-            Activated += delegate { RefreshIdleMapState(); };
+            Activated += delegate
+            {
+                RefreshIdleMapState();
+                if (!busy && modeBar.Selected == 2) codeBox.FillFromClipboard();
+            };
             WorkshopLatest.Changed += delegate
             {
                 if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)RefreshIdleMapState);

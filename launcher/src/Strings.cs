@@ -74,6 +74,7 @@ namespace Windy10v10AI.Launcher
         public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
         public static string CodeExample { get { return Pick("例：Z82QCT", "e.g. Z82QCT", "Например: Z82QCT"); } }
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
+        public static string Paste { get { return Pick("粘贴", "Paste", "Вставить"); } }
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
         public static string RoomHostingHint { get { return Pick("把房间码发给朋友，人到齐后在游戏里点「锁定并开始」", "Send the code to your friends and start the game once everyone is in", "Отправьте код друзьям и начните игру, когда все зайдут"); } }
