@@ -8,7 +8,7 @@
 2. 在后台启动专用服，等地图加载完成。
 3. 通过 Steam 启动 Dota 2 并自动连进去；游戏退出后关闭专用服。
 
-客户端用 `steam.exe -applaunch` 启动：直接运行 `dota2.exe` 会跳过 Steam 的会话验证，打完一局不退出 Dota 再从游廊开局时被 VAC 拦下；没用 `steam://run`，因为带参数时会弹 Steam 确认框。
+客户端用注册表记录的 Steam 客户端配合 `-applaunch` 启动，兼容 `steam.exe` 与 `steamchina.exe`：直接运行 `dota2.exe` 会跳过 Steam 的会话验证，打完一局不退出 Dota 再从游廊开局时被 VAC 拦下；没用 `steam://run`，因为带参数时会弹 Steam 确认框。
 
 每次打开时查一次有没有新版本，有就在提示条上给出「更新」按钮，点击后下载、替换自己并重启。
 
@@ -63,7 +63,7 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。
-   - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只单独列对玩家影响大的主要变化，其余小修小改合成一句「修复了一些问题，优化了使用体验」，不逐条写技术细节；跳过未发布的版本，它们的改动并进本版。启动器右上角的版本号链接到这一节。
+   - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只单独列对玩家影响大的主要变化，其余小修小改合成一句「修复了一些问题，优化了使用体验」，不逐条写技术细节；跳过未发布的版本，它们的改动并进本版；只有小修小改、写不出实质内容的版本不列条目。启动器右上角的版本号链接到这一节。
 
 同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。
 

@@ -7,8 +7,8 @@ import { LauncherReleaseDto } from './dto/launcher-release.dto';
 
 // 发布新版启动器时与 web 的 LAUNCHER_VERSION 一起改，哈希取自 web/public/downloads 下的 exe
 export const LAUNCHER_RELEASE: LauncherReleaseDto = {
-  version: '0.4.0',
-  sha256: 'b06679dc4bfffba0a56178d25a3c0f5ea2a6cfbfa33b6c054df00e2f5866ddb7',
+  version: '0.4.1',
+  sha256: 'aa8851b749b54dc5589eb5fe360ebd3a3ca702add2d03168b6c86a68cced7862',
 };
 export const LAUNCHER_VERSION_CACHE_SECONDS = 3600;
 
