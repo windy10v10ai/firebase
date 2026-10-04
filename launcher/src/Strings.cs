@@ -72,6 +72,7 @@ namespace Windy10v10AI.Launcher
         public static string PrivatePrompt { get { return Pick("好友房：输入房主发来的房间码", "Friends room: enter the code from the host", "Комната для друзей: введите код от хоста"); } }
         public static string PublicRooms { get { return Pick("公开房间", "Public rooms", "Открытые комнаты"); } }
         public static string RoomCount { get { return Pick("{0} 个", "{0}", "{0}"); } }
+        public static string ActiveGames { get { return Pick("正在进行：{0} 局 · {1} 人", "In progress: {0} games · {1} players", "В игре: {0} игр · {1} игроков"); } }
         public static string Refresh { get { return Pick("刷新", "Refresh", "Обновить"); } }
         public static string ColumnMap { get { return Pick("地图", "Map", "Карта"); } }
         public static string ColumnPlayers { get { return Pick("人数", "Players", "Игроки"); } }

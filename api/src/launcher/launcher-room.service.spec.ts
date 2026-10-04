@@ -287,6 +287,40 @@ describe('LauncherRoomService', () => {
     await expect(service.join(stale.code, JOINER)).resolves.toBeDefined();
   });
 
+  it('列表汇总仍在进行的公开游戏与玩家数', async () => {
+    const current = await service.host({ ...HOST, steamId: 3001, public: true, playerCount: 4 });
+    await service.host({
+      ...HOST,
+      code: current.code,
+      token: current.token,
+      started: true,
+      playerCount: 4,
+    });
+    const privateRoom = await service.host({ ...HOST, steamId: 3002, playerCount: 5 });
+    await service.host({
+      ...HOST,
+      code: privateRoom.code,
+      token: privateRoom.token,
+      started: true,
+      playerCount: 5,
+    });
+    const stale = await service.host({ ...HOST, steamId: 3003, public: true, playerCount: 6 });
+    await service.host({
+      ...HOST,
+      code: stale.code,
+      token: stale.token,
+      started: true,
+      playerCount: 6,
+    });
+    rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - 90 * 1000 - 1);
+
+    await expect(service.list({ steamId: 2002, protocolVersion: 1 })).resolves.toEqual({
+      rooms: [],
+      activeGames: 1,
+      activePlayers: 4,
+    });
+  });
+
   it('列表结果缓存 3 秒，期间不再查 Firestore', async () => {
     const query = { steamId: 2002, protocolVersion: 1 };
     await service.list(query);
