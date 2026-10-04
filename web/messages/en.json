@@ -150,6 +150,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_4_2": [
+          "Report problems and suggest ideas from the launcher"
+        ],
         "v0_4_1": [
           "Shows games and players in progress",
           "Bug fixes"
@@ -297,9 +300,9 @@
       "settings": "It remembers your last choices and saves player avatars, so it opens faster next time."
     },
     "privacy": {
-      "title": "Privacy",
+      "title": "Privacy Policy",
       "update": "The launcher asks Steam and this site whether the map or the launcher has a new version. A new version is downloaded only after you click \"Update\".",
-      "online": "Single-player games share none of your information. When playing online, this site receives your Dota2 ID and network address, and deletes them after a week.",
+      "online": "Single-player games share none of your information. Only when needed, such as playing online or sending feedback, this site receives necessary information such as your Dota2 ID, network address and game logs. It is used only for online play and improving the game, and is deleted after 90 days at most.",
       "data": "Other than that, the launcher does not collect or upload your personal information."
     }
   },
