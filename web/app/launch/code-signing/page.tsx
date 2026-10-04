@@ -55,7 +55,7 @@ export default function CodeSigningPage() {
         </ul>
       </Section>
 
-      <Section title={t('privacy.title')}>
+      <Section id="privacy" title={t('privacy.title')}>
         <ul className="list-disc space-y-2 pl-5 text-content text-pretty">
           <li>{t('privacy.update')}</li>
           <li>{t('privacy.online')}</li>
