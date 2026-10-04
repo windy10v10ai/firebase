@@ -67,6 +67,17 @@ namespace Windy10v10AI.Launcher
             return install.HasKnownUpdate(id) ? MapState.Outdated : MapState.Unverified;
         }
 
+        // The build Steam installed, compared between host and joiners so both run the same map
+        public string InstalledManifest(string id)
+        {
+            foreach (var block in AcfBlocks(id))
+            {
+                var manifest = ReadValue(block, "manifest");
+                if (manifest != null) return manifest;
+            }
+            return null;
+        }
+
         bool IsOutdated(string id, string published)
         {
             foreach (var block in AcfBlocks(id))
