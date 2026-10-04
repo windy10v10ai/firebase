@@ -674,6 +674,7 @@ namespace Windy10v10AI.Launcher
         const int MaxLength = 6;
         const string Alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
         string code = "";
+        string seenClipboard;
         public string Placeholder = "";
         public event EventHandler Submit;
 
@@ -686,39 +687,43 @@ namespace Windy10v10AI.Launcher
             var menu = new ContextMenuStrip();
             menu.Items.Add(Strings.Paste, null, delegate { Paste(); });
             ContextMenuStrip = menu;
+            seenClipboard = ReadClipboard();
         }
 
-        void Paste()
+        static string ReadClipboard()
         {
             try
             {
-                if (Clipboard.ContainsText()) Append(Clipboard.GetText(), 0);
+                return Clipboard.ContainsText() ? Clipboard.GetText() : null;
             }
             catch (Exception)
             {
                 // Another program may hold the clipboard open
+                return null;
             }
         }
 
-        // Friends copy the code from a chat app, so an empty box takes it from the clipboard when it is clearly a room code
+        void Paste()
+        {
+            var text = ReadClipboard();
+            if (text != null) Append(text, 0);
+        }
+
+        // Friends copy the code from a chat app after opening the launcher, so only a newly copied code fills the box;
+        // whatever was on the clipboard at launch is usually a code from an earlier game
         public void FillFromClipboard()
         {
-            if (code.Length > 0) return;
-            try
+            var text = ReadClipboard();
+            if (text == null || text == seenClipboard) return;
+            seenClipboard = text;
+            text = text.Trim().ToUpperInvariant();
+            if (text.Length != MaxLength) return;
+            foreach (var c in text)
             {
-                if (!Clipboard.ContainsText()) return;
-                var text = Clipboard.GetText().Trim().ToUpperInvariant();
-                if (text.Length != MaxLength) return;
-                foreach (var c in text)
-                {
-                    if (Alphabet.IndexOf(c) < 0) return;
-                }
-                code = text;
-                Invalidate();
+                if (Alphabet.IndexOf(c) < 0) return;
             }
-            catch (Exception)
-            {
-            }
+            code = text;
+            Invalidate();
         }
 
         public string Code
