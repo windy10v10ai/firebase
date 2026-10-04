@@ -12,6 +12,7 @@ export class LauncherRoomJoin {
   avatarUrl?: string;
   candidates: string[];
   upnp: boolean;
+  symmetricNat?: boolean;
   launcherVersion: string;
   country?: string;
   createdAt: Date;

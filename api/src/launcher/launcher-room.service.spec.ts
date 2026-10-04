@@ -31,6 +31,7 @@ const HOST: HostRoomDto = {
   candidates: ['lan:192.168.0.50:50000', 'stun:1.2.3.4:50000'],
   upnp: true,
   publicIp: false,
+  symmetricNat: false,
   protocolVersion: 1,
   launcherVersion: '0.3.5',
 };
@@ -39,6 +40,7 @@ const JOINER: JoinRoomDto = {
   steamId: 2002,
   candidates: ['lan:192.168.0.13:50001'],
   upnp: false,
+  symmetricNat: true,
   protocolVersion: 1,
   launcherVersion: '0.3.5',
 };
@@ -156,8 +158,8 @@ describe('LauncherRoomService', () => {
 
     expect(bigQuery.recordJoinResult).toHaveBeenCalledTimes(1);
     expect(bigQuery.recordJoinResult).toHaveBeenCalledWith(
-      expect.objectContaining({ id: room.code }),
-      expect.objectContaining({ id: joined.joinId, steamId: 2002 }),
+      expect.objectContaining({ id: room.code, hostSymmetricNat: false }),
+      expect.objectContaining({ id: joined.joinId, steamId: 2002, symmetricNat: true }),
       'punch',
       1200,
     );

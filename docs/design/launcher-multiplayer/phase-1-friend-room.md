@@ -57,7 +57,9 @@
 | `elapsed_ms` | INT64 | 房主拿到加入请求到连通或放弃 |
 | `host_upnp` | BOOL | 房主路由器是否成功开了端口 |
 | `host_public_ip` | BOOL | 房主 STUN 查到的地址是否等于 UPnP 外部地址，即路由器有公网 IP |
+| `host_symmetric_nat` | BOOL | 房主是否为对称型 NAT：同一端口问两台 STUN，看到的外部端口不同。打洞基本必败，用来解释失败原因；只拿到一个结果时为空 |
 | `joiner_upnp` | BOOL | 加入者路由器是否成功开了端口 |
+| `joiner_symmetric_nat` | BOOL | 加入者是否为对称型 NAT |
 | `launcher_version` | STRING | |
 | `country` | STRING | 按请求来源判定 |
 | `steam_id` | INT64 | 上报者：开房是房主，加入是加入者。启动器从注册表 `HKCU\Software\Valve\Steam\ActiveProcess` 的 `ActiveUser` 读，可伪造，只用于排查 |

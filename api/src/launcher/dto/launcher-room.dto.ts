@@ -38,6 +38,13 @@ class LauncherPeerDto {
   @IsBoolean()
   upnp: boolean;
 
+  @ApiPropertyOptional({
+    description: '两台 STUN 服务器看到的端口是否不同，即对称型 NAT；只拿到一个结果时不传',
+  })
+  @IsOptional()
+  @IsBoolean()
+  symmetricNat?: boolean;
+
   @ApiProperty({ description: '隧道协议版本，双方不同时拒绝加入' })
   @IsInt()
   @Min(1)

@@ -13,6 +13,7 @@ export class LauncherRoom {
   hostCandidates: string[];
   hostUpnp: boolean;
   hostPublicIp: boolean;
+  hostSymmetricNat?: boolean;
   protocolVersion: number;
   mapVersion?: string;
   /** 进入选英雄后不再接受加入 */
