@@ -567,15 +567,26 @@ namespace Windy10v10AI.Launcher
                 circle.AddEllipse(inner);
                 if (image != null)
                 {
-                    g.SetClip(circle, CombineMode.Intersect);
-                    // Steam's picture is several times larger than the circle, and the default filter blurs a shrink that big
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    var attributes = new System.Drawing.Imaging.ImageAttributes();
-                    attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = fade / 255f });
-                    attributes.SetWrapMode(WrapMode.TileFlipXY);
-                    g.DrawImage(image, Rectangle.Round(inner), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
-                    g.ResetClip();
-                    g.SetClip(new Rectangle(1, Top0, Width - 2, Height - Top0 - 2));
+                    // A clip region has hard edges, so the picture is shrunk first and painted as an anti-aliased fill
+                    var box = Rectangle.Round(inner);
+                    using (var scaled = new Bitmap(box.Width, box.Height))
+                    {
+                        using (var sg = Graphics.FromImage(scaled))
+                        using (var attributes = new System.Drawing.Imaging.ImageAttributes())
+                        {
+                            // Steam's picture is several times larger than the circle, and the default filter blurs a shrink that big
+                            sg.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            sg.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = fade / 255f });
+                            attributes.SetWrapMode(WrapMode.TileFlipXY);
+                            sg.DrawImage(image, new Rectangle(0, 0, box.Width, box.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                        }
+                        using (var brush = new TextureBrush(scaled))
+                        {
+                            brush.TranslateTransform(box.X, box.Y);
+                            g.FillEllipse(brush, box);
+                        }
+                    }
                 }
                 else
                 {
@@ -594,7 +605,7 @@ namespace Windy10v10AI.Launcher
             var tag = player.IsHost ? Strings.TagHost : (player.SteamId != 0 && player.SteamId == me ? Strings.TagMe : null);
             const TextFormatFlags measure = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
             const TextFormatFlags flat = measure | TextFormatFlags.Left | TextFormatFlags.EndEllipsis;
-            using (var nameFont = new Font(Theme.FontName, 9f))
+            using (var nameFont = new Font(Theme.FontName, 10f))
             using (var tagFont = new Font(Theme.FontName, 7f))
             using (var statusFont = new Font(Theme.FontName, 7.5f))
             {
