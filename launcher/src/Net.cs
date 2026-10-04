@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Reflection;
-using System.Threading;
 using Microsoft.Win32;
 
 namespace Windy10v10AI.Launcher
@@ -16,6 +14,7 @@ namespace Windy10v10AI.Launcher
         public const string Upnp = "upnp";
         public const string Stun = "stun";
 
+        // Peers exchange a route as its index here, so the UPnP slot stays for older launchers even though none is gathered
         public static readonly string[] Preference = { Lan, Upnp, Stun };
 
         // Statistics name a STUN route by how it was reached
@@ -58,7 +57,6 @@ namespace Windy10v10AI.Launcher
             "stun.l.google.com:19302",
         };
         const int StunTimeout = 1500;
-        const int UpnpTimeout = 8000;
 
         // Adapters without a gateway are virtual ones (WSL, Hyper-V) that another PC cannot reach
         public static List<IPAddress> LanAddresses()
@@ -166,53 +164,6 @@ namespace Windy10v10AI.Launcher
                 offset = value + ((length + 3) & ~3);
             }
             return null;
-        }
-
-        // Asks the router to forward the same UDP port to us through Windows' built-in UPnP client; null when it cannot
-        public static IPAddress MapUpnp(int port, IPAddress lan)
-        {
-            IPAddress result = null;
-            var worker = new Thread(() =>
-            {
-                try
-                {
-                    var mappings = UpnpMappings();
-                    if (mappings == null) return;
-                    var mapping = mappings.GetType().InvokeMember("Add", BindingFlags.InvokeMethod, null, mappings,
-                        new object[] { port, "UDP", port, lan.ToString(), true, "Windy10v10AI" });
-                    var external = (string)mapping.GetType().InvokeMember("ExternalIPAddress", BindingFlags.GetProperty, null, mapping, null);
-                    IPAddress parsed;
-                    if (IPAddress.TryParse(external, out parsed)) result = parsed;
-                }
-                catch (Exception)
-                {
-                    // Router without UPnP, or the user turned it off
-                }
-            }) { IsBackground = true };
-            worker.Start();
-            // The COM call blocks for a long time on routers that ignore discovery
-            worker.Join(UpnpTimeout);
-            return result;
-        }
-
-        public static void UnmapUpnp(int port)
-        {
-            try
-            {
-                var mappings = UpnpMappings();
-                if (mappings != null) mappings.GetType().InvokeMember("Remove", BindingFlags.InvokeMethod, null, mappings, new object[] { port, "UDP" });
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        static object UpnpMappings()
-        {
-            var type = Type.GetTypeFromProgID("HNetCfg.NATUPnP");
-            if (type == null) return null;
-            var nat = Activator.CreateInstance(type);
-            return type.InvokeMember("StaticPortMappingCollection", BindingFlags.GetProperty, null, nat, null);
         }
 
         // The account Steam is signed in with, as the 32-bit ID the game API uses; 0 when Steam is not running
