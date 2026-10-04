@@ -24,6 +24,7 @@
 
 改了玩家能看到的窗口或文案时，PR 放改动后的截图，中、英、俄三种语言各一张，默认不拍改动前。
 
+- **测试程序与截图放会话的临时目录，不放 `dist/`**：`dist/` 只放编译出的 `Windy10v10AI.exe`，测试程序用反射加载它即可。临时文件混在里面，分不清哪个是要发布的产物
 - **不走真实开局流程**：写一个测试程序，用反射加载 `dist/Windy10v10AI.exe`，`Activator.CreateInstance` 建 `MainForm`，再调用私有方法让窗口进入要拍的状态（报错提示用 `Finish(message, false)`）。`Finish` 会把 `stopping` 置为 `true`，连续拍多条时每次调用后要重置回 `false`，否则后面的提示不显示
 - **每种语言单独起一个进程**，启动时先设 `CurrentUICulture`：`Strings` 在第一次被访问时就定下了语言
 - **窗口放到屏幕外，用 `ShowWindow(SW_SHOWNOACTIVATE)` 显示，用 `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT)` 出图**：不抢焦点，被全屏的游戏挡住也照样拍得到
