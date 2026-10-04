@@ -287,7 +287,7 @@
     },
     "team": {
       "title": "Team and roles",
-      "body": "The launcher is maintained by <maintainer>windy</maintainer> alone, who writes the code, reviews changes and approves every release."
+      "body": "Only <maintainer>windy</maintainer> can publish the launcher, and windy reviews and approves every change and release to keep it safe."
     },
     "changes": {
       "title": "Changes to your computer",
@@ -297,7 +297,7 @@
     "privacy": {
       "title": "Privacy",
       "update": "The launcher asks Steam and this site whether the map or the launcher has a new version. A new version is downloaded only after you click \"Update\".",
-      "online": "When playing online, this site uses your Dota2 ID to connect you with other players, and the records are deleted after 7 days. A public room shows your Steam name and avatar in the room list; if you would rather not, open a friends room.",
+      "online": "Single-player games share none of your information. When playing online, this site receives your Dota2 ID and network address, and deletes them after a week.",
       "data": "Other than that, the launcher does not collect or upload your personal information."
     }
   },
