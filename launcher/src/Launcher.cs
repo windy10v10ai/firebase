@@ -517,9 +517,9 @@ namespace Windy10v10AI.Launcher
                 {
                     UI(() => status.Text = Strings.OpeningRoom);
                     hostTunnel = new HostTunnel();
-                    bool upnp, publicIp;
-                    var candidates = hostTunnel.Gather(out upnp, out publicIp);
-                    hostBody = PeerBody(candidates, upnp, hostTunnel.SymmetricNat, manifest);
+                    bool publicIp;
+                    var candidates = hostTunnel.Gather(out publicIp);
+                    hostBody = PeerBody(candidates, hostTunnel.SymmetricNat, manifest);
                     hostBody["publicIp"] = publicIp;
                     Dictionary<string, object> opened;
                     try
@@ -567,6 +567,14 @@ namespace Windy10v10AI.Launcher
                     WindowStyle = ProcessWindowStyle.Hidden,
                 });
 
+                // The code is shown as soon as the room opens, so friends may join while the server is still loading
+                if (code != null)
+                {
+                    var roomCode = code;
+                    var roomToken = token;
+                    new Thread(() => PollRoom(roomCode, roomToken, hostBody)) { IsBackground = true }.Start();
+                }
+
                 WaitForMap(map);
                 UI(() => hint.Text = Strings.OpeningDota);
 
@@ -588,12 +596,6 @@ namespace Windy10v10AI.Launcher
                     action.Text = Strings.StopServer;
                     Relayout();
                 });
-                if (code != null)
-                {
-                    var roomCode = code;
-                    var roomToken = token;
-                    new Thread(() => PollRoom(roomCode, roomToken, hostBody)) { IsBackground = true }.Start();
-                }
                 WatchClient();
             }
             catch (LaunchError error)
@@ -677,12 +679,12 @@ namespace Windy10v10AI.Launcher
             {
                 var tunnel = new JoinTunnel();
                 joinTunnel = tunnel;
-                bool upnp, publicIp;
-                var candidates = tunnel.Gather(out upnp, out publicIp);
+                bool publicIp;
+                var candidates = tunnel.Gather(out publicIp);
                 Dictionary<string, object> joined;
                 try
                 {
-                    joined = RoomApi.Join(code, PeerBody(candidates, upnp, tunnel.SymmetricNat, install.InstalledManifest(id)));
+                    joined = RoomApi.Join(code, PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id)));
                 }
                 catch (RoomError error)
                 {
@@ -797,14 +799,15 @@ namespace Windy10v10AI.Launcher
             if (roster != null) roster.SetStatus(joinId, path != null ? PlayerStatus.Loading : PlayerStatus.Failed);
         }
 
-        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool upnp, bool? symmetricNat, string mapVersion)
+        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool? symmetricNat, string mapVersion)
         {
             return new Dictionary<string, object>
             {
                 { "mapVersion", mapVersion },
                 { "steamId", Net.SteamAccountId() },
                 { "candidates", candidates.ConvertAll(c => c.ToString()) },
-                { "upnp", upnp },
+                // A required API field; this launcher never maps a router port
+                { "upnp", false },
                 { "symmetricNat", symmetricNat },
                 { "protocolVersion", RoomApi.ProtocolVersion },
                 { "launcherVersion", Version },
