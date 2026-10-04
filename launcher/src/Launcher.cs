@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.4.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.4.0.0")]
+[assembly: System.Reflection.AssemblyVersion("0.4.1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.4.1.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -48,7 +48,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.4.0";
+        const string Version = "0.4.1";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -1210,9 +1210,11 @@ namespace Windy10v10AI.Launcher
         // -applaunch goes through Steam without the confirmation dialog that steam://run shows
         static void StartClient()
         {
+            var steam = DotaInstall.SteamExecutable();
+            if (steam == null) throw new LaunchError(Strings.SteamClientMissing, false);
             StartDota(new ProcessStartInfo
             {
-                FileName = Path.Combine(DotaInstall.SteamPath(), "steam.exe"),
+                FileName = steam,
                 Arguments = "-applaunch 570 -novid +connect 127.0.0.1:" + Port,
                 UseShellExecute = false,
             });

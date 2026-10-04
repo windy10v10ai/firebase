@@ -9,6 +9,7 @@
 
 ## 校验
 
+- `launcher\test.cmd` 通过
 - `launcher\build.cmd` 编译通过，并核对 `launcher/dist/Windy10v10AI.exe` 的文件版本等于新版本号
 
 ## VirusTotal 扫描
