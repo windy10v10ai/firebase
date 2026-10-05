@@ -176,9 +176,9 @@ gcloud monitoring dashboards update $ID --config-from-file=/tmp/api-latency-dash
 gcloud alpha monitoring policies update projects/windy10v10ai/alertPolicies/10525598496095275816 --policy-from-file=scripts/monitoring/api-alert-policy.yaml --project windy10v10ai
 ```
 
-可用性检测不在策略文件里，建一次即可，告警条件按域名匹配它：
+可用性检测不在策略文件里，建一次即可，告警条件按域名匹配它。Windows 上在 PowerShell 里跑，Git Bash 会把 `--path` 的值改写成本机路径：
 
-```bash
+```powershell
 gcloud monitoring uptime create "API hello" --resource-type=uptime-url --resource-labels=host=api.windy10v10ai.com,project_id=windy10v10ai --protocol=https --path=/api/hello --period=5 --timeout=10 --regions=asia-pacific,usa-oregon,europe --project windy10v10ai
 ```
 
