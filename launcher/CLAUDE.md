@@ -4,13 +4,13 @@
 
 ## 版本号
 
-- 每个改 `launcher/` 的 PR 都升版本：`src/Launcher.cs` 的 `Version`、`AssemblyVersion`、`AssemblyFileVersion` 三处一致。修 bug 与小功能升第三位，明显改善玩家体验的新功能（如联机、公开房间）升第二位。拿不准时问用户
-- PR「概要」写明升级前后的版本与幅度，如「版本 0.3.2 → 0.3.3（修 bug，升第三位）」，review 时不用翻 diff 就能判断是小版本还是大版本
+- 改 `launcher/` 的 PR 只在当前版本号已经发布过时升版本：`src/Launcher.cs` 的 `Version` 等于 `api/src/launcher/launcher-release.service.ts` 里的线上版本就升，已经比线上高（攒着还没发版）就不动。三处 `Version`、`AssemblyVersion`、`AssemblyFileVersion` 保持一致。修 bug 与小功能升第三位，明显改善玩家体验的新功能（如联机、公开房间）升第二位。拿不准时问用户
+- PR「概要」写明升级前后的版本与幅度，如「版本 0.3.2 → 0.3.3（修 bug，升第三位）」，review 时不用翻 diff 就能判断是小版本还是大版本；没升时写明并入哪个未发布的版本，如「并入未发布的 0.5.0」
 
 ## 校验
 
 - `launcher\test.cmd` 通过
-- `launcher\build.cmd` 编译通过，并核对 `launcher/dist/Windy10v10AI.exe` 的文件版本等于新版本号
+- `launcher\build.cmd` 编译通过，并核对 `launcher/dist/Windy10v10AI.exe` 的文件版本等于 `Version`
 
 ## VirusTotal 扫描
 

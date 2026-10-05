@@ -24,6 +24,7 @@ import {
 } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
 import { LauncherRoom } from './entities/launcher-room.entity';
+import { LauncherRelayService } from './launcher-relay.service';
 
 // 去掉 0 O 1 I L，玩家转述房间码时不会看错
 const ROOM_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -49,6 +50,7 @@ export class LauncherRoomService {
     private readonly joinRepository: BaseFirestoreRepository<LauncherRoomJoin>,
     private readonly bigQueryService: BigQueryService,
     private readonly steamProfileService: SteamProfileService,
+    private readonly relayService: LauncherRelayService,
   ) {}
 
   // 放在实例上：函数实例处理完请求不会立刻销毁，实例回收或多开时只是多查一次
@@ -96,6 +98,7 @@ export class LauncherRoomService {
         personaName: join.personaName,
         avatarUrl: join.avatarUrl,
         probe: join.probe === true,
+        relay: join.probe ? undefined : this.relayService.issue(join.id, 'h', now),
       })),
     };
   }
@@ -160,6 +163,7 @@ export class LauncherRoomService {
       hostCandidates: room.hostCandidates,
       host: { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
       self: profile,
+      relay: this.relayService.issue(join.id, 'j', now),
     };
   }
 

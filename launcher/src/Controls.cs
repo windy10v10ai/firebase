@@ -26,6 +26,8 @@ namespace Windy10v10AI.Launcher
         public static readonly Color Error = ColorTranslator.FromHtml("#e5484d");
         public static readonly Color ErrorPanel = ColorTranslator.FromHtml("#2a1718");
         public static readonly Color ErrorBorder = ColorTranslator.FromHtml("#6b2a2c");
+        public static readonly Color OkPanel = ColorTranslator.FromHtml("#17251c");
+        public static readonly Color OkBorder = ColorTranslator.FromHtml("#2d5a3e");
 
         public const string FontName = "Microsoft YaHei UI";
 
@@ -153,7 +155,7 @@ namespace Windy10v10AI.Launcher
         }
     }
 
-    enum NoticeKind { Warning, Error }
+    enum NoticeKind { Warning, Error, Success }
 
     class NoticeBar : PaintedControl
     {
@@ -182,7 +184,7 @@ namespace Windy10v10AI.Launcher
             Action.Text = action ?? "";
             hasAction = action != null;
             Action.Visible = hasAction;
-            Action.BorderColor = kind == NoticeKind.Error ? Theme.ErrorBorder : Theme.WarningBorder;
+            Action.BorderColor = kind == NoticeKind.Error ? Theme.ErrorBorder : (kind == NoticeKind.Success ? Theme.OkBorder : Theme.WarningBorder);
             Visible = true;
             LayoutChildren();
             Invalidate();
@@ -212,9 +214,10 @@ namespace Windy10v10AI.Launcher
         {
             var g = Prepare(e);
             var s = DpiScale;
-            var fill = Kind == NoticeKind.Error ? Theme.ErrorPanel : Theme.WarningPanel;
-            var edge = Kind == NoticeKind.Error ? Theme.ErrorBorder : Theme.WarningBorder;
-            var icon = Kind == NoticeKind.Error ? Theme.Error : Theme.Warning;
+            var success = Kind == NoticeKind.Success;
+            var fill = Kind == NoticeKind.Error ? Theme.ErrorPanel : (success ? Theme.OkPanel : Theme.WarningPanel);
+            var edge = Kind == NoticeKind.Error ? Theme.ErrorBorder : (success ? Theme.OkBorder : Theme.WarningBorder);
+            var icon = Kind == NoticeKind.Error ? Theme.Error : (success ? Theme.Ok : Theme.Warning);
             using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 8 * s))
             using (var brush = new SolidBrush(fill))
             using (var pen = new Pen(edge, Math.Max(1f, s)))
@@ -224,8 +227,14 @@ namespace Windy10v10AI.Launcher
             }
             var cx = 22 * s;
             var cy = Height / 2f;
-            using (var pen = new Pen(icon, 1.8f * s) { LineJoin = LineJoin.Round })
+            using (var pen = new Pen(icon, 1.8f * s) { LineJoin = LineJoin.Round, StartCap = LineCap.Round, EndCap = LineCap.Round })
             {
+                if (success)
+                {
+                    g.DrawEllipse(pen, cx - 9 * s, cy - 9 * s, 18 * s, 18 * s);
+                    g.DrawLines(pen, new[] { new PointF(cx - 4.5f * s, cy), new PointF(cx - 1 * s, cy + 3.5f * s), new PointF(cx + 5 * s, cy - 3.5f * s) });
+                    return;
+                }
                 g.DrawPolygon(pen, new[] { new PointF(cx, cy - 9 * s), new PointF(cx + 10 * s, cy + 8 * s), new PointF(cx - 10 * s, cy + 8 * s) });
                 g.DrawLine(pen, cx, cy - 3 * s, cx, cy + 2 * s);
                 g.DrawLine(pen, cx, cy + 4.5f * s, cx, cy + 5.5f * s);
@@ -761,10 +770,28 @@ namespace Windy10v10AI.Launcher
             set { code = value ?? ""; Invalidate(); }
         }
 
+        // A public room is found in the list, so its code stays in small print rather than inviting players to share it
+        bool quiet;
+
+        public bool Quiet
+        {
+            get { return quiet; }
+            set { quiet = value; Invalidate(); }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = Prepare(e);
             var s = DpiScale;
+            if (quiet)
+            {
+                using (var small = new Font(Theme.FontName, 9f))
+                {
+                    TextRenderer.DrawText(g, Strings.RoomCode + "  " + code, small, ClientRectangle, Theme.Faint,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                }
+                return;
+            }
             using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 6 * s))
             using (var brush = new SolidBrush(Theme.Panel))
             using (var pen = new Pen(Theme.Border, Math.Max(1f, s)))
@@ -1408,14 +1435,19 @@ namespace Windy10v10AI.Launcher
         public FlatButton()
         {
             FlatStyle = FlatStyle.Flat;
+            Cursor = Cursors.Hand;
+            UseVisualStyleBackColor = false;
+            MakePlain();
+        }
+
+        public void MakePlain()
+        {
             BackColor = Theme.Background;
             ForeColor = Theme.Text;
             Font = new Font(Theme.FontName, 9f);
-            Cursor = Cursors.Hand;
             BorderColor = Theme.Border;
             FlatAppearance.MouseOverBackColor = Theme.PanelHover;
             FlatAppearance.MouseDownBackColor = Theme.Panel;
-            UseVisualStyleBackColor = false;
         }
 
         public Color BorderColor

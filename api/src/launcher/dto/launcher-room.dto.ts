@@ -168,6 +168,13 @@ export class LauncherProfileDto {
   avatarUrl?: string;
 }
 
+export class RelayDto {
+  @ApiProperty({ description: '中转服务器的 IP:端口' })
+  address: string;
+  @ApiProperty({ description: 'API 签的通行证，启动器原样交给中转' })
+  ticket: string;
+}
+
 export class PendingJoinDto extends LauncherProfileDto {
   @ApiProperty()
   joinId: string;
@@ -179,6 +186,11 @@ export class PendingJoinDto extends LauncherProfileDto {
   candidates: string[];
   @ApiProperty({ description: '测试连通，打通后不加进玩家列表' })
   probe: boolean;
+  @ApiPropertyOptional({
+    type: RelayDto,
+    description: '房主的中转通行证，没配中转或测试连通时省略',
+  })
+  relay?: RelayDto;
 }
 
 export class HostRoomResponse extends LauncherProfileDto {
@@ -201,6 +213,11 @@ export class JoinRoomResponse {
   host: LauncherProfileDto;
   @ApiProperty({ type: LauncherProfileDto, description: '加入者自己' })
   self: LauncherProfileDto;
+  @ApiPropertyOptional({
+    type: RelayDto,
+    description: '加入者的中转通行证，没配中转或测试连通时省略',
+  })
+  relay?: RelayDto;
 }
 
 export class PublicRoomDto extends LauncherProfileDto {

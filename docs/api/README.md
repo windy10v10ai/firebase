@@ -30,6 +30,7 @@ API 自己往外调的第三方服务：
 | Steam Web API `GetPublishedFileDetails` | 启动器检测工坊地图是否最新 | 无 | 每个函数实例内存 60 秒，响应带 `Cache-Control: max-age=60` |
 | 爱发电订单查询 | 补激活遗漏的订单 | `AFDIAN_API_TOKEN` | 无 |
 | GA4 Measurement Protocol | 服务端埋点 | `GA4_API_SECRET` | 无 |
+| 启动器中转服务器（不调用，只签通行证） | 给联机加入签中转通行证 | `LAUNCHER_RELAY_PRIVATE_KEY` | 无 |
 | BigQuery 流式写入 | 战绩明细与积分记录，见「分析数据」 | 函数的运行时服务账号 | 无 |
 
 两条只对 Steam Web API 成立、但必须守住的规矩：
@@ -48,7 +49,7 @@ API 自己往外调的第三方服务：
 - **请求体校验失败记一行 warn 日志**（`request validation failed`，带不合格的字段路径、`version` 与报文里的 steamId）：游戏端只知道请求失败、看不到原因，HTTP 日志里也没有请求体
 - **`GET /api/launcher/workshop/:id` 是公开端点**：启动器是发给玩家的 exe，放进去的 key 等于公开。它只接受正式图与测试图两个工坊 ID，其余 404，免得被当成通用的 Steam 代理。启动器先直连 Steam，失败才来这里，所以海外玩家不经过我们的服务
 - **`GET /api/launcher/version` 与 `GET /api/launcher/download/:version` 是启动器自我更新用的公开端点**：版本号与 exe 哈希写死在代码里，查版本不读任何文件；下载只接受当前版本，由函数从官网取 exe、核对哈希后返回。两者都靠 CDN 缓存挡住重复请求，下载地址带版本号可以永久缓存，所以哈希不符时宁可失败也不返回。放在 API 下而不是只放官网，是因为国内代理只转发 `/api/`
-- **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，7 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
+- **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转地址时，加入与房主轮询的响应附带用私钥签的中转通行证，中转只用公钥验签、不回调 API。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，7 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
 - **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房主昵称头像、地图与人数，不含地址与令牌。只列 30 秒内有心跳的可加入房间；另返回 90 秒内仍有心跳的公开游戏局数与玩家数，不含任何房间资料。整份候选房间在函数实例的内存里缓存 3 秒、所有请求共用，Firestore 只按心跳时间一个条件查，其余条件在内存里筛，不建组合索引。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器与网站共用：报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都 90 天删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：每人每小时 3 次、每天 10 次，有 Steam ID 按 ID 计、否则按 IP 计（国内代理转发的请求共用代理 IP）；全站每天 500 次，Steam ID 能伪造，这是存储费用的上限。日志只认 gzip、单份压缩后 1MB，服务端不解压。分类与设计见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
 - 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
