@@ -28,6 +28,7 @@ namespace Windy10v10AI.Launcher
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            JoinTunnel.RelayOnly = Array.IndexOf(Environment.GetCommandLineArgs(), "--relay-only") > 0;
             Updater.RemoveOld();
             Avatars.RemoveUnused();
             Application.Run(new MainForm());
@@ -143,8 +144,6 @@ namespace Windy10v10AI.Launcher
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
         string endNotice;
-        bool? hostSymmetric;
-        bool? joinSymmetric;
 
         readonly System.Windows.Forms.Timer mapPoll = new System.Windows.Forms.Timer { Interval = 5000 };
         Process server;
@@ -561,11 +560,9 @@ namespace Windy10v10AI.Launcher
         {
             var host = hostRoster;
             var join = joinTunnel;
-            var symmetric = host != null ? hostSymmetric : joinSymmetric;
-            var warning = symmetric == true ? Strings.SymmetricNat : null;
             players.MaxPlayers = host != null ? Settings.MaxPlayers : 0;
-            if (host != null) players.SetPlayers(host.Snapshot(), selfId, warning);
-            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : warning);
+            if (host != null) players.SetPlayers(host.Snapshot(), selfId, null);
+            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : null);
         }
 
         // The list lives only while the join page is idle and visible, so each visit measures every room once
@@ -598,9 +595,7 @@ namespace Windy10v10AI.Launcher
             if (source == null) return;
             var rows = source.Snapshot();
             var state = rows.Count > 0 || source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
-            string warning = null;
-            if (source.SymmetricNat == true) warning = Strings.SymmetricNat;
-            roomList.SetRooms(rows, state, warning);
+            roomList.SetRooms(rows, state, null);
             roomsCount.Text = source.Loaded
                 ? (source.ActiveGames > 0 ? string.Format(Strings.ActiveGames, source.ActiveGames, source.ActivePlayers) : string.Format(Strings.RoomCount, rows.Count))
                 : "";
@@ -835,7 +830,6 @@ namespace Windy10v10AI.Launcher
                     var candidates = hostTunnel.Gather(out publicIp);
                     hostBody = PeerBody(candidates, hostTunnel.SymmetricNat, manifest);
                     hostBody["publicIp"] = publicIp;
-                    hostSymmetric = hostTunnel.SymmetricNat;
                     lock (seenJoins) seenJoins.Clear();
                     lock (kicked) kicked.Clear();
                     Dictionary<string, object> opened;
@@ -1024,7 +1018,6 @@ namespace Windy10v10AI.Launcher
                     tunnel.Start();
                 }
                 joinTunnel = tunnel;
-                joinSymmetric = tunnel.SymmetricNat;
                 if (stopping) throw new OperationCanceledException();
                 Dictionary<string, object> joined;
                 try
@@ -1051,7 +1044,7 @@ namespace Windy10v10AI.Launcher
                 UI(() => ShowPlayers(true));
                 var hostCandidates = new List<Candidate>();
                 foreach (var text in (object[])joined["hostCandidates"]) hostCandidates.Add(Candidate.Parse((string)text));
-                var path = tunnel.Connect((string)joined["joinToken"], hostCandidates);
+                var path = tunnel.Connect((string)joined["joinToken"], hostCandidates, RelayTicket.Read(joined));
                 if (stopping) throw new OperationCanceledException();
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (path == null) throw new LaunchError(Strings.ConnectFailed, false);
@@ -1173,7 +1166,7 @@ namespace Windy10v10AI.Launcher
                         }
                         var candidates = new List<Candidate>();
                         foreach (var text in (object[])join["candidates"]) candidates.Add(Candidate.Parse((string)text));
-                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates, probe);
+                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates, probe, RelayTicket.Read(join));
                     }
                 }
                 catch (Exception)
@@ -1500,7 +1493,6 @@ namespace Windy10v10AI.Launcher
                 var ended = endNotice;
                 endNotice = null;
                 players.CanKick = false;
-                hostSymmetric = joinSymmetric = null;
                 paused = false;
                 pauseBar.Visible = false;
                 ShowPlayers(false);

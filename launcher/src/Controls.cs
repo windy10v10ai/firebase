@@ -1321,7 +1321,7 @@ namespace Windy10v10AI.Launcher
         void DrawRoom(Graphics g, RoomRow room, Rectangle row, bool hot, int nameLeft, int mapLeft, int countLeft, int pingLeft, bool separator)
         {
             var s = DpiScale;
-            var faded = room.Full || room.Probe == ProbeState.Unreachable;
+            var faded = room.Full;
             if (hot && room.Joinable && Enabled)
             {
                 using (var brush = new SolidBrush(Theme.PanelHover)) g.FillRectangle(brush, row);

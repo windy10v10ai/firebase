@@ -4,7 +4,8 @@ using System.Threading;
 
 namespace Windy10v10AI.Launcher
 {
-    // Untested is for full rooms, which are not worth a probe until a slot opens
+    // Untested is for full rooms, which are not worth a probe until a slot opens.
+    // Probes never use the relay, so Unreachable only means no direct route and the room can still be joined
     enum ProbeState { Untested, Testing, Reachable, Unreachable }
 
     class RoomRow
@@ -25,7 +26,7 @@ namespace Windy10v10AI.Launcher
 
         public bool Joinable
         {
-            get { return Probe == ProbeState.Reachable && !Full; }
+            get { return (Probe == ProbeState.Reachable || Probe == ProbeState.Unreachable) && !Full; }
         }
 
         public RoomRow Copy()
@@ -216,7 +217,7 @@ namespace Windy10v10AI.Launcher
             Raise();
         }
 
-        // Joinable rooms first, the fuller and closer the better; rooms still testing next; unreachable and full last
+        // Directly reachable rooms first, the fuller and closer the better; rooms still testing next; then rooms only the relay reaches; full last
         public List<RoomRow> Snapshot()
         {
             List<RoomRow> list;
@@ -234,9 +235,10 @@ namespace Windy10v10AI.Launcher
 
         static int Rank(RoomRow row)
         {
-            if (row.Joinable) return 0;
-            if (!row.Full && row.Probe != ProbeState.Unreachable) return 1;
-            return 2;
+            if (row.Full) return 3;
+            if (row.Probe == ProbeState.Reachable) return 0;
+            if (row.Probe == ProbeState.Unreachable) return 2;
+            return 1;
         }
 
         // Hands the probing socket to a join, so the host already knows the address the join comes from.

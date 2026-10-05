@@ -13,9 +13,10 @@ namespace Windy10v10AI.Launcher
         public const string Lan = "lan";
         public const string Upnp = "upnp";
         public const string Stun = "stun";
+        public const string Relay = "relay";
 
         // Peers exchange a route as its index here, so the UPnP slot stays for older launchers even though none is gathered
-        public static readonly string[] Preference = { Lan, Upnp, Stun };
+        public static readonly string[] Preference = { Lan, Upnp, Stun, Relay };
 
         // Statistics name a STUN route by how it was reached
         public static string Report(string type)
@@ -44,6 +45,34 @@ namespace Windy10v10AI.Launcher
         {
             var parts = text.Split(':');
             return new Candidate(parts[0], new IPEndPoint(IPAddress.Parse(parts[1]), int.Parse(parts[2])));
+        }
+    }
+
+    // The relay the API assigned to one join, and the ticket that proves this side belongs to it
+    class RelayTicket
+    {
+        public readonly IPEndPoint Control;
+        public readonly string Ticket;
+
+        RelayTicket(IPEndPoint control, string ticket)
+        {
+            Control = control;
+            Ticket = ticket;
+        }
+
+        // Null when the API sent no relay, so the join only tries LAN and hole punching
+        public static RelayTicket Read(Dictionary<string, object> answer)
+        {
+            var relay = answer.ContainsKey("relay") ? answer["relay"] as Dictionary<string, object> : null;
+            if (relay == null) return null;
+            var address = relay.ContainsKey("address") ? relay["address"] as string : null;
+            var ticket = relay.ContainsKey("ticket") ? relay["ticket"] as string : null;
+            if (string.IsNullOrEmpty(address) || string.IsNullOrEmpty(ticket)) return null;
+            var parts = address.Split(':');
+            IPAddress ip;
+            int port;
+            if (parts.Length != 2 || !IPAddress.TryParse(parts[0], out ip) || !int.TryParse(parts[1], out port)) return null;
+            return new RelayTicket(new IPEndPoint(ip, port), ticket);
         }
     }
 

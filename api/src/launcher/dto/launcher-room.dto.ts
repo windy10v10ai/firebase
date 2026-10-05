@@ -21,7 +21,7 @@ const MAX_KICKED = 50;
 // 类型前缀让加入者知道连通的是哪条路，房主才能上报 lan / upnp / punch
 const CANDIDATE_PATTERN = /^(lan|stun|upnp):\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 
-export const JOIN_PATHS = ['lan', 'upnp', 'punch'] as const;
+export const JOIN_PATHS = ['lan', 'upnp', 'punch', 'relay'] as const;
 export type JoinPath = (typeof JOIN_PATHS)[number];
 
 class LauncherPeerDto {
