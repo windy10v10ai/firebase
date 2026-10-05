@@ -58,7 +58,7 @@ describe('LauncherRoomService', () => {
   let rooms: ReturnType<typeof memoryRepository<LauncherRoom>>;
   let joins: ReturnType<typeof memoryRepository<LauncherRoomJoin>>;
   let bigQuery: { recordRoomCreated: jest.Mock; recordJoinResult: jest.Mock };
-  let relay: { issue: jest.Mock };
+  let relay: { issue: jest.Mock; address: jest.Mock };
   let service: LauncherRoomService;
 
   beforeEach(() => {
@@ -73,7 +73,7 @@ describe('LauncherRoomService', () => {
         avatarUrl: null,
       })),
     };
-    relay = { issue: jest.fn(() => undefined) };
+    relay = { issue: jest.fn(() => undefined), address: jest.fn(() => undefined) };
     service = new LauncherRoomService(
       rooms as never,
       joins as never,
@@ -308,6 +308,26 @@ describe('LauncherRoomService', () => {
       },
     ]);
     await expect(service.join(stale.code, JOINER)).resolves.toBeDefined();
+  });
+
+  it('配了中转时开房、轮询与列表都带中转地址，列表转交房主报的中转延迟', async () => {
+    relay.address.mockReturnValue('1.2.3.4:27200');
+    const opened = await service.host({ ...HOST, public: true });
+    const polled = await service.host({
+      ...HOST,
+      code: opened.code,
+      token: opened.token,
+      relayRtt: 42,
+    });
+
+    const res = await service.list({ steamId: 2002, protocolVersion: 1 });
+
+    expect([opened.relayAddress, polled.relayAddress, res.relayAddress]).toEqual([
+      '1.2.3.4:27200',
+      '1.2.3.4:27200',
+      '1.2.3.4:27200',
+    ]);
+    expect(res.rooms.map((room) => room.hostRelayRtt)).toEqual([42]);
   });
 
   it('列表汇总仍在进行的公开游戏与玩家数', async () => {

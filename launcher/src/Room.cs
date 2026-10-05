@@ -22,7 +22,7 @@ namespace Windy10v10AI.Launcher
     static class RoomApi
     {
         // Bumped whenever the tunnel packets change, so mismatched launchers fail with a clear message
-        public const int ProtocolVersion = 2;
+        public const int ProtocolVersion = 3;
         const int DirectTimeout = 4000;
         const int RelayTimeout = 8000;
 

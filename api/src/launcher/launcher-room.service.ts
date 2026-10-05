@@ -100,6 +100,7 @@ export class LauncherRoomService {
         probe: join.probe === true,
         relay: join.probe ? undefined : this.relayService.issue(join.id, 'h', now),
       })),
+      relayAddress: this.relayService.address(),
     };
   }
 
@@ -195,9 +196,11 @@ export class LauncherRoomService {
           map: room.map,
           playerCount: room.playerCount,
           maxPlayers: room.maxPlayers,
+          hostRelayRtt: room.relayRtt,
         })),
       activeGames: activeRooms.length,
       activePlayers: activeRooms.reduce((total, room) => total + (room.playerCount ?? 0), 0),
+      relayAddress: this.relayService.address(),
     };
   }
 
@@ -238,7 +241,13 @@ export class LauncherRoomService {
       expireAt: expireAt(now),
     });
     await this.bigQueryService.recordRoomCreated(room, dto.launcherVersion, country);
-    return { code: room.id, token: room.hostToken, ...profile, joins: [] };
+    return {
+      code: room.id,
+      token: room.hostToken,
+      ...profile,
+      joins: [],
+      relayAddress: this.relayService.address(),
+    };
   }
 
   // 码已被还在用的房间占着就换一个；先查再写不上事务，同一瞬间撞码的概率可以忽略
@@ -288,6 +297,7 @@ function roomSettings(dto: HostRoomDto): Partial<LauncherRoom> {
     maxPlayers: dto.maxPlayers,
     map: dto.map,
     playerCount: dto.playerCount,
+    relayRtt: dto.relayRtt,
     kickedSteamIds: dto.kickedSteamIds,
   };
   return Object.fromEntries(

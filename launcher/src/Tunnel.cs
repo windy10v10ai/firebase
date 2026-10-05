@@ -29,6 +29,19 @@ namespace Windy10v10AI.Launcher
         public const byte GameEnded = 11;
     }
 
+    // Packets between a launcher and the relay; they start at 0xF0 so the relay never forwards them as tunnel packets
+    static class RelayPacket
+    {
+        public const byte Min = 0xF0;
+        public const byte Allocate = 0xF1;
+        public const byte Allocated = 0xF2;
+        public const byte Rejected = 0xF3;
+        public const byte Claim = 0xF4;
+        public const byte Claimed = 0xF5;
+        public const byte Ping = 0xF6;
+        public const byte Pong = 0xF7;
+    }
+
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
     abstract class Tunnel : IDisposable
     {
@@ -41,9 +54,16 @@ namespace Windy10v10AI.Launcher
         const int HelloIntervalMs = 200;
         const int MaxLanCandidates = 6;
         const int SioUdpConnReset = -1744830452;
+        const int RelayRetryMs = 500;
+        const int RelayPingMs = 1500;
+        const int RelayPingSamples = 3;
 
         protected readonly UdpClient Socket;
         protected volatile bool Closed;
+        readonly object relayClaim = new object();
+        readonly object relaySync = new object();
+        IPEndPoint relayWaitFrom;
+        byte[] relayAnswer;
 
         protected Tunnel()
         {
@@ -78,7 +98,9 @@ namespace Windy10v10AI.Launcher
                     {
                         var from = new IPEndPoint(IPAddress.Any, 0);
                         var data = Socket.Receive(ref from);
-                        if (data.Length > 0) OnPacket(data, from);
+                        if (data.Length == 0) continue;
+                        if (data[0] >= RelayPacket.Min) OnRelay(data, from);
+                        else OnPacket(data, from);
                     }
                     catch (Exception)
                     {
@@ -115,15 +137,91 @@ namespace Windy10v10AI.Launcher
         {
             return Encoding.ASCII.GetString(data, 1, data.Length - 1);
         }
-        // Sends Hello to every candidate until done() says the handshake settled or the window ends
+        // Sends Hello to every candidate until done() says the handshake settled or the window ends.
+        // The relay candidate joins the list once its claim succeeds, so the list is locked while it is read
         protected void Burst(string token, List<Candidate> targets, Func<bool> done)
         {
             var hello = Encoding.ASCII.GetBytes(token);
             var deadline = DateTime.UtcNow.AddMilliseconds(HandshakeMs);
             while (!Closed && DateTime.UtcNow < deadline && !done())
             {
-                foreach (var target in targets) Send(Packet.Hello, hello, target.EndPoint);
+                Candidate[] round;
+                lock (targets) round = targets.ToArray();
+                foreach (var target in round) Send(Packet.Hello, hello, target.EndPoint);
                 Thread.Sleep(HelloIntervalMs);
+            }
+        }
+
+        // Registers this socket on the relay for one join and returns the relay port that reaches the other side,
+        // or null when the relay does not answer within the handshake window or refuses the ticket
+        protected IPEndPoint ClaimRelay(RelayTicket relay)
+        {
+            // An Allocated reply does not name its join, so a host claims for one joiner at a time
+            lock (relayClaim)
+            {
+                var ticket = Encoding.ASCII.GetBytes(relay.Ticket);
+                var deadline = DateTime.UtcNow.AddMilliseconds(HandshakeMs);
+                while (!Closed && DateTime.UtcNow < deadline)
+                {
+                    var allocated = AskRelay(RelayPacket.Allocate, ticket, relay.Control, deadline);
+                    if (allocated == null || allocated[0] != RelayPacket.Allocated || allocated.Length < 3) return null;
+                    var session = new IPEndPoint(relay.Control.Address, (allocated[1] << 8) | allocated[2]);
+                    var claimed = AskRelay(RelayPacket.Claim, ticket, session, deadline);
+                    if (claimed == null) return null;
+                    if (claimed[0] == RelayPacket.Claimed) return session;
+                    // A late reply to an earlier allocation names another join's port, which refuses this ticket
+                }
+                return null;
+            }
+        }
+
+        // The lowest of a few round trips to the relay, or -1 when it never answers
+        public int MeasureRelay(IPEndPoint relay)
+        {
+            var best = -1;
+            lock (relayClaim)
+            {
+                for (var i = 0; i < RelayPingSamples; i++)
+                {
+                    var answer = AskRelay(RelayPacket.Ping, BitConverter.GetBytes(Stopwatch.GetTimestamp()), relay, DateTime.UtcNow.AddMilliseconds(RelayPingMs));
+                    if (answer == null || answer[0] != RelayPacket.Pong || answer.Length < 9) continue;
+                    var ms = (int)((Stopwatch.GetTimestamp() - BitConverter.ToInt64(answer, 1)) * 1000 / Stopwatch.Frequency);
+                    if (best < 0 || ms < best) best = ms;
+                }
+            }
+            return best;
+        }
+
+        // Repeats the request until the relay answers from that address, since either packet may be lost
+        byte[] AskRelay(byte type, byte[] ticket, IPEndPoint to, DateTime deadline)
+        {
+            lock (relaySync)
+            {
+                relayWaitFrom = to;
+                relayAnswer = null;
+                try
+                {
+                    while (!Closed && relayAnswer == null && DateTime.UtcNow < deadline)
+                    {
+                        Send(type, ticket, to);
+                        Monitor.Wait(relaySync, RelayRetryMs);
+                    }
+                    return relayAnswer;
+                }
+                finally
+                {
+                    relayWaitFrom = null;
+                }
+            }
+        }
+
+        void OnRelay(byte[] data, IPEndPoint from)
+        {
+            lock (relaySync)
+            {
+                if (relayWaitFrom == null || !relayWaitFrom.Equals(from)) return;
+                relayAnswer = data;
+                Monitor.PulseAll(relaySync);
             }
         }
 
@@ -183,7 +281,7 @@ namespace Windy10v10AI.Launcher
             }) { IsBackground = true }.Start();
         }
 
-        public void AddJoin(string joinId, string token, List<Candidate> candidates, bool probe)
+        public void AddJoin(string joinId, string token, List<Candidate> candidates, bool probe, RelayTicket relay)
         {
             lock (sync)
             {
@@ -200,6 +298,15 @@ namespace Windy10v10AI.Launcher
                     Thread.Sleep(ProbeLingerMs);
                     lock (sync) Forget(token);
                     return;
+                }
+                if (relay != null)
+                {
+                    new Thread(() =>
+                    {
+                        var session = ClaimRelay(relay);
+                        if (session == null) return;
+                        lock (candidates) candidates.Add(new Candidate(PathType.Relay, session));
+                    }) { IsBackground = true }.Start();
                 }
                 // A kicked joiner's token is gone, which also ends its handshake
                 Burst(token, candidates, () => { lock (sync) return paths.ContainsKey(token) || !joinIds.ContainsKey(token); });
@@ -366,6 +473,8 @@ namespace Windy10v10AI.Launcher
     {
         // Wait this long after the first route answers, in case the faster LAN route is about to answer too
         const int SettleMs = 300;
+        // Peers that can punch through usually connect within a second, so waiting this long keeps them off the relay
+        const int RelayWaitMs = 3000;
         // Gives up after this long without the host, which by then has most likely closed the game
         const int GiveUpMs = 90000;
         const int QuietMs = 7000;
@@ -383,6 +492,7 @@ namespace Windy10v10AI.Launcher
         readonly Dictionary<string, Probe> probes = new Dictionary<string, Probe>();
         string token;
         List<Candidate> hosts;
+        RelayTicket relay;
         IPEndPoint host;
         UdpClient local;
         IPEndPoint dota;
@@ -396,14 +506,17 @@ namespace Windy10v10AI.Launcher
         int rosterCount = -1;
         // Shown until the host's own list arrives
         public List<RosterEntry> Placeholder = new List<RosterEntry>();
+        // Lets a tester whose network can punch through still play a whole game over the relay
+        public static bool RelayOnly;
 
         // Returns the path type that connected, or null when nothing answered in the handshake window
-        public string Connect(string joinToken, List<Candidate> hostCandidates)
+        public string Connect(string joinToken, List<Candidate> hostCandidates, RelayTicket relayTicket)
         {
             lock (sync)
             {
                 token = joinToken;
-                hosts = hostCandidates;
+                hosts = RelayOnly ? new List<Candidate>() : hostCandidates;
+                relay = relayTicket;
             }
             return Handshake();
         }
@@ -450,15 +563,36 @@ namespace Windy10v10AI.Launcher
                 reached.Clear();
                 host = null;
             }
-            var firstReach = DateTime.MaxValue;
+            // Claimed again on every handshake, so a reconnect from a changed address reaches the relay too
+            if (relay != null)
+            {
+                var ticket = relay;
+                new Thread(() =>
+                {
+                    var session = ClaimRelay(ticket);
+                    if (session == null) return;
+                    lock (sync)
+                    lock (hosts)
+                    {
+                        hosts.RemoveAll(c => c.Type == PathType.Relay);
+                        hosts.Add(new Candidate(PathType.Relay, session));
+                    }
+                }) { IsBackground = true }.Start();
+            }
+            var started = DateTime.UtcNow;
+            var firstDirect = DateTime.MaxValue;
             Burst(token, hosts, () =>
             {
                 lock (sync)
                 {
-                    if (Kicked) return true;
-                    if (reached.Count == 0) return false;
-                    if (firstReach == DateTime.MaxValue) firstReach = DateTime.UtcNow;
-                    return reached.ContainsValue(PathType.Lan) || (DateTime.UtcNow - firstReach).TotalMilliseconds >= SettleMs;
+                    if (Kicked || reached.ContainsValue(PathType.Lan)) return true;
+                    var now = DateTime.UtcNow;
+                    foreach (var type in reached.Values)
+                    {
+                        if (type != PathType.Relay && firstDirect == DateTime.MaxValue) firstDirect = now;
+                    }
+                    if ((now - firstDirect).TotalMilliseconds >= SettleMs) return true;
+                    return reached.ContainsValue(PathType.Relay) && (now - started).TotalMilliseconds >= RelayWaitMs;
                 }
             });
 
@@ -574,6 +708,8 @@ namespace Windy10v10AI.Launcher
                     var received = ReadToken(data);
                     var joining = token != null && received == token;
                     if (!joining && !probes.ContainsKey(received)) return;
+                    // The host also punches toward us; answering would connect directly and skip the relay under test
+                    if (joining && RelayOnly && TypeOf(from) != PathType.Relay) return;
                     if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(received), from);
                     if (joining)
                     {
