@@ -31,6 +31,7 @@ namespace Windy10v10AI.Launcher
         {
             try
             {
+                NativeMethods.KeepPrivate(listener.Server);
                 listener.Start();
             }
             catch (SocketException)
