@@ -121,7 +121,7 @@ namespace Windy10v10AI.Launcher
         public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
         public static string Rejoin { get { return Pick("重新进入游戏", "Rejoin game", "Вернуться в игру"); } }
-        public static string HostGuide { get { return Pick("启动后 Dota 2 会自动打开，等其他玩家加入后，在 Dota 2 里点「锁定并开始」", "Dota 2 opens automatically. Once everyone has joined, start the game in Dota 2.", "Dota 2 откроется автоматически. Когда все зайдут, начните игру в Dota 2."); } }
+        public static string HostGuide { get { return Pick("创建房间后 Dota 2 会自动打开，等其他玩家加入后，在 Dota 2 里点「锁定并开始」", "Dota 2 opens once the room is created. When everyone has joined, start the game in Dota 2.", "После создания комнаты Dota 2 откроется автоматически. Когда все зайдут, начните игру в Dota 2."); } }
         public static string ServerStillRunning { get { return Pick("Dota 2 已关闭，服务器仍在运行", "Dota 2 is closed; the server is still running", "Dota 2 закрыта, сервер продолжает работать"); } }
         public static string SavingResults { get { return Pick("游戏已结束，正在保存结果", "Game over. Saving the results...", "Игра окончена. Сохраняем результаты…"); } }
         public static string ResultsSaved { get { return Pick("结算已完成，可以关闭服务器。所有人退出 Dota 2 后会自动关闭", "Results saved. You can stop the server; it stops by itself once everyone leaves Dota 2.", "Результаты сохранены. Сервер можно остановить; он остановится сам, когда все выйдут из Dota 2."); } }
