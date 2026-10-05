@@ -82,8 +82,8 @@ namespace Windy10v10AI.Launcher
         public static string Full { get { return Pick("已满", "Full", "Мест нет"); } }
         public static string ProbeLatency { get { return Pick("延迟 {0} ms", "Ping {0} ms", "Пинг {0} мс"); } }
         public static string ProbeTesting { get { return Pick("正在测试能否连通", "Testing the connection", "Проверяем соединение"); } }
-        public static string ProbeFailed { get { return Pick("你的网络连不上这个房间", "Your network cannot reach this room", "Ваша сеть не может подключиться к этой комнате"); } }
-        public static string SymmetricNat { get { return Pick("你的网络类型可能无法联机，将在后续版本解决", "Your network type may not support online play. A later version will fix this.", "Ваш тип сети может не подходить для игры по сети — исправим позже."); } }
+        public static string ProbeRelayLatency { get { return Pick("无法直连，经中转服务器延迟约 {0} ms", "No direct route; about {0} ms through our relay server", "Прямого соединения нет — через наш сервер пинг около {0} мс"); } }
+        public static string ProbeFailed { get { return Pick("无法直连，加入后经中转服务器连接", "No direct route; joining goes through our relay server", "Прямого соединения нет — подключение пойдёт через наш сервер"); } }
         public static string RoomsLoading { get { return Pick("正在获取房间列表…", "Loading rooms...", "Загрузка комнат…"); } }
         public static string RoomsFailed { get { return Pick("获取房间列表失败，请点「刷新」重试", "Could not load rooms. Press Refresh to try again.", "Не удалось загрузить комнаты. Нажмите «Обновить»."); } }
         public static string NoRooms { get { return Pick("现在没有公开房间，可以自己开一个", "No public rooms right now. Host one yourself!", "Сейчас нет открытых комнат — создайте свою!"); } }
@@ -116,7 +116,7 @@ namespace Windy10v10AI.Launcher
         public static string GameStarted { get { return Pick("游戏已开始，无法加入。", "The game has already started.", "Игра уже началась."); } }
         public static string VersionMismatch { get { return Pick("双方启动器版本不同，请都更新到最新版本。", "Your launcher versions differ. Both of you need the latest version.", "Версии лаунчера отличаются. Обновите лаунчер у обоих."); } }
         public static string RoomNetwork { get { return Pick("连不上服务器，请检查网络后重试。", "Could not reach our server. Check your network and try again.", "Не удалось связаться с сервером. Проверьте сеть и попробуйте снова."); } }
-        public static string ConnectFailed { get { return Pick("因为网络问题，目前无法连接。请进入别的主机，或更换网络环境后再试。", "Could not connect because of a network problem. Join another host, or try again on a different network.", "Не удалось подключиться из-за проблем с сетью. Присоединитесь к другому хосту или попробуйте другую сеть."); } }
+        public static string ConnectFailed { get { return Pick("连接失败，请稍后再试。", "Could not connect. Please try again later.", "Не удалось подключиться. Попробуйте позже."); } }
         public static string Joined { get { return Pick("已加入房间 {0}", "Joined room {0}", "Вы в комнате {0}"); } }
         public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }

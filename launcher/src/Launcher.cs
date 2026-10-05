@@ -28,6 +28,7 @@ namespace Windy10v10AI.Launcher
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            JoinTunnel.RelayOnly = Array.IndexOf(Environment.GetCommandLineArgs(), "--relay-only") > 0;
             Updater.RemoveOld();
             Avatars.RemoveUnused();
             Application.Run(new MainForm());
@@ -134,6 +135,7 @@ namespace Windy10v10AI.Launcher
         string roomToken;
         string roomMap;
         Dictionary<string, object> roomBody;
+        volatile int hostRelayRtt = -1;
         readonly HashSet<string> seenJoins = new HashSet<string>();
         readonly List<long> kicked = new List<long>();
         bool paused;
@@ -143,8 +145,6 @@ namespace Windy10v10AI.Launcher
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
         string endNotice;
-        bool? hostSymmetric;
-        bool? joinSymmetric;
 
         readonly System.Windows.Forms.Timer mapPoll = new System.Windows.Forms.Timer { Interval = 5000 };
         Process server;
@@ -561,11 +561,9 @@ namespace Windy10v10AI.Launcher
         {
             var host = hostRoster;
             var join = joinTunnel;
-            var symmetric = host != null ? hostSymmetric : joinSymmetric;
-            var warning = symmetric == true ? Strings.SymmetricNat : null;
             players.MaxPlayers = host != null ? Settings.MaxPlayers : 0;
-            if (host != null) players.SetPlayers(host.Snapshot(), selfId, warning);
-            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : warning);
+            if (host != null) players.SetPlayers(host.Snapshot(), selfId, null);
+            else if (join != null) players.SetPlayers(join.Roster(), selfId, join.Silent ? Strings.HostSilent : null);
         }
 
         // The list lives only while the join page is idle and visible, so each visit measures every room once
@@ -598,9 +596,7 @@ namespace Windy10v10AI.Launcher
             if (source == null) return;
             var rows = source.Snapshot();
             var state = rows.Count > 0 || source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
-            string warning = null;
-            if (source.SymmetricNat == true) warning = Strings.SymmetricNat;
-            roomList.SetRooms(rows, state, warning);
+            roomList.SetRooms(rows, state, null);
             roomsCount.Text = source.Loaded
                 ? (source.ActiveGames > 0 ? string.Format(Strings.ActiveGames, source.ActiveGames, source.ActivePlayers) : string.Format(Strings.RoomCount, rows.Count))
                 : "";
@@ -835,9 +831,9 @@ namespace Windy10v10AI.Launcher
                     var candidates = hostTunnel.Gather(out publicIp);
                     hostBody = PeerBody(candidates, hostTunnel.SymmetricNat, manifest);
                     hostBody["publicIp"] = publicIp;
-                    hostSymmetric = hostTunnel.SymmetricNat;
                     lock (seenJoins) seenJoins.Clear();
                     lock (kicked) kicked.Clear();
+                    hostRelayRtt = -1;
                     Dictionary<string, object> opened;
                     try
                     {
@@ -858,6 +854,13 @@ namespace Windy10v10AI.Launcher
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
                     hostTunnel.Start();
+                    var relay = RelayTicket.Address(opened.ContainsKey("relayAddress") ? opened["relayAddress"] : null);
+                    if (relay != null)
+                    {
+                        var measuring = hostTunnel;
+                        // Measured once per room; joiners add it to their own to estimate a relayed route
+                        new Thread(() => hostRelayRtt = measuring.MeasureRelay(relay)) { IsBackground = true }.Start();
+                    }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
                     rosterServer.Start();
                     // The code is ready long before the server, so the host can share it while waiting
@@ -1024,7 +1027,6 @@ namespace Windy10v10AI.Launcher
                     tunnel.Start();
                 }
                 joinTunnel = tunnel;
-                joinSymmetric = tunnel.SymmetricNat;
                 if (stopping) throw new OperationCanceledException();
                 Dictionary<string, object> joined;
                 try
@@ -1051,7 +1053,7 @@ namespace Windy10v10AI.Launcher
                 UI(() => ShowPlayers(true));
                 var hostCandidates = new List<Candidate>();
                 foreach (var text in (object[])joined["hostCandidates"]) hostCandidates.Add(Candidate.Parse((string)text));
-                var path = tunnel.Connect((string)joined["joinToken"], hostCandidates);
+                var path = tunnel.Connect((string)joined["joinToken"], hostCandidates, RelayTicket.Read(joined));
                 if (stopping) throw new OperationCanceledException();
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (path == null) throw new LaunchError(Strings.ConnectFailed, false);
@@ -1173,7 +1175,7 @@ namespace Windy10v10AI.Launcher
                         }
                         var candidates = new List<Candidate>();
                         foreach (var text in (object[])join["candidates"]) candidates.Add(Candidate.Parse((string)text));
-                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates, probe);
+                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates, probe, RelayTicket.Read(join));
                     }
                 }
                 catch (Exception)
@@ -1212,6 +1214,7 @@ namespace Windy10v10AI.Launcher
             body["maxPlayers"] = Settings.MaxPlayers;
             body["map"] = roomMap;
             body["playerCount"] = playerCount;
+            if (hostRelayRtt >= 0) body["relayRtt"] = hostRelayRtt;
             lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
         }
 
@@ -1500,7 +1503,6 @@ namespace Windy10v10AI.Launcher
                 var ended = endNotice;
                 endNotice = null;
                 players.CanKick = false;
-                hostSymmetric = joinSymmetric = null;
                 paused = false;
                 pauseBar.Visible = false;
                 ShowPlayers(false);

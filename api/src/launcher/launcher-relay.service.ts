@@ -17,6 +17,11 @@ export type RelayRole = 'h' | 'j';
 export class LauncherRelayService {
   private privateKey?: KeyObject;
 
+  /** 启动器测延迟用的中转地址，关掉中转时返回 undefined。 */
+  address(): string | undefined {
+    return LAUNCHER_RELAY_ADDRESS || undefined;
+  }
+
   /** 给一次加入的房主或加入者签中转通行证，没配中转地址或私钥时返回 undefined。 */
   issue(
     joinId: string,

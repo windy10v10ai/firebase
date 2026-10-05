@@ -1243,7 +1243,7 @@ namespace Windy10v10AI.Launcher
         static string PingTip(RoomRow room)
         {
             if (room.Probe == ProbeState.Testing) return Strings.ProbeTesting;
-            if (room.Probe == ProbeState.Unreachable) return Strings.ProbeFailed;
+            if (room.Probe == ProbeState.Unreachable) return room.RelayRtt >= 0 ? string.Format(Strings.ProbeRelayLatency, room.RelayRtt) : Strings.ProbeFailed;
             if (room.Probe == ProbeState.Reachable) return string.Format(Strings.ProbeLatency, room.Rtt);
             return null;
         }
@@ -1321,7 +1321,7 @@ namespace Windy10v10AI.Launcher
         void DrawRoom(Graphics g, RoomRow room, Rectangle row, bool hot, int nameLeft, int mapLeft, int countLeft, int pingLeft, bool separator)
         {
             var s = DpiScale;
-            var faded = room.Full || room.Probe == ProbeState.Unreachable;
+            var faded = room.Full;
             if (hot && room.Joinable && Enabled)
             {
                 using (var brush = new SolidBrush(Theme.PanelHover)) g.FillRectangle(brush, row);
@@ -1377,10 +1377,11 @@ namespace Windy10v10AI.Launcher
         {
             var lit = 0;
             var color = Theme.Border;
-            if (room.Probe == ProbeState.Reachable)
+            var latency = room.Latency;
+            if (latency >= 0)
             {
-                if (room.Rtt < 60) { lit = 3; color = Theme.Ok; }
-                else if (room.Rtt <= 120) { lit = 2; color = Theme.Warning; }
+                if (latency < 60) { lit = 3; color = Theme.Ok; }
+                else if (latency <= 120) { lit = 2; color = Theme.Warning; }
                 else { lit = 1; color = Theme.Error; }
             }
             var left = center.X - 9 * s;
@@ -1395,7 +1396,7 @@ namespace Windy10v10AI.Launcher
                     g.FillPath(brush, path);
                 }
             }
-            if (room.Probe == ProbeState.Unreachable)
+            if (room.Probe == ProbeState.Unreachable && latency < 0)
             {
                 using (var pen = new Pen(Theme.Error, 2 * s) { StartCap = LineCap.Round, EndCap = LineCap.Round })
                 {
