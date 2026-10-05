@@ -7,7 +7,7 @@ import { SECRET, SecretService } from '../util/secret/secret.service';
 import { RelayDto } from './dto/launcher-room.dto';
 
 // 空串时不发通行证，启动器只试局域网与打洞；中转出问题时清空它重新部署即可关掉中转
-export const LAUNCHER_RELAY_ADDRESS = '';
+export const LAUNCHER_RELAY_ADDRESS = '123.207.219.78:27200';
 // 掉线重连要拿同一张通行证重新认领，有效期要盖住一整局
 export const RELAY_TICKET_TTL_MS = 6 * 60 * 60 * 1000;
 
