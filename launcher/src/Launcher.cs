@@ -53,6 +53,8 @@ namespace Windy10v10AI.Launcher
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
+        // Long enough for Steam to apply a pending update before signing in
+        const int SteamSignInMs = 90000;
         const int SlowSeconds = 60;
         const int TimeoutSeconds = 180;
         const int ErrorAccessDenied = 5;
@@ -136,12 +138,14 @@ namespace Windy10v10AI.Launcher
         string roomMap;
         Dictionary<string, object> roomBody;
         volatile int hostRelayRtt = -1;
+        volatile int hostRelayLoss = -1;
         readonly HashSet<string> seenJoins = new HashSet<string>();
         readonly List<long> kicked = new List<long>();
         bool paused;
         bool hostingReady;
         readonly NoticeBar hostGuide = new NoticeBar();
         bool clientClosed;
+        volatile bool clientRestarted;
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
         string endNotice;
@@ -471,8 +475,10 @@ namespace Windy10v10AI.Launcher
             {
                 marquee.SetBounds(P(20), P(y + 26), P(440), P(4));
                 hint.SetBounds(P(20), P(y + 36), P(440), P(20));
-                action.SetBounds(P(20), P(y + 62), actionWidth, P(30));
-                secondary.SetBounds(P(20) + actionWidth + P(8), P(y + 62), secondaryWidth, P(30));
+                // Rejoining is the joiner's only secondary action and the one players want, so it comes first
+                var actionLeft = secondary.Visible ? P(20) + secondaryWidth + P(8) : P(20);
+                secondary.SetBounds(P(20), P(y + 62), secondaryWidth, P(30));
+                action.SetBounds(actionLeft, P(y + 62), actionWidth, P(30));
             }
             // An idle join page only ever shows a notice in this area, so it needs less room than a launch in progress
             y += browsing && !busy ? 60 : 124;
@@ -816,6 +822,7 @@ namespace Windy10v10AI.Launcher
                     if (DotaProcesses().Count > 0) throw new LaunchError(Strings.DotaNotClosed, false);
                     UI(() => status.Text = Strings.Starting);
                 }
+                EnsurePortFree();
 
                 if (stopping) throw new OperationCanceledException();
                 var manifest = install.InstalledManifest(id);
@@ -825,6 +832,7 @@ namespace Windy10v10AI.Launcher
                 Dictionary<string, object> hostBody = null;
                 if (room)
                 {
+                    selfId = SignedInAccount();
                     UI(() => status.Text = Strings.OpeningRoom);
                     hostTunnel = new HostTunnel();
                     bool publicIp;
@@ -834,6 +842,7 @@ namespace Windy10v10AI.Launcher
                     lock (seenJoins) seenJoins.Clear();
                     lock (kicked) kicked.Clear();
                     hostRelayRtt = -1;
+                    hostRelayLoss = -1;
                     Dictionary<string, object> opened;
                     try
                     {
@@ -859,7 +868,12 @@ namespace Windy10v10AI.Launcher
                     {
                         var measuring = hostTunnel;
                         // Measured once per room; joiners add it to their own to estimate a relayed route
-                        new Thread(() => hostRelayRtt = measuring.MeasureRelay(relay)) { IsBackground = true }.Start();
+                        new Thread(() =>
+                        {
+                            var quality = measuring.MeasureRelay(relay);
+                            hostRelayLoss = quality.Loss;
+                            hostRelayRtt = quality.Rtt;
+                        }) { IsBackground = true }.Start();
                     }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
                     rosterServer.Start();
@@ -891,6 +905,14 @@ namespace Windy10v10AI.Launcher
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                 });
+                // The host's own Dota renders on the same PC, and a starved server stalls every player's connection
+                try
+                {
+                    server.PriorityClass = ProcessPriorityClass.AboveNormal;
+                }
+                catch (Exception)
+                {
+                }
 
                 // The code is shown as soon as the room opens, so friends may join while the server is still loading
                 if (code != null)
@@ -923,7 +945,7 @@ namespace Windy10v10AI.Launcher
                     action.Text = Strings.StopServer;
                     Relayout();
                 });
-                if (code == null) WatchSolo();
+                if (code == null) WatchSolo(install);
                 else WatchRoom(install);
             }
             catch (LaunchError error)
@@ -1011,10 +1033,17 @@ namespace Windy10v10AI.Launcher
         {
             try
             {
+                if (Net.SteamAccountId() == 0)
+                {
+                    selfId = SignedInAccount();
+                    UI(() => status.Text = Strings.Connecting);
+                }
                 JoinTunnel tunnel = null;
                 List<Candidate> candidates = null;
+                var relayQuality = RelayQuality.Unknown;
                 if (source != null)
                 {
+                    relayQuality = source.RelayQuality;
                     tunnel = source.TakeTunnel(out candidates);
                     source.Dispose();
                 }
@@ -1031,7 +1060,11 @@ namespace Windy10v10AI.Launcher
                 Dictionary<string, object> joined;
                 try
                 {
-                    joined = RoomApi.Join(code, PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id)));
+                    var body = PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id));
+                    // Reported with the join so every joiner's route to the relay is recorded without a request of its own
+                    if (relayQuality.Rtt >= 0) body["relayRtt"] = relayQuality.Rtt;
+                    if (relayQuality.Loss >= 0) body["relayLoss"] = relayQuality.Loss;
+                    joined = RoomApi.Join(code, body);
                 }
                 catch (RoomError error)
                 {
@@ -1063,7 +1096,14 @@ namespace Windy10v10AI.Launcher
                 foreach (var p in running) WaitQuietly(p);
                 if (DotaProcesses().Count > 0) throw new LaunchError(Strings.DotaNotClosed, false);
                 PrepareAddon(install, id);
-                tunnel.Forward();
+                try
+                {
+                    tunnel.Forward();
+                }
+                catch (System.Net.Sockets.SocketException)
+                {
+                    throw new LaunchError(Strings.PortInUse, false);
+                }
                 StartClient(install);
 
                 UI(() => ShowProgress(string.Format(Strings.Joined, code), Strings.JoinedHint, Strings.LeaveRoom, false));
@@ -1086,11 +1126,13 @@ namespace Windy10v10AI.Launcher
         {
             bool? wasRunning = null;
             var ended = false;
+            var client = new ClientWatch();
             while (!stopping)
             {
                 Thread.Sleep(2000);
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
-                var running = DotaProcesses().Count > 0;
+                var state = Poll(client, install, -1);
+                var running = state == ClientState.Starting || state == ClientState.InGame;
                 // Nothing is left to rejoin after the game, so leaving the room is the only next step
                 if (tunnel.GameEnded)
                 {
@@ -1113,7 +1155,7 @@ namespace Windy10v10AI.Launcher
                 UI(() =>
                 {
                     if (running) secondary.Visible = false;
-                    else ShowSecondary(Strings.Rejoin, () => StartClient(install));
+                    else ShowSecondary(Strings.Rejoin, () => Rejoin(install, -1), true);
                 });
             }
             Finish(null, false);
@@ -1215,6 +1257,7 @@ namespace Windy10v10AI.Launcher
             body["map"] = roomMap;
             body["playerCount"] = playerCount;
             if (hostRelayRtt >= 0) body["relayRtt"] = hostRelayRtt;
+            if (hostRelayLoss >= 0) body["relayLoss"] = hostRelayLoss;
             lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
         }
 
@@ -1285,6 +1328,38 @@ namespace Windy10v10AI.Launcher
 
         // A client started outside Steam fails VAC verification when it later joins an Arcade lobby;
         // -applaunch goes through Steam without the confirmation dialog that steam://run shows
+        // Rooms tell players apart by their Steam account, which is only known once Steam is running and signed in
+        long SignedInAccount()
+        {
+            var account = Net.SteamAccountId();
+            if (account != 0) return account;
+            var steam = DotaInstall.SteamExecutable();
+            if (steam == null) throw new LaunchError(Strings.SteamClientMissing, false);
+            UI(() => status.Text = Strings.StartingSteam);
+            StartDota(new ProcessStartInfo { FileName = steam, Arguments = "-silent", UseShellExecute = false });
+            for (var waited = 0; waited < SteamSignInMs; waited += 1000)
+            {
+                Thread.Sleep(1000);
+                if (stopping) throw new OperationCanceledException();
+                account = Net.SteamAccountId();
+                if (account != 0) return account;
+            }
+            throw new LaunchError(Strings.SteamNotSignedIn, false);
+        }
+
+        // The dedicated server would fail on a taken port only after the room is open, with nothing the player can read
+        static void EnsurePortFree()
+        {
+            try
+            {
+                new System.Net.Sockets.UdpClient(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, Port)).Close();
+            }
+            catch (System.Net.Sockets.SocketException)
+            {
+                throw new LaunchError(Strings.PortInUse, false);
+            }
+        }
+
         static void StartClient(DotaInstall install)
         {
             var steam = DotaInstall.SteamExecutable();
@@ -1313,8 +1388,10 @@ namespace Windy10v10AI.Launcher
             return modeBar.Selected == 2 ? "" : Strings.Idle;
         }
 
-        void ShowSecondary(string text, Action onClick)
+        void ShowSecondary(string text, Action onClick, bool primary)
         {
+            if (primary) secondary.MakePrimary();
+            else secondary.MakePlain();
             secondary.Text = text;
             secondaryAction = onClick;
             secondary.Visible = true;
@@ -1344,20 +1421,98 @@ namespace Windy10v10AI.Launcher
             if (j != null) j.Dispose();
         }
 
-        void WatchSolo()
+        // Closing Dota ends a solo game, except after the server dropped it, when the game is still there to rejoin
+        void WatchSolo(DotaInstall install)
         {
-            var seen = false;
             var serverId = server.Id;
+            var client = new ClientWatch();
+            var wasDropped = false;
             while (!stopping)
             {
                 Thread.Sleep(3000);
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
                 NativeMethods.HideWindowsOf(serverId);
-                var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count;
-                if (clients > 0) seen = true;
-                else if (seen) break;
+                var state = Poll(client, install, serverId);
+                if (state == ClientState.Closed) break;
+                var dropped = state == ClientState.Dropped;
+                if (dropped == wasDropped) continue;
+                wasDropped = dropped;
+                UI(() =>
+                {
+                    if (!busy) return;
+                    if (dropped)
+                    {
+                        ShowProgress(Strings.ClientDropped, Strings.RejoinHint, Strings.StopServer, false);
+                        ShowSecondary(Strings.Rejoin, () => Rejoin(install, serverId), true);
+                    }
+                    else
+                    {
+                        secondary.Visible = false;
+                        ShowProgress(Strings.InGame, Strings.InGameHint, Strings.StopServer, false);
+                    }
+                });
             }
             Finish(null, false);
+        }
+
+        enum ClientState { Starting, InGame, Dropped, Closed }
+
+        class ClientWatch
+        {
+            public long LogOffset;
+            public bool Seen;
+            public bool Dropped;
+        }
+
+        // Ends of a connection the player chose; any other disconnect means the server dropped a game still in progress
+        static readonly string[] IntentionalDisconnects = { "NETWORK_DISCONNECT_DISCONNECT_BY_USER", "NETWORK_DISCONNECT_EXITING" };
+
+        // Dota stays open after the server drops it, so the client log decides whether the player is still in the game
+        ClientState Poll(ClientWatch watch, DotaInstall install, int serverId)
+        {
+            if (clientRestarted)
+            {
+                clientRestarted = false;
+                watch.LogOffset = 0;
+                watch.Seen = false;
+                watch.Dropped = false;
+            }
+            var running = DotaProcesses().FindAll(p => p.Id != serverId).Count > 0;
+            if (running) watch.Seen = true;
+            var text = ReadFrom(Path.Combine(install.Game, @"dota\client.log"), ref watch.LogOffset);
+            foreach (Match match in Regex.Matches(text, @"Disconnected from server: (\w+)"))
+            {
+                watch.Dropped = Array.IndexOf(IntentionalDisconnects, match.Groups[1].Value) < 0;
+            }
+            // Steam takes a few seconds to start Dota, which is not the player closing it
+            if (!watch.Seen) return ClientState.Starting;
+            if (watch.Dropped) return ClientState.Dropped;
+            return running ? ClientState.InGame : ClientState.Closed;
+        }
+
+        // A dropped Dota is still open and would ignore a second launch, so it is closed before starting again
+        void Rejoin(DotaInstall install, int serverId)
+        {
+            secondary.Visible = false;
+            Relayout();
+            new Thread(() =>
+            {
+                var clients = DotaProcesses().FindAll(p => p.Id != serverId);
+                foreach (var p in clients) KillQuietly(p);
+                foreach (var p in clients) WaitQuietly(p);
+                clientRestarted = true;
+                UI(() =>
+                {
+                    try
+                    {
+                        StartClient(install);
+                    }
+                    catch (LaunchError error)
+                    {
+                        ShowNotice(NoticeKind.Error, error.Message, false);
+                    }
+                });
+            }) { IsBackground = true }.Start();
         }
 
         // Friends are still playing on this server, so closing the host's own Dota never stops it; only the host
@@ -1367,9 +1522,9 @@ namespace Windy10v10AI.Launcher
             var serverId = server.Id;
             long logOffset = 0;
             bool? wasRunning = null;
-            var seen = false;
             DateTime? endedAt = null;
             var saved = false;
+            var client = new ClientWatch();
             while (!stopping)
             {
                 Thread.Sleep(3000);
@@ -1397,27 +1552,26 @@ namespace Windy10v10AI.Launcher
                     UI(() => ShowRoomEnd(true));
                 }
 
-                var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count > 0;
-                if (saved && !clients && roster.GuestCount() == 0) break;
-                if (clients) seen = true;
-                // Steam takes a few seconds to start Dota, which is not the host closing it
-                var running = clients || !seen;
+                var state = Poll(client, install, serverId);
+                if (saved && state != ClientState.InGame && roster.GuestCount() == 0) break;
+                var running = state == ClientState.Starting || state == ClientState.InGame;
                 if (running == wasRunning) continue;
                 wasRunning = running;
                 var ended = endedAt != null;
-                UI(() => ShowHostClient(running, ended, install));
+                var dropped = state == ClientState.Dropped;
+                UI(() => ShowHostClient(running, ended, dropped, install, serverId));
             }
             Finish(null, false);
         }
 
-        void ShowHostClient(bool running, bool ended, DotaInstall install)
+        void ShowHostClient(bool running, bool ended, bool dropped, DotaInstall install, int serverId)
         {
             if (!busy || !hostCode.Visible) return;
             clientClosed = !running && !ended;
             if (clientClosed)
             {
-                status.Text = Strings.ServerStillRunning;
-                ShowSecondary(Strings.Rejoin, () => StartClient(install));
+                status.Text = dropped ? Strings.ClientDropped : Strings.ServerStillRunning;
+                ShowSecondary(Strings.Rejoin, () => Rejoin(install, serverId), true);
             }
             ApplyRoomType();
         }
@@ -1447,7 +1601,7 @@ namespace Windy10v10AI.Launcher
                 status.Text = Settings.PublicRoom ? "" : Strings.RoomCode;
                 var code = hostCode.Code;
                 if (Settings.PublicRoom) secondary.Visible = false;
-                else ShowSecondary(Strings.Copy, () => Clipboard.SetText(code));
+                else ShowSecondary(Strings.Copy, () => Clipboard.SetText(code), false);
             }
             Relayout();
         }
@@ -1697,6 +1851,15 @@ namespace Windy10v10AI.Launcher
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool CreateHardLink(string fileName, string existingFileName, IntPtr securityAttributes);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool SetHandleInformation(IntPtr handle, uint mask, uint flags);
+
+        // Steam and Dota are started with inherited handles, and a socket they inherit keeps its port after the launcher exits
+        public static void KeepPrivate(System.Net.Sockets.Socket socket)
+        {
+            SetHandleInformation(socket.Handle, 1, 0);
+        }
 
         delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr param);
 

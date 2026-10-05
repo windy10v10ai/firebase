@@ -49,6 +49,22 @@ class LauncherPeerDto {
   @IsBoolean()
   symmetricNat?: boolean;
 
+  @ApiPropertyOptional({
+    description: '本机到中转的往返毫秒数；房主的用来给加入者估算走中转的延迟，加入者的只做统计',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  relayRtt?: number;
+
+  @ApiPropertyOptional({ description: '本机向中转发回声测试的丢失百分比，没测时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  relayLoss?: number;
+
   @ApiProperty({ description: '隧道协议版本，双方不同时拒绝加入' })
   @IsInt()
   @Min(1)
@@ -129,13 +145,6 @@ export class HostRoomDto extends LauncherPeerDto {
   @IsInt()
   @Min(1)
   playerCount?: number;
-
-  @ApiPropertyOptional({ description: '房主到中转的往返毫秒数，加入者据此估算走中转的延迟' })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Max(10000)
-  relayRtt?: number;
 
   @ApiPropertyOptional({ description: '被移出的 32 位账号 ID，每次传完整名单', type: [Number] })
   @IsOptional()
