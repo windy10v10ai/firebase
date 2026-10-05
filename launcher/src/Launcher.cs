@@ -1,4 +1,4 @@
-// Windy10v10AI local dedicated server launcher.
+﻿// Windy10v10AI local dedicated server launcher.
 // Built with the .NET Framework 4 compiler that ships with Windows, so the language level is C# 5.
 using System;
 using System.Collections.Generic;
@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.4.2.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.4.2.0")]
+[assembly: System.Reflection.AssemblyVersion("0.4.3.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.4.3.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -48,13 +48,14 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.4.2";
+        const string Version = "0.4.3";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
         const int SlowSeconds = 60;
         const int TimeoutSeconds = 180;
         const int ErrorAccessDenied = 5;
+        const int ErrorElevationRequired = 740;
         // The game turns off its auto start when the dedicated server carries this name
         const string RoomHostname = "windy10v10ai-room";
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
@@ -1503,6 +1504,8 @@ namespace Windy10v10AI.Launcher
 
         static Process StartDota(ProcessStartInfo info)
         {
+            // Players often mark Steam or Dota as "Run as administrator"; neither needs it, and a non-elevated launcher cannot start them otherwise
+            info.EnvironmentVariables["__COMPAT_LAYER"] = "RunAsInvoker";
             try
             {
                 return Process.Start(info);
@@ -1510,6 +1513,7 @@ namespace Windy10v10AI.Launcher
             catch (Win32Exception error)
             {
                 if (error.NativeErrorCode == ErrorAccessDenied) throw new LaunchError(Strings.DotaBlocked, false);
+                if (error.NativeErrorCode == ErrorElevationRequired) throw new LaunchError(Strings.DotaNeedsAdmin, false);
                 throw;
             }
         }
