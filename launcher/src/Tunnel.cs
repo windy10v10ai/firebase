@@ -68,6 +68,7 @@ namespace Windy10v10AI.Launcher
         protected Tunnel()
         {
             Socket = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
+            NativeMethods.KeepPrivate(Socket.Client);
             // An unreachable candidate answers with ICMP, which Windows would otherwise raise on the next receive
             Socket.Client.IOControl(SioUdpConnReset, new byte[] { 0 }, null);
         }
@@ -424,6 +425,7 @@ namespace Windy10v10AI.Launcher
             Peer peer;
             if (peers.TryGetValue(token, out peer)) return peer;
             peer = new Peer { Local = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)) };
+            NativeMethods.KeepPrivate(peer.Local.Client);
             peer.Local.Connect(IPAddress.Loopback, GamePort);
             peers[token] = peer;
             new Thread(() =>
@@ -641,6 +643,7 @@ namespace Windy10v10AI.Launcher
         public void Forward()
         {
             local = new UdpClient(new IPEndPoint(IPAddress.Loopback, GamePort));
+            NativeMethods.KeepPrivate(local.Client);
             new Thread(() =>
             {
                 while (!Closed)
