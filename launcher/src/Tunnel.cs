@@ -25,6 +25,8 @@ namespace Windy10v10AI.Launcher
         // A timestamp and token the host echoes back unchanged, so the joiner measures the round trip on its own clock
         public const byte Ping = 9;
         public const byte Pong = 10;
+        // Only the host reads the server log, so joiners learn from it that the game is over; older launchers ignore it
+        public const byte GameEnded = 11;
     }
 
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
@@ -156,6 +158,7 @@ namespace Windy10v10AI.Launcher
         public event Action<string, string, int> JoinFinished;
         public event Action<string> JoinLeft;
         public Func<List<RosterEntry>> RosterSource;
+        public volatile bool GameEnded;
 
         public HostTunnel()
         {
@@ -172,6 +175,7 @@ namespace Windy10v10AI.Launcher
                         {
                             // Roster packets go out every two seconds, so they also keep the route open
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
+                            if (GameEnded) SendTo(peer, Packet.GameEnded, new byte[0]);
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                         }
                     }
@@ -387,6 +391,7 @@ namespace Windy10v10AI.Launcher
 
         public volatile bool Lost;
         public volatile bool Kicked;
+        public volatile bool GameEnded;
         readonly Dictionary<int, RosterEntry> roster = new Dictionary<int, RosterEntry>();
         int rosterCount = -1;
         // Shown until the host's own list arrives
@@ -596,6 +601,11 @@ namespace Windy10v10AI.Launcher
                     return;
                 }
                 lastReceived = DateTime.UtcNow;
+                if (data[0] == Packet.GameEnded)
+                {
+                    GameEnded = true;
+                    return;
+                }
                 if (data[0] == Packet.Roster)
                 {
                     try

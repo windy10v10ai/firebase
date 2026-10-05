@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.4.3.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.4.3.0")]
+[assembly: System.Reflection.AssemblyVersion("0.5.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.5.0.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -48,7 +48,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.4.3";
+        const string Version = "0.5.0";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -59,6 +59,13 @@ namespace Windy10v10AI.Launcher
         // The game turns off its auto start when the dedicated server carries this name
         const string RoomHostname = "windy10v10ai-room";
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
+        // The game sends its results the moment a team wins, a few seconds before the post-game state
+        const string ResultsSent = "/api/game/end";
+        const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
+        // The game prints this once its results request has finally succeeded or failed
+        const string ResultsDone = "[Game] end game callback";
+        // An offline game never prints the callback, so the room cannot wait on it forever
+        const int ResultsFallbackSeconds = 120;
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
@@ -130,6 +137,11 @@ namespace Windy10v10AI.Launcher
         readonly List<long> kicked = new List<long>();
         bool paused;
         bool hostingReady;
+        readonly NoticeBar hostGuide = new NoticeBar();
+        bool clientClosed;
+        bool saving;
+        // Shown once the window is back to idle, so a finished game does not end on a blank screen
+        string endNotice;
         bool? hostSymmetric;
         bool? joinSymmetric;
 
@@ -201,7 +213,13 @@ namespace Windy10v10AI.Launcher
             marquee.Visible = false;
             hint.Visible = false;
             action.Visible = false;
-            action.Click += delegate { StopServer(); };
+            action.Click += delegate
+            {
+                if (saving && !ConfirmDialog.Ask(this, Strings.SavingCloseTitle, Strings.SavingCloseBody, Strings.StopAnyway)) return;
+                StopServer();
+            };
+            hostGuide.Show(NoticeKind.Success, Strings.HostGuide, null);
+            hostGuide.Visible = false;
 
             divider.BackColor = Theme.Border;
             mapDot.BackColor = Theme.Faint;
@@ -275,6 +293,7 @@ namespace Windy10v10AI.Launcher
                 Settings.PublicRoom = roomTypeBar.Selected == 0;
                 Settings.Save();
                 UpdateHostingHint();
+                ApplyRoomType();
             };
             maxButton.BackColor = Theme.Panel;
             maxButton.TextAlign = ContentAlignment.MiddleCenter;
@@ -331,7 +350,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -428,17 +447,23 @@ namespace Windy10v10AI.Launcher
             }
             // Notices share the status area below the buttons so the window never shifts
             notice.SetBounds(P(20), P(y), P(440), P(52));
-            status.Visible = !notice.Visible;
+            // Takes the idle status line on the host tab, so the host learns before starting that the game waits in Dota
+            hostGuide.Visible = modeBar.Selected == 1 && !busy && !cardShown && !notice.Visible;
+            hostGuide.SetBounds(P(20), P(y), P(440), P(52));
+            status.Visible = !notice.Visible && !hostGuide.Visible;
             status.SetBounds(P(20), P(y), P(440), P(20));
             var actionWidth = Math.Max(P(80), TextRenderer.MeasureText(action.Text, action.Font).Width + P(28));
             var secondaryWidth = Math.Max(P(80), TextRenderer.MeasureText(secondary.Text, secondary.Font).Width + P(28));
             if (hostCode.Visible)
             {
-                hostCode.SetBounds(P(20), P(y + 24), P(150), P(36));
-                secondary.SetBounds(P(178), P(y + 24), secondaryWidth, P(36));
-                action.SetBounds(P(460) - actionWidth, P(y + 24), actionWidth, P(36));
+                // A notice about the finished game is taller than the status line it replaces
+                var row = notice.Visible ? y + 34 : y;
+                hostCode.SetBounds(P(20), P(row + 24), P(150), P(36));
+                secondary.SetBounds(P(178), P(row + 24), secondaryWidth, P(36));
+                action.SetBounds(P(460) - actionWidth, P(row + 24), actionWidth, P(36));
                 // The hosting hint runs to two lines in every language
-                hint.SetBounds(P(20), P(y + 66), P(440), P(38));
+                hint.SetBounds(P(20), P(row + 66), P(440), P(38));
+                y = row;
             }
             else
             {
@@ -840,7 +865,7 @@ namespace Windy10v10AI.Launcher
                         players.CanKick = true;
                         ShowPlayers(true);
                         ShowProgress(Strings.RoomCode, "", Strings.Cancel, false);
-                        ShowSecondary(Strings.Copy, () => Clipboard.SetText(shown));
+                        ApplyRoomType();
                     });
                 }
 
@@ -891,7 +916,8 @@ namespace Windy10v10AI.Launcher
                     action.Text = Strings.StopServer;
                     Relayout();
                 });
-                WatchClient();
+                if (code == null) WatchSolo();
+                else WatchRoom(install);
             }
             catch (LaunchError error)
             {
@@ -1053,12 +1079,29 @@ namespace Windy10v10AI.Launcher
         void WatchJoin(JoinTunnel tunnel, DotaInstall install)
         {
             bool? wasRunning = null;
+            var ended = false;
             while (!stopping)
             {
                 Thread.Sleep(2000);
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
-                if (tunnel.Lost) throw new LaunchError(Strings.HostLost, false);
                 var running = DotaProcesses().Count > 0;
+                // Nothing is left to rejoin after the game, so leaving the room is the only next step
+                if (tunnel.GameEnded)
+                {
+                    endNotice = Strings.GameEnded;
+                    if (!running || tunnel.Lost) break;
+                    if (ended) continue;
+                    ended = true;
+                    UI(() =>
+                    {
+                        if (!busy) return;
+                        secondary.Visible = false;
+                        hint.Visible = false;
+                        ShowNotice(NoticeKind.Success, Strings.GameEndedLeave, null, null);
+                    });
+                    continue;
+                }
+                if (tunnel.Lost) throw new LaunchError(Strings.HostLost, false);
                 if (running == wasRunning) continue;
                 wasRunning = running;
                 UI(() =>
@@ -1291,22 +1334,13 @@ namespace Windy10v10AI.Launcher
             if (j != null) j.Dispose();
         }
 
-        void WatchClient()
+        void WatchSolo()
         {
             var seen = false;
             var serverId = server.Id;
-            long logOffset = 0;
             while (!stopping)
             {
                 Thread.Sleep(3000);
-                var roster = hostRoster;
-                if (roster != null)
-                {
-                    foreach (Match match in Regex.Matches(ReadFrom(logFile, ref logOffset), @"Adding player SteamID (\d+)"))
-                    {
-                        roster.SetInGame(long.Parse(match.Groups[1].Value));
-                    }
-                }
                 if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
                 NativeMethods.HideWindowsOf(serverId);
                 var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count;
@@ -1314,6 +1348,98 @@ namespace Windy10v10AI.Launcher
                 else if (seen) break;
             }
             Finish(null, false);
+        }
+
+        // Friends are still playing on this server, so closing the host's own Dota never stops it; only the host
+        // does, or the room itself once the results are saved and everyone has left
+        void WatchRoom(DotaInstall install)
+        {
+            var serverId = server.Id;
+            long logOffset = 0;
+            bool? wasRunning = null;
+            var seen = false;
+            DateTime? endedAt = null;
+            var saved = false;
+            while (!stopping)
+            {
+                Thread.Sleep(3000);
+                var text = ReadFrom(logFile, ref logOffset);
+                var roster = hostRoster;
+                var tunnel = hostTunnel;
+                if (roster == null || tunnel == null) break;
+                foreach (Match match in Regex.Matches(text, @"Adding player SteamID (\d+)"))
+                {
+                    roster.SetInGame(long.Parse(match.Groups[1].Value));
+                }
+                if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
+                NativeMethods.HideWindowsOf(serverId);
+
+                if (endedAt == null && (text.Contains(ResultsSent) || text.Contains(PostGame)))
+                {
+                    endedAt = DateTime.UtcNow;
+                    tunnel.GameEnded = true;
+                    UI(() => ShowRoomEnd(false));
+                }
+                if (endedAt != null && !saved &&
+                    (text.Contains(ResultsDone) || (DateTime.UtcNow - endedAt.Value).TotalSeconds > ResultsFallbackSeconds))
+                {
+                    saved = true;
+                    UI(() => ShowRoomEnd(true));
+                }
+
+                var clients = DotaProcesses().FindAll(p => p.Id != serverId).Count > 0;
+                if (saved && !clients && roster.GuestCount() == 0) break;
+                if (clients) seen = true;
+                // Steam takes a few seconds to start Dota, which is not the host closing it
+                var running = clients || !seen;
+                if (running == wasRunning) continue;
+                wasRunning = running;
+                var ended = endedAt != null;
+                UI(() => ShowHostClient(running, ended, install));
+            }
+            Finish(null, false);
+        }
+
+        void ShowHostClient(bool running, bool ended, DotaInstall install)
+        {
+            if (!busy || !hostCode.Visible) return;
+            clientClosed = !running && !ended;
+            if (clientClosed)
+            {
+                status.Text = Strings.ServerStillRunning;
+                ShowSecondary(Strings.Rejoin, () => StartClient(install));
+            }
+            ApplyRoomType();
+        }
+
+        // Runs when the game ends and again once its results are saved
+        void ShowRoomEnd(bool saved)
+        {
+            if (!busy || !hostCode.Visible) return;
+            saving = !saved;
+            endNotice = Strings.GameEnded;
+            clientClosed = false;
+            secondary.Visible = false;
+            pauseBar.Visible = false;
+            hint.Visible = false;
+            ShowNotice(saved ? NoticeKind.Success : NoticeKind.Warning, saved ? Strings.ResultsSaved : Strings.SavingResults, null, null);
+            if (saved) action.MakePrimary();
+            Relayout();
+        }
+
+        // A public room is found in the list, so it does not ask the host to share the code
+        void ApplyRoomType()
+        {
+            if (!hostCode.Visible) return;
+            hostCode.Quiet = Settings.PublicRoom;
+            if (endNotice == null && !clientClosed)
+            {
+                status.Text = Settings.PublicRoom ? "" : Strings.RoomCode;
+                var code = hostCode.Code;
+                if (Settings.PublicRoom) secondary.Visible = false;
+                else ShowSecondary(Strings.Copy, () => Clipboard.SetText(code));
+            }
+            Relayout();
         }
 
         void StopServer()
@@ -1361,6 +1487,11 @@ namespace Windy10v10AI.Launcher
                 secondary.Visible = false;
                 hostCode.Visible = false;
                 hostingReady = false;
+                clientClosed = false;
+                saving = false;
+                action.MakePlain();
+                var ended = endNotice;
+                endNotice = null;
                 players.CanKick = false;
                 hostSymmetric = joinSymmetric = null;
                 paused = false;
@@ -1374,6 +1505,12 @@ namespace Windy10v10AI.Launcher
                 UpdateBrowsing();
                 if (error != null && !cancelled && button != null) ShowNotice(NoticeKind.Error, error, button, onClick);
                 else if (error != null && !cancelled) ShowNotice(NoticeKind.Error, error, showLog && logFile != null && File.Exists(logFile));
+                else if (ended != null)
+                {
+                    ShowNotice(NoticeKind.Success, ended, null, null);
+                    // Kept until the next launch rather than cleared by the next map check
+                    stickyNotice = true;
+                }
                 else RefreshMapState();
                 Relayout();
             });
