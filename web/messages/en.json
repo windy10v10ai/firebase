@@ -150,6 +150,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_4_3": [
+          "Fix games failing to start when Steam or Dota 2 is set to run as administrator"
+        ],
         "v0_4_2": [
           "Report problems and suggest ideas from the launcher"
         ],
