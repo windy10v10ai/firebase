@@ -126,6 +126,7 @@ namespace Windy10v10AI.Launcher
         readonly FlatButton secondary = new FlatButton();
         Action secondaryAction;
         HostTunnel hostTunnel;
+        RosterServer rosterServer;
         JoinTunnel joinTunnel;
         readonly List<Dictionary<string, object>> joinResults = new List<Dictionary<string, object>>();
         // The room this launcher hosts; the poll thread reads them again when the host resumes a paused room
@@ -856,6 +857,8 @@ namespace Windy10v10AI.Launcher
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
                     hostTunnel.Start();
+                    rosterServer = new RosterServer(roster.Snapshot);
+                    rosterServer.Start();
                     // The code is ready long before the server, so the host can share it while waiting
                     var shown = code;
                     UI(() =>
@@ -1329,6 +1332,9 @@ namespace Windy10v10AI.Launcher
             var h = hostTunnel;
             hostTunnel = null;
             if (h != null) h.Dispose();
+            var r = rosterServer;
+            rosterServer = null;
+            if (r != null) r.Dispose();
             var j = joinTunnel;
             joinTunnel = null;
             if (j != null) j.Dispose();
