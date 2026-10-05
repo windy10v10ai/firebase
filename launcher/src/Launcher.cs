@@ -138,6 +138,7 @@ namespace Windy10v10AI.Launcher
         string roomMap;
         Dictionary<string, object> roomBody;
         volatile int hostRelayRtt = -1;
+        volatile int hostRelayLoss = -1;
         readonly HashSet<string> seenJoins = new HashSet<string>();
         readonly List<long> kicked = new List<long>();
         bool paused;
@@ -841,6 +842,7 @@ namespace Windy10v10AI.Launcher
                     lock (seenJoins) seenJoins.Clear();
                     lock (kicked) kicked.Clear();
                     hostRelayRtt = -1;
+                    hostRelayLoss = -1;
                     Dictionary<string, object> opened;
                     try
                     {
@@ -866,7 +868,12 @@ namespace Windy10v10AI.Launcher
                     {
                         var measuring = hostTunnel;
                         // Measured once per room; joiners add it to their own to estimate a relayed route
-                        new Thread(() => hostRelayRtt = measuring.MeasureRelay(relay)) { IsBackground = true }.Start();
+                        new Thread(() =>
+                        {
+                            var quality = measuring.MeasureRelay(relay);
+                            hostRelayLoss = quality.Loss;
+                            hostRelayRtt = quality.Rtt;
+                        }) { IsBackground = true }.Start();
                     }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
                     rosterServer.Start();
@@ -1033,8 +1040,10 @@ namespace Windy10v10AI.Launcher
                 }
                 JoinTunnel tunnel = null;
                 List<Candidate> candidates = null;
+                var relayQuality = RelayQuality.Unknown;
                 if (source != null)
                 {
+                    relayQuality = source.RelayQuality;
                     tunnel = source.TakeTunnel(out candidates);
                     source.Dispose();
                 }
@@ -1051,7 +1060,11 @@ namespace Windy10v10AI.Launcher
                 Dictionary<string, object> joined;
                 try
                 {
-                    joined = RoomApi.Join(code, PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id)));
+                    var body = PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id));
+                    // Reported with the join so every joiner's route to the relay is recorded without a request of its own
+                    if (relayQuality.Rtt >= 0) body["relayRtt"] = relayQuality.Rtt;
+                    if (relayQuality.Loss >= 0) body["relayLoss"] = relayQuality.Loss;
+                    joined = RoomApi.Join(code, body);
                 }
                 catch (RoomError error)
                 {
@@ -1244,6 +1257,7 @@ namespace Windy10v10AI.Launcher
             body["map"] = roomMap;
             body["playerCount"] = playerCount;
             if (hostRelayRtt >= 0) body["relayRtt"] = hostRelayRtt;
+            if (hostRelayLoss >= 0) body["relayLoss"] = hostRelayLoss;
             lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
         }
 

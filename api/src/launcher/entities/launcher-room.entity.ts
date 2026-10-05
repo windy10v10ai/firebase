@@ -27,6 +27,7 @@ export class LauncherRoom {
   map?: LauncherRoomMap;
   playerCount?: number;
   relayRtt?: number;
+  relayLoss?: number;
   /** 只对这一个房间生效，房主重开房就清空 */
   kickedSteamIds?: number[];
   lastSeenAt: Date;
