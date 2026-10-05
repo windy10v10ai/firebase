@@ -156,6 +156,32 @@ gcloud monitoring dashboards update $ID --config-from-file=/tmp/api-latency-dash
 
 日志指标的定义存在同目录的 `api-request-latency.metric.yaml`，改了用 `gcloud logging metrics update api_request_latency --config-from-file=...` 同步。命令行查延迟的方法见 [debug-evidence](../../.claude/skills/debug-evidence/SKILL.md) 技能的「查延迟」。
 
+### 告警
+
+一条告警策略「windy10v10ai API Alert」，任一条件满足就发邮件到 `windybirth@gmail.com` 并推送 Cloud Console 手机 App。三个条件各管一类故障：
+
+| 条件 | 抓什么 |
+|---|---|
+| p95 | 请求到了但变慢 |
+| 4xx/5xx 比例 | 请求到了但失败：接口被删、鉴权改错、后端报错、服务起不来 |
+| 可用性检测 | 请求到不了 API：`api.windy10v10ai.com` 的域名解析、Cloudflare、证书出问题 |
+
+- **只盯游戏走的那条路**：游戏请求直连 API 域名，可用性检测只测它；网站转发坏了只影响网站页面，用户打开就能发现
+- **不按错误日志量告警**：与流量无关，零星报错到不了阈值，大量报错又几乎都伴随 5xx，比例条件先抓到。代价是定时函数失败没有告警
+- **4xx 也算失败**：接口被删、鉴权改错这类部署事故返回的是 4xx，只看 5xx 会漏
+
+阈值的取值理由写在配置文件里。告警策略存在 [api/scripts/monitoring/api-alert-policy.yaml](../../api/scripts/monitoring/api-alert-policy.yaml)，改了在 `api/` 下同步：
+
+```bash
+gcloud alpha monitoring policies update projects/windy10v10ai/alertPolicies/10525598496095275816 --policy-from-file=scripts/monitoring/api-alert-policy.yaml --project windy10v10ai
+```
+
+可用性检测不在策略文件里，建一次即可，告警条件按域名匹配它：
+
+```bash
+gcloud monitoring uptime create "API hello" --resource-type=uptime-url --resource-labels=host=api.windy10v10ai.com,project_id=windy10v10ai --protocol=https --path=/api/hello --period=5 --timeout=10 --regions=asia-pacific,usa-oregon,europe --project windy10v10ai
+```
+
 ## 一致性
 
 系统对两类数据给的保证不一样，这是有意的。
