@@ -198,6 +198,27 @@ describe('LauncherRoomService', () => {
     );
   });
 
+  it('双方到中转的延迟与丢包随加入结果写进统计', async () => {
+    const room = await service.host(HOST);
+    const joined = await service.join(room.code, { ...JOINER, relayRtt: 60, relayLoss: 15 });
+
+    await service.host({
+      ...HOST,
+      code: room.code,
+      token: room.token,
+      relayRtt: 30,
+      relayLoss: 5,
+      results: [{ joinId: joined.joinId, path: 'relay', elapsedMs: 2400 }],
+    });
+
+    expect(bigQuery.recordJoinResult).toHaveBeenCalledWith(
+      expect.objectContaining({ relayRtt: 30, relayLoss: 5 }),
+      expect.objectContaining({ relayRtt: 60, relayLoss: 15 }),
+      'relay',
+      2400,
+    );
+  });
+
   it('开局后加入返回 409，房主过期后依旧是 409', async () => {
     const room = await service.host(HOST);
     await service.host({ ...HOST, code: room.code, token: room.token, started: true });

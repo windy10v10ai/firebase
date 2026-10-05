@@ -145,6 +145,8 @@ export class LauncherRoomService {
       symmetricNat: dto.symmetricNat,
       launcherVersion: dto.launcherVersion,
       country,
+      relayRtt: dto.relayRtt,
+      relayLoss: dto.relayLoss,
       probe: dto.probe,
       createdAt: now,
       expireAt: expireAt(now),
@@ -298,6 +300,7 @@ function roomSettings(dto: HostRoomDto): Partial<LauncherRoom> {
     map: dto.map,
     playerCount: dto.playerCount,
     relayRtt: dto.relayRtt,
+    relayLoss: dto.relayLoss,
     kickedSteamIds: dto.kickedSteamIds,
   };
   return Object.fromEntries(

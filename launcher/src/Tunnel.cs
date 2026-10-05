@@ -42,6 +42,14 @@ namespace Windy10v10AI.Launcher
         public const byte Pong = 0xF7;
     }
 
+    // Round trip and loss percentage to the relay; Rtt is -1 when every echo was lost, Loss is -1 when nothing was measured
+    struct RelayQuality
+    {
+        public static readonly RelayQuality Unknown = new RelayQuality { Rtt = -1, Loss = -1 };
+        public int Rtt;
+        public int Loss;
+    }
+
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
     abstract class Tunnel : IDisposable
     {
@@ -55,8 +63,10 @@ namespace Windy10v10AI.Launcher
         const int MaxLanCandidates = 6;
         const int SioUdpConnReset = -1744830452;
         const int RelayRetryMs = 500;
-        const int RelayPingMs = 1500;
-        const int RelayPingSamples = 3;
+        // Twenty echoes resolve loss to five percent while the whole probe stays under three seconds
+        const int RelayProbeCount = 20;
+        const int RelayProbeGapMs = 50;
+        const int RelayProbeWaitMs = 1000;
 
         protected readonly UdpClient Socket;
         protected volatile bool Closed;
@@ -64,6 +74,7 @@ namespace Windy10v10AI.Launcher
         readonly object relaySync = new object();
         IPEndPoint relayWaitFrom;
         byte[] relayAnswer;
+        List<KeyValuePair<byte[], long>> probeReplies;
 
         protected Tunnel()
         {
@@ -177,20 +188,50 @@ namespace Windy10v10AI.Launcher
         }
 
         // The lowest of a few round trips to the relay, or -1 when it never answers
-        public int MeasureRelay(IPEndPoint relay)
+        public RelayQuality MeasureRelay(IPEndPoint relay)
         {
-            var best = -1;
+            var sent = new HashSet<long>();
+            var replies = new List<KeyValuePair<byte[], long>>();
             lock (relayClaim)
             {
-                for (var i = 0; i < RelayPingSamples; i++)
+                lock (relaySync)
                 {
-                    var answer = AskRelay(RelayPacket.Ping, BitConverter.GetBytes(Stopwatch.GetTimestamp()), relay, DateTime.UtcNow.AddMilliseconds(RelayPingMs));
-                    if (answer == null || answer[0] != RelayPacket.Pong || answer.Length < 9) continue;
-                    var ms = (int)((Stopwatch.GetTimestamp() - BitConverter.ToInt64(answer, 1)) * 1000 / Stopwatch.Frequency);
-                    if (best < 0 || ms < best) best = ms;
+                    relayWaitFrom = relay;
+                    probeReplies = replies;
+                }
+                try
+                {
+                    for (var i = 0; i < RelayProbeCount && !Closed; i++)
+                    {
+                        var stamp = Stopwatch.GetTimestamp();
+                        sent.Add(stamp);
+                        Send(RelayPacket.Ping, BitConverter.GetBytes(stamp), relay);
+                        Thread.Sleep(RelayProbeGapMs);
+                    }
+                    Thread.Sleep(RelayProbeWaitMs);
+                }
+                finally
+                {
+                    lock (relaySync)
+                    {
+                        relayWaitFrom = null;
+                        probeReplies = null;
+                    }
                 }
             }
-            return best;
+            if (sent.Count < RelayProbeCount) return RelayQuality.Unknown;
+            var best = -1;
+            var answered = 0;
+            foreach (var reply in replies)
+            {
+                if (reply.Key[0] != RelayPacket.Pong || reply.Key.Length < 9) continue;
+                var stamp = BitConverter.ToInt64(reply.Key, 1);
+                if (!sent.Remove(stamp)) continue;
+                answered++;
+                var ms = (int)((reply.Value - stamp) * 1000 / Stopwatch.Frequency);
+                if (best < 0 || ms < best) best = ms;
+            }
+            return new RelayQuality { Rtt = best, Loss = (RelayProbeCount - answered) * 100 / RelayProbeCount };
         }
 
         // Repeats the request until the relay answers from that address, since either packet may be lost
@@ -221,6 +262,11 @@ namespace Windy10v10AI.Launcher
             lock (relaySync)
             {
                 if (relayWaitFrom == null || !relayWaitFrom.Equals(from)) return;
+                if (probeReplies != null)
+                {
+                    probeReplies.Add(new KeyValuePair<byte[], long>(data, Stopwatch.GetTimestamp()));
+                    return;
+                }
                 relayAnswer = data;
                 Monitor.PulseAll(relaySync);
             }

@@ -67,6 +67,8 @@
 | `country` | STRING | 按请求来源判定 |
 | `steam_id` | INT64 | 上报者：开房是房主，加入是加入者。启动器从注册表 `HKCU\Software\Valve\Steam\ActiveProcess` 的 `ActiveUser` 读，可伪造，只用于排查 |
 | `host_steam_id` | INT64 | 房主，API 从房间文档取 |
+| `host_relay_rtt_ms` / `host_relay_loss_pct` | INT64 | 只在加入结果里有：房主到中转的往返毫秒数与回声丢失百分比，0.5.0 起；全丢时往返为空 |
+| `joiner_relay_rtt_ms` / `joiner_relay_loss_pct` | INT64 | 同上，加入者在加入页量的；凭房间码直接加入、没打开列表的为空 |
 
 `room_created` 由开房请求写入；加入结果由房主在下一次轮询里上报，加入者的 Steam ID 与网络情况取自加入时存下的文档，所以加入者不用再调接口。房主在连接过程中崩溃时这次结果会丢，不影响看失败率。
 

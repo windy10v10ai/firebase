@@ -57,7 +57,7 @@ namespace Windy10v10AI.Launcher
         int refreshing;
         volatile bool disposed;
         int relayMeasuring;
-        int relayRtt = -1;
+        RelayQuality relayQuality = RelayQuality.Unknown;
 
         public bool? SymmetricNat;
         public int ActiveGames;
@@ -241,8 +241,8 @@ namespace Windy10v10AI.Launcher
             JoinTunnel socket;
             lock (sync) socket = tunnel;
             if (socket == null || disposed) return;
-            var rtt = socket.MeasureRelay(relay);
-            lock (sync) relayRtt = rtt;
+            var quality = socket.MeasureRelay(relay);
+            lock (sync) relayQuality = quality;
             Raise();
         }
 
@@ -254,7 +254,8 @@ namespace Windy10v10AI.Launcher
             {
                 list = rows.ConvertAll(r => r.Copy());
                 // A host that has not measured yet is assumed as far from the relay as we are
-                if (relayRtt >= 0) foreach (var row in list) row.RelayRtt = relayRtt + (row.HostRelayRtt >= 0 ? row.HostRelayRtt : relayRtt);
+                var own = relayQuality.Rtt;
+                if (own >= 0) foreach (var row in list) row.RelayRtt = own + (row.HostRelayRtt >= 0 ? row.HostRelayRtt : own);
             }
             list.Sort((a, b) =>
             {
@@ -277,6 +278,11 @@ namespace Windy10v10AI.Launcher
 
         // Hands the probing socket to a join, so the host already knows the address the join comes from.
         // Returns null when gathering failed and the join has to open its own
+        public RelayQuality RelayQuality
+        {
+            get { lock (sync) return relayQuality; }
+        }
+
         public JoinTunnel TakeTunnel(out List<Candidate> gathered)
         {
             ready.WaitOne();
