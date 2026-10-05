@@ -1,15 +1,13 @@
 import { generateKeyPairSync, verify } from 'crypto';
 
-import { SecretService } from '../util/secret/secret.service';
-
 import { LauncherRelayService, RELAY_TICKET_TTL_MS } from './launcher-relay.service';
 
 describe('LauncherRelayService', () => {
   const { privateKey, publicKey } = generateKeyPairSync('ed25519');
-  const secretService = {
-    getSecretValue: () => privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
-  } as unknown as SecretService;
-  const service = new LauncherRelayService(secretService);
+  process.env.LAUNCHER_RELAY_PRIVATE_KEY = privateKey
+    .export({ type: 'pkcs8', format: 'pem' })
+    .toString();
+  const service = new LauncherRelayService();
   const now = new Date('2026-10-05T12:00:00Z');
 
   it('签出的通行证能用公钥验证，载荷带加入编号、身份与过期时间', () => {
@@ -32,7 +30,10 @@ describe('LauncherRelayService', () => {
     });
   });
 
-  it('没配中转地址时不发通行证', () => {
+  it('没配中转地址或私钥时不发通行证', () => {
     expect(service.issue('join-1', 'h', now, '')).toBeUndefined();
+    expect(new LauncherRelayService().issue('join-1', 'h', now, '1.2.3.4:3478')).toBeDefined();
+    delete process.env.LAUNCHER_RELAY_PRIVATE_KEY;
+    expect(new LauncherRelayService().issue('join-1', 'h', now, '1.2.3.4:3478')).toBeUndefined();
   });
 });

@@ -3,7 +3,6 @@ import { FireormModule } from 'nestjs-fireorm';
 
 import { BigQueryModule } from '../bigquery/bigquery.module';
 import { SteamProfileModule } from '../steam-profile/steam-profile.module';
-import { SecretModule } from '../util/secret/secret.module';
 
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
 import { LauncherRoom } from './entities/launcher-room.entity';
@@ -19,7 +18,6 @@ import { LauncherController } from './launcher.controller';
     FireormModule.forFeature([LauncherRoom, LauncherRoomJoin]),
     BigQueryModule,
     SteamProfileModule,
-    SecretModule,
   ],
   controllers: [LauncherController, LauncherRoomController],
   providers: [

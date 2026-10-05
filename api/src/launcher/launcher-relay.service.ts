@@ -2,7 +2,7 @@ import { KeyObject, createPrivateKey, sign } from 'crypto';
 
 import { Injectable } from '@nestjs/common';
 
-import { SECRET, SecretService } from '../util/secret/secret.service';
+import { SECRET } from '../util/secret/secret.service';
 
 import { RelayDto } from './dto/launcher-room.dto';
 
@@ -15,23 +15,21 @@ export type RelayRole = 'h' | 'j';
 
 @Injectable()
 export class LauncherRelayService {
-  constructor(private readonly secretService: SecretService) {}
-
   private privateKey?: KeyObject;
 
-  /** 给一次加入的房主或加入者签中转通行证，没配中转地址时返回 undefined。 */
+  /** 给一次加入的房主或加入者签中转通行证，没配中转地址或私钥时返回 undefined。 */
   issue(
     joinId: string,
     role: RelayRole,
     now: Date,
     address = LAUNCHER_RELAY_ADDRESS,
   ): RelayDto | undefined {
-    if (!address) {
+    const privateKeyPem = process.env[SECRET.LAUNCHER_RELAY_PRIVATE_KEY];
+    // 本地与 e2e 不配私钥，不发通行证，开房与加入照常
+    if (!address || !privateKeyPem) {
       return undefined;
     }
-    this.privateKey ??= createPrivateKey(
-      this.secretService.getSecretValue(SECRET.LAUNCHER_RELAY_PRIVATE_KEY),
-    );
+    this.privateKey ??= createPrivateKey(privateKeyPem);
     const payload = Buffer.from(
       JSON.stringify({
         j: joinId,
