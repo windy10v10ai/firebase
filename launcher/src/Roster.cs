@@ -123,6 +123,11 @@ namespace Windy10v10AI.Launcher
             lock (sync) return entries.FindAll(e => e.Status != PlayerStatus.Failed && e.Status != PlayerStatus.Left).Count;
         }
 
+        public int GuestCount()
+        {
+            lock (sync) return entries.FindAll(e => !e.IsHost && e.Status != PlayerStatus.Failed && e.Status != PlayerStatus.Left).Count;
+        }
+
         public List<RosterEntry> Snapshot()
         {
             lock (sync)

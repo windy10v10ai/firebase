@@ -106,7 +106,7 @@ namespace Windy10v10AI.Launcher
         public static string Paste { get { return Pick("粘贴", "Paste", "Вставить"); } }
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
-        public static string PublicHostingHint { get { return Pick("其他玩家能在列表里看到这个房间，也可以把房间码发给朋友，人到齐后在游戏里点「锁定并开始」", "Other players can find this room in the list, or send the code to friends. Start in game once everyone is in.", "Комнату видно в списке, можно и отправить код друзьям. Начните игру, когда все зайдут."); } }
+        public static string PublicHostingHint { get { return Pick("其他玩家能在列表里看到这个房间，人到齐后在游戏里点「锁定并开始」", "Other players can find this room in the list. Start in game once everyone is in.", "Комнату видно в списке. Начните игру, когда все зайдут."); } }
         public static string PrivateHostingHint { get { return Pick("不在列表里显示，只有拿到房间码的朋友能加入，人到齐后在游戏里点「锁定并开始」", "Hidden from the list; only friends with the code can join. Start in game once everyone is in.", "Комнаты нет в списке, войти можно только по коду. Начните игру, когда все зайдут."); } }
         public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
         public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
@@ -121,6 +121,15 @@ namespace Windy10v10AI.Launcher
         public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
         public static string Rejoin { get { return Pick("重新进入游戏", "Rejoin game", "Вернуться в игру"); } }
+        public static string HostGuide { get { return Pick("创建房间后 Dota 2 会自动打开，等其他玩家加入后，在 Dota 2 里点「锁定并开始」", "Dota 2 opens once the room is created. When everyone has joined, start the game in Dota 2.", "После создания комнаты Dota 2 откроется автоматически. Когда все зайдут, начните игру в Dota 2."); } }
+        public static string ServerStillRunning { get { return Pick("Dota 2 已关闭，服务器仍在运行", "Dota 2 is closed; the server is still running", "Dota 2 закрыта, сервер продолжает работать"); } }
+        public static string SavingResults { get { return Pick("游戏已结束，正在保存结果", "Game over. Saving the results...", "Игра окончена. Сохраняем результаты…"); } }
+        public static string ResultsSaved { get { return Pick("结算已完成，可以关闭服务器。所有人退出 Dota 2 后会自动关闭", "Results saved. You can stop the server; it stops by itself once everyone leaves Dota 2.", "Результаты сохранены. Сервер можно остановить; он остановится сам, когда все выйдут из Dota 2."); } }
+        public static string SavingCloseTitle { get { return Pick("结果还没保存完", "Results not saved yet", "Результаты ещё не сохранены"); } }
+        public static string SavingCloseBody { get { return Pick("现在关闭服务器，这局的积分可能不会记录。", "Stopping the server now may lose this game's points.", "Если остановить сервер сейчас, очки за эту игру могут не засчитаться."); } }
+        public static string StopAnyway { get { return Pick("仍然关闭", "Stop anyway", "Всё равно остановить"); } }
+        public static string GameEndedLeave { get { return Pick("游戏已结束，关闭 Dota 2 后自动退出房间", "Game over. You leave the room when you close Dota 2.", "Игра окончена. После закрытия Dota 2 вы выйдете из комнаты."); } }
+        public static string GameEnded { get { return Pick("游戏已结束", "Game over", "Игра окончена"); } }
         public static string HostLost { get { return Pick("房主已关闭游戏，或连接已断开。", "The host closed the game or the connection was lost.", "Хост закрыл игру, или соединение потеряно."); } }
 
         public static string PlayersInRoom { get { return Pick("房间里的玩家", "Players in the room", "Игроки в комнате"); } }
