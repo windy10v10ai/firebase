@@ -857,7 +857,7 @@ namespace Windy10v10AI.Launcher
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
                     hostTunnel.Start();
-                    rosterServer = new RosterServer(roster.Snapshot);
+                    rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
                     rosterServer.Start();
                     // The code is ready long before the server, so the host can share it while waiting
                     var shown = code;

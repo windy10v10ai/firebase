@@ -8,7 +8,7 @@ using System.Web.Script.Serialization;
 
 namespace Windy10v10AI.Launcher
 {
-    // Serves the players still on their way in to the game's lobby screen, which runs on this machine's dedicated server.
+    // Tells the game's lobby screen, which runs on this machine's dedicated server, who is still joining and how full the room is.
     // Bound to loopback only, so nothing outside this computer can reach it and Windows never asks about the firewall
     class RosterServer : IDisposable
     {
@@ -17,11 +17,13 @@ namespace Windy10v10AI.Launcher
 
         readonly TcpListener listener = new TcpListener(IPAddress.Loopback, Port);
         readonly Func<List<RosterEntry>> source;
+        readonly Func<int> maxPlayers;
         volatile bool closed;
 
-        public RosterServer(Func<List<RosterEntry>> source)
+        public RosterServer(Func<List<RosterEntry>> source, Func<int> maxPlayers)
         {
             this.source = source;
+            this.maxPlayers = maxPlayers;
         }
 
         // A port already in use only costs the lobby its list of incoming players
@@ -65,13 +67,19 @@ namespace Windy10v10AI.Launcher
 
         string Body()
         {
-            var entering = new List<Dictionary<string, object>>();
+            var entering = new List<string>();
+            var inGame = 0;
             foreach (var entry in source())
             {
-                if (entry.IsHost || (entry.Status != PlayerStatus.Connecting && entry.Status != PlayerStatus.Loading)) continue;
-                entering.Add(new Dictionary<string, object> { { "name", entry.Name ?? "" }, { "loading", entry.Status == PlayerStatus.Loading } });
+                if (entry.Status == PlayerStatus.InGame) inGame++;
+                else if (!entry.IsHost && (entry.Status == PlayerStatus.Connecting || entry.Status == PlayerStatus.Loading)) entering.Add(entry.Name ?? "");
             }
-            return new JavaScriptSerializer().Serialize(new Dictionary<string, object> { { "entering", entering } });
+            return new JavaScriptSerializer().Serialize(new Dictionary<string, object>
+            {
+                { "entering", entering },
+                { "inGame", inGame },
+                { "maxPlayers", maxPlayers() },
+            });
         }
 
         public void Dispose()
