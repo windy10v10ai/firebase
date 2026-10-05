@@ -135,6 +135,7 @@ namespace Windy10v10AI.Launcher
         string roomToken;
         string roomMap;
         Dictionary<string, object> roomBody;
+        volatile int hostRelayRtt = -1;
         readonly HashSet<string> seenJoins = new HashSet<string>();
         readonly List<long> kicked = new List<long>();
         bool paused;
@@ -832,6 +833,7 @@ namespace Windy10v10AI.Launcher
                     hostBody["publicIp"] = publicIp;
                     lock (seenJoins) seenJoins.Clear();
                     lock (kicked) kicked.Clear();
+                    hostRelayRtt = -1;
                     Dictionary<string, object> opened;
                     try
                     {
@@ -852,6 +854,13 @@ namespace Windy10v10AI.Launcher
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
                     hostTunnel.Start();
+                    var relay = RelayTicket.Address(opened.ContainsKey("relayAddress") ? opened["relayAddress"] : null);
+                    if (relay != null)
+                    {
+                        var measuring = hostTunnel;
+                        // Measured once per room; joiners add it to their own to estimate a relayed route
+                        new Thread(() => hostRelayRtt = measuring.MeasureRelay(relay)) { IsBackground = true }.Start();
+                    }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
                     rosterServer.Start();
                     // The code is ready long before the server, so the host can share it while waiting
@@ -1205,6 +1214,7 @@ namespace Windy10v10AI.Launcher
             body["maxPlayers"] = Settings.MaxPlayers;
             body["map"] = roomMap;
             body["playerCount"] = playerCount;
+            if (hostRelayRtt >= 0) body["relayRtt"] = hostRelayRtt;
             lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
         }
 

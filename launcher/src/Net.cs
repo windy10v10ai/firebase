@@ -65,14 +65,23 @@ namespace Windy10v10AI.Launcher
         {
             var relay = answer.ContainsKey("relay") ? answer["relay"] as Dictionary<string, object> : null;
             if (relay == null) return null;
-            var address = relay.ContainsKey("address") ? relay["address"] as string : null;
+            var address = relay.ContainsKey("address") ? relay["address"] : null;
             var ticket = relay.ContainsKey("ticket") ? relay["ticket"] as string : null;
-            if (string.IsNullOrEmpty(address) || string.IsNullOrEmpty(ticket)) return null;
+            var control = Address(address);
+            if (control == null || string.IsNullOrEmpty(ticket)) return null;
+            return new RelayTicket(control, ticket);
+        }
+
+        // The relay's IP:port as the API sends it, or null when absent or malformed
+        public static IPEndPoint Address(object value)
+        {
+            var address = value as string;
+            if (string.IsNullOrEmpty(address)) return null;
             var parts = address.Split(':');
             IPAddress ip;
             int port;
             if (parts.Length != 2 || !IPAddress.TryParse(parts[0], out ip) || !int.TryParse(parts[1], out port)) return null;
-            return new RelayTicket(new IPEndPoint(ip, port), ticket);
+            return new IPEndPoint(ip, port);
         }
     }
 

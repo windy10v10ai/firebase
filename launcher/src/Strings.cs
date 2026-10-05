@@ -82,6 +82,7 @@ namespace Windy10v10AI.Launcher
         public static string Full { get { return Pick("已满", "Full", "Мест нет"); } }
         public static string ProbeLatency { get { return Pick("延迟 {0} ms", "Ping {0} ms", "Пинг {0} мс"); } }
         public static string ProbeTesting { get { return Pick("正在测试能否连通", "Testing the connection", "Проверяем соединение"); } }
+        public static string ProbeRelayLatency { get { return Pick("无法直连，经中转服务器延迟约 {0} ms", "No direct route; about {0} ms through our relay server", "Прямого соединения нет — через наш сервер пинг около {0} мс"); } }
         public static string ProbeFailed { get { return Pick("无法直连，加入后经中转服务器连接", "No direct route; joining goes through our relay server", "Прямого соединения нет — подключение пойдёт через наш сервер"); } }
         public static string RoomsLoading { get { return Pick("正在获取房间列表…", "Loading rooms...", "Загрузка комнат…"); } }
         public static string RoomsFailed { get { return Pick("获取房间列表失败，请点「刷新」重试", "Could not load rooms. Press Refresh to try again.", "Не удалось загрузить комнаты. Нажмите «Обновить»."); } }

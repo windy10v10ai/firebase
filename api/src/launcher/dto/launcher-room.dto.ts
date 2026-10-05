@@ -130,6 +130,13 @@ export class HostRoomDto extends LauncherPeerDto {
   @Min(1)
   playerCount?: number;
 
+  @ApiPropertyOptional({ description: '房主到中转的往返毫秒数，加入者据此估算走中转的延迟' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  relayRtt?: number;
+
   @ApiPropertyOptional({ description: '被移出的 32 位账号 ID，每次传完整名单', type: [Number] })
   @IsOptional()
   @IsArray()
@@ -200,6 +207,8 @@ export class HostRoomResponse extends LauncherProfileDto {
   token: string;
   @ApiProperty({ type: [PendingJoinDto] })
   joins: PendingJoinDto[];
+  @ApiPropertyOptional({ description: '中转地址，房主测到中转的延迟用，没配中转时省略' })
+  relayAddress?: string;
 }
 
 export class JoinRoomResponse {
@@ -229,6 +238,8 @@ export class PublicRoomDto extends LauncherProfileDto {
   playerCount?: number;
   @ApiPropertyOptional()
   maxPlayers?: number;
+  @ApiPropertyOptional({ description: '房主到中转的往返毫秒数，房主没测到时省略' })
+  hostRelayRtt?: number;
 }
 
 export class ListRoomsResponse {
@@ -238,4 +249,6 @@ export class ListRoomsResponse {
   activeGames: number;
   @ApiProperty({ description: '仍在进行的公开游戏玩家数' })
   activePlayers: number;
+  @ApiPropertyOptional({ description: '中转地址，测自己到中转的延迟用，没配中转时省略' })
+  relayAddress?: string;
 }

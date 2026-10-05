@@ -38,6 +38,8 @@ namespace Windy10v10AI.Launcher
         public const byte Rejected = 0xF3;
         public const byte Claim = 0xF4;
         public const byte Claimed = 0xF5;
+        public const byte Ping = 0xF6;
+        public const byte Pong = 0xF7;
     }
 
     // Carries Dota's UDP traffic between two launchers over a single port, so both Dota processes only talk to localhost
@@ -53,6 +55,8 @@ namespace Windy10v10AI.Launcher
         const int MaxLanCandidates = 6;
         const int SioUdpConnReset = -1744830452;
         const int RelayRetryMs = 500;
+        const int RelayPingMs = 1500;
+        const int RelayPingSamples = 3;
 
         protected readonly UdpClient Socket;
         protected volatile bool Closed;
@@ -169,6 +173,23 @@ namespace Windy10v10AI.Launcher
                 }
                 return null;
             }
+        }
+
+        // The lowest of a few round trips to the relay, or -1 when it never answers
+        public int MeasureRelay(IPEndPoint relay)
+        {
+            var best = -1;
+            lock (relayClaim)
+            {
+                for (var i = 0; i < RelayPingSamples; i++)
+                {
+                    var answer = AskRelay(RelayPacket.Ping, BitConverter.GetBytes(Stopwatch.GetTimestamp()), relay, DateTime.UtcNow.AddMilliseconds(RelayPingMs));
+                    if (answer == null || answer[0] != RelayPacket.Pong || answer.Length < 9) continue;
+                    var ms = (int)((Stopwatch.GetTimestamp() - BitConverter.ToInt64(answer, 1)) * 1000 / Stopwatch.Frequency);
+                    if (best < 0 || ms < best) best = ms;
+                }
+            }
+            return best;
         }
 
         // Repeats the request until the relay answers from that address, since either packet may be lost

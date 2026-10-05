@@ -18,6 +18,15 @@ namespace Windy10v10AI.Launcher
         public int MaxPlayers;
         public ProbeState Probe;
         public int Rtt = -1;
+        public int HostRelayRtt = -1;
+        // Estimated from both sides' round trips to the relay, since probes never go through it
+        public int RelayRtt = -1;
+
+        // The latency a join will most likely see, or -1 while unknown
+        public int Latency
+        {
+            get { return Probe == ProbeState.Reachable ? Rtt : (Probe == ProbeState.Unreachable ? RelayRtt : -1); }
+        }
 
         public bool Full
         {
@@ -47,6 +56,8 @@ namespace Windy10v10AI.Launcher
         List<Candidate> candidates;
         int refreshing;
         volatile bool disposed;
+        int relayMeasuring;
+        int relayRtt = -1;
 
         public bool? SymmetricNat;
         public int ActiveGames;
@@ -123,6 +134,11 @@ namespace Windy10v10AI.Launcher
                         Loaded = true;
                         LoadFailed = false;
                     }
+                    var relay = RelayTicket.Address(answer.TryGetValue("relayAddress", out value) ? value : null);
+                    if (relay != null && Interlocked.Exchange(ref relayMeasuring, 1) == 0)
+                    {
+                        new Thread(() => MeasureRelay(relay)) { IsBackground = true }.Start();
+                    }
                     foreach (var code in toProbe)
                     {
                         var target = code;
@@ -152,6 +168,7 @@ namespace Windy10v10AI.Launcher
                 Map = room.TryGetValue("map", out value) ? value as string : null,
                 Players = room.TryGetValue("playerCount", out value) && value != null ? Convert.ToInt32(value) : 0,
                 MaxPlayers = room.TryGetValue("maxPlayers", out value) && value != null ? Convert.ToInt32(value) : 0,
+                HostRelayRtt = room.TryGetValue("hostRelayRtt", out value) && value != null ? Convert.ToInt32(value) : -1,
             };
         }
 
@@ -217,17 +234,34 @@ namespace Windy10v10AI.Launcher
             Raise();
         }
 
+        // Measured once per visit on the probing socket, which is the one a later join takes over
+        void MeasureRelay(System.Net.IPEndPoint relay)
+        {
+            ready.WaitOne();
+            JoinTunnel socket;
+            lock (sync) socket = tunnel;
+            if (socket == null || disposed) return;
+            var rtt = socket.MeasureRelay(relay);
+            lock (sync) relayRtt = rtt;
+            Raise();
+        }
+
         // Directly reachable rooms first, the fuller and closer the better; rooms still testing next; then rooms only the relay reaches; full last
         public List<RoomRow> Snapshot()
         {
             List<RoomRow> list;
-            lock (sync) list = rows.ConvertAll(r => r.Copy());
+            lock (sync)
+            {
+                list = rows.ConvertAll(r => r.Copy());
+                // A host that has not measured yet is assumed as far from the relay as we are
+                if (relayRtt >= 0) foreach (var row in list) row.RelayRtt = relayRtt + (row.HostRelayRtt >= 0 ? row.HostRelayRtt : relayRtt);
+            }
             list.Sort((a, b) =>
             {
                 var rank = Rank(a).CompareTo(Rank(b));
                 if (rank != 0) return rank;
                 if (a.Players != b.Players) return b.Players.CompareTo(a.Players);
-                if (a.Joinable && a.Rtt != b.Rtt) return a.Rtt.CompareTo(b.Rtt);
+                if (a.Joinable && a.Latency != b.Latency) return a.Latency.CompareTo(b.Latency);
                 return string.CompareOrdinal(a.Code, b.Code);
             });
             return list;
