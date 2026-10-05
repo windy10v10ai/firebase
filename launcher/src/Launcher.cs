@@ -238,6 +238,7 @@ namespace Windy10v10AI.Launcher
             devLink.LinkClicked += delegate
             {
                 testBox.Visible = !testBox.Visible;
+                Relayout();
             };
 
             feedbackLink.Text = Strings.Feedback;
