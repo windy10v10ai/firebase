@@ -1,0 +1,64 @@
+# 告警策略「windy10v10ai API Alert」，同步方式见 docs/api/README.md 的「告警」
+displayName: windy10v10ai API Alert
+documentation:
+  subject: windy10v10ai API has some thing wrong
+combiner: OR
+conditions:
+- displayName: API - P95
+  conditionThreshold:
+    filter: resource.type = "cloud_function" AND resource.labels.function_name = "client"
+      AND metric.type = "cloudfunctions.googleapis.com/function/execution_times" AND
+      metric.labels.status = "ok"
+    aggregations:
+    - alignmentPeriod: 1800s
+      perSeriesAligner: ALIGN_PERCENTILE_95
+    comparison: COMPARISON_GT
+    thresholdValue: 2e+09
+    duration: 0s
+    trigger:
+      count: 1
+# 低流量时段一次短暂的突发就能把长窗口的比例推过阈值，用短窗口加持续时间，只对持续的失败告警
+- displayName: API - 4xx/5xx ratio
+  conditionThreshold:
+    filter: resource.type = "cloud_run_revision" AND resource.labels.service_name = "client"
+      AND metric.type = "run.googleapis.com/request_count"
+      AND metric.labels.response_code_class = one_of("4xx", "5xx")
+    aggregations:
+    - alignmentPeriod: 300s
+      perSeriesAligner: ALIGN_DELTA
+      crossSeriesReducer: REDUCE_SUM
+    denominatorFilter: resource.type = "cloud_run_revision" AND resource.labels.service_name = "client"
+      AND metric.type = "run.googleapis.com/request_count"
+    denominatorAggregations:
+    - alignmentPeriod: 300s
+      perSeriesAligner: ALIGN_DELTA
+      crossSeriesReducer: REDUCE_SUM
+    comparison: COMPARISON_GT
+    thresholdValue: 0.3
+    duration: 900s
+    trigger:
+      count: 1
+# 只有请求到不了 API 时才失败，这类故障上面两个条件都看不见；要求两个地区同时失败，排除单个地区自身的网络抖动
+- displayName: API - uptime check failed
+  conditionThreshold:
+    filter: resource.type = "uptime_url" AND resource.labels.host = "api.windy10v10ai.com"
+      AND metric.type = "monitoring.googleapis.com/uptime_check/check_passed"
+    aggregations:
+    - alignmentPeriod: 1200s
+      perSeriesAligner: ALIGN_NEXT_OLDER
+      crossSeriesReducer: REDUCE_COUNT_FALSE
+      groupByFields:
+      - resource.label.host
+    comparison: COMPARISON_GT
+    thresholdValue: 1
+    duration: 60s
+    trigger:
+      count: 1
+alertStrategy:
+  autoClose: 604800s
+  notificationPrompts:
+  - OPENED
+notificationChannels:
+- projects/windy10v10ai/notificationChannels/17285459368849692924
+- projects/windy10v10ai/notificationChannels/15023091692128420282
+enabled: true
