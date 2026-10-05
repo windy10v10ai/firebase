@@ -58,6 +58,7 @@ describe('LauncherRoomService', () => {
   let rooms: ReturnType<typeof memoryRepository<LauncherRoom>>;
   let joins: ReturnType<typeof memoryRepository<LauncherRoomJoin>>;
   let bigQuery: { recordRoomCreated: jest.Mock; recordJoinResult: jest.Mock };
+  let relay: { issue: jest.Mock };
   let service: LauncherRoomService;
 
   beforeEach(() => {
@@ -72,11 +73,13 @@ describe('LauncherRoomService', () => {
         avatarUrl: null,
       })),
     };
+    relay = { issue: jest.fn(() => undefined) };
     service = new LauncherRoomService(
       rooms as never,
       joins as never,
       bigQuery as unknown as BigQueryService,
       steamProfile as never,
+      relay as never,
     );
   });
 
@@ -124,9 +127,29 @@ describe('LauncherRoomService', () => {
         personaName: 'CalmDown!',
         avatarUrl: undefined,
         probe: false,
+        relay: undefined,
       },
     ]);
     expect(joined.self.personaName).toEqual('CalmDown!');
+  });
+
+  it('配了中转时房主与加入者各拿一张同一次加入的通行证，测试连通不发', async () => {
+    relay.issue.mockImplementation((joinId: string, role: string) => ({
+      address: '1.2.3.4:3478',
+      ticket: `${joinId}:${role}`,
+    }));
+    const room = await service.host(HOST);
+
+    const joined = await service.join(room.code, JOINER);
+    const probed = await service.join(room.code, { ...JOINER, probe: true });
+    const polled = await service.host({ ...HOST, code: room.code, token: room.token });
+
+    expect(joined.relay?.ticket).toEqual(`${joined.joinId}:j`);
+    expect(probed.relay).toBeUndefined();
+    expect(polled.joins.map((join) => join.relay?.ticket)).toEqual([
+      `${joined.joinId}:h`,
+      undefined,
+    ]);
   });
 
   it('超过 30 秒的加入请求不再返回给房主', async () => {

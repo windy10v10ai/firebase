@@ -22,11 +22,12 @@
 
 ## 联机
 
-顶部分段切换「单人游戏 | 联机主机 | 加入联机」。设计与取舍见[阶段 1 设计](../docs/design/launcher-multiplayer/phase-1-friend-room.md)、[阶段 2 设计](../docs/design/launcher-multiplayer/phase-2-public-room.md)与[阶段 3 设计](../docs/design/launcher-multiplayer/phase-3-room-flow.md)。
+顶部分段切换「单人游戏 | 联机主机 | 加入联机」。设计与取舍见[阶段 1 设计](../docs/design/launcher-multiplayer/phase-1-friend-room.md)、[阶段 2 设计](../docs/design/launcher-multiplayer/phase-2-public-room.md)、[阶段 3 设计](../docs/design/launcher-multiplayer/phase-3-room-flow.md)与[阶段 4 设计](../docs/design/launcher-multiplayer/phase-4-relay.md)。
 
 - **Dota 两边都只连本机**：跨网的只有两个启动器之间的 UDP 隧道，单人模式验证过的 Dota 行为不变。
-- **API 只牵线**：开房、轮询、交换双方地址走 API，连通后游戏数据不经过我们的服务器。
-- **不依赖公网 IP**：局域网、STUN 打洞两条路同时试，按局域网 > 打洞取用；不用 UPnP，理由见设计文档；都不通就失败，暂无中转。
+- **API 只牵线**：开房、轮询、交换双方地址走 API；直连时游戏数据不经过我们的服务器。
+- **不依赖公网 IP**：局域网、STUN 打洞、中转三条路同时试，按局域网 > 打洞 > 中转取用，中转先通也等到握手开始后 3 秒；不用 UPnP，理由见设计文档。选路由加入者决定再告诉房主。
+- **中转只转发、不看内容**：服务器在 server 仓库，国内一台。每次加入在中转上分一个单独的端口，房主照旧按对方地址区分朋友。中转地址与通行证由 API 下发，API 不配地址时不走中转；加入者带 `--relay-only` 启动只走中转，用来实测。
 - **玩家列表由房主维护**：房主从隧道与专用服日志得知每个人的状态，经隧道发给加入者，两边看到的一致。状态只有连接中、已连通正在载入、已进入游戏、连接失败、已离开五种，不跟踪 Dota 内的掉线与重连。
 - **联机要求地图最新**：双方地图版本不同进游戏可能出错，地图不是最新时联机两个分段都不能开局。
 - **联机主机关闭自动开始**：专用服带固定的服务器名启动，游戏据此等房主点「锁定并开始」。
