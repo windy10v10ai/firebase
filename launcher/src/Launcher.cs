@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.5.2.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.5.2.0")]
+[assembly: System.Reflection.AssemblyVersion("0.5.3.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.5.3.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.5.2";
+        const string Version = "0.5.3";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -512,6 +512,8 @@ namespace Windy10v10AI.Launcher
             SetHostAreaShown(!away);
             // An idle join page only ever shows a notice in this area, so it needs less room than a launch in progress
             y += away ? 0 : (browsing && !busy ? 60 : 124);
+            // Keeps the solo tab as tall as the host tab's room settings row, so switching between them does not resize the window
+            if (modeBar.Selected == 0 && !cardShown) y += 42;
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
             mapDot.SetBounds(P(20), P(y + 16), P(8), P(8));
             var devWidth = TextRenderer.MeasureText(devLink.Text, devLink.Font).Width + P(4);

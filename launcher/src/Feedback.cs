@@ -375,7 +375,7 @@ namespace Windy10v10AI.Launcher
         const int MaxTopics = 2;
         const int MaxDescription = 1000;
         const string PrivacyUrl = Updater.DownloadPage + "/code-signing#privacy";
-        static readonly string[] TopicIds = { "hero", "ability", "item", "bot", "balance", "ui", "member", "lag", "launcher", "web" };
+        static readonly string[] TopicIds = { "hero", "ability", "awaken", "item", "bot", "balance", "ui", "member", "lag", "launcher", "web" };
 
         readonly FeedbackContext context;
         readonly SegmentedBar typeBar = new SegmentedBar();

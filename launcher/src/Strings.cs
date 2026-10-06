@@ -71,9 +71,9 @@ namespace Windy10v10AI.Launcher
         public static string UseTestMap { get { return Pick("使用测试服", "Use test map", "Тестовая карта"); } }
 
         public static string Solo { get { return Pick("单人游戏", "Single player", "Одиночная игра"); } }
-        public static string HostRoom { get { return Pick("联机主机", "Host", "Хост"); } }
-        public static string JoinRoom { get { return Pick("加入联机", "Join", "Присоединиться"); } }
-        public static string HostIdle { get { return Pick("点击难度，创建联机主机", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
+        public static string HostRoom { get { return Pick("创建房间", "Host", "Хост"); } }
+        public static string JoinRoom { get { return Pick("加入房间", "Join", "Присоединиться"); } }
+        public static string HostIdle { get { return Pick("点击难度，创建房间", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
         public static string PublicRooms { get { return Pick("公开房间", "Public rooms", "Открытые комнаты"); } }
         public static string SectionWaiting { get { return Pick("等待加入", "Open to join", "Ждут игроков"); } }
         public static string SectionPlaying { get { return Pick("进行中", "In progress", "Идут игры"); } }
@@ -81,16 +81,16 @@ namespace Windy10v10AI.Launcher
         public static string WaitingForPlayers { get { return Pick("等人加入…", "Waiting…", "Ждём игроков…"); } }
         public static string PlayingFor { get { return Pick("已进行 {0} 分钟", "{0} min in", "Идёт {0} мин"); } }
         public static string RoomPlayers { get { return Pick("{0} 人", "{0}", "{0}"); } }
-        public static string FriendGame { get { return Pick("好友游戏", "Friends", "Друзья"); } }
+        public static string FriendGame { get { return Pick("好友房间", "Friends", "Друзья"); } }
         public static string Refresh { get { return Pick("刷新", "Refresh", "Обновить"); } }
         public static string ColumnMap { get { return Pick("地图", "Map", "Карта"); } }
         public static string ColumnPlayers { get { return Pick("人数", "Players", "Игроки"); } }
         public static string ColumnPing { get { return Pick("延迟", "Ping", "Пинг"); } }
         public static string Full { get { return Pick("已满", "Full", "Мест нет"); } }
-        public static string ProbeLatency { get { return Pick("延迟 {0} ms", "Ping {0} ms", "Пинг {0} мс"); } }
+        public static string ProbeLatency { get { return Pick("直连，延迟 {0} ms", "Direct, ping {0} ms", "Напрямую, пинг {0} мс"); } }
         public static string ProbeTesting { get { return Pick("正在测试能否连通", "Testing the connection", "Проверяем соединение"); } }
-        public static string ProbeRelayLatency { get { return Pick("无法直连，经中转服务器延迟约 {0} ms", "No direct route; about {0} ms through our relay server", "Прямого соединения нет — через наш сервер пинг около {0} мс"); } }
-        public static string ProbeFailed { get { return Pick("无法直连，加入后经中转服务器连接", "No direct route; joining goes through our relay server", "Прямого соединения нет — подключение пойдёт через наш сервер"); } }
+        public static string ProbeRelayLatency { get { return Pick("经服务器，延迟 {0} ms", "Via server, ping {0} ms", "Через сервер, пинг {0} мс"); } }
+        public static string ProbeFailed { get { return Pick("经服务器连接", "Via server", "Через сервер"); } }
         public static string RoomsLoading { get { return Pick("正在获取房间列表…", "Loading rooms...", "Загрузка комнат…"); } }
         public static string RoomsFailed { get { return Pick("获取房间列表失败，请点「刷新」重试", "Could not load rooms. Press Refresh to try again.", "Не удалось загрузить комнаты. Нажмите «Обновить»."); } }
         public static string NoRooms { get { return Pick("现在没有公开房间，可以自己开一个", "No public rooms right now. Host one yourself!", "Сейчас нет открытых комнат — создайте свою!"); } }
@@ -154,7 +154,7 @@ namespace Windy10v10AI.Launcher
         public static string StatusLeft { get { return Pick("已离开", "Left", "Вышел"); } }
         public static string HostSilent { get { return Pick("与房主的连接中断，正在重连…", "Lost contact with the host, reconnecting...", "Связь с хостом прервана, переподключение…"); } }
         public static string MapCardTitle { get { return Pick("联机需要最新版地图", "Online play needs the latest map", "Для игры по сети нужна последняя версия карты"); } }
-        public static string MapCardHost { get { return Pick("地图正在等待 Steam 更新。更新完成前不能创建联机主机，期间不要打开 Dota 2。", "The map is waiting for a Steam update. You can host once it finishes; keep Dota 2 closed until then.", "Карта ждёт обновления в Steam. Хостить можно после обновления; до этого не открывайте Dota 2."); } }
+        public static string MapCardHost { get { return Pick("地图正在等待 Steam 更新。更新完成前不能创建房间，期间不要打开 Dota 2。", "The map is waiting for a Steam update. You can host once it finishes; keep Dota 2 closed until then.", "Карта ждёт обновления в Steam. Хостить можно после обновления; до этого не открывайте Dota 2."); } }
         public static string MapCardJoin { get { return Pick("地图正在等待 Steam 更新。更新完成后这张卡片会自动消失，再点「加入」即可，期间不要打开 Dota 2。", "The map is waiting for a Steam update. This card disappears once it finishes; then press Join. Keep Dota 2 closed until then.", "Карта ждёт обновления в Steam. После обновления эта карточка исчезнет — нажмите «Войти». До этого не открывайте Dota 2."); } }
         public static string MapHostOld { get { return Pick("房主的地图不是最新版本：请房主关掉服务器，等地图更新完成后重新开房（房间码会变）。", "The host's map is out of date. The host needs to stop the server, wait for the update and host again (the code will change).", "У хоста устаревшая карта. Хосту нужно остановить сервер, дождаться обновления и создать комнату заново (код изменится)."); } }
         public static string MapMismatch { get { return Pick("你和房主的地图版本不同：请两人都确认地图已更新到最新版。", "You and the host have different map versions. Both of you need the latest map.", "У вас и хоста разные версии карты. Обновите карту у обоих."); } }
@@ -180,6 +180,7 @@ namespace Windy10v10AI.Launcher
                 {
                     Pick("英雄", "Hero", "Герой"),
                     Pick("技能", "Ability", "Способность"),
+                    Pick("觉醒", "Awakening", "Пробуждение"),
                     Pick("物品", "Item", "Предмет"),
                     Pick("电脑 AI", "Bot AI", "ИИ ботов"),
                     Pick("平衡", "Balance", "Баланс"),
