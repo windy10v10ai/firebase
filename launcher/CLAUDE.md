@@ -18,6 +18,14 @@
 
 ## VirusTotal 扫描
 
+本机 Defender 扫描用 `& "$env:ProgramFiles\Windows Defender\MpCmdRun.exe" -Scan -ScanType 3 -File <exe> -DisableRemediation`，输出 `found no threats` 即通过。
+
+VirusTotal 的 Microsoft 一栏报 `!ml` 时，由 Claude 用 Claude in Chrome 代为申报误报，用户的 Chrome 已登录微软账号：
+
+- 申报页选「Software developer」，产品选「Microsoft Defender Antivirus (Windows 11)」，Company Name 填 `Windy10v10AI`，「What do you believe this file is?」选「Incorrectly detected as malware/malicious」，Detection name 填 VirusTotal 上的检出名，Additional information 用英文写清这是本仓库的开源启动器、源码与下载地址、由 GitHub Actions 编译、本机 Defender 不报
+- 上传框是普通的 file input，`find` 拿到 ref 后直接 `file_upload`；文件要先复制到会话临时目录
+- 最后一页「Review your submission」有验证码，Claude 不能代填：滚到验证码处，请用户填验证码并点 Submit
+
 发版前的扫描（理由见 README「发布」第 3 步）用 Claude in Chrome 自动上传，不用 API（要填密钥）：
 
 - 上传框藏在 `vt-ui-main-upload-form` 的 shadow DOM 里，`find` / `file_upload` 拿不到 ref。先用 `javascript_tool` 往 `document.body` 插一个带 `aria-label` 的 `<input type="file">`，`file_upload` 传给它，再用 `DataTransfer` 把文件赋给 shadow DOM 里的第二个 file input 并派发 `change`，页面会弹出「Confirm upload」，同样在 shadow DOM 里找到这个按钮调 `click()` 即开始扫描

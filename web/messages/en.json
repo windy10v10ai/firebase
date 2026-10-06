@@ -150,6 +150,10 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_5_0": [
+          "Improved online play, fixing connection failures for some players",
+          "Rejoin from the launcher after a disconnect; fewer overflow errors"
+        ],
         "v0_4_3": [
           "Fix games failing to start when Steam or Dota 2 is set to run as administrator"
         ],

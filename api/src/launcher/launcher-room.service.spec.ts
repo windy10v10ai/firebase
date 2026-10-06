@@ -57,7 +57,11 @@ const JOINER: JoinRoomDto = {
 describe('LauncherRoomService', () => {
   let rooms: ReturnType<typeof memoryRepository<LauncherRoom>>;
   let joins: ReturnType<typeof memoryRepository<LauncherRoomJoin>>;
-  let bigQuery: { recordRoomCreated: jest.Mock; recordJoinResult: jest.Mock };
+  let bigQuery: {
+    recordRoomCreated: jest.Mock;
+    recordJoinResult: jest.Mock;
+    recordConnectionQuality: jest.Mock;
+  };
   let relay: { issue: jest.Mock; address: jest.Mock };
   let service: LauncherRoomService;
 
@@ -65,7 +69,11 @@ describe('LauncherRoomService', () => {
     jest.useFakeTimers({ now: new Date('2026-10-03T12:00:00Z') });
     rooms = memoryRepository<LauncherRoom>();
     joins = memoryRepository<LauncherRoomJoin>();
-    bigQuery = { recordRoomCreated: jest.fn(), recordJoinResult: jest.fn() };
+    bigQuery = {
+      recordRoomCreated: jest.fn(),
+      recordJoinResult: jest.fn(),
+      recordConnectionQuality: jest.fn(),
+    };
     const steamProfile = {
       findBySteamId: jest.fn(async (steamId: number) => ({
         steamId: `${steamId}`,
@@ -195,6 +203,7 @@ describe('LauncherRoomService', () => {
       expect.objectContaining({ id: joined.joinId, steamId: 2002, symmetricNat: true }),
       'punch',
       1200,
+      undefined,
     );
   });
 
@@ -216,6 +225,45 @@ describe('LauncherRoomService', () => {
       expect.objectContaining({ relayRtt: 60, relayLoss: 15 }),
       'relay',
       2400,
+      undefined,
+    );
+  });
+
+  it('开局后的连接质量按加入记录写进统计，走中转的带上中转地址，测试连通与别的房间的不写', async () => {
+    relay.address.mockReturnValue('1.2.3.4:27200');
+    const room = await service.host(HOST);
+    const joined = await service.join(room.code, JOINER);
+    const probe = await service.join(room.code, { ...JOINER, probe: true });
+    const other = await service.host({ ...HOST, steamId: 3003 });
+    const otherJoin = await service.join(other.code, JOINER);
+
+    await service.host({
+      ...HOST,
+      code: room.code,
+      token: room.token,
+      started: true,
+      quality: [
+        { joinId: joined.joinId, path: 'relay', sent: 30, lost: 3, rttP50: 45, rttP95: 120 },
+        { joinId: joined.joinId, path: 'punch', sent: 30, lost: 30 },
+        { joinId: probe.joinId, path: 'punch', sent: 30, lost: 0, rttP50: 10, rttP95: 12 },
+        { joinId: otherJoin.joinId, path: 'lan', sent: 30, lost: 0, rttP50: 1, rttP95: 2 },
+      ],
+    });
+
+    expect(bigQuery.recordConnectionQuality).toHaveBeenCalledWith(
+      expect.objectContaining({ id: room.code }),
+      [
+        {
+          join: expect.objectContaining({ id: joined.joinId }),
+          quality: expect.objectContaining({ path: 'relay', lost: 3 }),
+          relayAddress: '1.2.3.4:27200',
+        },
+        {
+          join: expect.objectContaining({ id: joined.joinId }),
+          quality: expect.objectContaining({ path: 'punch', lost: 30 }),
+          relayAddress: undefined,
+        },
+      ],
     );
   });
 
