@@ -374,6 +374,7 @@ describe('LauncherRoomService', () => {
         map: 'hard',
         playerCount: 3,
         maxPlayers: 10,
+        players: [{ personaName: undefined, avatarUrl: undefined }],
       },
     ]);
     await expect(service.join(stale.code, JOINER)).resolves.toBeDefined();
@@ -426,11 +427,56 @@ describe('LauncherRoomService', () => {
     });
     rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - 90 * 1000 - 1);
 
-    await expect(service.list({ steamId: 2002, protocolVersion: 1 })).resolves.toEqual({
-      rooms: [],
-      activeGames: 1,
-      activePlayers: 4,
+    const res = await service.list({ steamId: 2002, protocolVersion: 1 });
+
+    expect(res).toMatchObject({ activeGames: 1, activePlayers: 4 });
+    expect(res.games.map((game) => [game.public, game.playerCount])).toEqual([
+      [true, 4],
+      [false, 5],
+    ]);
+  });
+
+  it('进行中的游戏按开局先后列出，公开的带玩家资料，好友房只给人数与时长，结束的不列', async () => {
+    const room = await service.host({ ...HOST, public: true, map: 'hard' });
+    await service.join(room.code, JOINER);
+    const poll = { ...HOST, code: room.code, token: room.token };
+    await service.host({ ...poll, players: [2002, 4004] });
+    await service.host({ ...poll, started: true, playerCount: 3 });
+    jest.advanceTimersByTime(5 * 60 * 1000);
+    const friends = await service.host({ ...HOST, steamId: 3001 });
+    await service.host({
+      ...HOST,
+      code: friends.code,
+      token: friends.token,
+      started: true,
+      playerCount: 2,
     });
+    const ended = await service.host({ ...HOST, steamId: 3002, public: true });
+    const endedPoll = { ...HOST, code: ended.code, token: ended.token };
+    await service.host({ ...endedPoll, started: true });
+    await service.host({ ...endedPoll, ended: true });
+    jest.advanceTimersByTime(2 * 60 * 1000);
+    // 开局后的心跳不改开局时间
+    await service.host(poll);
+    await service.host({ ...HOST, code: friends.code, token: friends.token });
+    await service.host(endedPoll);
+
+    const res = await service.list({ steamId: 2002, protocolVersion: 1 });
+
+    expect(res.games).toEqual([
+      {
+        public: true,
+        map: 'hard',
+        playerCount: 3,
+        minutes: 7,
+        players: [
+          { personaName: undefined, avatarUrl: undefined },
+          { personaName: 'CalmDown!', avatarUrl: undefined },
+          { personaName: undefined, avatarUrl: undefined },
+        ],
+      },
+      { public: false, playerCount: 2, minutes: 2 },
+    ]);
   });
 
   it('列表结果缓存 3 秒，期间不再查 Firestore', async () => {

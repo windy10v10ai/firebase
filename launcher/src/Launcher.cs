@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.5.1.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.5.1.0")]
+[assembly: System.Reflection.AssemblyVersion("0.6.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.6.0.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.5.1";
+        const string Version = "0.6.0";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -81,9 +81,11 @@ namespace Windy10v10AI.Launcher
         // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
         const int PauseMinutes = 15;
         const int ListRefreshMs = 30000;
+        const int BadgeRefreshMs = 60000;
         // A join page left open in the background stops asking the API for the list
         const int BrowseMinutes = 5;
-        const int ListHeight = 216;
+        const int ListHeight = 280;
+        const int BannerHeight = 80;
 
         static readonly string[] MapKeys = { "dota", "hard", "custom" };
         static readonly string[] MapNames = { "easy", "hard", "custom" };
@@ -113,13 +115,11 @@ namespace Windy10v10AI.Launcher
         readonly ContextMenuStrip maxMenu = new ContextMenuStrip();
         readonly NoticeBar pauseBar = new NoticeBar();
         readonly Label roomsTitle = new Label();
-        readonly Label roomsCount = new Label();
         readonly FlatButton refresh = new FlatButton();
         readonly RoomList roomList = new RoomList();
         readonly System.Windows.Forms.Timer listTimer = new System.Windows.Forms.Timer { Interval = ListRefreshMs };
         RoomBrowser browser;
         DateTime browseSince;
-        readonly Label privatePrompt = new Label();
         readonly CodeInput codeBox = new CodeInput();
         readonly CodeDisplay hostCode = new CodeDisplay();
         readonly PlayerList players = new PlayerList();
@@ -147,6 +147,12 @@ namespace Windy10v10AI.Launcher
         readonly List<long> kicked = new List<long>();
         bool paused;
         bool hostingReady;
+        // Read by the poll thread, so the list hides a finished game and shows how long the host's own has run
+        volatile bool roomEnded;
+        DateTime? roomStartedAt;
+        readonly Dictionary<Control, bool> hiddenTabStops = new Dictionary<Control, bool>();
+        readonly System.Windows.Forms.Timer badgeTimer = new System.Windows.Forms.Timer { Interval = BadgeRefreshMs };
+        int badgeLoading;
         readonly NoticeBar hostGuide = new NoticeBar();
         bool clientClosed;
         volatile bool clientRestarted;
@@ -185,8 +191,9 @@ namespace Windy10v10AI.Launcher
             banner.SizeMode = PictureBoxSizeMode.Zoom;
             banner.BackColor = Color.Black;
             using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("banner.jpg"))
+            using (var picture = Image.FromStream(stream))
             {
-                banner.Image = Image.FromStream(stream);
+                banner.Image = ShortBanner(picture);
             }
 
             subtitle.Text = Strings.Subtitle;
@@ -264,10 +271,19 @@ namespace Windy10v10AI.Launcher
             // Only the screen comes back; a room is never opened without a click
             Settings.Load();
             modeBar.Items = new[] { Strings.Solo, Strings.HostRoom, Strings.JoinRoom };
+            modeBar.Badge = 2;
+            badgeTimer.Tick += delegate { RefreshBadge(); };
             modeBar.Selected = Settings.Mode;
             status.Text = IdleText();
             modeBar.SelectedChanged += delegate
             {
+                // A host may look at the public list while its room is open; the saved tab stays the host's
+                if (Hosting)
+                {
+                    Relayout();
+                    UpdateBrowsing();
+                    return;
+                }
                 if (busy) return;
                 Settings.Mode = modeBar.Selected;
                 Settings.Save();
@@ -278,7 +294,11 @@ namespace Windy10v10AI.Launcher
                 if (modeBar.Selected == 2) codeBox.FillFromClipboard();
             };
             mapCard.Action.Click += delegate { OpenUrl("steam://url/CommunityFilePage/" + MapId); };
-            rosterTimer.Tick += delegate { RefreshPlayers(); };
+            rosterTimer.Tick += delegate
+            {
+                RefreshPlayers();
+                if (Hosting && browser != null) UpdateRoomList();
+            };
             thanksTimer.Tick += delegate
             {
                 thanksTimer.Stop();
@@ -330,8 +350,6 @@ namespace Windy10v10AI.Launcher
             roomsTitle.Text = Strings.PublicRooms;
             roomsTitle.Font = new Font(Theme.FontName, 10.5f, FontStyle.Bold);
             roomsTitle.TextAlign = ContentAlignment.MiddleLeft;
-            roomsCount.ForeColor = Theme.Muted;
-            roomsCount.TextAlign = ContentAlignment.MiddleLeft;
             refresh.Text = Strings.Refresh;
             refresh.Click += delegate
             {
@@ -342,13 +360,10 @@ namespace Windy10v10AI.Launcher
             listTimer.Tick += delegate
             {
                 // Nobody is looking at a minimised, background or long-forgotten join page
-                if (browser == null || busy || WindowState == FormWindowState.Minimized || ActiveForm != this) return;
+                if (browser == null || (busy && !Hosting) || WindowState == FormWindowState.Minimized || ActiveForm != this) return;
                 if ((DateTime.UtcNow - browseSince).TotalMinutes > BrowseMinutes) return;
                 browser.Refresh();
             };
-            privatePrompt.Text = Strings.PrivatePrompt;
-            privatePrompt.ForeColor = Theme.Muted;
-            privatePrompt.TextAlign = ContentAlignment.MiddleLeft;
             codeBox.Placeholder = Strings.CodeExample;
             codeBox.Submit += delegate { OnJoinClick(codeBox.Code); };
             codeBox.CodeChanged += delegate { UpdateJoinButton(); };
@@ -360,7 +375,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -374,7 +389,12 @@ namespace Windy10v10AI.Launcher
                 RefreshIdleMapState();
                 if (!busy && modeBar.Selected == 2) codeBox.FillFromClipboard();
             };
-            Shown += delegate { UpdateBrowsing(); };
+            Shown += delegate
+            {
+                UpdateBrowsing();
+                RefreshBadge();
+                badgeTimer.Start();
+            };
             WorkshopLatest.Changed += delegate
             {
                 if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)RefreshIdleMapState);
@@ -405,10 +425,10 @@ namespace Windy10v10AI.Launcher
 
         void Relayout()
         {
-            banner.SetBounds(0, 0, P(480), P(120));
-            subtitle.SetBounds(P(20), P(132), P(370), P(22));
-            version.SetBounds(P(390), P(132), P(70), P(22));
-            var y = 162;
+            banner.SetBounds(0, 0, P(480), P(BannerHeight));
+            subtitle.SetBounds(P(20), P(BannerHeight + 12), P(370), P(22));
+            version.SetBounds(P(390), P(BannerHeight + 12), P(70), P(22));
+            var y = BannerHeight + 42;
             modeBar.SetBounds(P(20), P(y), P(440), P(36));
             y += 48;
             // Room settings stay above the player list, because the host may change them while the room is open
@@ -428,13 +448,18 @@ namespace Windy10v10AI.Launcher
             }
             // Joining needs no difficulty, so the room list takes the place of the mode buttons
             var joining = modeBar.Selected == 2;
+            // A host looking at the public list leaves its own player list on the host tab
+            var showPlayers = playersShown && !(Hosting && joining);
             // The player list and the map card take the place of the buttons below the mode bar
-            var replaced = playersShown || cardShown;
+            var replaced = showPlayers || cardShown;
             var browsing = joining && !replaced;
+            // A host cannot join anyone, so a room code has nowhere to go
+            var typing = browsing && !Hosting;
             foreach (var mode in modes) mode.Visible = !joining && !replaced;
-            foreach (var control in new Control[] { roomsTitle, roomsCount, refresh, roomList, privatePrompt, codeBox, joinButton }) control.Visible = browsing;
-            players.Visible = playersShown;
-            mapCard.Visible = cardShown && !playersShown;
+            foreach (var control in new Control[] { roomsTitle, refresh, roomList }) control.Visible = browsing;
+            codeBox.Visible = joinButton.Visible = typing;
+            players.Visible = showPlayers;
+            mapCard.Visible = cardShown && !showPlayers;
             players.SetBounds(P(20), P(y), P(440), P(168));
             mapCard.SetBounds(P(20), P(y), P(440), P(118));
             for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
@@ -442,14 +467,12 @@ namespace Windy10v10AI.Launcher
             roomsTitle.SetBounds(P(20), P(y), titleWidth, P(28));
             var refreshWidth = Math.Max(P(64), TextRenderer.MeasureText(refresh.Text, refresh.Font).Width + P(24));
             refresh.SetBounds(P(460) - refreshWidth, P(y), refreshWidth, P(28));
-            roomsCount.SetBounds(P(20) + titleWidth + P(4), P(y), refresh.Left - (P(20) + titleWidth + P(12)), P(28));
             roomList.SetBounds(P(20), P(y + 34), P(440), P(ListHeight));
             var below = y + 34 + ListHeight + 10;
-            privatePrompt.SetBounds(P(20), P(below), P(440), P(20));
-            codeBox.SetBounds(P(20), P(below + 22), P(350), P(36));
-            joinButton.SetBounds(P(378), P(below + 22), P(82), P(36));
-            y += playersShown ? 180 : (cardShown ? 130 : (browsing ? 34 + ListHeight + 10 + 22 + 36 + 12 : 96));
-            pauseBar.Visible = playersShown && paused;
+            codeBox.SetBounds(P(20), P(below), P(350), P(36));
+            joinButton.SetBounds(P(378), P(below), P(82), P(36));
+            y += showPlayers ? 180 : (cardShown ? 130 : (browsing ? 34 + ListHeight + 10 + (typing ? 36 + 12 : 0) : 96));
+            pauseBar.Visible = showPlayers && paused;
             if (pauseBar.Visible)
             {
                 pauseBar.SetBounds(P(20), P(y), P(440), P(44));
@@ -484,8 +507,11 @@ namespace Windy10v10AI.Launcher
                 secondary.SetBounds(P(20), P(y + 62), secondaryWidth, P(30));
                 action.SetBounds(actionLeft, P(y + 62), actionWidth, P(30));
             }
+            // A host looking at the public list leaves its own room controls on the host tab
+            var away = Hosting && joining;
+            SetHostAreaShown(!away);
             // An idle join page only ever shows a notice in this area, so it needs less room than a launch in progress
-            y += browsing && !busy ? 60 : 124;
+            y += away ? 0 : (browsing && !busy ? 60 : 124);
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
             mapDot.SetBounds(P(20), P(y + 16), P(8), P(8));
             var devWidth = TextRenderer.MeasureText(devLink.Text, devLink.Font).Width + P(4);
@@ -579,20 +605,27 @@ namespace Windy10v10AI.Launcher
         // The list lives only while the join page is idle and visible, so each visit measures every room once
         void UpdateBrowsing()
         {
-            var wanted = !busy && modeBar.Selected == 2 && !cardShown;
+            var wanted = (!busy || Hosting) && modeBar.Selected == 2 && !cardShown;
+            // Probing opens sockets for a later join, which a host never makes; a room that just closed needs them again
+            if (browser != null && browser.Probing == Hosting && (!busy || Hosting))
+            {
+                browser.Dispose();
+                browser = null;
+                listTimer.Stop();
+            }
             if (wanted && browser == null)
             {
-                var created = new RoomBrowser(ListBody, (candidates, symmetric) => PeerBody(candidates, symmetric, InstalledMapVersion()));
+                var created = new RoomBrowser(ListBody, (candidates, symmetric) => PeerBody(candidates, symmetric, InstalledMapVersion()), !Hosting);
                 browser = created;
                 created.Changed += () => UI(() => { if (browser == created) UpdateRoomList(); });
-                roomList.SetRooms(new List<RoomRow>(), RoomList.ListState.Loading, null);
-                roomsCount.Text = "";
+                roomList.LookOnly = Hosting;
+                roomList.SetRooms(OwnRows(), RoomList.ListState.Loading, null);
                 browseSince = DateTime.UtcNow;
                 created.Start();
                 created.Refresh();
                 listTimer.Start();
             }
-            else if (!wanted && browser != null && !busy)
+            else if (!wanted && browser != null && (!busy || Hosting))
             {
                 browser.Dispose();
                 browser = null;
@@ -600,16 +633,147 @@ namespace Windy10v10AI.Launcher
             }
         }
 
+        // The host's own room on top, then rooms open to join, then games in progress
         void UpdateRoomList()
         {
             var source = browser;
             if (source == null) return;
-            var rows = source.Snapshot();
-            var state = rows.Count > 0 || source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
+            var own = OwnRows();
+            var waiting = source.Snapshot();
+            if (own.Count > 0) waiting.RemoveAll(r => r.Code == roomCode);
+            var games = source.Games();
+            var rows = new List<RoomRow>(own);
+            if (source.Loaded && (waiting.Count > 0 || games.Count > 0 || own.Count > 0))
+            {
+                rows.Add(new RoomRow { Kind = RowKind.Header, Text = Strings.SectionWaiting });
+                if (waiting.Count > 0) rows.AddRange(waiting);
+                else rows.Add(new RoomRow { Kind = RowKind.Empty, Text = Strings.NoRooms });
+                if (games.Count > 0)
+                {
+                    rows.Add(new RoomRow { Kind = RowKind.Header, Text = Strings.SectionPlaying });
+                    rows.AddRange(games);
+                }
+            }
+            var state = source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
             roomList.SetRooms(rows, state, null);
-            roomsCount.Text = source.Loaded
-                ? (source.ActiveGames > 0 ? string.Format(Strings.ActiveGames, source.ActiveGames, source.ActivePlayers) : string.Format(Strings.RoomCount, rows.Count))
-                : "";
+            if (source.Loaded) ShowBadge(waiting.Count + (own.Count > 0 && Settings.PublicRoom ? 1 : 0));
+        }
+
+        List<RoomRow> OwnRows()
+        {
+            var list = new List<RoomRow>();
+            var roster = hostRoster;
+            if (!Hosting || roster == null) return list;
+            var row = new RoomRow { Kind = RowKind.Own, Code = roomCode, Map = roomMap, MaxPlayers = Settings.MaxPlayers };
+            foreach (var entry in roster.Snapshot())
+            {
+                if (entry.Status == PlayerStatus.Failed || entry.Status == PlayerStatus.Left) continue;
+                row.Avatars.Add(new RoomAvatar { Url = entry.AvatarUrl, Name = entry.Name });
+            }
+            row.Players = row.Avatars.Count;
+            var started = roomStartedAt;
+            if (started != null) row.Minutes = (int)(DateTime.UtcNow - started.Value).TotalMinutes;
+            list.Add(row);
+            return list;
+        }
+
+        bool Hosting
+        {
+            get { return busy && hostRoster != null; }
+        }
+
+        // Moved out of sight rather than hidden, since the room flow reads and sets their visibility as its state;
+        // they also leave the tab order so a key press cannot reach a button nobody sees
+        void SetHostAreaShown(bool shown)
+        {
+            var area = new Control[] { notice, hostGuide, status, marquee, hint, action, secondary, hostCode, pauseBar };
+            if (shown)
+            {
+                foreach (var pair in hiddenTabStops) pair.Key.TabStop = pair.Value;
+                hiddenTabStops.Clear();
+                return;
+            }
+            foreach (var control in area)
+            {
+                control.Left = -P(2000);
+                if (control.ContainsFocus) modeBar.Focus();
+                foreach (var item in WithChildren(control))
+                {
+                    if (hiddenTabStops.ContainsKey(item)) continue;
+                    hiddenTabStops[item] = item.TabStop;
+                    item.TabStop = false;
+                }
+            }
+        }
+
+        static IEnumerable<Control> WithChildren(Control control)
+        {
+            yield return control;
+            foreach (Control child in control.Controls)
+            {
+                foreach (var item in WithChildren(child)) yield return item;
+            }
+        }
+
+        // The count of rooms open to join, kept current while the player is on another tab
+        void RefreshBadge()
+        {
+            if (modeBar.Selected == 2 || WindowState == FormWindowState.Minimized) return;
+            if (Interlocked.Exchange(ref badgeLoading, 1) == 1) return;
+            var body = ListBody();
+            new Thread(() =>
+            {
+                try
+                {
+                    var answer = RoomApi.List(body);
+                    var count = ((object[])answer["rooms"]).Length;
+                    UI(() => ShowBadge(count));
+                }
+                catch (Exception)
+                {
+                    // The count simply stays as it was until the next try
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref badgeLoading, 0);
+                }
+            }) { IsBackground = true }.Start();
+        }
+
+        void ShowBadge(int count)
+        {
+            if (modeBar.BadgeCount == count) return;
+            modeBar.BadgeCount = count;
+            modeBar.Invalidate();
+        }
+
+        // Once the room is open the host may switch to the public list; single player stays locked until it closes
+        void AllowRoomBrowsing(bool allow)
+        {
+            modeBar.Locked.Clear();
+            if (allow) modeBar.Locked.Add(0);
+            modeBar.Dot = allow ? 1 : -1;
+            foreach (var control in new Control[] { modeBar, roomList, refresh })
+            {
+                control.Enabled = allow || !busy;
+                control.Invalidate();
+            }
+        }
+
+        // The picture shrinks onto a shorter strip on black, so the logo stays whole without stretching
+        static Image ShortBanner(Image picture)
+        {
+            const float Shrink = 0.8f;
+            var strip = new Bitmap(picture.Width, picture.Width * BannerHeight / 480);
+            using (var g = Graphics.FromImage(strip))
+            {
+                g.Clear(Color.Black);
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                var w = picture.Width * Shrink;
+                var h = picture.Height * Shrink;
+                g.DrawImage(picture, (strip.Width - w) / 2, (strip.Height - h) / 2, w, h);
+            }
+            return strip;
         }
 
         Dictionary<string, object> ListBody()
@@ -845,6 +1009,8 @@ namespace Windy10v10AI.Launcher
                     hostBody["publicIp"] = publicIp;
                     lock (seenJoins) seenJoins.Clear();
                     lock (kicked) kicked.Clear();
+                    roomEnded = false;
+                    roomStartedAt = null;
                     hostRelayRtt = -1;
                     hostRelayLoss = -1;
                     Dictionary<string, object> opened;
@@ -888,6 +1054,7 @@ namespace Windy10v10AI.Launcher
                         hostCode.Code = shown;
                         hostCode.Visible = true;
                         players.CanKick = true;
+                        AllowRoomBrowsing(true);
                         ShowPlayers(true);
                         ShowProgress(Strings.RoomCode, "", Strings.Cancel, false);
                         ApplyRoomType();
@@ -1190,7 +1357,10 @@ namespace Windy10v10AI.Launcher
                 body["code"] = roomCode;
                 body["token"] = roomToken;
                 body["started"] = startedNow;
+                if (startedNow && roomStartedAt == null) roomStartedAt = DateTime.UtcNow;
+                if (roomEnded) body["ended"] = true;
                 AddRoomState(body, roster.ActiveCount());
+                body["players"] = GuestIds(roster);
                 List<Dictionary<string, object>> results;
                 lock (joinResults)
                 {
@@ -1267,6 +1437,18 @@ namespace Windy10v10AI.Launcher
             {
                 // The room still drops out once the API sees the polls stop
             }
+        }
+
+        // Account IDs of everyone else still in the room, so the list can show their avatars
+        static long[] GuestIds(HostRoster roster)
+        {
+            var ids = new List<long>();
+            foreach (var entry in roster.Snapshot())
+            {
+                if (entry.IsHost || entry.SteamId == 0 || entry.Status == PlayerStatus.Failed || entry.Status == PlayerStatus.Left) continue;
+                ids.Add(entry.SteamId);
+            }
+            return ids.ToArray();
         }
 
         // Sent with the opening request and every poll, so changes the host makes while the room is open reach the list
@@ -1563,6 +1745,7 @@ namespace Windy10v10AI.Launcher
                 {
                     endedAt = DateTime.UtcNow;
                     tunnel.GameEnded = true;
+                    roomEnded = true;
                     UI(() => ShowRoomEnd(false));
                 }
                 if (endedAt != null && !saved &&
@@ -1668,6 +1851,7 @@ namespace Windy10v10AI.Launcher
                     mode.Invalidate();
                 }
                 SetIdleControlsEnabled(true);
+                AllowRoomBrowsing(false);
                 secondary.Visible = false;
                 hostCode.Visible = false;
                 hostingReady = false;
