@@ -10,6 +10,7 @@ export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 export const FEEDBACK_TOPICS = [
   'hero',
   'ability',
+  'awaken',
   'item',
   'bot',
   'balance',

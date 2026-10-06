@@ -28,6 +28,7 @@
 |---|---|
 | 英雄 | game `hero` |
 | 技能 | game `ability` `4+3` |
+| 觉醒 | game `awaken` |
 | 物品 | game `item` |
 | 电脑 AI | game `bot` |
 | 平衡 | game `balance` |
