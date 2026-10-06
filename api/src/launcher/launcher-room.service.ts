@@ -35,9 +35,9 @@ export const ROOM_LIST_ALIVE_MS = 30 * 1000;
 export const ACTIVE_GAME_ALIVE_MS = 90 * 1000;
 // 加入者的握手窗口比它短，更早的加入请求已经失效
 export const PENDING_JOIN_MS = 30 * 1000;
-// 房间码一天后可以重新分配；记录多留几天，方便排查最近的房间
+// 房间码一天后可以重新分配；记录留一个月，候选地址里的公网 IP 用来按地区分析中转服务器选址
 const CODE_REUSE_MS = 24 * 60 * 60 * 1000;
-const RECORD_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const RECORD_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 // 所有请求共用一份查询结果，Firestore 读取量不随看列表的人数增长
 export const ROOM_LIST_CACHE_MS = 3 * 1000;
 
