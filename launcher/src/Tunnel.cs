@@ -286,7 +286,12 @@ namespace Windy10v10AI.Launcher
             public IPEndPoint Remote;
             public UdpClient Local;
             public DateTime LastSent;
+            public DateTime LastReceived;
             public volatile bool Closed;
+            // Only joiners that answer pings are reported, so a launcher too old to echo does not show as total loss
+            public bool Echoed;
+            public int Sent;
+            public readonly List<int> Rtts = new List<int>();
         }
 
         // A probe only measures the route, and its token is forgotten shortly after so it cannot be used to play
@@ -322,6 +327,12 @@ namespace Windy10v10AI.Launcher
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (GameEnded) SendTo(peer, Packet.GameEnded, new byte[0]);
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
+                            // A joiner that left or dropped stops being measured once Dota itself would give up on it
+                            if (peer.Remote != null && (DateTime.UtcNow - peer.LastReceived).TotalMilliseconds < SilenceMs)
+                            {
+                                SendTo(peer, Packet.Ping, BitConverter.GetBytes(Stopwatch.GetTimestamp()));
+                                peer.Sent++;
+                            }
                         }
                     }
                 }
@@ -367,6 +378,40 @@ namespace Windy10v10AI.Launcher
                 var handler = JoinFinished;
                 if (handler != null && !Closed && !kicked) handler(joinId, path == null ? null : PathType.Report(path), (int)(DateTime.UtcNow - started).TotalMilliseconds);
             }) { IsBackground = true }.Start();
+        }
+
+        // Ping results per joiner since the last call, each with the route in use when it was taken
+        public List<Dictionary<string, object>> TakeQuality()
+        {
+            var list = new List<Dictionary<string, object>>();
+            lock (sync)
+            {
+                foreach (var pair in peers)
+                {
+                    var peer = pair.Value;
+                    string joinId, path;
+                    if (peer.Echoed && peer.Sent > 0 && joinIds.TryGetValue(pair.Key, out joinId) && paths.TryGetValue(pair.Key, out path))
+                    {
+                        var entry = new Dictionary<string, object>
+                        {
+                            { "joinId", joinId },
+                            { "path", PathType.Report(path) },
+                            { "sent", peer.Sent },
+                            { "lost", Math.Max(0, peer.Sent - peer.Rtts.Count) },
+                        };
+                        if (peer.Rtts.Count > 0)
+                        {
+                            peer.Rtts.Sort();
+                            entry["rttP50"] = peer.Rtts[(peer.Rtts.Count - 1) / 2];
+                            entry["rttP95"] = peer.Rtts[(peer.Rtts.Count - 1) * 95 / 100];
+                        }
+                        list.Add(entry);
+                    }
+                    peer.Sent = 0;
+                    peer.Rtts.Clear();
+                }
+            }
+            return list;
         }
 
         // Tells the joiner it was removed and drops its session; its later packets come from an unknown token
@@ -442,12 +487,20 @@ namespace Windy10v10AI.Launcher
                 var peer = PeerOf(owner);
                 // The joiner may switch routes after a reconnect, so replies follow its latest packet
                 peer.Remote = from;
-                if (data[0] == Packet.Select && data.Length == 2 && data[1] < PathType.Preference.Length && !paths.ContainsKey(owner))
+                peer.LastReceived = DateTime.UtcNow;
+                // A reconnect selects again, and the latest route is the one the quality report names
+                if (data[0] == Packet.Select && data.Length == 2 && data[1] < PathType.Preference.Length)
                 {
                     paths[owner] = PathType.Preference[data[1]];
                 }
+                else if (data[0] == Packet.Pong && data.Length >= 9)
+                {
+                    peer.Echoed = true;
+                    peer.Rtts.Add((int)((Stopwatch.GetTimestamp() - BitConverter.ToInt64(data, 1)) * 1000 / Stopwatch.Frequency));
+                }
                 else if (data[0] == Packet.Bye)
                 {
+                    peer.LastReceived = DateTime.MinValue;
                     var left = JoinLeft;
                     if (left != null) left(joinIds[owner]);
                 }
@@ -786,6 +839,11 @@ namespace Windy10v10AI.Launcher
                     return;
                 }
                 lastReceived = DateTime.UtcNow;
+                if (data[0] == Packet.Ping)
+                {
+                    Send(Packet.Pong, Payload(data), from);
+                    return;
+                }
                 if (data[0] == Packet.GameEnded)
                 {
                     GameEnded = true;

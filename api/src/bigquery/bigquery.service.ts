@@ -13,7 +13,12 @@ import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
 
 import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
-import { buildJoinResultRow, buildRoomCreatedRow } from './launcher-room-rows';
+import {
+  ConnectionQualityRecord,
+  buildConnectionQualityRow,
+  buildJoinResultRow,
+  buildRoomCreatedRow,
+} from './launcher-room-rows';
 import { buildMemberHistoryRow } from './member-history-rows';
 import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
 import {
@@ -83,10 +88,23 @@ export class BigQueryService {
     join: LauncherRoomJoin,
     path: JoinPath | undefined,
     elapsedMs: number,
+    relayAddress: string | undefined,
   ): Promise<void> {
     await this.insert(LAUNCHER_ROOM_EVENTS_TABLE, [
-      buildJoinResultRow(room, join, path, elapsedMs, new Date()),
+      buildJoinResultRow(room, join, path, elapsedMs, relayAddress, new Date()),
     ]);
+  }
+
+  /** 记录开局后各加入者的连接质量，一次轮询带来的几段写成几行。 */
+  async recordConnectionQuality(
+    room: LauncherRoom,
+    records: ConnectionQualityRecord[],
+  ): Promise<void> {
+    const now = new Date();
+    await this.insert(
+      LAUNCHER_ROOM_EVENTS_TABLE,
+      records.map((record) => buildConnectionQualityRow(room, record, now)),
+    );
   }
 
   /** 按难度汇总全体玩家的六边形基准；未连 BigQuery 时返回 null。 */

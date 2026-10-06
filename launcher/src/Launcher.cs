@@ -73,6 +73,10 @@ namespace Windy10v10AI.Launcher
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
         const int GamePollMs = 30000;
+        // Thirty pings per joiner per row: enough to see loss, short enough that a crash loses little
+        const int QualityWindowMs = 60000;
+        // Matches the API's cap, so rows piling up while the API is unreachable are dropped oldest first
+        const int MaxPendingQuality = 50;
         const int FastPollMinutes = 5;
         // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
         const int PauseMinutes = 15;
@@ -1166,6 +1170,8 @@ namespace Windy10v10AI.Launcher
         {
             var since = DateTime.UtcNow;
             var started = false;
+            var qualitySince = DateTime.UtcNow;
+            var quality = new List<Dictionary<string, object>>();
             while (!stopping)
             {
                 var elapsed = DateTime.UtcNow - since;
@@ -1192,9 +1198,23 @@ namespace Windy10v10AI.Launcher
                     joinResults.Clear();
                 }
                 body["results"] = results;
+                // Only the game itself is measured, so the first row starts when the game does
+                if (!startedNow)
+                {
+                    tunnel.TakeQuality();
+                    qualitySince = DateTime.UtcNow;
+                }
+                else if ((DateTime.UtcNow - qualitySince).TotalMilliseconds >= QualityWindowMs)
+                {
+                    quality.AddRange(tunnel.TakeQuality());
+                    qualitySince = DateTime.UtcNow;
+                    if (quality.Count > MaxPendingQuality) quality.RemoveRange(0, quality.Count - MaxPendingQuality);
+                }
+                if (quality.Count > 0) body["quality"] = quality.ToArray();
                 try
                 {
                     var answer = RoomApi.Host(body);
+                    quality.Clear();
                     started = startedNow;
                     foreach (Dictionary<string, object> join in (object[])answer["joins"])
                     {
