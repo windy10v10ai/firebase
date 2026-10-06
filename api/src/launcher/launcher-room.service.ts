@@ -16,6 +16,7 @@ import { SteamProfileService } from '../steam-profile/steam-profile.service';
 import {
   HostRoomDto,
   HostRoomResponse,
+  JoinPath,
   JoinRoomDto,
   JoinRoomResponse,
   LauncherProfileDto,
@@ -75,9 +76,23 @@ export class LauncherRoomService {
     for (const result of dto.results ?? []) {
       const join = await this.joinRepository.findById(result.joinId);
       if (join?.roomId === room.roomId && !join.probe) {
-        await this.bigQueryService.recordJoinResult(room, join, result.path, result.elapsedMs);
+        await this.bigQueryService.recordJoinResult(
+          room,
+          join,
+          result.path,
+          result.elapsedMs,
+          this.relayAddressOf(result.path),
+        );
       }
     }
+    const qualities = [];
+    for (const quality of dto.quality ?? []) {
+      const join = await this.joinRepository.findById(quality.joinId);
+      if (join?.roomId === room.roomId && !join.probe) {
+        qualities.push({ join, quality, relayAddress: this.relayAddressOf(quality.path) });
+      }
+    }
+    await this.bigQueryService.recordConnectionQuality(room, qualities);
 
     room.lastSeenAt = now;
     room.started = room.started || dto.started === true;
@@ -168,6 +183,10 @@ export class LauncherRoomService {
       self: profile,
       relay: this.relayService.issue(join.id, 'j', now),
     };
+  }
+
+  private relayAddressOf(path: JoinPath | undefined): string | undefined {
+    return path === 'relay' ? this.relayService.address() : undefined;
   }
 
   /** 列出请求者能加入的公开房间，不含候选地址与令牌。 */

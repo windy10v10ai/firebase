@@ -54,9 +54,9 @@
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `event_time` | TIMESTAMP | 分区键（按天） |
-| `event` | STRING | `room_created` / `join_succeeded` / `join_failed`，聚类键 |
+| `event` | STRING | `room_created` / `join_succeeded` / `join_failed` / `connection_quality`，聚类键 |
 | `room_id` | STRING | 开房时生成 |
-| `path` | STRING | 连通所走的路：`lan` / `punch`（`upnp` 只出现在 0.3.5 的数据里）；失败为空 |
+| `path` | STRING | 连通所走的路：`lan` / `punch` / `relay`（`upnp` 只出现在 0.3.5 的数据里）；失败为空。`connection_quality` 里是这 5 分钟实际在用的路 |
 | `elapsed_ms` | INT64 | 房主拿到加入请求到连通或放弃 |
 | `host_upnp` | BOOL | 房主路由器是否成功开了端口，0.4.0 起恒为 false |
 | `host_public_ip` | BOOL | 房主电脑本身是否有公网 IP：STUN 查到的地址是本机网卡地址。0.3.5 的含义是等于 UPnP 外部地址 |
@@ -69,10 +69,15 @@
 | `host_steam_id` | INT64 | 房主，API 从房间文档取 |
 | `host_relay_rtt_ms` / `host_relay_loss_pct` | INT64 | 只在加入结果里有：房主到中转的往返毫秒数与回声丢失百分比，0.5.0 起；全丢时往返为空 |
 | `joiner_relay_rtt_ms` / `joiner_relay_loss_pct` | INT64 | 同上，加入者在加入页量的；凭房间码直接加入、没打开列表的为空 |
+| `relay_address` | STRING | 走中转时是哪台中转，直连为空，0.5.0 起 |
+| `ping_sent` / `ping_lost` | INT64 | 只在 `connection_quality` 里有：这 5 分钟房主经实际线路发给加入者的测速包数与没收到回音的数，0.5.0 起。丢包率按 `SUM(ping_lost) / SUM(ping_sent)` 汇总 |
+| `rtt_p50_ms` / `rtt_p95_ms` | INT64 | 同上，往返毫秒数的中位数与 95 分位；全丢时为空 |
 
 `room_created` 由开房请求写入；加入结果由房主在下一次轮询里上报，加入者的 Steam ID 与网络情况取自加入时存下的文档，所以加入者不用再调接口。房主在连接过程中崩溃时这次结果会丢，不影响看失败率。
 
-不记 IP 地址。写入沿用现有 best-effort 方式，失败不影响开房和加入。建表 SQL 放仓库根目录 `bigquery/`。
+`connection_quality` 衡量游戏中启动器之间这一段，正是游廊开局没有、启动器联机多出来的部分：开局后房主约每 6 秒经实际线路给每个加入者发一个测速包，加入者原样回传，房主算往返；每 5 分钟每个加入者一行，随房主轮询上报。测的是两人之间这条线路，一来一回两个方向都含在内。频率按负荷与费用定：测速包相对游戏流量可以忽略，一行约 50 个包，丢包率精确到 2% 左右。由房主测是为了复用轮询上报，不另开接口；房主自己在本机玩，没有这一段。房主崩溃最多丢最后 5 分钟。没回过测速包的加入者（旧版启动器）不上报，免得被当成全部丢失。
+
+不记 IP 地址，按 IP 分析地区时查 Firestore 里的候选地址。写入沿用现有 best-effort 方式，失败不影响开房和加入。建表 SQL 放仓库根目录 `bigquery/`。
 
 ## 隧道
 

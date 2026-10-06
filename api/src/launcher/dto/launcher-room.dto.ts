@@ -18,6 +18,7 @@ import { LAUNCHER_ROOM_MAPS, LauncherRoomMap } from '../entities/launcher-room.e
 
 const MAX_CANDIDATES = 8;
 const MAX_KICKED = 50;
+const MAX_QUALITY = 50;
 // 类型前缀让加入者知道连通的是哪条路，房主才能上报 lan / upnp / punch
 const CANDIDATE_PATTERN = /^(lan|stun|upnp):\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 
@@ -96,6 +97,40 @@ export class JoinResultDto {
   elapsedMs: number;
 }
 
+export class ConnectionQualityDto {
+  @ApiProperty()
+  @IsString()
+  joinId: string;
+
+  @ApiProperty({ enum: JOIN_PATHS, description: '这段时间里房主与加入者之间实际在用的路' })
+  @IsIn(JOIN_PATHS)
+  path: JoinPath;
+
+  @ApiProperty({ description: '房主发给加入者的测速包数' })
+  @IsInt()
+  @Min(1)
+  @Max(10000)
+  sent: number;
+
+  @ApiProperty({ description: '没收到回音的测速包数' })
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  lost: number;
+
+  @ApiPropertyOptional({ description: '往返毫秒数的中位数，全部丢失时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  rttP50?: number;
+
+  @ApiPropertyOptional({ description: '往返毫秒数的 95 分位，全部丢失时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  rttP95?: number;
+}
+
 export class HostRoomDto extends LauncherPeerDto {
   @ApiPropertyOptional({ description: '省略时开新房，带上时为轮询' })
   @IsOptional()
@@ -117,6 +152,17 @@ export class HostRoomDto extends LauncherPeerDto {
   @ValidateNested({ each: true })
   @Type(() => JoinResultDto)
   results?: JoinResultDto[];
+
+  @ApiPropertyOptional({
+    type: [ConnectionQualityDto],
+    description: '开局后每个加入者一段时间内的连接质量，每段一条',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_QUALITY)
+  @ValidateNested({ each: true })
+  @Type(() => ConnectionQualityDto)
+  quality?: ConnectionQualityDto[];
 
   @ApiPropertyOptional({ description: '进入选英雄时传 true，之后不再接受加入' })
   @IsOptional()
