@@ -296,6 +296,8 @@ namespace Windy10v10AI.Launcher
 
         // A probe only measures the route, and its token is forgotten shortly after so it cannot be used to play
         const int ProbeLingerMs = 5000;
+        // Every third roster round: sparse enough to cost nothing next to the game's own traffic, yet fifty pings a report still resolve loss to two percent
+        const int QualityPingMs = 6000;
 
         readonly object sync = new object();
         readonly Dictionary<string, string> joinIds = new Dictionary<string, string>();
@@ -314,9 +316,12 @@ namespace Windy10v10AI.Launcher
         {
             new Thread(() =>
             {
+                var lastPing = DateTime.MinValue;
                 while (!Closed)
                 {
                     Thread.Sleep(2000);
+                    var ping = (DateTime.UtcNow - lastPing).TotalMilliseconds >= QualityPingMs;
+                    if (ping) lastPing = DateTime.UtcNow;
                     var source = RosterSource;
                     var roster = source == null ? new List<RosterEntry>() : source();
                     lock (sync)
@@ -328,7 +333,7 @@ namespace Windy10v10AI.Launcher
                             if (GameEnded) SendTo(peer, Packet.GameEnded, new byte[0]);
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                             // A joiner that left or dropped stops being measured once Dota itself would give up on it
-                            if (peer.Remote != null && (DateTime.UtcNow - peer.LastReceived).TotalMilliseconds < SilenceMs)
+                            if (ping && peer.Remote != null && (DateTime.UtcNow - peer.LastReceived).TotalMilliseconds < SilenceMs)
                             {
                                 SendTo(peer, Packet.Ping, BitConverter.GetBytes(Stopwatch.GetTimestamp()));
                                 peer.Sent++;

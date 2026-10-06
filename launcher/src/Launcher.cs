@@ -73,8 +73,8 @@ namespace Windy10v10AI.Launcher
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
         const int GamePollMs = 30000;
-        // Thirty pings per joiner per row: enough to see loss, short enough that a crash loses little
-        const int QualityWindowMs = 60000;
+        // Keeps BigQuery rows few, at the cost of losing up to this much when the host crashes
+        const int QualityWindowMs = 300000;
         // Matches the API's cap, so rows piling up while the API is unreachable are dropped oldest first
         const int MaxPendingQuality = 50;
         const int FastPollMinutes = 5;
