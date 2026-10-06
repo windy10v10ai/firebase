@@ -150,6 +150,10 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_5_0": [
+          "When a direct connection fails, the launcher connects through a relay server, so playing with friends works far more often",
+          "Rejoin a game after being disconnected; hosting runs more smoothly"
+        ],
         "v0_4_3": [
           "Fix games failing to start when Steam or Dota 2 is set to run as administrator"
         ],

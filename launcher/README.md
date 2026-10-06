@@ -67,7 +67,7 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
 
 1. 代码 PR：当前版本号已经发布过时，升 `src/Launcher.cs` 的 `Version`、`AssemblyVersion` 与 `AssemblyFileVersion`（规则见 [CLAUDE.md](CLAUDE.md) 的「版本号」），合进 `develop`。可以攒几个 PR 再发版，攒着的这几个共用同一个未发布的版本号。
 2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。其他分支、或版本号不比线上新时会直接失败。发布的 exe 必须来自这里，不用本机编译的。
-3. 代码签名下来之前，每次发版都把这个 exe 上传到 [VirusTotal](https://www.virustotal.com/) 扫描，Microsoft 一栏必须是 Undetected，检出数写进发版 PR 的测试清单。Defender 报毒时玩家一下载就被隔离，其他引擎零星报毒可以接受。Microsoft 是机器学习判定，只改版本号这类小差异也可能翻转结果，所以扫的必须是要发布的那一个 exe；报毒时改动后重新编译、重扫，通过了才发。
+3. 代码签名下来之前，每次发版都用本机 Defender 扫描这个 exe，必须没有报毒：Defender 报毒时玩家一下载就被隔离。再上传到 [VirusTotal](https://www.virustotal.com/)，两项结果都写进发版 PR 的测试清单，其他引擎零星报毒可以接受。VirusTotal 的 Microsoft 一栏是云端机器学习判定（名字带 `!ml`），同一份代码重新编译都可能翻转，与本机 Defender 不一致时以本机为准，到 [Microsoft 误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission) 提交这个 exe 后即可发版；报的是具体病毒家族名、或大量引擎一起报时先停下排查。
 4. 发版 PR：
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
