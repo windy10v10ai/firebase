@@ -1,5 +1,7 @@
 {
   "art": {
+    "npc_dota_hero_antimage": "antimage.4b96c7dc.webp",
+    "npc_dota_hero_terrorblade": "terrorblade.38c7a323.webp",
     "npc_dota_hero_bounty_hunter": "bounty_hunter.a8cac8de.webp",
     "npc_dota_hero_nyx_assassin": "nyx_assassin.29612b0f.webp",
     "npc_dota_hero_beastmaster": "beastmaster.32266deb.webp",
@@ -41,6 +43,8 @@
     "npc_dota_hero_pudge": "pudge.f0968078.webp"
   },
   "icons": {
+    "antimage_blink": "antimage_blink.1e48365e.webp",
+    "terrorblade_sunder": "terrorblade_sunder.81abec5d.webp",
     "bounty_hunter_track": "bounty_hunter_track.ee84d8d3.webp",
     "nyx_assassin_burrow": "nyx_assassin_burrow.a289b3f2.webp",
     "beastmaster_wild_axes": "beastmaster_wild_axes.b094b423.webp",

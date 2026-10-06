@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "d5e457d1758bce2589c7fd08dde8add8bf3fb2f6",
+  gameCommit: "5766bde9e5c1dce0f59bb88b98126646e7e3c30c",
   dotaVersion: "7.41",
 } as const;
 
@@ -82,6 +82,28 @@ export interface AwakenHero {
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
 export const AWAKEN_HEROES: AwakenHero[] = [
   {
+    heroName: "npc_dota_hero_antimage",
+    abilityName: "special_bonus_unique_antimage_mana_suppression_awaken",
+    freeTrial: true,
+    art: "antimage.4b96c7dc.webp",
+    icon: "antimage_blink.1e48365e.webp",
+    name: { zh: "敌法师", en: "Anti-Mage" },
+    title: { zh: "<font color='#d000ff'>法力禁域 觉醒</font>", en: "<font color='#d000ff'>Mana Suppression Awakened</font>" },
+    desc: { zh: "施放闪烁后，附近<font color='#FFFFFF'><b>600</b></font>范围内的敌方英雄立刻损失<font color='#FFFFFF'><b>40%</b></font>当前魔法，<font color='#FFFFFF'><b>4</b></font>秒内无法回复魔法。<br>法力虚空对范围内每个敌方英雄按其自身损失的魔法造成伤害。", en: "After casting Blink, enemy heroes within <font color='#FFFFFF'><b>600</b></font> instantly lose <font color='#FFFFFF'><b>40%</b></font> of their current mana and cannot regain mana for <font color='#FFFFFF'><b>4</b></font> seconds.<br>Mana Void deals damage to each enemy hero in the area based on that hero's own missing mana." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
+  },
+  {
+    heroName: "npc_dota_hero_terrorblade",
+    abilityName: "terrorblade_sunder_awakened_status",
+    freeTrial: true,
+    art: "terrorblade.38c7a323.webp",
+    icon: "terrorblade_sunder.81abec5d.webp",
+    name: { zh: "恐怖利刃", en: "Terrorblade" },
+    title: { zh: "<font color='#d000ff'>魂断 觉醒</font>", en: "<font color='#d000ff'>Sunder Awakened</font>" },
+    desc: { zh: "生命值低于<font color='#FFFFFF'><b>30%</b></font>时，<font color='#FF0000'>自动</font>对施法距离内生命值百分比最高的敌方英雄施放魂断。<br><font color='#FF0000'>被眩晕、沉默、妖术等控制时也会自动施放。</font><br>需要魂断冷却完毕且魔法足够；敌方英雄生命值百分比都低于自己时不触发。", en: "Below <font color='#FFFFFF'><b>30%</b></font> health, <font color='#FF0000'>automatically</font> casts Sunder on the enemy hero with the highest health percentage within cast range.<br><font color='#FF0000'>Still triggers while stunned, silenced, hexed, or otherwise disabled.</font><br>Requires Sunder to be off cooldown with enough mana; does not trigger if no enemy hero's health percentage is higher than your own." },
+    ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
+  },
+  {
     heroName: "npc_dota_hero_bounty_hunter",
     abilityName: "bounty_hunter_track_awaken",
     freeTrial: true,
@@ -139,7 +161,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: "npc_dota_hero_slark",
     abilityName: "special_bonus_unique_slark_permanent_essence_awaken",
-    freeTrial: true,
+    freeTrial: false,
     art: "slark.af0aa43b.webp",
     icon: "slark_essence_shift.2ac17b05.webp",
     name: { zh: "斯拉克", en: "Slark" },
@@ -150,7 +172,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: "npc_dota_hero_abaddon",
     abilityName: "special_bonus_unique_abaddon_quickening_awaken",
-    freeTrial: true,
+    freeTrial: false,
     art: "abaddon.a4dc4053.webp",
     icon: "abaddon_borrowed_time.3737ee83.webp",
     name: { zh: "亚巴顿", en: "Abaddon" },
