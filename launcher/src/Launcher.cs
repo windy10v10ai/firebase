@@ -67,8 +67,8 @@ namespace Windy10v10AI.Launcher
         const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
         // The game prints this once its results request has finally succeeded or failed
         const string ResultsDone = "[Game] end game callback";
-        // An offline game never prints the callback, so the room cannot wait on it forever
-        const int ResultsFallbackSeconds = 120;
+        // The callback is missing in an offline game and once every player has left, while the request itself settles within seconds
+        const int ResultsFallbackSeconds = 15;
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
