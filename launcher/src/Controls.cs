@@ -366,6 +366,15 @@ namespace Windy10v10AI.Launcher
     class SegmentedBar : PaintedControl
     {
         public string[] Items = new string[0];
+        // Segments that cannot be picked right now, and the one carrying a green dot
+        public readonly HashSet<int> Locked = new HashSet<int>();
+        public int Dot = -1;
+        // A quiet count after one segment's label; zero shows nothing
+        public int Badge = -1;
+        public int BadgeCount;
+        static readonly Color BadgeFill = ColorTranslator.FromHtml("#172230");
+        static readonly Color BadgeBorder = ColorTranslator.FromHtml("#2f4a68");
+        static readonly Color BadgeText = ColorTranslator.FromHtml("#9fc6ef");
         int selected;
         int hover = -1;
         public event EventHandler SelectedChanged;
@@ -401,7 +410,7 @@ namespace Windy10v10AI.Launcher
 
         protected override void OnMouseClick(MouseEventArgs e)
         {
-            if (Enabled) Selected = IndexAt(e.X);
+            if (Enabled && !Locked.Contains(IndexAt(e.X))) Selected = IndexAt(e.X);
             base.OnMouseClick(e);
         }
 
@@ -412,8 +421,8 @@ namespace Windy10v10AI.Launcher
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            if (Enabled && e.KeyCode == Keys.Left && selected > 0) Selected = selected - 1;
-            if (Enabled && e.KeyCode == Keys.Right && selected < Items.Length - 1) Selected = selected + 1;
+            if (Enabled && e.KeyCode == Keys.Left && selected > 0 && !Locked.Contains(selected - 1)) Selected = selected - 1;
+            if (Enabled && e.KeyCode == Keys.Right && selected < Items.Length - 1 && !Locked.Contains(selected + 1)) Selected = selected + 1;
             base.OnKeyDown(e);
         }
 
@@ -432,7 +441,8 @@ namespace Windy10v10AI.Launcher
             {
                 var rect = new RectangleF(pad + i * (w + gap), pad, w, Height - 2 * pad - 1);
                 var on = i == selected;
-                if (on || (Enabled && i == hover))
+                var locked = Locked.Contains(i);
+                if (on || (Enabled && !locked && i == hover))
                 {
                     using (var path = Theme.Rounded(rect, 6 * s))
                     using (var brush = new SolidBrush(on ? Theme.ActivePanel : Theme.PanelHover))
@@ -444,9 +454,50 @@ namespace Windy10v10AI.Launcher
                         }
                     }
                 }
-                var color = on ? Theme.Text : (Enabled ? Theme.Muted : Theme.Faint);
-                TextRenderer.DrawText(g, Items[i], Font, Rectangle.Round(rect), color,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                var color = on ? Theme.Text : (Enabled && !locked ? Theme.Muted : Theme.Faint);
+                // The dot, label and count are centred together as one line
+                var spacing = 6 * s;
+                var width = TextRenderer.MeasureText(Items[i], Font).Width;
+                var dot = i == Dot ? 7 * s : 0;
+                var count = i == Badge && i != selected && BadgeCount > 0 ? BadgeCount.ToString() : null;
+                using (var small = new Font(Theme.FontName, 8.25f, FontStyle.Bold))
+                {
+                    var pillHeight = 18 * s;
+                    var pillWidth = count == null ? 0 : Math.Max(pillHeight, TextRenderer.MeasureText(count, small).Width + 8 * s);
+                    var total = width + (dot > 0 ? dot + spacing : 0) + (pillWidth > 0 ? spacing + pillWidth : 0);
+                    var left = rect.X + (rect.Width - total) / 2;
+                    if (dot > 0)
+                    {
+                        using (var brush = new SolidBrush(Theme.Ok)) g.FillEllipse(brush, left, rect.Y + (rect.Height - dot) / 2, dot, dot);
+                        left += dot + spacing;
+                    }
+                    TextRenderer.DrawText(g, Items[i], Font, new Rectangle((int)left, (int)rect.Y, width + 2, (int)rect.Height), color,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    if (count != null)
+                    {
+                        var pill = new RectangleF(left + width + spacing, rect.Y + (rect.Height - pillHeight) / 2, pillWidth, pillHeight);
+                        using (var path = Theme.Rounded(pill, pillHeight / 2))
+                        using (var fill = new SolidBrush(BadgeFill))
+                        using (var pen = new Pen(BadgeBorder, Math.Max(1f, s)))
+                        {
+                            g.FillPath(fill, path);
+                            g.DrawPath(pen, path);
+                        }
+                        // Centred on the glyph's own outline, since a text box centres the font's line height and leaves a digit low
+                        using (var digits = new GraphicsPath())
+                        using (var brush = new SolidBrush(BadgeText))
+                        {
+                            digits.AddString(count, small.FontFamily, (int)small.Style, small.SizeInPoints * g.DpiY / 72f, PointF.Empty, StringFormat.GenericTypographic);
+                            var glyph = digits.GetBounds();
+                            using (var shift = new Matrix())
+                            {
+                                shift.Translate(pill.X + (pill.Width - glyph.Width) / 2 - glyph.X, pill.Y + (pill.Height - glyph.Height) / 2 - glyph.Y);
+                                digits.Transform(shift);
+                            }
+                            g.FillPath(brush, digits);
+                        }
+                    }
+                }
             }
         }
     }
@@ -1077,7 +1128,6 @@ namespace Windy10v10AI.Launcher
     {
         public enum ListState { Loading, Failed, Ready }
 
-        const int VisibleRows = 4;
         // Mixed into the panel colour for rows that cannot be joined
         const float FadeAlpha = 0.45f;
 
@@ -1105,11 +1155,6 @@ namespace Windy10v10AI.Launcher
             };
         }
 
-        public static int PreferredHeight(float scale, bool withBanner)
-        {
-            return (int)(((withBanner ? 20 : 0) + 22 + VisibleRows * 52 + 2) * scale);
-        }
-
         public void SetRooms(List<RoomRow> list, ListState listState, string warning)
         {
             rooms = list;
@@ -1124,6 +1169,9 @@ namespace Windy10v10AI.Launcher
             get { return banner != null; }
         }
 
+        // A host only looks at the list, so rooms show no latency and cannot be joined
+        public bool LookOnly;
+
         protected override void OnVisibleChanged(EventArgs e)
         {
             timer.Enabled = Visible;
@@ -1132,11 +1180,22 @@ namespace Windy10v10AI.Launcher
 
         int BannerHeight { get { return banner == null ? 0 : (int)(20 * DpiScale); } }
         int BoxTop { get { return BannerHeight + (int)(22 * DpiScale); } }
-        int RowHeight { get { return (int)(52 * DpiScale); } }
+
+        int HeightOf(RoomRow row)
+        {
+            return (int)((row.Kind == RowKind.Header ? 24 : 52) * DpiScale);
+        }
+
+        int ContentHeight()
+        {
+            var total = 0;
+            foreach (var row in rooms) total += HeightOf(row);
+            return total;
+        }
 
         int MaxScroll()
         {
-            return Math.Max(0, rooms.Count * RowHeight - (Height - BoxTop - 2));
+            return Math.Max(0, ContentHeight() - (Height - BoxTop - 2));
         }
 
         int ButtonWidth
@@ -1152,55 +1211,67 @@ namespace Windy10v10AI.Launcher
         }
 
         // Column edges from the right, shared by the header and every row
-        void Columns(out int nameLeft, out int mapLeft, out int countLeft, out int pingLeft, out int buttonLeft)
+        void Columns(out int mapLeft, out int countLeft, out int pingLeft, out int buttonLeft)
         {
             var s = DpiScale;
             buttonLeft = Width - (int)(12 * s) - ButtonWidth;
             pingLeft = buttonLeft - (int)(10 * s) - (int)(40 * s);
             countLeft = pingLeft - (int)(6 * s) - (int)(44 * s);
             mapLeft = countLeft - (int)(8 * s) - (int)(56 * s);
-            nameLeft = (int)(12 * s) + (int)(28 * s) + (int)(10 * s);
         }
 
         Rectangle RowRect(int index)
         {
-            return new Rectangle(1, BoxTop + 1 + index * RowHeight - scroll, Width - 2, RowHeight);
+            var top = BoxTop + 1 - scroll;
+            for (var i = 0; i < index; i++) top += HeightOf(rooms[i]);
+            return new Rectangle(1, top, Width - 2, HeightOf(rooms[index]));
         }
 
         Rectangle ButtonRect(Rectangle row)
         {
-            int nameLeft, mapLeft, countLeft, pingLeft, buttonLeft;
-            Columns(out nameLeft, out mapLeft, out countLeft, out pingLeft, out buttonLeft);
+            int mapLeft, countLeft, pingLeft, buttonLeft;
+            Columns(out mapLeft, out countLeft, out pingLeft, out buttonLeft);
             var h = (int)(30 * DpiScale);
             return new Rectangle(buttonLeft, row.Y + (row.Height - h) / 2, ButtonWidth, h);
         }
 
         Rectangle PingRect(Rectangle row)
         {
-            int nameLeft, mapLeft, countLeft, pingLeft, buttonLeft;
-            Columns(out nameLeft, out mapLeft, out countLeft, out pingLeft, out buttonLeft);
+            int mapLeft, countLeft, pingLeft, buttonLeft;
+            Columns(out mapLeft, out countLeft, out pingLeft, out buttonLeft);
             return new Rectangle(pingLeft, row.Y, (int)(40 * DpiScale), row.Height);
         }
 
         int RowAt(Point point)
         {
             if (point.Y < BoxTop || point.Y >= Height - 1) return -1;
-            var index = (point.Y - BoxTop - 1 + scroll) / RowHeight;
-            return index >= 0 && index < rooms.Count ? index : -1;
+            var top = BoxTop + 1 - scroll;
+            for (var i = 0; i < rooms.Count; i++)
+            {
+                var bottom = top + HeightOf(rooms[i]);
+                if (point.Y >= top && point.Y < bottom) return i;
+                top = bottom;
+            }
+            return -1;
+        }
+
+        bool CanJoin(RoomRow room)
+        {
+            return room.Joinable && !LookOnly && Enabled;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             var row = RowAt(e.Location);
-            var onButton = row >= 0 && ButtonRect(RowRect(row)).Contains(e.Location);
+            var onButton = row >= 0 && rooms[row].Kind == RowKind.Waiting && ButtonRect(RowRect(row)).Contains(e.Location);
             string text = null;
-            if (row >= 0 && PingRect(RowRect(row)).Contains(e.Location)) text = PingTip(rooms[row]);
+            if (row >= 0 && rooms[row].Kind == RowKind.Waiting && !LookOnly && PingRect(RowRect(row)).Contains(e.Location)) text = PingTip(rooms[row]);
             if (text != tipText)
             {
                 tipText = text;
                 tip.SetToolTip(this, text ?? "");
             }
-            Cursor = onButton && rooms[row].Joinable ? Cursors.Hand : Cursors.Default;
+            Cursor = onButton && CanJoin(rooms[row]) ? Cursors.Hand : Cursors.Default;
             if (row != hoverRow || onButton != hoverButton)
             {
                 hoverRow = row;
@@ -1236,7 +1307,7 @@ namespace Windy10v10AI.Launcher
         protected override void OnMouseClick(MouseEventArgs e)
         {
             var row = RowAt(e.Location);
-            if (Enabled && row >= 0 && rooms[row].Joinable && ButtonRect(RowRect(row)).Contains(e.Location) && JoinRoom != null) JoinRoom(rooms[row].Code);
+            if (row >= 0 && CanJoin(rooms[row]) && ButtonRect(RowRect(row)).Contains(e.Location) && JoinRoom != null) JoinRoom(rooms[row].Code);
             base.OnMouseClick(e);
         }
 
@@ -1272,8 +1343,8 @@ namespace Windy10v10AI.Launcher
         {
             var g = Prepare(e);
             var s = DpiScale;
-            int nameLeft, mapLeft, countLeft, pingLeft, buttonLeft;
-            Columns(out nameLeft, out mapLeft, out countLeft, out pingLeft, out buttonLeft);
+            int mapLeft, countLeft, pingLeft, buttonLeft;
+            Columns(out mapLeft, out countLeft, out pingLeft, out buttonLeft);
             const TextFormatFlags line = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
             using (var small = new Font(Theme.FontName, 8.25f))
             {
@@ -1282,7 +1353,6 @@ namespace Windy10v10AI.Launcher
                     TextRenderer.DrawText(g, banner, small, new Rectangle(0, 0, Width, BannerHeight - (int)(4 * s)), Theme.Warning, line | TextFormatFlags.Left);
                 }
                 var header = new Rectangle(0, BannerHeight, 0, (int)(18 * s));
-                TextRenderer.DrawText(g, Strings.TagHost, small, new Rectangle(nameLeft, header.Y, mapLeft - nameLeft, header.Height), Theme.Muted, line | TextFormatFlags.Left);
                 TextRenderer.DrawText(g, Strings.ColumnMap, small, new Rectangle(mapLeft, header.Y, countLeft - mapLeft, header.Height), Theme.Muted, line | TextFormatFlags.Left);
                 TextRenderer.DrawText(g, Strings.ColumnPlayers, small, new Rectangle(countLeft, header.Y, pingLeft - countLeft - (int)(6 * s), header.Height), Theme.Muted, line | TextFormatFlags.Right);
                 TextRenderer.DrawText(g, Strings.ColumnPing, small, new Rectangle(pingLeft - (int)(10 * s), header.Y, (int)(60 * s), header.Height), Theme.Muted, line | TextFormatFlags.HorizontalCenter);
@@ -1308,50 +1378,100 @@ namespace Windy10v10AI.Launcher
                 return;
             }
 
-            g.SetClip(new Rectangle(1, BoxTop + 1, Width - 2, Height - BoxTop - 2));
+            // Rounded so a filled row at the top or bottom keeps the box's corners
+            using (var inner = Theme.Rounded(new RectangleF(1, BoxTop + 1, Width - 2, Height - BoxTop - 2), 5 * s)) g.SetClip(inner);
+            var top = BoxTop + 1 - scroll;
             for (var i = 0; i < rooms.Count; i++)
             {
-                var row = RowRect(i);
+                var row = new Rectangle(1, top, Width - 2, HeightOf(rooms[i]));
+                top = row.Bottom;
                 if (row.Bottom < BoxTop || row.Top > Height) continue;
-                DrawRoom(g, rooms[i], row, i == hoverRow, nameLeft, mapLeft, countLeft, pingLeft, i < rooms.Count - 1);
+                // A caption band already edges the row above it, so rows only separate within one section
+                var separator = i < rooms.Count - 1 && rooms[i + 1].Kind != RowKind.Header;
+                DrawRow(g, rooms[i], row, i == hoverRow, mapLeft, countLeft, pingLeft, separator);
             }
             g.ResetClip();
         }
 
-        void DrawRoom(Graphics g, RoomRow room, Rectangle row, bool hot, int nameLeft, int mapLeft, int countLeft, int pingLeft, bool separator)
+        void DrawRow(Graphics g, RoomRow room, Rectangle row, bool hot, int mapLeft, int countLeft, int pingLeft, bool separator)
         {
             var s = DpiScale;
-            var faded = room.Full;
-            if (hot && room.Joinable && Enabled)
+            const TextFormatFlags line = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
+            if (room.Kind == RowKind.Header)
             {
-                using (var brush = new SolidBrush(Theme.PanelHover)) g.FillRectangle(brush, row);
+                // A darker band bounds the caption on both sides, so it never reads as part of the row below
+                using (var brush = new SolidBrush(Theme.Background)) g.FillRectangle(brush, row);
+                using (var font = new Font(Theme.FontName, 8.25f, FontStyle.Bold))
+                {
+                    TextRenderer.DrawText(g, room.Text, font, new Rectangle(row.X + (int)(12 * s), row.Y, row.Width - (int)(24 * s), row.Height), Theme.Muted, line | TextFormatFlags.Left);
+                }
+                return;
+            }
+            if (room.Kind == RowKind.Empty)
+            {
+                using (var font = new Font(Theme.FontName, 9f))
+                {
+                    TextRenderer.DrawText(g, room.Text, font, row, Theme.Faint, line | TextFormatFlags.HorizontalCenter);
+                }
+                return;
+            }
+
+            var own = room.Kind == RowKind.Own;
+            var waiting = room.Kind == RowKind.Waiting;
+            var faded = waiting && room.Full;
+            var back = own ? Theme.ActivePanel : (hot && CanJoin(room) ? Theme.PanelHover : Theme.Panel);
+            if (back != Theme.Panel)
+            {
+                using (var brush = new SolidBrush(back)) g.FillRectangle(brush, row);
             }
             if (separator)
             {
                 using (var pen = new Pen(Theme.Border, Math.Max(1f, s))) g.DrawLine(pen, row.X + 8 * s, row.Bottom - 0.5f, row.Right - 8 * s, row.Bottom - 0.5f);
             }
 
-            var name = string.IsNullOrEmpty(room.Name) ? Strings.Player : room.Name;
-            var d = 28 * s;
-            AvatarPainter.Draw(g, new RectangleF(12 * s, row.Y + (row.Height - d) / 2, d, d), room.AvatarUrl, name, room.Code.GetHashCode(), faded ? 115 : 255);
-
-            const TextFormatFlags line = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
+            var avatarsRight = DrawAvatars(g, room, row, back, mapLeft - (int)(8 * s), faded);
             using (var nameFont = new Font(Theme.FontName, 9.75f))
             using (var small = new Font(Theme.FontName, 9f))
             {
-                TextRenderer.DrawText(g, name, nameFont, new Rectangle(nameLeft, row.Y, mapLeft - nameLeft - (int)(8 * s), row.Height), Fade(Theme.Text, faded), line | TextFormatFlags.Left);
-                TextRenderer.DrawText(g, MapName(room.Map), small, new Rectangle(mapLeft, row.Y, countLeft - mapLeft, row.Height), Fade(Theme.Muted, faded), line | TextFormatFlags.Left);
-                var count = room.MaxPlayers > 0 ? room.Players + "/" + room.MaxPlayers : room.Players.ToString();
-                TextRenderer.DrawText(g, count, small, new Rectangle(countLeft, row.Y, pingLeft - countLeft - (int)(6 * s), row.Height), room.Full ? Theme.Error : Fade(Theme.Muted, faded), line | TextFormatFlags.Right);
+                var nameLeft = avatarsRight + (int)(10 * s);
+                var nameRect = new Rectangle(nameLeft, row.Y, mapLeft - nameLeft - (int)(8 * s), row.Height);
+                if (own) DrawTag(g, Strings.YourRoom, nameRect);
+                else if (waiting)
+                {
+                    var name = string.IsNullOrEmpty(room.Name) ? Strings.Player : room.Name;
+                    TextRenderer.DrawText(g, name, nameFont, nameRect, Fade(Theme.Text, faded), line | TextFormatFlags.Left);
+                }
+
+                var map = room.Friends ? Strings.FriendGame : MapName(room.Map);
+                TextRenderer.DrawText(g, map, small, new Rectangle(mapLeft, row.Y, countLeft - mapLeft, row.Height), Fade(Theme.Muted, faded), line | TextFormatFlags.Left);
+                var count = waiting || (own && room.Minutes < 0)
+                    ? (room.MaxPlayers > 0 ? room.Players + "/" + room.MaxPlayers : room.Players.ToString())
+                    : string.Format(Strings.RoomPlayers, room.Players);
+                TextRenderer.DrawText(g, count, small, new Rectangle(countLeft, row.Y, pingLeft - countLeft - (int)(6 * s), row.Height), faded ? Theme.Error : Theme.Muted, line | TextFormatFlags.Right);
+
+                if (!waiting)
+                {
+                    var right = new Rectangle(pingLeft - (int)(10 * s), row.Y, row.Right - (int)(12 * s) - (pingLeft - (int)(10 * s)), row.Height);
+                    var text = room.Minutes >= 0 ? string.Format(Strings.PlayingFor, room.Minutes) : (own ? Strings.WaitingForPlayers : "");
+                    TextRenderer.DrawText(g, text, small, right, Theme.Muted, line | TextFormatFlags.Right);
+                    return;
+                }
+                if (LookOnly)
+                {
+                    TextRenderer.DrawText(g, "—", small, PingRect(row), Theme.Faint, line | TextFormatFlags.HorizontalCenter);
+                }
             }
 
-            var ping = PingRect(row);
-            var center = new PointF(ping.X + ping.Width / 2f, ping.Y + ping.Height / 2f);
-            if (room.Probe == ProbeState.Testing) DrawSpinner(g, center, s);
-            else DrawSignal(g, center, s, room);
+            if (!LookOnly)
+            {
+                var ping = PingRect(row);
+                var center = new PointF(ping.X + ping.Width / 2f, ping.Y + ping.Height / 2f);
+                if (room.Probe == ProbeState.Testing) DrawSpinner(g, center, s);
+                else DrawSignal(g, center, s, room);
+            }
 
             var button = ButtonRect(row);
-            var usable = room.Joinable && Enabled;
+            var usable = CanJoin(room);
             using (var path = Theme.Rounded(button, 6 * s))
             using (var brush = new SolidBrush(usable ? (hot && hoverButton ? Theme.AccentHover : Theme.Accent) : Theme.PanelHover))
             {
@@ -1361,6 +1481,60 @@ namespace Windy10v10AI.Launcher
             {
                 TextRenderer.DrawText(g, room.Full ? Strings.Full : Strings.Join, bold, button, usable ? Color.White : Theme.Faint,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            }
+        }
+
+        // Overlapping circles, each ringed in the row colour so the one behind shows a clean edge; returns where they end
+        int DrawAvatars(Graphics g, RoomRow room, Rectangle row, Color back, int limit, bool faded)
+        {
+            var s = DpiScale;
+            var d = 26 * s;
+            var left = 12 * s;
+            var count = room.Friends ? Math.Max(1, room.Players) : Math.Max(1, room.Avatars.Count);
+            var step = count > 1 ? Math.Min(19 * s, (limit - left - d) / (count - 1)) : 0;
+            var top = row.Y + (row.Height - d) / 2;
+            for (var i = 0; i < count; i++)
+            {
+                var rect = new RectangleF(left + i * step, top, d, d);
+                using (var ring = new SolidBrush(back)) g.FillEllipse(ring, RectangleF.Inflate(rect, 2 * s, 2 * s));
+                if (room.Friends) DrawFigure(g, rect, s);
+                else
+                {
+                    var avatar = i < room.Avatars.Count ? room.Avatars[i] : null;
+                    var name = avatar == null || string.IsNullOrEmpty(avatar.Name) ? Strings.Player : avatar.Name;
+                    AvatarPainter.Draw(g, rect, avatar == null ? null : avatar.Url, name, name.GetHashCode(), faded ? 115 : 255);
+                }
+            }
+            return (int)(left + (count - 1) * step + d);
+        }
+
+        // A friends game hides who is playing, so each player is a plain head and shoulders
+        static void DrawFigure(Graphics g, RectangleF rect, float s)
+        {
+            using (var brush = new SolidBrush(ColorTranslator.FromHtml("#4a3f37"))) g.FillEllipse(brush, rect);
+            var cx = rect.X + rect.Width / 2;
+            var cy = rect.Y + rect.Height / 2;
+            using (var pen = new Pen(Theme.Muted, 1.6f * s))
+            {
+                g.DrawEllipse(pen, cx - 3.5f * s, cy - 6.5f * s, 7 * s, 7 * s);
+                g.DrawArc(pen, cx - 6.5f * s, cy + 1.5f * s, 13 * s, 10 * s, 200, 140);
+            }
+        }
+
+        static void DrawTag(Graphics g, string text, Rectangle area)
+        {
+            using (var font = new Font(Theme.FontName, 8.25f, FontStyle.Bold))
+            {
+                var size = TextRenderer.MeasureText(text, font);
+                var h = font.Height + 4;
+                var pill = new Rectangle(area.X, area.Y + (area.Height - h) / 2, Math.Min(area.Width, size.Width + 12), h);
+                using (var path = Theme.Rounded(pill, h / 2f))
+                using (var brush = new SolidBrush(Theme.Accent))
+                {
+                    g.FillPath(brush, path);
+                }
+                TextRenderer.DrawText(g, text, font, pill, Color.White,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis);
             }
         }
 

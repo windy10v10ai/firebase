@@ -8,8 +8,19 @@ namespace Windy10v10AI.Launcher
     // Probes never use the relay, so Unreachable only means no direct route and the room can still be joined
     enum ProbeState { Untested, Testing, Reachable, Unreachable }
 
+    // Header and Empty are captions inside the list; only Waiting rows can be joined
+    enum RowKind { Waiting, Playing, Own, Header, Empty }
+
+    class RoomAvatar
+    {
+        public string Url;
+        public string Name;
+    }
+
     class RoomRow
     {
+        public RowKind Kind;
+        public string Text;
         public string Code;
         public string Name;
         public string AvatarUrl;
@@ -21,6 +32,10 @@ namespace Windy10v10AI.Launcher
         public int HostRelayRtt = -1;
         // Estimated from both sides' round trips to the relay, since probes never go through it
         public int RelayRtt = -1;
+        // Host first; a friends game carries none, so the list draws one blank figure per player
+        public List<RoomAvatar> Avatars = new List<RoomAvatar>();
+        public bool Friends;
+        public int Minutes = -1;
 
         // The latency a join will most likely see, or -1 while unknown
         public int Latency
@@ -35,22 +50,27 @@ namespace Windy10v10AI.Launcher
 
         public bool Joinable
         {
-            get { return (Probe == ProbeState.Reachable || Probe == ProbeState.Unreachable) && !Full; }
+            get { return Kind == RowKind.Waiting && (Probe == ProbeState.Reachable || Probe == ProbeState.Unreachable) && !Full; }
         }
 
         public RoomRow Copy()
         {
-            return (RoomRow)MemberwiseClone();
+            var copy = (RoomRow)MemberwiseClone();
+            copy.Avatars = new List<RoomAvatar>(Avatars);
+            return copy;
         }
     }
 
-    // One visit to the join page: the public room list, and a probe of each room on the socket a later join reuses
+    // One visit to the join page: the public room list, and a probe of each room on the socket a later join reuses.
+    // A host only looks, since it cannot join anyone while its own room is open
     class RoomBrowser : IDisposable
     {
+        public readonly bool Probing;
         readonly Func<Dictionary<string, object>> listBody;
         readonly Func<List<Candidate>, bool?, Dictionary<string, object>> peerBody;
         readonly object sync = new object();
         readonly List<RoomRow> rows = new List<RoomRow>();
+        List<RoomRow> games = new List<RoomRow>();
         readonly ManualResetEvent ready = new ManualResetEvent(false);
         JoinTunnel tunnel;
         List<Candidate> candidates;
@@ -60,21 +80,25 @@ namespace Windy10v10AI.Launcher
         RelayQuality relayQuality = RelayQuality.Unknown;
 
         public bool? SymmetricNat;
-        public int ActiveGames;
-        public int ActivePlayers;
         public bool Loaded;
         public bool LoadFailed;
         // Raised on worker threads
         public event Action Changed;
 
-        public RoomBrowser(Func<Dictionary<string, object>> listBody, Func<List<Candidate>, bool?, Dictionary<string, object>> peerBody)
+        public RoomBrowser(Func<Dictionary<string, object>> listBody, Func<List<Candidate>, bool?, Dictionary<string, object>> peerBody, bool probing)
         {
             this.listBody = listBody;
             this.peerBody = peerBody;
+            Probing = probing;
         }
 
         public void Start()
         {
+            if (!Probing)
+            {
+                ready.Set();
+                return;
+            }
             new Thread(() =>
             {
                 var gathered = new JoinTunnel();
@@ -117,17 +141,21 @@ namespace Windy10v10AI.Launcher
                     var answer = RoomApi.List(listBody());
                     var fresh = new List<RoomRow>();
                     foreach (Dictionary<string, object> room in (object[])answer["rooms"]) fresh.Add(Parse(room));
-                    var toProbe = new List<string>();
+                    var playing = new List<RoomRow>();
                     object value;
+                    if (answer.TryGetValue("games", out value) && value is object[])
+                    {
+                        foreach (Dictionary<string, object> game in (object[])value) playing.Add(ParseGame(game));
+                    }
+                    var toProbe = new List<string>();
                     lock (sync)
                     {
                         Merge(fresh);
-                        ActiveGames = answer.TryGetValue("activeGames", out value) && value != null ? Convert.ToInt32(value) : 0;
-                        ActivePlayers = answer.TryGetValue("activePlayers", out value) && value != null ? Convert.ToInt32(value) : 0;
+                        games = playing;
                         // A row keeps its result while it stays listed, so only rooms that are new or came back are measured
                         foreach (var row in rows)
                         {
-                            if (row.Probe != ProbeState.Untested || row.Full) continue;
+                            if (!Probing || row.Probe != ProbeState.Untested || row.Full) continue;
                             row.Probe = ProbeState.Testing;
                             toProbe.Add(row.Code);
                         }
@@ -135,7 +163,7 @@ namespace Windy10v10AI.Launcher
                         LoadFailed = false;
                     }
                     var relay = RelayTicket.Address(answer.TryGetValue("relayAddress", out value) ? value : null);
-                    if (relay != null && Interlocked.Exchange(ref relayMeasuring, 1) == 0)
+                    if (Probing && relay != null && Interlocked.Exchange(ref relayMeasuring, 1) == 0)
                     {
                         new Thread(() => MeasureRelay(relay)) { IsBackground = true }.Start();
                     }
@@ -160,7 +188,7 @@ namespace Windy10v10AI.Launcher
         static RoomRow Parse(Dictionary<string, object> room)
         {
             object value;
-            return new RoomRow
+            var row = new RoomRow
             {
                 Code = (string)room["code"],
                 Name = room.TryGetValue("personaName", out value) ? value as string : null,
@@ -170,6 +198,41 @@ namespace Windy10v10AI.Launcher
                 MaxPlayers = room.TryGetValue("maxPlayers", out value) && value != null ? Convert.ToInt32(value) : 0,
                 HostRelayRtt = room.TryGetValue("hostRelayRtt", out value) && value != null ? Convert.ToInt32(value) : -1,
             };
+            row.Avatars = ParseAvatars(room);
+            // An API without the player list still names the host
+            if (row.Avatars.Count == 0) row.Avatars.Add(new RoomAvatar { Url = row.AvatarUrl, Name = row.Name });
+            return row;
+        }
+
+        static RoomRow ParseGame(Dictionary<string, object> game)
+        {
+            object value;
+            return new RoomRow
+            {
+                Kind = RowKind.Playing,
+                Friends = !(game.TryGetValue("public", out value) && true.Equals(value)),
+                Map = game.TryGetValue("map", out value) ? value as string : null,
+                Players = game.TryGetValue("playerCount", out value) && value != null ? Convert.ToInt32(value) : 0,
+                Minutes = game.TryGetValue("minutes", out value) && value != null ? Convert.ToInt32(value) : -1,
+                Avatars = ParseAvatars(game),
+            };
+        }
+
+        static List<RoomAvatar> ParseAvatars(Dictionary<string, object> data)
+        {
+            var list = new List<RoomAvatar>();
+            object value;
+            if (!data.TryGetValue("players", out value) || !(value is object[])) return list;
+            foreach (Dictionary<string, object> player in (object[])value)
+            {
+                object field;
+                list.Add(new RoomAvatar
+                {
+                    Url = player.TryGetValue("avatarUrl", out field) ? field as string : null,
+                    Name = player.TryGetValue("personaName", out field) ? field as string : null,
+                });
+            }
+            return list;
         }
 
         // A room keeps its measured latency across refreshes, since the route to it does not change
@@ -244,6 +307,16 @@ namespace Windy10v10AI.Launcher
             var quality = socket.MeasureRelay(relay);
             lock (sync) relayQuality = quality;
             Raise();
+        }
+
+        // Public games first, then friends games, each longest running first as the API sends them
+        public List<RoomRow> Games()
+        {
+            List<RoomRow> list;
+            lock (sync) list = games.ConvertAll(r => r.Copy());
+            var ordered = list.FindAll(r => !r.Friends);
+            ordered.AddRange(list.FindAll(r => r.Friends));
+            return ordered;
         }
 
         // Directly reachable rooms first, the fuller and closer the better; rooms still testing next; then rooms only the relay reaches; full last
