@@ -483,8 +483,19 @@ namespace Windy10v10AI.Launcher
                             g.FillPath(fill, path);
                             g.DrawPath(pen, path);
                         }
-                        TextRenderer.DrawText(g, count, small, Rectangle.Round(pill), BadgeText,
-                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                        // Centred on the glyph's own outline, since a text box centres the font's line height and leaves a digit low
+                        using (var digits = new GraphicsPath())
+                        using (var brush = new SolidBrush(BadgeText))
+                        {
+                            digits.AddString(count, small.FontFamily, (int)small.Style, small.SizeInPoints * g.DpiY / 72f, PointF.Empty, StringFormat.GenericTypographic);
+                            var glyph = digits.GetBounds();
+                            using (var shift = new Matrix())
+                            {
+                                shift.Translate(pill.X + (pill.Width - glyph.Width) / 2 - glyph.X, pill.Y + (pill.Height - glyph.Height) / 2 - glyph.Y);
+                                digits.Transform(shift);
+                            }
+                            g.FillPath(brush, digits);
+                        }
                     }
                 }
             }
@@ -1172,7 +1183,7 @@ namespace Windy10v10AI.Launcher
 
         int HeightOf(RoomRow row)
         {
-            return (int)((row.Kind == RowKind.Header ? 26 : 52) * DpiScale);
+            return (int)((row.Kind == RowKind.Header ? 24 : 52) * DpiScale);
         }
 
         int ContentHeight()
@@ -1367,30 +1378,29 @@ namespace Windy10v10AI.Launcher
                 return;
             }
 
-            g.SetClip(new Rectangle(1, BoxTop + 1, Width - 2, Height - BoxTop - 2));
+            // Rounded so a filled row at the top or bottom keeps the box's corners
+            using (var inner = Theme.Rounded(new RectangleF(1, BoxTop + 1, Width - 2, Height - BoxTop - 2), 5 * s)) g.SetClip(inner);
             var top = BoxTop + 1 - scroll;
             for (var i = 0; i < rooms.Count; i++)
             {
                 var row = new Rectangle(1, top, Width - 2, HeightOf(rooms[i]));
                 top = row.Bottom;
                 if (row.Bottom < BoxTop || row.Top > Height) continue;
-                // A caption opens a section with a full-width line, so rows only separate within one
+                // A caption band already edges the row above it, so rows only separate within one section
                 var separator = i < rooms.Count - 1 && rooms[i + 1].Kind != RowKind.Header;
-                DrawRow(g, rooms[i], row, i == hoverRow, mapLeft, countLeft, pingLeft, separator, i > 0);
+                DrawRow(g, rooms[i], row, i == hoverRow, mapLeft, countLeft, pingLeft, separator);
             }
             g.ResetClip();
         }
 
-        void DrawRow(Graphics g, RoomRow room, Rectangle row, bool hot, int mapLeft, int countLeft, int pingLeft, bool separator, bool captionLine)
+        void DrawRow(Graphics g, RoomRow room, Rectangle row, bool hot, int mapLeft, int countLeft, int pingLeft, bool separator)
         {
             var s = DpiScale;
             const TextFormatFlags line = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
             if (room.Kind == RowKind.Header)
             {
-                if (captionLine)
-                {
-                    using (var pen = new Pen(Theme.Border, Math.Max(1f, s))) g.DrawLine(pen, row.X, row.Y + 0.5f, row.Right, row.Y + 0.5f);
-                }
+                // A darker band bounds the caption on both sides, so it never reads as part of the row below
+                using (var brush = new SolidBrush(Theme.Background)) g.FillRectangle(brush, row);
                 using (var font = new Font(Theme.FontName, 8.25f, FontStyle.Bold))
                 {
                     TextRenderer.DrawText(g, room.Text, font, new Rectangle(row.X + (int)(12 * s), row.Y, row.Width - (int)(24 * s), row.Height), Theme.Muted, line | TextFormatFlags.Left);
