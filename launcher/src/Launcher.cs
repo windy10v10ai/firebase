@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.5.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.5.0.0")]
+[assembly: System.Reflection.AssemblyVersion("0.5.1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.5.1.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.5.0";
+        const string Version = "0.5.1";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -67,8 +67,8 @@ namespace Windy10v10AI.Launcher
         const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
         // The game prints this once its results request has finally succeeded or failed
         const string ResultsDone = "[Game] end game callback";
-        // An offline game never prints the callback, so the room cannot wait on it forever
-        const int ResultsFallbackSeconds = 120;
+        // The callback is missing in an offline game and once every player has left, while the request itself settles within seconds
+        const int ResultsFallbackSeconds = 15;
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;

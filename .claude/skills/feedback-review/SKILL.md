@@ -1,11 +1,22 @@
 ---
 name: feedback-review
-description: 汇总、分析玩家从启动器（以后还有网站）提交的反馈时加载——「看看最近的反馈」「汇总这周的报告」「AI 发呆的反馈有哪些」「把反馈整理成 issue」。包含报告与日志存在哪、用 gcloud 怎么读、怎么按分类汇总、怎么转成 game / firebase 仓库的 issue。
+description: 汇总、分析玩家从启动器（以后还有网站）提交的反馈时加载——「看看最近的反馈」「汇总这周的报告」「AI 发呆的反馈有哪些」「把反馈整理成 issue」「上次的反馈处理得怎么样了」。包含跟踪 issue 的读写、报告与日志存在哪、用 gcloud 怎么读、怎么按分类汇总、怎么转成 game / firebase 仓库的 issue。
 ---
 
 # 玩家反馈的汇总与分析
 
 反馈的设计、分类与字段含义见 [docs/design/launcher-feedback/phase-1-launcher.md](../../../docs/design/launcher-feedback/phase-1-launcher.md)，接口约束见 [docs/api/README.md](../../../docs/api/README.md) 的 `POST /api/feedback`。
+
+## 一轮的流程
+
+处理状态记在跟踪 issue [windy10v10ai/firebase#1404](https://github.com/windy10v10ai/firebase/issues/1404)：正文是当前状态（处理到哪、待处理、长期反馈），每轮的汇总是一条评论。
+
+1. **读状态**：`gh issue view 1404 --repo windy10v10ai/firebase --comments`。完成标准：拿到「处理到哪」的截止时间，知道待处理里每条现在等的是什么
+2. **读新报告**：按下文「读报告」取截止时间之后的报告，有日志的按「读日志」查。用户问的是上次的某条待处理时，先查那一条
+3. **汇总**：按下文「汇总怎么写」回复用户
+4. **更新 issue**：用户确认汇总后，改写正文并加一条本轮评论。完成标准：截止时间是本轮最后一份报告的 `createdAt`；本轮每个报告 ID 都出现在正文或评论里；每份新报告要么进了待处理并写明去向（已转 issue、等复现、等数据、待查日志），要么计入了长期反馈的份数；已勾选的待处理从正文删掉
+
+正文与评论写现象和报告 ID，不写 Steam ID、昵称、IP，玩家原话转述。
 
 ## 数据在哪
 
@@ -19,14 +30,14 @@ description: 汇总、分析玩家从启动器（以后还有网站）提交的�
 
 ## 读报告
 
-按提交时间取一段，`SINCE` 换成起始时间（UTC）：
+取截止时间之后的报告，不含截止时间那一份：
 
 ```bash
-SINCE=2026-10-01T00:00:00Z
+SINCE=2026-10-06T06:58:44Z  # 换成跟踪 issue 的截止时间
 T=$(gcloud auth print-access-token)
 curl -s -X POST -H "Authorization: Bearer $T" -H "Content-Type: application/json" \
   "https://firestore.googleapis.com/v1/projects/windy10v10ai/databases/(default)/documents:runQuery" \
-  -d "{\"structuredQuery\":{\"from\":[{\"collectionId\":\"FeedbackReports\"}],\"where\":{\"fieldFilter\":{\"field\":{\"fieldPath\":\"createdAt\"},\"op\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"$SINCE\"}}},\"orderBy\":[{\"field\":{\"fieldPath\":\"createdAt\"}}]}}" \
+  -d "{\"structuredQuery\":{\"from\":[{\"collectionId\":\"FeedbackReports\"}],\"where\":{\"fieldFilter\":{\"field\":{\"fieldPath\":\"createdAt\"},\"op\":\"GREATER_THAN\",\"value\":{\"timestampValue\":\"$SINCE\"}}},\"orderBy\":[{\"field\":{\"fieldPath\":\"createdAt\"}}]}}" \
   > "$TEMP/feedback.json"
 ```
 
@@ -51,7 +62,7 @@ gcloud storage cp -q gs://windy10v10ai-feedback/2026-10-04/<报告ID>/server.log
 
 ## 转成 issue
 
-只在用户同意后做。`topics` 与仓库标签的对应见设计文档的分类表（`ui` 对应 game 的 `UI/UX`，`lag` 对应 `system`，`launcher` / `web` 进 firebase 仓库）。先用 `gh issue list --search` 查有没有现成的 issue，有就在下面补评论，不重复建。issue 正文写现象与报告 ID，不贴 Steam ID 与日志原文。
+只在用户同意后做。`topics` 与仓库标签的对应见设计文档的分类表（`ui` 对应 game 的 `UI/UX`，`lag` 对应 `system`，`launcher` / `web` 进 firebase 仓库）。先用 `gh issue list --search` 查有没有现成的 issue，有就在下面补评论，不重复建。issue 正文写现象与报告 ID，不贴 Steam ID 与日志原文。建好后把链接填进跟踪 issue 对应的待处理条目。
 
 ## 注意
 
