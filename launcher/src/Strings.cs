@@ -74,10 +74,14 @@ namespace Windy10v10AI.Launcher
         public static string HostRoom { get { return Pick("联机主机", "Host", "Хост"); } }
         public static string JoinRoom { get { return Pick("加入联机", "Join", "Присоединиться"); } }
         public static string HostIdle { get { return Pick("点击难度，创建联机主机", "Click a difficulty to host a game", "Выберите сложность, чтобы стать хостом"); } }
-        public static string PrivatePrompt { get { return Pick("好友房：输入房主发来的房间码", "Friends room: enter the code from the host", "Комната для друзей: введите код от хоста"); } }
         public static string PublicRooms { get { return Pick("公开房间", "Public rooms", "Открытые комнаты"); } }
-        public static string RoomCount { get { return Pick("{0} 个", "{0}", "{0}"); } }
-        public static string ActiveGames { get { return Pick("正在进行：{0} 局 · {1} 人", "In progress: {0} games · {1} players", "В игре: {0} игр · {1} игроков"); } }
+        public static string SectionWaiting { get { return Pick("等待加入", "Open to join", "Ждут игроков"); } }
+        public static string SectionPlaying { get { return Pick("进行中", "In progress", "Идут игры"); } }
+        public static string YourRoom { get { return Pick("你的房间", "Your room", "Ваша комната"); } }
+        public static string WaitingForPlayers { get { return Pick("等人加入…", "Waiting…", "Ждём игроков…"); } }
+        public static string PlayingFor { get { return Pick("已进行 {0} 分钟", "{0} min in", "Идёт {0} мин"); } }
+        public static string RoomPlayers { get { return Pick("{0} 人", "{0}", "{0}"); } }
+        public static string FriendGame { get { return Pick("好友游戏", "Friends", "Друзья"); } }
         public static string Refresh { get { return Pick("刷新", "Refresh", "Обновить"); } }
         public static string ColumnMap { get { return Pick("地图", "Map", "Карта"); } }
         public static string ColumnPlayers { get { return Pick("人数", "Players", "Игроки"); } }
@@ -104,7 +108,7 @@ namespace Windy10v10AI.Launcher
         public static string RoomClosed { get { return Pick("超过 15 分钟未开始，房间已关闭", "Not started within 15 minutes, so the room is closed", "Игра не началась за 15 минут, комната закрыта"); } }
         public static string Reopen { get { return Pick("重新开放", "Reopen", "Открыть снова"); } }
         public static string RoomCode { get { return Pick("房间码", "Room code", "Код комнаты"); } }
-        public static string CodeExample { get { return Pick("例：Z82QCT", "e.g. Z82QCT", "Например: Z82QCT"); } }
+        public static string CodeExample { get { return Pick("好友房间码，例：Z82QCT", "Friends room code, e.g. Z82QCT", "Код комнаты друзей, напр. Z82QCT"); } }
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
         public static string Paste { get { return Pick("粘贴", "Paste", "Вставить"); } }
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }

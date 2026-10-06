@@ -24,7 +24,7 @@ import {
   ListRoomsResponse,
 } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
-import { LauncherRoom } from './entities/launcher-room.entity';
+import { LauncherRoom, LauncherRoomPlayer } from './entities/launcher-room.entity';
 import { LauncherRelayService } from './launcher-relay.service';
 
 // 去掉 0 O 1 I L，玩家转述房间码时不会看错
@@ -94,12 +94,27 @@ export class LauncherRoomService {
     }
     await this.bigQueryService.recordConnectionQuality(room, qualities);
 
+    // 开局后房主仍每次轮询都报名单，只在名单变了时才查加入记录换昵称头像
+    const playersChanged =
+      dto.players !== undefined &&
+      dto.players.join() !== (room.players ?? []).map((player) => player.steamId).join();
+    const roomJoins = !room.started || playersChanged ? await this.findRoomJoins(room) : [];
+    if (playersChanged) {
+      room.players = dto.players!.map((steamId) => profileOf(steamId, roomJoins));
+    }
+
     room.lastSeenAt = now;
+    if (!room.started && dto.started === true) {
+      room.startedAt = now;
+    }
     room.started = room.started || dto.started === true;
+    room.ended = room.ended || dto.ended === true;
     Object.assign(room, roomSettings(dto));
     await this.roomRepository.update(room);
 
-    const joins = room.started ? [] : await this.findPendingJoins(room, now);
+    const joins = room.started
+      ? []
+      : roomJoins.filter((join) => now.getTime() - join.createdAt.getTime() <= PENDING_JOIN_MS);
     return {
       code: room.id,
       token: room.hostToken,
@@ -193,12 +208,17 @@ export class LauncherRoomService {
   async list(dto: ListRoomsDto): Promise<ListRoomsResponse> {
     const now = Date.now();
     const rooms = await this.findAliveRooms(now);
-    const activeRooms = rooms.filter(
-      (room) =>
-        room.public === true &&
-        room.started &&
-        now - room.lastSeenAt.getTime() <= ACTIVE_GAME_ALIVE_MS,
-    );
+    const games = rooms
+      .filter(
+        (room) =>
+          room.started && !room.ended && now - room.lastSeenAt.getTime() <= ACTIVE_GAME_ALIVE_MS,
+      )
+      .sort(
+        (a, b) =>
+          (a.startedAt?.getTime() ?? Number.MAX_SAFE_INTEGER) -
+          (b.startedAt?.getTime() ?? Number.MAX_SAFE_INTEGER),
+      );
+    const activeRooms = games.filter((room) => room.public === true);
     return {
       rooms: rooms
         .filter(
@@ -218,7 +238,23 @@ export class LauncherRoomService {
           playerCount: room.playerCount,
           maxPlayers: room.maxPlayers,
           hostRelayRtt: room.relayRtt,
+          players: hostAndPlayers(room),
         })),
+      games: games.map((room) => {
+        const minutes = room.startedAt
+          ? Math.floor((now - room.startedAt.getTime()) / 60000)
+          : undefined;
+        // 好友房的人选了不公开，只给人数与时长
+        return room.public === true
+          ? {
+              public: true,
+              map: room.map,
+              playerCount: room.playerCount,
+              minutes,
+              players: hostAndPlayers(room),
+            }
+          : { public: false, playerCount: room.playerCount, minutes };
+      }),
       activeGames: activeRooms.length,
       activePlayers: activeRooms.reduce((total, room) => total + (room.playerCount ?? 0), 0),
       relayAddress: this.relayService.address(),
@@ -302,13 +338,28 @@ export class LauncherRoomService {
   }
 
   // 只按房间码等值查再在内存里筛，免得为这张小表建复合索引
-  private async findPendingJoins(room: LauncherRoom, now: Date): Promise<LauncherRoomJoin[]> {
+  private async findRoomJoins(room: LauncherRoom): Promise<LauncherRoomJoin[]> {
     const joins = await this.joinRepository.whereEqualTo('roomCode', room.id).find();
-    return joins.filter(
-      (join) =>
-        join.roomId === room.roomId && now.getTime() - join.createdAt.getTime() <= PENDING_JOIN_MS,
-    );
+    return joins.filter((join) => join.roomId === room.roomId);
   }
+}
+
+// 同一个人可能加入过几次，取最近一次的资料；查不到就只留账号，列表照样算人数
+function profileOf(steamId: number, joins: LauncherRoomJoin[]): LauncherRoomPlayer {
+  const join = joins
+    .filter((candidate) => candidate.steamId === steamId && !candidate.probe)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+  return { steamId, personaName: join?.personaName, avatarUrl: join?.avatarUrl };
+}
+
+function hostAndPlayers(room: LauncherRoom): LauncherProfileDto[] {
+  return [
+    { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
+    ...(room.players ?? []).map((player) => ({
+      personaName: player.personaName,
+      avatarUrl: player.avatarUrl,
+    })),
+  ];
 }
 
 // 只取房主这次带上的字段，没带的保留上次的值

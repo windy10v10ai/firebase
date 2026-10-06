@@ -19,6 +19,7 @@ import { LAUNCHER_ROOM_MAPS, LauncherRoomMap } from '../entities/launcher-room.e
 const MAX_CANDIDATES = 8;
 const MAX_KICKED = 50;
 const MAX_QUALITY = 50;
+const MAX_PLAYERS = 10;
 // 类型前缀让加入者知道连通的是哪条路，房主才能上报 lan / upnp / punch
 const CANDIDATE_PATTERN = /^(lan|stun|upnp):\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 
@@ -169,6 +170,22 @@ export class HostRoomDto extends LauncherPeerDto {
   @IsBoolean()
   started?: boolean;
 
+  @ApiPropertyOptional({ description: '游戏已结束时传 true，之后不再显示在列表里' })
+  @IsOptional()
+  @IsBoolean()
+  ended?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      '房里还在的加入者的 32 位账号 ID，不含房主；开局前是已连上的人，开局后是还在游戏里的人',
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_PLAYERS)
+  @IsInt({ each: true })
+  players?: number[];
+
   @ApiPropertyOptional({ description: '是否进房间列表，省略按私密处理' })
   @IsOptional()
   @IsBoolean()
@@ -295,12 +312,29 @@ export class PublicRoomDto extends LauncherProfileDto {
   maxPlayers?: number;
   @ApiPropertyOptional({ description: '房主到中转的往返毫秒数，房主没测到时省略' })
   hostRelayRtt?: number;
+  @ApiProperty({ type: [LauncherProfileDto], description: '房里的人，房主在第一个' })
+  players: LauncherProfileDto[];
+}
+
+export class ActiveGameDto {
+  @ApiProperty({ description: '好友房只给人数与时长，不给地图与玩家' })
+  public: boolean;
+  @ApiPropertyOptional({ enum: LAUNCHER_ROOM_MAPS })
+  map?: LauncherRoomMap;
+  @ApiPropertyOptional()
+  playerCount?: number;
+  @ApiPropertyOptional({ description: '开局至今的整分钟数，开局时间不明时省略' })
+  minutes?: number;
+  @ApiPropertyOptional({ type: [LauncherProfileDto], description: '公开游戏里的人，房主在第一个' })
+  players?: LauncherProfileDto[];
 }
 
 export class ListRoomsResponse {
   @ApiProperty({ type: [PublicRoomDto] })
   rooms: PublicRoomDto[];
-  @ApiProperty({ description: '仍在进行的公开游戏数' })
+  @ApiProperty({ type: [ActiveGameDto], description: '仍在进行的游戏，含好友房，开局早的在前' })
+  games: ActiveGameDto[];
+  @ApiProperty({ description: '仍在进行的公开游戏数，给只认这一项的旧版启动器' })
   activeGames: number;
   @ApiProperty({ description: '仍在进行的公开游戏玩家数' })
   activePlayers: number;
