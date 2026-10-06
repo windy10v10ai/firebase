@@ -150,6 +150,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_5_1": [
+          "Fixed some issues"
+        ],
         "v0_5_0": [
           "Improved online play, fixing connection failures for some players",
           "Rejoin from the launcher after a disconnect; fewer overflow errors"
