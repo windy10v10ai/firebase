@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: "5766bde9e5c1dce0f59bb88b98126646e7e3c30c",
+  gameCommit: "63d3246707bda93ffc8577f3389c7f7983362754",
   dotaVersion: "7.41",
 } as const;
 
@@ -100,7 +100,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "terrorblade_sunder.81abec5d.webp",
     name: { zh: "恐怖利刃", en: "Terrorblade" },
     title: { zh: "<font color='#d000ff'>魂断 觉醒</font>", en: "<font color='#d000ff'>Sunder Awakened</font>" },
-    desc: { zh: "生命值低于<font color='#FFFFFF'><b>30%</b></font>时，<font color='#FF0000'>自动</font>对施法距离内生命值百分比最高的敌方英雄施放魂断。<br><font color='#FF0000'>被眩晕、沉默、妖术等控制时也会自动施放。</font><br>需要魂断冷却完毕且魔法足够；敌方英雄生命值百分比都低于自己时不触发。", en: "Below <font color='#FFFFFF'><b>30%</b></font> health, <font color='#FF0000'>automatically</font> casts Sunder on the enemy hero with the highest health percentage within cast range.<br><font color='#FF0000'>Still triggers while stunned, silenced, hexed, or otherwise disabled.</font><br>Requires Sunder to be off cooldown with enough mana; does not trigger if no enemy hero's health percentage is higher than your own." },
+    desc: { zh: "隔断恐怖利刃以及目标英雄的灵魂并将双方的当前血量百分比进行互换。交换后双方英雄的生命值必定在一定百分比以上。<br><br><font color='#00CED1'>自动施放：</font>生命值低于<font color='#FFFFFF'><b>30%</b></font>时，自动对施法距离内生命值百分比最高的敌方英雄施放魂断。<br><font color='#d000ff'>觉醒强化：</font>被眩晕、沉默、妖术等控制时也会自动施放。魂断需冷却完毕且魔法足够，敌方英雄生命值百分比都低于自己时不触发。", en: "Severs the life from both Terrorblade and a target hero, exchanging a percentage of both units' current health. Some health points must remain.<br><br><font color='#00CED1'>Autocast:</font> Below <font color='#FFFFFF'><b>30%</b></font> health, automatically casts Sunder on the enemy hero with the highest health percentage within cast range.<br><font color='#d000ff'>AWAKENED:</font> Still triggers while stunned, silenced, hexed, or otherwise disabled. Requires Sunder to be off cooldown with enough mana, and does not trigger if no enemy hero's health percentage is higher than your own." },
     ability: {"behavior":"passive","targeting":null,"damageType":null,"piercesImmunity":null,"dispellable":null,"values":[],"cooldown":null,"manaCost":null,"lore":null},
   },
   {
@@ -133,7 +133,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     icon: "beastmaster_wild_axes.b094b423.webp",
     name: { zh: "兽王", en: "Beastmaster" },
     title: { zh: "<font color='#d000ff'>野性之斧 觉醒</font>", en: "<font color='#d000ff'>Wild Axes Awakened</font>" },
-    desc: { zh: "兽王投出他的斧头然后召回它们，切开飞过的敌人和树木。每把飞斧对同一个敌人只能击中一次，并且使受到来自兽王和其单位的伤害增加。减益持续时间受状态抗性影响。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方单位时自动朝最远的敌方英雄投斧。<br><font color='#d000ff'>觉醒强化：</font>飞斧伤害提高，伤害加深持续时间延长，飞斧以极快速度飞出并返回，斯洛姆战鼓的伤害，治疗和原始咆哮提供的敲鼓层数一并提高。", en: "Beastmaster sends his axes flying and calls them home again, slicing through enemy units and trees along their path. Each axe can hit an enemy once, and amplifies subsequent damage from Beastmaster and his units. Debuff duration is affected by Status Resistance.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, throws the axes toward the farthest enemy hero whenever an enemy unit is within cast range.<br><font color='#d000ff'>AWAKENED:</font> Axe damage is increased, damage amplification lasts longer, the axes travel out and back at extreme speed, and Drums of Slom gains increased damage, healing, and drum stacks from Primal Roar." },
+    desc: { zh: "兽王投出他的斧头然后召回它们，切开飞过的敌人和树木。每把飞斧对同一个敌人只能击中一次，并且使受到来自兽王和其单位的伤害增加。减益持续时间受状态抗性影响。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方单位时自动朝最远的敌方英雄投斧。<br><font color='#d000ff'>觉醒强化：</font>伤害加深持续时间延长，飞斧以极快速度飞出并返回，斯洛姆战鼓的伤害，治疗和原始咆哮提供的敲鼓层数一并提高。", en: "Beastmaster sends his axes flying and calls them home again, slicing through enemy units and trees along their path. Each axe can hit an enemy once, and amplifies subsequent damage from Beastmaster and his units. Debuff duration is affected by Status Resistance.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, throws the axes toward the farthest enemy hero whenever an enemy unit is within cast range.<br><font color='#d000ff'>AWAKENED:</font> Damage amplification lasts longer, the axes travel out and back at extreme speed, and Drums of Slom gains increased damage, healing, and drum stacks from Primal Roar." },
     ability: {"behavior":"autocast","targeting":"enemyUnits","damageType":"magical","piercesImmunity":"yes","dispellable":"soft","values":[{"label":{"zh":"每把飞斧伤害：","en":"DAMAGE PER AXE:"},"levels":["80","160","240","320","400"],"percent":false,"aoe":false,"spellAmp":true},{"label":{"zh":"每把加深伤害：","en":"DAMAGE AMP PER STACK:"},"levels":["5","6","7","8","9"],"percent":true,"aoe":false,"spellAmp":false},{"label":{"zh":"负面效果持续时间：","en":"DEBUFF DURATION:"},"levels":["10","11","12","13","14"],"percent":false,"aoe":false,"spellAmp":false},{"label":{"zh":"飞斧飞行时间：","en":"AXE TRAVEL TIME:"},"levels":["0.4"],"percent":false,"aoe":false,"spellAmp":false}],"cooldown":["8"],"manaCost":["50","55","60","65","70"],"lore":null},
   },
   {
