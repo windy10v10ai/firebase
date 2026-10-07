@@ -1314,7 +1314,7 @@ namespace Windy10v10AI.Launcher
         static string PingTip(RoomRow room)
         {
             if (room.Probe == ProbeState.Testing) return Strings.ProbeTesting;
-            if (room.Probe == ProbeState.Unreachable) return room.RelayRtt >= 0 ? string.Format(Strings.ProbeRelayLatency, room.RelayRtt) : Strings.ProbeFailed;
+            if (room.Probe == ProbeState.Unreachable) return room.RelayRtt >= 0 ? string.Format(Strings.ProbeRelayLatency, room.RelayRtt) : null;
             if (room.Probe == ProbeState.Reachable) return string.Format(Strings.ProbeLatency, room.Rtt);
             return null;
         }
