@@ -6,6 +6,8 @@ export interface TaskDefinition {
   metric: TaskMetric;
   /** 1-star base target. */
   target: number;
+  /** 三档目标写死时使用，首项须等于 target；倍率档与加法档都给不出想要的档距时才用。 */
+  starTargets?: readonly [number, number, number];
   heroName?: string;
 }
 
@@ -16,7 +18,7 @@ export const STAR_TARGET_MULTIPLIERS = { 1: 1, 2: 1.5, 3: 2 } as const;
 export const SMALL_TARGET_THRESHOLD = 10;
 
 export const DAILY_TASKS: TaskDefinition[] = [
-  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 60 },
+  { id: 'general_kills', scope: TaskScope.PERSONAL_GENERAL, metric: TaskMetric.KILLS, target: 70 },
   {
     id: 'general_assists',
     scope: TaskScope.PERSONAL_GENERAL,
@@ -34,12 +36,13 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
+    starTargets: [4, 6, 8],
   },
   {
     id: 'general_hero_damage',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.HERO_DAMAGE,
-    target: 800_000,
+    target: 700_000,
   },
   {
     id: 'general_healing',
@@ -57,7 +60,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'general_damage_taken',
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 200_000,
+    target: 150_000,
   },
   {
     id: 'general_stun_duration',
@@ -188,6 +191,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_shadow_shaman',
   },
   {
@@ -229,7 +233,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_sniper_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_sniper',
   },
   {
@@ -313,7 +317,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_viper_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 200_000,
+    target: 160_000,
     heroName: 'npc_dota_hero_viper',
   },
   {
@@ -355,7 +359,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_dragon_knight_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 220_000,
+    target: 140_000,
     heroName: 'npc_dota_hero_dragon_knight',
   },
   {
@@ -376,7 +380,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_phantom_assassin_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 50,
+    target: 62,
     heroName: 'npc_dota_hero_phantom_assassin',
   },
   {
@@ -390,7 +394,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_nevermore_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_nevermore',
   },
   {
@@ -425,7 +429,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_kunkka_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 200_000,
+    target: 140_000,
     heroName: 'npc_dota_hero_kunkka',
   },
   {
@@ -516,7 +520,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_antimage_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_antimage',
   },
   {
@@ -531,6 +535,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_arc_warden',
   },
   {
@@ -559,6 +564,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 3,
+    starTargets: [3, 5, 7],
     heroName: 'npc_dota_hero_batrider',
   },
   {
@@ -579,7 +585,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_bloodseeker_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_bloodseeker',
   },
   {
@@ -593,7 +599,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_bounty_hunter_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 36,
+    target: 46,
     heroName: 'npc_dota_hero_bounty_hunter',
   },
   {
@@ -621,7 +627,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_broodmother_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 180_000,
+    target: 120_000,
     heroName: 'npc_dota_hero_broodmother',
   },
   {
@@ -636,6 +642,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_chaos_knight',
   },
   {
@@ -664,6 +671,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_clinkz',
   },
   {
@@ -720,6 +728,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_death_prophet',
   },
   {
@@ -748,6 +757,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 3,
+    starTargets: [3, 5, 7],
     heroName: 'npc_dota_hero_drow_ranger',
   },
   {
@@ -775,7 +785,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_elder_titan_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 200_000,
+    target: 140_000,
     heroName: 'npc_dota_hero_elder_titan',
   },
   {
@@ -810,7 +820,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_faceless_void_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 220_000,
+    target: 140_000,
     heroName: 'npc_dota_hero_faceless_void',
   },
   {
@@ -915,7 +925,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_legion_commander_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_legion_commander',
   },
   {
@@ -930,6 +940,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_leshrac',
   },
   {
@@ -972,6 +983,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_lone_druid',
   },
   {
@@ -1000,6 +1012,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_lycan',
   },
   {
@@ -1105,6 +1118,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_furion',
   },
   {
@@ -1174,7 +1188,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_obsidian_destroyer_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_obsidian_destroyer',
   },
   {
@@ -1237,7 +1251,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_queenofpain_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_queenofpain',
   },
   {
@@ -1265,7 +1279,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_riki_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 36,
+    target: 46,
     heroName: 'npc_dota_hero_riki',
   },
   {
@@ -1321,7 +1335,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_slardar_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 200_000,
+    target: 160_000,
     heroName: 'npc_dota_hero_slardar',
   },
   {
@@ -1335,7 +1349,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_slark_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_slark',
   },
   {
@@ -1391,7 +1405,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_storm_spirit_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_storm_spirit',
   },
   {
@@ -1405,14 +1419,14 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_techies_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 32,
+    target: 40,
     heroName: 'npc_dota_hero_techies',
   },
   {
     id: 'hero_templar_assassin_1',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_templar_assassin',
   },
   {
@@ -1420,6 +1434,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_templar_assassin',
   },
   {
@@ -1434,6 +1449,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_terrorblade',
   },
   {
@@ -1504,6 +1520,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 5,
+    starTargets: [5, 7, 9],
     heroName: 'npc_dota_hero_troll_warlord',
   },
   {
@@ -1524,7 +1541,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_abyssal_underlord_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.DAMAGE_TAKEN,
-    target: 220_000,
+    target: 140_000,
     heroName: 'npc_dota_hero_abyssal_underlord',
   },
   {
@@ -1545,7 +1562,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_ursa_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_ursa',
   },
   {
@@ -1573,7 +1590,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_visage_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_visage',
   },
   {
@@ -1587,7 +1604,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_void_spirit_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_void_spirit',
   },
   {
@@ -1601,7 +1618,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_weaver_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_weaver',
   },
   {
@@ -1692,7 +1709,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_muerta_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_muerta',
   },
   {
@@ -1720,7 +1737,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     id: 'hero_kez_2',
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.KILLS,
-    target: 40,
+    target: 50,
     heroName: 'npc_dota_hero_kez',
   },
   {

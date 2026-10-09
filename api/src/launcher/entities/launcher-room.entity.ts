@@ -9,6 +9,12 @@ export interface LauncherRoomPlayer {
   avatarUrl?: string;
 }
 
+export interface LauncherRelayProbe {
+  address: string;
+  rtt?: number;
+  loss: number;
+}
+
 /** 启动器联机开房，文档 ID 就是房间码。 */
 @Collection()
 export class LauncherRoom {
@@ -39,6 +45,8 @@ export class LauncherRoom {
   players?: LauncherRoomPlayer[];
   relayRtt?: number;
   relayLoss?: number;
+  /** 房主到每台中转的测量结果，旧版启动器不报 */
+  relays?: LauncherRelayProbe[];
   /** 只对这一个房间生效，房主重开房就清空 */
   kickedSteamIds?: number[];
   lastSeenAt: Date;

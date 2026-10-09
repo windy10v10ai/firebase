@@ -1,7 +1,7 @@
 import { LauncherRoomJoin } from '../launcher/entities/launcher-room-join.entity';
 import { LauncherRoom } from '../launcher/entities/launcher-room.entity';
 
-import { buildConnectionQualityRow } from './launcher-room-rows';
+import { buildConnectionQualityRow, buildJoinResultRow } from './launcher-room-rows';
 
 describe('buildConnectionQualityRow', () => {
   const room = {
@@ -55,5 +55,36 @@ describe('buildConnectionQualityRow', () => {
     );
 
     expect(row).toMatchObject({ rtt_p50_ms: null, rtt_p95_ms: null, relay_address: null });
+  });
+});
+
+describe('buildJoinResultRow', () => {
+  it('房主与加入者到每台中转的测量按地址合并成一组', () => {
+    const row = buildJoinResultRow(
+      {
+        roomId: 'room-1',
+        hostSteamId: 1001,
+        relays: [
+          { address: 'a', rtt: 10, loss: 0 },
+          { address: 'b', loss: 100 },
+        ],
+      } as LauncherRoom,
+      { steamId: 2002, relays: [{ address: 'a', rtt: 20, loss: 5 }] } as LauncherRoomJoin,
+      'relay',
+      1500,
+      'a',
+      new Date(),
+    );
+
+    expect(row.relay_probes).toEqual([
+      { address: 'a', host_rtt_ms: 10, host_loss_pct: 0, joiner_rtt_ms: 20, joiner_loss_pct: 5 },
+      {
+        address: 'b',
+        host_rtt_ms: null,
+        host_loss_pct: 100,
+        joiner_rtt_ms: null,
+        joiner_loss_pct: null,
+      },
+    ]);
   });
 });

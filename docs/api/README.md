@@ -49,7 +49,7 @@ API 自己往外调的第三方服务：
 - **请求体校验失败记一行 warn 日志**（`request validation failed`，带不合格的字段路径、`version` 与报文里的 steamId）：游戏端只知道请求失败、看不到原因，HTTP 日志里也没有请求体
 - **`GET /api/launcher/workshop/:id` 是公开端点**：启动器是发给玩家的 exe，放进去的 key 等于公开。它只接受正式图与测试图两个工坊 ID，其余 404，免得被当成通用的 Steam 代理。启动器先直连 Steam，失败才来这里，所以海外玩家不经过我们的服务
 - **`GET /api/launcher/version` 与 `GET /api/launcher/download/:version` 是启动器自我更新用的公开端点**：版本号与 exe 哈希写死在代码里，查版本不读任何文件；下载只接受当前版本，由函数从官网取 exe、核对哈希后返回。两者都靠 CDN 缓存挡住重复请求，下载地址带版本号可以永久缓存，所以哈希不符时宁可失败也不返回。放在 API 下而不是只放官网，是因为国内代理只转发 `/api/`
-- **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转地址时，加入与房主轮询的响应附带用私钥签的中转通行证，中转只用公钥验签、不回调 API。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，30 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
+- **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，30 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
 - **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。只列 30 秒内有心跳的可加入房间；另列出 90 秒内仍有心跳、已开局未结束的游戏，公开的带地图、玩家昵称头像与已进行分钟数，好友房只给人数与分钟数。加入者的昵称头像由 API 从加入记录取，不用房主上报的资料。旧版启动器读的局数与玩家数字段仍保留，只算公开游戏。整份候选房间在函数实例的内存里缓存 3 秒、所有请求共用，Firestore 只按心跳时间一个条件查，其余条件在内存里筛，不建组合索引。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器与网站共用：报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都 90 天删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：每人每小时 3 次、每天 10 次，有 Steam ID 按 ID 计、否则按 IP 计（国内代理转发的请求共用代理 IP）；全站每天 500 次，Steam ID 能伪造，这是存储费用的上限。日志只认 gzip、单份压缩后 1MB，服务端不解压。分类与设计见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
 - 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
@@ -123,6 +123,18 @@ API 自己往外调的第三方服务：
 | 推进 | 推塔 | 每局，总数有上限，按分钟算会让速推局失真 |
 
 设计取舍见 [docs/design/bigquery/phase-2-radar.md](../design/bigquery/phase-2-radar.md)。
+
+## 每日任务数值
+
+- **每条任务只配 1★ 目标，2★ / 3★ 按规则推导**：大数值乘 1 / 1.5 / 2；1★ 小于 10 的小整数每星加 1，免得倍率算出重复档。两种都给不出想要的档距时，在任务上写死三档（`starTargets`），首项等于 1★ 目标。推塔用的就是写死的「每星加 2」：每星只加 1 的话 3 星太容易
+- **任务按单局判定，校准看三个数**，三者要一起看。只看完成率会被自选偏差骗：敢选难任务的大多是擅长它的人
+  - **按出现次数折算的被选比例**：候选按日期、steamId、轮次、刷新次数确定性生成，服务器不记出现次数，拿生成代码模拟出现概率
+  - **选了那局比玩家自己平时多打几分钟**：越多越说明要硬拖时间
+  - **全体真人不刻意也能达到 3★ 的比例**：拿来横向比各任务的难度，英雄任务只算该英雄的局
+- **「选了哪个任务、完成没有」只有 GA4 事件 `game_end_daily_task` 有**：结算表只记完成的任务，Firestore 也只存完成记录。GA4 只覆盖约三分之一的局，按抽样看；战绩和时长以 `game_end_players` 为准，两边按 steamId 加结算时间对齐
+- **承伤只算敌方英雄打来的、减伤后的伤害**：小兵、塔、肉山都不计入，所以护甲越厚的英雄这一项反而越低，目标按英雄自己的分布定，不按定位估
+
+2026 年 10 月的一次校准见 [docs/design/daily-task/target-calibration.md](../design/daily-task/target-calibration.md)。
 
 ## 成本与延迟
 

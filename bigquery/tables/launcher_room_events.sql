@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS `${PROJECT_ID}.${DATASET}.launcher_room_events` (
   ping_sent INT64,
   ping_lost INT64,
   rtt_p50_ms INT64,
-  rtt_p95_ms INT64
+  rtt_p95_ms INT64,
+  relay_probes ARRAY<STRUCT<address STRING, host_rtt_ms INT64, host_loss_pct INT64, joiner_rtt_ms INT64, joiner_loss_pct INT64>>
 )
 PARTITION BY DATE(event_time)
 CLUSTER BY event;
@@ -36,4 +37,5 @@ ALTER TABLE `${PROJECT_ID}.${DATASET}.launcher_room_events`
   ADD COLUMN IF NOT EXISTS ping_sent INT64,
   ADD COLUMN IF NOT EXISTS ping_lost INT64,
   ADD COLUMN IF NOT EXISTS rtt_p50_ms INT64,
-  ADD COLUMN IF NOT EXISTS rtt_p95_ms INT64;
+  ADD COLUMN IF NOT EXISTS rtt_p95_ms INT64,
+  ADD COLUMN IF NOT EXISTS relay_probes ARRAY<STRUCT<address STRING, host_rtt_ms INT64, host_loss_pct INT64, joiner_rtt_ms INT64, joiner_loss_pct INT64>>;

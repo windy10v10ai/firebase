@@ -1625,19 +1625,28 @@ namespace Windy10v10AI.Launcher
             if (j != null) j.Dispose();
         }
 
-        // Closing Dota ends a solo game, except after the server dropped it, when the game is still there to rejoin
+        // Closing Dota ends a solo game, except after the server dropped it, when the game is still there to rejoin.
+        // Once the results are saved, leaving the game in any way ends it too
         void WatchSolo(DotaInstall install)
         {
             var serverId = server.Id;
+            long logOffset = 0;
+            var end = new GameEnd();
             var client = new ClientWatch();
             var wasDropped = false;
             while (!stopping)
             {
                 Thread.Sleep(3000);
-                if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
+                end.Track(ReadFrom(logFile, ref logOffset));
+                if (server.HasExited)
+                {
+                    if (end.Ended) break;
+                    throw new LaunchError(Strings.ServerExited, true);
+                }
                 NativeMethods.HideWindowsOf(serverId);
                 var state = Poll(client, install, serverId);
                 if (state == ClientState.Closed) break;
+                if (end.Saved && HasLeft(state, client)) break;
                 var dropped = state == ClientState.Dropped;
                 if (dropped == wasDropped) continue;
                 wasDropped = dropped;
@@ -1666,6 +1675,41 @@ namespace Windy10v10AI.Launcher
             public long LogOffset;
             public bool Seen;
             public bool Dropped;
+            // Left the server on purpose with Dota still open, which counts as in game until the results are saved
+            public bool Left;
+        }
+
+        static bool HasLeft(ClientState state, ClientWatch watch)
+        {
+            return state != ClientState.InGame || watch.Left;
+        }
+
+        // A server that keeps running after its lobby is gone fails within minutes, so it is closed once the results
+        // are saved and nobody is playing, and its exit after the game ended is not a failure
+        class GameEnd
+        {
+            public DateTime? EndedAt;
+            public bool Saved;
+
+            public bool Ended { get { return EndedAt != null; } }
+
+            // Returns whether this part of the server log moved the game to a later stage
+            public bool Track(string serverLog)
+            {
+                var changed = false;
+                if (EndedAt == null && (serverLog.Contains(ResultsSent) || serverLog.Contains(PostGame)))
+                {
+                    EndedAt = DateTime.UtcNow;
+                    changed = true;
+                }
+                if (EndedAt != null && !Saved &&
+                    (serverLog.Contains(ResultsDone) || (DateTime.UtcNow - EndedAt.Value).TotalSeconds > ResultsFallbackSeconds))
+                {
+                    Saved = true;
+                    changed = true;
+                }
+                return changed;
+            }
         }
 
         // Ends of a connection the player chose; any other disconnect means the server dropped a game still in progress
@@ -1680,6 +1724,7 @@ namespace Windy10v10AI.Launcher
                 watch.LogOffset = 0;
                 watch.Seen = false;
                 watch.Dropped = false;
+                watch.Left = false;
             }
             var running = DotaProcesses().FindAll(p => p.Id != serverId).Count > 0;
             if (running) watch.Seen = true;
@@ -1687,6 +1732,7 @@ namespace Windy10v10AI.Launcher
             foreach (Match match in Regex.Matches(text, @"Disconnected from server: (\w+)"))
             {
                 watch.Dropped = Array.IndexOf(IntentionalDisconnects, match.Groups[1].Value) < 0;
+                watch.Left = !watch.Dropped;
             }
             // Steam takes a few seconds to start Dota, which is not the player closing it
             if (!watch.Seen) return ClientState.Starting;
@@ -1726,8 +1772,7 @@ namespace Windy10v10AI.Launcher
             var serverId = server.Id;
             long logOffset = 0;
             bool? wasRunning = null;
-            DateTime? endedAt = null;
-            var saved = false;
+            var end = new GameEnd();
             var client = new ClientWatch();
             while (!stopping)
             {
@@ -1740,29 +1785,30 @@ namespace Windy10v10AI.Launcher
                 {
                     roster.SetInGame(long.Parse(match.Groups[1].Value));
                 }
-                if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
+                var wasEnded = end.Ended;
+                if (end.Track(text))
+                {
+                    if (!wasEnded)
+                    {
+                        tunnel.GameEnded = true;
+                        roomEnded = true;
+                        UI(() => ShowRoomEnd(false));
+                    }
+                    if (end.Saved) UI(() => ShowRoomEnd(true));
+                }
+                if (server.HasExited)
+                {
+                    if (end.Ended) break;
+                    throw new LaunchError(Strings.ServerExited, true);
+                }
                 NativeMethods.HideWindowsOf(serverId);
 
-                if (endedAt == null && (text.Contains(ResultsSent) || text.Contains(PostGame)))
-                {
-                    endedAt = DateTime.UtcNow;
-                    tunnel.GameEnded = true;
-                    roomEnded = true;
-                    UI(() => ShowRoomEnd(false));
-                }
-                if (endedAt != null && !saved &&
-                    (text.Contains(ResultsDone) || (DateTime.UtcNow - endedAt.Value).TotalSeconds > ResultsFallbackSeconds))
-                {
-                    saved = true;
-                    UI(() => ShowRoomEnd(true));
-                }
-
                 var state = Poll(client, install, serverId);
-                if (saved && state != ClientState.InGame && roster.GuestCount() == 0) break;
+                if (end.Saved && HasLeft(state, client) && roster.GuestCount() == 0) break;
                 var running = state == ClientState.Starting || state == ClientState.InGame;
                 if (running == wasRunning) continue;
                 wasRunning = running;
-                var ended = endedAt != null;
+                var ended = end.Ended;
                 var dropped = state == ClientState.Dropped;
                 UI(() => ShowHostClient(running, ended, dropped, install, serverId));
             }

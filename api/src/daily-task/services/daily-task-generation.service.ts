@@ -99,6 +99,9 @@ export class DailyTaskGenerationService {
   }
 
   getTarget(task: TaskDefinition, star: 1 | 2 | 3): number {
+    if (task.starTargets) {
+      return task.starTargets[star - 1];
+    }
     const scaled =
       task.target < SMALL_TARGET_THRESHOLD
         ? task.target + (star - 1)
