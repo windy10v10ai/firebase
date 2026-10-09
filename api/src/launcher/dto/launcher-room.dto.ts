@@ -20,11 +20,32 @@ const MAX_CANDIDATES = 8;
 const MAX_KICKED = 50;
 const MAX_QUALITY = 50;
 const MAX_PLAYERS = 10;
+const MAX_RELAYS = 8;
+const RELAY_ADDRESS_PATTERN = /^\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 // 类型前缀让加入者知道连通的是哪条路，房主才能上报 lan / upnp / punch
 const CANDIDATE_PATTERN = /^(lan|stun|upnp):\d{1,3}(\.\d{1,3}){3}:\d{1,5}$/;
 
 export const JOIN_PATHS = ['lan', 'upnp', 'punch', 'relay'] as const;
 export type JoinPath = (typeof JOIN_PATHS)[number];
+
+export class RelayProbeDto {
+  @ApiProperty({ description: '中转的 IP:端口，取自 API 下发的列表' })
+  @Matches(RELAY_ADDRESS_PATTERN)
+  address: string;
+
+  @ApiPropertyOptional({ description: '最快一次往返的毫秒数，全部丢失时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  rtt?: number;
+
+  @ApiProperty({ description: '回声测试的丢失百分比' })
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  loss: number;
+}
 
 class LauncherPeerDto {
   @ApiProperty()
@@ -67,6 +88,17 @@ class LauncherPeerDto {
   @Max(100)
   relayLoss?: number;
 
+  @ApiPropertyOptional({
+    type: [RelayProbeDto],
+    description: '本机到每台中转的测量结果；房主随轮询更新，加入者的用来挑这次加入走哪台',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_RELAYS)
+  @ValidateNested({ each: true })
+  @Type(() => RelayProbeDto)
+  relays?: RelayProbeDto[];
+
   @ApiProperty({ description: '隧道协议版本，双方不同时拒绝加入' })
   @IsInt()
   @Min(1)
@@ -92,6 +124,11 @@ export class JoinResultDto {
   @IsIn(JOIN_PATHS)
   path?: JoinPath;
 
+  @ApiPropertyOptional({ description: '走中转时连上的是哪台，旧版启动器不报' })
+  @IsOptional()
+  @Matches(RELAY_ADDRESS_PATTERN)
+  relayAddress?: string;
+
   @ApiProperty({ description: '房主拿到加入请求到连通或放弃的毫秒数' })
   @IsInt()
   @Min(0)
@@ -106,6 +143,11 @@ export class ConnectionQualityDto {
   @ApiProperty({ enum: JOIN_PATHS, description: '这段时间里房主与加入者之间实际在用的路' })
   @IsIn(JOIN_PATHS)
   path: JoinPath;
+
+  @ApiPropertyOptional({ description: '走中转时在用的是哪台，旧版启动器不报' })
+  @IsOptional()
+  @Matches(RELAY_ADDRESS_PATTERN)
+  relayAddress?: string;
 
   @ApiProperty({ description: '房主发给加入者的测速包数' })
   @IsInt()
@@ -248,8 +290,13 @@ export class LauncherProfileDto {
 }
 
 export class RelayDto {
-  @ApiProperty({ description: '中转服务器的 IP:端口' })
+  @ApiProperty({ description: '中转服务器的 IP:端口，即下面顺序里的第一台，旧版启动器只认它' })
   address: string;
+  @ApiProperty({
+    type: [String],
+    description: '这次加入要依次尝试的中转，房主与加入者拿到同一顺序，被拒绝时换下一台',
+  })
+  addresses: string[];
   @ApiProperty({ description: 'API 签的通行证，启动器原样交给中转' })
   ticket: string;
 }
@@ -279,8 +326,10 @@ export class HostRoomResponse extends LauncherProfileDto {
   token: string;
   @ApiProperty({ type: [PendingJoinDto] })
   joins: PendingJoinDto[];
-  @ApiPropertyOptional({ description: '中转地址，房主测到中转的延迟用，没配中转时省略' })
+  @ApiPropertyOptional({ description: '旧版启动器测延迟用的那台中转，没配中转时省略' })
   relayAddress?: string;
+  @ApiProperty({ type: [String], description: '要测延迟的全部中转，没配中转时为空' })
+  relayAddresses: string[];
 }
 
 export class JoinRoomResponse {
@@ -310,8 +359,13 @@ export class PublicRoomDto extends LauncherProfileDto {
   playerCount?: number;
   @ApiPropertyOptional()
   maxPlayers?: number;
-  @ApiPropertyOptional({ description: '房主到中转的往返毫秒数，房主没测到时省略' })
+  @ApiPropertyOptional({ description: '房主到旧版启动器那台中转的往返毫秒数，房主没测到时省略' })
   hostRelayRtt?: number;
+  @ApiPropertyOptional({
+    type: [RelayProbeDto],
+    description: '房主到每台中转的测量结果，加入者据此估算走中转的延迟，旧版房主省略',
+  })
+  hostRelays?: RelayProbeDto[];
   @ApiProperty({ type: [LauncherProfileDto], description: '房里的人，房主在第一个' })
   players: LauncherProfileDto[];
 }
@@ -338,6 +392,8 @@ export class ListRoomsResponse {
   activeGames: number;
   @ApiProperty({ description: '仍在进行的公开游戏玩家数' })
   activePlayers: number;
-  @ApiPropertyOptional({ description: '中转地址，测自己到中转的延迟用，没配中转时省略' })
+  @ApiPropertyOptional({ description: '旧版启动器测延迟用的那台中转，没配中转时省略' })
   relayAddress?: string;
+  @ApiProperty({ type: [String], description: '要测延迟的全部中转，没配中转时为空' })
+  relayAddresses: string[];
 }

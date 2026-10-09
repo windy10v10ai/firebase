@@ -62,7 +62,7 @@ describe('LauncherRoomService', () => {
     recordJoinResult: jest.Mock;
     recordConnectionQuality: jest.Mock;
   };
-  let relay: { issue: jest.Mock; address: jest.Mock };
+  let relay: { issue: jest.Mock; address: jest.Mock; addresses: jest.Mock; order: jest.Mock };
   let service: LauncherRoomService;
 
   beforeEach(() => {
@@ -81,7 +81,12 @@ describe('LauncherRoomService', () => {
         avatarUrl: null,
       })),
     };
-    relay = { issue: jest.fn(() => undefined), address: jest.fn(() => undefined) };
+    relay = {
+      issue: jest.fn(() => undefined),
+      address: jest.fn(() => undefined),
+      addresses: jest.fn(() => []),
+      order: jest.fn(() => []),
+    };
     service = new LauncherRoomService(
       rooms as never,
       joins as never,
@@ -141,21 +146,30 @@ describe('LauncherRoomService', () => {
     expect(joined.self.personaName).toEqual('CalmDown!');
   });
 
-  it('配了中转时房主与加入者各拿一张同一次加入的通行证，测试连通不发', async () => {
-    relay.issue.mockImplementation((joinId: string, role: string) => ({
-      address: '1.2.3.4:3478',
+  it('配了中转时房主与加入者各拿一张同一次加入的通行证、同一个中转顺序，测试连通不发', async () => {
+    relay.issue.mockImplementation((joinId: string, role: string, _now: Date, order: string[]) => ({
+      address: order[0],
+      addresses: order,
       ticket: `${joinId}:${role}`,
     }));
-    const room = await service.host(HOST);
+    relay.order.mockReturnValue(['5.6.7.8:27200', '1.2.3.4:27200']);
+    const hostRelays = [{ address: '1.2.3.4:27200', rtt: 20, loss: 0 }];
+    const joinerRelays = [{ address: '5.6.7.8:27200', rtt: 10, loss: 0 }];
+    const room = await service.host({ ...HOST, relays: hostRelays });
 
-    const joined = await service.join(room.code, JOINER);
+    const joined = await service.join(room.code, { ...JOINER, relays: joinerRelays });
     const probed = await service.join(room.code, { ...JOINER, probe: true });
     const polled = await service.host({ ...HOST, code: room.code, token: room.token });
 
-    expect(joined.relay?.ticket).toEqual(`${joined.joinId}:j`);
+    expect(relay.order).toHaveBeenCalledWith(hostRelays, joinerRelays);
+    expect(joined.relay).toEqual({
+      address: '5.6.7.8:27200',
+      addresses: ['5.6.7.8:27200', '1.2.3.4:27200'],
+      ticket: `${joined.joinId}:j`,
+    });
     expect(probed.relay).toBeUndefined();
-    expect(polled.joins.map((join) => join.relay?.ticket)).toEqual([
-      `${joined.joinId}:h`,
+    expect(polled.joins.map((join) => join.relay)).toEqual([
+      { ...joined.relay, ticket: `${joined.joinId}:h` },
       undefined,
     ]);
   });
@@ -244,6 +258,7 @@ describe('LauncherRoomService', () => {
       started: true,
       quality: [
         { joinId: joined.joinId, path: 'relay', sent: 30, lost: 3, rttP50: 45, rttP95: 120 },
+        { joinId: joined.joinId, path: 'relay', sent: 30, lost: 0, relayAddress: '5.6.7.8:27200' },
         { joinId: joined.joinId, path: 'punch', sent: 30, lost: 30 },
         { joinId: probe.joinId, path: 'punch', sent: 30, lost: 0, rttP50: 10, rttP95: 12 },
         { joinId: otherJoin.joinId, path: 'lan', sent: 30, lost: 0, rttP50: 1, rttP95: 2 },
@@ -257,6 +272,11 @@ describe('LauncherRoomService', () => {
           join: expect.objectContaining({ id: joined.joinId }),
           quality: expect.objectContaining({ path: 'relay', lost: 3 }),
           relayAddress: '1.2.3.4:27200',
+        },
+        {
+          join: expect.objectContaining({ id: joined.joinId }),
+          quality: expect.objectContaining({ path: 'relay', lost: 0 }),
+          relayAddress: '5.6.7.8:27200',
         },
         {
           join: expect.objectContaining({ id: joined.joinId }),
@@ -382,12 +402,15 @@ describe('LauncherRoomService', () => {
 
   it('配了中转时开房、轮询与列表都带中转地址，列表转交房主报的中转延迟', async () => {
     relay.address.mockReturnValue('1.2.3.4:27200');
+    relay.addresses.mockReturnValue(['1.2.3.4:27200', '5.6.7.8:27200']);
+    const hostRelays = [{ address: '5.6.7.8:27200', rtt: 30, loss: 0 }];
     const opened = await service.host({ ...HOST, public: true });
     const polled = await service.host({
       ...HOST,
       code: opened.code,
       token: opened.token,
       relayRtt: 42,
+      relays: hostRelays,
     });
 
     const res = await service.list({ steamId: 2002, protocolVersion: 1 });
@@ -397,7 +420,12 @@ describe('LauncherRoomService', () => {
       '1.2.3.4:27200',
       '1.2.3.4:27200',
     ]);
-    expect(res.rooms.map((room) => room.hostRelayRtt)).toEqual([42]);
+    expect([opened, polled, res].map((r) => r.relayAddresses)).toEqual(
+      Array(3).fill(['1.2.3.4:27200', '5.6.7.8:27200']),
+    );
+    expect(res.rooms.map((room) => [room.hostRelayRtt, room.hostRelays])).toEqual([
+      [42, hostRelays],
+    ]);
   });
 
   it('列表汇总仍在进行的公开游戏与玩家数', async () => {
