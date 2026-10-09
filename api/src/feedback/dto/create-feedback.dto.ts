@@ -5,18 +5,24 @@ import {
   ArrayUnique,
   IsArray,
   IsBase64,
+  IsBoolean,
   IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
 import {
+  FEEDBACK_SOURCES,
   FEEDBACK_TOPICS,
   FEEDBACK_TYPES,
+  FeedbackSource,
   FeedbackTopic,
   FeedbackType,
   LAUNCHER_MODES,
@@ -47,7 +53,147 @@ class LauncherErrorDto {
   detail?: string;
 }
 
+const ITEM_NAME_MAX_LENGTH = 64;
+
+class GameOptionsDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  multiplierRadiant?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  multiplierDire?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  playerNumberRadiant?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  playerNumberDire?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  towerPowerPct?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  respawnTimePct?: number;
+}
+
+class GameStateDto {
+  @ApiPropertyOptional({ description: '游戏已进行的毫秒数，与结算一致' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  gameTimeMsec?: number;
+
+  @ApiPropertyOptional({ description: '全场真人数' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  playerCount?: number;
+
+  @ApiPropertyOptional({ description: '难度：0 为自定义，1 到 8 对应 N1 到 N8，与结算一致' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(8)
+  difficulty?: number;
+
+  @ApiPropertyOptional({ type: GameOptionsDto, description: '游戏选项，字段与结算一致' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GameOptionsDto)
+  gameOptions?: GameOptionsDto;
+
+  @ApiPropertyOptional({ description: '这局跑在玩家自己的机器上' })
+  @IsOptional()
+  @IsBoolean()
+  localHost?: boolean;
+
+  @ApiPropertyOptional({ description: '这局没连上服务器' })
+  @IsOptional()
+  @IsBoolean()
+  offline?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  heroName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  level?: number;
+
+  @ApiPropertyOptional({ description: '0 = 未觉醒，1 = 已觉醒' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  awaken?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  strength?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  agility?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  intellect?: number;
+
+  @ApiPropertyOptional({ type: [String], description: '主物品栏 6 格，空槽为空串' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsString({ each: true })
+  @MaxLength(ITEM_NAME_MAX_LENGTH, { each: true })
+  items?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  neutralItem?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  neutralPassiveItem?: string;
+
+  @ApiPropertyOptional({ type: [String], description: '抽选的技能，顺序为主动、被动 1、被动 2' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsString({ each: true })
+  @MaxLength(ITEM_NAME_MAX_LENGTH, { each: true })
+  abilities?: string[];
+}
+
 export class CreateFeedbackDto {
+  @ApiPropertyOptional({ enum: FEEDBACK_SOURCES, description: '不传按启动器处理，兼容旧版启动器' })
+  @IsOptional()
+  @IsIn(FEEDBACK_SOURCES)
+  source?: FeedbackSource;
+
   @ApiProperty({ enum: FEEDBACK_TYPES })
   @IsIn(FEEDBACK_TYPES)
   type: FeedbackType;
@@ -71,10 +217,11 @@ export class CreateFeedbackDto {
   @Min(1)
   steamId?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional({ description: '来源为启动器时必填' })
+  @ValidateIf((dto: CreateFeedbackDto) => dto.source !== 'game')
   @IsString()
   @MaxLength(20)
-  launcherVersion: string;
+  launcherVersion?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -98,6 +245,12 @@ export class CreateFeedbackDto {
   @ValidateNested()
   @Type(() => LauncherErrorDto)
   launcherError?: LauncherErrorDto;
+
+  @ApiPropertyOptional({ type: GameStateDto, description: '来源为游戏时附带' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GameStateDto)
+  gameState?: GameStateDto;
 
   @ApiPropertyOptional({ description: '专用服日志，gzip 后 base64，压缩后不超过 1MB' })
   @IsOptional()

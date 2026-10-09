@@ -1,6 +1,6 @@
 import { Collection } from 'fireorm';
 
-export const FEEDBACK_SOURCES = ['launcher'] as const;
+export const FEEDBACK_SOURCES = ['launcher', 'game'] as const;
 export type FeedbackSource = (typeof FEEDBACK_SOURCES)[number];
 
 export const FEEDBACK_TYPES = ['problem', 'suggestion'] as const;
@@ -19,6 +19,7 @@ export const FEEDBACK_TOPICS = [
   'lag',
   'launcher',
   'web',
+  'game',
 ] as const;
 export type FeedbackTopic = (typeof FEEDBACK_TOPICS)[number];
 
@@ -29,6 +30,38 @@ export interface LauncherError {
   message: string;
   stage?: string;
   detail?: string;
+}
+
+export interface GameOptions {
+  multiplierRadiant?: number;
+  multiplierDire?: number;
+  playerNumberRadiant?: number;
+  playerNumberDire?: number;
+  towerPowerPct?: number;
+  respawnTimePct?: number;
+}
+
+/** 玩家点发送时的游戏现场，字段名与结算保持一致。 */
+export interface GameState {
+  gameTimeMsec?: number;
+  playerCount?: number;
+  /** 0 为自定义，1 到 8 对应 N1 到 N8 */
+  difficulty?: number;
+  gameOptions?: GameOptions;
+  /** 这局跑在玩家自己的机器上，而不是服务器主机 */
+  localHost?: boolean;
+  /** 这局没连上服务器 */
+  offline?: boolean;
+  heroName?: string;
+  level?: number;
+  awaken?: number;
+  strength?: number;
+  agility?: number;
+  intellect?: number;
+  items?: string[];
+  neutralItem?: string;
+  neutralPassiveItem?: string;
+  abilities?: string[];
 }
 
 /** 玩家的一份问题报告或建议。 */
@@ -49,6 +82,8 @@ export class FeedbackReport {
   windowsVersion?: string;
   mode?: LauncherMode;
   launcherError?: LauncherError;
+  /** 只有来源为游戏时才有 */
+  gameState?: GameState;
   /** gs:// 路径 */
   serverLog?: string;
   clientLog?: string;
