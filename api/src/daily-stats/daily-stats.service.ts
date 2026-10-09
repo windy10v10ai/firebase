@@ -13,7 +13,13 @@ export class DailyStatsService {
 
   /** 整份覆盖一种统计的结果。 */
   async save<K extends DailyStatId>(id: K, data: DailyStatData[K]): Promise<void> {
-    await this.dailyStatRepository.create({ id, data, updatedAt: new Date() });
+    const stat = { id, data, updatedAt: new Date() };
+    // fireorm 的 create 遇到已有文档会抛错，没有 set 语义，只能先查再分支
+    if (await this.dailyStatRepository.findById(id)) {
+      await this.dailyStatRepository.update(stat);
+    } else {
+      await this.dailyStatRepository.create(stat);
+    }
   }
 
   /** 读一种统计的结果，还没生成过时返回 null。 */
