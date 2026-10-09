@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react';
 
 import Skeleton from '@/app/components/ui/skeleton';
 import {
+  battleRadarCorners,
   fetchStatsRadar,
+  type BattleRadarCorner,
   type PlayerStatsRadarResponse,
-  type RadarAxis,
 } from '@/app/lib/player-stats-radar';
 
 type LoadResult =
@@ -16,14 +17,14 @@ type LoadResult =
 
 type LabelSide = 'top' | 'bottom' | 'left' | 'right';
 
-// 顺时针从左上角排：打人的两项在上，挨打与活下来在下，发育与推进各占一侧
-const AXES: { key: RadarAxis; deg: number; side: LabelSide }[] = [
+// 顺时针从左上角排：打人的两项在上，生存与辅助在下；左右两角标签贴着图边，只放短词
+const AXES: { key: BattleRadarCorner; deg: number; side: LabelSide }[] = [
   { key: 'damage', deg: 240, side: 'top' },
   { key: 'participation', deg: 300, side: 'top' },
   { key: 'gold', deg: 0, side: 'right' },
-  { key: 'push', deg: 60, side: 'bottom' },
-  { key: 'survival', deg: 120, side: 'bottom' },
-  { key: 'tank', deg: 180, side: 'left' },
+  { key: 'survival', deg: 60, side: 'bottom' },
+  { key: 'support', deg: 120, side: 'bottom' },
+  { key: 'push', deg: 180, side: 'left' },
 ];
 
 const VIEW_WIDTH = 300;
@@ -31,9 +32,10 @@ const VIEW_HEIGHT = 260;
 const CENTER_X = 150;
 const CENTER_Y = 132;
 const RADIUS = 80;
-const GRID_RATIOS = [1 / 3, 2 / 3];
-// 落后的玩家也要画得出形状，百分位 0 落在这一圈而不是圆心
+// 落后的玩家也要画得出形状，百分位 0 落在中心底的边上而不是圆心
 const FLOOR_RATIO = 0.2;
+// 网格均分中心底到外圈这一段，四层等距
+const GRID_RATIOS = [1 / 3, 2 / 3].map((part) => FLOOR_RATIO + (1 - FLOOR_RATIO) * part);
 
 function point(deg: number, ratio: number) {
   const angle = (deg * Math.PI) / 180;
@@ -43,7 +45,7 @@ function point(deg: number, ratio: number) {
   };
 }
 
-function polygon(ratioOf: (key: RadarAxis) => number): string {
+function polygon(ratioOf: (key: BattleRadarCorner) => number): string {
   return AXES.map(({ key, deg }) => {
     const { x, y } = point(deg, ratioOf(key));
     return `${x.toFixed(1)},${y.toFixed(1)}`;
@@ -94,7 +96,7 @@ export default function RadarCard({ steamId }: { steamId: string }) {
 
   const loaded = result?.steamId === steamId ? result : null;
   const data = loaded?.status === 'ready' ? loaded.data : null;
-  const radar = data?.radar ?? null;
+  const radar = data?.radar ? battleRadarCorners(data.radar) : null;
 
   let overlay: string | null = null;
   if (loaded?.status === 'failed') {
@@ -134,7 +136,12 @@ export default function RadarCard({ steamId }: { steamId: string }) {
               className="fill-radar-plate/20 stroke-radar-grid/30"
               strokeWidth={1.5}
             />
-            {GRID_RATIOS.map((ratio) => (
+            <polygon
+            points={polygon(() => FLOOR_RATIO)}
+            className="fill-radar-grid/20 stroke-radar-grid/35"
+            strokeWidth={1}
+          />
+          {GRID_RATIOS.map((ratio) => (
               <polygon
                 key={ratio}
                 points={polygon(() => ratio)}
