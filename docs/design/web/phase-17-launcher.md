@@ -15,5 +15,5 @@
 
 ## 不做
 
-- **代码签名**：SignPath Foundation 申请被拒（项目知名度不够）。备选 Azure Artifact Signing（约 $120/年，日本开业届是否被认可待确认），暂时不做
+- **代码签名**：SignPath Foundation 申请被拒（项目知名度不够）。备选 Azure Artifact Signing（约 $120/年），暂时不做
 - **页面上列使用条件**：只能单人已在对比表里，装了 Dota、订阅了地图是玩这张图的前提
