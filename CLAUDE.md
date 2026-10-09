@@ -313,9 +313,11 @@ feature/<issue-id>-<short-kebab-summary>
 | PR | 方式 | 命令 |
 |---|---|---|
 | `feature` / `fix` / `chore` / `docs` → `develop` | squash | `gh pr merge <编号> --squash` |
-| `develop` → `main`（Release PR） | merge commit | `gh pr merge <编号> --merge` |
+| `develop` → `main`（Release PR） | merge commit | 不手动合并，见下 |
 
 feature 分支的中间提交对 `develop` 的历史没有价值，压成一条。`develop` → `main` 是两条长期分支对齐，保留每条提交，`main` 的历史才与 `develop` 一一对应。
+
+**Release PR 由用户审批上线，Claude 不审批、不合并。**「Create Release PR」工作流在每次推送 `develop` 时自动建好标题为 `Release` 的 PR 并开启自动合并，合进 `main` 就部署 API。`main` 要求代码所有者审批，审批一过就自动合并，所以审批就是上线指令，只由用户做。要上线时告诉用户 Release PR 的编号与里面包含哪些改动，等用户审批。Release PR 始终跟着 `develop` 的最新提交，**要分批上线时，下一批的 PR 等上一批的 Release PR 合并后再合进 `develop`**，否则会被一起带上线。
 
 仓库设置里 rebase 已关闭，不是可选项。
 
