@@ -76,6 +76,33 @@ describe('FeedbackService', () => {
     expect(limits.docs.get('steam-1001')).toMatchObject({ dailyDate: '2026-10-04', dailyCount: 1 });
   });
 
+  it('游戏来源不需要启动器版本，游戏状态一并存下', async () => {
+    const { launcherVersion: _, ...fromGame } = PROBLEM;
+    await service.create(
+      {
+        ...fromGame,
+        source: 'game',
+        mapVersion: '4.5.0',
+        gameState: {
+          gameTime: 1260,
+          heroName: 'npc_dota_hero_axe',
+          localHost: true,
+          offline: false,
+        },
+      },
+      {},
+    );
+
+    const [report] = [...reports.docs.values()];
+    expect(report).toMatchObject({
+      source: 'game',
+      steamIdVerified: false,
+      mapVersion: '4.5.0',
+      gameState: { gameTime: 1260, heroName: 'npc_dota_hero_axe', localHost: true, offline: false },
+    });
+    expect(report.launcherVersion).toBeUndefined();
+  });
+
   it('提建议必须写描述，日志必须是 gzip', async () => {
     await expect(
       service.create({ ...PROBLEM, type: 'suggestion', description: '  ' }, {}),

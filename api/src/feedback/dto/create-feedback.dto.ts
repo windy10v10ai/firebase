@@ -5,18 +5,22 @@ import {
   ArrayUnique,
   IsArray,
   IsBase64,
+  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
   IsString,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
 import {
+  FEEDBACK_SOURCES,
   FEEDBACK_TOPICS,
   FEEDBACK_TYPES,
+  FeedbackSource,
   FeedbackTopic,
   FeedbackType,
   LAUNCHER_MODES,
@@ -47,7 +51,36 @@ class LauncherErrorDto {
   detail?: string;
 }
 
+class GameStateDto {
+  @ApiPropertyOptional({ description: '游戏内已进行的秒数' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  gameTime?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  heroName?: string;
+
+  @ApiPropertyOptional({ description: '这局跑在玩家自己的机器上' })
+  @IsOptional()
+  @IsBoolean()
+  localHost?: boolean;
+
+  @ApiPropertyOptional({ description: '这局没连上服务器' })
+  @IsOptional()
+  @IsBoolean()
+  offline?: boolean;
+}
+
 export class CreateFeedbackDto {
+  @ApiPropertyOptional({ enum: FEEDBACK_SOURCES, description: '不传按启动器处理，兼容旧版启动器' })
+  @IsOptional()
+  @IsIn(FEEDBACK_SOURCES)
+  source?: FeedbackSource;
+
   @ApiProperty({ enum: FEEDBACK_TYPES })
   @IsIn(FEEDBACK_TYPES)
   type: FeedbackType;
@@ -71,10 +104,11 @@ export class CreateFeedbackDto {
   @Min(1)
   steamId?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional({ description: '来源为启动器时必填' })
+  @ValidateIf((dto: CreateFeedbackDto) => dto.source !== 'game')
   @IsString()
   @MaxLength(20)
-  launcherVersion: string;
+  launcherVersion?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -98,6 +132,12 @@ export class CreateFeedbackDto {
   @ValidateNested()
   @Type(() => LauncherErrorDto)
   launcherError?: LauncherErrorDto;
+
+  @ApiPropertyOptional({ type: GameStateDto, description: '来源为游戏时附带' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GameStateDto)
+  gameState?: GameStateDto;
 
   @ApiPropertyOptional({ description: '专用服日志，gzip 后 base64，压缩后不超过 1MB' })
   @IsOptional()

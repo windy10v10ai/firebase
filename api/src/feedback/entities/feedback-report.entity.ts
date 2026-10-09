@@ -1,6 +1,6 @@
 import { Collection } from 'fireorm';
 
-export const FEEDBACK_SOURCES = ['launcher'] as const;
+export const FEEDBACK_SOURCES = ['launcher', 'game'] as const;
 export type FeedbackSource = (typeof FEEDBACK_SOURCES)[number];
 
 export const FEEDBACK_TYPES = ['problem', 'suggestion'] as const;
@@ -31,6 +31,16 @@ export interface LauncherError {
   detail?: string;
 }
 
+export interface GameState {
+  /** 游戏内已进行的秒数 */
+  gameTime?: number;
+  heroName?: string;
+  /** 这局跑在玩家自己的机器上，而不是服务器主机 */
+  localHost?: boolean;
+  /** 这局没连上服务器 */
+  offline?: boolean;
+}
+
 /** 玩家的一份问题报告或建议。 */
 @Collection('FeedbackReports')
 export class FeedbackReport {
@@ -49,6 +59,8 @@ export class FeedbackReport {
   windowsVersion?: string;
   mode?: LauncherMode;
   launcherError?: LauncherError;
+  /** 只有来源为游戏时才有 */
+  gameState?: GameState;
   /** gs:// 路径 */
   serverLog?: string;
   clientLog?: string;
