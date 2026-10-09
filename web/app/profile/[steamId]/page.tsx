@@ -19,6 +19,7 @@ import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 import FeatureEntryCard from './FeatureEntryCard';
 import LevelCard from './LevelCard';
 import PlayerCard from './PlayerCard';
+import RadarCard from './RadarCard';
 import RecentMatchesCard from './RecentMatchesCard';
 import StatsCard from './StatsCard';
 
@@ -125,7 +126,7 @@ export default function ProfilePage() {
   const info = loaded?.info ?? null;
 
   return (
-    // 电脑宽度左栏放身份卡、右栏放等级卡与入口卡，两张战绩卡通栏；更窄时按 DOM 顺序单列，入口卡从平板起两张一行
+    // 电脑宽度左栏放身份卡、右栏放等级卡与入口卡；下一行六边形图在左、战绩在右，近期战绩通栏；更窄时按 DOM 顺序单列，入口卡从平板起两张一行
     <div className="grid gap-6 lg:grid-cols-3" aria-busy={!info}>
       {info ? null : (
         <p role="status" className="sr-only">
@@ -167,7 +168,9 @@ export default function ProfilePage() {
                   total: AWAKEN_HERO_COUNT,
                 })
               ) : (
-                <Skeleton>{t('entries.awaken.badge', { awakened: 0, total: AWAKEN_HERO_COUNT })}</Skeleton>
+                <Skeleton>
+                  {t('entries.awaken.badge', { awakened: 0, total: AWAKEN_HERO_COUNT })}
+                </Skeleton>
               )
             }
             href={playerPagePath(steamId, 'awaken')}
@@ -194,8 +197,11 @@ export default function ProfilePage() {
           />
         </div>
       </div>
-      <div className="lg:col-span-3 grid gap-6">
+      <RadarCard steamId={steamId} />
+      <div className="min-w-0 lg:col-span-2">
         <StatsCard info={info} />
+      </div>
+      <div className="lg:col-span-3">
         {/* 自己发一次请求：满员 50 场约 50 KB，挂在首屏那次请求上会拖慢整页 */}
         <RecentMatchesCard steamId={steamId} />
       </div>
