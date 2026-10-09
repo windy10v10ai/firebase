@@ -29,8 +29,11 @@ namespace Windy10v10AI.Launcher
         public int MaxPlayers;
         public ProbeState Probe;
         public int Rtt = -1;
+        // Per-relay echo results the host reported; empty when the host is on an older API
+        public List<RelayLeg> HostRelays = new List<RelayLeg>();
+        // The legacy single-relay figure, read when HostRelays is empty
         public int HostRelayRtt = -1;
-        // Estimated from both sides' round trips to the relay, since probes never go through it
+        // Estimated from both sides' round trips to a shared relay, since probes never go through it
         public int RelayRtt = -1;
         // Host first; a friends game carries none, so the list draws one blank figure per player
         public List<RoomAvatar> Avatars = new List<RoomAvatar>();
@@ -77,7 +80,7 @@ namespace Windy10v10AI.Launcher
         int refreshing;
         volatile bool disposed;
         int relayMeasuring;
-        RelayQuality relayQuality = RelayQuality.Unknown;
+        List<RelayLeg> ownRelays = new List<RelayLeg>();
 
         public bool? SymmetricNat;
         public bool Loaded;
@@ -162,10 +165,10 @@ namespace Windy10v10AI.Launcher
                         Loaded = true;
                         LoadFailed = false;
                     }
-                    var relay = RelayTicket.Address(answer.TryGetValue("relayAddress", out value) ? value : null);
-                    if (Probing && relay != null && Interlocked.Exchange(ref relayMeasuring, 1) == 0)
+                    var relays = RelayTicket.ReadAddresses(answer, "relayAddresses", "relayAddress");
+                    if (Probing && relays.Count > 0 && Interlocked.Exchange(ref relayMeasuring, 1) == 0)
                     {
-                        new Thread(() => MeasureRelay(relay)) { IsBackground = true }.Start();
+                        new Thread(() => MeasureRelays(relays)) { IsBackground = true }.Start();
                     }
                     foreach (var code in toProbe)
                     {
@@ -196,6 +199,7 @@ namespace Windy10v10AI.Launcher
                 Map = room.TryGetValue("map", out value) ? value as string : null,
                 Players = room.TryGetValue("playerCount", out value) && value != null ? Convert.ToInt32(value) : 0,
                 MaxPlayers = room.TryGetValue("maxPlayers", out value) && value != null ? Convert.ToInt32(value) : 0,
+                HostRelays = RelayLeg.ParseList(room.TryGetValue("hostRelays", out value) ? value : null),
                 HostRelayRtt = room.TryGetValue("hostRelayRtt", out value) && value != null ? Convert.ToInt32(value) : -1,
             };
             row.Avatars = ParseAvatars(room);
@@ -297,16 +301,21 @@ namespace Windy10v10AI.Launcher
             Raise();
         }
 
-        // Measured once per visit on the probing socket, which is the one a later join takes over
-        void MeasureRelay(System.Net.IPEndPoint relay)
+        // Measured once per visit on the probing socket, which is the one a later join takes over.
+        // Relays are tried one at a time (the socket serializes them anyway) and published as each one finishes
+        void MeasureRelays(List<System.Net.IPEndPoint> relays)
         {
             ready.WaitOne();
             JoinTunnel socket;
             lock (sync) socket = tunnel;
             if (socket == null || disposed) return;
-            var quality = socket.MeasureRelay(relay);
-            lock (sync) relayQuality = quality;
-            Raise();
+            var legs = new List<RelayLeg>();
+            foreach (var relay in relays)
+            {
+                legs.Add(new RelayLeg(relay) { Quality = socket.MeasureRelay(relay) });
+                lock (sync) ownRelays = new List<RelayLeg>(legs);
+                Raise();
+            }
         }
 
         // Public games first, then friends games, each longest running first as the API sends them
@@ -326,9 +335,8 @@ namespace Windy10v10AI.Launcher
             lock (sync)
             {
                 list = rows.ConvertAll(r => r.Copy());
-                // A host that has not measured yet is assumed as far from the relay as we are
-                var own = relayQuality.Rtt;
-                if (own >= 0) foreach (var row in list) row.RelayRtt = own + (row.HostRelayRtt >= 0 ? row.HostRelayRtt : own);
+                var own = new List<RelayLeg>(ownRelays);
+                foreach (var row in list) row.RelayRtt = EstimateRelayRtt(row, own);
             }
             list.Sort((a, b) =>
             {
@@ -349,11 +357,31 @@ namespace Windy10v10AI.Launcher
             return 1;
         }
 
+        // The lowest sum of a host leg and the matching own leg to the same relay, ignoring any leg lossy enough to be unusable.
+        // Falls back to the legacy single-relay figure when either side lacks per-relay detail, assuming the host is as far as we are
+        internal static int EstimateRelayRtt(RoomRow row, List<RelayLeg> own)
+        {
+            const int MaxUsableLossPercent = 10;
+            var best = -1;
+            foreach (var hostLeg in row.HostRelays)
+            {
+                if (hostLeg.Quality.Rtt < 0 || hostLeg.Quality.Loss > MaxUsableLossPercent) continue;
+                var ownLeg = own.Find(leg => leg.Address.Equals(hostLeg.Address));
+                if (ownLeg == null || ownLeg.Quality.Rtt < 0 || ownLeg.Quality.Loss > MaxUsableLossPercent) continue;
+                var sum = hostLeg.Quality.Rtt + ownLeg.Quality.Rtt;
+                if (best < 0 || sum < best) best = sum;
+            }
+            if (best >= 0) return best;
+            var ownRtt = own.Count > 0 ? own[0].Quality.Rtt : -1;
+            if (ownRtt < 0) return -1;
+            return ownRtt + (row.HostRelayRtt >= 0 ? row.HostRelayRtt : ownRtt);
+        }
+
         // Hands the probing socket to a join, so the host already knows the address the join comes from.
         // Returns null when gathering failed and the join has to open its own
-        public RelayQuality RelayQuality
+        public List<RelayLeg> OwnRelays
         {
-            get { lock (sync) return relayQuality; }
+            get { lock (sync) return new List<RelayLeg>(ownRelays); }
         }
 
         public JoinTunnel TakeTunnel(out List<Candidate> gathered)
