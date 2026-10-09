@@ -78,7 +78,7 @@ export class FeedbackService {
       ...(dto.windowsVersion && { windowsVersion: dto.windowsVersion }),
       ...(dto.mode && { mode: dto.mode }),
       ...(dto.launcherError && { launcherError: { ...dto.launcherError } }),
-      ...(dto.gameState && { gameState: { ...dto.gameState } }),
+      ...(dto.gameState && { gameState: toPlain(dto.gameState) }),
       ...(serverLogPath && { serverLog: serverLogPath }),
       ...(clientLogPath && { clientLog: clientLogPath }),
       ...(origin.country && { country: origin.country }),
@@ -125,6 +125,11 @@ export class FeedbackService {
 
 function todayCount(limit: FeedbackRateLimit | null, day: string): number {
   return limit?.dailyDate === day ? limit.dailyCount : 0;
+}
+
+// 校验后的嵌套对象是类实例，Firestore 只收普通对象
+function toPlain<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 function decodeLog(base64?: string): Buffer | undefined {

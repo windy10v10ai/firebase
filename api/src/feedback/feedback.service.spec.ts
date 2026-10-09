@@ -78,17 +78,23 @@ describe('FeedbackService', () => {
 
   it('游戏来源不需要启动器版本，游戏状态一并存下', async () => {
     const { launcherVersion: _, ...fromGame } = PROBLEM;
+    const gameState = {
+      gameTimeMsec: 1260000,
+      playerCount: 3,
+      gameOptions: { multiplierRadiant: 2, multiplierDire: 3, towerPowerPct: 100 },
+      localHost: true,
+      offline: false,
+      heroName: 'npc_dota_hero_axe',
+      level: 30,
+      items: ['item_blink', '', '', '', '', ''],
+      abilities: ['axe_berserkers_call', 'axe_counter_helix'],
+    };
     await service.create(
       {
         ...fromGame,
         source: 'game',
         mapVersion: '4.5.0',
-        gameState: {
-          gameTime: 1260,
-          heroName: 'npc_dota_hero_axe',
-          localHost: true,
-          offline: false,
-        },
+        gameState,
       },
       {},
     );
@@ -98,7 +104,7 @@ describe('FeedbackService', () => {
       source: 'game',
       steamIdVerified: false,
       mapVersion: '4.5.0',
-      gameState: { gameTime: 1260, heroName: 'npc_dota_hero_axe', localHost: true, offline: false },
+      gameState,
     });
     expect(report.launcherVersion).toBeUndefined();
   });

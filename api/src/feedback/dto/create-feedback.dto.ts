@@ -8,6 +8,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -51,18 +52,58 @@ class LauncherErrorDto {
   detail?: string;
 }
 
-class GameStateDto {
-  @ApiPropertyOptional({ description: '游戏内已进行的秒数' })
+const ITEM_NAME_MAX_LENGTH = 64;
+
+class GameOptionsDto {
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  gameTime?: number;
+  @IsNumber()
+  multiplierRadiant?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  heroName?: string;
+  @IsNumber()
+  multiplierDire?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  playerNumberRadiant?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  playerNumberDire?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  towerPowerPct?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  respawnTimePct?: number;
+}
+
+class GameStateDto {
+  @ApiPropertyOptional({ description: '游戏已进行的毫秒数，与结算一致' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  gameTimeMsec?: number;
+
+  @ApiPropertyOptional({ description: '全场真人数' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  playerCount?: number;
+
+  @ApiPropertyOptional({ type: GameOptionsDto, description: '难度，字段与结算的游戏选项一致' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GameOptionsDto)
+  gameOptions?: GameOptionsDto;
 
   @ApiPropertyOptional({ description: '这局跑在玩家自己的机器上' })
   @IsOptional()
@@ -73,6 +114,70 @@ class GameStateDto {
   @IsOptional()
   @IsBoolean()
   offline?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  heroName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  level?: number;
+
+  @ApiPropertyOptional({ description: '0 = 未觉醒，1 = 已觉醒' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  awaken?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  strength?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  agility?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  intellect?: number;
+
+  @ApiPropertyOptional({ type: [String], description: '主物品栏 6 格，空槽为空串' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsString({ each: true })
+  @MaxLength(ITEM_NAME_MAX_LENGTH, { each: true })
+  items?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  neutralItem?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(ITEM_NAME_MAX_LENGTH)
+  neutralPassiveItem?: string;
+
+  @ApiPropertyOptional({ type: [String], description: '抽选的技能，顺序为主动、被动 1、被动 2' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsString({ each: true })
+  @MaxLength(ITEM_NAME_MAX_LENGTH, { each: true })
+  abilities?: string[];
 }
 
 export class CreateFeedbackDto {

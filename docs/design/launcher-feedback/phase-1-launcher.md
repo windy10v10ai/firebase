@@ -37,6 +37,7 @@
 | 卡顿 / 掉线 | game `system` |
 | 启动器 | firebase `launcher` |
 | 网站 | firebase `web` |
+| 游戏 | game，不加标签 |
 
 另留一个 `tags` 数组，玩家提交时为空，AI 汇总时补更细的标签。
 
