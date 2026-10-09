@@ -172,7 +172,7 @@ describe('Daily task Phase1 (e2e)', () => {
         scope: 'personal_general',
         metric: 'kills',
         star: 1,
-        target: 60,
+        target: 70,
         rewardSeasonPoint: 60,
       },
     ]);

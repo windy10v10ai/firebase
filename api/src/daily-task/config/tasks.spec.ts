@@ -63,14 +63,14 @@ describe('daily task configuration', () => {
     const targets = Object.fromEntries(GENERAL_TASKS.map((task) => [task.metric, task.target]));
 
     expect(targets).toEqual({
-      [TaskMetric.KILLS]: 60,
+      [TaskMetric.KILLS]: 70,
       [TaskMetric.ASSISTS]: 40,
       [TaskMetric.LAST_HITS]: 200,
       [TaskMetric.TOWER_KILLS]: 4,
-      [TaskMetric.HERO_DAMAGE]: 800_000,
+      [TaskMetric.HERO_DAMAGE]: 700_000,
       [TaskMetric.HEALING]: 40_000,
       [TaskMetric.TOTAL_GOLD_EARNED]: 240_000,
-      [TaskMetric.DAMAGE_TAKEN]: 200_000,
+      [TaskMetric.DAMAGE_TAKEN]: 150_000,
       [TaskMetric.STUN_DURATION]: 100,
       [TaskMetric.ROSHAN_KILLS]: 1,
     });
@@ -132,12 +132,12 @@ describe('daily task hero pool', () => {
 
   it('keeps hero targets in the reviewed metric bands', () => {
     const targetBands: Partial<Record<TaskMetric, readonly [number, number]>> = {
-      [TaskMetric.KILLS]: [32, 50],
+      [TaskMetric.KILLS]: [40, 62],
       [TaskMetric.ASSISTS]: [30, 60],
       [TaskMetric.TOWER_KILLS]: [3, 5],
       [TaskMetric.HERO_DAMAGE]: [300_000, 900_000],
       [TaskMetric.HEALING]: [10_000, 80_000],
-      [TaskMetric.DAMAGE_TAKEN]: [180_000, 260_000],
+      [TaskMetric.DAMAGE_TAKEN]: [120_000, 260_000],
       [TaskMetric.STUN_DURATION]: [30, 400],
     };
 
@@ -209,7 +209,9 @@ describe('daily task numeric parameters', () => {
   });
 
   it('gives small targets a distinct additive target at every star', () => {
-    const smallTasks = DAILY_TASKS.filter((task) => task.target < SMALL_TARGET_THRESHOLD);
+    const smallTasks = DAILY_TASKS.filter(
+      (task) => task.target < SMALL_TARGET_THRESHOLD && !task.starTargets,
+    );
 
     for (const task of smallTasks) {
       const starTargets = STARS.map((star) => task.target + (star - 1));
@@ -220,9 +222,20 @@ describe('daily task numeric parameters', () => {
     const roshanTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.ROSHAN_KILLS);
     expect(roshanTask).toBeDefined();
     expect(STARS.map((star) => (roshanTask?.target ?? 0) + (star - 1))).toEqual([1, 2, 3]);
+  });
+
+  it('keeps fixed star targets increasing and starting from the base target', () => {
+    const fixedTasks = DAILY_TASKS.filter((task) => task.starTargets);
+
+    expect(fixedTasks.length).toBeGreaterThan(0);
+    for (const task of fixedTasks) {
+      const [first, second, third] = task.starTargets ?? [0, 0, 0];
+      expect(first).toBe(task.target);
+      expect(second).toBeGreaterThan(first);
+      expect(third).toBeGreaterThan(second);
+    }
 
     const towerTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.TOWER_KILLS);
-    expect(towerTask).toBeDefined();
-    expect(STARS.map((star) => (towerTask?.target ?? 0) + (star - 1))).toEqual([4, 5, 6]);
+    expect(towerTask?.starTargets).toEqual([4, 6, 8]);
   });
 });

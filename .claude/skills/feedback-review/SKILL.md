@@ -64,7 +64,15 @@ gcloud storage cp -q gs://windy10v10ai-feedback/2026-10-04/<报告ID>/server.log
 
 ## 转成 issue
 
-只在用户同意后做。`topics` 与仓库标签的对应见设计文档的分类表（`ui` 对应 game 的 `UI/UX`，`lag` 对应 `system`，`launcher` / `web` 进 firebase 仓库）。先用 `gh issue list --search` 查有没有现成的 issue，有就在下面补评论，不重复建。issue 正文写现象与报告 ID，不贴 Steam ID 与日志原文。建好后把链接填进跟踪 issue 对应的待处理条目。
+只在用户同意后做，**建之前先给用户一份清单确认**：每条写拟定的标题、仓库、类型、标签、对应报告 ID，以及哪些是补评论、哪些不建只记进跟踪 issue。用户确认或调整后再动手。
+
+- 先用 `gh issue list --search` 查有没有现成的 issue，有就在下面补评论，不重复建
+- `topics` 与仓库标签的对应见设计文档的分类表（`ui` 对应 game 的 `UI/UX`，`lag` 对应 `system`，`launcher` / `web` 进 firebase 仓库）
+- 每个 issue 都要设**类型**（issue type）：玩家报的故障是 `Bug`，要新增或改的功能是 `Feature`，需要评估、调研的是 `Task`。设置用 `gh api -X PATCH repos/<owner>/<repo>/issues/<编号> -f type=<类型名>`
+- 数值在哪个仓库就建在哪个仓库：每日任务等数值在 firebase，不在 game
+- issue 正文写现象与报告 ID，不贴 Steam ID 与日志原文
+- 用户说不单独建的，只记进跟踪 issue 的长期反馈。建错了就关掉（不做）并说明记在哪
+- 建好后把链接填进跟踪 issue 对应的待处理条目
 
 ## 注意
 

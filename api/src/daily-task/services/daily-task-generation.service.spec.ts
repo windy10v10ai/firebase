@@ -189,6 +189,18 @@ describe('DailyTaskGenerationService', () => {
     expect([1, 2, 3].map((star) => service.getTarget(task, star as 1 | 2 | 3))).toEqual([1, 2, 3]);
   });
 
+  it('uses fixed star targets when configured', () => {
+    const task: TaskDefinition = {
+      id: 'test_fixed',
+      scope: TaskScope.PERSONAL_GENERAL,
+      metric: TaskMetric.TOWER_KILLS,
+      target: 4,
+      starTargets: [4, 6, 8],
+    };
+
+    expect([1, 2, 3].map((star) => service.getTarget(task, star as 1 | 2 | 3))).toEqual([4, 6, 8]);
+  });
+
   it('uses multiplicative targets at and above the threshold', () => {
     const task: TaskDefinition = {
       id: 'test_large',
