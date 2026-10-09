@@ -1,21 +1,32 @@
 import { PlayerStatsRecentMatch } from './entities/player-stats-recent.entity';
 import { DifficultyBaseline } from './entities/radar-baseline';
 import { RADAR_MIN_MATCHES } from './player-stats-radar.constants';
-import { PlayerStatsRadarService, buildRadar, percentileOf } from './player-stats-radar.service';
+import {
+  PlayerStatsRadarService,
+  buildRadar,
+  nonZeroPercentileOf,
+  percentileOf,
+} from './player-stats-radar.service';
 
 // 从 0 到 max 等距的 21 个分位点，中位数是 max / 2
 function evenQuantiles(max: number): number[] {
   return Array.from({ length: 21 }, (_, i) => (max * i) / 20);
 }
 
+// 前一半的局没有治疗，有治疗的局每分钟 1–10
+const halfZeroHealing = [...Array(11).fill(0), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 const baseline: DifficultyBaseline = {
   sampleCount: 500,
   damage: evenQuantiles(2000),
   gold: evenQuantiles(1000),
   participation: evenQuantiles(1),
-  survival: evenQuantiles(0.4),
-  tank: evenQuantiles(600),
   push: evenQuantiles(8),
+  deaths: evenQuantiles(0.4),
+  tank: evenQuantiles(600),
+  healing: halfZeroHealing,
+  assists: evenQuantiles(0.4),
+  stuns: evenQuantiles(4),
 };
 
 // 10 分钟一局，各项正好是中位数
@@ -31,6 +42,8 @@ function medianMatch(overrides: Partial<PlayerStatsRecentMatch> = {}): PlayerSta
     deaths: 2,
     damageTaken: 3000,
     towerKills: 4,
+    healing: 0,
+    stuns: 20,
     ...overrides,
   } as PlayerStatsRecentMatch;
 }
@@ -50,27 +63,48 @@ describe('percentileOf', () => {
   });
 
   it('多个分位点同值时取这一段的中间', () => {
-    // 前一半的人推塔为 0
-    const quantiles = [...Array(11).fill(0), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    expect(percentileOf(0, halfZeroHealing)).toBe(25);
+  });
+});
 
-    expect(percentileOf(0, quantiles)).toBe(25);
+describe('nonZeroPercentileOf', () => {
+  it('0 记 0 分，大于 0 的值在非 0 的那一段里铺满 0–100', () => {
+    expect(nonZeroPercentileOf(0, halfZeroHealing)).toBe(0);
+    expect(nonZeroPercentileOf(5.5, halfZeroHealing)).toBeCloseTo(50);
+    expect(nonZeroPercentileOf(10, halfZeroHealing)).toBe(100);
+  });
+
+  it('全体几乎都是 0 时，有一点治疗就是最高', () => {
+    expect(nonZeroPercentileOf(1, [...Array(20).fill(0), 3])).toBe(100);
   });
 });
 
 describe('buildRadar', () => {
-  it('每局都是中位数时各项与综合评分都是 50', () => {
+  it('每局都是中位数时各项都是 50，没有治疗的局治疗记 0', () => {
     const result = buildRadar(repeat(medianMatch()), { '5': baseline });
 
     expect(result.matchCount).toBe(RADAR_MIN_MATCHES);
     expect(result.radar).toEqual({
-      score: 50,
       damage: 50,
       gold: 50,
       participation: 50,
-      survival: 50,
-      tank: 50,
       push: 50,
+      deaths: 50,
+      tank: 50,
+      healing: 0,
+      assists: 50,
+      stuns: 50,
     });
+  });
+
+  it('治疗各局平均后放大，封顶 100', () => {
+    // 十局里一局治疗排在有治疗的局中间，平均 5 分，放大后 25
+    const once = [medianMatch({ healing: 55 }), ...repeat(medianMatch(), RADAR_MIN_MATCHES - 1)];
+    // 每局都是有治疗的局里的中位，放大后超过 100
+    const always = repeat(medianMatch({ healing: 55 }));
+
+    expect(buildRadar(once, { '5': baseline }).radar?.healing).toBe(25);
+    expect(buildRadar(always, { '5': baseline }).radar?.healing).toBe(100);
   });
 
   it('伤害按每分钟比，推塔按每局比，死亡越少越高', () => {
@@ -90,17 +124,22 @@ describe('buildRadar', () => {
 
     expect(radar?.damage).toBe(50);
     expect(radar?.push).toBe(100);
-    expect(radar?.survival).toBe(100);
+    expect(radar?.deaths).toBe(100);
   });
 
-  it('跳过掉线局与没有基准的难度', () => {
+  it('跳过掉线局、没有基准的难度与基准缺项的难度', () => {
+    const { healing: _healing, ...withoutHealing } = baseline;
     const matches = [
       ...repeat(medianMatch(), RADAR_MIN_MATCHES - 1),
       medianMatch({ isDisconnected: true }),
       medianMatch({ difficulty: 8 }),
+      medianMatch({ difficulty: 3 }),
     ];
 
-    const result = buildRadar(matches, { '5': baseline });
+    const result = buildRadar(matches, {
+      '5': baseline,
+      '3': withoutHealing as DifficultyBaseline,
+    });
 
     expect(result.matchCount).toBe(RADAR_MIN_MATCHES - 1);
     expect(result.radar).toBeNull();
