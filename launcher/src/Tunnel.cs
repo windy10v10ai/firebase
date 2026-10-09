@@ -169,7 +169,7 @@ namespace Windy10v10AI.Launcher
 
         // Registers this socket on one of the relays in the ticket for one join and returns the relay port that reaches
         // the other side, or null when none of them answers within the handshake window or claims the ticket.
-        // Both sides walk the same address order, so a relay rejecting one of them as full is skipped by both
+        // Both sides walk the same order, and a full relay still accepts the side whose partner already waits there, so they end on the same relay
         protected IPEndPoint ClaimRelay(RelayTicket relay, out IPEndPoint used)
         {
             used = null;
@@ -187,7 +187,6 @@ namespace Windy10v10AI.Launcher
                     while (!Closed && DateTime.UtcNow < sliceDeadline)
                     {
                         var allocated = AskRelay(RelayPacket.Allocate, ticket, control, sliceDeadline);
-                        // No answer, or an explicit refusal (e.g. the relay is full): move on to the next relay
                         if (allocated == null || allocated[0] != RelayPacket.Allocated || allocated.Length < 3) break;
                         var session = new IPEndPoint(control.Address, (allocated[1] << 8) | allocated[2]);
                         var claimed = AskRelay(RelayPacket.Claim, ticket, session, sliceDeadline);
