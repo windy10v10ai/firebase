@@ -81,6 +81,7 @@ describe('FeedbackService', () => {
     const gameState = {
       gameTimeMsec: 1260000,
       playerCount: 3,
+      difficulty: 0,
       gameOptions: { multiplierRadiant: 2, multiplierDire: 3, towerPowerPct: 100 },
       localHost: true,
       offline: false,

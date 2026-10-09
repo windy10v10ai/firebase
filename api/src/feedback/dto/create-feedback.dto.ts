@@ -11,6 +11,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
   ValidateIf,
@@ -99,7 +100,14 @@ class GameStateDto {
   @Min(1)
   playerCount?: number;
 
-  @ApiPropertyOptional({ type: GameOptionsDto, description: '难度，字段与结算的游戏选项一致' })
+  @ApiPropertyOptional({ description: '难度：0 为自定义，1 到 8 对应 N1 到 N8，与结算一致' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(8)
+  difficulty?: number;
+
+  @ApiPropertyOptional({ type: GameOptionsDto, description: '游戏选项，字段与结算一致' })
   @IsOptional()
   @ValidateNested()
   @Type(() => GameOptionsDto)

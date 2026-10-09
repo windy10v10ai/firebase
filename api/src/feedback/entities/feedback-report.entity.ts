@@ -45,6 +45,8 @@ export interface GameOptions {
 export interface GameState {
   gameTimeMsec?: number;
   playerCount?: number;
+  /** 0 为自定义，1 到 8 对应 N1 到 N8 */
+  difficulty?: number;
   gameOptions?: GameOptions;
   /** 这局跑在玩家自己的机器上，而不是服务器主机 */
   localHost?: boolean;

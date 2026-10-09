@@ -33,6 +33,7 @@ describe('Feedback (e2e)', () => {
       gameState: {
         gameTimeMsec: 600000,
         playerCount: 2,
+        difficulty: 8,
         gameOptions: { multiplierRadiant: 2, multiplierDire: 3, towerPowerPct: 100 },
         heroName: 'npc_dota_hero_axe',
         items: ['item_blink', '', '', '', '', ''],
@@ -42,6 +43,7 @@ describe('Feedback (e2e)', () => {
       },
     }).expect(204);
     await send({ ...base, source: 'game', gameState: { items: Array(7).fill('') } }).expect(400);
+    await send({ ...base, source: 'game', gameState: { difficulty: 9 } }).expect(400);
     await send({ ...base, source: 'launcher' }).expect(400);
     await send({ ...base, source: 'web' }).expect(400);
   });
