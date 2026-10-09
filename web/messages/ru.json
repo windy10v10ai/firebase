@@ -489,6 +489,20 @@
       "stuns": "Оглушение",
       "roshanKills": "Убийства Рошана"
     },
+    "radar": {
+      "title": "Текущая форма",
+      "matches": "{count, plural, one {# матч} few {# матча} many {# матчей} other {# матча}}",
+      "needMore": "Сыграйте ещё {count, plural, one {# матч} few {# матча} many {# матчей} other {# матча}}",
+      "failed": "Сейчас недоступно",
+      "axes": {
+        "damage": "Урон",
+        "participation": "Бои",
+        "gold": "Фарм",
+        "push": "Пуш",
+        "survival": "Выживание",
+        "tank": "Танк"
+      }
+    },
     "recent": {
       "title": "Последние матчи",
       "note": "Хранятся только последние {count, plural, one {# матч} few {# матча} many {# матчей} other {# матча}}, более старые удаляются.",

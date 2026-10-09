@@ -489,6 +489,20 @@
       "stuns": "Stun Duration",
       "roshanKills": "Roshan Kills"
     },
+    "radar": {
+      "title": "Recent Form",
+      "matches": "Last {count} matches",
+      "needMore": "Play {count} more to unlock",
+      "failed": "Unavailable right now",
+      "axes": {
+        "damage": "Damage",
+        "participation": "Fights",
+        "gold": "Farm",
+        "push": "Push",
+        "survival": "Survival",
+        "tank": "Tanking"
+      }
+    },
     "recent": {
       "title": "Recent Matches",
       "note": "Only your last {count} matches are kept; older ones are dropped.",
