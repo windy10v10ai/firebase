@@ -1,10 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+/** 各项是近期各局在同难度玩家中百分位的平均，0–100，越大越好；合并成六边形的哪个角由网站决定。 */
 export class PlayerStatsRadar {
-  /** 六项的平均 */
-  @ApiProperty()
-  score: number;
-  /** 以下各项是在同难度玩家中的百分位，0–100，50 为中位 */
   @ApiProperty()
   damage: number;
   @ApiProperty()
@@ -12,11 +9,19 @@ export class PlayerStatsRadar {
   @ApiProperty()
   participation: number;
   @ApiProperty()
-  survival: number;
+  push: number;
+  /** 已反过来算，死得越少越高 */
+  @ApiProperty()
+  deaths: number;
   @ApiProperty()
   tank: number;
+  /** 没有治疗的局记 0，有治疗的局只在有治疗的局里排名；各局平均后放大，封顶 100 */
   @ApiProperty()
-  push: number;
+  healing: number;
+  @ApiProperty()
+  assists: number;
+  @ApiProperty()
+  stuns: number;
 }
 
 export class PlayerStatsRadarResponse {

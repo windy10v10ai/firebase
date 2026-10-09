@@ -15,6 +15,7 @@ import {
 import {
   RADAR_AXES,
   RADAR_AXIS_DEFINITIONS,
+  RADAR_HEALING_AVERAGE_MULTIPLIER,
   RADAR_MIN_MATCHES,
   RadarAxis,
   STATS_BASELINE_MIN_SAMPLES,
@@ -55,9 +56,12 @@ export class PlayerStatsRadarService {
         damage: row.damage,
         gold: row.gold,
         participation: row.participation,
-        survival: row.survival,
-        tank: row.tank,
         push: row.push,
+        deaths: row.deaths,
+        tank: row.tank,
+        healing: row.healing,
+        assists: row.assists,
+        stuns: row.stuns,
       };
     }
 
@@ -87,15 +91,23 @@ export function buildRadar(
 
   for (const match of matches) {
     const base = difficulties[match.difficulty?.toString()];
-    // 掉线局的数据不代表水平，基准里也排除了
-    if (!base || match.isDisconnected || !(match.durationSec > 0)) {
+    // 掉线局的数据不代表水平，基准里也排除了；基准缺项时这一局整局不比，免得各项局数不一致
+    if (
+      !base ||
+      !RADAR_AXES.every((axis) => base[axis]?.length) ||
+      match.isDisconnected ||
+      !(match.durationSec > 0)
+    ) {
       continue;
     }
     const minutes = match.durationSec / 60;
     for (const axis of RADAR_AXES) {
-      const { value, perMinute, inverse } = RADAR_AXIS_DEFINITIONS[axis];
-      const own = perMinute ? value(match) / minutes : value(match);
-      const percentile = percentileOf(own, base[axis]);
+      const { value, perMinute, inverse, zeroIsFloor } = RADAR_AXIS_DEFINITIONS[axis];
+      const raw = value(match) ?? 0;
+      const own = perMinute ? raw / minutes : raw;
+      const percentile = zeroIsFloor
+        ? nonZeroPercentileOf(own, base[axis])
+        : percentileOf(own, base[axis]);
       sums[axis] += inverse ? 100 - percentile : percentile;
     }
     matchCount++;
@@ -105,14 +117,13 @@ export function buildRadar(
     return { matchCount, minMatchCount: RADAR_MIN_MATCHES, radar: null };
   }
 
-  const axes = Object.fromEntries(
-    RADAR_AXES.map((axis) => [axis, Math.round(sums[axis] / matchCount)]),
+  const averages = Object.fromEntries(
+    RADAR_AXES.map((axis) => [axis, sums[axis] / matchCount]),
   ) as Record<RadarAxis, number>;
-  const total = RADAR_AXES.reduce((acc, axis) => acc + sums[axis], 0);
-  const radar: PlayerStatsRadar = {
-    score: Math.round(total / RADAR_AXES.length / matchCount),
-    ...axes,
-  };
+  averages.healing = Math.min(100, averages.healing * RADAR_HEALING_AVERAGE_MULTIPLIER);
+  const radar: PlayerStatsRadar = Object.fromEntries(
+    RADAR_AXES.map((axis) => [axis, Math.round(averages[axis])]),
+  ) as Record<RadarAxis, number>;
   return { matchCount, minMatchCount: RADAR_MIN_MATCHES, radar };
 }
 
@@ -138,4 +149,19 @@ export function percentileOf(value: number, quantiles: number[]): number {
   const low = quantiles[first - 1];
   const high = quantiles[first];
   return (first - 1 + (value - low) / (high - low)) * step;
+}
+
+/** 0 记 0 分；大于 0 的值在全体里 0 值占满的那一段之后重新排名，铺满 0–100。 */
+export function nonZeroPercentileOf(value: number, quantiles: number[]): number {
+  if (!(value > 0)) {
+    return 0;
+  }
+  const last = quantiles.length - 1;
+  const zeroCount = quantiles.filter((q) => q <= 0).length;
+  if (zeroCount >= last) {
+    return 100;
+  }
+  const zeroTop = (zeroCount / last) * 100;
+  const rescaled = ((percentileOf(value, quantiles) - zeroTop) / (100 - zeroTop)) * 100;
+  return Math.min(100, Math.max(0, rescaled));
 }
