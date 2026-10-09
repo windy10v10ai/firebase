@@ -52,11 +52,30 @@ export function buildJoinResultRow(
     joiner_relay_rtt_ms: join.relayRtt ?? null,
     joiner_relay_loss_pct: join.relayLoss ?? null,
     relay_address: relayAddress ?? null,
+    relay_probes: relayProbes(room, join),
     launcher_version: join.launcherVersion,
     country: join.country ?? null,
     steam_id: join.steamId,
     host_steam_id: room.hostSteamId,
   };
+}
+
+// 按中转合并房主与加入者的测量，比较各台线路时一行就能看到两边
+function relayProbes(room: LauncherRoom, join: LauncherRoomJoin): Record<string, unknown>[] {
+  const addresses = [
+    ...new Set([...(room.relays ?? []), ...(join.relays ?? [])].map((probe) => probe.address)),
+  ];
+  return addresses.map((address) => {
+    const host = room.relays?.find((probe) => probe.address === address);
+    const joiner = join.relays?.find((probe) => probe.address === address);
+    return {
+      address,
+      host_rtt_ms: host?.rtt ?? null,
+      host_loss_pct: host?.loss ?? null,
+      joiner_rtt_ms: joiner?.rtt ?? null,
+      joiner_loss_pct: joiner?.loss ?? null,
+    };
+  });
 }
 
 export interface ConnectionQualityRecord {

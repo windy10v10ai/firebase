@@ -313,9 +313,11 @@ feature/<issue-id>-<short-kebab-summary>
 | PR | 方式 | 命令 |
 |---|---|---|
 | `feature` / `fix` / `chore` / `docs` → `develop` | squash | `gh pr merge <编号> --squash` |
-| `develop` → `main`（Release PR） | merge commit | `gh pr merge <编号> --merge` |
+| `develop` → `main`（Release PR） | merge commit | 不手动合并，见下 |
 
 feature 分支的中间提交对 `develop` 的历史没有价值，压成一条。`develop` → `main` 是两条长期分支对齐，保留每条提交，`main` 的历史才与 `develop` 一一对应。
+
+「Create Release PR」工作流在每次推送 `develop` 时自动创建 Release PR。**Release PR 由用户审批上线，Claude 不审批、不合并。**
 
 仓库设置里 rebase 已关闭，不是可选项。
 

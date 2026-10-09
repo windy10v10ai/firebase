@@ -22,9 +22,14 @@ import {
   LauncherProfileDto,
   ListRoomsDto,
   ListRoomsResponse,
+  RelayProbeDto,
 } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
-import { LauncherRoom, LauncherRoomPlayer } from './entities/launcher-room.entity';
+import {
+  LauncherRelayProbe,
+  LauncherRoom,
+  LauncherRoomPlayer,
+} from './entities/launcher-room.entity';
 import { LauncherRelayService } from './launcher-relay.service';
 
 // 去掉 0 O 1 I L，玩家转述房间码时不会看错
@@ -81,7 +86,7 @@ export class LauncherRoomService {
           join,
           result.path,
           result.elapsedMs,
-          this.relayAddressOf(result.path),
+          this.relayAddressOf(result.path, result.relayAddress, join),
         );
       }
     }
@@ -89,7 +94,11 @@ export class LauncherRoomService {
     for (const quality of dto.quality ?? []) {
       const join = await this.joinRepository.findById(quality.joinId);
       if (join?.roomId === room.roomId && !join.probe) {
-        qualities.push({ join, quality, relayAddress: this.relayAddressOf(quality.path) });
+        qualities.push({
+          join,
+          quality,
+          relayAddress: this.relayAddressOf(quality.path, quality.relayAddress, join),
+        });
       }
     }
     await this.bigQueryService.recordConnectionQuality(room, qualities);
@@ -128,9 +137,12 @@ export class LauncherRoomService {
         personaName: join.personaName,
         avatarUrl: join.avatarUrl,
         probe: join.probe === true,
-        relay: join.probe ? undefined : this.relayService.issue(join.id, 'h', now),
+        relay: join.probe
+          ? undefined
+          : this.relayService.issue(join.id, 'h', now, join.relayOrder ?? this.legacyOrder()),
       })),
       relayAddress: this.relayService.address(),
+      relayAddresses: this.relayService.addresses(),
     };
   }
 
@@ -162,6 +174,7 @@ export class LauncherRoomService {
 
     // 测试连通每次打开加入页对每个房间都发一次，省掉 Steam 资料查询
     const profile = dto.probe ? {} : await this.findProfile(dto.steamId);
+    const relayOrder = dto.probe ? undefined : this.relayService.order(room.relays, dto.relays);
     const join = await this.joinRepository.create({
       id: randomUUID(),
       roomCode: room.id,
@@ -177,6 +190,8 @@ export class LauncherRoomService {
       country,
       relayRtt: dto.relayRtt,
       relayLoss: dto.relayLoss,
+      relays: plainProbes(dto.relays),
+      relayOrder,
       probe: dto.probe,
       createdAt: now,
       expireAt: expireAt(now),
@@ -196,12 +211,25 @@ export class LauncherRoomService {
       hostCandidates: room.hostCandidates,
       host: { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
       self: profile,
-      relay: this.relayService.issue(join.id, 'j', now),
+      relay: this.relayService.issue(join.id, 'j', now, relayOrder ?? []),
     };
   }
 
-  private relayAddressOf(path: JoinPath | undefined): string | undefined {
-    return path === 'relay' ? this.relayService.address() : undefined;
+  // 没存顺序的加入记录按旧版只认第一台处理
+  private legacyOrder(): string[] {
+    const address = this.relayService.address();
+    return address ? [address] : [];
+  }
+
+  private relayAddressOf(
+    path: JoinPath | undefined,
+    reported: string | undefined,
+    join: LauncherRoomJoin,
+  ): string | undefined {
+    if (path !== 'relay') {
+      return undefined;
+    }
+    return reported ?? join.relayOrder?.[0] ?? this.relayService.address();
   }
 
   /** 列出请求者能加入的公开房间，不含候选地址与令牌。 */
@@ -238,6 +266,7 @@ export class LauncherRoomService {
           playerCount: room.playerCount,
           maxPlayers: room.maxPlayers,
           hostRelayRtt: room.relayRtt,
+          hostRelays: room.relays,
           players: hostAndPlayers(room),
         })),
       games: games.map((room) => {
@@ -258,6 +287,7 @@ export class LauncherRoomService {
       activeGames: activeRooms.length,
       activePlayers: activeRooms.reduce((total, room) => total + (room.playerCount ?? 0), 0),
       relayAddress: this.relayService.address(),
+      relayAddresses: this.relayService.addresses(),
     };
   }
 
@@ -304,6 +334,7 @@ export class LauncherRoomService {
       ...profile,
       joins: [],
       relayAddress: this.relayService.address(),
+      relayAddresses: this.relayService.addresses(),
     };
   }
 
@@ -371,11 +402,17 @@ function roomSettings(dto: HostRoomDto): Partial<LauncherRoom> {
     playerCount: dto.playerCount,
     relayRtt: dto.relayRtt,
     relayLoss: dto.relayLoss,
+    relays: plainProbes(dto.relays),
     kickedSteamIds: dto.kickedSteamIds,
   };
   return Object.fromEntries(
     Object.entries(settings).filter(([, value]) => value !== undefined),
   ) as Partial<LauncherRoom>;
+}
+
+// 请求体里是校验用的类实例，Firestore 只收普通对象
+function plainProbes(probes: RelayProbeDto[] | undefined): LauncherRelayProbe[] | undefined {
+  return probes?.map(({ address, rtt, loss }) => ({ address, rtt, loss }));
 }
 
 function newToken(): string {
