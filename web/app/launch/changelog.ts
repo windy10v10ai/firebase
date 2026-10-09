@@ -1,5 +1,6 @@
 // 只列有实质改动的发布版本，新的在前；说明文案在 messages 的 launch.changelog.entries，键名由版本号的点换成下划线
 export const LAUNCHER_CHANGELOG: { version: string; date: string }[] = [
+  { version: '0.5.3', date: '2026-10-09' },
   { version: '0.5.2', date: '2026-10-06' },
   { version: '0.5.1', date: '2026-10-06' },
   { version: '0.5.0', date: '2026-10-06' },

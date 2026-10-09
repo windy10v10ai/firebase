@@ -141,8 +141,8 @@ namespace Windy10v10AI.Launcher
         string roomToken;
         string roomMap;
         Dictionary<string, object> roomBody;
-        volatile int hostRelayRtt = -1;
-        volatile int hostRelayLoss = -1;
+        // Replaced wholesale by the measuring thread, so readers never see a half-filled list
+        volatile List<RelayLeg> hostRelays = new List<RelayLeg>();
         readonly HashSet<string> seenJoins = new HashSet<string>();
         readonly List<long> kicked = new List<long>();
         bool paused;
@@ -1013,8 +1013,7 @@ namespace Windy10v10AI.Launcher
                     lock (kicked) kicked.Clear();
                     roomEnded = false;
                     roomStartedAt = null;
-                    hostRelayRtt = -1;
-                    hostRelayLoss = -1;
+                    hostRelays = new List<RelayLeg>();
                     Dictionary<string, object> opened;
                     try
                     {
@@ -1035,16 +1034,16 @@ namespace Windy10v10AI.Launcher
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
                     hostTunnel.Start();
-                    var relay = RelayTicket.Address(opened.ContainsKey("relayAddress") ? opened["relayAddress"] : null);
-                    if (relay != null)
+                    var relays = RelayTicket.ReadAddresses(opened, "relayAddresses", "relayAddress");
+                    if (relays.Count > 0)
                     {
                         var measuring = hostTunnel;
-                        // Measured once per room; joiners add it to their own to estimate a relayed route
+                        // Measured once per room; joiners add their own to each leg to estimate a relayed route
                         new Thread(() =>
                         {
-                            var quality = measuring.MeasureRelay(relay);
-                            hostRelayLoss = quality.Loss;
-                            hostRelayRtt = quality.Rtt;
+                            var legs = new List<RelayLeg>();
+                            foreach (var relay in relays) legs.Add(new RelayLeg(relay) { Quality = measuring.MeasureRelay(relay) });
+                            hostRelays = legs;
                         }) { IsBackground = true }.Start();
                     }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
@@ -1213,10 +1212,10 @@ namespace Windy10v10AI.Launcher
                 }
                 JoinTunnel tunnel = null;
                 List<Candidate> candidates = null;
-                var relayQuality = RelayQuality.Unknown;
+                var ownRelays = new List<RelayLeg>();
                 if (source != null)
                 {
-                    relayQuality = source.RelayQuality;
+                    ownRelays = source.OwnRelays;
                     tunnel = source.TakeTunnel(out candidates);
                     source.Dispose();
                 }
@@ -1234,9 +1233,15 @@ namespace Windy10v10AI.Launcher
                 try
                 {
                     var body = PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id));
-                    // Reported with the join so every joiner's route to the relay is recorded without a request of its own
-                    if (relayQuality.Rtt >= 0) body["relayRtt"] = relayQuality.Rtt;
-                    if (relayQuality.Loss >= 0) body["relayLoss"] = relayQuality.Loss;
+                    // Reported with the join so every joiner's route to each relay is recorded without a request of its own
+                    var relays = RelayLeg.Encode(ownRelays);
+                    if (relays.Count > 0)
+                    {
+                        body["relays"] = relays;
+                        object rtt;
+                        if (relays[0].TryGetValue("rtt", out rtt)) body["relayRtt"] = rtt;
+                        body["relayLoss"] = relays[0]["loss"];
+                    }
                     joined = RoomApi.Join(code, body);
                 }
                 catch (RoomError error)
@@ -1460,8 +1465,15 @@ namespace Windy10v10AI.Launcher
             body["maxPlayers"] = Settings.MaxPlayers;
             body["map"] = roomMap;
             body["playerCount"] = playerCount;
-            if (hostRelayRtt >= 0) body["relayRtt"] = hostRelayRtt;
-            if (hostRelayLoss >= 0) body["relayLoss"] = hostRelayLoss;
+            var relays = RelayLeg.Encode(hostRelays);
+            if (relays.Count > 0)
+            {
+                body["relays"] = relays;
+                // Kept for an older API that only reads the first relay
+                object rtt;
+                if (relays[0].TryGetValue("rtt", out rtt)) body["relayRtt"] = rtt;
+                body["relayLoss"] = relays[0]["loss"];
+            }
             lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
         }
 
@@ -1479,10 +1491,11 @@ namespace Windy10v10AI.Launcher
             if (browser != null) browser.Refresh();
         }
 
-        void OnJoinFinished(string joinId, string path, int elapsedMs)
+        void OnJoinFinished(string joinId, string path, string relayAddress, int elapsedMs)
         {
             var result = new Dictionary<string, object> { { "joinId", joinId }, { "elapsedMs", elapsedMs } };
             if (path != null) result["path"] = path;
+            if (relayAddress != null) result["relayAddress"] = relayAddress;
             lock (joinResults) joinResults.Add(result);
             var roster = hostRoster;
             if (roster != null) roster.SetStatus(joinId, path != null ? PlayerStatus.Loading : PlayerStatus.Failed);
