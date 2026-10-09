@@ -127,8 +127,7 @@
       "download": "下载启动器",
       "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
       "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
-      "codeSigning": "签名政策",
-      "signing": "代码签名：正在申请 SignPath.io 为开源项目免费提供的签名，证书由 SignPath Foundation 签发。",
+      "codeSigning": "隐私与安全说明",
       "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
     },
@@ -292,17 +291,13 @@
     "copyright": "© 2025 Windy10v10ai. 保留所有权利。"
   },
   "codeSigning": {
-    "title": "启动器代码签名政策",
+    "title": "启动器说明与隐私",
     "intro": "这里说明 Windy10v10AI 启动器（Windy10v10AI.exe）从哪里来、由谁发布、会不会传输你的数据。",
     "build": {
       "title": "构建与发布",
       "source": "源码以 GPL-3.0 公开在 <source>GitHub</source>。",
       "ci": "发布的 exe 由 GitHub Actions 的 <workflow>构建工作流</workflow>从 develop 分支的公开源码编译，不使用本地编译的版本。",
       "download": "唯一的下载地址是本站<launch>启动游戏</launch>页，启动器的自动更新也从这里下载。"
-    },
-    "signing": {
-      "title": "代码签名",
-      "body": "我们正在申请 SignPath Foundation 的免费开源代码签名。通过后，发布的 exe 由 SignPath.io 签名，证书由 SignPath Foundation 签发。"
     },
     "team": {
       "title": "团队与角色",

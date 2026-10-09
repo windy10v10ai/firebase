@@ -127,8 +127,7 @@
       "download": "Download launcher",
       "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
       "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
-      "codeSigning": "Signing policy",
-      "signing": "Code signing: we are applying for free open source code signing by SignPath.io, with a certificate by SignPath Foundation.",
+      "codeSigning": "Privacy and safety",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
     },
@@ -294,17 +293,13 @@
     "copyright": "© 2025 Windy10v10ai. All rights reserved."
   },
   "codeSigning": {
-    "title": "Launcher code signing policy",
+    "title": "Launcher notes and privacy",
     "intro": "This page explains where the Windy10v10AI launcher (Windy10v10AI.exe) comes from, who publishes it, and whether it sends any of your data.",
     "build": {
       "title": "Build and release",
       "source": "The source code is public on <source>GitHub</source> under GPL-3.0.",
       "ci": "Released exe files are compiled from the public source on the develop branch by the GitHub Actions <workflow>build workflow</workflow>, never from a local build.",
       "download": "The only download location is the <launch>Start the game</launch> page on this site. The launcher also updates itself from here."
-    },
-    "signing": {
-      "title": "Code signing",
-      "body": "We are applying for free open source code signing from SignPath Foundation. Once approved, released exe files will be signed by SignPath.io with a certificate issued by SignPath Foundation."
     },
     "team": {
       "title": "Team and roles",

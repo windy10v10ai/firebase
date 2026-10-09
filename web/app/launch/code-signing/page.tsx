@@ -16,7 +16,7 @@ const external = (href: string) => {
   return ExternalLink;
 };
 
-// SignPath 开源签名要求下载页公开这份政策：构建方式、团队角色与隐私说明
+// 启动器内的反馈窗口按此路径链接隐私一节，路径不能改
 export default function CodeSigningPage() {
   const t = useTranslations('codeSigning');
   const launch = (chunks: React.ReactNode) => (
@@ -36,10 +36,6 @@ export default function CodeSigningPage() {
           <li>{t.rich('build.ci', { workflow: external(LAUNCHER_BUILD_URL) })}</li>
           <li>{t.rich('build.download', { launch })}</li>
         </ul>
-      </Section>
-
-      <Section title={t('signing.title')}>
-        <p className="text-content text-pretty">{t('signing.body')}</p>
       </Section>
 
       <Section title={t('team.title')}>
