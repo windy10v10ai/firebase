@@ -164,24 +164,40 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        // Registers this socket on the relay for one join and returns the relay port that reaches the other side,
-        // or null when the relay does not answer within the handshake window or refuses the ticket
-        protected IPEndPoint ClaimRelay(RelayTicket relay)
+        // Each relay gets this much of the handshake window before the next one in the list is tried
+        const int RelaySliceMs = 4000;
+
+        // Registers this socket on one of the relays in the ticket for one join and returns the relay port that reaches
+        // the other side, or null when none of them answers within the handshake window or claims the ticket.
+        // Both sides walk the same order, and a full relay still accepts the side whose partner already waits there, so they end on the same relay
+        protected IPEndPoint ClaimRelay(RelayTicket relay, out IPEndPoint used)
         {
+            used = null;
             // An Allocated reply does not name its join, so a host claims for one joiner at a time
             lock (relayClaim)
             {
                 var ticket = Encoding.ASCII.GetBytes(relay.Ticket);
-                var deadline = DateTime.UtcNow.AddMilliseconds(HandshakeMs);
-                while (!Closed && DateTime.UtcNow < deadline)
+                var overallDeadline = DateTime.UtcNow.AddMilliseconds(HandshakeMs);
+                var sliceMs = Math.Max(RelaySliceMs, HandshakeMs / relay.Addresses.Count);
+                foreach (var control in relay.Addresses)
                 {
-                    var allocated = AskRelay(RelayPacket.Allocate, ticket, relay.Control, deadline);
-                    if (allocated == null || allocated[0] != RelayPacket.Allocated || allocated.Length < 3) return null;
-                    var session = new IPEndPoint(relay.Control.Address, (allocated[1] << 8) | allocated[2]);
-                    var claimed = AskRelay(RelayPacket.Claim, ticket, session, deadline);
-                    if (claimed == null) return null;
-                    if (claimed[0] == RelayPacket.Claimed) return session;
-                    // A late reply to an earlier allocation names another join's port, which refuses this ticket
+                    if (Closed || DateTime.UtcNow >= overallDeadline) break;
+                    var sliceDeadline = DateTime.UtcNow.AddMilliseconds(sliceMs);
+                    if (sliceDeadline > overallDeadline) sliceDeadline = overallDeadline;
+                    while (!Closed && DateTime.UtcNow < sliceDeadline)
+                    {
+                        var allocated = AskRelay(RelayPacket.Allocate, ticket, control, sliceDeadline);
+                        if (allocated == null || allocated[0] != RelayPacket.Allocated || allocated.Length < 3) break;
+                        var session = new IPEndPoint(control.Address, (allocated[1] << 8) | allocated[2]);
+                        var claimed = AskRelay(RelayPacket.Claim, ticket, session, sliceDeadline);
+                        if (claimed == null || claimed[0] == RelayPacket.Rejected) break;
+                        if (claimed[0] == RelayPacket.Claimed)
+                        {
+                            used = control;
+                            return session;
+                        }
+                        // A late reply to an earlier allocation names another join's port; allocate again on this same relay
+                    }
                 }
                 return null;
             }
@@ -305,9 +321,11 @@ namespace Windy10v10AI.Launcher
         readonly Dictionary<string, string> paths = new Dictionary<string, string>();
         readonly Dictionary<IPEndPoint, string> verified = new Dictionary<IPEndPoint, string>();
         readonly Dictionary<string, Peer> peers = new Dictionary<string, Peer>();
+        // The relay address a join actually claimed, when its route turned out to be the relay
+        readonly Dictionary<string, string> relayUsed = new Dictionary<string, string>();
 
-        // joinId, the reported path or null when the handshake failed, and milliseconds taken
-        public event Action<string, string, int> JoinFinished;
+        // joinId, the reported path or null when the handshake failed, the relay address used when the path is relay, and milliseconds taken
+        public event Action<string, string, string, int> JoinFinished;
         public event Action<string> JoinLeft;
         public Func<List<RosterEntry>> RosterSource;
         public volatile bool GameEnded;
@@ -366,22 +384,25 @@ namespace Windy10v10AI.Launcher
                 {
                     new Thread(() =>
                     {
-                        var session = ClaimRelay(relay);
+                        IPEndPoint control;
+                        var session = ClaimRelay(relay, out control);
                         if (session == null) return;
+                        lock (sync) relayUsed[token] = control.ToString();
                         lock (candidates) candidates.Add(new Candidate(PathType.Relay, session));
                     }) { IsBackground = true }.Start();
                 }
                 // A kicked joiner's token is gone, which also ends its handshake
                 Burst(token, candidates, () => { lock (sync) return paths.ContainsKey(token) || !joinIds.ContainsKey(token); });
-                string path;
+                string path, relayAddress;
                 bool kicked;
                 lock (sync)
                 {
                     paths.TryGetValue(token, out path);
                     kicked = !joinIds.ContainsKey(token);
+                    relayUsed.TryGetValue(token, out relayAddress);
                 }
                 var handler = JoinFinished;
-                if (handler != null && !Closed && !kicked) handler(joinId, path == null ? null : PathType.Report(path), (int)(DateTime.UtcNow - started).TotalMilliseconds);
+                if (handler != null && !Closed && !kicked) handler(joinId, path == null ? null : PathType.Report(path), path == PathType.Relay ? relayAddress : null, (int)(DateTime.UtcNow - started).TotalMilliseconds);
             }) { IsBackground = true }.Start();
         }
 
@@ -410,6 +431,8 @@ namespace Windy10v10AI.Launcher
                             entry["rttP50"] = peer.Rtts[(peer.Rtts.Count - 1) / 2];
                             entry["rttP95"] = peer.Rtts[(peer.Rtts.Count - 1) * 95 / 100];
                         }
+                        string relayAddress;
+                        if (path == PathType.Relay && relayUsed.TryGetValue(pair.Key, out relayAddress)) entry["relayAddress"] = relayAddress;
                         list.Add(entry);
                     }
                     peer.Sent = 0;
@@ -459,6 +482,7 @@ namespace Windy10v10AI.Launcher
             joinIds.Remove(token);
             probes.Remove(token);
             paths.Remove(token);
+            relayUsed.Remove(token);
             var stale = new List<IPEndPoint>();
             foreach (var pair in verified)
             {
@@ -675,7 +699,8 @@ namespace Windy10v10AI.Launcher
                 var ticket = relay;
                 new Thread(() =>
                 {
-                    var session = ClaimRelay(ticket);
+                    IPEndPoint control;
+                    var session = ClaimRelay(ticket, out control);
                     if (session == null) return;
                     lock (sync)
                     lock (hosts)

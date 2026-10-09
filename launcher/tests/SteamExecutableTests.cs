@@ -18,6 +18,7 @@ namespace Windy10v10AI.Launcher.Tests
                 UsesSteamChinaWhenSteamIsMissing();
                 ReturnsNullWhenClientsAreMissing();
                 Console.WriteLine("PASS Steam executable tests (" + culture + ")");
+                RelayTests.RunAll();
                 return 0;
             }
             catch (Exception error)
