@@ -181,9 +181,7 @@ export default function LaunchPage() {
             </p>
             <SmartScreenFigure kind="windows" />
           </div>
-          {/* SignPath 要求下载页写明签名来源 */}
           <p className="mt-5 text-xs text-muted text-pretty">
-            {t('launcher.signing')}{' '}
             <Link href="/launch/code-signing" className="link-hover underline">
               {t('launcher.codeSigning')}
             </Link>

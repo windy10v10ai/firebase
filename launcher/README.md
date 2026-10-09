@@ -30,7 +30,7 @@
 ## 自我更新
 
 - **版本信息与下载都走 API**：和地图检测同一套国内外线路。
-- **只校验 sha256，不做代码签名**：哈希用来挡下载不完整或被代理损坏；以后加签名时，旧版会先自动更新到带公钥的版本。
+- **只校验 sha256，不做代码签名**：哈希用来挡下载不完整或被代理损坏。
 - **只升不降**：线上版本比自己新才提示，本地开发不会被换回旧版。
 
 ## 编译
@@ -47,7 +47,7 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
 
 1. 代码 PR：按 [CLAUDE.md](CLAUDE.md) 的「版本号」升版本，合进 `develop`。可以攒几个 PR 共用一个未发布的版本号。
 2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。发布的 exe 必须来自这里，不用本机编译的。
-3. 代码签名下来之前，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可发版；报具体病毒家族、或大量引擎一起报时先停下排查。
+3. 没有代码签名，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可发版；报具体病毒家族、或大量引擎一起报时先停下排查。
 4. 发版 PR：
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
