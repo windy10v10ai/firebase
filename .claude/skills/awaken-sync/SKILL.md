@@ -15,7 +15,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 - `src/vscripts/modules/awaken/awaken-config.ts`（增删觉醒英雄、改限免名单）
 - `src/panorama/react/hud_main/pages/profile/tabs/AwakenTab.tsx`（展示顺序、展示哪个技能）
 - `game/scripts/npc/npc_abilities_custom_awaken.txt` 等 KV（改数值、换图标）
-- `game/resource/addon_schinese.txt` / `addon_english.txt`（改技能文案）
+- `game/resource/addon_schinese.txt` / `addon_english.txt` / `addon_russian.txt`（改技能文案）
 - `docs/reference/` 升了 Dota 版本
 
 **不要靠「哪些文件改了」判断要不要同步。** 18/38 的描述里带 `%占位符%`，改一个

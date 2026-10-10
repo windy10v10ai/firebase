@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import AbilityDetails from '@/app/components/AbilityDetails';
 import AbilityHoverTip from '@/app/components/AbilityHoverTip';
 import GameText from '@/app/components/GameText';
+import { abilityLocale } from '@/app/lib/ability-text';
 import { awakenAssetPath } from '@/app/lib/awaken';
 
 import { useBadgeWrap } from './use-badge-wrap';
@@ -38,7 +39,7 @@ interface AwakenCardProps {
  */
 export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: AwakenCardProps) {
   const t = useTranslations('awaken');
-  const locale = useLocale() === 'zh' ? 'zh' : 'en';
+  const locale = abilityLocale(useLocale());
   // 立绘、英雄名、技能图标都是本地常量，数据没到照样画；这时按钮按未觉醒的样子置灰锁住
   const known = unlocked !== null;
   const dimmed = !unlocked && (tooPoor || busy);
