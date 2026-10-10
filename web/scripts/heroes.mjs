@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { resolveDotaVersion, resolveGameRepo } from './awaken-source.mjs';
+import { resolveDotaVersion, resolveGameRepo } from './dota-ability.mjs';
 
 /**
  * 取英雄小地图头像与中英文名，产出清单 config/heroes.json。

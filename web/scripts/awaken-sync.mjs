@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { gameHead, loadAwakenSource } from './awaken-source.mjs';
+import { loadAwakenSource } from './awaken-source.mjs';
+import { gameHead } from './dota-ability.mjs';
 
 /**
  * 从 game 仓库重新生成 web/config/awaken.ts。

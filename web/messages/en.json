@@ -12,8 +12,8 @@
     "dailyTaskFull": "Daily Tasks",
     "leaderboard": "Leaderboard",
     "leaderboardFull": "Leaderboard",
-    "wiki": "Skills & Items",
-    "wikiFull": "Skills & Items",
+    "wiki": "Wiki",
+    "wikiFull": "Wiki",
     "workshop": "Steam Workshop",
     "github": "GitHub",
     "membershipShort": "Member",
@@ -39,7 +39,7 @@
       "title": "Sign in to check your own data anytime",
       "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
       "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
-      "upcoming": ["More statistics", "Ability and item draft list"]
+      "upcoming": ["More statistics"]
     },
     "summary": {
       "profileLink": "Profile",
@@ -94,8 +94,8 @@
         "description": "Preview and refresh your daily tasks"
       },
       "wiki": {
-        "title": "Skills & Items",
-        "description": "The abilities and items in the opening draft"
+        "title": "Wiki",
+        "description": "Abilities and items you can draw in the game"
       },
       "leaderboard": {
         "title": "Leaderboard",
@@ -699,9 +699,7 @@
       "useBattle": "{cost} usable Battle Points",
       "useMember": "{cost} usable Member Points",
       "battleShort": "You have {have} Battle Points, {need} short",
-      "memberShort": "You have {have} Member Points, {need} short",
-      "scrollHint": "Swipe for more",
-      "close": "Close"
+      "memberShort": "You have {have} Member Points, {need} short"
     },
     "random": {
       "title": "Random Awaken",
@@ -874,7 +872,37 @@
     },
     "cooldown": "Cooldown",
     "manaCost": "Mana Cost",
-    "aoe": "Affected by AoE bonuses"
+    "aoe": "Affected by AoE bonuses",
+    "dialog": {
+      "close": "Close",
+      "scrollHint": "Swipe for more"
+    }
+  },
+  "wiki": {
+    "pageTitle": {
+      "abilities": "Abilities Wiki",
+      "items": "Items Wiki"
+    },
+    "description": "Every ability and item you can draw in the game. Higher tiers are rarer.",
+    "tabs": {
+      "abilities": "Abilities",
+      "items": "Items"
+    },
+    "search": {
+      "abilities": "Search abilities",
+      "items": "Search items"
+    },
+    "pool": {
+      "active": "Active abilities",
+      "passive": "Passive abilities"
+    },
+    "poolShort": {
+      "active": "Active",
+      "passive": "Passive"
+    },
+    "count": "{n}",
+    "empty": "No results for “{query}”",
+    "iconMissing": "No icon"
   },
   "auth": {
     "login": "Sign in with Steam",

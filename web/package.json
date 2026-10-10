@@ -16,6 +16,7 @@
     "awaken:images": "node scripts/awaken-images.mjs",
     "heroes": "node scripts/heroes.mjs",
     "items": "node scripts/items.mjs",
+    "wiki:sync": "node scripts/wiki-sync.mjs",
     "font:heading": "node scripts/heading-font.mjs",
     "font:heading:check": "node scripts/heading-font.mjs --check"
   },

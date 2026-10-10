@@ -40,6 +40,7 @@ export default function PageCards() {
     awaken: playerPagePath(uid, 'awaken'),
     membership: '/membership',
     dailyTask: playerPagePath(uid, 'daily-task'),
+    wiki: '/wiki/abilities',
     leaderboard: '/leaderboard',
   };
 
