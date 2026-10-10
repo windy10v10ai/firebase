@@ -92,11 +92,11 @@ function readKvDir(dir, files) {
   return merged;
 }
 
-/** 注释掉的行不算，所以先去掉行注释再找 */
+/** 注释掉的行不算，所以先去掉行注释再找；game 在 Windows 上检出是 CRLF，断行要连 \r 一起去掉，否则行尾的 $ 匹配不到 */
 function readListed(file, pattern) {
   const text = fs
     .readFileSync(file, 'utf8')
-    .split('\n')
+    .split(/\r?\n/)
     .map((line) => line.replace(/\/\/.*$/, ''))
     .join('\n');
   return [...text.matchAll(pattern)].map((m) => m[1]);

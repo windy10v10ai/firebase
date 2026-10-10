@@ -237,31 +237,31 @@
     "icon": "blessing_of_dragon.4c8237f6.webp",
     "zh": "神龙",
     "en": "Dragon's Blessing",
-    "ru": null
+    "ru": "Благословение дракона"
   },
   "item_blessing_of_dragon_1": {
     "icon": "blessing_of_dragon_1.51c9618d.webp",
     "zh": "神龙赐福·不死",
     "en": "Dragon's Blessing of Immortality",
-    "ru": null
+    "ru": "Благословение дракона: Бессмертие"
   },
   "item_blessing_of_dragon_2": {
     "icon": "blessing_of_dragon_2.4a38e0fc.webp",
     "zh": "神龙赐福·毁灭",
     "en": "Dragon's Blessing of Destruction",
-    "ru": null
+    "ru": "Благословение дракона: Разрушение"
   },
   "item_blessing_of_dragon_3": {
     "icon": "blessing_of_dragon_3.d5377fd9.webp",
     "zh": "神龙赐福·时间",
     "en": "Dragon's Blessing of Time",
-    "ru": null
+    "ru": "Благословение дракона: Время"
   },
   "item_blessing_of_dragon_4": {
     "icon": "blessing_of_dragon_4.2369bfb5.webp",
     "zh": "神龙赐福·空间",
     "en": "Dragon's Blessing of Space",
-    "ru": null
+    "ru": "Благословение дракона: Пространство"
   },
   "item_blight_stone": {
     "icon": "blight_stone.adb9d557.webp",
@@ -669,43 +669,43 @@
     "icon": "dragon_ball_1.e3407721.webp",
     "zh": "一星珠",
     "en": "One-Star Dragon Ball",
-    "ru": null
+    "ru": "Однозвёздный Dragon Ball"
   },
   "item_dragon_ball_2": {
     "icon": "dragon_ball_2.2c6e58c0.webp",
     "zh": "二星珠",
     "en": "Two-Star Dragon Ball",
-    "ru": null
+    "ru": "Двухзвёздный Dragon Ball"
   },
   "item_dragon_ball_3": {
     "icon": "dragon_ball_3.c41604c6.webp",
     "zh": "三星珠",
     "en": "Three-Star Dragon Ball",
-    "ru": null
+    "ru": "Трёхзвёздный Dragon Ball"
   },
   "item_dragon_ball_4": {
     "icon": "dragon_ball_4.4e697c55.webp",
     "zh": "四星珠",
     "en": "Four-Star Dragon Ball",
-    "ru": null
+    "ru": "Четырёхзвёздный Dragon Ball"
   },
   "item_dragon_ball_5": {
     "icon": "dragon_ball_5.6196a5f6.webp",
     "zh": "五星珠",
     "en": "Five-Star Dragon Ball",
-    "ru": null
+    "ru": "Пятизвёздный Dragon Ball"
   },
   "item_dragon_ball_6": {
     "icon": "dragon_ball_6.6beb55b1.webp",
     "zh": "六星珠",
     "en": "Six-Star Dragon Ball",
-    "ru": null
+    "ru": "Шестизвёздный Dragon Ball"
   },
   "item_dragon_ball_7": {
     "icon": "dragon_ball_7.2813e0a6.webp",
     "zh": "七星珠",
     "en": "Seven-Star Dragon Ball",
-    "ru": null
+    "ru": "Семизвёздный Dragon Ball"
   },
   "item_dragon_lance": {
     "icon": "dragon_lance.229f6a03.webp",
@@ -1389,7 +1389,7 @@
     "icon": "jump_jump_jump.0e43deca.webp",
     "zh": "跳！跳！跳！刀",
     "en": "Jump! Jump! Jump!",
-    "ru": null
+    "ru": "Прыг! Прыг! Прыг!"
   },
   "item_kaya": {
     "icon": "kaya.9e0215fa.webp",
@@ -1833,12 +1833,6 @@
     "icon": "quelling_blade_2_datadriven.ad0985f7.webp",
     "zh": "毒瘤之刃",
     "en": "Toxic Blade",
-    "ru": null
-  },
-  "item_radar_of_dragon": {
-    "icon": "radar_of_dragon.30a722a5.webp",
-    "zh": "龙珠雷达",
-    "en": "Dragon Ball Radar(NOT PURCHASEABLE!)",
     "ru": null
   },
   "item_radiance": {
@@ -2529,25 +2523,25 @@
     "icon": "wish_1.97948e0b.webp",
     "zh": "愿望1",
     "en": "Wish 1",
-    "ru": null
+    "ru": "Желание 1"
   },
   "item_wish_2": {
     "icon": "wish_2.97948e0b.webp",
     "zh": "愿望2",
     "en": "Wish 2",
-    "ru": null
+    "ru": "Желание 2"
   },
   "item_wish_3": {
     "icon": "wish_3.97948e0b.webp",
     "zh": "愿望3",
     "en": "Wish 3",
-    "ru": null
+    "ru": "Желание 3"
   },
   "item_wish_4": {
     "icon": "wish_4.97948e0b.webp",
     "zh": "愿望4",
     "en": "Wish 4",
-    "ru": null
+    "ru": "Желание 4"
   },
   "item_witch_blade": {
     "icon": "witch_blade.05507cb6.webp",
