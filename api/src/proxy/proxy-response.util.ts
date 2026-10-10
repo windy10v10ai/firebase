@@ -6,7 +6,14 @@ import { logger } from 'firebase-functions';
 const TITLE_MAX_LENGTH = 4096;
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
-export type ProxyErrorCode = 'unauthorized' | 'bad_request' | 'not_found' | 'too_long' | 'internal';
+export type ProxyErrorCode =
+  | 'unauthorized'
+  | 'bad_request'
+  | 'not_found'
+  | 'too_long'
+  | 'too_many_reports'
+  | 'daily_limit_reached'
+  | 'internal';
 
 export function validateRequestId(requestId: string): void {
   if (!requestId || !REQUEST_ID_PATTERN.test(requestId)) {

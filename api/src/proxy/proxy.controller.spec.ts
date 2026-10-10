@@ -12,7 +12,11 @@ function parseTitle(html: string) {
   return JSON.parse(html.match(/<title>req1\|(.*)<\/title>/)![1]);
 }
 
-function createController(services: { gameService?: object; dailyTaskService?: object }) {
+function createController(services: {
+  gameService?: object;
+  dailyTaskService?: object;
+  feedbackService?: object;
+}) {
   return new ProxyController(
     (services.gameService ?? {}) as never,
     {} as never,
@@ -23,6 +27,7 @@ function createController(services: { gameService?: object; dailyTaskService?: o
     {} as never,
     {} as never,
     {} as never,
+    (services.feedbackService ?? {}) as never,
   );
 }
 
@@ -68,5 +73,31 @@ describe('ProxyController 每日任务', () => {
     expect(refresh).toHaveBeenCalledWith(1, '20261001');
     expect(payload).toEqual({ steamId: 1, dayId: '20261001' });
     await expect(controller.dailyTaskRefreshPost('req1', 'not-json')).rejects.toThrow();
+  });
+});
+
+describe('ProxyController.feedbackPost', () => {
+  const origin = { ip: '1.2.3.4' } as never;
+  const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+
+  it('解出 body 后交给反馈服务，回空对象', async () => {
+    const create = jest.fn().mockResolvedValue(undefined);
+    const controller = createController({ feedbackService: { create } });
+    const body = { source: 'game', type: 'problem', topics: ['game'], steamId: 1 };
+
+    const html = await controller.feedbackPost('req1', encode(body), origin);
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining(body), origin);
+    expect(html).toBe('<!DOCTYPE html><title>req1|{}</title>');
+  });
+
+  it('非法 body 抛错，不调用反馈服务', async () => {
+    const create = jest.fn();
+    const controller = createController({ feedbackService: { create } });
+
+    await expect(
+      controller.feedbackPost('req1', encode({ type: 'nope', topics: [] }), origin),
+    ).rejects.toThrow();
+    expect(create).not.toHaveBeenCalled();
   });
 });

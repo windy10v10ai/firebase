@@ -11,5 +11,6 @@ import { FeedbackService } from './feedback.service';
   imports: [FireormModule.forFeature([FeedbackReport, FeedbackRateLimit])],
   controllers: [FeedbackController],
   providers: [FeedbackService, FeedbackLogStorageService],
+  exports: [FeedbackService],
 })
 export class FeedbackModule {}

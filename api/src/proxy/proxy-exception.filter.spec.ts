@@ -2,6 +2,8 @@ import {
   ArgumentsHost,
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -32,6 +34,9 @@ describe('ProxyExceptionFilter', () => {
     [new ForbiddenException(), 'unauthorized'],
     [new BadRequestException(), 'bad_request'],
     [new NotFoundException(), 'not_found'],
+    [new HttpException('too_many_reports', HttpStatus.TOO_MANY_REQUESTS), 'too_many_reports'],
+    [new HttpException('daily_limit_reached', HttpStatus.TOO_MANY_REQUESTS), 'daily_limit_reached'],
+    [new HttpException('other', HttpStatus.TOO_MANY_REQUESTS), 'internal'],
     [new Error('boom'), 'internal'],
   ])('把 %s 转成 ERR:%s，且响应状态码始终是 200', (exception, code) => {
     const { host, response } = createHost('req1');
