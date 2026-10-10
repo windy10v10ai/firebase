@@ -55,7 +55,8 @@ export const client = onRequest(
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 10,
-    timeoutSeconds: 10,
+    // 缩到零后的第一个请求要等冷启动，超时得把整个冷启动包进去
+    timeoutSeconds: 15,
     secrets: commonSecrets,
   },
   async (req, res) => {
