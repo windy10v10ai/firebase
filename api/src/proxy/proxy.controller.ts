@@ -29,6 +29,7 @@ import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points
 import { PlayerConductService } from '../player/player-conduct.service';
 import { PlayerGamePresetService } from '../player/player-game-preset.service';
 import { PlayerSettingService } from '../player/player-setting.service';
+import { PlayerStatsRadarService } from '../player/player-stats-radar.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { PlayerInfoDto } from '../player-info/dto/player-info.dto';
 import { PlayerInfoService } from '../player-info/player-info.service';
@@ -67,6 +68,7 @@ export class ProxyController {
     private readonly playerConductService: PlayerConductService,
     private readonly alipayService: AlipayService,
     private readonly feedbackService: FeedbackService,
+    private readonly playerStatsRadarService: PlayerStatsRadarService,
   ) {}
 
   // 对应 GET /game/probe
@@ -139,6 +141,17 @@ export class ProxyController {
     // 新玩家可能还没经过 game-start 建档，把「查无此人」当成「没有可选字段」，不算失败
     const player = await this.findPlayerInfoOrUndefined(steamId, include);
     return buildProxySuccessHtml(requestId, player ?? {});
+  }
+
+  // 对应 GET /player/:steamId/stats/radar
+  @Get('player-stats-radar')
+  async playerStatsRadar(
+    @Query('requestId') requestId: string,
+    @Query('steamId', ParseIntPipe) steamId: number,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const radar = await this.playerStatsRadarService.getRadar(steamId);
+    return buildProxySuccessHtml(requestId, radar);
   }
 
   // 对应 POST /game/end/local。一条请求只带一个玩家，逐人过限额与冷却；
