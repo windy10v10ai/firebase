@@ -1,4 +1,4 @@
-import { Noto_Sans_SC } from 'next/font/google';
+import localFont from 'next/font/local';
 import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
@@ -20,22 +20,14 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 
-// 中文子集拆成上百个 unicode-range 分片，preload 会往每页塞上百个 <link>，
-// 交给浏览器按页面实际用到的字形去取
-const notoSansSC = Noto_Sans_SC({
-  weight: ['400', '500', '700'],
-  // 系统字体与 Noto Sans SC 字宽不同，中途换字体整页文字会跳；来不及就本次沿用系统字体，缓存后再用
-  display: 'optional',
-  preload: false,
-  // 不点名 emoji 字体时，emoji 会落到最后兜底的那一份，字形画得比排版宽度宽，
-  // 紧跟其后的汉字被压住
-  fallback: [
-    'system-ui',
-    'sans-serif',
-    'Apple Color Emoji',
-    'Segoe UI Emoji',
-    'Noto Color Emoji',
-  ],
+// 只收了顶栏与页面大标题的字，正文与玩家昵称用系统字体，见 scripts/heading-font.mjs
+const headingFont = localFont({
+  src: './fonts/heading.woff2',
+  weight: '400 700',
+  // 文件小且预加载，等它就绪再画标题，从地址栏打开时不会先画系统字体再替换
+  display: 'block',
+  variable: '--font-heading-face',
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -68,8 +60,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const siteOrigin = await requestOrigin();
 
   return (
-    <html lang={locale}>
-      <body className={`${notoSansSC.className} min-h-screen bg-surface`}>
+    <html lang={locale} className={headingFont.variable}>
+      <body className="min-h-screen bg-surface">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AuthProvider initialUid={initialUid} initialProfile={initialProfile} siteOrigin={siteOrigin}>
             <QueryProvider>

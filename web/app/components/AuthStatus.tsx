@@ -41,8 +41,9 @@ export default function AuthStatus() {
           imageClassName="size-5 shrink-0 rounded-full object-cover"
           iconClassName="size-5 shrink-0"
         />
-        {/* 手机与平板放不下文字，退回只有头像；昵称上限见 phase-9-steam-profile.md */}
-        <span className="hidden max-w-40 truncate lg:block">
+        {/* 手机与平板放不下文字，退回只有头像；昵称上限见 phase-9-steam-profile.md。
+            昵称什么字都可能有，标题字体收不全，用系统字体免得一个名字里混两种字形 */}
+        <span className="hidden max-w-40 truncate font-sans lg:block">
           {profile?.personaName ?? t('loggedInAs', { uid })}
         </span>
       </Link>
