@@ -110,7 +110,13 @@ export default function Header() {
             className="flex items-center gap-2 text-xl font-bold text-heading link-hover whitespace-nowrap"
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
-            <img src="/images/launcher.webp" alt="" width={32} height={32} className="size-8 shrink-0" />
+            <img
+              src="/images/launcher.webp"
+              alt=""
+              width={32}
+              height={32}
+              className="size-8 shrink-0"
+            />
             {/* 1024 以下一律收短：全名加五个站内项在 768 会把右侧控件挤出屏幕 */}
             <span className="lg:hidden">{t('homeShort')}</span>
             <span className="hidden lg:inline">{t('home')}</span>
@@ -122,7 +128,9 @@ export default function Header() {
                   key={item.key}
                   href={item.href}
                   prefetch={false}
-                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  aria-current={
+                    isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                  }
                   className={`nav-top${'desktopOnly' in item ? desktopOnlyClass : ''}`}
                 >
                   {t(item.shortLabelKey)}
@@ -189,7 +197,9 @@ export default function Header() {
                   href={item.href}
                   prefetch={false}
                   onClick={() => setMenuOpen(false)}
-                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  aria-current={
+                    isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                  }
                   className="nav-menu-item"
                 >
                   <Icon

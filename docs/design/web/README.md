@@ -37,7 +37,7 @@
 | 15 俄语 | 无 | 网站加俄语，语言切换改成下拉列表，没译到的条目回落英文，见 [phase-15-russian-locale.md](phase-15-russian-locale.md) | 已完成 |
 | 17 启动器 | 无 | `/launch` 改为下载启动器 `Windy10v10AI.exe`，取代从网站启动游戏；game 加载界面加提示，启动器可自我更新，见 [phase-17-launcher.md](phase-17-launcher.md) | 已完成 |
 | 个人主页公开 | #1267 | 个人主页开放访问与公开开关，排行榜可点进个人主页 | 未开始 |
-| 19 技能与物品图鉴 | #1309 | `/wiki/abilities` 技能页与 `/wiki/items` 物品页：按档位排开的图标墙、搜索、悬浮提示与详情弹窗，数据由 `wiki:sync` 从 game 抽选池生成，见 [phase-19-wiki.md](phase-19-wiki.md) | 已完成 |
+| 19 百科 | #1309 | `/wiki/abilities` 技能页与 `/wiki/items` 物品页：按档位排开的图标墙、搜索、悬浮提示与详情弹窗，数据由 `wiki:sync` 从 game 抽选池生成，见 [phase-19-wiki.md](phase-19-wiki.md) | 已完成 |
 | 18 数据缓存 | #1175 | 引入 TanStack Query，站内跳转复用缓存，按实时 / 短缓存 / 长缓存三档，写操作后失效，见 [phase-18-query-cache.md](phase-18-query-cache.md) | 已完成 |
 
 ### 后续依赖
