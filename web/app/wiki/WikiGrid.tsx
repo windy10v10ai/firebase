@@ -86,11 +86,7 @@ export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProp
       const tiers = [...new Set(inGroup.map((entry) => entry.tier))]
         .sort((a, b) => b - a)
         .map((tier) => ({ tier, items: inGroup.filter((entry) => entry.tier === tier) }));
-      return {
-        ...group,
-        total: entries.filter((entry) => entry.group === group.key).length,
-        tiers,
-      };
+      return { ...group, tiers };
     })
     .filter((section) => section.tiers.length > 0);
 
@@ -145,9 +141,6 @@ export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProp
                 className="flex min-h-9 items-center rounded-full border border-line-strong px-3.5 text-sm text-content transition-colors hover:border-link hover:text-heading"
               >
                 {group.title}
-                <span className="ms-1.5 text-muted">
-                  {entries.filter((entry) => entry.group === group.key).length}
-                </span>
               </a>
             ))}
           </nav>
@@ -175,21 +168,15 @@ export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProp
           className="flex scroll-mt-20 flex-col gap-3 md:gap-4"
         >
           {section.title ? (
-            <h2 className="flex items-baseline gap-2 text-lg font-bold text-heading">
-              {section.title}
-              <span className="text-sm font-normal text-muted">{section.total}</span>
-            </h2>
+            <h2 className="text-lg font-bold text-heading">{section.title}</h2>
           ) : null}
           {section.tiers.map(({ tier, items }) => (
             <div key={tier} className="card-container card-pad-sm flex flex-col gap-3">
-              <div className="flex items-center gap-2.5">
-                <span
-                  className={`inline-flex h-6 min-w-9 items-center justify-center rounded-md px-2 text-[13px] font-bold ${TIER_CLASS[tier].badge}`}
-                >
-                  T{tier}
-                </span>
-                <span className="text-[13px] text-muted">{t('count', { n: items.length })}</span>
-              </div>
+              <span
+                className={`inline-flex h-6 min-w-9 items-center justify-center self-start rounded-md px-2 text-[13px] font-bold ${TIER_CLASS[tier].badge}`}
+              >
+                T{tier}
+              </span>
               <ul className="grid grid-cols-4 gap-x-1.5 gap-y-3.5 md:grid-cols-8 lg:grid-cols-12 lg:gap-x-2 lg:gap-y-4">
                 {items.map((entry) => (
                   <li key={entry.key} className="min-w-0">

@@ -6,7 +6,7 @@
   "abilities": [
     {
       "name": "abaddon_borrowed_time",
-      "pool": "active",
+      "group": "active",
       "tier": 5,
       "desc": {
         "zh": "启动后驱散自身，所有受到的伤害转而产生<font color='#07d738'>治疗</font>效果。只要技能不在冷却中，在生命值低于1000 2000 3000 4000点时技能会自动启动。<br><br>驱散类型：强驱散",
@@ -69,7 +69,7 @@
     },
     {
       "name": "alchemist_chemical_rage",
-      "pool": "active",
+      "group": "active",
       "tier": 5,
       "desc": {
         "zh": "炼金术士诱发他的食人魔同伴进入化学狂暴，降低攻击间隔，提高移动速度和生命恢复。<br><br>驱散类型：弱驱散",
@@ -192,7 +192,7 @@
     },
     {
       "name": "life_stealer_rage",
-      "pool": "active",
+      "group": "active",
       "tier": 5,
       "desc": {
         "zh": "进入狂暴状态，变成<font color='#d76907'>减益免疫</font>，提升魔法抗性和移动速度。<br><br>驱散类型：弱驱散",
@@ -277,7 +277,7 @@
     },
     {
       "name": "marci_unleash",
-      "pool": "active",
+      "group": "active",
       "tier": 5,
       "desc": {
         "zh": "玛西释放潜藏的力量，获得狂怒的猛攻效果，使自身可以发动快速的打击，并且降低打击目标的移动和攻击速度，持续2.0秒。每次狂怒连技的最后一击都会创造一个脉冲效果，对目标周围的敌人造成伤害。在狂怒连技的间隔，玛西无法攻击，持续1.0 0.9 0.8 0.7秒。<br><br>玛西施放怒拳破时移动速度提升15%。",
@@ -416,7 +416,7 @@
     },
     {
       "name": "dark_willow_shadow_realm",
-      "pool": "active",
+      "group": "active",
       "tier": 5,
       "desc": {
         "zh": "邪影芳灵遁入暗影之境，无法成为攻击或技能的目标。她的下次攻击具有600额外攻击距离，并且造成额外魔法伤害，暗影之境技能也会随之结束。在暗影中时间越长，伤害越高。在暗影之境内的时间超过3.0秒将达到最高伤害。",
@@ -484,7 +484,7 @@
     },
     {
       "name": "juggernaut_omni_slash",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "主宰挥剑跃向敌方目标单位，随后再以更短的攻击频率斩击该单位和附近的其它敌方单位。主宰在无敌斩期间无敌。<br><br>驱散类型：弱驱散",
@@ -591,7 +591,7 @@
     },
     {
       "name": "sven_gods_strength",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "斯温爆发出他流浪剑客的力量，获得攻击力加成和<font color='#9ec8e3'>减速抗性</font>，持续30.0秒。",
@@ -653,7 +653,7 @@
     },
     {
       "name": "legion_commander_duel",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "军团指挥官强制与目标敌方英雄进行决斗，持续短暂的数秒。决斗开始后双方英雄不能使用任何物品，而目标敌方英雄不能使用技能。如果有英雄在决斗期间死亡，赢得决斗的英雄将永久获得攻击力加成。",
@@ -720,7 +720,7 @@
     },
     {
       "name": "mars_bulwark",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "每当玛尔斯受到来自正面或侧面的攻击时，他就挥舞他那面巨大的战盾来格挡一定百分比的伤害。<br><br>可以开启，开启后获得<font color='#9019e3'>相位移动</font>状态，但无法攻击，自身锁定为面朝的方向，并且移动速度降低，但飞向队友的攻击弹道中70%将改变方向朝他飞去。",
@@ -806,7 +806,7 @@
     },
     {
       "name": "faceless_void_time_zone",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "在时空中创造一个遮罩，改变其中所有单位的移动、攻击、施法、弹道和转身速度。友军的速度提升，冷却加快。敌人的速度降低，技能和物品的冷却全部冻结。时间膨胀的负面状态持续时间在逆转时空内不会变少。",
@@ -958,7 +958,7 @@
     },
     {
       "name": "doom_bringer_doom_awakened",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "对敌人施加末日诅咒，对其进行驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>驱散类型：弱驱散<br><br>持有<font color='#92acf5'>阿哈利姆神杖</font>时，末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
@@ -1019,7 +1019,7 @@
     },
     {
       "name": "puck_dream_coil",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "创造一个变化无常的的魔法梦境来困住敌方英雄，对他们造成伤害和<font color='#e3d59e'>束缚</font>。如果被困住的敌方英雄试图挣脱缠绕走出梦境，将因为梦境破碎而受到<font color='#2dd5e4'>眩晕</font>和额外伤害。",
@@ -1129,7 +1129,7 @@
     },
     {
       "name": "windrunner_whirlwind_custom",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "集中火力不再需要施法目标，而是对风行者攻击距离 + 150范围内的随机敌人发动攻击。每秒发动固定次数的攻击，以英雄优先。<br><br>学会本技能后，施放风行时进入<font color='#d7ccc7'>隐身</font>状态，持续时间与风行相同。攻击敌人后会短暂显形，随后重新隐身。移动不会破坏隐身状态。",
@@ -1210,7 +1210,7 @@
     },
     {
       "name": "antimage_counterspell",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "被动提升魔法抗性。可以主动开启法术反制，创造一个环绕敌法师的反魔法外壳，抵挡和反弹所有指向性技能。",
@@ -1274,7 +1274,7 @@
     },
     {
       "name": "marci_bodyguard",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "被动使玛西获得吸血和攻击力加成。<br><br>对友军施放时，使其获得她的75%被动吸血和攻击力加成。另外马上还会给她和她的搭档制造共用的<font color='#b97812'>全伤害护盾</font>。在玛西攻击英雄时，造成伤害的30%会补充<font color='#b97812'>护盾</font>。",
@@ -1372,7 +1372,7 @@
     },
     {
       "name": "magnataur_empower",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "对友军施放时，给予攻击力加成并使其获得分裂效果。<br><br>授予力量总是在马格纳斯身上生效，拥有60%额外效果。",
@@ -1457,7 +1457,7 @@
     },
     {
       "name": "imba_chaos_knight_phantasm",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "召集其他维度的混沌骑士来到这个世界，与此处的混沌骑士一同作战。每当混沌骑士攻击时，其他的混沌骑士也会对目标开展额外攻击，其他的混沌骑士的攻击有短暂的冷却。",
@@ -1538,7 +1538,7 @@
     },
     {
       "name": "bloodseeker_blood_mist2",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "血魔将自己的鲜血撒向一片区域，伤害自身的同时对敌人造成伤害",
@@ -1590,7 +1590,7 @@
     },
     {
       "name": "ability_trigger_on_active",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "<h1><font color='#A74ABD'>主动：狂潮</font></h1>以前所未有的速度对指定地点范围内的敌人疯狂倾泻法术，包括所有可用的技能和物品。效果期间所有冷却时间缩短为1/5，移除施法前摇，持续状态不会被打断，直至蓝尽人亡，但人无法移动。<br><br>持续时间：3 4 5 6 7 秒",
@@ -1716,7 +1716,7 @@
     },
     {
       "name": "brewmaster_drunken_boxing",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "被动：有概率闪避攻击并造成暴击。<br><br>主动：进入醉拳状态，英雄开始左右摇晃醉步，获得30%移动速度加成，闪避与暴击概率提升至3倍，持续5秒。",
@@ -1793,7 +1793,7 @@
     },
     {
       "name": "juggernaut_blade_fury_custom",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "剑圣化身旋转风暴，每秒对周围敌人造成基础伤害加目标最大生命百分比的魔法伤害。期间获得<font color='#FFCC66'>减益免疫</font>和80%魔法抗性，可以正常攻击但攻击力降低50%。旋转结束时对自身施加强效驱散。",
@@ -1883,7 +1883,7 @@
     },
     {
       "name": "ability_fate_roulette",
-      "pool": "active",
+      "group": "active",
       "tier": 4,
       "desc": {
         "zh": "英雄与命运博弈，每一次攻击都是赌注。累计 4 次有效普通攻击后，下一次有效普通攻击将对目标等概率触发以下命运之一：<font color='#FFD76A'>暴击</font>、<font color='#8FD7FF'>眩晕</font>目标 0.6 0.7 0.8 0.9 秒、持续驱散、破坏、缠绕、锁闭，持续 2 2.25 2.5 2.75 秒。持续驱散会立即并每 0.2 秒进行一次弱驱散，仅移除目标的正面状态。每次轮盘触发都会对英雄自身施加一次弱驱散。<br>主动释放后进入“命定之刻”，持续期间每次有效普通攻击都必定触发轮盘，且不会增加、重置或消耗原有攻击计数。",
@@ -1980,7 +1980,7 @@
     },
     {
       "name": "shadow_shaman_mass_serpent_ward",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "召唤4个群蛇守卫攻击敌方单位和建筑。守卫免疫魔法。非英雄单位对毒蛇守卫造成半额伤害。",
@@ -2081,7 +2081,7 @@
     },
     {
       "name": "necrolyte_reapers_scythe",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "<font color='#2dd5e4'>眩晕</font>目标敌方英雄，然后造成基于他当前损失生命值的伤害。瘟疫法师击杀敌人后将永久获得生命和魔法恢复。如果目标在死神镰刀效果下死亡，击杀者为瘟疫法师。",
@@ -2175,7 +2175,7 @@
     },
     {
       "name": "storm_spirit_ball_lightning",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "风暴之灵变成不稳定的电流在战场上横冲直撞，直到他的魔法耗尽或到达目标才停下。施法消耗为25+总魔法量的3.5%，每移动100距离消耗10+总魔法量的0.65%，本技能造成的伤害每飞行100距离就会递增。",
@@ -2245,7 +2245,7 @@
     },
     {
       "name": "slark_shadow_dance",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "当斯拉克不处于敌方视野内时，他会被动获得移动速度加成和生命恢复。如果受到来自中立单位的伤害，2.0秒内会失去被动移速和生命恢复加成。<br><br>主动开启后，斯拉克将自己藏进暗影之云，变成<font color='#d7ccc7'>隐身</font>状态，不会被反隐手段发现。攻击、施法、使用物品都不会使斯拉克显形，但是敌人可以看见暗影之云。",
@@ -2326,7 +2326,7 @@
     },
     {
       "name": "brewmaster_primal_split_lua",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "酒仙这下NB了，获得四种拳法的效果。",
@@ -2521,7 +2521,7 @@
     },
     {
       "name": "elder_titan_earth_splitter",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "上古巨神向前方放出一道不平坦的裂纹。3秒后裂纹塌陷，范围内的单位将被减速，并受到基于他们自身生命最大值的伤害。其中一半伤害为魔法伤害，另一半为物理伤害。",
@@ -2644,7 +2644,7 @@
     },
     {
       "name": "void_spirit_astral_step",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "虚无之灵撕裂现实进入精神位面，再出现在目标地点，对沿途的所有敌人造成伤害。此次攻击将施加一个太虚印记，造成1.25秒减速，然后引爆。",
@@ -2720,7 +2720,7 @@
     },
     {
       "name": "lich_chain_frost",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "释放一个在敌人间弹跳至多20 30 40 50次的霜冻之球，每次击中敌人后都会造成伤害和减速效果。每次弹跳后会提升后续的伤害。连环霜冻无法弹跳时会停留在上个目标身上，如果出现新目标可以再次弹跳。",
@@ -2879,7 +2879,7 @@
     },
     {
       "name": "jakiro_macropyre",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "杰奇洛释放出烈焰风暴，烈焰风暴作用范围很宽，并持续数秒。烈焰风暴每秒都会对作用范围内的敌人造成伤害。",
@@ -2957,7 +2957,7 @@
     },
     {
       "name": "axe_culling_blade",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "斧王洞察到弱点并出击，造成纯粹伤害。淘汰之刃击杀敌方英雄时将重置冷却时间，而附近所有友军单位获得移动速度和护甲加成。<br><br>每当斧王通过淘汰之刃击杀敌方英雄，他的战刃就会浸满鲜血，获得永久叠加效果，每层都会提供护甲加成。",
@@ -3083,7 +3083,7 @@
     },
     {
       "name": "treant_overgrowth",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "在树精卫士周围召唤出疯狂生长的伤害性藤条和枝干，造成伤害并且阻止被缠绕的敌人移动、闪烁、进入隐身或攻击。",
@@ -3164,7 +3164,7 @@
     },
     {
       "name": "zuus_thundergods_wrath",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "用闪电打击所有敌方英雄，对他们造成伤害，无论他们身在何处。在打击前提供每个英雄的真实视域。",
@@ -3239,7 +3239,7 @@
     },
     {
       "name": "crystal_maiden_freezing_field",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "持续施法 - 以水晶室女为中心召唤100次随机冰爆轰炸敌人，将其减速并造成大量伤害。持续10秒。",
@@ -3330,7 +3330,7 @@
     },
     {
       "name": "phantom_assassin_blur",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "幻影刺客模糊自己的身形，躲避多种飞行过程中的攻击和技能弹道，提升她的移动速度，使她无法被看到，直到她靠近敌方英雄或防御塔。",
@@ -3412,7 +3412,7 @@
     },
     {
       "name": "furion_teleportation",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "传送到地图上任何位置。到达地点后获得一个护盾。",
@@ -3480,7 +3480,7 @@
     },
     {
       "name": "gyrocopter_flak_cannon",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "矮人直升机的攻击会击中目标周围一定范围内的所有敌人，持续一定次数的攻击。只有主要目标会受到致命一击等攻击特效。持续12秒或攻击次数耗尽。",
@@ -3544,7 +3544,7 @@
     },
     {
       "name": "dark_willow_bramble_maze",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "0.3秒后邪影芳灵在目标区域创造出500范围的迷宫，迷宫拥有12棵荆棘。进入荆棘的敌人将被<font color='#cae96d'>缠绕</font>，并且持续受到伤害。迷宫持续12 13 14 15 16秒。",
@@ -3625,7 +3625,7 @@
     },
     {
       "name": "ember_spirit_sleight_of_fist",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "灰烬之灵以燎原之火的速度横冲直撞，攻击目标区域内所有敌人，随后返回所在位置。对英雄造成额外伤害。",
@@ -3710,7 +3710,7 @@
     },
     {
       "name": "shredder_whirling_death",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "伐木机使极其锋利的刀刃飞旋，对敌人造成伤害并摧毁他周围的树木。如果敌方英雄受到了作用，他的主属性将在短时间内降低少许。如果该技能施放过程中砍倒了树木则会根据砍倒的数量造成额外伤害。",
@@ -3834,7 +3834,7 @@
     },
     {
       "name": "tidehunter_kraken_shell",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "加厚潮汐猎人的外皮，可以被动格挡物理伤害。对非英雄单位的格挡伤害有所减少。潮汐猎人的外皮在他受到的伤害超过临界值后还将移除负面的状态效果。<br><br>可以主动开启，以40%移动速度的代价使伤害格挡量加倍。持续6.0秒。<br><br>驱散类型：强驱散",
@@ -3920,7 +3920,7 @@
     },
     {
       "name": "earthshaker_enchant_totem",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "强化撼地者的图腾，使下次攻击拥有额外攻击力和200攻击距离加成。",
@@ -3971,7 +3971,7 @@
     },
     {
       "name": "dark_seer_vacuum",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "黑暗贤者在目标区域制造一个真空环境，将周围的敌方单位吸入，具有打断效果并造成伤害。",
@@ -4039,7 +4039,7 @@
     },
     {
       "name": "clinkz_burning_barrage2",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "持续施法 - 克林克兹持续朝目标方向射出多支灼热的箭矢，击中所有敌人，造成克林克兹攻击伤害的一定百分比并施加攻击特效，同时敌人会受到焦油炸弹的减速效果。",
@@ -4116,7 +4116,7 @@
     },
     {
       "name": "ancient_apparition_freezing_aura",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "减少敌方单位的治疗和生命回复。<br/><br/>主动施法：对周围敌方单位造成伤害和减速，距离自己越近伤害和减速越大",
@@ -4223,7 +4223,7 @@
     },
     {
       "name": "special_bonus_unique_sniper_assassinate_upgrade",
-      "pool": "active",
+      "group": "active",
       "tier": 3,
       "desc": {
         "zh": "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><font color='#FFFFFF'>神杖升级：命中的敌方英雄附加眩晕效果。</font>",
@@ -4301,7 +4301,7 @@
     },
     {
       "name": "tidehunter_ravage",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "猛击地面，触手向各个方向穿出，伤害并<font color='#2dd5e4'>眩晕</font>附近所有敌方单位。",
@@ -4366,7 +4366,7 @@
     },
     {
       "name": "bounty_hunter_track",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "追踪一个敌方英雄，获得目标的真实视域，使目标受到的伤害增加，同时掌握目标当前携带的金钱数额。如果目标在被追踪期间死亡，赏金猎人和附近友方英雄都将获得若干金钱奖励。施放追踪术不会脱离<font color='#d7ccc7'>隐身</font>。",
@@ -4460,7 +4460,7 @@
     },
     {
       "name": "lion_finger_of_death",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "撕裂一个敌方单位，将其折磨得死去活来，并造成巨大伤害。<br><br>使用死亡之指后，莱恩的手臂增强了力量，使他可以发动带有分裂效果的近战攻击，攻击距离为250，并拥有移动速度加成。<br><br>每次技能或重拳击杀英雄后都会分别使技能和重拳永久获得额外伤害和攻击力。<br><br>技能设为（右键点击技能栏图标）后可以禁用近战攻击。",
@@ -4619,7 +4619,7 @@
     },
     {
       "name": "silencer_global_silence",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "沉默术士停止一切声音，<font color='#6db6e9'>阻止</font>地图上所有敌方英雄和单位施法。",
@@ -4668,7 +4668,7 @@
     },
     {
       "name": "winter_wyvern_winters_curse",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "寒冬飞龙驱散一个敌方目标并将其冻在原地，附近的其他敌人将受到癫狂诅咒，对冻住的队友进行攻击，而且攻击速度得到提升。冻住的目标和被诅咒攻击队友的敌人不会受到任何来自敌方的伤害，不过寒冬飞龙或她控制的单位造成的伤害除外。敌方英雄进入施放后的诅咒范围内会增加诅咒的持续时间。",
@@ -4795,7 +4795,7 @@
     },
     {
       "name": "kunkka_ghostship",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "召唤一艘幽灵船驶过战场，直到撞成粉碎，残骸周围的敌人将会因撞击受到伤害并<font color='#2dd5e4'>眩晕</font>。<br><br>被幽灵船碰到的友军会获得2倍效果的统帅朗姆酒。",
@@ -4883,7 +4883,7 @@
     },
     {
       "name": "pangolier_gyroshell",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "石鳞剑士卷成一个<font color='#d76907'>减益免疫</font>状态的圆球，拥有80%魔法抗性，隆隆地向前滚去。滚动时移动速度提升，可以碾过树木，但是转身速率降低。敌人被击中后会被击退，然后受到与他的攻击力成正比的伤害，并且被<font color='#2dd5e4'>眩晕</font>。<br><br>与地形障碍相撞后会暂时停止滚动，并且滚动方向变反。<br><br>驱散类型：弱驱散",
@@ -5013,7 +5013,7 @@
     },
     {
       "name": "tinker_rearm_lua",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "持续施法 - 重置修补匠的大多数物品和技能的冷却时间。<br>按住Alt查看不能刷新的物品和技能。",
@@ -5060,7 +5060,7 @@
     },
     {
       "name": "ringmaster_wheel",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "百戏大王推出奇观轮向目标地点滚去，击退沿途的敌人。到达目的地后，范围内的敌人会持续受到伤害，并且被减速-50%。<br><br>敌方英雄面对转轮超过0.5秒会被迷住，朝其走去。首个敌人着迷后会触发转轮爆炸的倒计时。如果没有触发倒计时，在6秒后转轮会自动爆炸。",
@@ -5170,7 +5170,7 @@
     },
     {
       "name": "batrider_flaming_lasso",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "用枷锁捆住一个敌人，在蝙蝠骑士的后面拖行。被拖行的单位不能移动、攻击或使用技能。传送或闪烁会打破枷锁。",
@@ -5239,7 +5239,7 @@
     },
     {
       "name": "dazzle_bad_juju",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "减少其他所有技能的剩余冷却时间。施放邪能会暂时增加生命消耗。",
@@ -5309,7 +5309,7 @@
     },
     {
       "name": "omniknight_guardian_angel",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "全能骑士召唤出守护天使，使全能骑士附近的所有友方单位对物理伤害免疫。",
@@ -5371,7 +5371,7 @@
     },
     {
       "name": "lion_impale",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "岩石尖刺在地上沿一条直线穿刺而出。敌方单位被抛向空中，落地时被<font color='#2dd5e4'>眩晕</font>并受到伤害。",
@@ -5443,7 +5443,7 @@
     },
     {
       "name": "sven_storm_bolt",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "斯温用他充满魔力的手套对目标周围内所有敌人造成伤害和<font color='#2dd5e4'>眩晕</font>。",
@@ -5515,7 +5515,7 @@
     },
     {
       "name": "omniknight_repel",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "创造出一个神圣屏障环绕友军，提升目标的状态抗性，力量和生命恢复。<br><br>驱散类型：强驱散",
@@ -5609,7 +5609,7 @@
     },
     {
       "name": "templar_assassin_refraction",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "圣堂刺客变得高度难以捉摸，获得一个小型<font color='#b97812'>护盾</font>，同时获得攻击力加成。攻击力加成和<font color='#b97812'>护盾</font>效果相互独立，并且都是有限次数的效果。如果<font color='#b97812'>护盾</font>被摧毁，只要还有能量点数就会再产生一个新的。如果单次伤害超过了剩余的<font color='#b97812'>护盾</font>，该次的全部伤害都会被吸收。",
@@ -5699,7 +5699,7 @@
     },
     {
       "name": "centaur_double_edge",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "半人马战行者以猛烈的力量进行近战攻击，对目标周围单位和自身造成伤害。将基于力量值造成额外伤害。此技能无法用于自杀。",
@@ -5761,7 +5761,7 @@
     },
     {
       "name": "axe_berserkers_call",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "斧王嘲讽附近的敌方单位，强迫他们攻击自己，同时获得额外护甲。",
@@ -5859,7 +5859,7 @@
     },
     {
       "name": "faceless_void_chronosphere",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "在时空中创造一个泡状遮罩，将所有位于其中的单位定住，并使虚空假面在其内部来去自如。只有虚空假面和他控制的单位不受影响。在其中的隐形敌人会显形。",
@@ -5921,7 +5921,7 @@
     },
     {
       "name": "tidehunter_anchor_smash",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "潮汐猎人挥动他巨大的锚攻击附近的敌人，攻击时获得攻击力加成，同时降低敌人的攻击力。锚击的作用范围为潮汐猎人的攻击距离 + 225。",
@@ -6006,7 +6006,7 @@
     },
     {
       "name": "primal_beast_trample",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "獸践踏一切。每行进140距离就会对獸附近范围内所有敌人造成伤害。伤害量为基础伤害加上獸攻击力的一定系数。獸在技能期间被<font color='#afb912'>缴械</font>。",
@@ -6096,7 +6096,7 @@
     },
     {
       "name": "mars_gods_rebuke",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "玛尔斯举起他的战盾粉碎前方的敌人，将他们击退并且基于自身攻击力造成致命一击伤害。攻击英雄时攻击伤害提升。具有克敌机先效果。",
@@ -6203,7 +6203,7 @@
     },
     {
       "name": "antimage_blink",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "短距离传送，能让敌法师自由出入战场。",
@@ -6240,7 +6240,7 @@
     },
     {
       "name": "ringmaster_tame_the_beasts",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "持续施法 - 百戏大王卷起他的鞭子，最多持续1.0秒，然后猛甩出去。被鞭打的敌人会受到伤害，并且被<font color='#1eddb7'>恐惧</font>，逃离百戏大王。持续施法时间会使伤害和<font color='#1eddb7'>恐惧</font>时间成倍增加，但是作用范围减少。",
@@ -6372,7 +6372,7 @@
     },
     {
       "name": "abyssal_underlord_firestorm",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "召唤数波火焰风暴攻击目标区域内的所有单位，并额外持续造成烧灼伤害。",
@@ -6496,7 +6496,7 @@
     },
     {
       "name": "obsidian_destroyer_objurgation",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "提升殁境神蚀者的最大魔法值。施放后，殁境神蚀者获得<font color='#b97812'>全伤害护盾</font>，数值为固定值 + 最大魔法值的一定百分比。",
@@ -6586,7 +6586,7 @@
     },
     {
       "name": "magnataur_reverse_polarity",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "马格纳斯改变物质的属性，将附近的敌人拖拽至他的前方，并且以震击对他们造成伤害和<font color='#2dd5e4'>眩晕</font>。",
@@ -6664,7 +6664,7 @@
     },
     {
       "name": "bloodseeker_bloodrage",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "使血魔陷入渴望鲜血的狂怒中，以每秒流失一定百分比生命的代价获得攻击速度和技能增强加成。",
@@ -6756,7 +6756,7 @@
     },
     {
       "name": "batrider_firefly",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "蝙蝠骑士飞向天空，从空中留下一道燃烧的尾迹。飞行时，燃烧尾迹会破坏树木，对经过的敌人造成伤害。在火焰飞行持续时间的最后会达到最高移动速度加成。",
@@ -6846,7 +6846,7 @@
     },
     {
       "name": "pugna_nether_blast",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "一个爆炸性脉冲，对敌方单位造成伤害。对建筑物造成65%伤害。",
@@ -6923,7 +6923,7 @@
     },
     {
       "name": "undying_decay",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "不朽尸王偷取区域内所有敌方英雄的力量，造成基础伤害并将敌人的力量据为己有。对非英雄单位造成2.0倍伤害。",
@@ -7013,7 +7013,7 @@
     },
     {
       "name": "mirana_starfall",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "召唤一波流星砸向附近的敌方单位。1225范围内最近的敌方单位将会再受到一次冲击。",
@@ -7093,7 +7093,7 @@
     },
     {
       "name": "jakiro_dual_breath",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "杰奇洛对面前的敌人先后喷出寒冰和火焰。寒冰吐息减速敌人，火焰吐息对敌人造成持续伤害。",
@@ -7208,7 +7208,7 @@
     },
     {
       "name": "jakiro_ice_path",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "在杰奇洛前方制造一条冰封路径，对触及到的敌人造成伤害并<font color='#2dd5e4'>眩晕</font>。",
@@ -7315,7 +7315,7 @@
     },
     {
       "name": "monkey_king_boundless_strike",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "齐天大圣让金箍棒变大，并将其挥起猛击地面，<font color='#2dd5e4'>眩晕</font>一条直线上的敌人并造成额外伤害和基于他普通攻击的致命一击伤害。具有克敌机先效果。",
@@ -7417,7 +7417,7 @@
     },
     {
       "name": "earthshaker_fissure",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "用威武的图腾猛击地面，沿直线裂开地面，制造一条无法通过的岩脊，对沿途的敌方单位造成<font color='#2dd5e4'>眩晕</font>和伤害。",
@@ -7502,7 +7502,7 @@
     },
     {
       "name": "mirana_arrow",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "射出一支绝对精准的箭矢，对第一个击中的敌人造成伤害并<font color='#2dd5e4'>眩晕</font>目标。目标距离越远，<font color='#2dd5e4'>眩晕</font>时间越长，最短1.0秒，最长可达2.3 3.2 4.1 5.0 5.9秒。根据箭矢飞行的距离还将对目标额外造成最多360点伤害。若击中的是非远古的普通单位，将直接秒杀。",
@@ -7592,7 +7592,7 @@
     },
     {
       "name": "lina_flame_cloak2",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "使莉娜获得顺畅的移动状态，并且提升技能伤害和魔法抗性。开启时获得炽魂的最高叠加层数。",
@@ -7673,7 +7673,7 @@
     },
     {
       "name": "dazzle_rain_of_vermin",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "对一片区域造成持续伤害，并有12%概率将其变为小鸡",
@@ -7784,7 +7784,7 @@
     },
     {
       "name": "alchemist_berserk_potion2",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "炼金术士向友军目标扔出一瓶药剂，施加弱驱散效果，并提供攻击速度，移动速度和生命恢复。<br><br>驱散类型：弱驱散",
@@ -7862,7 +7862,7 @@
     },
     {
       "name": "pudge_meat_hook_lua",
-      "pool": "active",
+      "group": "active",
       "tier": 2,
       "desc": {
         "zh": "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。",
@@ -7943,7 +7943,7 @@
     },
     {
       "name": "centaur_stampede",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "半人马战行者带领所有队友向胜利冲锋，所有友方英雄达到极限移动速度，并使踩到的敌人减速。每个敌人只会受到一次踩踏作用，并受到基于半人马战行者力量值的伤害。",
@@ -8037,7 +8037,7 @@
     },
     {
       "name": "bloodseeker_rupture",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "让一个敌方单位皮开肉绽，根据其当前生命值造成初始伤害。单位移动后会根据移动的距离受到伤害。",
@@ -8118,7 +8118,7 @@
     },
     {
       "name": "queenofpain_sonic_wave",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "痛苦女王在她面前制造出强大的声波，对其轨迹上的所有敌人造成大量伤害，并将他们击退。",
@@ -8196,7 +8196,7 @@
     },
     {
       "name": "earthshaker_echo_slam",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "穿过地面的冲击波，伤害敌方单位。每个受到攻击的敌人都会引起伤害附近单位的反射波。英雄本体将引起两次反射。",
@@ -8274,7 +8274,7 @@
     },
     {
       "name": "witch_doctor_death_ward",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "持续施法 - 召唤一个死亡守卫，会优先攻击其攻击距离内的敌方英雄。最多持续8.0秒。死亡守卫拥有50%额外必中率。",
@@ -8338,7 +8338,7 @@
     },
     {
       "name": "slardar_amplify_damage",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "削弱敌人的护甲，加深他受到的物理伤害，同时提供目标的真实视域，显示<font color='#d7ccc7'>隐身</font>单位。敌方单位将在身后留下水迹。",
@@ -8423,7 +8423,7 @@
     },
     {
       "name": "medusa_stone_gaze",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "任何盯着蛇发女妖的敌方单位的攻击速度和移动速度均将被减缓。如果一单位在石化凝视期间盯着蛇发女妖超过2.0秒，该单位会被完全石化。被石化的单位处于<font color='#2dd5e4'>眩晕</font>状态，受到物理攻击时承受额外伤害。",
@@ -8540,7 +8540,7 @@
     },
     {
       "name": "lina_light_strike_array",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "召唤柱状火焰伤害并<font color='#2dd5e4'>眩晕</font>敌人。",
@@ -8638,7 +8638,7 @@
     },
     {
       "name": "dazzle_shadow_wave",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "放出一道能量弧，可以瞬间跳跃至目标附近的队友，<font color='#07d738'>治疗</font>的同时还将对附近的敌方单位造成伤害。施放暗影波时戴泽必定会享受到<font color='#07d738'>治疗</font>效果。",
@@ -8732,7 +8732,7 @@
     },
     {
       "name": "skywrath_mage_arcane_bolt",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "天怒法师施放出缓慢移动的奥术鹰群，对敌方单位造成基于天怒法师智力值的伤害。",
@@ -8796,7 +8796,7 @@
     },
     {
       "name": "kunkka_torrent",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "召唤喷涌的洪流，短暂延迟后，将敌人冲上天，造成伤害、<font color='#2dd5e4'>眩晕</font>和减速。",
@@ -8916,7 +8916,7 @@
     },
     {
       "name": "leshrac_split_earth",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "撕裂敌人脚下的大地。造成伤害和短暂的<font color='#2dd5e4'>眩晕</font>。",
@@ -8993,7 +8993,7 @@
     },
     {
       "name": "witch_doctor_paralyzing_cask",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "抛出一个装满麻痹粉末的药剂，在敌方单位之间弹跳，<font color='#2dd5e4'>眩晕</font>击中的敌人并造成伤害。每次弹跳都会提升伤害。",
@@ -9091,7 +9091,7 @@
     },
     {
       "name": "templar_assassin_meld",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "圣堂刺客将自己隐藏起来，只要静止不动将一直处于<font color='#d7ccc7'>隐身</font>状态。只要在隐匿状态下攻击敌人打破<font color='#d7ccc7'>隐身</font>，拉娜娅的攻击将对敌人造成额外伤害，并降低其护甲，持续6秒。额外伤害和隐匿的负面效果会施加给灵能之刃飞溅距离内所有敌人。",
@@ -9176,7 +9176,7 @@
     },
     {
       "name": "bounty_hunter_wind_walk",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "赏金猎人进入<font color='#d7ccc7'>隐身</font>，获得移动速度加成，并能够穿越其它单位，直到他攻击或使用技能。破隐一击会短暂<font color='#2dd5e4'>眩晕</font>目标。",
@@ -9278,7 +9278,7 @@
     },
     {
       "name": "alchemist_acid_spray",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "向目标区域喷洒高压酸雾。穿过受污染地带的敌人每秒会受到物理伤害，同时护甲被削弱。",
@@ -9376,7 +9376,7 @@
     },
     {
       "name": "treant_living_armor",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "将目标英雄或建筑笼罩在保护性外壳中，<font color='#07d738'>治疗</font>目标并格挡来自玩家控制来源的伤害。每次本技能格挡伤害后，下次的伤害格挡量都会减少。如果伤害格挡量降至0，加成效果会提前移除。",
@@ -9470,7 +9470,7 @@
     },
     {
       "name": "witch_doctor_maledict",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "对一个较小区域内所有敌方英雄和玩家控制的目标施放诅咒，他们将每秒受到固定伤害，并且从诅咒开始每4秒根据失去的血量再受到爆发伤害。",
@@ -9551,7 +9551,7 @@
     },
     {
       "name": "rattletrap_rocket_flare",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "向全地图范围内的指定区域发射照明弹。击中时对区域内敌人造成伤害和短暂减速。照明火箭提供6.0秒击中区域的视野。",
@@ -9645,7 +9645,7 @@
     },
     {
       "name": "tinker_heat_seeking_missile",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "发射火箭，攻击1800范围内可见的最近敌方英雄。",
@@ -9726,7 +9726,7 @@
     },
     {
       "name": "ancient_apparition_ice_vortex",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "创造一个寒冰能量的漩涡，对范围内敌人造成伤害和减速，并增加他们受到的魔法伤害。",
@@ -9841,7 +9841,7 @@
     },
     {
       "name": "shadow_shaman_voodoo",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "将一个敌方单位变成人畜无害的动物，使其无法攻击和使用技能。",
@@ -9896,7 +9896,7 @@
     },
     {
       "name": "lich_frost_armor",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "为一个友方单位或建筑物制造一层寒冰护甲，增加护甲值并减速对其发动攻击的敌方单位。持续60.0秒。",
@@ -9996,7 +9996,7 @@
     },
     {
       "name": "crystal_maiden_crystal_nova",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "召唤具有破坏性的冰爆，降低目标区域内的敌人的移动速度。",
@@ -10111,7 +10111,7 @@
     },
     {
       "name": "crystal_maiden_frostbite",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "操控冰霜包围一个敌方单位，禁止移动和攻击，并持续造成伤害。对非远古的普通单位施放将造成4倍伤害。",
@@ -10183,7 +10183,7 @@
     },
     {
       "name": "magnataur_shockwave",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "马格纳斯放出一道能量波，对一条直线上的敌方单位造成伤害，并将他们朝自身牵引，同时受到短暂减速效果。",
@@ -10281,7 +10281,7 @@
     },
     {
       "name": "lich_death_charge",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "牺牲一个友方非英雄单位，把它的当前生命值转化为巫妖的魔法，并且巫妖获得它的击杀经验。<br><br>游戏开始时处于冷却，没有能量点数。",
@@ -10329,7 +10329,7 @@
     },
     {
       "name": "treant_natures_grasp",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "朝目标地点制造藤蔓。藤蔓对穿过的敌人造成减速和伤害。对非英雄单位造成的伤害减少35%。",
@@ -10414,7 +10414,7 @@
     },
     {
       "name": "arc_warden_scepter2",
-      "pool": "active",
+      "group": "active",
       "tier": 1,
       "desc": {
         "zh": "创建一个随机神符，神符创建后20秒后会消失",
@@ -10441,7 +10441,7 @@
     },
     {
       "name": "muerta_gunslinger",
-      "pool": "passive",
+      "group": "passive",
       "tier": 5,
       "desc": {
         "zh": "可以开关。开启后，琼英碧灵攻击时有几率对另一个目标再射一枪。",
@@ -10484,7 +10484,7 @@
     },
     {
       "name": "slark_essence_shift",
-      "pool": "passive",
+      "group": "passive",
       "tier": 5,
       "desc": {
         "zh": "斯拉克的攻击会偷走敌方英雄的生命能量，每次吸取他们的1点全属性并转化成自身额外3点敏捷值。只要敌方英雄带着该效果在斯拉克300范围内阵亡，他将永久窃取1点敏捷。",
@@ -10536,7 +10536,7 @@
     },
     {
       "name": "winter_wyvern_arctic_burn",
-      "pool": "passive",
+      "group": "passive",
       "tier": 5,
       "desc": {
         "zh": "寒冬飞龙乘着一股极地寒风扶摇而上，移动将无视地形，每次攻击都将呼出逼人的寒气。高飞时，她的攻击距离更远，攻击弹道速度也更快，被攻击的敌人在寒意作用下，移动速度会被减缓，同时每秒损失4 6 8 10 12%当前生命值。",
@@ -10647,7 +10647,7 @@
     },
     {
       "name": "batrider_smoldering_resin2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 5,
       "desc": {
         "zh": "蝙蝠骑士的攻击会施加一个负面效果，每1秒造成16 20 24 28 32%攻击伤害，持续2秒。",
@@ -10668,7 +10668,7 @@
     },
     {
       "name": "jakiro_double_trouble2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 5,
       "desc": {
         "zh": "杰奇洛攻击时两个头都会发动攻击，不过每个头造成的伤害减少。",
@@ -10707,7 +10707,7 @@
     },
     {
       "name": "faceless_void_time_lock",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "攻击有一定概率将一个敌方目标<font color='#2dd5e4'>锁定</font>在时间中，再次发动攻击。",
@@ -10780,7 +10780,7 @@
     },
     {
       "name": "dazzle_good_juju",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "戴泽每次施放技能后，其他所有冷却中的技能都会减少冷却时间。",
@@ -10822,7 +10822,7 @@
     },
     {
       "name": "templar_assassin_psi_blades",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "圣堂刺客锋利的灵能之刃可以穿透敌人，对其正后方的敌方单位造成伤害，并且攻击距离得到提升。每对一个单位造成伤害后，飞溅伤害都会减少一定百分比。",
@@ -10899,7 +10899,7 @@
     },
     {
       "name": "luna_moon_glaive",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "强化露娜的月刃，使攻击可以在敌方单位之间弹跳。每次弹跳造成的伤害都会减少。",
@@ -10972,7 +10972,7 @@
     },
     {
       "name": "phantom_assassin_coup_de_grace",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "幻影刺客的战斗技能得到精进，每次攻击时有几率获得致命专注。攻击时若带有致命专注，幻影刺客会消耗该效果，并且必定产生一次致命一击。窒碍短匕拥有额外几率获得致命专注。",
@@ -11056,7 +11056,7 @@
     },
     {
       "name": "slardar_bash",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "3次攻击后，下次攻击会<font color='#2dd5e4'>重击</font>目标。",
@@ -11112,7 +11112,7 @@
     },
     {
       "name": "clinkz_infernal_shred2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "克林克兹和他的骷髅弓手会施加一个可叠加的负面效果，使他们的攻击可以穿透最高目标20 30 40 50 60%总物理护甲（不会降低他们的护甲）。克林克兹每次攻击施加3%，骷髅弓手施加1%。<br><br>持续5秒。",
@@ -11133,7 +11133,7 @@
     },
     {
       "name": "shadow_demon_menace",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "暗影恶魔的攻击会对敌人施加一个可叠加的负面状态，使他们受到的伤害增加，持续8秒。",
@@ -11168,7 +11168,7 @@
     },
     {
       "name": "medusa_split_shot",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "美杜莎施展魔法将她的箭分裂成若干支箭矢。分裂箭造成的伤害为正常攻击力的一定百分比。<br/><br/>额外目标不会受到其他攻击特效（比如致命一击）的作用。",
@@ -11224,7 +11224,7 @@
     },
     {
       "name": "spectre_dispersion2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "减免一定比例的伤害。基于减免前的伤害，累积1秒后反射给范围内的所有敌人，反射伤害类型与接收伤害类型一致。",
@@ -11293,7 +11293,7 @@
     },
     {
       "name": "dark_seer_normal_punch2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "被动技能。使黑暗贤者下次攻击可以打出目标的复制体,造成伤害和眩晕。",
@@ -11373,7 +11373,7 @@
     },
     {
       "name": "ogre_magi_multicast_lua",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "使英雄在单次施法中有概率多次施放同一技能和物品，多重施法间隔为0.6秒。<br>食人魔魔法师觉醒时额外获得此技能，与大招多重施法叠加形成双重多重施法，并移除先天技能傻福。",
@@ -11444,7 +11444,7 @@
     },
     {
       "name": "leshrac_defilement2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "每点智力都会提供作用范围加成，影响技能和物品。",
@@ -11479,7 +11479,7 @@
     },
     {
       "name": "tinker_eureka2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "修补匠的每3点智力提供1%物品冷却时间减少，最多为60%。",
@@ -11500,7 +11500,7 @@
     },
     {
       "name": "rubick_curiosity2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "拉比克现在每级获得1层奇心的叠加效果，每层奇心提供1点基础攻击力，0.3%增益/减益增强，和1作用范围加成。<br><br>如果拉比克看到1200范围内有敌方英雄施放技能，他就会获得2层奇心，持续20秒。如果当前提供临时奇心的敌人在受到来自拉比克的伤害后3秒内阵亡，他就会永久获得1层奇心.",
@@ -11521,7 +11521,7 @@
     },
     {
       "name": "ability_trigger_learned_skills",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "<h1><font color='#0096FF'>被动：武痴</font></h1>普攻有概率触发一个学习过的主动技能，普通技能和终极技能独立伪随机触发。如果技能不在冷却，触发后会短暂进入冷却后返还（剑圣无敌斩单独4s返还，其他技能0.1s返还）。如果技能在冷却，触发后会重新冷却。",
@@ -11577,12 +11577,12 @@
     },
     {
       "name": "ability_trigger_on_cast",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
-        "zh": "<h1><font color='#FF0000'>被动：入魔</font></h1>施放技能有概率触发一个学习过的主动技能，普通技能和终极技能独立伪随机触发。与多重施法互斥。孙悟空模型无法触发。<br><br>普通技能触发概率：35 45 55 65 75%<br>终极技能触发概率：15 20 25 30 35%<br>",
-        "en": "<h1><font color='#FF0000'>Passive: Spell Echo</font></h1>When you cast an ability, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. Mutually exclusive with multiple cast. Monkey King model cannot trigger.<br><br>Basic Ability Trigger Chance: 35 45 55 65 75%<br>Ultimate Ability Trigger Chance: 15 20 25 30 35%<br>",
-        "ru": "<h1><font color='#FF0000'>Passive: Spell Echo</font></h1>When you cast an ability, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. Mutually exclusive with multiple cast. Monkey King model cannot trigger.<br><br>Basic Ability Trigger Chance: 35 45 55 65 75%<br>Ultimate Ability Trigger Chance: 15 20 25 30 35%<br>"
+        "zh": "<h1><font color='#FF0000'>被动：入魔</font></h1>施放技能有概率触发一个学习过的主动技能，普通技能和终极技能独立伪随机触发。与多重施法互斥。孙悟空模型无法触发。<br><br>普通技能触发概率：35 45 55 65 75%<br>终极技能触发概率：15 20 25 30 35%",
+        "en": "<h1><font color='#FF0000'>Passive: Spell Echo</font></h1>When you cast an ability, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. Mutually exclusive with multiple cast. Monkey King model cannot trigger.<br><br>Basic Ability Trigger Chance: 35 45 55 65 75%<br>Ultimate Ability Trigger Chance: 15 20 25 30 35%",
+        "ru": "<h1><font color='#FF0000'>Passive: Spell Echo</font></h1>When you cast an ability, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. Mutually exclusive with multiple cast. Monkey King model cannot trigger.<br><br>Basic Ability Trigger Chance: 35 45 55 65 75%<br>Ultimate Ability Trigger Chance: 15 20 25 30 35%"
       },
       "ability": {
         "behavior": "passive",
@@ -11602,7 +11602,7 @@
     },
     {
       "name": "ability_trigger_on_attacked",
-      "pool": "passive",
+      "group": "passive",
       "tier": 4,
       "desc": {
         "zh": "<h1><font color='#FFFF00'>被动：金身</font></h1>被攻击时有概率触发已学习的技能。普通技能和终极技能独立伪随机触发。",
@@ -11679,7 +11679,7 @@
     },
     {
       "name": "riki_innate_backstab",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "力丸每次从背后攻击敌人时都会造成额外伤害，伤害量为自身敏捷的一定倍数。",
@@ -11714,7 +11714,7 @@
     },
     {
       "name": "elder_titan_natural_order",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "使所有元素降低至基础水平，移除附近敌方单位的基础物理护甲和魔法抗性。护甲降低效果以英雄为中心，魔法抗性降低效果以灵体游魂为中心。",
@@ -11787,7 +11787,7 @@
     },
     {
       "name": "muerta_supernatural",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "每当琼英碧灵附近925范围内有敌方英雄阵亡，她就会获得一层2.0%技能增强的叠加效果。琼英碧灵阵亡时，她会失去一半（向下取整）的叠加层数。",
@@ -11848,7 +11848,7 @@
     },
     {
       "name": "dawnbreaker_luminosity",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "破晓辰星在数次攻击后提升了力量，她的下一次攻击会造成致命一击，并<font color='#07d738'>治疗</font>她附近650范围内所有友方英雄，治疗量为攻击伤害的一定百分比。攻击小兵和野怪产生的治疗量有所减少。对友军的治疗量为50%。",
@@ -11934,7 +11934,7 @@
     },
     {
       "name": "earthshaker_aftershock",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "撼地者施放技能时会引起脚下的大地震动，<font color='#2dd5e4'>眩晕</font>附近的敌方单位并造成额外伤害。",
@@ -11990,7 +11990,7 @@
     },
     {
       "name": "chaos_knight_chaos_strike",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "混沌骑士和他的幻象在攻击时有几率造成威力不一的致命一击，并且触发时具有吸血效果。对非英雄单位的吸血效果减少。",
@@ -12076,7 +12076,7 @@
     },
     {
       "name": "riki_backstab",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "力丸遁入阴影，变为<font color='#d7ccc7'>隐身</font>状态，主动攻击敌人后力丸将会显形。击杀英雄和助攻会提供额外经验。",
@@ -12147,7 +12147,7 @@
     },
     {
       "name": "weaver_geminate_attack",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "允许编织者立刻发动两次攻击。",
@@ -12196,7 +12196,7 @@
     },
     {
       "name": "spectre_desolate",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "幽鬼的攻击对敌人造成额外的纯粹伤害。",
@@ -12235,7 +12235,7 @@
     },
     {
       "name": "brewmaster_fire_phase",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "向元素战士提供<font color='#9019e3'>相位移动</font>状态和<font color='#b99012'>状态抗性</font>加成。",
@@ -12270,7 +12270,7 @@
     },
     {
       "name": "juggernaut_blade_dance",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "主宰有一定概率在攻击时触发致命一击。",
@@ -12326,7 +12326,7 @@
     },
     {
       "name": "tiny_grow",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "小小崎岖的身体不断成长，提升了攻击力、移动速度、护甲和投掷的威力，但攻击速度降低。",
@@ -12429,7 +12429,7 @@
     },
     {
       "name": "sven_great_cleave",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "斯温以巨力攻击，并对所有附近的敌方单位造成分裂攻击伤害。",
@@ -12489,7 +12489,7 @@
     },
     {
       "name": "silencer_glaives_of_wisdom",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "沉默术士用他的智慧强化刀刃，每次攻击窃取目标的智力，并造成基于他智力值的额外伤害。",
@@ -12572,7 +12572,7 @@
     },
     {
       "name": "tiny_insurmountable",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "小小从力量中获得<font color='#b99012'>状态</font>和<font color='#9ec8e3'>减速抗性</font>。<font color='#9ec8e3'>减速抗性</font>还会降低攻击速度减少的影响。",
@@ -12620,7 +12620,7 @@
     },
     {
       "name": "drow_ranger_trueshot",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "卓尔游侠根据她自身的当前敏捷和英雄等级获得敏捷加成。附近远程英雄获得50%敏捷加成。",
@@ -12672,7 +12672,7 @@
     },
     {
       "name": "death_prophet_witchcraft",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "死亡先知的神秘学识随着经验积累而加深，获得移动速度和技能冷却时间减少。",
@@ -12707,7 +12707,7 @@
     },
     {
       "name": "omniknight_hammer_of_purity",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "全能骑士将神圣之力注入他的战锤，使他的攻击距离提升，会根据基础攻击力的一定百分比造成纯粹伤害，并且使目标短时间内被减速。<br><br>全能骑士会在4秒内回复40%造成的伤害。",
@@ -12812,7 +12812,7 @@
     },
     {
       "name": "dragon_knight_dragon_blood2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "神龙的生命之血提升了龙骑士的生命恢复和护甲。",
@@ -12868,7 +12868,7 @@
     },
     {
       "name": "primal_beast_colossal2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "獸拥有10%基础减速抗性，每拥有250点生命上限就获得+0.5%作用范围加成和+1%减速抗性。",
@@ -12889,7 +12889,7 @@
     },
     {
       "name": "silencer_brain_drain2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "沉默术士对被沉默的目标造成更多伤害，受到来自他们的伤害减少。<br><br>沉默术士无需完成击杀就能永久窃取1点智力，只要敌方英雄在沉默术士附近1200范围内阵亡或者死亡时带有沉默术士的负面效果即可。如果阵亡时被沉默，将额外窃取1点智力。",
@@ -12924,7 +12924,7 @@
     },
     {
       "name": "sven_wrath_of_god2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "斯温从力量中获得额外攻击力，但是基础攻击力降低。",
@@ -12963,7 +12963,7 @@
     },
     {
       "name": "centaur_sturdy",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "增加自身状态抗性和力量",
@@ -13019,7 +13019,7 @@
     },
     {
       "name": "ancient_apparition_frost_orb",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "每4次攻击发射一枚冰霜法球，造成范围伤害，并短暂减速主要目标",
@@ -13084,7 +13084,7 @@
     },
     {
       "name": "crystal_maiden_ice_explosion",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "增加额外攻击速度，攻击有35%概率召唤一个冰爆打击随机区域，造成伤害和1秒减速",
@@ -13179,7 +13179,7 @@
     },
     {
       "name": "ability_trigger_on_move",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "<h1><font color='#FFCC66'>被动：绝影</font></h1>根据过去一定时间内的位移距离概率触发已学习的技能。腿儿倒腾的越快，触发概率越高。",
@@ -13252,7 +13252,7 @@
     },
     {
       "name": "ability_trigger_on_spell_reflect",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "<h1><font color='#90EE90'>被动：幽莲</font></h1>受到指向性技能伤害时有概率反弹伤害，成功反弹时有概率触发已学习的技能。",
@@ -13351,7 +13351,7 @@
     },
     {
       "name": "ability_charge_damage",
-      "pool": "passive",
+      "group": "passive",
       "tier": 3,
       "desc": {
         "zh": "<h1><font color='#87CEEB'>被动：凝心</font></h1>凝心静气，在技能冷却好而不释放的时候积蓄能量，增幅下次释放造成的第一次伤害。<br><br>大招在充能15 12 9 7 5秒后开始计数，小技能在充能7 6 5 4 3秒后开始计数。<br>充能达到阈值后，额外获得2倍基础增幅。<br>伤害增幅效果持续3.0秒。<br>最大增幅倍率：3 4 5 6 7倍。",
@@ -13376,7 +13376,7 @@
     },
     {
       "name": "shredder_reactive_armor",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "伐木机每受到一次物理攻击，他的生命恢复和护甲值都会提升。英雄攻击提供4倍提升。",
@@ -13470,7 +13470,7 @@
     },
     {
       "name": "chaos_knight_fundamental_forging",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "混沌骑士的中立物品额外获得一个随机附魔。",
@@ -13491,7 +13491,7 @@
     },
     {
       "name": "nevermore_dark_lord",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "影魔的出现使得周围的敌人护甲降低。",
@@ -13547,7 +13547,7 @@
     },
     {
       "name": "nevermore_necromastery",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "影魔每杀死一个单位都会窃取其灵魂，每个灵魂获得1点额外攻击力。击杀英雄会获得4个灵魂。影魔死亡时30.0%的灵魂将逃离他的束缚。",
@@ -13599,7 +13599,7 @@
     },
     {
       "name": "tusk_bitter_chill",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "被动降低450范围内所有敌方英雄的攻击速度。",
@@ -13634,7 +13634,7 @@
     },
     {
       "name": "ursa_fury_swipes",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "熊战士的利爪深深地撕裂敌人的伤口，对同一敌人连续攻击将造成更多伤害。如果同一个目标在8 12 16 20 24秒内不受攻击，将失去额外伤害加成。",
@@ -13707,7 +13707,7 @@
     },
     {
       "name": "vengefulspirit_command_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "复仇之魂的存在提升了附近友方英雄的攻击力。复仇之魂自身获得25%额外加成。",
@@ -13776,7 +13776,7 @@
     },
     {
       "name": "bloodseeker_thirst",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "血魔能够感知到敌人的伤口中涌出的鲜血，敌方英雄的生命值低于100%，他的移动速度就会提升，而且生命值越低，提升效果越大。如果生命值低于25%，他还将获得该英雄的视野和真实视域。焦渴的效果可以叠加。血魔可以突破最大速度限制。",
@@ -13845,7 +13845,7 @@
     },
     {
       "name": "rubick_arcane_supremacy",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "拉比克对奥术的熟稔使他拥有更远的施法距离，和额外技能增强。",
@@ -13905,7 +13905,7 @@
     },
     {
       "name": "monkey_king_jingu_mastery",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "齐天大圣的攻击唤醒了金箍棒的力量。连续攻击四次同个敌方英雄后，齐天大圣的下4次攻击得到加强，拥有攻击力加成和吸血效果。",
@@ -14008,7 +14008,7 @@
     },
     {
       "name": "skeleton_king_mortal_strike",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "冥魂大帝被动地在攻击时造成额外伤害，本技能具有冷却时间。",
@@ -14057,7 +14057,7 @@
     },
     {
       "name": "abyssal_underlord_atrophy_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "周围所有敌方单位遭到了削弱，损失部分基础攻击力。如果敌方英雄在光环范围内死亡，孽主将获得临时的额外攻击力加成。",
@@ -14164,7 +14164,7 @@
     },
     {
       "name": "abaddon_frostmourne",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "亚巴顿打击一个敌人，使其受到寒心诅咒的作用，被减速，并且持续受到伤害，同时所有攻击目标的单位将提升攻击速度。对建筑的持续伤害减少100%。",
@@ -14254,7 +14254,7 @@
     },
     {
       "name": "lycan_feral_impulse",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "提升狼人和所有他控制的单位的生命恢复和攻击力。",
@@ -14314,7 +14314,7 @@
     },
     {
       "name": "axe_counter_helix",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "受到一定次数攻击后，斧王就会做出螺旋反击，对附近所有敌方单位造成纯粹伤害。",
@@ -14389,7 +14389,7 @@
     },
     {
       "name": "centaur_return",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "半人马战行者向攻击他的单位发出反击。反弹固定伤害加上自身力量的一定百分比。对防御塔的伤害减半。",
@@ -14449,7 +14449,7 @@
     },
     {
       "name": "necrolyte_heartstopper_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "瘟疫法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。",
@@ -14505,7 +14505,7 @@
     },
     {
       "name": "drow_ranger_marksmanship",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "卓尔游侠的战斗经验使她有概率发出极其精准高效的箭矢。箭矢将穿透敌人的防御，无视他们的基础护甲。如果200范围内有敌方英雄，本技能没有效果。",
@@ -14563,7 +14563,7 @@
     },
     {
       "name": "undying_ceaseless_dirge",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "不朽尸王阵亡时会立刻在泉水复活。比赛开始时处于冷却状态。无法被刷新。",
@@ -14590,7 +14590,7 @@
     },
     {
       "name": "nyx_assassin_neuro_sting",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "司夜刺客对敌人造成伤害还会燃烧造成伤害一定百分比的魔法。",
@@ -14625,7 +14625,7 @@
     },
     {
       "name": "zuus_static_field",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "宙斯攻击或通过技能击中敌人都会电击他们，造成他们当前生命值一定百分比的伤害。",
@@ -14664,7 +14664,7 @@
     },
     {
       "name": "furion_spirit_of_the_forest",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "附近的每棵树都会让自然先知获得2%攻击力加成。每个树人也会让自然先知获得若干倍数的加成，不论相距多远。树人也拥有这个技能。",
@@ -14712,7 +14712,7 @@
     },
     {
       "name": "magnataur_solid_core",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "马格纳斯的<font color='#9ec8e3'>减速抗性</font>得到提升，并且受到敌人技能和物品的击退效果减少。",
@@ -14760,7 +14760,7 @@
     },
     {
       "name": "medusa_mana_shield",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "创造一个魔法护盾，消耗美杜莎的魔法值以吸收98%的伤害。幻象的伤害吸收系数减少60%。",
@@ -14799,7 +14799,7 @@
     },
     {
       "name": "luna_lunar_blessing",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "提升露娜和附近1200范围内友方英雄的攻击力，露娜获得双倍的攻击力加成。夜晚期间月之祝福为全地图生效，并且露娜受到福佑后夜间视野提升。",
@@ -14838,7 +14838,7 @@
     },
     {
       "name": "bloodseeker_sanguivore",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "血魔每杀死一个单位都会回复部分生命，回复量为基础30点加上该单位最大生命值的一定百分比。<br><br>友军击杀了附近的敌方英雄时会回复半额数值。",
@@ -14873,7 +14873,7 @@
     },
     {
       "name": "bounty_hunter_jinada",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "赏金猎人准备好他的下次攻击，造成额外伤害并窃取若干不可靠金钱。",
@@ -14939,7 +14939,7 @@
     },
     {
       "name": "antimage_mana_break",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "每次攻击损毁目标魔法值，并造成相当于损毁魔法值一定百分比的伤害。",
@@ -15012,7 +15012,7 @@
     },
     {
       "name": "lina_fiery_soul",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "莉娜每次利用技能击中一个敌人都会使她获得攻击和移动速度加成。可以叠加。持续16秒。",
@@ -15098,7 +15098,7 @@
     },
     {
       "name": "alchemist_goblins_greed2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "炼金术士将敌人的尸体和赏金神符转化成额外的金币。炼金术士每杀死一个单位，就能获得基础额外金钱和附加额外金钱。如果炼金术士在接下来40秒内又杀死了一个单位，获得了黄金，那么他所获得的附加额外金钱将有一定幅度的增加。另外，赏金神符将提供成倍金钱。",
@@ -15201,7 +15201,7 @@
     },
     {
       "name": "pudge_innate_graft_flesh",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "每次帕吉击杀敌方英雄时，他的皮肤就会永久变厚，获得的每层叠加效果为3.0点额外力量。",
@@ -15222,7 +15222,7 @@
     },
     {
       "name": "frostbitten_golem_time_warp_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "由于来自一个不同的纪元，霜害傀儡天生可以控制时间，使周围所有友军的技能冷却加快。",
@@ -15273,7 +15273,7 @@
     },
     {
       "name": "doom_bringer_infernal_blade",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "末日挥舞他的炽烈之剑，将敌人点燃。造成0.66秒<font color='#2dd5e4'>眩晕</font>，并施加一个燃烧效果，持续4秒，每秒造成伤害，数值为基础伤害+目标最大生命值的一定百分比。",
@@ -15367,7 +15367,7 @@
     },
     {
       "name": "viper_poison_attack",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "蝮蛇的毒液得到强化，使他的普通攻击附带效果，可以降低目标的移动速度和魔法抗性，并持续造成伤害。效果可以叠加，最多叠加6次。",
@@ -15472,7 +15472,7 @@
     },
     {
       "name": "tusk_walrus_punch",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "巨牙海民为他强力的海象神拳做好准备，下一次攻击将会造成额外伤害并暴击，同时将目标打到半空中。",
@@ -15550,7 +15550,7 @@
     },
     {
       "name": "kunkka_tidebringer",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "昆卡的传奇之剑使他的下一次攻击附加额外的攻击力并在前方造成大范围的分裂攻击伤害。",
@@ -15629,7 +15629,7 @@
     },
     {
       "name": "mirana_celestial_quiver",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "有可用能量时，米拉娜的下次攻击会造成额外魔法伤害。",
@@ -15690,7 +15690,7 @@
     },
     {
       "name": "sniper_keen_scope2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "狙击手和目标相距每100距离，他的攻击都会造成额外伤害。",
@@ -15729,7 +15729,7 @@
     },
     {
       "name": "ursa_maul2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "熊战士获得攻击力加成，数值为当前生命值的一定百分比。",
@@ -15768,7 +15768,7 @@
     },
     {
       "name": "axe_one_man_army2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "获得护甲一定百分比的力量",
@@ -15807,7 +15807,7 @@
     },
     {
       "name": "dark_seer_quick_wit2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "黑暗贤者从每点智力获得0.6 0.8 1.0 1.2 1.4攻击速度。",
@@ -15828,7 +15828,7 @@
     },
     {
       "name": "rubick_might_and_magus2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 2,
       "desc": {
         "zh": "拉比克施放法术时获得可叠加的作用范围加成。",
@@ -15889,7 +15889,7 @@
     },
     {
       "name": "ancient_apparition_bone_chill2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "每当远古冰魄通过他的技能对敌人造成魔法伤害，敌人就会减速一段时间。如果目标是英雄，力量还会降低。多个本效果会叠加，并且持续时间相互独立。",
@@ -15954,7 +15954,7 @@
     },
     {
       "name": "huskar_berserkers_blood",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "哈斯卡的伤痛赐予他力量，根据他损失的生命值将获得攻击速度、魔法抗性和生命恢复加成。生命恢复为力量的一定百分比。",
@@ -16044,7 +16044,7 @@
     },
     {
       "name": "night_stalker_hunter_in_the_night",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "暗夜魔王在夜晚如鱼得水，攻击和移动都变得迅速。",
@@ -16096,7 +16096,7 @@
     },
     {
       "name": "legion_commander_moment_of_courage",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "每当受到攻击达到一定次数，军团指挥官都会对目标立即作出反击，而且此次攻击具有吸血效果。",
@@ -16158,7 +16158,7 @@
     },
     {
       "name": "phoenix_dying_light",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "凤凰每秒对400范围内所有敌人造成3.5%自身缺失生命值的魔法伤害。",
@@ -16179,7 +16179,7 @@
     },
     {
       "name": "pangolier_fortune_favors_the_bold",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "附近敌人攻击石鳞剑士时，他们触发物品和技能的随机类攻击特效的几率有所降低。",
@@ -16227,7 +16227,7 @@
     },
     {
       "name": "enchantress_untouchable",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "魅惑魔女让她的敌人神魂颠倒，受到他们攻击时会降低其攻击速度。",
@@ -16269,7 +16269,7 @@
     },
     {
       "name": "spirit_breaker_greater_bash",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "攻击时有一定概率<font color='#2dd5e4'>眩晕</font>并击退敌方单位。重击的伤害值为移动速度的一定百分比。",
@@ -16374,7 +16374,7 @@
     },
     {
       "name": "sniper_headshot",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "狙击手提高他的精确度，有一定概率造成20 50 80 110 140点额外伤害并击退敌人。敌人距离狙击手越近，击退距离越远。爆头会短暂地降低敌人-100%移动和攻击速度。",
@@ -16460,7 +16460,7 @@
     },
     {
       "name": "razor_storm_surge",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "被攻击时拥有几率、每次受到指向性技能时都会释放一道叉状闪电，击中目标和附近其他敌人，优先打击与目标类型相同的单位，造成伤害并减缓移动速度。",
@@ -16585,7 +16585,7 @@
     },
     {
       "name": "troll_warlord_fervor",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "当巨魔战将持续攻击同一个目标时，他会攻击得越来越快。如果改变目标，则额外的攻速加成清零。",
@@ -16641,7 +16641,7 @@
     },
     {
       "name": "visage_gravekeepers_cloak",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "维萨吉产生数层屏障来保护他，降低受到的伤害。每当他受到来自玩家的伤害，就会失去一层屏障，失去的屏障需要一定时间才能恢复。<br><br>维萨吉的佣兽在900范围内也会受到斗篷的保护，承伤降低的数值取决于维萨吉拥有的层数。",
@@ -16740,7 +16740,7 @@
     },
     {
       "name": "viper_corrosive_skin",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "蝮蛇分泌出感染性的毒素，1200范围内任何伤害它的敌人都将受到伤害，同时攻击速度也被降低。这种酸性分泌物还能提高蝮蛇的魔法抗性。",
@@ -16843,7 +16843,7 @@
     },
     {
       "name": "rubick_null_field",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "拉比克对奥术的精通能够影响周围敌人的感知，降低他们的魔法抗性。可以在防御和进攻之间切换，选择降低敌人的魔法抗性或提升队友的魔法抗性。",
@@ -16901,7 +16901,7 @@
     },
     {
       "name": "pangolier_lucky_shot",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "石鳞剑士孤注一掷，让命运决定敌人的下场。石鳞剑士的攻击或技能拥有一定几率大幅降低攻击速度，同时削弱护甲。",
@@ -16991,7 +16991,7 @@
     },
     {
       "name": "faceless_void_backtrack2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "16 20 24 28 32%概率躲避伤害",
@@ -17012,7 +17012,7 @@
     },
     {
       "name": "gyrocopter_afterburner",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "矮人直升机通过攻击或技能对敌人造成伤害后，在短时间内获得移动速度提升。",
@@ -17073,7 +17073,7 @@
     },
     {
       "name": "omniknight_degen_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "削弱过于靠近的敌方单位的移动能力，降低其移动速度。",
@@ -17125,7 +17125,7 @@
     },
     {
       "name": "legion_commander_outfight_them",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "如果军团指挥官或附近1200范围内的友方英雄施放技能，他们会获得6.0秒的护甲加成；其中友军获得的数值为50%。这个加成效果独立叠加。",
@@ -17160,7 +17160,7 @@
     },
     {
       "name": "crystal_maiden_brilliance_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "地图上所有友方单位获得额外魔法恢复。水晶室女附近8000范围内友军获得更高的魔法恢复。<br><br>水晶室女被动获得魔法恢复增强。",
@@ -17237,7 +17237,7 @@
     },
     {
       "name": "drow_ranger_frost_arrows",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "卓尔游侠在箭矢中附上冰冻效果，减缓敌人的移动速度并造成额外伤害。持续1.5秒。",
@@ -17303,7 +17303,7 @@
     },
     {
       "name": "enchantress_impetus",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "激活后每次攻击都有附魔效果，根据与目标的距离造成额外伤害。目标越远，伤害越高。对幻象造成双倍伤害。",
@@ -17358,7 +17358,7 @@
     },
     {
       "name": "ancient_apparition_chilling_touch",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "使自己的普通攻击附带距离提升，高额魔法伤害和减速效果。",
@@ -17456,7 +17456,7 @@
     },
     {
       "name": "slark_saltwater_shiv",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "斯拉克用他的海浪短刀划开目标，窃取目标一部分的移动速度、生命恢复和生命回复。<br><br>这个效果独立叠加。",
@@ -17554,7 +17554,7 @@
     },
     {
       "name": "kobold_taskmaster_speed_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "狗头人长官残酷地追求效率，提高他和附近所有友军的移动速度。",
@@ -17605,7 +17605,7 @@
     },
     {
       "name": "black_drake_magic_amplification_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "黑蜉蝣的凝视让敌人更难抵挡技能伤害。",
@@ -17656,7 +17656,7 @@
     },
     {
       "name": "abyssal_underlord_firestorm2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "每攻击4次，召唤火雨对目标周围的敌方单位造成伤害",
@@ -17725,7 +17725,7 @@
     },
     {
       "name": "bounty_hunter_cutpurse2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "赏金猎人以敌方英雄为目标施放技能和物品时会偷取4 6 8 10 12金钱。",
@@ -17764,7 +17764,7 @@
     },
     {
       "name": "abyssal_underlord_malice_aura",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "在自身光环范围内停留一定时间的敌人会被缠绕，并造成伤害",
@@ -17846,7 +17846,7 @@
     },
     {
       "name": "crystal_maiden_glacial_guard2",
-      "pool": "passive",
+      "group": "passive",
       "tier": 1,
       "desc": {
         "zh": "水晶室女消耗在她技能上的一部分魔法会转化为物理护盾。",

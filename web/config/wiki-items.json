@@ -1,0 +1,2795 @@
+{
+  "source": {
+    "gameCommit": "410fa1db41262cc3acf62baad1bb464624ef5fa2",
+    "dotaVersion": "7.41f"
+  },
+  "items": [
+    {
+      "name": "item_tome_of_luoshu",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "<h1>使用: 洛书祝福</h1> 永久获得 <br>+100 点全属性<br>+30% 状态抗性<br>+50% 技能增强<br>+80% 基础攻击力<br>+200 施法距离。<br>只可使用一次<br>可以分享给队友",
+        "en": "<h1>Use: Luoshu</h1> Permanently grants: <br>+100 all attributes<br>+80% Base Attack Damage<br>+30% Status Resistance<br>+50% Spell Amplification<br>+200 Cast Range<br><br>A hero can only use one.<br>Shareable with teammates.",
+        "ru": "<h1>Use: Luoshu</h1> Permanently grants: <br>+100 all attributes<br>+80% Base Attack Damage<br>+30% Status Resistance<br>+50% Spell Amplification<br>+200 Cast Range<br><br>A hero can only use one.<br>Shareable with teammates."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_passive_skill_tome",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "<h1>使用: 学习被动技能</h1> 有更高概率获得强力技能，从 4 个随机被动技能中任选其一学习。<br>每名玩家整局最多使用 2 次<br>可以分享给队友<br>不可购买出售，藏宝箱有概率出现",
+        "en": "<h1>Active: Learn Passive Skill</h1> Higher chance of strong abilities. Choose one passive ability to learn from 4 random options.<br>Each player can use this up to 2 times per game.<br>Shareable with teammates.<br>Cannot be purchased or sell. Has a chance to appear in treasure chests.",
+        "ru": "<h1>Active: Learn Passive Skill</h1> Higher chance of strong abilities. Choose one passive ability to learn from 4 random options.<br>Each player can use this up to 2 times per game.<br>Shareable with teammates.<br>Cannot be purchased or sell. Has a chance to appear in treasure chests."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": [
+          "1.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "翻开它，便能习得前人沉淀的力量。",
+          "en": "Open it, and the power distilled by those before you becomes yours.",
+          "ru": "Open it, and the power distilled by those before you becomes yours."
+        }
+      }
+    },
+    {
+      "name": "item_awaken_stone",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "<h1>使用: 觉醒</h1> 唤醒英雄沉睡的力量，将一个技能蜕变为觉醒形态。<br><br>支持的英雄请在个人主页-觉醒页面查看。<br>可以分享给队友，不可购买出售，藏宝箱有概率出现。",
+        "en": "<h1>Active: Awaken</h1> Stir the hero's slumbering power, transfiguring one ability into its awakened form.<br><br>See supported heroes on the Profile - Awaken page.<br>Shareable with teammates. Cannot be purchased or sold. Has a chance to appear in treasure chests.",
+        "ru": "<h1>Active: Awaken</h1> Stir the hero's slumbering power, transfiguring one ability into its awakened form.<br><br>See supported heroes on the Profile - Awaken page.<br>Shareable with teammates. Cannot be purchased or sold. Has a chance to appear in treasure chests."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": [
+          "1.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "一块能唤醒沉睡之力的石头。",
+          "en": "A stone that stirs dormant power awake.",
+          "ru": "A stone that stirs dormant power awake."
+        }
+      }
+    },
+    {
+      "name": "item_inventory_slot_unlock",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "<h1>使用：扩展行囊</h1>本局中永久解锁1个物品栏，使该栏位中的物品可以正常生效并主动使用。每名英雄最多使用3次。<br>可以分享给队友。",
+        "en": "<h1>Use: Expand Inventory</h1>Permanently unlocks 1 item slot for this match, allowing items in that slot to provide their effects and be actively used. Each hero can use up to 3.<br>Shareable with teammates.",
+        "ru": "<h1>Use: Expand Inventory</h1>Permanently unlocks 1 item slot for this match, allowing items in that slot to provide their effects and be actively used. Each hero can use up to 3.<br>Shareable with teammates."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": [
+          "1.0"
+        ],
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_hawkeye",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着鹰眼的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 鹰眼炮台、鹰眼战机",
+        "en": "A mysterious fusion rune containing the power of hawkeye. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Hawkeye Turret, Hawkeye Fighter",
+        "ru": "A mysterious fusion rune containing the power of hawkeye. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Hawkeye Turret, Hawkeye Fighter"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_forbidden",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着禁忌的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 禁忌法锤、禁忌战刃",
+        "en": "A mysterious fusion rune containing forbidden power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Forbidden Staff, Forbidden Blade",
+        "ru": "A mysterious fusion rune containing forbidden power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Forbidden Staff, Forbidden Blade"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_brutal",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着暴虐的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 归海一刀、魔龙狂舞",
+        "en": "A mysterious fusion rune containing brutal power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Guihai Blade, Dragon Dance",
+        "ru": "A mysterious fusion rune containing brutal power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Guihai Blade, Dragon Dance"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_beast",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着兽化的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 兽化盾、兽化甲",
+        "en": "A mysterious fusion rune containing beastly power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Beast Shield, Beast Armor",
+        "ru": "A mysterious fusion rune containing beastly power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Beast Shield, Beast Armor"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_life",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着生命的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 生命之心、生命之盔",
+        "en": "A mysterious fusion rune containing life power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Withered Spring, Dracula Mask",
+        "ru": "A mysterious fusion rune containing life power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Withered Spring, Dracula Mask"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_shadow",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着暗影的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 暗影裁决、暗影法杖",
+        "en": "A mysterious fusion rune containing shadow power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Shadow Judgment, Shadow Staff",
+        "ru": "A mysterious fusion rune containing shadow power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Shadow Judgment, Shadow Staff"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_magic",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着魔化的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 魔渊剑、时间宝石",
+        "en": "A mysterious fusion rune containing arcane power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Magic Sword, Time Gem",
+        "ru": "A mysterious fusion rune containing arcane power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Magic Sword, Time Gem"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_fusion_agile",
+      "group": "all",
+      "tier": 5,
+      "desc": {
+        "zh": "一种神秘的融合符文,蕴含着灵动的力量。击杀中立生物有概率获得。目前限时开放购买<br><br><font color='#FFCC66'>可合成:</font> 无限手套",
+        "en": "A mysterious fusion rune containing agile power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Swift Glove",
+        "ru": "A mysterious fusion rune containing agile power. Can be obtained by killing neutral creeps. Currently available for limited-time purchase.<br><br><font color='#FFCC66'>Can craft:</font> Swift Glove"
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_tome_of_ability_reset",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>使用：能力重置</h1>打开能力重置界面，可以移除已学习的技能并学习新技能。<br>移除技能时会返还技能点。<br><br>一本书只能选择一个技能进行重置。<br><br>可以分享给队友",
+        "en": "<h1>Use: Ability Reset</h1>Opens the ability draft interface, allowing you to remove selected abilities and learn new ones.<br>Skill points are refunded when removing abilities.<br><br>One tome can only be used to reset one ability.<br><br>Can be shared with teammates.",
+        "ru": "<h1>Use: Ability Reset</h1>Opens the ability draft interface, allowing you to remove selected abilities and learn new ones.<br>Skill points are refunded when removing abilities.<br><br>One tome can only be used to reset one ability.<br><br>Can be shared with teammates."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "重新规划你的能力路线。",
+          "en": "Redesign your ability path.",
+          "ru": "Redesign your ability path."
+        }
+      }
+    },
+    {
+      "name": "item_tome_of_agility",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>使用: 敏捷之书</h1> 永久增加敏捷 100 点。<br>可以分享给队友",
+        "en": "<h1>Use: Lighten</h1> Permanently increases your agility by 100.<br>Shareable with teammates.",
+        "ru": "<h1>Use: Lighten</h1> Permanently increases your agility by 100.<br>Shareable with teammates."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "Is it swiftness that you seek...?",
+          "en": "Is it swiftness that you seek...?",
+          "ru": "Is it swiftness that you seek...?"
+        }
+      }
+    },
+    {
+      "name": "item_tome_of_intelligence",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>使用: 智力之书</h1> 永久增加智力 100 点。<br>可以分享给队友",
+        "en": "<h1>Use: Learn</h1> Permanently increases your intelligence by 100.<br>Shareable with teammates.",
+        "ru": "<h1>Use: Learn</h1> Permanently increases your intelligence by 100.<br>Shareable with teammates."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "Is it enlightenment that you aspire to...?",
+          "en": "Is it enlightenment that you aspire to...?",
+          "ru": "Is it enlightenment that you aspire to...?"
+        }
+      }
+    },
+    {
+      "name": "item_tome_of_strength",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>使用: 力量之书</h1> 永久增加力量 100 点。<br>可以分享给队友",
+        "en": "<h1>Use: Bulk</h1> Permanently increases your strength by 100.<br>Shareable with teammates.",
+        "ru": "<h1>Use: Bulk</h1> Permanently increases your strength by 100.<br>Shareable with teammates."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "Is it strength that you desire...?",
+          "en": "Is it strength that you desire...?",
+          "ru": "Is it strength that you desire...?"
+        }
+      }
+    },
+    {
+      "name": "item_ultimate_scepter_2",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>使用：永久升级</h1>消耗阿哈利姆神杖永久获得神杖和属性加成，不可叠加。<br>可以对友方英雄释放。<br><h1>被动：技能升级</h1>提升所有英雄的终极技能或基础技能效果。",
+        "en": "<h1>Use: Permanently Upgrade</h1> Consume the Aghanim's Regalia to permanently gain your Ultimate Upgrade and attribute bonuses. Cannot stack with itself.<br>Can be used on allied heroes.<br><h1>Passive: Ultimate Upgrade</h1> Upgrades the ultimate, and some abilities, of certain heroes.",
+        "ru": "<h1>Пассивное: Ability Upgrade</h1>Улучшает ульт и некоторые способности."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "alliedHeroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "600"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法值",
+              "en": "Mana",
+              "ru": "к мане"
+            },
+            "sign": "+",
+            "levels": [
+              "600"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "技能伤害",
+              "en": "Spell Damage",
+              "ru": "к урону от заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "24"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "一位拥有半神般力量的巫师所持有的权杖。",
+          "en": "The regalia of a wizard with demigod-like powers.",
+          "ru": "Скипетр колдуна, мощью сходного с полубогами."
+        }
+      }
+    },
+    {
+      "name": "item_hydras_breath",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>被动：瘴毒</h1>攻击会使目标中毒，每秒造成目标2.5%最大生命值的魔法伤害，持续3秒。<br><br><h1>被动：多头一体</h1>远程攻击有30%的概率向非原攻击目标的前方120度角内、攻击距离+150距离内的最多3个附近敌人发射额外弹道。额外弹道造成20 + 75%普通攻击伤害，并且不会触发瘴毒除外的击中效果。主攻击造成20 + 100%普通攻击伤害。",
+        "en": "<h1>Passive: Miasma</h1>Attacks poison enemies, dealing 2.5% of the target's Max HP as Magical Damage per second for 3 seconds.<br><br><h1>Passive: Polycephaly</h1>Ranged attacks have a 30% chance to fire additional projectiles at up to 3 nearby enemies with 150 extra range and within a 120 degree angle in front of the attacker. The additional projectiles deal 20 + 75% damage of a normal attack and do not trigger on hit effects except for Miasma. The primary attack deals 20 + 100% damage of a normal attack.",
+        "ru": "<h1>Пассивное: Miasma</h1>Атаки отравляют врагов, каждую секунду нанося им магический урон в размере 2.5% от их максимального здоровья на протяжении 3 сек.<br><br><h1>Пассивное: Polycephaly</h1>С вероятностью в 30% каждая атака дальнего боя может поразить ещё до 3 целей в радиусе атаки + 150. Дополнительные цели должны находиться в 120-градусном конусе перед владельцем, получают 20 базового урона + 75% урона от атак, и на них не срабатывают эффекты атаки, кроме Miasma. Основная цель получает 20 базового урона + 100% урона от атак."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "15"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "30"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击力",
+              "en": "Damage",
+              "ru": "к урону"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+              "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
+              "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
+            },
+            "sign": "+",
+            "levels": [
+              "150"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_roshans_banner",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>使用：放置战旗</h1>在目标地点创造一面旗帜。战旗立起后作用范围内的小兵将免疫伤害。战旗持续90秒。<br><br>可以被摧毁。近战英雄对战旗造成2倍伤害。",
+        "en": "<h1>Use: Place Banner</h1> Creates a banner at the target location. Lane creeps in the area of effect become damage immune while the Banner is up. Lasts 90 seconds.<br><br> Can be destroyed. Melee hero attacks deal 2x damage to the banner.",
+        "ru": "<h1>Использование: Place Banner</h1> Устанавливает в указанной точке знамя, которое делает неуязвимыми союзных крипов на линии в области действия. Знамя существует 90 сек. или пока его не уничтожат. Герои ближнего боя наносят ему двойной урон."
+      },
+      "ability": {
+        "behavior": "point",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "效果作用范围：",
+              "en": "EFFECT RADIUS:",
+              "ru": "РАДИУС ДЕЙСТВИЯ:"
+            },
+            "levels": [
+              "600",
+              "900",
+              "1200"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "可攻击次数：",
+              "en": "HITS TO KILL:",
+              "ru": "ЧИСЛО АТАК ДЛЯ УНИЧТОЖЕНИЯ:"
+            },
+            "levels": [
+              "10",
+              "20",
+              "30"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "1.0"
+        ],
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_light_part",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "可以用来将装备进行圣光改造。升级后的装备将放在主背包中。 <br>无法合成时，请尝试从备用背包中移动至主背包或仓库，或扔下再捡起。",
+        "en": "Can be used to transform items into light-themed upgrades.<br>If a Light Part cannot be combined, try moving it from the backpack or stash to the main inventory, or drop it and pick it up again.",
+        "ru": "Can be used to transform items into light-themed upgrades.<br>If a Light Part cannot be combined, try moving it from the backpack or stash to the main inventory, or drop it and pick it up again."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "攻击力",
+              "en": "Damage",
+              "ru": "к урону"
+            },
+            "sign": "+",
+            "levels": [
+              "80"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "在白天击杀肉山和中立生物时，有几率随机掉落。",
+          "en": "Drops randomly when killing Roshan and neutral creeps during the day.",
+          "ru": "Drops randomly when killing Roshan and neutral creeps during the day."
+        }
+      }
+    },
+    {
+      "name": "item_dark_part",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "可以用来将装备进行暗影改造。升级后的装备将放在主背包中。<br>无法合成时，请尝试从备用背包中移动至主背包或仓库，或扔下再捡起。",
+        "en": "Can be used to transform items into dark-themed upgrades.<br>If a Dark Part cannot be combined, try moving it from the backpack or stash to the main inventory, or drop it and pick it up again.",
+        "ru": "Can be used to transform items into dark-themed upgrades.<br>If a Dark Part cannot be combined, try moving it from the backpack or stash to the main inventory, or drop it and pick it up again."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "技能伤害",
+              "en": "Spell Damage",
+              "ru": "к урону от заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "30"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "在夜间击杀肉山和中立生物时，有几率随机掉落。",
+          "en": "Drops randomly when killing Roshan and neutral creeps during the night.",
+          "ru": "Drops randomly when killing Roshan and neutral creeps during the night."
+        }
+      }
+    },
+    {
+      "name": "item_veil_of_discord_2",
+      "group": "all",
+      "tier": 4,
+      "desc": {
+        "zh": "<h1>主动：法术虚弱</h1>发出一波弱化冲击，使900范围内敌方英雄受到的技能伤害增加20%。<br><br>可以在持续施法期间施放。<br><br>持续时间：16.0秒。",
+        "en": "<h1>Active: Spell Weakness</h1> Cast a 900 radius blast that causes enemy heroes to take 20% increased damage from spells.<br><br>Can be cast while channeling.<br><br>Duration: 16.0 seconds.",
+        "ru": "<h1>Active: Spell Weakness</h1> Cast a 900 radius blast that causes enemy heroes to take 20% increased damage from spells.<br><br>Can be cast while channeling.<br><br>Duration: 16.0 seconds."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": "soft",
+        "values": [
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "350"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "20"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "技能吸血",
+              "en": "Spell Lifesteal",
+              "ru": "к вампиризму заклинаниями"
+            },
+            "sign": "+",
+            "levels": [
+              "36"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "16"
+        ],
+        "manaCost": [
+          "200"
+        ],
+        "lore": {
+          "zh": "一个堕落法师的头饰。",
+          "en": "The headwear of corrupt magi.",
+          "ru": "The headwear of corrupt magi."
+        }
+      }
+    },
+    {
+      "name": "item_consumable_gem",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>使用: 消耗</h1> 使用后赋予英雄在900范围内的真视效果。<br>真视增益将持续10分钟。<br><br>拥有5点能量。每次死亡消耗1点能量。当所有能量耗尽时，增益将被移除。",
+        "en": "<h1>Use: Consume</h1> Consume the Phantom Gem to grant yourself True Sight within 900 range.<br>True Sight will last for 10 minutes.<br>The buff has 5 charges. Each death consumes 1 charge. The buff is removed when all charges are consumed.",
+        "ru": "<h1>Use: Consume</h1> Consume the Phantom Gem to grant yourself True Sight within 900 range.<br>True Sight will last for 10 minutes.<br>The buff has 5 charges. Each death consumes 1 charge. The buff is removed when all charges are consumed."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_candy_candy",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "吃了这颗糖，就是一嘉人了。<br/>可以获得所有强化神符的加成效果，持续40秒。",
+        "en": "Eat this candy, you are a fan of Diana.<br/>Grants the effects of all Power Runes for 40 seconds (except Shield).",
+        "ru": "Eat this candy, you are a fan of Diana.<br/>Grants the effects of all Power Runes for 40 seconds (except Shield)."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "alliedHeroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": [
+          "120.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "嘉然，我好喜欢你啊！为了你，我要听猫中毒！",
+          "en": "Diana, I love you so much! For you, I'm going to listen to Cat Addiction!",
+          "ru": "Diana, I love you so much! For you, I'm going to listen to Cat Addiction!"
+        }
+      }
+    },
+    {
+      "name": "item_force_staff_2",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>主动：风力</h1>将任何目标单位向其面对方向推进900距离。<br><br>施法距离：900",
+        "en": "<h1>Active: Wind Force</h1>Pushes any target unit 900 units in the direction it is facing.<br><br>Cast Range: 900",
+        "ru": "<h1>Active: Wind Force</h1>Pushes any target unit 900 units in the direction it is facing.<br><br>Cast Range: 900"
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "units",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "3"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "技能伤害",
+              "en": "Spell Damage",
+              "ru": "к урону от заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "18.0"
+        ],
+        "manaCost": [
+          "175"
+        ],
+        "lore": {
+          "zh": "让你可以操纵他人，不论出于善或恶。",
+          "en": "Allows you to manipulate others, for good or evil.",
+          "ru": "Allows you to manipulate others, for good or evil."
+        }
+      }
+    },
+    {
+      "name": "item_sange_and_yasha",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "",
+        "en": "",
+        "ru": ""
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "<font color='#b99012'>状态抗性</font>",
+              "en": "Status Resistance",
+              "ru": "к сопротивлению эффектам"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "20"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "移动速度",
+              "en": "Movement Speed",
+              "ru": "к скорости передвижения"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命回复",
+              "en": "Health Restoration",
+              "ru": "к пополнению здоровья"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "<font color='#9ec8e3'>减速抗性</font>",
+              "en": "Slow Resistance",
+              "ru": "к сопротивлению замедлениям"
+            },
+            "sign": "+",
+            "levels": [
+              "30"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "散华和夜叉经过月光的照耀而产生共鸣，双剑合璧发挥出更大的威力。",
+          "en": "Sange and Yasha, when attuned by the moonlight and used together, become a very powerful combination.",
+          "ru": "Сандж и Яша, собранные вместе и ведомые лунным светом, становятся грозным оружием."
+        }
+      }
+    },
+    {
+      "name": "item_kaya_and_sange",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "",
+        "en": "",
+        "ru": ""
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "<font color='#9ec8e3'>减速抗性</font>",
+              "en": "Slow Resistance",
+              "ru": "к сопротивлению замедлениям"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复增强",
+              "en": "Mana Regen Amplification",
+              "ru": "к усилению восстановления маны"
+            },
+            "sign": "+",
+            "levels": [
+              "30"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "技能增强",
+              "en": "Spell Amplification",
+              "ru": "к урону от заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命回复",
+              "en": "Health Restoration",
+              "ru": "к пополнению здоровья"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法消耗/魔法损失降低",
+              "en": "Mana Cost/Mana Loss Reduction",
+              "ru": "к уменьшению расхода и потери маны"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "这是三大利器的其中两件，因为他们都蕴含着不可思议的力量，很多人相信他们全是在同一个附魔师的熔炉中打造的。",
+          "en": "Two of three known items of unimaginable power that many believe were crafted at the same enchanter's forge.",
+          "ru": "Это лишь два оружия невиданной мощи из трёх. Многие поговаривают, что все они были созданы в печи одного и того же заклинателя."
+        }
+      }
+    },
+    {
+      "name": "item_yasha_and_kaya",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "",
+        "en": "",
+        "ru": ""
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "16"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "20"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复增强",
+              "en": "Mana Regen Amplification",
+              "ru": "к усилению восстановления маны"
+            },
+            "sign": "+",
+            "levels": [
+              "30"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "移动速度",
+              "en": "Movement Speed",
+              "ru": "к скорости передвижения"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "技能增强",
+              "en": "Spell Amplification",
+              "ru": "к урону от заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "施法速度加成",
+              "en": "Cast Speed Bonus",
+              "ru": "к скорости применения заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "夜叉和慧光配成一对时会产生共鸣。",
+          "en": "Yasha and Kaya when paired together share a natural resonance.",
+          "ru": "Когда Яша и Кайя оказываются рядом, между ними возникает естественная связь."
+        }
+      }
+    },
+    {
+      "name": "item_bfury",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>主动：砍伐</h1>砍伐一根指定树木。<br><br><h1>被动：压制</h1>对非英雄单位进行物理攻击会造成额外伤害，近战英雄为10点，远程英雄为5点。<br><br><h1>被动：分裂</h1>普通攻击时对目标周围最远650距离的锥形区域内敌人造成60%物理伤害。对非英雄单位造成40%物理伤害。（仅近战有效）",
+        "en": "<h1>Active: Chop Tree</h1> Destroy a target tree. <br><br><h1>Passive: Quell</h1> Increases attack damage against non-hero units by 10 for melee heroes, and 5 for ranged. <br><br><h1>Passive: Cleave</h1> Deals 60% of attack damage as physical damage in a cone up to 650 around the target. Deals 40% against creeps. (Melee Only)",
+        "ru": "<h1>Активное: Chop Tree</h1> Срубает выбранное дерево.<br><br><h1>Пассивное: Quell</h1> Увеличивает урон от атак по существам, не являющимися героями, на 10 для героев ближнего боя и на 5 — для дальнего. <br><br><h1>Пассивное: Cleave</h1> Атаки героя прорубают жертву, нанося врагам в радиусе 650 вокруг неё физический урон (только в ближнем бою).<br><br>• Урон героям: 60%<br>• Урон крипам: 40%"
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "攻击力",
+              "en": "Damage",
+              "ru": "к урону"
+            },
+            "sign": "+",
+            "levels": [
+              "50"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命恢复",
+              "en": "Health Regeneration",
+              "ru": "к восстановлению здоровья"
+            },
+            "sign": "+",
+            "levels": [
+              "7.5"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "2.75"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "3.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "握着这把强大的斧头可以一次砍倒一片敌人。",
+          "en": "The bearer of this mighty axe gains the ability to cut down swaths of enemies at once.",
+          "ru": "Владелец этого могучего топора может выкашивать врагов целыми рядами."
+        }
+      }
+    },
+    {
+      "name": "item_solar_crest",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>主动：日耀</h1>对友军施放可以提供5点护甲，60攻击速度，15%移动速度和1400点生命的<font color='#b94512'>物理伤害护盾</font>。<br><br>对自身施放时不会提供护甲、移动速度和攻击速度加成。<br><br>持续时间：10",
+        "en": "<h1>Active: Shine</h1>When cast on an ally, grants them 5 armor, 60 attack speed, 15% movement speed and a 1400 physical damage barrier. <br><br>Does not grant bonus armor, movement or attack speed if used on self. <br><br>Duration: 10",
+        "ru": "<h1>Активное: Shine</h1> Даёт выбранному союзнику физический барьер на 1400 здоровья, +5 к броне, +60 к скорости атаки и +15% к скорости передвижения.<br><br>При применении на себя владелец получит только барьер.<br><br>Длительность: 10 сек."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "alliedUnits",
+        "damageType": null,
+        "piercesImmunity": "no",
+        "dispellable": "soft",
+        "values": [
+          {
+            "label": {
+              "zh": "护甲",
+              "en": "Armor",
+              "ru": "к броне"
+            },
+            "sign": "+",
+            "levels": [
+              "7"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "移动速度",
+              "en": "Movement Speed",
+              "ru": "к скорости передвижения"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法值",
+              "en": "Mana",
+              "ru": "к мане"
+            },
+            "sign": "+",
+            "levels": [
+              "200"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "200"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "16.0"
+        ],
+        "manaCost": [
+          "100"
+        ],
+        "lore": {
+          "zh": "为了纪念炎日天空所打造的护符。",
+          "en": "A talisman forged to honor the daytime sky.",
+          "ru": "Талисман, выкованный во хвалу дневного неба."
+        }
+      }
+    },
+    {
+      "name": "item_aether_lens_2",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>被动：以太焦点</h1>提升指向性技能和物品的施法距离。",
+        "en": "<h1>Passive: Aethereal Focus</h1> Increases targeted spell and item cast range.",
+        "ru": "<h1>Passive: Aethereal Focus</h1> Increases targeted spell and item cast range."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "魔法值",
+              "en": "Mana",
+              "ru": "к мане"
+            },
+            "sign": "+",
+            "levels": [
+              "400"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "3"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "施法距离",
+              "en": "Cast Range",
+              "ru": "к дальности применения заклинаний"
+            },
+            "sign": "+",
+            "levels": [
+              "250"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_wings_of_haste",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>使用：永久升级</h1>消耗急速之翼永久获得 100 移动速度, 25 攻击速度, 8 生命恢复, 5 魔法恢复。",
+        "en": "<h1>Use: Hasten</h1> Consume the Wings of Haste to permanently gain 100 movement speed, 25 attack speed, 8 health regeneration, and 5 mana regeneration.<br>This item may be used on allied heroes who have not consumed this item yet.",
+        "ru": "<h1>Use: Hasten</h1> Consume the Wings of Haste to permanently gain 100 movement speed, 25 attack speed, 8 health regeneration, and 5 mana regeneration.<br>This item may be used on allied heroes who have not consumed this item yet."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "alliedHeroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "移动速度",
+              "en": "Movement Speed",
+              "ru": "к скорости передвижения"
+            },
+            "sign": "+",
+            "levels": [
+              "100"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "15"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命恢复",
+              "en": "Health Regeneration",
+              "ru": "к восстановлению здоровья"
+            },
+            "sign": "+",
+            "levels": [
+              "8"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "5"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "Wings that grant swift retribution in battle.",
+          "en": "Wings that grant swift retribution in battle.",
+          "ru": "Wings that grant swift retribution in battle."
+        }
+      }
+    },
+    {
+      "name": "item_crellas_crozier",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>主动：鲁姆斯克仪式</h1>进入<font color='#57e550'>鬼魂</font>形态，持续4.0秒，对物理伤害免疫，但是无法攻击，并且承受的魔法伤害增加-30%。<br><br>每秒从900范围内的敌方英雄窃取6%移动速度。移动速度的窃取效果持续2.0秒。<br><br>腐化光环效果提升至90%。每秒所有减少的生命回复都会转移到身上。<br><br><h1>被动：腐化光环</h1>附近敌方英雄的生命回复减少30%。<br><br>作用范围：900",
+        "en": "<h1>Active: Rite of Rumusque</h1> You enter ghost form for 4.0 seconds, becoming immune to physical damage, but are unable to attack and -30% more vulnerable to magic damage.<br><br>Steal 6% movement speed from enemy heroes in 900 range every second. Movement speed steal lasts 2.0s.<br><br>Putrefaction Aura's effect is increased to 90%. All of the lost Health Restoration is redirected to you every second.<br><br><h1>Passive: Putrefaction Aura</h1>Reduces nearby enemy heroes' Health Restoration by 30%.<br><br>Radius: 900",
+        "ru": "<h1>Активное: Rite of Rumusque</h1> Придаёт владельцу бесплотный облик, который полностью защищает от физического урона, но не позволяет атаковать и увеличивает получаемый магический урон на -30%. Действует 4.0 сек.<br><br>Каждую секунду крадёт 6% скорости передвижения у вражеских героев в радиусе 900 на 2.0 сек.<br><br><h1>Пассивное: Putrefaction Aura</h1>Уменьшает пополнение здоровья врагов поблизости на 30%. Под действием Rite of Rumusque эффект увеличивается до 90%, а всё потерянное врагами пополнение здоровья каждую секунду перенаправляется владельцу.<br><br>Радиус: 900"
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": "soft",
+        "values": [
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "6"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "450"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法值",
+              "en": "Mana",
+              "ru": "к мане"
+            },
+            "sign": "+",
+            "levels": [
+              "450"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "20.0"
+        ],
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_specialists_array",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>被动：分裂射击</h1>远程攻击有30%的概率向非原攻击目标的前方120度角内、攻击距离+150距离内的最多2个附近敌人发射额外弹道。额外弹道造成20 + 75%普通攻击伤害，并且不会触发击中效果。主攻击造成20 + 100%普通攻击伤害。",
+        "en": "<h1>Passive: Splitshot</h1>Ranged attacks have a 30% chance to fire additional projectiles at up to 2 nearby enemies with 150 extra range and within a 120 degree angle in front of the attacker. The additional projectiles deal 20 + 75% damage of a normal attack and do not trigger on hit effects. The primary attack deals 20 + 100% damage of a normal attack.",
+        "ru": "<h1>Пассивное: Splitshot</h1>С вероятностью в 30% каждая атака дальнего боя может поразить ещё до 2 целей в радиусе атаки + 150. Дополнительные цели должны находиться в 120-градусном конусе перед владельцем, получают 20 базового урона + 75% урона от атак, и на них не срабатывают эффекты атаки. Основная цель получает 20 базового урона + 100% урона от атак."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "15"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击力",
+              "en": "Damage",
+              "ru": "к урону"
+            },
+            "sign": "+",
+            "levels": [
+              "20"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "加强扳机的出色器具，源自一位年迈的刺客闲暇时的想法。",
+          "en": "An impressive kit of trigger enhancements born in an aging assassin's idle mind.",
+          "ru": "Впечатляющий набор всевозможных улучшений для оружия, созданных праздным умом стареющего убийцы."
+        }
+      }
+    },
+    {
+      "name": "item_hand_of_group",
+      "group": "all",
+      "tier": 3,
+      "desc": {
+        "zh": "<h1>主动：点石成金</h1> 立刻炼化一个普通单位，获得 360 金钱和 2 倍经验值。<br>周围 1800 范围内的友军获得 80 金钱和 0.5 倍经验值。<br><br>无法用于远古单位。<br><br>施法距离：600",
+        "en": "<h1>Active: Transmute</h1> Kills a non-hero target for 360 gold and 2x experience. <br>Allies within 1800 gain 80 gold and 0.5x experience.<br><br> Cannot be used on Ancient Creeps.<br><br>Range: 600",
+        "ru": "<h1>Active: Transmute</h1> Kills a non-hero target for 360 gold and 2x experience. <br>Allies within 1800 gain 80 gold and 0.5x experience.<br><br> Cannot be used on Ancient Creeps.<br><br>Range: 600"
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "enemyUnits",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "100"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "明智的选择，科学的投资。",
+          "en": "A wise choice and scientific investment.",
+          "ru": "A wise choice and scientific investment."
+        }
+      }
+    },
+    {
+      "name": "item_tome_of_knowledge",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>使用：启迪</h1>直接获得750点经验值，而且己方在前两本书后每消耗一本知识之书，将额外获得300点经验。",
+        "en": "<h1>Use: Enlighten</h1>Grants you 750 experience plus 300 per tome consumed by your team after the first two.",
+        "ru": "<h1>Использование: Enlighten</h1> Даёт 750 базового опыта + 300 опыта за каждое предыдущее применение этого предмета в вашей команде, не считая первых двух."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "让兽变成人，人变成神的东西。",
+          "en": "That which raises beast to man and man to god.",
+          "ru": "Источник силы, превращающей зверя в человека, а человека — в бога."
+        }
+      }
+    },
+    {
+      "name": "item_aghanims_shard",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>被动：技能升级</h1>使英雄升级一个已有技能，或新增一个技能。",
+        "en": "<h1>Passive: Ability Upgrade</h1>Upgrades an existing ability or adds a new ability to your hero.",
+        "ru": "<h1>Пассивное: Ability Upgrade</h1>Улучшает существующую способность героя или даёт ему новую."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "这块不可思议的水晶只有一名巫师知晓它的起源，而水晶的碎片几乎与赫赫有名的神杖一样让人梦寐以求。",
+          "en": "With origins known only to a single wizard, fragments of this impossible crystal are nearly as coveted as the renowned scepter itself.",
+          "ru": "Лишь один чародей знает, откуда берутся осколки этих невозможных кристаллов, и потому они не менее желанны, чем его прославленный скипетр."
+        }
+      }
+    },
+    {
+      "name": "item_great_famango",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>使用：吞食莲花</h1>立刻回复2000点生命和魔法。",
+        "en": "<h1>Use: Eat Lotus</h1> Instantly restores 2000 health and mana.",
+        "ru": "<h1>Использование: Eat Lotus</h1> Мгновенно восстанавливает 2000 здоровья и маны."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": "alliedHeroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_hand_of_midas",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>主动：炼金</h1>立刻炼化一个普通单位，获得160金钱。对中立生物使用时，在允许的情况下会掉落一包狂石。<br><br>无法用于远古单位。",
+        "en": "<h1>Active: Transmute</h1> Kills a non-hero target for 160 gold. Killing a neutral creep additionally grants a madstone bundle. <br><br> Cannot be used on Ancient creeps.",
+        "ru": "<h1>Активное: Transmute</h1> Убивает выбранную цель (но не героя) и даёт за неё 160 золота. При применении на нейтрального крипа гарантирует получение безумрудов, если не все из них получены.<br><br>Не действует на древних крипов."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "enemyUnits",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "40"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "以未知的魔法手段维持着的迈达斯之手，是件贪婪的武器，通过炼化生灵来装满持有者的腰包。",
+          "en": "Preserved through unknown magical means, the Hand of Midas is a weapon of greed, sacrificing animals to line the owner's pockets.",
+          "ru": "Эта перчатка, сохранившаяся благодаря неведомой магии, служит жадности владельца, наполняя его карманы золотом в обмен на жизни животных."
+        }
+      }
+    },
+    {
+      "name": "item_force_staff",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>主动：原力</h1>将任何目标单位向其面对方向推进600距离。",
+        "en": "<h1>Active: Force</h1>Pushes any target unit 600 units in the direction it is facing.",
+        "ru": "<h1>Активное: Force</h1>Толкает выбранное существо в направлении его взгляда на расстояние в 600."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "units",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "175"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "19.0"
+        ],
+        "manaCost": [
+          "150"
+        ],
+        "lore": {
+          "zh": "让你可以操纵他人，不论出于善或恶。",
+          "en": "Allows you to manipulate others, for good or evil.",
+          "ru": "Позволяет вам манипулировать другими во благо или во зло."
+        }
+      }
+    },
+    {
+      "name": "item_glimmer_cape",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>主动： 微光</h1>经过0.5秒延迟后，自身或者友方目标单位进入<font color='#d7ccc7'>隐身</font>状态， 获得40移动速度加成和可以吸收最多600点伤害的<font color='#1278b9'>魔法护盾</font>。持续5秒。<br><br>可以在持续施法时施放。",
+        "en": "<h1>Active: Glimmer</h1> After a 0.5 second delay, grants invisibility, 40 movement speed and a magic damage barrier that absorbs up to 600 damage to you or a target allied unit for 5 seconds.<br><br>Can be cast while channeling.",
+        "ru": "<h1>Активное: Glimmer</h1> После задержки в 0.5 сек. даёт владельцу или выбранному союзнику невидимость, +40 к скорости передвижения и барьер, поглощающий до 600 магического урона. Действует 5 сек.<br><br>Не останавливает прерываемые способности."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "alliedUnits",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": "soft",
+        "values": [
+          {
+            "label": {
+              "zh": "魔法抗性",
+              "en": "Magic Resistance",
+              "ru": "к сопротивлению магии"
+            },
+            "sign": "+",
+            "levels": [
+              "30"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "15.0"
+        ],
+        "manaCost": [
+          "50"
+        ],
+        "lore": {
+          "zh": "一位幻术大师失窃的披风。",
+          "en": "The stolen cape of a master illusionist.",
+          "ru": "Украденная накидка великого иллюзиониста."
+        }
+      }
+    },
+    {
+      "name": "item_essence_distiller",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>主动：灵魂释放</h1>对友方单位施放时提供40点/秒生命恢复。<br><br>可以对地面施放，使其潜伏最多15.0秒并附着在第一个进入450范围的敌人。对敌方单位施放时造成25点每秒伤害，并且提供敌人的真实视域，与佩戴者全队共享他们的视野。<br><br>持续8.0秒。<br><br>每次1500范围内有敌方英雄阵亡时获得能量。",
+        "en": "<h1>Active: Soul Release</h1> Provides 40 health regeneration when cast on allies.<br><br>Can be ground targeted to lie dormant for up to 15.0s and attach to the first enemy that comes within 450 radius. When on enemies, deals 25 damage per second and provides True Sight over them and shares their vision with the wearer's team.<br><br>Lasts 8.0 seconds.<br><br>Gains charges every time an enemy hero dies within 1500 units.",
+        "ru": "<h1>Активное: Soul Release</h1>Если применить на союзника, увеличит его восстановление здоровья на 40 в секунду.<br><br>Если применить на точку, в течение 15.0 сек. там будет находиться бездействующий эффект, который сработает на первого противника, оказавшегося в радиусе 450. Эффект наносит жертве 25 урона в секунду, раскрывает её невидимость и делится её обзором с командой владельца.<br><br>Длительность: 8.0 сек.<br><br>Получает заряды каждый раз, когда в радиусе 1500 от владельца умирает вражеский герой."
+      },
+      "ability": {
+        "behavior": "unitOrPoint",
+        "targeting": "heroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "1.5"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "3"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "护甲",
+              "en": "Armor",
+              "ru": "к броне"
+            },
+            "sign": "+",
+            "levels": [
+              "6"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法值",
+              "en": "Mana",
+              "ru": "к мане"
+            },
+            "sign": "+",
+            "levels": [
+              "150"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "10.0"
+        ],
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_ancient_janggo",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>主动：坚韧</h1>为周围友军提供+35攻速加成和+13%移动速度加成，持续6秒。<br><br>作用范围：1200<br><br><h1>被动：迅捷光环</h1>为周围友军提供15移动速度和2.5点/秒生命恢复。<br><br>作用范围：1200",
+        "en": "<h1>Active: Endurance</h1> Gives +35 attack speed and +13% movement speed to nearby allies for 6 seconds.<br><br>Radius: 1200  <br><br><h1>Passive: Swiftness Aura</h1>Grants 15 movement speed and 2.5 health regeneration to allies.  <br><br>Radius: 1200",
+        "ru": "<h1>Активное: Endurance</h1> Увеличивает союзникам вокруг скорость атаки на 35 и скорость передвижения на 13%. Действует 6 сек.<br><br>Радиус: 1200<br><br><h1>Пассивное: Swiftness Aura</h1>Увеличивает скорость передвижения союзников вокруг на 15, а их восстановление здоровья — на 2.5.<br><br>Радиус: 1200"
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "8"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "45.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "在危难时刻能鼓舞周围人士气的遗物。",
+          "en": "A relic that enchants the bodies of those around it for swifter movement in times of crisis.",
+          "ru": "Реликвия, в неспокойные времена зачаровывающая тела воинов вокруг, дабы те двигались скорее."
+        }
+      }
+    },
+    {
+      "name": "item_holy_locket",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>主动：充能</h1>使友方单位目标受到的治疗增强提升15%，持续4.0秒，并且立刻根据能量点数回复相应的生命和魔法，每点能量恢复17点生命和15点魔法。<br><br>每10秒自动获得一点能量，每当附近1200范围内有可见敌人施放技能也会获得一点。<br><br><h1>被动：神圣福佑</h1>自身提供的治疗效果提升10%。",
+        "en": "<h1>Active: Energy Charge</h1>Target an allied unit to increase their incoming Heal Amplification by 15% for 4.0s and instantly restore 17 health and 15 mana per charge stored. <br><br>Automatically gains a charge every 10 seconds and whenever a visible enemy within 1200 range uses an ability.<br><br><h1>Passive: Holy Blessing</h1>Amplifies heals you provide by 10%.",
+        "ru": "<h1>Активное: Energy Charge</h1>Применяет на союзника эффект, который на 4.0 сек. увеличивает получаемое им лечение на 15% и мгновенно восстанавливает ему 17 здоровья и 15 маны за каждый заряд.<br><br>Получает один заряд каждые 10 сек. и каждый раз, когда видимый враг в радиусе 1200 использует способность.<br><br><h1>Пассивное: Holy Blessing</h1>Все лечащие заклинания владельца восстанавливают на 10% больше здоровья."
+      },
+      "ability": {
+        "behavior": "target",
+        "targeting": "alliedHeroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "冷却时间：",
+              "en": "COOLDOWN:",
+              "ru": "ПЕРЕЗАРЯДКА:"
+            },
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "一件珍贵的圣物，多年以来人们认为在远征失败后已经永远地遗失了。",
+          "en": "A prized relic long thought lost forever in a failed crusade.",
+          "ru": "Заветная реликвия, которая долгое время считалась утерянной в неудавшемся походе."
+        }
+      }
+    },
+    {
+      "name": "item_consecrated_wraps",
+      "group": "all",
+      "tier": 2,
+      "desc": {
+        "zh": "<h1>被动：神圣化</h1>每4秒获得一点能量，最多为3点。获得一点能量时，移动速度提升15%，持续5秒。<br><br>只要受到来自玩家控制来源或肉山的伤害，所有能量都会被消耗，并获得<font color='#b97812'>全伤害护盾</font>，持续5秒，每点能量可以吸收120点伤害（最高为360点）。",
+        "en": "<h1>Passive: Hallowed</h1> Gain a charge every 4s, up to a maximum of 3 charges. Upon gaining a charge, your movement speed is increased by 15% for 5s.<br><br>Whenever you take damage from a player-controlled source or Roshan, consume all charges to gain an all damage barrier for 5s that absorbs 120 damage per charge (360 max).",
+        "ru": "<h1>Пассивное: Hallowed</h1> Каждые 4 сек. владелец получает один заряд этой способности, а его скорость передвижения на 5 сек. увеличивается на 15%. Максимум зарядов: 3.<br><br>Когда владелец получает урон от подконтрольного игроку существа или Рошана, все заряды расходуются, и на 5 сек. даётся барьер от всех типов урона, имеющий 120 здоровья за заряд (максимум — 360)."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": "soft",
+        "values": [
+          {
+            "label": {
+              "zh": "魔法抗性",
+              "en": "Magic Resistance",
+              "ru": "к сопротивлению магии"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "5"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "250"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": null
+      }
+    },
+    {
+      "name": "item_bracer",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "",
+        "en": "",
+        "ru": ""
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命恢复",
+              "en": "Health Regeneration",
+              "ru": "к восстановлению здоровья"
+            },
+            "sign": "+",
+            "levels": [
+              "3"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "生命值",
+              "en": "Health",
+              "ru": "к здоровью"
+            },
+            "sign": "+",
+            "levels": [
+              "100"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "护腕是增强防御、延长寿命的常见选择。",
+          "en": "The bracer is a common choice to toughen up defenses and increase longevity.",
+          "ru": "Наручи подойдут в том случае, если нужно укрепить защиту и повысить живучесть."
+        }
+      }
+    },
+    {
+      "name": "item_wraith_band",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "",
+        "en": "",
+        "ru": ""
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "护甲",
+              "en": "Armor",
+              "ru": "к броне"
+            },
+            "sign": "+",
+            "levels": [
+              "3.5"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "总是回响着微弱耳语的圆环。",
+          "en": "A circlet with faint whispers echoing about it.",
+          "ru": "Тиара, от которой доносится лёгкий шёпот."
+        }
+      }
+    },
+    {
+      "name": "item_null_talisman",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "",
+        "en": "",
+        "ru": ""
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "智力",
+              "en": "Intelligence",
+              "ru": "к интеллекту"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "力量",
+              "en": "Strength",
+              "ru": "к силе"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "敏捷",
+              "en": "Agility",
+              "ru": "к ловкости"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "最大魔法值",
+              "en": "Max Mana",
+              "ru": "максимальной маны"
+            },
+            "sign": "+",
+            "levels": [
+              "6"
+            ],
+            "percent": true,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "2"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "由锁链装饰起来的小巧的宝石。",
+          "en": "A small gemstone attached to several chains.",
+          "ru": "Небольшой драгоценный камень на нескольких цепочках."
+        }
+      }
+    },
+    {
+      "name": "item_infused_raindrop",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "<h1>被动：魔法伤害抵挡</h1>受到超过120点伤害时自动触发，消耗一点能量并抵挡600点魔法伤害。<br><br>自带9点能量。能量耗尽后消失。",
+        "en": "<h1>Passive: Magical Damage Block</h1> Consumes a charge to block 600 magic damage from damage instances over 120 damage. <br><br>Comes with 9 charges. When the charges are gone, the item disappears.",
+        "ru": "<h1>Пассивное: Magical Damage Block</h1> Теряет один заряд и блокирует до 600 магического урона. Срабатывает, только если урон был больше 120. <br><br>Изначально имеет 9 зарядов и пропадает вместе с последним из них."
+      },
+      "ability": {
+        "behavior": "passive",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "2.4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "1.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "为魔法突袭提供质朴的防护。",
+          "en": "Elemental protection from magical assaults.",
+          "ru": "Стихийная защита от магических атак."
+        }
+      }
+    },
+    {
+      "name": "item_magic_wand",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "<h1>主动：充能</h1>立刻根据能量点数回复相应的生命和魔法，每点能量恢复20点生命和魔法。<br><br>每当附近1200范围内有可见敌人施放技能都会自动充能（最多20点能量）。",
+        "en": "<h1>Active: Energy Charge</h1>Instantly restores 20 health and mana per charge stored. <br><br>Max 20 charges. Gains a charge whenever a visible enemy within 1200 range uses an ability.",
+        "ru": "<h1>Активное: Energy Charge</h1> Мгновенно восстанавливает 20 здоровья и маны за каждый имеющийся заряд.<br><br> Может иметь до 20 зарядов. Получает один заряд каждый раз, когда видимый враг в радиусе 1200 использует способность."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "全属性",
+              "en": "All Attributes",
+              "ru": "ко всем атрибутам"
+            },
+            "sign": "+",
+            "levels": [
+              "5"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "10.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "一根朴实的魔杖，能够引导魔法能量——巫师学徒和高级术士都对其青睐有加。",
+          "en": "A simple wand used to channel magic energies, it is favored by apprentice wizards and great warlocks alike.",
+          "ru": "Простая волшебная палочка, в которой концентрируют магическую энергию начинающие волшебники и великие колдуны."
+        }
+      }
+    },
+    {
+      "name": "item_bottle",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "<h1>使用：恢复</h1>每次使用都能在2.7秒内恢复110点生命与60点魔法。受到来自敌方英雄或肉山的攻击会失去恢复效果。<br><br>魔瓶在靠近友方泉水时会被灌满。<br><br>按住Ctrl键可以对友军施放。<br><br><h1>被动：储存神符</h1>右键点击神符可以将其存入魔瓶内留作备用，90秒后神符未被使用将会自动激活。<br><br>使用储存的神符后魔瓶将会被灌满。",
+        "en": "<h1>Active: Regenerate</h1>Consumes a charge to restore 110 health and 60 mana over 2.7 seconds. If the hero is attacked by an enemy hero or Roshan, the effect is lost.<br><br>The Bottle automatically refills at the fountain.<br><br>Hold Control to use on an allied hero.<br><br><h1>Passive:  Store Rune</h1>Runes can be stored in the Bottle for later use by right-clicking them. Unused runes will automatically activate after 90 seconds.<br><br>Using a stored rune fully refills the Bottle.",
+        "ru": "<h1>Активное: Regenerate</h1>Тратит один заряд, чтобы постепенно восстановить цели 110 здоровья и 60 маны за 2.7 сек. Восстановление прекращается, если получить урон от вражеского героя или Рошана.<br><br>Заряды можно восполнить возле союзного фонтана.<br><br>Можно применить на союзного героя, зажав клавишу Ctrl.<br><br><h1>Пассивное: Store Rune</h1>В бутыль можно поместить одну руну, чтобы воспользоваться ей позже. Помещённая в бутыль руна активируется сама спустя 90 секунд.<br><br>Руны полностью наполняют бутыль."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": "alliedHeroes",
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [],
+        "cooldown": [
+          "0.5"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "一个流传至今的古老瓶子，内部空间随着时间的流逝逐渐拥有魔力。",
+          "en": "An old bottle that survived the ages, the contents placed inside become enchanted.",
+          "ru": "Старая бутыль, пережившая много веков. Любое её содержимое становится зачарованным."
+        }
+      }
+    },
+    {
+      "name": "item_arcane_boots",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "<h1>主动：补充</h1>回复英雄周围友方单位150点魔法。<br><br>作用范围：1200<br><br><h1>被动：王者光环</h1>提升友方单位1点/秒魔法恢复。<br><br>作用范围：1200<br>多个鞋类物品提供的移动速度加成不叠加。",
+        "en": "<h1>Active: Replenish</h1>Restores 150 mana to all nearby allies.<br><br>Radius: 1200<br><br><h1>Passive: Basilius Aura</h1>Grants 1 mana regeneration to allies.  <br><br>Radius: 1200<br>Movement speed bonuses from multiple pairs of boots do not stack.",
+        "ru": "<h1>Активное: Replenish</h1>Восстанавливает 150 маны всем союзникам вокруг.<br><br>Радиус: 1200<br><br><h1>Пассивное: Basilius Aura</h1> Увеличивает восстановление маны союзников на 1.<br><br>Радиус: 1200<br>Бонусы к скорости передвижения от нескольких пар ботинок не складываются."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "移动速度",
+              "en": "Movement Speed",
+              "ru": "к скорости передвижения"
+            },
+            "sign": "+",
+            "levels": [
+              "45"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法恢复",
+              "en": "Mana Regeneration",
+              "ru": "к восстановлению маны"
+            },
+            "sign": "+",
+            "levels": [
+              "0.25"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "魔法值",
+              "en": "Mana",
+              "ru": "к мане"
+            },
+            "sign": "+",
+            "levels": [
+              "125"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "55.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "装备这种鞋子的法师在战斗中值得重视。",
+          "en": "Magi equipped with these boots are valued in battle.",
+          "ru": "Магу, что носит эти ботинки, всегда рады в бою."
+        }
+      }
+    },
+    {
+      "name": "item_phase_boots",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "<h1>主动：相位移动</h1>提升移动速度并使你可以穿越单位，转身也更快，持续3.0秒。近战英雄提升20%移动速度，远程英雄提升10%移动速度。<br>多个鞋类物品提供的移动速度加成不叠加。",
+        "en": "<h1>Active: Phase</h1> Gives 20% increased movement speed on melee heroes, and 10% on ranged heroes, and lets you move through units and turn more quickly for 3.0 seconds.<br>Movement speed bonuses from multiple pairs of boots do not stack.",
+        "ru": "<h1>Активное: Phase</h1> Увеличивает скорость передвижения на 20% для героев ближнего боя и на 10% для героев дальнего боя, а также позволяет проходить сквозь существ и поворачиваться быстрее. Действует 3.0 сек.<br>Бонусы к скорости передвижения от нескольких пар ботинок не складываются."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "移动速度",
+              "en": "Movement Speed",
+              "ru": "к скорости передвижения"
+            },
+            "sign": "+",
+            "levels": [
+              "50"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击力（近战）",
+              "en": "Damage (MELEE)",
+              "ru": "к урону (БЛИЖНИЙ БОЙ)"
+            },
+            "sign": "+",
+            "levels": [
+              "18"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击力（远程）",
+              "en": "Damage (RANGED)",
+              "ru": "к урону (ДАЛЬНИЙ БОЙ)"
+            },
+            "sign": "+",
+            "levels": [
+              "12"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "护甲",
+              "en": "Armor",
+              "ru": "к броне"
+            },
+            "sign": "+",
+            "levels": [
+              "4"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "8.0"
+        ],
+        "manaCost": null,
+        "lore": {
+          "zh": "穿着它的人可以穿越虚空。",
+          "en": "Boots that allow the wearer to travel between the ether.",
+          "ru": "Ботинки, которые позволяют владельцу путешествовать между слоями реальности."
+        }
+      }
+    },
+    {
+      "name": "item_power_treads",
+      "group": "all",
+      "tier": 1,
+      "desc": {
+        "zh": "<h1>主动：属性切换</h1>将附加属性在力量，敏捷以及智力三者间切换，选择+10点力量，+10点敏捷或+10点智力。<br>多个鞋类物品提供的移动速度加成不叠加。",
+        "en": "<h1>Active: Switch Attribute</h1>Switches between +10 Strength, +10 Agility, or +10 Intelligence.<br>Movement speed bonuses from multiple pairs of boots do not stack.",
+        "ru": "<h1>Активное: Switch Attribute</h1>Меняет атрибут, который получает бонус: +10 к силе, ловкости или интеллекту.<br>Бонусы к скорости передвижения от нескольких пар ботинок не складываются."
+      },
+      "ability": {
+        "behavior": "noTarget",
+        "targeting": null,
+        "damageType": null,
+        "piercesImmunity": null,
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "移动速度（远程英雄）",
+              "en": "Move Speed (Ranged Heroes)",
+              "ru": "к скорости передвижения (ДАЛЬНИЙ БОЙ)"
+            },
+            "sign": "+",
+            "levels": [
+              "45"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "移动速度（近战英雄）",
+              "en": "Move Speed (Melee Heroes)",
+              "ru": "к скорости передвижения (БЛИЖНИЙ БОЙ)"
+            },
+            "sign": "+",
+            "levels": [
+              "55"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "所选属性",
+              "en": "Selected Attribute",
+              "ru": "к выбранному атрибуту"
+            },
+            "sign": "+",
+            "levels": [
+              "10"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "攻击速度",
+              "en": "Attack Speed",
+              "ru": "к скорости атаки"
+            },
+            "sign": "+",
+            "levels": [
+              "25"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": null,
+        "manaCost": null,
+        "lore": {
+          "zh": "一双厚实的皮靴，能根据穿着者的需求切换属性。",
+          "en": "A pair of tough-skinned boots that change to meet the demands of the wearer.",
+          "ru": "Пара сапог, выделанных из жёсткой кожи, способна изменять свои свойства по желанию владельца."
+        }
+      }
+    }
+  ]
+}

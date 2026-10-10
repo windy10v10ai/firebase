@@ -77,14 +77,17 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
       </div>,
     );
   }
-  sections.push(
-    <p
-      key="desc"
-      className={`leading-[1.65] ${variant === 'dialog' ? 'text-[15px]' : 'text-[13px]'}`}
-    >
-      <GameText text={desc} />
-    </p>,
-  );
+  // 纯加属性的物品游戏里也只有数值，没有描述
+  if (desc) {
+    sections.push(
+      <p
+        key="desc"
+        className={`leading-[1.65] ${variant === 'dialog' ? 'text-[15px]' : 'text-[13px]'}`}
+      >
+        <GameText text={desc} />
+      </p>,
+    );
+  }
   if (ability.values.length) {
     sections.push(
       <div key="values" className={`flex flex-col gap-0.75 ${ROW_CLASS}`}>
@@ -136,9 +139,13 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
   ));
 }
 
-/** 标签自带冒号；全角冒号本身带留白，半角冒号后补一个空隙 */
+/** 标签自带冒号；全角冒号本身带留白，半角冒号后补一个空隙。物品的标签里可能带 <font> 着色 */
 function Label({ text }: { text: string }) {
-  return <span className={`text-muted ${text.endsWith('：') ? '' : 'me-1'}`}>{text}</span>;
+  return (
+    <span className={`text-muted ${text.endsWith('：') ? '' : 'me-1'}`}>
+      <GameText text={text} />
+    </span>
+  );
 }
 
 function ValueRow({
@@ -153,6 +160,17 @@ function ValueRow({
   const t = useTranslations('ability');
   // 吃技能增强的伤害数值按伤害类型上色，与游戏提示框一致
   const color = row.spellAmp && damageType ? DAMAGE_COLOR[damageType] : 'text-heading';
+  if (row.sign) {
+    return (
+      <div className="flex flex-wrap items-center">
+        <span className={`font-semibold ${color}`}>{row.sign}</span>
+        <Levels levels={row.levels} percent={row.percent} className={color} />
+        <span className="ms-1 text-muted">
+          <GameText text={label} />
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-wrap items-center">
       <Label text={label} />

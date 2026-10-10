@@ -3,6 +3,8 @@ import { useTranslations } from 'next-intl';
 
 import { pageTitle } from '@/app/lib/page-title';
 
+import WikiTabs from './WikiTabs';
+
 export const generateMetadata = pageTitle('navigation', 'wikiFull');
 
 export default function WikiLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +21,12 @@ export default function WikiLayout({ children }: { children: React.ReactNode }) 
           <p className="text-sm text-muted md:text-base">{t('wiki.description')}</p>
         </div>
       </div>
+      <WikiTabs
+        tabs={[
+          { href: '/wiki/abilities', label: t('wiki.tabs.abilities') },
+          { href: '/wiki/items', label: t('wiki.tabs.items') },
+        ]}
+      />
       {children}
     </div>
   );

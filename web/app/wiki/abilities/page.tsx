@@ -17,10 +17,10 @@ export default async function WikiAbilitiesPage() {
     const asset = abilityAsset(entry.name);
     return {
       key: entry.name,
-      group: entry.pool,
+      group: entry.group,
       tier: entry.tier,
       label: abilityLabel(entry.name, locale),
-      tag: `${t(`poolShort.${entry.pool}`)} · T${entry.tier}`,
+      tag: `${t(`poolShort.${entry.group}`)} · T${entry.tier}`,
       icon: asset?.icon ? abilityIconPath(asset.icon) : null,
       // 搜索不分界面语言：玩家记得的可能是游戏里另一种语言的名字
       search: [asset?.zh, asset?.en, asset?.ru].filter(Boolean).join('\n').toLowerCase(),

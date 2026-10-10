@@ -46,6 +46,8 @@ export interface AbilityValueRow {
   aoe: boolean;
   /** 受技能增强影响 */
   spellAmp: boolean;
+  /** 属性加成行，按「+40 攻击力」把符号与数值排在标签前 */
+  sign?: '+' | '-';
 }
 
 /** 技能提示框要的数据，取数规则见 docs/web/ability-tooltip.md；没有的项为 null 或空数组 */

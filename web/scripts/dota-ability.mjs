@@ -79,16 +79,32 @@ export function parseFlatKv(file) {
 /**
  * 技能 KV 的取值来源，顺序即优先级：自定义觉醒 → 自定义 → 抽奖 → override → 原版合并本 → 原版按英雄。
  * 最后一项不能省：炸弹人的 attack_range_tooltip 只在 heroes/npc_dota_hero_techies.txt 里。
+ * 物品同理：game 的各份物品 KV 在前，原版 items.txt 兜底。
  */
-function kvSourceFiles(game, version) {
+function kvSourceFiles(game, version, kind) {
+  const npc = (file) => path.join(game, 'game/scripts/npc', file);
+  if (kind === 'items') {
+    return [
+      npc('npc_items_custom.txt'),
+      npc('npc_items_artifact.txt'),
+      npc('npc_items_clone.txt'),
+      npc('npc_items_override.txt'),
+      npc('npc_items_override_neutral.txt'),
+      npc('npc_items_override_neutral_passive.txt'),
+      path.join(game, `docs/reference/${version}/items.txt`),
+    ];
+  }
   const heroDir = path.join(game, `docs/reference/${version}/heroes`);
   return [
-    path.join(game, 'game/scripts/npc/npc_abilities_custom_awaken.txt'),
-    path.join(game, 'game/scripts/npc/npc_abilities_custom.txt'),
-    path.join(game, 'game/scripts/npc/npc_abilities_custom_lottery.txt'),
-    path.join(game, 'game/scripts/npc/npc_abilities_override.txt'),
+    npc('npc_abilities_custom_awaken.txt'),
+    npc('npc_abilities_custom.txt'),
+    npc('npc_abilities_custom_lottery.txt'),
+    npc('npc_abilities_override.txt'),
     path.join(game, `docs/reference/${version}/npc_abilities.txt`),
-    ...fs.readdirSync(heroDir).filter((f) => f.endsWith('.txt')).map((f) => path.join(heroDir, f)),
+    ...fs
+      .readdirSync(heroDir)
+      .filter((f) => f.endsWith('.txt'))
+      .map((f) => path.join(heroDir, f)),
   ];
 }
 
@@ -191,7 +207,8 @@ function targetingOf(team, type) {
   if (!team) return null;
   const heroesOnly = !!type && type.includes('HERO') && !type.includes('BASIC');
   if (team.includes('ENEMY')) return type ? (heroesOnly ? 'enemyHeroes' : 'enemyUnits') : 'enemy';
-  if (team.includes('FRIENDLY')) return type ? (heroesOnly ? 'alliedHeroes' : 'alliedUnits') : 'allies';
+  if (team.includes('FRIENDLY'))
+    return type ? (heroesOnly ? 'alliedHeroes' : 'alliedUnits') : 'allies';
   if (team.includes('BOTH')) return heroesOnly ? 'heroes' : 'units';
   return null;
 }
@@ -248,8 +265,21 @@ function valueRows(abilityName, kv, labelOf, damageType) {
     for (const [lang, text] of Object.entries(withFallback(label))) {
       stripped[lang] = text.replace(/^%\s*/, '');
     }
+    // 标签以 + 或 - 开头的是属性加成，游戏里显示为「+40 攻击力」：符号和数值在前，标签在后；
+    // 「+$damage」这种变量写法的属性名取原版的变量译名
+    const stat = stripped.en.match(/^([+-])\s*(\$(\w+))?/);
+    if (stat) {
+      const statName = stat[3] ? labelOf(`dota_ability_variable_${stat[3]}`) : null;
+      if (statName && (!statName.zh || !statName.en)) continue;
+      for (const lang of Object.keys(stripped)) {
+        stripped[lang] = statName
+          ? statName[lang] || statName.en
+          : stripped[lang].replace(/^[+-]\s*/, '').replace(/[:：]\s*$/, '');
+      }
+    }
     rows.push({
       label: stripped,
+      ...(stat ? { sign: stat[1] } : {}),
       levels: new Set(levels).size === 1 ? [levels[0]] : levels,
       percent,
       aoe: flags.get('affected_by_aoe_increase') === '1',
@@ -269,12 +299,12 @@ const levelsOrNull = (raw) =>
   raw && splitLevels(raw).some((v) => Number(v) !== 0) ? splitLevels(raw) : null;
 
 /**
- * 一次读齐 KV 与本地化，返回按技能名取数的函数。langs 决定产出哪几种语言，zh、en 必须在内。
+ * 一次读齐 KV 与本地化，返回按技能名取数的函数。langs 决定产出哪几种语言，zh、en 必须在内；kind 选技能或物品的 KV。
  * 取不到值的描述占位符记进 unresolved，由调用方的自检决定是否放行。
  */
-export function createAbilityReader(game, version, langs) {
+export function createAbilityReader(game, version, langs, kind = 'abilities') {
   const bodiesByAbility = new Map();
-  for (const file of kvSourceFiles(game, version)) {
+  for (const file of kvSourceFiles(game, version, kind)) {
     for (const [name, body] of blockBodies(readText(file))) {
       if (!bodiesByAbility.has(name)) bodiesByAbility.set(name, []);
       bodiesByAbility.get(name).push(body);
@@ -307,10 +337,9 @@ export function createAbilityReader(game, version, langs) {
     const kv = abilityKv(bodies);
     // 描述里的占位符不分大小写，也能引用顶层字段：%abilityduration% 指的是 AbilityDuration
     const values = new Map(
-      [...kv.top, ...[...kv.values].map(([name, { value }]) => [name, value])].map(([name, value]) => [
-        name.toLowerCase(),
-        value,
-      ]),
+      [...kv.top, ...[...kv.values].map(([name, { value }]) => [name, value])].map(
+        ([name, value]) => [name.toLowerCase(), value],
+      ),
     );
     const textureMatch = bodies
       .map((b) => b.match(/"AbilityTextureName"\s*"([^"]+)"/))
@@ -323,8 +352,14 @@ export function createAbilityReader(game, version, langs) {
     const descs = labelOf(`${key}_Description`);
     const text = {};
     for (const lang of langs) {
+      // customval 是游戏里实时变化的计数（如己方已用几本书），网站给不出值，所在的那一行整行不展示
+      const live = descs[lang]
+        .split(/<br>|\n/i)
+        .filter((line) => !/%customval_\w+%/.test(line))
+        .join('<br>')
+        .replace(/(<br>)+$/i, '');
       // 一次从左到右扫完：%% 是百分号的转义，先替换占位符再还原转义会把「%value%%%」拆错
-      const desc = descs[lang].replace(/%([A-Za-z0-9_]*)%/g, (whole, name) => {
+      const desc = live.replace(/%([A-Za-z0-9_]*)%/g, (whole, name) => {
         if (name === '') return '%';
         const lower = name.toLowerCase();
         const value = values.get(lower) ?? values.get(lower.replace(/_tooltip$/, ''));
@@ -349,13 +384,20 @@ export function createAbilityReader(game, version, langs) {
     const lore = labelOf(`${key}_Lore`);
     const ability = {
       behavior: behaviorOf(kv.top.get('AbilityBehavior')),
-      targeting: targetingOf(kv.top.get('AbilityUnitTargetTeam'), kv.top.get('AbilityUnitTargetType')),
+      targeting: targetingOf(
+        kv.top.get('AbilityUnitTargetTeam'),
+        kv.top.get('AbilityUnitTargetType'),
+      ),
       damageType,
       piercesImmunity: immunityOf(kv.top.get('SpellImmunityType')),
       dispellable: DISPELLABLE[kv.top.get('SpellDispellableType')] ?? null,
       values: valueRows(abilityName, kv, labelOf, damageType),
-      cooldown: levelsOrNull(kv.values.get('AbilityCooldown')?.value ?? kv.top.get('AbilityCooldown')),
-      manaCost: levelsOrNull(kv.values.get('AbilityManaCost')?.value ?? kv.top.get('AbilityManaCost')),
+      cooldown: levelsOrNull(
+        kv.values.get('AbilityCooldown')?.value ?? kv.top.get('AbilityCooldown'),
+      ),
+      manaCost: levelsOrNull(
+        kv.values.get('AbilityManaCost')?.value ?? kv.top.get('AbilityManaCost'),
+      ),
       lore: lore.zh && lore.en ? withFallback(lore) : null,
     };
 
@@ -371,8 +413,7 @@ export function createAbilityReader(game, version, langs) {
  * 分支名在 detached HEAD 下只会得到 "HEAD"，而同步脚本从 worktree 跑是常态。
  */
 export function gameHead(game) {
-  const run = (...args) =>
-    execFileSync('git', ['-C', game, ...args], { encoding: 'utf8' }).trim();
+  const run = (...args) => execFileSync('git', ['-C', game, ...args], { encoding: 'utf8' }).trim();
   const commit = run('rev-parse', 'HEAD');
   let onDevelop = false;
   try {

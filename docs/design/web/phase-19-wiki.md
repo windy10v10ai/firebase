@@ -1,6 +1,6 @@
 # 批次 19：百科（技能与物品）
 
-> 状态：进行中。批次 A 技能页、批次 B 物品页。长期规范见 [docs/web/README.md](../../web/README.md) 第 3、4 节、[ability-tooltip.md](../../web/ability-tooltip.md)、[design-system.md](../../web/design-system.md) 第 6 节「抽选档位」。
+> 状态：已完成。长期规范见 [docs/web/README.md](../../web/README.md) 第 3、4 节、[ability-tooltip.md](../../web/ability-tooltip.md)、[design-system.md](../../web/design-system.md) 第 6 节「抽选档位」。
 
 玩家在游戏里抽到技能、开到物品时只看得到名字和图标，想提前知道池子里有什么、某个技能具体做什么，只能进游戏试。#1309 把抽选池整份搬上网站。
 
@@ -18,6 +18,7 @@
 
 ## 不做
 
+- 不显示个数（tab、分区、档位卡都不写）：图鉴看的是池子里有什么，档位卡上的数量还容易被误读成抽中概率
 - 不公开抽中概率：概率随开局点位与藏宝箱种类变，一个数字说不清
 - 不显示物品价格与合成：抽到的物品不花钱
 
