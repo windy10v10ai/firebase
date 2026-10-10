@@ -58,7 +58,7 @@ gcloud storage cp -q gs://windy10v10ai-feedback/2026-10-04/<报告ID>/server.log
 ## 汇总怎么写
 
 1. 先给总数：多少份，问题与建议各多少，按 `topics` 与 `launcherVersion` 分组的数量
-2. 问题类按原因归并，每类写现象、份数、一两个典型报告 ID、日志里看到的原因；`launcherError` 是启动器报错原文与异常，优先看它
+2. 问题类按原因归并，每类写现象、份数、一两个典型报告 ID、日志里看到的原因；`launcherError` 是启动器报错原文与异常，优先看它；卡顿类看 `connection`（加入者的线路、延迟、丢包、房间码），0.5.4 以前的报告没有它，用 Steam ID 与时间去 BigQuery 的 `launcher_room_events` 对
 3. 建议类按 `topics` 归并，合并说法相近的
 4. 结论放最前，写给用户看，遵守根目录 CLAUDE.md 的「回复风格」
 

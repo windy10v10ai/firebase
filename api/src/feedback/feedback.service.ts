@@ -78,6 +78,7 @@ export class FeedbackService {
       ...(dto.windowsVersion && { windowsVersion: dto.windowsVersion }),
       ...(dto.mode && { mode: dto.mode }),
       ...(dto.launcherError && { launcherError: { ...dto.launcherError } }),
+      ...(dto.connection && { connection: toPlain(dto.connection) }),
       ...(dto.gameState && { gameState: toPlain(dto.gameState) }),
       ...(serverLogPath && { serverLog: serverLogPath }),
       ...(clientLogPath && { clientLog: clientLogPath }),
