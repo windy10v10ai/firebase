@@ -12,8 +12,8 @@
     "dailyTaskFull": "Daily Tasks",
     "leaderboard": "Leaderboard",
     "leaderboardFull": "Leaderboard",
-    "wiki": "Skills & Items",
-    "wikiFull": "Skills & Items",
+    "wiki": "Abilities & Items",
+    "wikiFull": "Abilities & Items",
     "workshop": "Steam Workshop",
     "github": "GitHub",
     "membershipShort": "Member",
@@ -94,7 +94,7 @@
         "description": "Preview and refresh your daily tasks"
       },
       "wiki": {
-        "title": "Skills & Items",
+        "title": "Abilities & Items",
         "description": "Abilities and items you can draw in the game"
       },
       "leaderboard": {
