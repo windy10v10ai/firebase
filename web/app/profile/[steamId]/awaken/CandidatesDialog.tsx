@@ -5,6 +5,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
+import { abilityLocale } from '@/app/lib/ability-text';
 import { awakenAssetPath } from '@/app/lib/awaken';
 
 import type { AwakenHero } from '@/config/awaken';
@@ -39,7 +40,7 @@ interface RollProps {
  */
 function CandidatesRoll({ candidates, rollPool, onSelect, onClose }: RollProps) {
   const t = useTranslations('awaken.random');
-  const locale = useLocale() === 'zh' ? 'zh' : 'en';
+  const locale = abilityLocale(useLocale());
   const [rolling, setRolling] = useState<AwakenHero[]>(() => pick(rollPool, SLOTS));
   const [settled, setSettled] = useState(false);
 

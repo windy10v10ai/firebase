@@ -45,7 +45,9 @@ function parseAwakenConfig(file) {
   ];
   const start = text.indexOf('FREE_TRIAL_HEROES');
   const freeTrialBody = text.slice(start, text.indexOf('\n];', start));
-  const freeTrialHeroes = [...freeTrialBody.matchAll(/'(npc_dota_hero_[a-z_]+)'/g)].map((m) => m[1]);
+  const freeTrialHeroes = [...freeTrialBody.matchAll(/'(npc_dota_hero_[a-z_]+)'/g)].map(
+    (m) => m[1],
+  );
   return { replacementHeroes, freeTrialHeroes };
 }
 
@@ -57,7 +59,7 @@ export function loadAwakenSource(repoRoot) {
 
   const display = parseDisplayList(ts.tab);
   const { replacementHeroes, freeTrialHeroes } = parseAwakenConfig(ts.config);
-  const reader = createAbilityReader(game, version, ['zh', 'en']);
+  const reader = createAbilityReader(game, version, ['zh', 'en', 'ru']);
 
   const heroes = display.map((entry) => {
     const { texture, text, ability } = reader.read(entry.abilityName);
@@ -68,6 +70,8 @@ export function loadAwakenSource(repoRoot) {
         ...text[lang],
       };
     }
+    // 俄文缺译的英雄名落英文，与技能文本同一口径
+    heroText.ru.heroName ||= heroText.en.heroName;
     return {
       heroName: entry.heroName,
       abilityName: entry.abilityName,
@@ -79,5 +83,12 @@ export function loadAwakenSource(repoRoot) {
     };
   });
 
-  return { game, version, heroes, replacementHeroes, freeTrialHeroes, unresolved: reader.unresolved };
+  return {
+    game,
+    version,
+    heroes,
+    replacementHeroes,
+    freeTrialHeroes,
+    unresolved: reader.unresolved,
+  };
 }

@@ -71,7 +71,8 @@ export function parseFlatKv(file) {
     .filter((line) => !line.trimStart().startsWith('//'))
     .join('\n');
   for (const m of text.matchAll(/"([^"\r\n]+)"\s*"((?:[^"\\]|\\.)*)"/g)) {
-    map.set(m[1], unescapeKv(m[2]));
+    // 俄文的名词前带 #|m|# 这类语法性别记号，引擎显示时会去掉
+    map.set(m[1], unescapeKv(m[2]).replace(/^#\|[a-z]+\|#/, ''));
   }
   return map;
 }

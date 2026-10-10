@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import AbilityDetails from '@/app/components/AbilityDetails';
 import AbilityDialog from '@/app/components/AbilityDialog';
 import GameText from '@/app/components/GameText';
+import { abilityLocale } from '@/app/lib/ability-text';
 import {
   AWAKEN_MEMBER_POINT_COST,
   AWAKEN_RANDOM_MEMBER_POINT_COST,
@@ -45,7 +46,7 @@ export default function AwakenDialog({
   onConfirm,
 }: AwakenDialogProps) {
   const t = useTranslations('awaken.dialog');
-  const locale = useLocale() === 'zh' ? 'zh' : 'en';
+  const locale = abilityLocale(useLocale());
 
   const seasonCost = fromRandom ? AWAKEN_RANDOM_SEASON_POINT_COST : AWAKEN_SEASON_POINT_COST;
   const memberCost = fromRandom ? AWAKEN_RANDOM_MEMBER_POINT_COST : AWAKEN_MEMBER_POINT_COST;
