@@ -1,11 +1,13 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { useAuth } from '@/app/lib/auth';
 import { fetchPlayerMember, type PlayerInfo } from '@/app/lib/player-info';
+import { invalidatePlayer } from '@/app/lib/queries';
 
 import Section from '../components/Section';
 
@@ -55,6 +57,7 @@ function EmojiLead({ text }: { text: string }) {
 export default function MembershipPage() {
   const t = useTranslations();
   const auth = useAuth();
+  const queryClient = useQueryClient();
   const uid = auth.status === 'authenticated' ? auth.uid : null;
   const [result, setResult] = useState<MemberResult | null>(null);
   const [payRequest, setPayRequest] = useState<AlipayRequest | null>(null);
@@ -84,9 +87,10 @@ export default function MembershipPage() {
 
   const onPaid = useCallback(() => {
     if (uid) {
+      void invalidatePlayer(queryClient, uid);
       loadMember(uid).then((fresh) => setPaidExpireDate(fresh?.member?.expireDateString ?? null));
     }
-  }, [uid, loadMember]);
+  }, [uid, loadMember, queryClient]);
 
   const openPay = useCallback((request: AlipayRequest) => {
     setPayKey((key) => key + 1);

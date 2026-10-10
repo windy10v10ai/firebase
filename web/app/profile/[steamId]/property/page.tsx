@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ import {
   upgradeProperty,
   type PlayerInfo,
 } from '@/app/lib/player-info';
+import { invalidatePlayer } from '@/app/lib/queries';
 import { PROPERTY_GROUPS, PROPERTY_LIST, type PropertyDef } from '@/config/properties';
 
 import PointsCard from './PointsCard';
@@ -35,6 +37,7 @@ export default function PropertyPage() {
   const t = useTranslations('property');
   const { steamId } = useParams<{ steamId: string }>();
 
+  const queryClient = useQueryClient();
   const [result, setResult] = useState<LoadResult | null>(null);
   // 属性名 → 还没提交的档数
   const [pending, setPending] = useState<Record<string, number>>({});
@@ -87,6 +90,7 @@ export default function PropertyPage() {
       try {
         const info = await upgradeProperty(steamId, def.name, targetLevel);
         setResult({ steamId, status: 'ready', info });
+        void invalidatePlayer(queryClient, steamId);
         setPending((current) => {
           const next = { ...current };
           delete next[def.name];
@@ -99,7 +103,7 @@ export default function PropertyPage() {
         setBusy(null);
       }
     },
-    [resync, steamId],
+    [queryClient, resync, steamId],
   );
 
   const handleReset = useCallback(
@@ -109,6 +113,7 @@ export default function PropertyPage() {
       try {
         const info = await resetProperties(steamId, useMemberPoint);
         setResult({ steamId, status: 'ready', info });
+        void invalidatePlayer(queryClient, steamId);
         setPending({});
         setDialogOpen(false);
       } catch {
@@ -119,7 +124,7 @@ export default function PropertyPage() {
         setBusy(null);
       }
     },
-    [resync, steamId],
+    [queryClient, resync, steamId],
   );
 
   if (loaded?.status === 'failed') {

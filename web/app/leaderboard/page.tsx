@@ -1,12 +1,13 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import Notice from '@/app/components/Notice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { useAuth } from '@/app/lib/auth';
-import { fetchLeaderboard, type Leaderboard } from '@/app/lib/leaderboard';
+import { leaderboardQuery } from '@/app/lib/queries';
 
 import LeaderboardRow from './LeaderboardRow';
 import MyRankBar from './MyRankBar';
@@ -18,29 +19,10 @@ export default function LeaderboardPage() {
   const t = useTranslations('leaderboard');
   const auth = useAuth();
   const uid = auth.status === 'authenticated' ? auth.uid : null;
-  const [board, setBoard] = useState<Leaderboard | null>(null);
-  const [failed, setFailed] = useState(false);
+  const { data: board, isError } = useQuery(leaderboardQuery());
   const myRowRef = useRef<HTMLLIElement>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchLeaderboard()
-      .then((result) => {
-        if (!cancelled) {
-          setBoard(result);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (failed) {
+  if (!board && isError) {
     return (
       <Notice title={t('failed.title')}>
         <p className="text-content">{t('failed.description')}</p>
@@ -82,7 +64,7 @@ export default function LeaderboardPage() {
         </ol>
         <MyRankBar
           uid={uid}
-          loaded={board !== null}
+          loaded={board !== undefined}
           listRank={myIndex >= 0 ? myIndex + 1 : null}
           myRowRef={myRowRef}
         />

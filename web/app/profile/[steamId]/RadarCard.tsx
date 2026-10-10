@@ -1,19 +1,19 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import Skeleton from '@/app/components/ui/skeleton';
 import {
   battleRadarCorners,
-  fetchStatsRadar,
   type BattleRadarCorner,
   type PlayerStatsRadarResponse,
 } from '@/app/lib/player-stats-radar';
+import { statsRadarQuery } from '@/app/lib/queries';
 
 type LoadResult =
-  | { steamId: string; status: 'failed' }
-  | { steamId: string; status: 'ready'; data: PlayerStatsRadarResponse };
+  | { status: 'failed' }
+  | { status: 'ready'; data: PlayerStatsRadarResponse };
 
 type LabelSide = 'top' | 'bottom' | 'left' | 'right';
 
@@ -72,29 +72,14 @@ function labelLayout(deg: number, side: LabelSide) {
 
 export default function RadarCard({ steamId }: { steamId: string }) {
   const t = useTranslations('profile.radar');
-  const [result, setResult] = useState<LoadResult | null>(null);
+  const query = useQuery(statsRadarQuery(steamId));
 
-  useEffect(() => {
-    let cancelled = false;
 
-    fetchStatsRadar(steamId)
-      .then((data) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', data });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'failed' });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  const loaded = result?.steamId === steamId ? result : null;
+  const loaded: LoadResult | null = query.data
+    ? { status: 'ready', data: query.data }
+    : query.isError
+      ? { status: 'failed' }
+      : null;
   const data = loaded?.status === 'ready' ? loaded.data : null;
   const radar = data?.radar ? battleRadarCorners(data.radar) : null;
 

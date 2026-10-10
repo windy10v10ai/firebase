@@ -1,19 +1,19 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck, CirclePlus, Sparkles, Trophy } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
-import { fetchBattleRank, formatBattleRank } from '@/app/lib/leaderboard';
-import { fetchPlayerInfo, type PlayerInfo } from '@/app/lib/player-info';
+import { formatBattleRank } from '@/app/lib/leaderboard';
 import { playerPagePath } from '@/app/lib/player-path';
-import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
+import { applyPlayerWrite, battleRankQuery, playerInfoQuery } from '@/app/lib/queries';
+import { useSteamProfile } from '@/app/lib/use-steam-profile';
 import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 
 import FeatureEntryCard from './FeatureEntryCard';
@@ -22,13 +22,6 @@ import PlayerCard from './PlayerCard';
 import RadarCard from './RadarCard';
 import RecentMatchesCard from './RecentMatchesCard';
 import StatsCard from './StatsCard';
-
-// 带上请求时用的 steamId，换一个玩家时旧结果立刻失效，不用先手动置回加载中
-type LoadResult =
-  | { steamId: string; status: 'failed'; httpStatus: number }
-  | { steamId: string; status: 'ready'; info: PlayerInfo };
-
-type RankResult = { steamId: string; rank: number | null } | { steamId: string; failed: true };
 
 const FAILURE_KEY: Record<number, string> = {
   403: 'private',
@@ -39,91 +32,29 @@ export default function ProfilePage() {
   const t = useTranslations('profile');
   const { steamId } = useParams<{ steamId: string }>();
   const auth = useAuth();
-  const { initialProfile } = auth;
-  const [result, setResult] = useState<LoadResult | null>(null);
-  const [steamProfile, setSteamProfile] = useState<SteamProfile | null>(() => initialProfile);
-  const [rankResult, setRankResult] = useState<RankResult | null>(null);
+  const queryClient = useQueryClient();
+  const infoQuery = useQuery(playerInfoQuery(steamId));
+  // 昵称头像与名次各自单独请求：一个要向 Steam 取数，一个要在库里数人数，快慢都不该拖住整页
+  const profile = useSteamProfile(steamId);
+  const rankQuery = useQuery(battleRankQuery(steamId));
 
   // 个人主页能看别人的，签到入口只给本人
   const isSelf = auth.status === 'authenticated' && auth.uid === steamId;
-  const loaded = result?.steamId === steamId ? result : null;
-  const profile = steamProfile?.steamId === steamId ? steamProfile : null;
-  const rank = rankResult?.steamId === steamId ? rankResult : null;
+  const info = infoQuery.data ?? null;
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchPlayerInfo(steamId)
-      .then((info) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', info });
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setResult({
-            steamId,
-            status: 'failed',
-            httpStatus: error instanceof ApiError ? error.status : 0,
-          });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  // 昵称头像单独发一次，与上面那次并行：它要向 Steam 取数，快慢不该拖住整页
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchSteamProfile(steamId).then((fetched) => {
-      if (!cancelled) {
-        setSteamProfile(fetched);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  // 名次也单独发：要在库里数人数，比读玩家数据慢，取失败时入口卡照常能点，只是不带标签
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchBattleRank(steamId)
-      .then((fetched) => {
-        if (!cancelled) {
-          setRankResult({ steamId, rank: fetched });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setRankResult({ steamId, failed: true });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  if (loaded?.status === 'failed') {
+  if (!info && infoQuery.isError) {
+    const httpStatus = infoQuery.error instanceof ApiError ? infoQuery.error.status : 0;
     // 页面不判断登录，看得到看不到由接口说了算
-    if (loaded.httpStatus === 401) {
+    if (httpStatus === 401) {
       return <LoginPanel />;
     }
-    const key = FAILURE_KEY[loaded.httpStatus] ?? 'failed';
+    const key = FAILURE_KEY[httpStatus] ?? 'failed';
     return (
       <Notice title={t(`${key}.title`)}>
         <p className="text-content">{t(`${key}.description`)}</p>
       </Notice>
     );
   }
-
-  const info = loaded?.info ?? null;
 
   return (
     // 电脑宽度左栏放身份卡、右栏放等级卡与入口卡；下一行六边形图在左、战绩在右，近期战绩通栏；更窄时按 DOM 顺序单列，入口卡从平板起两张一行
@@ -138,7 +69,11 @@ export default function ProfilePage() {
         info={info}
         profile={profile}
         onCheckInClaimed={
-          isSelf ? (player) => setResult({ steamId, status: 'ready', info: player }) : undefined
+          isSelf
+            ? (player) => {
+                void applyPlayerWrite(queryClient, steamId, playerInfoQuery(steamId).queryKey, player);
+              }
+            : undefined
         }
       />
       <div className="grid min-w-0 content-start gap-6 lg:col-span-2">
@@ -187,10 +122,10 @@ export default function ProfilePage() {
             Icon={Trophy}
             title={t('entries.leaderboard.title')}
             badge={
-              !rank ? (
+              rankQuery.data !== undefined ? (
+                t('entries.leaderboard.badge', { rank: formatBattleRank(rankQuery.data) })
+              ) : rankQuery.isError ? undefined : (
                 <Skeleton>{t('entries.leaderboard.badge', { rank: '000' })}</Skeleton>
-              ) : 'failed' in rank ? undefined : (
-                t('entries.leaderboard.badge', { rank: formatBattleRank(rank.rank) })
               )
             }
             href="/leaderboard"

@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -7,9 +8,9 @@ import { useEffect, useState } from 'react';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import SteamLoginButton from '@/app/components/SteamLoginButton';
 import Skeleton from '@/app/components/ui/skeleton';
-import { useAuth } from '@/app/lib/auth';
-import { fetchBattleRank, formatBattleRank } from '@/app/lib/leaderboard';
-import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
+import { formatBattleRank } from '@/app/lib/leaderboard';
+import { battleRankQuery } from '@/app/lib/queries';
+import { useSteamProfile } from '@/app/lib/use-steam-profile';
 
 import type { ReactNode, RefObject } from 'react';
 
@@ -33,51 +34,12 @@ interface MyRankBarProps {
 /** 贴在榜单底部的「我的排名」栏；在榜上时整条可点，滚到自己那一行 */
 export default function MyRankBar({ uid, loaded, listRank, myRowRef }: MyRankBarProps) {
   const t = useTranslations('leaderboard');
-  const auth = useAuth();
-  const [profile, setProfile] = useState<SteamProfile | null>(() => auth.initialProfile);
-  // 带上请求时的 uid，换号后旧结果立刻失效
-  const [liveRank, setLiveRank] = useState<{ uid: string; rank: number | null | 'failed' } | null>(
-    null,
-  );
+  const profile = useSteamProfile(uid);
   const [direction, setDirection] = useState<Direction>(null);
-
-  useEffect(() => {
-    if (!uid) {
-      return;
-    }
-    let cancelled = false;
-    fetchSteamProfile(uid).then((fetched) => {
-      if (!cancelled) {
-        setProfile(fetched);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [uid]);
 
   // 不在榜上才需要实时名次；在榜上直接用榜单的名次，与列表保持一致
   const needsLiveRank = uid !== null && loaded && listRank === null;
-  useEffect(() => {
-    if (!needsLiveRank || !uid) {
-      return;
-    }
-    let cancelled = false;
-    fetchBattleRank(uid)
-      .then((rank) => {
-        if (!cancelled) {
-          setLiveRank({ uid, rank });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setLiveRank({ uid, rank: 'failed' });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [needsLiveRank, uid]);
+  const liveRank = useQuery({ ...battleRankQuery(uid ?? ''), enabled: needsLiveRank });
 
   const inList = listRank !== null;
   useEffect(() => {
@@ -114,13 +76,13 @@ export default function MyRankBar({ uid, loaded, listRank, myRowRef }: MyRankBar
         {rankText}
       </span>
       <PlayerAvatar
-        avatarUrl={profile?.steamId === uid ? profile.avatarUrl : null}
+        avatarUrl={profile?.avatarUrl}
         imageClassName="size-9 shrink-0 rounded-lg md:size-10"
         iconClassName="size-9 shrink-0 rounded-lg bg-panel-soft p-2 text-muted md:size-10"
       />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-bold text-heading">
-          {(profile?.steamId === uid && profile.personaName) || uid}
+          {profile?.personaName || uid}
         </span>
         <span className="text-xs text-muted">{t('myRank')}</span>
       </span>
@@ -155,14 +117,13 @@ export default function MyRankBar({ uid, loaded, listRank, myRowRef }: MyRankBar
     );
   }
 
-  const current = liveRank?.uid === uid ? liveRank.rank : undefined;
   let rankText: ReactNode;
-  if (current === undefined) {
-    rankText = <Skeleton>000</Skeleton>;
-  } else if (current === 'failed') {
+  if (liveRank.data !== undefined) {
+    rankText = formatBattleRank(liveRank.data);
+  } else if (liveRank.isError) {
     rankText = '—';
   } else {
-    rankText = formatBattleRank(current);
+    rankText = <Skeleton>000</Skeleton>;
   }
 
   return <div className={BAR_CLASS}>{identity(rankText)}</div>;
