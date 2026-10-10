@@ -1382,6 +1382,7 @@ namespace Windy10v10AI.Launcher
             var qualitySince = DateTime.UtcNow;
             var quality = new List<Dictionary<string, object>>();
             var routeChecks = new List<Dictionary<string, object>>();
+            var own = hostTunnel;
             while (!stopping)
             {
                 var elapsed = DateTime.UtcNow - since;
@@ -1394,7 +1395,8 @@ namespace Windy10v10AI.Launcher
                 Thread.Sleep(started ? GamePollMs : (elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs));
                 var tunnel = hostTunnel;
                 var roster = hostRoster;
-                if (tunnel == null || roster == null || stopping) return;
+                // A room reopened during the sleep has a poller of its own, and this one would mark it started
+                if (tunnel == null || tunnel != own || roster == null || stopping) return;
                 var startedNow = started || ReadShared(logFile).Contains(HeroSelection);
                 var body = new Dictionary<string, object>(roomBody);
                 body["code"] = roomCode;
