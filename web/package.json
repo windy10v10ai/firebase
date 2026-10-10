@@ -11,12 +11,14 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "vitest run",
     "awaken:sync": "node scripts/awaken-sync.mjs",
     "awaken:images": "node scripts/awaken-images.mjs",
     "heroes": "node scripts/heroes.mjs",
     "items": "node scripts/items.mjs"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.104.1",
     "eslint-config-next": "16.3.5",
     "firebase": "^12.19.0",
     "lucide-react": "^1.45.0",
@@ -39,6 +41,7 @@
     "playwright-core": "1.63.0",
     "postcss": "^8.5.18",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
   }
 }

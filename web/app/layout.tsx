@@ -14,6 +14,7 @@ import {
   parsePlayerUid,
 } from './lib/auth-hint';
 import { SITE_NAME, TITLE_TEMPLATE } from './lib/page-title';
+import { QueryProvider } from './lib/query-client';
 
 import './globals.css';
 
@@ -71,11 +72,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${notoSansSC.className} min-h-screen bg-surface`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AuthProvider initialUid={initialUid} initialProfile={initialProfile} siteOrigin={siteOrigin}>
-            <div className="relative z-10 flex flex-col min-h-screen">
-              <Header />
-              <main className="mx-auto w-full max-w-7xl px-3 py-6 md:px-4 md:py-8 flex-1">{children}</main>
-              <Footer />
-            </div>
+            <QueryProvider>
+              <div className="relative z-10 flex flex-col min-h-screen">
+                <Header />
+                <main className="mx-auto w-full max-w-7xl px-3 py-6 md:px-4 md:py-8 flex-1">{children}</main>
+                <Footer />
+              </div>
+            </QueryProvider>
           </AuthProvider>
         </NextIntlClientProvider>
         <Analytics />

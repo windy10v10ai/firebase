@@ -1,18 +1,18 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import CheckInRow from '@/app/components/CheckInRow';
 import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
-import { useAuth } from '@/app/lib/auth';
-import { fetchPlayerInfo, memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
+import { memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
-import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
+import { applyPlayerWrite, playerInfoQuery } from '@/app/lib/queries';
+import { useSteamProfile } from '@/app/lib/use-steam-profile';
 
 function StatRow({
   label,
@@ -33,45 +33,13 @@ function StatRow({
 
 export default function PlayerSummary({ uid }: { uid: string }) {
   const t = useTranslations('home.summary');
-  const { initialProfile } = useAuth();
-  const [info, setInfo] = useState<PlayerInfo | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [loadedProfile, setLoadedProfile] = useState<SteamProfile | null>(() => initialProfile);
-
+  const queryClient = useQueryClient();
+  const infoQuery = useQuery(playerInfoQuery(uid));
+  const info = infoQuery.data ?? null;
   // 网格始终占位，失败时数值显示为横线，卡片高度不随请求结果变化
-  useEffect(() => {
-    let cancelled = false;
-    fetchPlayerInfo(uid)
-      .then((loaded) => {
-        if (!cancelled) {
-          setInfo(loaded);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [uid]);
+  const failed = !info && infoQuery.isError;
+  const profile = useSteamProfile(uid);
 
-  // 昵称头像单独发一次，与上面那次并行：写法同 profile 页身份卡
-  useEffect(() => {
-    let cancelled = false;
-    fetchSteamProfile(uid).then((fetched) => {
-      if (!cancelled) {
-        setLoadedProfile(fetched);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [uid]);
-
-  // 换了账号时旧资料立刻失效，不用先手动置空
-  const profile = loadedProfile?.steamId === uid ? loadedProfile : null;
   const member = info?.member;
   const status = memberStatusKey(member);
   const pending = !info && !failed;
@@ -171,7 +139,13 @@ export default function PlayerSummary({ uid }: { uid: string }) {
         />
       </dl>
 
-      <CheckInRow info={info} steamId={uid} onClaimed={setInfo} />
+      <CheckInRow
+        info={info}
+        steamId={uid}
+        onClaimed={(player) => {
+          void applyPlayerWrite(queryClient, uid, playerInfoQuery(uid).queryKey, player);
+        }}
+      />
     </section>
   );
 }

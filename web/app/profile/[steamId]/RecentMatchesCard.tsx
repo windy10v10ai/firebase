@@ -1,16 +1,17 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, Skull, TowerControl, Zap, type LucideIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import InfoPopover from '@/app/components/InfoPopover';
 import Skeleton from '@/app/components/ui/skeleton';
 import {
-  fetchRecentMatches,
   RECENT_MATCH_LIMIT,
   type RecentMatch,
 } from '@/app/lib/player-stats-recent';
+import { recentMatchesQuery } from '@/app/lib/queries';
 import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { GAME_ICON } from '@/config/game-icons';
 import { heroAsset, heroIconPath, heroLabel } from '@/config/heroes';
@@ -47,8 +48,8 @@ const MIN_DIFFICULTY = 1;
 const MAX_DIFFICULTY = 8;
 
 type LoadResult =
-  | { steamId: string; status: 'failed' }
-  | { steamId: string; status: 'ready'; matches: RecentMatch[] };
+  | { status: 'failed' }
+  | { status: 'ready'; matches: RecentMatch[] };
 
 function formatDuration(durationSec: number): string {
   const minutes = Math.floor(durationSec / 60);
@@ -243,30 +244,15 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   const t = useTranslations('profile.recent');
   const tStats = useTranslations('profile.stats');
   const locale = useLocale();
-  const [result, setResult] = useState<LoadResult | null>(null);
+  const query = useQuery(recentMatchesQuery(steamId));
   const [openRow, setOpenRow] = useState<number | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
 
-    fetchRecentMatches(steamId)
-      .then(({ matches }) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', matches });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'failed' });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  const loaded = result?.steamId === steamId ? result : null;
+  const loaded: LoadResult | null = query.data
+    ? { status: 'ready', matches: query.data.matches }
+    : query.isError
+      ? { status: 'failed' }
+      : null;
   // 一条都没有时表头是空架子，反而让人以为数据没加载出来
   const hasRows = loaded === null || (loaded.status === 'ready' && loaded.matches.length > 0);
 

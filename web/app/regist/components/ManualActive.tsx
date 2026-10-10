@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Hash, Mail, ReceiptText } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -10,6 +11,7 @@ import Field from '@/app/components/ui/field';
 import Input from '@/app/components/ui/input';
 import { apiFetch } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
+import { invalidatePlayer } from '@/app/lib/queries';
 
 import ActiveResult from './ActiveResult';
 import {
@@ -52,6 +54,7 @@ const INITIAL_VALUES: ManualActiveFormValues = {
 const ManualActive = ({ activeType }: ManualActiveProps) => {
   const t = useTranslations('manualActive');
   const auth = useAuth();
+  const queryClient = useQueryClient();
   const pathname = usePathname();
   const [values, setValues] = useState(INITIAL_VALUES);
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
@@ -86,6 +89,9 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
       });
 
       setActivationResult({ success: response.result });
+      if (response.result) {
+        void invalidatePlayer(queryClient, formValues.steamId);
+      }
     } catch (error) {
       setActivationResult({
         errorMessage: error instanceof Error ? error.message : String(error),

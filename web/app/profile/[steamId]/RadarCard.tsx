@@ -1,19 +1,19 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import Skeleton from '@/app/components/ui/skeleton';
 import {
   battleRadarCorners,
-  fetchStatsRadar,
   type BattleRadarCorner,
   type PlayerStatsRadarResponse,
 } from '@/app/lib/player-stats-radar';
+import { statsRadarQuery } from '@/app/lib/queries';
 
 type LoadResult =
-  | { steamId: string; status: 'failed' }
-  | { steamId: string; status: 'ready'; data: PlayerStatsRadarResponse };
+  | { status: 'failed' }
+  | { status: 'ready'; data: PlayerStatsRadarResponse };
 
 type LabelSide = 'top' | 'bottom' | 'left' | 'right';
 
@@ -37,11 +37,16 @@ const FLOOR_RATIO = 0.2;
 // 网格均分中心底到外圈这一段，四层等距
 const GRID_RATIOS = [1 / 3, 2 / 3].map((part) => FLOOR_RATIO + (1 - FLOOR_RATIO) * part);
 
+// Node 与浏览器的三角函数末位精度不同，不取整的话服务端渲染的 SVG 属性与客户端对不上，触发 hydration 警告
+function roundCoord(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
 function point(deg: number, ratio: number) {
   const angle = (deg * Math.PI) / 180;
   return {
-    x: CENTER_X + Math.cos(angle) * RADIUS * ratio,
-    y: CENTER_Y + Math.sin(angle) * RADIUS * ratio,
+    x: roundCoord(CENTER_X + Math.cos(angle) * RADIUS * ratio),
+    y: roundCoord(CENTER_Y + Math.sin(angle) * RADIUS * ratio),
   };
 }
 
@@ -72,29 +77,14 @@ function labelLayout(deg: number, side: LabelSide) {
 
 export default function RadarCard({ steamId }: { steamId: string }) {
   const t = useTranslations('profile.radar');
-  const [result, setResult] = useState<LoadResult | null>(null);
+  const query = useQuery(statsRadarQuery(steamId));
 
-  useEffect(() => {
-    let cancelled = false;
 
-    fetchStatsRadar(steamId)
-      .then((data) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', data });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'failed' });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  const loaded = result?.steamId === steamId ? result : null;
+  const loaded: LoadResult | null = query.data
+    ? { status: 'ready', data: query.data }
+    : query.isError
+      ? { status: 'failed' }
+      : null;
   const data = loaded?.status === 'ready' ? loaded.data : null;
   const radar = data?.radar ? battleRadarCorners(data.radar) : null;
 

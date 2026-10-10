@@ -3,11 +3,10 @@
 import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/app/lib/auth';
 import { playerPagePath } from '@/app/lib/player-path';
-import { fetchSteamProfile, type SteamProfile } from '@/app/lib/steam-profile';
+import { useSteamProfile } from '@/app/lib/use-steam-profile';
 
 import AcceleratorHint from './AcceleratorHint';
 import PlayerAvatar from './PlayerAvatar';
@@ -17,24 +16,7 @@ export default function AuthStatus() {
   const t = useTranslations('auth');
   const auth = useAuth();
   const uid = auth.status === 'authenticated' ? auth.uid : null;
-  const [loaded, setLoaded] = useState<SteamProfile | null>(() => auth.initialProfile);
-  // 换了账号时旧资料立刻失效，不用先手动置空
-  const profile = loaded?.steamId === uid ? loaded : null;
-
-  useEffect(() => {
-    if (!uid) {
-      return;
-    }
-    let cancelled = false;
-    fetchSteamProfile(uid).then((fetched) => {
-      if (!cancelled) {
-        setLoaded(fetched);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [uid]);
+  const profile = useSteamProfile(uid);
 
   if (uid === null) {
     return (
