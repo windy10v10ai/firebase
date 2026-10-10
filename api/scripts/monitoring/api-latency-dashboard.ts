@@ -11,6 +11,7 @@ const PROXY_TO_ORIGINAL: [string, string][] = [
   ['GET proxy/player-setting-put', 'PUT player setting'],
   ['GET proxy/player-game-preset-put', 'PUT player game-preset'],
   ['GET proxy/player-conduct-post', 'POST player/conduct'],
+  ['GET proxy/feedback-post', 'POST feedback'],
   ['GET proxy/daily-task', 'GET daily-task'],
   ['GET proxy/daily-task-refresh-post', 'POST daily-task/refresh'],
   ['GET proxy/alipay-order-create-post', 'POST alipay/order/create'],

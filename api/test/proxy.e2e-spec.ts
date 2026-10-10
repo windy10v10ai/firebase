@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
+import { getTestFirestore } from './util/util-firestore';
 import { getLocalApiKey, initTest } from './util/util-http';
 import { createPlayer, getPlayer, getPlayerStatsLifetime } from './util/util-player';
 
@@ -66,6 +67,29 @@ describe('ProxyController (e2e)', () => {
         .get('/api/proxy/daily-task-refresh-post')
         .query({ requestId: 'p_3_3', body: encode({ steamId, dayId: 'bad' }), apiKey: localKey });
       expect(invalid.text).toContain('ERR:bad_request');
+    });
+  });
+
+  describe('feedback-post', () => {
+    const steamId = 310030006;
+    const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+    const send = (requestId: string, body: object) =>
+      request(app.getHttpServer())
+        .get('/api/proxy/feedback-post')
+        .query({ requestId, body: encode(body), apiKey: localKey });
+
+    it('游戏来源的反馈入库；提建议缺描述返回 ERR:bad_request', async () => {
+      const base = { source: 'game', type: 'problem', topics: ['game'], steamId };
+      const ok = await send('p_5_1', base);
+      expect(JSON.parse(decodeProxyTitle(ok.text).data)).toEqual({});
+      const saved = await getTestFirestore()
+        .collection('FeedbackReports')
+        .where('steamId', '==', steamId)
+        .get();
+      expect(saved.docs.map((doc) => doc.get('source'))).toEqual(['game']);
+
+      const missing = await send('p_5_2', { ...base, type: 'suggestion' });
+      expect(missing.text).toContain('ERR:bad_request');
     });
   });
 

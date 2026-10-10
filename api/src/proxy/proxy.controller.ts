@@ -17,6 +17,8 @@ import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { createGameEndRecordContext } from '../bigquery/game-end-rows';
 import { RefreshDailyTaskDto } from '../daily-task/dto/refresh-daily-task.dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
+import { CreateFeedbackDto } from '../feedback/dto/create-feedback.dto';
+import { FeedbackService } from '../feedback/feedback.service';
 import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
 import { LocalHostService } from '../local-host/local-host.service';
@@ -64,6 +66,7 @@ export class ProxyController {
     private readonly playerGamePresetService: PlayerGamePresetService,
     private readonly playerConductService: PlayerConductService,
     private readonly alipayService: AlipayService,
+    private readonly feedbackService: FeedbackService,
   ) {}
 
   // 对应 GET /game/probe
@@ -215,6 +218,19 @@ export class ProxyController {
     const dto = await decodeProxyBody(ConductPlayerDto, body);
     const player = await this.playerConductService.conduct(dto);
     return buildProxySuccessHtml(requestId, player);
+  }
+
+  // 对应 POST /feedback
+  @Get('feedback-post')
+  async feedbackPost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+    @CurrentClientOrigin() origin: ClientOrigin,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const dto = await decodeProxyBody(CreateFeedbackDto, body);
+    await this.feedbackService.create(dto, origin);
+    return buildProxySuccessHtml(requestId, {});
   }
 
   // 对应 POST /alipay/order/create
