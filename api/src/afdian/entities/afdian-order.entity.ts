@@ -1,6 +1,6 @@
 import { Collection } from 'fireorm';
-import { OrderDto } from 'src/afdian/dto/afdian-webhook.dto';
 
+import { OrderDto } from '../dto/afdian-webhook.dto';
 import { OrderType } from '../enums/order-type.enum';
 
 @Collection()
