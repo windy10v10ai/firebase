@@ -85,6 +85,7 @@ API 自己往外调的第三方服务：
 - **原路由路径里的参数改走 query**：`PUT /player/:id/setting` → `/proxy/player-setting-put?steamId=…&body=…`
 - **只接原路由已经 `@AllowLocal()` 的写入**：代理 controller 整体放行本地 key、直接调 service，绕得过原路由的认证。花积分的属性加点与重置、觉醒解锁与随机只认网页登录态，不进代理。原路由在 controller 里做的本地来源限制（如会员积分的每日限额）要先下沉到 service，两条路径调同一个方法
 - **代理路由不是原路由的转发**：字段集与错误语义都可以不同，如 `/proxy/player-info` 查无此人返回空对象而不是 404。名字表达的是取哪条原路由的数据，改原路由不会自动改到它
+- **429 限频按 message 映射成专用错误码**：`POST /feedback` 的 `too_many_reports`（个人限频）与 `daily_limit_reached`（全站日上限）在代发路由上变成 `ERR:too_many_reports`、`ERR:daily_limit_reached`，游戏据此给玩家不同提示；其他 429 仍归 `internal`
 - **title 上限 4096，随天数增长的字段不进开局包**：`/game/start` 与 `POST /daily-task/refresh` 的每日任务快照都不带 `history`（30 天可到 17000 字符），历史由 `GET /daily-task/:steamId` 单独取，它回带 30 天历史的完整快照，网站每日任务页也用它。代发版 `/proxy/daily-task` 只回最近 5 天历史、不含今日字段（开局时已下发），5 天实测标题 2723 字符，留约三成余量。取快照才会触发跨天归档，所以这条 GET 有写库副作用，不能改成纯读。超限时 `buildProxySuccessHtml` 记 warn 日志（`[Proxy] title too long`）
 
 ## 分析数据（BigQuery）

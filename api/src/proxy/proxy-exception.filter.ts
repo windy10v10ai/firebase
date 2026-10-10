@@ -11,6 +11,20 @@ const STATUS_ERROR_CODE: Partial<Record<number, ProxyErrorCode>> = {
   [HttpStatus.NOT_FOUND]: 'not_found',
 };
 
+// 反馈接口的限频靠 429 的 message 区分原因，游戏要据此给玩家不同的提示
+const RATE_LIMIT_ERROR_CODES: readonly ProxyErrorCode[] = [
+  'too_many_reports',
+  'daily_limit_reached',
+];
+
+function resolveErrorCode(exception: unknown, status: number): ProxyErrorCode {
+  if (status === HttpStatus.TOO_MANY_REQUESTS && exception instanceof HttpException) {
+    const message = exception.message as ProxyErrorCode;
+    return RATE_LIMIT_ERROR_CODES.includes(message) ? message : 'internal';
+  }
+  return STATUS_ERROR_CODE[status] ?? 'internal';
+}
+
 // 网页控件读不到非 200 的 title，所有异常（鉴权、参数校验、业务抛出）都要转成
 // 200 + <title>requestId|ERR:<code></title>，让客户端能立刻读到失败原因
 @Catch()
@@ -23,7 +37,7 @@ export class ProxyExceptionFilter implements ExceptionFilter {
 
     const status =
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const code = STATUS_ERROR_CODE[status] ?? 'internal';
+    const code = resolveErrorCode(exception, status);
 
     if (code === 'internal') {
       // Error 的 message 与 stack 都不可枚举，直接交给日志会序列化成空对象，

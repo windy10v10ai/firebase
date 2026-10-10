@@ -6,6 +6,5 @@
   "setupFiles": ["<rootDir>/util/setup-worker-project.ts"],
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  },
-  "transformIgnorePatterns": ["/node_modules/(?!(jose)/)"]
+  }
 }
