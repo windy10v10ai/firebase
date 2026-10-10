@@ -18,21 +18,21 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:cov": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "firebase emulators:exec --only firestore,auth \"jest --config ./test/jest-e2e.json\" --project windy10v10ai",
+    "test:e2e": "firebase emulators:exec --only firestore,auth \"cross-env NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json\" --project windy10v10ai",
     "export:snapshot": "ts-node scripts/offline-snapshot/export-player-snapshot.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^9.1.0",
-    "@nestjs/common": "^11.1.27",
-    "@nestjs/config": "^4.0.4",
-    "@nestjs/core": "^11.1.9",
-    "@nestjs/mapped-types": "*",
-    "@nestjs/platform-express": "^11.1.28",
-    "@nestjs/swagger": "^11.4.6",
+    "@nestjs/common": "^12.1.2",
+    "@nestjs/config": "^12.0.1",
+    "@nestjs/core": "^12.1.2",
+    "@nestjs/mapped-types": "^12.0.0",
+    "@nestjs/platform-express": "^12.1.2",
+    "@nestjs/swagger": "^12.0.2",
     "alipay-sdk": "^4.14.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -43,9 +43,9 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.23",
-    "@nestjs/schematics": "^11.1.0",
-    "@nestjs/testing": "^11.1.24",
+    "@nestjs/cli": "^12.0.8",
+    "@nestjs/schematics": "^12.0.6",
+    "@nestjs/testing": "^12.1.2",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.19.0",
@@ -82,9 +82,6 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(jose)/)"
-    ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],

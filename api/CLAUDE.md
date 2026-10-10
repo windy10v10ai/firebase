@@ -13,6 +13,8 @@ NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用�
 - **E2E**：`cd api && npm run test:e2e`（自带 `firebase emulators:exec`，跑前要确认 8080 没被占用）
 - **Lint**：`cd api && npm run lint`
 
+**Jest 只通过 npm 脚本跑**，单跑某个文件用 `npm run test -- <路径>`，不要直接 `npx jest`。NestJS 12 只发布 ESM，Jest 要带 `NODE_OPTIONS=--experimental-vm-modules` 才能加载，脚本里已经带上；直接调 Jest 会让每个套件都报 `Must use import to load ES Module`。编译产物是 CommonJS，靠 Node 原生的 `require(esm)` 加载 NestJS，所以函数运行时不能降到 Node 22.12 以下。
+
 **改了价格、上限这类业务常量，两套都要跑。** `npm run test` 不包含 e2e，单测全绿不代表 e2e 也绿——e2e 里的种子玩家常按旧数值给积分，改价后会因为「积分不够」而失败，而这只有跑 e2e 才看得见。
 
 ## 测试写多少
