@@ -550,14 +550,16 @@
     "entries": {
       "property": {
         "title": "属性加点",
-        "badge": "可用属性点 {count}"
+        "badge": "可用属性点 {count}",
+        "badgeDone": "已全部加点"
       },
       "awaken": {
         "title": "英雄觉醒",
         "badge": "已觉醒 {awakened} / {total}"
       },
       "dailyTask": {
-        "title": "每日任务"
+        "title": "每日任务",
+        "badge": "今日完成 {done} / {total}"
       },
       "leaderboard": {
         "title": "排行榜",
