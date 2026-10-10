@@ -16,6 +16,7 @@ function createController(services: {
   gameService?: object;
   dailyTaskService?: object;
   feedbackService?: object;
+  playerStatsRadarService?: object;
 }) {
   return new ProxyController(
     (services.gameService ?? {}) as never,
@@ -28,6 +29,7 @@ function createController(services: {
     {} as never,
     {} as never,
     (services.feedbackService ?? {}) as never,
+    (services.playerStatsRadarService ?? {}) as never,
   );
 }
 
@@ -99,5 +101,18 @@ describe('ProxyController.feedbackPost', () => {
       controller.feedbackPost('req1', encode({ type: 'nope', topics: [] }), origin),
     ).rejects.toThrow();
     expect(create).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProxyController.playerStatsRadar', () => {
+  it('原样回传六边形图数据', async () => {
+    const result = { matchCount: 3, minMatchCount: 10, radar: null };
+    const getRadar = jest.fn().mockResolvedValue(result);
+    const controller = createController({ playerStatsRadarService: { getRadar } });
+
+    const payload = parseTitle(await controller.playerStatsRadar('req1', 1));
+
+    expect(getRadar).toHaveBeenCalledWith(1);
+    expect(payload).toEqual(result);
   });
 });
