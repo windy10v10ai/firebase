@@ -12,8 +12,8 @@
     "dailyTaskFull": "Daily Tasks",
     "leaderboard": "Leaderboard",
     "leaderboardFull": "Leaderboard",
-    "wiki": "Abilities & Items",
-    "wikiFull": "Abilities & Items",
+    "wiki": "Wiki",
+    "wikiFull": "Wiki",
     "workshop": "Steam Workshop",
     "github": "GitHub",
     "membershipShort": "Member",
@@ -94,7 +94,7 @@
         "description": "Preview and refresh your daily tasks"
       },
       "wiki": {
-        "title": "Abilities & Items",
+        "title": "Wiki",
         "description": "Abilities and items you can draw in the game"
       },
       "leaderboard": {
@@ -879,6 +879,10 @@
     }
   },
   "wiki": {
+    "pageTitle": {
+      "abilities": "Abilities Wiki",
+      "items": "Items Wiki"
+    },
     "description": "Every ability and item you can draw in the game. Higher tiers are rarer.",
     "tabs": {
       "abilities": "Abilities",

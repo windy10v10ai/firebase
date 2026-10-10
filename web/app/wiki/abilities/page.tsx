@@ -1,10 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 
 import { abilityLocale } from '@/app/lib/ability-text';
+import { pageTitle } from '@/app/lib/page-title';
 import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { WIKI_ABILITIES } from '@/config/wiki';
 
 import WikiGrid, { type WikiEntry } from '../WikiGrid';
+
+export const generateMetadata = pageTitle('wiki', 'pageTitle.abilities');
 
 export default async function WikiAbilitiesPage() {
   const locale = abilityLocale(await getLocale());

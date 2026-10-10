@@ -12,8 +12,8 @@
     "dailyTaskFull": "每日任务",
     "leaderboard": "排行榜",
     "leaderboardFull": "排行榜",
-    "wiki": "技能物品",
-    "wikiFull": "技能与物品",
+    "wiki": "百科",
+    "wikiFull": "百科",
     "workshop": "Steam 创意工坊",
     "github": "GitHub",
     "membershipShort": "会员",
@@ -94,7 +94,7 @@
         "description": "预览与刷新每日任务"
       },
       "wiki": {
-        "title": "技能与物品",
+        "title": "百科",
         "description": "游戏里能抽到的技能与物品"
       },
       "leaderboard": {
@@ -873,6 +873,10 @@
     }
   },
   "wiki": {
+    "pageTitle": {
+      "abilities": "技能百科",
+      "items": "物品百科"
+    },
     "description": "游戏里能抽到的全部技能与物品，档位越高越难抽到。",
     "tabs": {
       "abilities": "技能",

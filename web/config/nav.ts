@@ -1,6 +1,7 @@
-// 站内项固定顺序：个人主页、属性、觉醒、会员、技能物品，见 docs/design/web/phase-2g-header-layout.md
+// 站内项固定顺序：个人主页、属性、觉醒、会员、百科，见 docs/design/web/phase-2g-header-layout.md
 // desktopOnly 的项在平板横排里让位：768 最多放得下四项，俄语文案比中英都长
-// menuOnly 的项只进菜单，不上横排：横排的宽度留给常用入口，只看不改的页面让位
+// menuOnly 的项只进菜单，不上横排：横排的宽度留给常用入口
+// section 是这一项覆盖的整段地址：入口只指向其中一页时，同段的其他页也算停在这一项上
 // 玩家自己的页面指向 /my/*：菜单里拼不出 steamId，登录后由那一页转到 /profile/<id>/*
 export const SITE_NAV_ITEMS = [
   { key: 'profile', shortLabelKey: 'profile', fullLabelKey: 'profileFull', href: '/my' },
@@ -48,6 +49,7 @@ export const SITE_NAV_ITEMS = [
     shortLabelKey: 'wiki',
     fullLabelKey: 'wikiFull',
     href: '/wiki/abilities',
-    menuOnly: true,
+    section: '/wiki',
+    desktopOnly: true,
   },
 ] as const;
