@@ -128,7 +128,7 @@
 
 @layer components {
   .title-primary {
-    @apply font-heading text-3xl font-bold text-heading;
+    @apply font-heading text-3xl font-bold text-balance text-heading;
   }
 
   .title-secondary {
