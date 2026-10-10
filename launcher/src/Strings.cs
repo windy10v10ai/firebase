@@ -89,7 +89,7 @@ namespace Windy10v10AI.Launcher
         public static string Full { get { return Pick("已满", "Full", "Мест нет"); } }
         public static string ProbeLatency { get { return Pick("直连，延迟 {0} ms", "Direct, ping {0} ms", "Напрямую, пинг {0} мс"); } }
         public static string ProbeTesting { get { return Pick("正在测试能否连通", "Testing the connection", "Проверяем соединение"); } }
-        public static string ProbeRelayLatency { get { return Pick("经服务器，延迟 {0} ms", "Via server, ping {0} ms", "Через сервер, пинг {0} мс"); } }
+        public static string ProbeRelayLatency { get { return Pick("中转，延迟 {0} ms", "Relay, ping {0} ms", "Через сервер, пинг {0} мс"); } }
         public static string RoomsLoading { get { return Pick("正在获取房间列表…", "Loading rooms...", "Загрузка комнат…"); } }
         public static string RoomsFailed { get { return Pick("获取房间列表失败，请点「刷新」重试", "Could not load rooms. Press Refresh to try again.", "Не удалось загрузить комнаты. Нажмите «Обновить»."); } }
         public static string NoRooms { get { return Pick("现在没有公开房间，可以自己开一个", "No public rooms right now. Host one yourself!", "Сейчас нет открытых комнат — создайте свою!"); } }
@@ -125,6 +125,11 @@ namespace Windy10v10AI.Launcher
         public static string ConnectFailed { get { return Pick("连接失败，请稍后再试。", "Could not connect. Please try again later.", "Не удалось подключиться. Попробуйте позже."); } }
         public static string Joined { get { return Pick("已加入房间 {0}", "Joined room {0}", "Вы в комнате {0}"); } }
         public static string JoinedHint { get { return Pick("Dota 2 关闭后可以重新进入游戏", "If Dota 2 closes, you can go back into the game", "Если Dota 2 закроется, можно вернуться в игру"); } }
+        public static string RouteChecking { get { return Pick("正在测线路…", "Checking the route...", "Проверяем маршрут…"); } }
+        public static string RouteLan { get { return Pick("局域网", "LAN", "Локальная сеть"); } }
+        public static string RouteDirect { get { return Pick("直连", "Direct", "Напрямую"); } }
+        public static string RouteRelay { get { return Pick("中转", "Relay", "Через сервер"); } }
+        public static string RouteQuality { get { return Pick("{0} · {1} ms · 丢包 {2}%", "{0} · {1} ms · {2}% loss", "{0} · {1} мс · потери {2}%"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
         public static string Rejoin { get { return Pick("重新进入游戏", "Rejoin game", "Вернуться в игру"); } }
         public static string HostGuide { get { return Pick("创建房间后 Dota 2 会自动打开，等其他玩家加入后，在 Dota 2 里点「锁定并开始」", "Dota 2 opens once the room is created. When everyone has joined, start the game in Dota 2.", "После создания комнаты Dota 2 откроется автоматически. Когда все зайдут, начните игру в Dota 2."); } }

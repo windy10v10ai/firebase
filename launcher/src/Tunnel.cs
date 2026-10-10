@@ -27,6 +27,16 @@ namespace Windy10v10AI.Launcher
         public const byte Pong = 10;
         // Only the host reads the server log, so joiners learn from it that the game is over; older launchers ignore it
         public const byte GameEnded = 11;
+        // The joiner's measurement of the direct route against the relay, which the host passes on to the API; older launchers ignore it
+        public const byte RouteCheck = 12;
+    }
+
+    // Recent round trip and loss on one route; Rtt is -1 when every reply was lost, Samples is 0 before anything was measured
+    struct RouteQuality
+    {
+        public int Rtt;
+        public int Loss;
+        public int Samples;
     }
 
     // Packets between a launcher and the relay; they start at 0xF0 so the relay never forwards them as tunnel packets
@@ -323,6 +333,9 @@ namespace Windy10v10AI.Launcher
         readonly Dictionary<string, Peer> peers = new Dictionary<string, Peer>();
         // The relay address a join actually claimed, when its route turned out to be the relay
         readonly Dictionary<string, string> relayUsed = new Dictionary<string, string>();
+        // Route checks waiting for the next poll, and the last one per joiner so the repeated copies are counted once
+        readonly List<Dictionary<string, object>> routeChecks = new List<Dictionary<string, object>>();
+        readonly Dictionary<string, string> lastRouteCheck = new Dictionary<string, string>();
 
         // joinId, the reported path or null when the handshake failed, the relay address used when the path is relay, and milliseconds taken
         public event Action<string, string, string, int> JoinFinished;
@@ -442,6 +455,17 @@ namespace Windy10v10AI.Launcher
             return list;
         }
 
+        // Route checks joiners reported since the last call
+        public List<Dictionary<string, object>> TakeRouteChecks()
+        {
+            lock (sync)
+            {
+                var list = new List<Dictionary<string, object>>(routeChecks);
+                routeChecks.Clear();
+                return list;
+            }
+        }
+
         // Tells the joiner it was removed and drops its session; its later packets come from an unknown token
         public void Kick(string joinId)
         {
@@ -483,6 +507,7 @@ namespace Windy10v10AI.Launcher
             probes.Remove(token);
             paths.Remove(token);
             relayUsed.Remove(token);
+            lastRouteCheck.Remove(token);
             var stale = new List<IPEndPoint>();
             foreach (var pair in verified)
             {
@@ -526,6 +551,26 @@ namespace Windy10v10AI.Launcher
                 {
                     peer.Echoed = true;
                     peer.Rtts.Add((int)((Stopwatch.GetTimestamp() - BitConverter.ToInt64(data, 1)) * 1000 / Stopwatch.Frequency));
+                }
+                else if (data[0] == Packet.RouteCheck && data.Length == 8)
+                {
+                    var copy = Convert.ToBase64String(data);
+                    string last;
+                    if (lastRouteCheck.TryGetValue(owner, out last) && last == copy) return;
+                    lastRouteCheck[owner] = copy;
+                    if (data[1] >= PathType.Preference.Length) return;
+                    var check = new Dictionary<string, object>
+                    {
+                        { "joinId", joinIds[owner] },
+                        { "path", PathType.Report(PathType.Preference[data[1]]) },
+                        { "directLossPct", (int)data[2] },
+                        { "relayLossPct", (int)data[3] },
+                    };
+                    var directRtt = BitConverter.ToUInt16(data, 4);
+                    var relayRtt = BitConverter.ToUInt16(data, 6);
+                    if (directRtt != ushort.MaxValue) check["directRttMs"] = (int)directRtt;
+                    if (relayRtt != ushort.MaxValue) check["relayRttMs"] = (int)relayRtt;
+                    routeChecks.Add(check);
                 }
                 else if (data[0] == Packet.Bye)
                 {
@@ -610,6 +655,18 @@ namespace Windy10v10AI.Launcher
         const int QuietMs = 7000;
         // The lowest of a few round trips, so one packet delayed by the first hole punch does not set the latency
         const int PingSamples = 3;
+        // Twenty pings a second on each route for ten seconds tell 0% from 5% loss, and the game barely notices the extra packets
+        const int CheckMs = 10000;
+        const int CheckGapMs = 50;
+        // Replies still on the way when a measurement stops are waited for, so they do not count as lost
+        const int LateReplyMs = 1000;
+        // The handshake usually settles on the direct route before the relay claim finishes
+        const int RelayReachMs = 8000;
+        // The status line describes the last minute of the route, not the whole game
+        const int StatusWindowMs = 60000;
+        const string DirectMeter = "~direct";
+        const string RelayMeter = "~relay";
+        const string StatusMeter = "~status";
 
         class Probe
         {
@@ -617,10 +674,20 @@ namespace Windy10v10AI.Launcher
             public int Rtt = -1;
         }
 
+        // Ping stamps sent on one route and the round trip of each that came back
+        class Meter
+        {
+            public readonly List<long> Sent = new List<long>();
+            public readonly Dictionary<long, int> Rtts = new Dictionary<long, int>();
+        }
+
         readonly object sync = new object();
         readonly Dictionary<IPEndPoint, string> reached = new Dictionary<IPEndPoint, string>();
         readonly Dictionary<string, Probe> probes = new Dictionary<string, Probe>();
+        readonly Dictionary<string, Meter> meters = new Dictionary<string, Meter>();
         string token;
+        string route;
+        bool checking;
         List<Candidate> hosts;
         RelayTicket relay;
         IPEndPoint host;
@@ -638,6 +705,13 @@ namespace Windy10v10AI.Launcher
         public List<RosterEntry> Placeholder = new List<RosterEntry>();
         // Lets a tester whose network can punch through still play a whole game over the relay
         public static bool RelayOnly;
+        // Loss limits from the API for moving from the direct route to the relay; null leaves the handshake's route alone
+        public RouteThresholds Thresholds;
+
+        public bool Checking
+        {
+            get { lock (sync) return checking; }
+        }
 
         // Returns the path type that connected, or null when nothing answered in the handshake window
         public string Connect(string joinToken, List<Candidate> hostCandidates, RelayTicket relayTicket)
@@ -665,23 +739,32 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        void SendPing(string probeToken, IPEndPoint to)
+        long SendPing(string probeToken, IPEndPoint to)
         {
-            var stamp = BitConverter.GetBytes(Stopwatch.GetTimestamp());
+            var now = Stopwatch.GetTimestamp();
+            var stamp = BitConverter.GetBytes(now);
             var id = Encoding.ASCII.GetBytes(probeToken);
             var payload = new byte[stamp.Length + id.Length];
             Buffer.BlockCopy(stamp, 0, payload, 0, stamp.Length);
             Buffer.BlockCopy(id, 0, payload, stamp.Length, id.Length);
             Send(Packet.Ping, payload, to);
+            return now;
         }
 
         void OnPong(byte[] data)
         {
             if (data.Length < 9) return;
-            Probe probe;
-            if (!probes.TryGetValue(Encoding.ASCII.GetString(data, 9, data.Length - 9), out probe)) return;
+            var id = Encoding.ASCII.GetString(data, 9, data.Length - 9);
             var sent = BitConverter.ToInt64(data, 1);
             var ms = (int)((Stopwatch.GetTimestamp() - sent) * 1000 / Stopwatch.Frequency);
+            Meter meter;
+            if (meters.TryGetValue(id, out meter))
+            {
+                meter.Rtts[sent] = ms;
+                return;
+            }
+            Probe probe;
+            if (!probes.TryGetValue(id, out probe)) return;
             probe.Samples++;
             if (probe.Rtt < 0 || ms < probe.Rtt) probe.Rtt = ms;
         }
@@ -735,6 +818,8 @@ namespace Windy10v10AI.Launcher
                     {
                         if (pair.Value != type) continue;
                         host = pair.Key;
+                        route = type;
+                        meters.Remove(StatusMeter);
                         lastReceived = DateTime.UtcNow;
                         var index = new[] { (byte)Array.IndexOf(PathType.Preference, type) };
                         // Select may be lost like any UDP packet, and the host only needs one
@@ -813,6 +898,7 @@ namespace Windy10v10AI.Launcher
                         Send(Packet.Keepalive, new byte[0], host);
                         lastSent = DateTime.UtcNow;
                     }
+                    if (host != null) Ping(StatusMeter, host);
                     silent = (DateTime.UtcNow - lastReceived).TotalMilliseconds > SilenceMs;
                 }
                 if (!silent)
@@ -827,7 +913,167 @@ namespace Windy10v10AI.Launcher
                     return;
                 }
                 // The host still accepts our token, so the route can be rebuilt without the API
-                Handshake();
+                if (Handshake() != null) StartRouteCheck();
+            }
+        }
+
+        public void StartRouteCheck()
+        {
+            new Thread(CheckRoute) { IsBackground = true }.Start();
+        }
+
+        // Measures the direct route against the relay right after connecting and moves to the relay when only the direct one loses packets.
+        // The choice holds for the rest of the game; the host follows whichever route our packets arrive on
+        void CheckRoute()
+        {
+            IPEndPoint direct;
+            var limits = Thresholds;
+            lock (sync)
+            {
+                if (limits == null || relay == null || checking || host == null || route == PathType.Lan || route == PathType.Relay) return;
+                direct = host;
+                checking = true;
+            }
+            try
+            {
+                var relayEnd = ReachRelay();
+                if (relayEnd == null) return;
+                lock (sync)
+                {
+                    meters[DirectMeter] = new Meter();
+                    meters[RelayMeter] = new Meter();
+                }
+                var until = DateTime.UtcNow.AddMilliseconds(CheckMs);
+                while (!Closed && DateTime.UtcNow < until)
+                {
+                    Ping(DirectMeter, direct);
+                    Ping(RelayMeter, relayEnd);
+                    Thread.Sleep(CheckGapMs);
+                }
+                Thread.Sleep(LateReplyMs);
+                lock (sync)
+                {
+                    var directQuality = Measure(meters[DirectMeter], 0);
+                    var relayQuality = Measure(meters[RelayMeter], 0);
+                    // A reconnect during the check already picked a route of its own
+                    if (Closed || !direct.Equals(host)) return;
+                    if (directQuality.Loss >= limits.DirectLossPct && relayQuality.Loss <= limits.RelayLossPct)
+                    {
+                        host = relayEnd;
+                        route = PathType.Relay;
+                        meters.Remove(StatusMeter);
+                        var index = new[] { (byte)Array.IndexOf(PathType.Preference, PathType.Relay) };
+                        for (var i = 0; i < 3; i++) Send(Packet.Select, index, host);
+                        lastSent = DateTime.UtcNow;
+                    }
+                    var report = new byte[7];
+                    report[0] = (byte)Array.IndexOf(PathType.Preference, route);
+                    report[1] = (byte)directQuality.Loss;
+                    report[2] = (byte)relayQuality.Loss;
+                    Buffer.BlockCopy(BitConverter.GetBytes(Rtt16(directQuality)), 0, report, 3, 2);
+                    Buffer.BlockCopy(BitConverter.GetBytes(Rtt16(relayQuality)), 0, report, 5, 2);
+                    // Sent a few times like Select; the host counts identical copies once
+                    for (var i = 0; i < 3; i++) Send(Packet.RouteCheck, report, host);
+                }
+            }
+            finally
+            {
+                lock (sync)
+                {
+                    meters.Remove(DirectMeter);
+                    meters.Remove(RelayMeter);
+                    checking = false;
+                }
+            }
+        }
+
+        static ushort Rtt16(RouteQuality quality)
+        {
+            return quality.Rtt < 0 ? ushort.MaxValue : (ushort)Math.Min(quality.Rtt, ushort.MaxValue - 1);
+        }
+
+        // Says hello over the relay until the host answers there, since the handshake stops as soon as the direct route answers
+        IPEndPoint ReachRelay()
+        {
+            byte[] hello;
+            lock (sync) hello = Encoding.ASCII.GetBytes(token);
+            var deadline = DateTime.UtcNow.AddMilliseconds(RelayReachMs);
+            while (!Closed && DateTime.UtcNow < deadline)
+            {
+                IPEndPoint relayEnd = null;
+                lock (hosts)
+                {
+                    foreach (var candidate in hosts)
+                    {
+                        if (candidate.Type == PathType.Relay) relayEnd = candidate.EndPoint;
+                    }
+                }
+                if (relayEnd != null)
+                {
+                    lock (sync)
+                    {
+                        if (reached.ContainsKey(relayEnd)) return relayEnd;
+                    }
+                    Send(Packet.Hello, hello, relayEnd);
+                }
+                Thread.Sleep(200);
+            }
+            return null;
+        }
+
+        void Ping(string meterId, IPEndPoint to)
+        {
+            lock (sync)
+            {
+                Meter meter;
+                if (!meters.TryGetValue(meterId, out meter)) meters[meterId] = meter = new Meter();
+                meter.Sent.Add(SendPing(meterId, to));
+            }
+        }
+
+        // Loss and median round trip of the pings sent within the window, or of all of them when the window is 0.
+        // The last second is left out of a window because its replies may still be on the way
+        static RouteQuality Measure(Meter meter, int windowMs)
+        {
+            var now = Stopwatch.GetTimestamp();
+            var newest = windowMs == 0 ? long.MaxValue : now - Stopwatch.Frequency * LateReplyMs / 1000;
+            if (windowMs > 0)
+            {
+                var oldest = now - Stopwatch.Frequency * windowMs / 1000;
+                meter.Sent.RemoveAll(stamp =>
+                {
+                    if (stamp >= oldest) return false;
+                    meter.Rtts.Remove(stamp);
+                    return true;
+                });
+            }
+            var rtts = new List<int>();
+            var counted = 0;
+            foreach (var stamp in meter.Sent)
+            {
+                if (stamp > newest) continue;
+                counted++;
+                int rtt;
+                if (meter.Rtts.TryGetValue(stamp, out rtt)) rtts.Add(rtt);
+            }
+            if (counted == 0) return new RouteQuality { Rtt = -1 };
+            rtts.Sort();
+            return new RouteQuality
+            {
+                Rtt = rtts.Count == 0 ? -1 : rtts[(rtts.Count - 1) / 2],
+                Loss = (counted - rtts.Count) * 100 / counted,
+                Samples = counted,
+            };
+        }
+
+        // The route in use and its last minute, for the joiner's status line
+        public RouteQuality Status(out string path)
+        {
+            lock (sync)
+            {
+                path = route;
+                Meter meter;
+                return meters.TryGetValue(StatusMeter, out meter) ? Measure(meter, StatusWindowMs) : new RouteQuality { Rtt = -1 };
             }
         }
 
