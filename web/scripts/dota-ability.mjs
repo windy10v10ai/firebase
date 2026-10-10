@@ -63,10 +63,14 @@ function unescapeKv(raw) {
   return raw.replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c === 't' ? '\t' : c));
 }
 
-/** `"key" "value"` 扁平表，本地化文件用 */
+/** `"key" "value"` 扁平表，本地化文件用；整行注释掉的条目不算，原版文件里留着不少废弃的旧译法 */
 export function parseFlatKv(file) {
   const map = new Map();
-  for (const m of readText(file).matchAll(/"([^"\r\n]+)"\s*"((?:[^"\\]|\\.)*)"/g)) {
+  const text = readText(file)
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('//'))
+    .join('\n');
+  for (const m of text.matchAll(/"([^"\r\n]+)"\s*"((?:[^"\\]|\\.)*)"/g)) {
     map.set(m[1], unescapeKv(m[2]));
   }
   return map;

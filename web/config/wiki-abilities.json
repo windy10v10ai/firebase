@@ -10872,9 +10872,9 @@
           },
           {
             "label": {
-              "zh": "SPLIT AMOUNT:",
+              "zh": "飞溅伤害：",
               "en": "SPLIT AMOUNT:",
-              "ru": "SPLIT AMOUNT:"
+              "ru": "УРОН ОТ ПРОБИТИЯ:"
             },
             "levels": [
               "70",
