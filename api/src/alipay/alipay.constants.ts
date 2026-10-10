@@ -3,8 +3,7 @@ import { MemberLevel } from '../members/entities/members.entity';
 import { AlipayProductCode } from './enums/alipay-product-code.enum';
 
 export type AlipayReward =
-  | { kind: 'member'; level: MemberLevel }
-  | { kind: 'points'; points: number };
+  { kind: 'member'; level: MemberLevel } | { kind: 'points'; points: number };
 
 export interface AlipayProductSpec {
   /** 用于构建订单标题，quantity > 1 时 service 自动追加数量 */
