@@ -521,6 +521,12 @@
     "en": "Untouchable",
     "ru": "Untouchable"
   },
+  "enigma_black_hole": {
+    "icon": "enigma_black_hole.793cf4f9.webp",
+    "zh": "黑洞",
+    "en": "Black Hole",
+    "ru": "Black Hole"
+  },
   "faceless_void_backtrack2": {
     "icon": "faceless_void_backtrack2.5e8155df.webp",
     "zh": "回到过去",
