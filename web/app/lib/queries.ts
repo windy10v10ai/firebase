@@ -1,7 +1,9 @@
 import { hashKey, queryOptions, type QueryClient, type QueryKey } from '@tanstack/react-query';
 
+import { fetchPlayerAwakening } from './awaken';
+import { fetchDailyTask } from './daily-task';
 import { fetchBattleRank, fetchLeaderboard } from './leaderboard';
-import { fetchPlayerInfo } from './player-info';
+import { fetchPlayerInfo, fetchPlayerMember, fetchPlayerProperties } from './player-info';
 import { fetchStatsRadar } from './player-stats-radar';
 import { fetchRecentMatches } from './player-stats-recent';
 import { fetchSteamProfile } from './steam-profile';
@@ -17,16 +19,55 @@ export const CACHE_TIERS = {
   long: { staleTime: 30 * MINUTE, gcTime: 30 * MINUTE },
 } as const;
 
-/** 某个玩家全部缓存的公共前缀，写操作后按它整体失效 */
+/** 某个玩家全部缓存的公共前缀 */
 export function playerKey(steamId: string) {
   return ['player', steamId] as const;
 }
 
+/** 会被网站写操作改变的那组数据，写操作后按它整体失效 */
+export function playerStateKey(steamId: string) {
+  return [...playerKey(steamId), 'state'] as const;
+}
+
 export function playerInfoQuery(steamId: string) {
   return queryOptions({
-    queryKey: [...playerKey(steamId), 'info'],
+    queryKey: [...playerStateKey(steamId), 'info'],
     queryFn: () => fetchPlayerInfo(steamId),
     ...CACHE_TIERS.short,
+  });
+}
+
+export function playerPropertiesQuery(steamId: string) {
+  return queryOptions({
+    queryKey: [...playerStateKey(steamId), 'properties'],
+    queryFn: () => fetchPlayerProperties(steamId),
+    ...CACHE_TIERS.realtime,
+  });
+}
+
+export function playerAwakeningQuery(steamId: string) {
+  return queryOptions({
+    queryKey: [...playerStateKey(steamId), 'awakening'],
+    queryFn: () => fetchPlayerAwakening(steamId),
+    ...CACHE_TIERS.realtime,
+  });
+}
+
+export function playerMemberQuery(steamId: string) {
+  return queryOptions({
+    queryKey: [...playerStateKey(steamId), 'member'],
+    queryFn: () => fetchPlayerMember(steamId),
+    ...CACHE_TIERS.realtime,
+  });
+}
+
+export function dailyTaskQuery(steamId: string) {
+  return queryOptions({
+    queryKey: [...playerKey(steamId), 'daily-task'],
+    queryFn: () => fetchDailyTask(steamId),
+    ...CACHE_TIERS.realtime,
+    // 这条读取会顺带写库，切回窗口不重新请求；页面上有刷新按钮
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -42,7 +83,7 @@ export function statsRadarQuery(steamId: string) {
   return queryOptions({
     queryKey: [...playerKey(steamId), 'stats-radar'],
     queryFn: () => fetchStatsRadar(steamId),
-    ...CACHE_TIERS.short,
+    ...CACHE_TIERS.long,
   });
 }
 
@@ -50,7 +91,7 @@ export function battleRankQuery(steamId: string) {
   return queryOptions({
     queryKey: [...playerKey(steamId), 'rank'],
     queryFn: () => fetchBattleRank(steamId),
-    ...CACHE_TIERS.short,
+    ...CACHE_TIERS.long,
   });
 }
 
@@ -70,18 +111,18 @@ export function leaderboardQuery() {
   });
 }
 
-/** 写操作成功后调用：该玩家的缓存全部过期，正在显示的立即后台刷新 */
-export function invalidatePlayer(client: QueryClient, steamId: string) {
-  return client.invalidateQueries({ queryKey: playerKey(steamId) });
+/** 写操作成功后调用：该玩家的状态组过期，正在显示的立即后台刷新；战绩、名次、昵称头像不受网站操作影响，不动 */
+export function invalidatePlayerState(client: QueryClient, steamId: string) {
+  return client.invalidateQueries({ queryKey: playerStateKey(steamId) });
 }
 
-/** 写接口返回了最新数据时用：直接写进对应缓存，该玩家的其余缓存过期 */
+/** 写接口返回了最新数据时用：直接写进对应缓存，该玩家状态组的其余缓存过期 */
 export function applyPlayerWrite<T>(client: QueryClient, steamId: string, queryKey: QueryKey, data: T) {
   client.setQueryData(queryKey, data);
   // 刚写进去的就是最新值，跟着失效会多发一次同样的请求
   const written = hashKey(queryKey);
   return client.invalidateQueries({
-    queryKey: playerKey(steamId),
+    queryKey: playerStateKey(steamId),
     predicate: (query) => query.queryHash !== written,
   });
 }

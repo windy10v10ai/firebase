@@ -1,9 +1,9 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
@@ -17,10 +17,9 @@ import {
   AWAKEN_SEASON_POINT_COST,
   awakenHero,
   ensureRandomCandidates,
-  fetchPlayerAwakening,
   pickRandomCandidates,
 } from '@/app/lib/awaken';
-import { invalidatePlayer } from '@/app/lib/queries';
+import { applyPlayerWrite, playerAwakeningQuery } from '@/app/lib/queries';
 import { AWAKEN_HEROES, type AwakenHero } from '@/config/awaken';
 
 import AwakenCard from './AwakenCard';
@@ -30,10 +29,7 @@ import RandomCard from './RandomCard';
 
 import type { PlayerInfo } from '@/app/lib/player-info';
 
-// 带上请求时用的 steamId，换一个玩家时旧结果立刻失效
-type LoadResult =
-  | { steamId: string; status: 'failed'; httpStatus: number }
-  | { steamId: string; status: 'ready'; info: PlayerInfo };
+type LoadResult = { status: 'failed'; httpStatus: number } | { status: 'ready'; info: PlayerInfo };
 
 const FAILURE_KEY: Record<number, string> = {
   403: 'private',
@@ -59,7 +55,7 @@ export default function AwakenPage() {
   const { steamId } = useParams<{ steamId: string }>();
 
   const queryClient = useQueryClient();
-  const [result, setResult] = useState<LoadResult | null>(null);
+  const query = useQuery(playerAwakeningQuery(steamId));
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   // 打开详情的英雄，以及它是不是从随机候选点进来的（决定按钮上的价格）
@@ -67,44 +63,19 @@ export default function AwakenPage() {
   const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [candidates, setCandidates] = useState<AwakenHero[]>([]);
 
-  const loaded = result?.steamId === steamId ? result : null;
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchPlayerAwakening(steamId)
-      .then((info) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', info });
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setResult({
-            steamId,
-            status: 'failed',
-            httpStatus: error instanceof ApiError ? error.status : 0,
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
+  const loaded: LoadResult | null = query.data
+    ? { status: 'ready', info: query.data }
+    : query.isError
+      ? { status: 'failed', httpStatus: query.error instanceof ApiError ? query.error.status : 0 }
+      : null;
 
   /** 请求失败后重新拉一次，免得界面停在已经不成立的数值上 */
   const resync = useCallback(async () => {
-    try {
-      const info = await fetchPlayerAwakening(steamId);
-      setResult({ steamId, status: 'ready', info });
-    } catch {
-      // 连重新拉取都失败时保留原画面，错误提示已经给过了
-    }
-  }, [steamId]);
+    // 连重新拉取都失败时保留原画面，错误提示已经给过了
+    await queryClient.refetchQueries({ queryKey: playerAwakeningQuery(steamId).queryKey });
+  }, [queryClient, steamId]);
 
-  const awakenedNames = useMemo(
-    () => (loaded?.status === 'ready' ? loaded.info.awakenedHeroes ?? [] : []),
-    [loaded],
-  );
+  const awakenedNames = useMemo(() => query.data?.awakenedHeroes ?? [], [query.data]);
 
   const handleRandom = useCallback(async () => {
     const picked = pickRandomCandidates(ALL_HERO_NAMES, awakenedNames);
@@ -133,8 +104,7 @@ export default function AwakenPage() {
       setFailed(null);
       try {
         const info = await awakenHero(steamId, target.hero.heroName, useMemberPoint);
-        setResult({ steamId, status: 'ready', info });
-        void invalidatePlayer(queryClient, steamId);
+        void applyPlayerWrite(queryClient, steamId, playerAwakeningQuery(steamId).queryKey, info);
         setTarget(null);
         setCandidatesOpen(false);
         setCandidates([]);

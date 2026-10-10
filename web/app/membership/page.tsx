@@ -1,13 +1,12 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { useAuth } from '@/app/lib/auth';
-import { fetchPlayerMember, type PlayerInfo } from '@/app/lib/player-info';
-import { invalidatePlayer } from '@/app/lib/queries';
+import { invalidatePlayerState, playerMemberQuery } from '@/app/lib/queries';
 
 import Section from '../components/Section';
 
@@ -36,9 +35,6 @@ const MANUAL_ACTIVE_LINKS = [
   },
 ];
 
-// 带上请求时用的 uid，换号登录时旧结果立刻失效
-type MemberResult = { uid: string; info: PlayerInfo | null };
-
 function EmojiLead({ text }: { text: string }) {
   const [emoji, rest] = splitLeadingEmoji(text);
   if (!emoji) {
@@ -59,38 +55,25 @@ export default function MembershipPage() {
   const auth = useAuth();
   const queryClient = useQueryClient();
   const uid = auth.status === 'authenticated' ? auth.uid : null;
-  const [result, setResult] = useState<MemberResult | null>(null);
+  const memberQuery = useQuery({ ...playerMemberQuery(uid ?? ''), enabled: uid !== null });
   const [payRequest, setPayRequest] = useState<AlipayRequest | null>(null);
   const [payKey, setPayKey] = useState(0);
   const [paidExpireDate, setPaidExpireDate] = useState<string | null>(null);
 
-  const loadMember = useCallback((steamId: string) => {
-    // 没有玩家记录或取失败都按「没有会员、积分为零」显示，页面照常能买
-    return fetchPlayerMember(steamId)
-      .then((info) => {
-        setResult({ uid: steamId, info });
-        return info;
-      })
-      .catch(() => {
-        setResult({ uid: steamId, info: null });
-        return null;
-      });
-  }, []);
-
-  useEffect(() => {
-    if (uid) {
-      loadMember(uid);
-    }
-  }, [uid, loadMember]);
-
-  const info = result && result.uid === uid ? result.info : undefined;
+  // 没有玩家记录或取失败都按「没有会员、积分为零」显示，页面照常能买
+  const info = uid ? (memberQuery.data ?? (memberQuery.isError ? null : undefined)) : undefined;
 
   const onPaid = useCallback(() => {
-    if (uid) {
-      void invalidatePlayer(queryClient, uid);
-      loadMember(uid).then((fresh) => setPaidExpireDate(fresh?.member?.expireDateString ?? null));
+    if (!uid) {
+      return;
     }
-  }, [uid, loadMember, queryClient]);
+    // 失效会立即重新请求正在显示的会员数据，等它回来再取新的有效期
+    void invalidatePlayerState(queryClient, uid).then(() => {
+      const state = queryClient.getQueryState(playerMemberQuery(uid).queryKey);
+      // 重新请求失败时缓存里还是付款前的有效期，不能拿来当新的显示
+      setPaidExpireDate(state?.status === 'success' ? (state.data?.member?.expireDateString ?? null) : null);
+    });
+  }, [uid, queryClient]);
 
   const openPay = useCallback((request: AlipayRequest) => {
     setPayKey((key) => key + 1);
