@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { resolveGameRepo } from './awaken-source.mjs';
+import { resolveGameRepo } from './dota-ability.mjs';
 
 /**
  * 取物品与抽选技能的图标和三语名字，产出清单 config/items.json、config/abilities.json。

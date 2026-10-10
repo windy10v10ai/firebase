@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { gameHead, loadAwakenSource } from './awaken-source.mjs';
+import { loadAwakenSource } from './awaken-source.mjs';
+import { gameHead } from './dota-ability.mjs';
 
 /**
  * 从 game 仓库重新生成 web/config/awaken.ts。
@@ -83,12 +84,15 @@ function check(source, assets) {
   // 8. 标题、描述、背景故事里不允许残留反斜杠转义：出现说明本地化解析没有把 \n \" \\ 等还原干净
   for (const hero of heroes) {
     for (const [lang, text] of Object.entries(hero.text)) {
-      if (text.title.includes('\\')) errors.push(`${hero.abilityName} 的 ${lang} 标题残留反斜杠转义`);
-      if (text.desc.includes('\\')) errors.push(`${hero.abilityName} 的 ${lang} 描述残留反斜杠转义`);
+      if (text.title.includes('\\'))
+        errors.push(`${hero.abilityName} 的 ${lang} 标题残留反斜杠转义`);
+      if (text.desc.includes('\\'))
+        errors.push(`${hero.abilityName} 的 ${lang} 描述残留反斜杠转义`);
     }
     if (hero.ability.lore) {
       for (const [lang, value] of Object.entries(hero.ability.lore)) {
-        if (value.includes('\\')) errors.push(`${hero.abilityName} 的 ${lang} 背景故事残留反斜杠转义`);
+        if (value.includes('\\'))
+          errors.push(`${hero.abilityName} 的 ${lang} 背景故事残留反斜杠转义`);
       }
     }
   }
@@ -108,9 +112,9 @@ function render(source, assets, head) {
         `freeTrial: ${hero.freeTrial}`,
         `art: ${quote(assets.art[hero.heroName])}`,
         `icon: ${icon === null ? 'null' : quote(icon)}`,
-        `name: { zh: ${quote(hero.text.zh.heroName)}, en: ${quote(hero.text.en.heroName)} }`,
-        `title: { zh: ${quote(hero.text.zh.title)}, en: ${quote(hero.text.en.title)} }`,
-        `desc: { zh: ${quote(hero.text.zh.desc)}, en: ${quote(hero.text.en.desc)} }`,
+        `name: { zh: ${quote(hero.text.zh.heroName)}, en: ${quote(hero.text.en.heroName)}, ru: ${quote(hero.text.ru.heroName)} }`,
+        `title: { zh: ${quote(hero.text.zh.title)}, en: ${quote(hero.text.en.title)}, ru: ${quote(hero.text.ru.title)} }`,
+        `desc: { zh: ${quote(hero.text.zh.desc)}, en: ${quote(hero.text.en.desc)}, ru: ${quote(hero.text.ru.desc)} }`,
         `ability: ${quote(hero.ability)}`,
       ];
       return `  {\n${fields.map((f) => `    ${f},`).join('\n')}\n  },`;
@@ -127,9 +131,11 @@ export const AWAKEN_SOURCE = {
   dotaVersion: ${quote(source.version)},
 } as const;
 
+/** 俄文缺译的条目在生成时已经落成英文 */
 export interface AwakenText {
   zh: string;
   en: string;
+  ru: string;
 }
 
 export type AbilityBehavior =
@@ -165,6 +171,8 @@ export interface AbilityValueRow {
   aoe: boolean;
   /** 受技能增强影响 */
   spellAmp: boolean;
+  /** 属性加成行，按「+40 攻击力」把符号与数值排在标签前 */
+  sign?: '+' | '-';
 }
 
 /** 技能提示框要的数据，取数规则见 docs/web/ability-tooltip.md；没有的项为 null 或空数组 */

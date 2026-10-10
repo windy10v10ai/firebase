@@ -12,8 +12,8 @@
     "dailyTaskFull": "每日任务",
     "leaderboard": "排行榜",
     "leaderboardFull": "排行榜",
-    "wiki": "技能物品",
-    "wikiFull": "技能与物品",
+    "wiki": "百科",
+    "wikiFull": "百科",
     "workshop": "Steam 创意工坊",
     "github": "GitHub",
     "membershipShort": "会员",
@@ -39,7 +39,7 @@
       "title": "登录后，随时查看自己的数据",
       "description": "用 Steam 登录，就能在网站上看战绩、勇士与会员积分，并给英雄属性加点、洗点、解锁觉醒。",
       "privacy": "密码输在 Steam 官网，本站只拿到你的 Steam ID",
-      "upcoming": ["更多数据统计", "技能与物品抽选一览"]
+      "upcoming": ["更多数据统计"]
     },
     "summary": {
       "profileLink": "个人主页",
@@ -94,8 +94,8 @@
         "description": "预览与刷新每日任务"
       },
       "wiki": {
-        "title": "技能与物品",
-        "description": "开局抽选的技能与物品一览"
+        "title": "百科",
+        "description": "游戏里能抽到的技能与物品"
       },
       "leaderboard": {
         "title": "排行榜",
@@ -550,14 +550,16 @@
     "entries": {
       "property": {
         "title": "属性加点",
-        "badge": "可用属性点 {count}"
+        "badge": "可用属性点 {count}",
+        "badgeDone": "已全部加点"
       },
       "awaken": {
         "title": "英雄觉醒",
         "badge": "已觉醒 {awakened} / {total}"
       },
       "dailyTask": {
-        "title": "每日任务"
+        "title": "每日任务",
+        "badge": "今日完成 {done} / {total}"
       },
       "leaderboard": {
         "title": "排行榜",
@@ -693,9 +695,7 @@
       "useBattle": "{cost} 可用勇士积分",
       "useMember": "{cost} 可用会员积分",
       "battleShort": "勇士积分 {have}，还差 {need}",
-      "memberShort": "会员积分 {have}，还差 {need}",
-      "scrollHint": "滑动查看更多",
-      "close": "关闭"
+      "memberShort": "会员积分 {have}，还差 {need}"
     },
     "random": {
       "title": "随机觉醒",
@@ -868,7 +868,36 @@
     },
     "cooldown": "冷却时间",
     "manaCost": "魔法消耗",
-    "aoe": "受范围加成影响"
+    "aoe": "受范围加成影响",
+    "dialog": {
+      "close": "关闭",
+      "scrollHint": "滑动查看更多"
+    }
+  },
+  "wiki": {
+    "pageTitle": {
+      "abilities": "技能百科",
+      "items": "物品百科"
+    },
+    "description": "游戏里能抽到的全部技能与物品，档位越高越难抽到。",
+    "tabs": {
+      "abilities": "技能",
+      "items": "物品"
+    },
+    "search": {
+      "abilities": "搜索技能名",
+      "items": "搜索物品名"
+    },
+    "pool": {
+      "active": "主动技能",
+      "passive": "被动技能"
+    },
+    "poolShort": {
+      "active": "主动",
+      "passive": "被动"
+    },
+    "empty": "没有找到「{query}」",
+    "iconMissing": "无图"
   },
   "auth": {
     "login": "通过 Steam 登录",

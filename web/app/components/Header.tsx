@@ -99,8 +99,9 @@ export default function Header() {
 
   return (
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
-    <header ref={headerRef} className="relative z-20 border-b border-line bg-surface">
-      <nav className="mx-auto max-w-7xl px-4 py-4">
+    <header ref={headerRef} className="relative z-20 border-b border-line bg-surface font-heading">
+      {/* 菜单浮层以它定位：平板起贴着外框右缘弹出，屏幕再宽也对着汉堡按钮 */}
+      <nav className="relative mx-auto max-w-7xl px-4 py-4">
         {/* 行高由账号位的 36px 控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
         <div className="flex min-h-9 justify-between items-center gap-3">
           {/* 每页都常驻的链接不预取：页面全是动态渲染，每次预取都是一次函数调用，按页面浏览量成倍放大 */}
@@ -110,7 +111,13 @@ export default function Header() {
             className="flex items-center gap-2 text-xl font-bold text-heading link-hover whitespace-nowrap"
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
-            <img src="/images/launcher.webp" alt="" width={32} height={32} className="size-8 shrink-0" />
+            <img
+              src="/images/launcher.webp"
+              alt=""
+              width={32}
+              height={32}
+              className="size-8 shrink-0"
+            />
             {/* 1024 以下一律收短：全名加五个站内项在 768 会把右侧控件挤出屏幕 */}
             <span className="lg:hidden">{t('homeShort')}</span>
             <span className="hidden lg:inline">{t('home')}</span>
@@ -122,7 +129,9 @@ export default function Header() {
                   key={item.key}
                   href={item.href}
                   prefetch={false}
-                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  aria-current={
+                    isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                  }
                   className={`nav-top${'desktopOnly' in item ? desktopOnlyClass : ''}`}
                 >
                   {t(item.shortLabelKey)}
@@ -173,10 +182,11 @@ export default function Header() {
           </div>
         </div>
         {menuOpen ? (
-          // 浮层下方是正文，底色必须不透明，否则两层文字叠在一起
+          // 浮层下方是正文，底色必须不透明，否则两层文字叠在一起。
+          // 手机铺满整行好点按；平板起改成挂在汉堡按钮下的面板，宽屏上菜单项不会远离按钮
           <div
             id="header-menu"
-            className="absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2"
+            className="absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 md:left-auto md:right-4 md:w-72 md:rounded-[10px] md:border md:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)]"
           >
             {SITE_NAV_ITEMS.map((item) => {
               if (item.href === null) {
@@ -189,7 +199,9 @@ export default function Header() {
                   href={item.href}
                   prefetch={false}
                   onClick={() => setMenuOpen(false)}
-                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  aria-current={
+                    isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                  }
                   className="nav-menu-item"
                 >
                   <Icon

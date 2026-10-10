@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck, CirclePlus, Sparkles, Trophy } from 'lucide-react';
+import { CalendarCheck, Check, CirclePlus, Sparkles, Trophy } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -12,9 +12,10 @@ import { ApiError } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
 import { formatBattleRank } from '@/app/lib/leaderboard';
 import { playerPagePath } from '@/app/lib/player-path';
-import { applyPlayerWrite, battleRankQuery, playerInfoQuery } from '@/app/lib/queries';
+import { applyPlayerWrite, battleRankQuery, dailyTaskPreviewQuery, playerInfoQuery } from '@/app/lib/queries';
 import { useSteamProfile } from '@/app/lib/use-steam-profile';
 import { AWAKEN_HERO_COUNT } from '@/config/awaken';
+import { ROUNDS_PER_DAY } from '@/config/daily-task';
 
 import FeatureEntryCard from './FeatureEntryCard';
 import LevelCard from './LevelCard';
@@ -37,10 +38,23 @@ export default function ProfilePage() {
   // 昵称头像与名次各自单独请求：一个要向 Steam 取数，一个要在库里数人数，快慢都不该拖住整页
   const profile = useSteamProfile(steamId);
   const rankQuery = useQuery(battleRankQuery(steamId));
+  const dailyTaskQuery = useQuery(dailyTaskPreviewQuery(steamId));
 
   // 个人主页能看别人的，签到入口只给本人
   const isSelf = auth.status === 'authenticated' && auth.uid === steamId;
   const info = infoQuery.data ?? null;
+
+  const dailyTaskBadge = (done: number) => {
+    const text = t('entries.dailyTask.badge', { done, total: ROUNDS_PER_DAY });
+    return done < ROUNDS_PER_DAY ? (
+      text
+    ) : (
+      <span className="inline-flex items-center gap-1 text-success">
+        <Check className="size-3.5 shrink-0" aria-hidden="true" />
+        {text}
+      </span>
+    );
+  };
 
   if (!info && infoQuery.isError) {
     const httpStatus = infoQuery.error instanceof ApiError ? infoQuery.error.status : 0;
@@ -85,7 +99,11 @@ export default function ProfilePage() {
             title={t('entries.property.title')}
             badge={
               info ? (
-                t('entries.property.badge', { count: info.useableLevel })
+                info.useableLevel > 0 ? (
+                  t('entries.property.badge', { count: info.useableLevel })
+                ) : (
+                  <span className="text-muted">{t('entries.property.badgeDone')}</span>
+                )
               ) : (
                 <Skeleton>{t('entries.property.badge', { count: 0 })}</Skeleton>
               )
@@ -110,11 +128,17 @@ export default function ProfilePage() {
             }
             href={playerPagePath(steamId, 'awaken')}
           />
-          {/* 不给这张卡加标签：轮次要多发一次每日任务的请求，而那条 GET 会写库 */}
           <FeatureEntryCard
             tone="dailyTask"
             Icon={CalendarCheck}
             title={t('entries.dailyTask.title')}
+            badge={
+              dailyTaskQuery.data ? (
+                dailyTaskBadge(Math.min(dailyTaskQuery.data.completedTasks.length, ROUNDS_PER_DAY))
+              ) : dailyTaskQuery.isError ? undefined : (
+                <Skeleton>{t('entries.dailyTask.badge', { done: 0, total: ROUNDS_PER_DAY })}</Skeleton>
+              )
+            }
             href={playerPagePath(steamId, 'daily-task')}
           />
           <FeatureEntryCard

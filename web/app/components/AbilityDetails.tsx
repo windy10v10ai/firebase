@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Fragment, type ReactNode } from 'react';
 
 import GameText from '@/app/components/GameText';
+import { type AbilityLocale, pickText } from '@/app/lib/ability-text';
 
 import type { AbilityDamageType, AbilityDetail, AbilityValueRow } from '@/config/awaken';
 
@@ -19,7 +20,7 @@ interface AbilityDetailsProps {
   ability: AbilityDetail;
   /** 已按当前语言取好的描述 */
   desc: string;
-  locale: 'zh' | 'en';
+  locale: AbilityLocale;
   /** 悬浮提示与详情弹窗只差描述和背景故事的字号 */
   variant: 'tooltip' | 'dialog';
 }
@@ -76,14 +77,17 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
       </div>,
     );
   }
-  sections.push(
-    <p
-      key="desc"
-      className={`leading-[1.65] ${variant === 'dialog' ? 'text-[15px]' : 'text-[13px]'}`}
-    >
-      <GameText text={desc} />
-    </p>,
-  );
+  // 纯加属性的物品游戏里也只有数值，没有描述
+  if (desc) {
+    sections.push(
+      <p
+        key="desc"
+        className={`leading-[1.65] ${variant === 'dialog' ? 'text-[15px]' : 'text-[13px]'}`}
+      >
+        <GameText text={desc} />
+      </p>,
+    );
+  }
   if (ability.values.length) {
     sections.push(
       <div key="values" className={`flex flex-col gap-0.75 ${ROW_CLASS}`}>
@@ -91,7 +95,7 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
           <ValueRow
             key={row.label.en}
             row={row}
-            label={row.label[locale]}
+            label={pickText(row.label, locale)}
             damageType={ability.damageType}
           />
         ))}
@@ -122,7 +126,7 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
         key="lore"
         className={`text-muted ${variant === 'dialog' ? 'text-[13px] leading-5' : 'text-xs leading-4.5'}`}
       >
-        {ability.lore[locale]}
+        {pickText(ability.lore, locale)}
       </p>,
     );
   }
@@ -135,9 +139,13 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
   ));
 }
 
-/** 标签自带冒号；全角冒号本身带留白，半角冒号后补一个空隙 */
+/** 标签自带冒号；全角冒号本身带留白，半角冒号后补一个空隙。物品的标签里可能带 <font> 着色 */
 function Label({ text }: { text: string }) {
-  return <span className={`text-muted ${text.endsWith('：') ? '' : 'me-1'}`}>{text}</span>;
+  return (
+    <span className={`text-muted ${text.endsWith('：') ? '' : 'me-1'}`}>
+      <GameText text={text} />
+    </span>
+  );
 }
 
 function ValueRow({
@@ -152,6 +160,17 @@ function ValueRow({
   const t = useTranslations('ability');
   // 吃技能增强的伤害数值按伤害类型上色，与游戏提示框一致
   const color = row.spellAmp && damageType ? DAMAGE_COLOR[damageType] : 'text-heading';
+  if (row.sign) {
+    return (
+      <div className="flex flex-wrap items-center">
+        <span className={`font-semibold ${color}`}>{row.sign}</span>
+        <Levels levels={row.levels} percent={row.percent} className={color} />
+        <span className="ms-1 text-muted">
+          <GameText text={label} />
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-wrap items-center">
       <Label text={label} />
@@ -205,7 +224,12 @@ function ManaIcon({ label }: { label: string }) {
 
 function AoeIcon({ label }: { label: string }) {
   return (
-    <svg viewBox="0 0 12 12" fill="none" className="ms-1 size-3 shrink-0 text-dota-magical" role="img">
+    <svg
+      viewBox="0 0 12 12"
+      fill="none"
+      className="ms-1 size-3 shrink-0 text-dota-magical"
+      role="img"
+    >
       <title>{label}</title>
       <circle cx="6" cy="6" r="4.75" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="6" cy="6" r="1.5" fill="currentColor" />

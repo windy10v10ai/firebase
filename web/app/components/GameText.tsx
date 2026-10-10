@@ -3,13 +3,13 @@ import { Fragment, type ReactNode } from 'react';
 /**
  * 渲染 game 本地化里的富文本。文案一个字都不改写，颜色也原样保留。
  *
- * 只认 <font color>、<b>、<br> 三种标记，解析成 React 节点。不走
+ * 只认 <font color>、<b>、<h1>、<br> 四种标记，解析成 React 节点。不走
  * dangerouslySetInnerHTML 加消毒：消毒是堵已知的洞，白名单解析是只放行已知的东西，
  * 后者没有注入面——这些文本来自 game 仓库，但渲染路径不该因为来源可信就放宽。
  */
 
-// 只匹配白名单内的三种标签；其余尖括号原样当文本输出
-const TAG = /<(\/?)(font|b|br)((?:\s+[a-zA-Z-]+='[^']*')*)\s*\/?>/g;
+// 只匹配白名单内的四种标签；其余尖括号原样当文本输出
+const TAG = /<(\/?)(font|b|h1|br)((?:\s+[a-zA-Z-]+='[^']*')*)\s*\/?>/g;
 const COLOR = /color='(#[0-9a-fA-F]{3,8})'/;
 
 interface Frame {
@@ -43,6 +43,16 @@ export function parseGameText(text: string): ReactNode[] {
     if (!closing) {
       if (tag === 'b') {
         stack.push({ children: [], wrap: (children, k) => <b key={k}>{children}</b> });
+      } else if (tag === 'h1') {
+        // 物品与部分技能用它给「主动：xx」「被动：xx」分段，游戏里是独占一行的粗体小标题
+        stack.push({
+          children: [],
+          wrap: (children, k) => (
+            <span key={k} className="block font-bold text-heading">
+              {children}
+            </span>
+          ),
+        });
       } else {
         const color = attrs.match(COLOR)?.[1];
         stack.push({

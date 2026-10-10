@@ -71,6 +71,14 @@ export function dailyTaskQuery(steamId: string) {
   });
 }
 
+/** 个人主页入口卡只看今天完成了几个，和任务页共用同一份数据，但按短缓存复用 */
+export function dailyTaskPreviewQuery(steamId: string) {
+  return queryOptions({
+    ...dailyTaskQuery(steamId),
+    ...CACHE_TIERS.short,
+  });
+}
+
 export function recentMatchesQuery(steamId: string) {
   return queryOptions({
     queryKey: [...playerKey(steamId), 'stats-recent'],

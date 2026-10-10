@@ -33,9 +33,11 @@ export default function DailyTaskPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshFailed, setRefreshFailed] = useState(false);
 
-  const loaded: LoadResult | null = query.data
+  // 个人主页入口卡会留下一份短缓存，任务页只认进页面之后请求到的，不先闪旧进度
+  const fresh = query.isFetchedAfterMount;
+  const loaded: LoadResult | null = fresh && query.isSuccess
     ? { status: 'ready', snapshot: query.data }
-    : query.isError
+    : fresh && query.isError
       ? { status: 'failed', httpStatus: query.error instanceof ApiError ? query.error.status : 0 }
       : null;
   const snapshot = loaded?.status === 'ready' ? loaded.snapshot : null;
