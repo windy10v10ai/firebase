@@ -1,6 +1,6 @@
 # web/ 规约
 
-Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓库通用约定见根目录 [CLAUDE.md](../CLAUDE.md)。
+Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓库通用约定见根目录 [CLAUDE.md](../.claude/CLAUDE.md)。
 
 ## 本地开发
 
@@ -45,7 +45,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 文案里的开局方式
 
-理由见 [docs/web/README.md](../docs/web/README.md) 的「开局方式与命名」，取值见[根目录 CLAUDE.md](../CLAUDE.md) 的「用语」。
+理由见 [docs/web/README.md](../docs/web/README.md) 的「开局方式与命名」，取值见[根目录 CLAUDE.md](../.claude/CLAUDE.md) 的「用语」。
 
 - **动作名只用「从游廊开局」「用启动器开局」**，不拿连接状态当动作名，不写「用在线模式开局」；对比表里简化成「游廊 / 启动器」
 - **「离线」「在线」只说连接状态**，用在解释数据新旧与 `/launch` 的对比表里；「本地主机」「服务器主机」只说主机，不指代连接状态

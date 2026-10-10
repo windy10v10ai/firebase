@@ -1,6 +1,6 @@
 # 本地主机策略 阶段 2：网站文案对齐离线模式
 
-> 状态：已完成。长期规范见 [docs/web/README.md](../../web/README.md) 的「开局方式与命名」与[根目录 CLAUDE.md](../../../CLAUDE.md) 的「用语」。
+> 状态：已完成。长期规范见 [docs/web/README.md](../../web/README.md) 的「开局方式与命名」与[根目录 CLAUDE.md](../../../.claude/CLAUDE.md) 的「用语」。
 
 对应 issue [#1214](https://github.com/windy10v10ai/firebase/issues/1214)。Dota 2 7.41f 起，从游廊直接开局的对局发不出网络请求，网站上的文案还在按「游戏内点刷新就同步」「会员下一局自动生效」写，对付费玩家尤其误导。
 

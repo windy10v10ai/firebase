@@ -81,7 +81,7 @@
 - **对玩家只说游廊开局「偶尔可能连不上」**，不解释代发、线路这些原因，也不列游戏内暂缺的功能
 - **启动器从 `/launch` 下载**，游戏内、首页的入口都指向这一页，不另设下载地址
 
-**入口说动作，不上状态词**：页脚、首页卡、提示条写怎么开局、什么时候在游戏内生效，「哪种方式是离线、哪种是在线」只在 `/launch` 页解释一次。完整说明与理由见 [docs/web/README.md](docs/web/README.md) 的「开局方式与命名」。
+**入口说动作，不上状态词**：页脚、首页卡、提示条写怎么开局、什么时候在游戏内生效，「哪种方式是离线、哪种是在线」只在 `/launch` 页解释一次。完整说明与理由见 [docs/web/README.md](../docs/web/README.md) 的「开局方式与命名」。
 
 ### 注释规约
 
@@ -114,16 +114,16 @@
 
 | 目录 | 说明 | 专属规约 |
 |---|---|---|
-| `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 | [api/CLAUDE.md](api/CLAUDE.md) |
-| `web/` | Next.js 前端 | [web/CLAUDE.md](web/CLAUDE.md) |
-| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；改 `launcher/` 时当前版本号已发布过才升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/CLAUDE.md](launcher/CLAUDE.md) |
+| `api/` | NestJS 后端 API，同时是 Firebase Functions 的源代码 | [api/CLAUDE.md](../api/CLAUDE.md) |
+| `web/` | Next.js 前端 | [web/CLAUDE.md](../web/CLAUDE.md) |
+| `launcher/` | 本机专用服启动器（C# WinForms 单文件 exe）。不得修改 Dota 2 原有文件；改 `launcher/` 时当前版本号已发布过才升版本号；发布的 exe 只从 `develop` 由「Launcher release build」工作流编译，代码 PR 与发版 PR 分开 | [launcher/CLAUDE.md](../launcher/CLAUDE.md) |
 | `extensions/` | Firebase BigQuery export 配置 | — |
 
 ### 文档目录
 
 三类文档分开存放，覆盖 brainstorming / writing-plans 等 skill 自带的默认路径。
 
-**写或改 `docs/` 下任何文档之前，先用 Skill 工具加载 [design-docs](.claude/skills/design-docs/SKILL.md) 技能**，按它判断内容该进哪一类，不凭印象定路径。向用户承诺「会写进哪份文档」之前同样先加载。批次完成后怎么瘦身也见该技能。
+**写或改 `docs/` 下任何文档之前，先用 Skill 工具加载 [design-docs](skills/design-docs/SKILL.md) 技能**，按它判断内容该进哪一类，不凭印象定路径。向用户承诺「会写进哪份文档」之前同样先加载。批次完成后怎么瘦身也见该技能。
 
 | 类型 | 路径 | 进 git |
 |---|---|---|
@@ -148,13 +148,13 @@
 
 | 服务 | 端口 | 单独启动 |
 |---|---|---|
-| Firestore emulator | 8080（UI 4000） | [api/CLAUDE.md](api/CLAUDE.md) |
-| NestJS API | 3001（Swagger `/api-doc`） | [api/CLAUDE.md](api/CLAUDE.md) |
-| Next.js web | 3000 | [web/CLAUDE.md](web/CLAUDE.md) |
+| Firestore emulator | 8080（UI 4000） | [api/CLAUDE.md](../api/CLAUDE.md) |
+| NestJS API | 3001（Swagger `/api-doc`） | [api/CLAUDE.md](../api/CLAUDE.md) |
+| Next.js web | 3000 | [web/CLAUDE.md](../web/CLAUDE.md) |
 
 ### 排查 bug
 
-**排查线上偶发故障、本地跑不通、登录链路异常、接口变慢，以及 API 部署后检查有没有出错、变慢之前，先用 Skill 工具加载 [debug-evidence](.claude/skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
+**排查线上偶发故障、本地跑不通、登录链路异常、接口变慢，以及 API 部署后检查有没有出错、变慢之前，先用 Skill 工具加载 [debug-evidence](skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
 
 ---
 
@@ -166,7 +166,7 @@
 - 仅在确有复用价值时提取公共逻辑；不要为了假设的未来需求提前设计。
 - **改动范围保持最小**：用最简单的机制满足当前需求，不顺手重构、不扩大 diff。
 - 「最小」指的是复杂度，不是字符数。为省几个字段而让多处代码必须遵守同一条隐式约定，是把复杂度从数据挪到了逻辑里，不算简化。
-- **严谨程度按数据性质分级**：涉及金钱的路径（支付、订单、退款）要经得起并发、重放与部分失败；玩法数据（战绩、积分、任务进度）按 MVP 来，不为极低概率的竞态加事务、加锁、加补偿。具体做法见 [api/CLAUDE.md](api/CLAUDE.md) 的「并发与一致性」。
+- **严谨程度按数据性质分级**：涉及金钱的路径（支付、订单、退款）要经得起并发、重放与部分失败；玩法数据（战绩、积分、任务进度）按 MVP 来，不为极低概率的竞态加事务、加锁、加补偿。具体做法见 [api/CLAUDE.md](../api/CLAUDE.md) 的「并发与一致性」。
 
 ### 命名规范
 
@@ -175,7 +175,7 @@
 - enum 成员：业务上下文决定，多数项目用 `PascalCase` 或 `SCREAMING_SNAKE_CASE`，本仓库以 `PascalCase` 为主（参考 `MemberLevel.NORMAL` 这种已有 `SCREAMING_SNAKE` 的特例除外）
 - 文件名：`kebab-case`
 
-NestJS 专属的后缀与目录约定（`*.controller.ts`、DTO、entity 等）见 [api/CLAUDE.md](api/CLAUDE.md)。
+NestJS 专属的后缀与目录约定（`*.controller.ts`、DTO、entity 等）见 [api/CLAUDE.md](../api/CLAUDE.md)。
 
 ### 常量（无状态、编译期确定的字面量）
 
@@ -254,7 +254,7 @@ feature/<issue-id>-<short-kebab-summary>
 
 不直接在本地把 feature 分支合并进 `develop`，统一走 PR：
 
-1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](api/CLAUDE.md)、[web/CLAUDE.md](web/CLAUDE.md) 与 [launcher/CLAUDE.md](launcher/CLAUDE.md) 的「校验」一节
+1. 实现完成后先跑完整校验，全部通过才能推送。改了哪个目录跑哪一套，命令见 [api/CLAUDE.md](../api/CLAUDE.md)、[web/CLAUDE.md](../web/CLAUDE.md) 与 [launcher/CLAUDE.md](../launcher/CLAUDE.md) 的「校验」一节
 2. 逐条读 `git diff develop...` 里新增和改动的注释，按「注释规约」自查：有没有写进具体场景、复述代码流程、把推测写成事实
 3. 加载 design-docs 技能检查文档：本次改动带来的长期有效决定已写进 `docs/<模块>/README.md`；涉及的批次设计文档如已完成，已按技能瘦身。没有需要改的也要过一遍这一步
 4. `git push -u origin <branch-name>`
@@ -293,7 +293,7 @@ feature/<issue-id>-<short-kebab-summary>
 |---|---|---|
 | 概要 | 是 | 这个 PR 做什么、对应哪个 issue（写法见下）。堆叠在其他 PR 上时说明依赖关系 |
 | 改动说明 | 是 | 写这个 PR 做了什么、为什么，不写怎么写的。涉及用户能感知的变化时分两部分：先「用户功能」——用户看到什么变化，不提代码和文件名；再「技术实现」——只写关键决定和它的理由。**两部分各控制在三五句以内**，讲不完说明该拆 PR。纯技术改动（网站不可见）不分部分，只写技术实现。涉及行为或性能差异时给实测数字 |
-| 界面变化 | 改动碰到网站页面时 | 改动后的截图，默认不放改动前，要对比时才放前后两份。**有没有差异都要放图**，测量数据只作补充不能代替截图。做法见 [web/CLAUDE.md](web/CLAUDE.md) 的「PR 截图」 |
+| 界面变化 | 改动碰到网站页面时 | 改动后的截图，默认不放改动前，要对比时才放前后两份。**有没有差异都要放图**，测量数据只作补充不能代替截图。做法见 [web/CLAUDE.md](../web/CLAUDE.md) 的「PR 截图」 |
 | 测试清单 | 是 | 勾选已执行的校验命令，并写明浏览器 / e2e 实测的操作与观察结果 |
 | 后续事项 | 有遗留动作时 | 发布后需要复验的项、依赖的配置变更、计划中的后续 PR |
 

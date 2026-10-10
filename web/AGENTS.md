@@ -1,6 +1,6 @@
 # Agent instructions
 
-Before making changes in this directory, read and follow [CLAUDE.md](CLAUDE.md) here and the repository-wide [CLAUDE.md](../CLAUDE.md).
+Before making changes in this directory, read and follow [CLAUDE.md](CLAUDE.md) here and the repository-wide [CLAUDE.md](../.claude/CLAUDE.md).
 
 `next dev` writes a managed `nextjs-agent-rules` block into this file. It picks this file over `CLAUDE.md` whenever it exists, so keeping it here is what stops the block from landing in `CLAUDE.md` on every run. Commit the block as written; only remove this file if that behaviour changes.
 

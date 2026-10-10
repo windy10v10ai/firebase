@@ -1,6 +1,6 @@
 # 本地主机策略 阶段 3：网页启动链接
 
-> 状态：已完成。长期规范见 [docs/web/README.md](../../web/README.md) 的「开局方式与命名」与[根目录 CLAUDE.md](../../../CLAUDE.md) 的「用语」。
+> 状态：已完成。长期规范见 [docs/web/README.md](../../web/README.md) 的「开局方式与命名」与[根目录 CLAUDE.md](../../../.claude/CLAUDE.md) 的「用语」。
 
 `steam://run/570//<编码后的启动参数>/` 这种链接能从网页直接拉起 Dota 并带上启动参数。玩家不必再开控制台、敲命令，`/launch` 从一篇教程变成一个入口。
 

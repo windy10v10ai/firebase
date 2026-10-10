@@ -82,7 +82,7 @@ await page.addStyleTag({ content: 'nextjs-portal { display: none !important; }' 
 
 拿登录态的做法——**只替换 Steam 换 token 这一次请求**，之后所有接口都打真后端、真写 Firestore：
 
-1. 起 Firestore + Auth 模拟器与 API（见根目录 [CLAUDE.md](../../../CLAUDE.md) 的「本地开发」）
+1. 起 Firestore + Auth 模拟器与 API（见根目录 [CLAUDE.md](../../CLAUDE.md) 的「本地开发」）
 2. 用 firebase-admin 往模拟器里塞一个测试玩家，并给同一个 id 签一个 custom token。**必须在 `api/` 目录下执行**：`firebase-admin/app` 这类 subpath export 只能从 `api/node_modules` 解析，脚本放在别处、又用绝对路径执行时解析不到。用 `node -e` 直接跑，不落文件，也就不用记得删；token 写到 scratchpad：
 
    ```bash

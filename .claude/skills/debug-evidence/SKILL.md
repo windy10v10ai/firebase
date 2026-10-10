@@ -101,7 +101,7 @@ gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.serv
 
 ## 本地复现真实 Steam 登录链路
 
-根目录 `npm run start` 起全套，端口见根目录 [CLAUDE.md](../../../CLAUDE.md) 的「本地开发」。开跑前确认三个都活着：
+根目录 `npm run start` 起全套，端口见根目录 [CLAUDE.md](../../CLAUDE.md) 的「本地开发」。开跑前确认三个都活着：
 
 ```bash
 curl -s -o /dev/null -w "web:%{http_code} " http://localhost:3000; \
