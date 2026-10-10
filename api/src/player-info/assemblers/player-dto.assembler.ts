@@ -11,11 +11,7 @@ import { PlayerPropertyService } from '../../player-property/player-property.ser
 import { PlayerInfoDto } from '../dto/player-info.dto';
 
 export type PlayerInfoInclude =
-  | 'member'
-  | 'property'
-  | 'setting'
-  | 'statsLifetime'
-  | 'heroAwakening';
+  'member' | 'property' | 'setting' | 'statsLifetime' | 'heroAwakening';
 
 @Injectable()
 export class PlayerDtoAssembler {

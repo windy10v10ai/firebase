@@ -21,6 +21,10 @@ updates:
       nestjs:
         patterns:
           - '@nestjs/*'
+    # 类型定义的大版本要跟运行时的 Node 大版本一致，升 Node 时手动一起升
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: 'github-actions'
     # Workflow files stored in the default location of `.github/workflows`. (You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.)
