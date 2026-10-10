@@ -15,7 +15,7 @@ export interface LauncherRelay {
 // 清空列表就不发通行证，启动器只试局域网与打洞，中转出问题时用它关掉中转。
 // 第一台是 0.5.2 及更早的启动器唯一会测、会连的一台，换它要等旧版用的人很少
 export const LAUNCHER_RELAYS: LauncherRelay[] = [
-  { address: '123.207.219.78:27200', priority: 1 },
+  { address: '123.207.219.78:27200', priority: 2 },
   { address: '118.195.194.163:27200', priority: 1 },
 ];
 // 掉线重连要拿同一张通行证重新认领，有效期要盖住一整局
