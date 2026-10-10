@@ -1,6 +1,6 @@
 # api/ 规约
 
-NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用约定见根目录 [CLAUDE.md](../CLAUDE.md)。
+NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用约定见根目录 [CLAUDE.md](../.claude/CLAUDE.md)。
 
 ## 本地开发
 
@@ -78,7 +78,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 
 ## 命名与文件名
 
-通用命名规则见根目录 [CLAUDE.md](../CLAUDE.md) 的「命名规范」。本目录额外遵守：
+通用命名规则见根目录 [CLAUDE.md](../.claude/CLAUDE.md) 的「命名规范」。本目录额外遵守：
 
 - DTO 类后缀 `Dto`，entity 类无后缀（参考 `Player`、`Member`）
 - 按职责加文件后缀：`*.controller.ts` / `*.service.ts` / `*.module.ts` / `*.entity.ts` / `*.dto.ts`

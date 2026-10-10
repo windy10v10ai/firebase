@@ -54,4 +54,4 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。
    - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只列对玩家影响大的变化，小修小改合成一句；未发布的版本并进本版。
 
-同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。发版 PR 合进 `develop` 后由用户审批 Release PR 上线（见根目录 [CLAUDE.md](../CLAUDE.md) 的「合并方式」）；请用户审批前，确认 `web/public/downloads/` 里只有这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。
+同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。发版 PR 合进 `develop` 后由用户审批 Release PR 上线（见根目录 [CLAUDE.md](../.claude/CLAUDE.md) 的「合并方式」）；请用户审批前，确认 `web/public/downloads/` 里只有这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。
