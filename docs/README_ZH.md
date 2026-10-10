@@ -4,7 +4,7 @@
 
 [![Build Status](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml/badge.svg)](https://github.com/windy10v10ai/firebase/actions/workflows/ci.yml)
 [![Deploy Firebase](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml/badge.svg?branch=main)](https://github.com/windy10v10ai/firebase/actions/workflows/deploy_firebase.yml)
-[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](../LICENSE)
 [![CodeFactor](https://www.codefactor.io/repository/github/windy10v10ai/firebase/badge)](https://www.codefactor.io/repository/github/windy10v10ai/firebase)
 <br>
 [![GitHub issues](https://img.shields.io/github/issues/windy10v10ai/firebase.svg)](https://github.com/windy10v10ai/firebase/issues)
