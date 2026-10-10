@@ -106,6 +106,8 @@ namespace Windy10v10AI.Launcher
         readonly Label routeLabel = new Label();
         bool routeShown;
         bool routeWasChecking;
+        string joinedCode;
+        Dictionary<string, object> lastConnection;
         DateTime routeRefreshed;
         readonly MarqueeBar marquee = new MarqueeBar();
         readonly Label hint = new Label();
@@ -1314,6 +1316,8 @@ namespace Windy10v10AI.Launcher
                 {
                     ShowProgress(string.Format(Strings.Joined, code), Strings.JoinedHint, Strings.LeaveRoom, false);
                     routeShown = true;
+                    joinedCode = code;
+                    lastConnection = null;
                     RefreshRoute(true);
                 });
                 WatchJoin(tunnel, install);
@@ -2005,6 +2009,15 @@ namespace Windy10v10AI.Launcher
             routeRefreshed = DateTime.UtcNow;
             string path;
             var quality = tunnel.Status(out path);
+            if (path != null)
+            {
+                lastConnection = new Dictionary<string, object> { { "path", PathType.Report(path) }, { "roomCode", joinedCode } };
+                if (quality.Samples > 0)
+                {
+                    lastConnection["lossPct"] = quality.Loss;
+                    if (quality.Rtt >= 0) lastConnection["rttMs"] = quality.Rtt;
+                }
+            }
             var color = Theme.Muted;
             var dot = Theme.Ok;
             string text;
@@ -2062,6 +2075,7 @@ namespace Windy10v10AI.Launcher
                 Mode = modeBar.Selected,
                 GameDir = install == null ? null : install.Game,
                 Error = error,
+                Connection = modeBar.Selected == 2 ? lastConnection : null,
             };
             using (var dialog = new FeedbackDialog(context))
             {
