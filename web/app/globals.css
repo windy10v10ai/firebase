@@ -2,13 +2,14 @@
 
 /* 配色分工见 docs/design/web/phase-12-color-system.md，取值见 docs/web/design-system.md */
 @theme {
-  /* 只用系统字体：中文网页字体要拆成上百个分片按需下载，首次访问与缓存后看到的字体不一致 */
+  /* 正文用系统字体：中文网页字体要拆成上百个分片按需下载，首次访问与缓存后看到的字体不一致 */
   /* 西文字体在前，汉字逐字回落到各平台的简体中文字体；emoji 落到兜底字体时比排版宽度宽，会压住后面的汉字，所以点名 emoji 字体 */
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC',
     'Source Han Sans SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Noto Color Emoji';
+  --font-heading: var(--font-heading-face), var(--font-sans);
 
   --color-surface: #09090b;
   --color-panel: #0f0f11;
@@ -127,7 +128,7 @@
 
 @layer components {
   .title-primary {
-    @apply text-3xl font-bold text-heading;
+    @apply font-heading text-3xl font-bold text-balance text-heading;
   }
 
   .title-secondary {

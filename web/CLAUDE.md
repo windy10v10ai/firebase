@@ -163,6 +163,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **每屏最多一个主按钮**
 - **请求进行中用 `Button` 的 `loading`**：按钮内转圈并禁用，文案由调用方换成进行时。不盖整页遮罩
 - **游戏按钮（`.btn-season`、`.btn-member`）的取值照搬游戏仓库的 `buttons.less`，不改**，属性、觉醒页要与游戏内同名操作长得一样
+- **标题字体只收了顶栏与页面大标题的字**（`font-heading`，`.title-primary` 已带上）。改了 `navigation.*`、键名为 `title` 或以 `Title` 结尾的文案，或语言名，跑 `npm run font:heading` 并提交 `app/fonts/` 下的产物，CI 的 `font:heading:check` 会拦下漏跑的情况。文案带接口数据（玩家昵称、英雄名等）的位置不用 `font-heading`，收不全的字会退回系统字体，一行里混两种字形。理由见 [docs/web/README.md](../docs/web/README.md) 的字体一行
 
 ## 校验
 

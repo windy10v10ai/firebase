@@ -15,7 +15,9 @@
     "awaken:sync": "node scripts/awaken-sync.mjs",
     "awaken:images": "node scripts/awaken-images.mjs",
     "heroes": "node scripts/heroes.mjs",
-    "items": "node scripts/items.mjs"
+    "items": "node scripts/items.mjs",
+    "font:heading": "node scripts/heading-font.mjs",
+    "font:heading:check": "node scripts/heading-font.mjs --check"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.1",
@@ -40,6 +42,7 @@
     "eslint-plugin-unused-imports": "^4.4.1",
     "playwright-core": "1.63.0",
     "postcss": "^8.5.18",
+    "subset-font": "^2.9.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vitest": "^5.0.3"
