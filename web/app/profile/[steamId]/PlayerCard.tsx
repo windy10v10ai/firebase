@@ -14,7 +14,7 @@ import { type SteamProfile } from '@/app/lib/steam-profile';
 interface PlayerCardProps {
   steamId: string;
   info: PlayerInfo | null;
-  profile: SteamProfile | null;
+  profile: SteamProfile | undefined;
   /** 只有本人的页面才传，别人的页面上整行不存在 */
   onCheckInClaimed?: (player: PlayerInfo) => void;
 }

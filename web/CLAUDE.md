@@ -38,6 +38,16 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **登录态变化时设 user_id**，只在 `AuthProvider` 那一处维护，退出时传 `null`
 - **测量 ID 读 `NEXT_PUBLIC_GA_MEASUREMENT_ID`**，留空即不加载 gtag。它是公开值，按上面「本地开发」的规约可以进 git
 
+## 数据请求与缓存
+
+理由与分档见 [docs/web/README.md](../docs/web/README.md) 第 4 节「数据缓存」。
+
+- **页面取 API 数据一律用 `useQuery`，查询定义写在 `app/lib/queries.ts`**：key、取数函数、档位都在那里定，页面只写 `useQuery(xxxQuery(steamId))`，不手写 `useEffect` 发请求，也不在调用点填 `staleTime` / `gcTime`
+- **新数据先选档**：玩家来这一页是为了操作的用 `realtime`，主要用来看的用 `short`，几乎不变或全体共用的用 `long`；拿不准时选更实时的那一档
+- **玩家相关的 key 以 `playerKey(steamId)` 开头**，写操作后的失效靠这个前缀，不挂在前缀下就清不掉
+- **写操作成功后必须更新缓存**：接口返回了最新数据用 `applyPlayerWrite`，没返回的用 `invalidatePlayer`；只调写接口、不碰缓存，别的页面会继续显示旧值
+- **不加 HTTP `Cache-Control`，不把缓存存进 localStorage**
+
 ## 界面文案
 
 - **只告诉玩家怎么做，不解释为什么这样设计**：平台限制、技术原因、方案取舍不进界面文案。写「付款时请在留言里填写你的 Dota2 好友 ID」，不写「Ko-fi 带不了 ID，所以请……」；理由留在设计文档与 PR
@@ -156,9 +166,9 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 校验
 
-`cd web && npm run lint && npx tsc --noEmit && npm run build`
+`cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build`
 
-本目录没有测试框架，校验靠上面三条加下面的浏览器实测。
+单元测试（Vitest）只覆盖不依赖浏览器的纯逻辑，测试文件与被测文件同目录、命名 `*.test.ts`；页面行为照常靠下面的浏览器实测。
 
 ## 浏览器验证
 

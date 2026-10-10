@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,6 +20,7 @@ import {
   fetchPlayerAwakening,
   pickRandomCandidates,
 } from '@/app/lib/awaken';
+import { invalidatePlayer } from '@/app/lib/queries';
 import { AWAKEN_HEROES, type AwakenHero } from '@/config/awaken';
 
 import AwakenCard from './AwakenCard';
@@ -56,6 +58,7 @@ export default function AwakenPage() {
   const t = useTranslations('awaken');
   const { steamId } = useParams<{ steamId: string }>();
 
+  const queryClient = useQueryClient();
   const [result, setResult] = useState<LoadResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
@@ -131,6 +134,7 @@ export default function AwakenPage() {
       try {
         const info = await awakenHero(steamId, target.hero.heroName, useMemberPoint);
         setResult({ steamId, status: 'ready', info });
+        void invalidatePlayer(queryClient, steamId);
         setTarget(null);
         setCandidatesOpen(false);
         setCandidates([]);
@@ -142,7 +146,7 @@ export default function AwakenPage() {
         setBusy(false);
       }
     },
-    [resync, steamId, target],
+    [queryClient, resync, steamId, target],
   );
 
   if (loaded?.status === 'failed') {
