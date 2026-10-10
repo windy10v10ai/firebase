@@ -44,8 +44,8 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **页面取 API 数据一律用 `useQuery`，查询定义写在 `app/lib/queries.ts`**：key、取数函数、档位都在那里定，页面只写 `useQuery(xxxQuery(steamId))`，不手写 `useEffect` 发请求，也不在调用点填 `staleTime` / `gcTime`
 - **新数据先选档**：玩家来这一页是为了操作的用 `realtime`，主要用来看的用 `short`，几乎不变或全体共用的用 `long`；拿不准时选更实时的那一档
-- **玩家相关的 key 以 `playerKey(steamId)` 开头**，写操作后的失效靠这个前缀，不挂在前缀下就清不掉
-- **写操作成功后必须更新缓存**：接口返回了最新数据用 `applyPlayerWrite`，没返回的用 `invalidatePlayer`；只调写接口、不碰缓存，别的页面会继续显示旧值
+- **玩家相关的 key 以 `playerKey(steamId)` 开头；网站写操作会改变的数据挂在 `playerStateKey(steamId)` 下**。写操作后的失效只清状态组，新数据会被加点、觉醒、签到、付款之类改变就放进去，不会就放在外面，放错了要么清不掉、要么白白重新请求
+- **写操作成功后必须更新缓存**：接口返回了最新数据用 `applyPlayerWrite`，没返回的用 `invalidatePlayerState`；只调写接口、不碰缓存，别的页面会继续显示旧值
 - **不加 HTTP `Cache-Control`，不把缓存存进 localStorage**
 
 ## 界面文案
