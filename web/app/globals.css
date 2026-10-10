@@ -80,6 +80,18 @@
   --color-dota-pure: #d8ae53;
   --color-dota-mana: #2f7fd6;
 
+  /* 抽选档位色：描边照搬 game 抽选界面的五档色；紫、橙、蓝原色压在深底上读不清，文字另提亮一档 */
+  --color-tier-1: #d3d3d3;
+  --color-tier-2: #1e90ff;
+  --color-tier-3: #a029af;
+  --color-tier-4: #ffd700;
+  --color-tier-5: #ff4500;
+  --color-tier-1-text: #d3d3d3;
+  --color-tier-2-text: #5aaeff;
+  --color-tier-3-text: #d07ddb;
+  --color-tier-4-text: #ffd84d;
+  --color-tier-5-text: #ff7a45;
+
   /* 滑动提示的箭头只轻轻上下动：幅度大了像在催促，还会和抽屉顶部的横杠抢眼 */
   --animate-scroll-hint: scroll-hint 1.6s ease-in-out infinite;
 

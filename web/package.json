@@ -15,7 +15,8 @@
     "awaken:sync": "node scripts/awaken-sync.mjs",
     "awaken:images": "node scripts/awaken-images.mjs",
     "heroes": "node scripts/heroes.mjs",
-    "items": "node scripts/items.mjs"
+    "items": "node scripts/items.mjs",
+    "wiki:sync": "node scripts/wiki-sync.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.1",

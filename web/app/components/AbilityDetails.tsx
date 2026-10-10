@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Fragment, type ReactNode } from 'react';
 
 import GameText from '@/app/components/GameText';
+import { type AbilityLocale, pickText } from '@/app/lib/ability-text';
 
 import type { AbilityDamageType, AbilityDetail, AbilityValueRow } from '@/config/awaken';
 
@@ -19,7 +20,7 @@ interface AbilityDetailsProps {
   ability: AbilityDetail;
   /** 已按当前语言取好的描述 */
   desc: string;
-  locale: 'zh' | 'en';
+  locale: AbilityLocale;
   /** 悬浮提示与详情弹窗只差描述和背景故事的字号 */
   variant: 'tooltip' | 'dialog';
 }
@@ -91,7 +92,7 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
           <ValueRow
             key={row.label.en}
             row={row}
-            label={row.label[locale]}
+            label={pickText(row.label, locale)}
             damageType={ability.damageType}
           />
         ))}
@@ -122,7 +123,7 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
         key="lore"
         className={`text-muted ${variant === 'dialog' ? 'text-[13px] leading-5' : 'text-xs leading-4.5'}`}
       >
-        {ability.lore[locale]}
+        {pickText(ability.lore, locale)}
       </p>,
     );
   }
@@ -205,7 +206,12 @@ function ManaIcon({ label }: { label: string }) {
 
 function AoeIcon({ label }: { label: string }) {
   return (
-    <svg viewBox="0 0 12 12" fill="none" className="ms-1 size-3 shrink-0 text-dota-magical" role="img">
+    <svg
+      viewBox="0 0 12 12"
+      fill="none"
+      className="ms-1 size-3 shrink-0 text-dota-magical"
+      role="img"
+    >
       <title>{label}</title>
       <circle cx="6" cy="6" r="4.75" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="6" cy="6" r="1.5" fill="currentColor" />

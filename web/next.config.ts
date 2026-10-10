@@ -4,6 +4,8 @@ import type { NextConfig } from 'next';
 
 const withNextIntl = createNextIntlPlugin();
 
+const HASHED_ASSET_DIRS = ['dota', 'heroes', 'abilities', 'items', 'item-slots'];
+
 const apiOrigin = process.env.API_ORIGIN;
 if (!apiOrigin) {
   throw new Error('API_ORIGIN is required to build the API proxy');
@@ -13,16 +15,17 @@ const config: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: __dirname,
   /*
-   * 觉醒页的立绘与图标文件名都带内容 hash，内容一变文件名必变，所以可以永久缓存。
+   * 取图脚本产出的游戏图（觉醒立绘、英雄头像、技能与物品图标、物品栏底图）文件名都带内容 hash，
+   * 内容一变文件名必变，所以可以永久缓存。
    * 不设的话 App Hosting 只给 max-age=14400，每 4 小时每个文件要回源问一次；
    * 而且它那个弱 ETag 实际只由文件大小决定，换成同样字节数的新图不会失效。
    */
   async headers() {
     return [
-      {
-        source: '/dota/:file*',
+      ...HASHED_ASSET_DIRS.map((dir) => ({
+        source: `/${dir}/:file*`,
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
+      })),
       // 启动器同理，文件名带版本号；保存名固定，直接打开下载地址也存成同一个名字
       {
         source: '/downloads/:file*',
