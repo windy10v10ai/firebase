@@ -75,6 +75,8 @@ export class PlayerController {
     return { matches: (stats?.matches ?? []).slice(0, take) };
   }
 
+  // 游戏服务端读取，启动器开的本地主机局也要能取到
+  @AllowLocal()
   @AllowWeb()
   @Get(':steamId/stats/radar')
   @ApiOperation({ summary: 'Get radar chart scores compared with the difficulty baseline' })
