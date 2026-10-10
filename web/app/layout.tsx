@@ -1,4 +1,3 @@
-import { Noto_Sans_SC } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
@@ -19,24 +18,6 @@ import { QueryProvider } from './lib/query-client';
 import './globals.css';
 
 import type { Metadata } from 'next';
-
-// 中文子集拆成上百个 unicode-range 分片，preload 会往每页塞上百个 <link>，
-// 交给浏览器按页面实际用到的字形去取
-const notoSansSC = Noto_Sans_SC({
-  weight: ['400', '500', '700'],
-  // 系统字体与 Noto Sans SC 字宽不同，中途换字体整页文字会跳；来不及就本次沿用系统字体，缓存后再用
-  display: 'optional',
-  preload: false,
-  // 不点名 emoji 字体时，emoji 会落到最后兜底的那一份，字形画得比排版宽度宽，
-  // 紧跟其后的汉字被压住
-  fallback: [
-    'system-ui',
-    'sans-serif',
-    'Apple Color Emoji',
-    'Segoe UI Emoji',
-    'Noto Color Emoji',
-  ],
-});
 
 export const metadata: Metadata = {
   title: { default: SITE_NAME, template: TITLE_TEMPLATE },
@@ -69,7 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
-      <body className={`${notoSansSC.className} min-h-screen bg-surface`}>
+      <body className="min-h-screen bg-surface">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AuthProvider initialUid={initialUid} initialProfile={initialProfile} siteOrigin={siteOrigin}>
             <QueryProvider>
