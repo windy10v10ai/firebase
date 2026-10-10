@@ -18,11 +18,11 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\" --fix",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:cov": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "firebase emulators:exec --only firestore,auth \"NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json\" --project windy10v10ai",
+    "test:e2e": "firebase emulators:exec --only firestore,auth \"cross-env NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json\" --project windy10v10ai",
     "export:snapshot": "ts-node scripts/offline-snapshot/export-player-snapshot.ts"
   },
   "dependencies": {
