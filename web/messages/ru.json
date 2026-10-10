@@ -556,14 +556,16 @@
     "entries": {
       "property": {
         "title": "Атрибуты",
-        "badge": "Доступно очков: {count}"
+        "badge": "Доступно очков: {count}",
+        "badgeDone": "Все очки распределены"
       },
       "awaken": {
         "title": "Пробуждение героев",
         "badge": "Пробуждено {awakened} / {total}"
       },
       "dailyTask": {
-        "title": "Ежедневные задания"
+        "title": "Ежедневные задания",
+        "badge": "Сегодня {done} / {total}"
       },
       "leaderboard": {
         "title": "Таблица лидеров",

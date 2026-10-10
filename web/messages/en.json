@@ -556,14 +556,16 @@
     "entries": {
       "property": {
         "title": "Attributes",
-        "badge": "Usable {count} points"
+        "badge": "Usable {count} points",
+        "badgeDone": "All points spent"
       },
       "awaken": {
         "title": "Hero Awakening",
         "badge": "Awakened {awakened} / {total}"
       },
       "dailyTask": {
-        "title": "Daily Tasks"
+        "title": "Daily Tasks",
+        "badge": "Today {done} / {total}"
       },
       "leaderboard": {
         "title": "Leaderboard",

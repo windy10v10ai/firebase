@@ -5,6 +5,7 @@ import {
   applyPlayerWrite,
   battleRankQuery,
   CACHE_TIERS,
+  dailyTaskPreviewQuery,
   dailyTaskQuery,
   invalidatePlayerState,
   leaderboardQuery,
@@ -68,6 +69,12 @@ describe('分档与 key', () => {
 
   it('每日任务切回窗口不重新请求', () => {
     expect(dailyTaskQuery(PLAYER).refetchOnWindowFocus).toBe(false);
+    expect(dailyTaskPreviewQuery(PLAYER).refetchOnWindowFocus).toBe(false);
+  });
+
+  it('入口卡与任务页共用同一份每日任务，入口卡走短缓存', () => {
+    expect(dailyTaskPreviewQuery(PLAYER).queryKey).toEqual(dailyTaskQuery(PLAYER).queryKey);
+    expect(dailyTaskPreviewQuery(PLAYER).staleTime).toBe(CACHE_TIERS.short.staleTime);
   });
 
   it('长缓存的回收时间不短于新鲜期', () => {
