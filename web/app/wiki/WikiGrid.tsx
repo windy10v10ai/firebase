@@ -14,6 +14,7 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { pickText } from '@/app/lib/ability-text';
 
 import { DETAIL_LOADERS, type WikiDetail } from './details';
+import WikiTabs from './WikiTabs';
 
 import type { AbilityLocale } from '@/app/lib/ability-text';
 
@@ -131,20 +132,14 @@ export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProp
 
   return (
     <>
+      {/* tab 与搜索框两页都有，放在同一行，切换页面时位置不动；分区跳转只有技能页有，放到下一行 */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        {groups.length > 1 ? (
-          <nav className="flex flex-wrap gap-2">
-            {groups.map((group) => (
-              <a
-                key={group.key}
-                href={`#${group.key}`}
-                className="flex min-h-9 items-center rounded-full border border-line-strong px-3.5 text-sm text-content transition-colors hover:border-link hover:text-heading"
-              >
-                {group.title}
-              </a>
-            ))}
-          </nav>
-        ) : null}
+        <WikiTabs
+          tabs={[
+            { href: '/wiki/abilities', label: t('tabs.abilities') },
+            { href: '/wiki/items', label: t('tabs.items') },
+          ]}
+        />
         <div className="md:w-72">
           <Input
             type="search"
@@ -156,6 +151,20 @@ export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProp
           />
         </div>
       </div>
+
+      {groups.length > 1 ? (
+        <nav className="flex flex-wrap gap-2">
+          {groups.map((group) => (
+            <a
+              key={group.key}
+              href={`#${group.key}`}
+              className="flex min-h-9 items-center rounded-full border border-line-strong px-3.5 text-sm text-content transition-colors hover:border-link hover:text-heading"
+            >
+              {group.title}
+            </a>
+          ))}
+        </nav>
+      ) : null}
 
       {sections.length === 0 ? (
         <p className="py-12 text-center text-muted">{t('empty', { query: query.trim() })}</p>
