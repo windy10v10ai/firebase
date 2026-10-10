@@ -1,3 +1,4 @@
+import localFont from 'next/font/local';
 import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
@@ -18,6 +19,16 @@ import { QueryProvider } from './lib/query-client';
 import './globals.css';
 
 import type { Metadata } from 'next';
+
+// 只收了顶栏与页面大标题的字，正文与玩家昵称用系统字体，见 scripts/heading-font.mjs
+const headingFont = localFont({
+  src: './fonts/heading.woff2',
+  weight: '400 700',
+  // 文件小且预加载，等它就绪再画标题，从地址栏打开时不会先画系统字体再替换
+  display: 'block',
+  variable: '--font-heading-face',
+  adjustFontFallback: false,
+});
 
 export const metadata: Metadata = {
   title: { default: SITE_NAME, template: TITLE_TEMPLATE },
@@ -49,7 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const siteOrigin = await requestOrigin();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={headingFont.variable}>
       <body className="min-h-screen bg-surface">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AuthProvider initialUid={initialUid} initialProfile={initialProfile} siteOrigin={siteOrigin}>

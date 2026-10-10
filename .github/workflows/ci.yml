@@ -137,6 +137,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Heading font coverage
+        run: npm run font:heading:check
+
       - name: Type check
         run: npx tsc --noEmit
 
