@@ -66,18 +66,19 @@ export class FeedbackService {
 
     await this.reportRepository.create({
       id,
-      source: 'launcher',
+      source: dto.source ?? 'launcher',
       type: dto.type,
       topics: dto.topics,
       tags: [],
       description,
       ...(dto.steamId && { steamId: dto.steamId }),
       steamIdVerified: false,
-      launcherVersion: dto.launcherVersion,
+      ...(dto.launcherVersion && { launcherVersion: dto.launcherVersion }),
       ...(dto.mapVersion && { mapVersion: dto.mapVersion }),
       ...(dto.windowsVersion && { windowsVersion: dto.windowsVersion }),
       ...(dto.mode && { mode: dto.mode }),
       ...(dto.launcherError && { launcherError: { ...dto.launcherError } }),
+      ...(dto.gameState && { gameState: toPlain(dto.gameState) }),
       ...(serverLogPath && { serverLog: serverLogPath }),
       ...(clientLogPath && { clientLog: clientLogPath }),
       ...(origin.country && { country: origin.country }),
@@ -96,6 +97,7 @@ export class FeedbackService {
       type: dto.type,
       topics: dto.topics,
       steamId: dto.steamId,
+      source: dto.source ?? 'launcher',
       launcherVersion: dto.launcherVersion,
       hasServerLog: !!serverLog,
       hasClientLog: !!clientLog,
@@ -123,6 +125,11 @@ export class FeedbackService {
 
 function todayCount(limit: FeedbackRateLimit | null, day: string): number {
   return limit?.dailyDate === day ? limit.dailyCount : 0;
+}
+
+// 校验后的嵌套对象是类实例，Firestore 只收普通对象
+function toPlain<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 function decodeLog(base64?: string): Buffer | undefined {

@@ -483,6 +483,20 @@
       "stuns": "眩晕",
       "roshanKills": "肉山击杀"
     },
+    "radar": {
+      "title": "近期表现",
+      "matches": "最近 {count} 场",
+      "needMore": "再玩 {count} 局后显示",
+      "failed": "暂时取不到",
+      "axes": {
+        "damage": "输出",
+        "participation": "参战",
+        "gold": "发育",
+        "push": "推进",
+        "survival": "生存",
+        "support": "辅助"
+      }
+    },
     "recent": {
       "title": "近期战绩",
       "note": "只保留最近 {count} 场，更早的不再保留。",

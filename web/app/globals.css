@@ -68,6 +68,12 @@
   --color-hero-level: #e7d291;
   --color-hero-level-border: rgba(231, 210, 145, 0.53);
 
+  /* 个人主页的六边形图，取值参照游戏内近期比赛雷达的橙色与灰底板，理由见 docs/web/design-system.md「游戏语义色」 */
+  --color-radar: #f59a46;
+  --color-radar-fill: #e8823a;
+  --color-radar-plate: #6a6e76;
+  --color-radar-grid: #a3a8b0;
+
   /* 游戏语义色，只用在技能提示框：取值照搬 Dota 本地化里的伤害类型色 */
   --color-dota-physical: #ae2f28;
   --color-dota-magical: #5b93d1;

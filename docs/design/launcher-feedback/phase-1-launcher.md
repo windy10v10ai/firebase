@@ -37,6 +37,7 @@
 | 卡顿 / 掉线 | game `system` |
 | 启动器 | firebase `launcher` |
 | 网站 | firebase `web` |
+| 游戏 | game，不加标签 |
 
 另留一个 `tags` 数组，玩家提交时为空，AI 汇总时补更细的标签。
 
@@ -74,3 +75,4 @@
 ## 后续事项
 
 - 网站反馈 #1379
+- 游戏内反馈 [game#2540](https://github.com/windy10v10ai/game/issues/2540)：接口已支持 `source: game`，不带日志，Steam ID 同启动器不算可信
