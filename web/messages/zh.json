@@ -894,7 +894,6 @@
       "active": "主动",
       "passive": "被动"
     },
-    "count": "{n} 个",
     "empty": "没有找到「{query}」",
     "iconMissing": "无图"
   },

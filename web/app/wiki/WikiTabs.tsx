@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 interface WikiTabsProps {
-  tabs: { href: string; label: string; count: number }[];
+  tabs: { href: string; label: string }[];
 }
 
 /** 技能与物品两页之间的切换，当前页的判断要读地址，所以单独做成客户端组件 */
@@ -20,14 +20,13 @@ export default function WikiTabs({ tabs }: WikiTabsProps) {
             key={tab.href}
             href={tab.href}
             aria-current={current ? 'page' : undefined}
-            className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-[7px] px-4.5 whitespace-nowrap transition-colors md:flex-none lg:min-h-10 ${
+            className={`flex min-h-11 flex-1 items-center justify-center rounded-[7px] px-4.5 whitespace-nowrap transition-colors md:flex-none lg:min-h-10 ${
               current
                 ? 'bg-panel-raised font-semibold text-heading'
                 : 'text-content hover:text-heading'
             }`}
           >
             {tab.label}
-            <span className="font-normal text-muted">{tab.count}</span>
           </Link>
         );
       })}

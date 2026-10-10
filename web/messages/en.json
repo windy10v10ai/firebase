@@ -900,7 +900,6 @@
       "active": "Active",
       "passive": "Passive"
     },
-    "count": "{n}",
     "empty": "No results for “{query}”",
     "iconMissing": "No icon"
   },

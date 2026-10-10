@@ -2,7 +2,6 @@ import { BookOpen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { pageTitle } from '@/app/lib/page-title';
-import { WIKI_ABILITIES, WIKI_ITEMS } from '@/config/wiki';
 
 import WikiTabs from './WikiTabs';
 
@@ -24,12 +23,8 @@ export default function WikiLayout({ children }: { children: React.ReactNode }) 
       </div>
       <WikiTabs
         tabs={[
-          {
-            href: '/wiki/abilities',
-            label: t('wiki.tabs.abilities'),
-            count: WIKI_ABILITIES.length,
-          },
-          { href: '/wiki/items', label: t('wiki.tabs.items'), count: WIKI_ITEMS.length },
+          { href: '/wiki/abilities', label: t('wiki.tabs.abilities') },
+          { href: '/wiki/items', label: t('wiki.tabs.items') },
         ]}
       />
       {children}
