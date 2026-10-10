@@ -3,13 +3,17 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyPlayerWrite,
+  battleRankQuery,
   CACHE_TIERS,
-  invalidatePlayer,
+  dailyTaskQuery,
+  invalidatePlayerState,
   leaderboardQuery,
+  playerAwakeningQuery,
   playerInfoQuery,
+  playerMemberQuery,
+  playerPropertiesQuery,
   recentMatchesQuery,
   statsRadarQuery,
-  battleRankQuery,
   steamProfileQuery,
 } from './queries';
 
@@ -17,33 +21,53 @@ const PLAYER = '123';
 const OTHER = '456';
 
 describe('分档与 key', () => {
-  it('玩家数据都挂在该玩家的前缀下', () => {
+  it('网站写操作会改变的数据挂在该玩家的状态组下', () => {
     for (const query of [
       playerInfoQuery(PLAYER),
+      playerPropertiesQuery(PLAYER),
+      playerAwakeningQuery(PLAYER),
+      playerMemberQuery(PLAYER),
+    ]) {
+      expect(query.queryKey.slice(0, 3)).toEqual(['player', PLAYER, 'state']);
+    }
+  });
+
+  it('写操作改不了的数据挂在玩家前缀下、状态组之外', () => {
+    for (const query of [
       recentMatchesQuery(PLAYER),
       statsRadarQuery(PLAYER),
       battleRankQuery(PLAYER),
       steamProfileQuery(PLAYER),
+      dailyTaskQuery(PLAYER),
     ]) {
       expect(query.queryKey.slice(0, 2)).toEqual(['player', PLAYER]);
+      expect(query.queryKey[2]).not.toBe('state');
     }
   });
 
-  it('看的数据走短缓存，昵称头像与排行榜走长缓存', () => {
+  it('各数据的档位', () => {
+    expect(playerInfoQuery(PLAYER).staleTime).toBe(CACHE_TIERS.short.staleTime);
+    expect(recentMatchesQuery(PLAYER).staleTime).toBe(CACHE_TIERS.short.staleTime);
     for (const query of [
-      playerInfoQuery(PLAYER),
-      recentMatchesQuery(PLAYER),
       statsRadarQuery(PLAYER),
       battleRankQuery(PLAYER),
+      steamProfileQuery(PLAYER),
+      leaderboardQuery(),
     ]) {
-      expect(query.staleTime).toBe(CACHE_TIERS.short.staleTime);
+      expect(query).toMatchObject(CACHE_TIERS.long);
     }
-    expect(steamProfileQuery(PLAYER)).toMatchObject(CACHE_TIERS.long);
-    expect(leaderboardQuery()).toMatchObject(CACHE_TIERS.long);
+    for (const query of [
+      playerPropertiesQuery(PLAYER),
+      playerAwakeningQuery(PLAYER),
+      playerMemberQuery(PLAYER),
+      dailyTaskQuery(PLAYER),
+    ]) {
+      expect(query).toMatchObject(CACHE_TIERS.realtime);
+    }
   });
 
-  it('实时档不留缓存', () => {
-    expect(CACHE_TIERS.realtime).toEqual({ staleTime: 0, gcTime: 0 });
+  it('每日任务切回窗口不重新请求', () => {
+    expect(dailyTaskQuery(PLAYER).refetchOnWindowFocus).toBe(false);
   });
 
   it('长缓存的回收时间不短于新鲜期', () => {
@@ -51,10 +75,14 @@ describe('分档与 key', () => {
   });
 });
 
+type SeedName = 'info' | 'properties' | 'recent' | 'rank' | 'otherInfo' | 'leaderboard';
+
 function seed(client: QueryClient) {
-  const keys: Record<'info' | 'recent' | 'otherInfo' | 'leaderboard', readonly unknown[]> = {
+  const keys: Record<SeedName, readonly unknown[]> = {
     info: playerInfoQuery(PLAYER).queryKey,
+    properties: playerPropertiesQuery(PLAYER).queryKey,
     recent: recentMatchesQuery(PLAYER).queryKey,
+    rank: battleRankQuery(PLAYER).queryKey,
     otherInfo: playerInfoQuery(OTHER).queryKey,
     leaderboard: leaderboardQuery().queryKey,
   };
@@ -68,29 +96,32 @@ const invalidated = (client: QueryClient, key: readonly unknown[]) =>
   client.getQueryState(key)?.isInvalidated;
 
 describe('写操作后的失效', () => {
-  it('invalidatePlayer 只让该玩家的缓存过期', async () => {
+  it('invalidatePlayerState 只让该玩家的状态组过期', async () => {
     const client = new QueryClient();
     const keys = seed(client);
 
-    await invalidatePlayer(client, PLAYER);
+    await invalidatePlayerState(client, PLAYER);
 
     expect(invalidated(client, keys.info)).toBe(true);
-    expect(invalidated(client, keys.recent)).toBe(true);
+    expect(invalidated(client, keys.properties)).toBe(true);
+    expect(invalidated(client, keys.recent)).toBe(false);
+    expect(invalidated(client, keys.rank)).toBe(false);
     expect(invalidated(client, keys.otherInfo)).toBe(false);
     expect(invalidated(client, keys.leaderboard)).toBe(false);
   });
 
-  it('applyPlayerWrite 写入返回值，该玩家其余缓存过期', async () => {
+  it('applyPlayerWrite 写入返回值，状态组其余缓存过期', async () => {
     const client = new QueryClient();
     const keys = seed(client);
     const fresh = { fresh: true };
 
-    await applyPlayerWrite(client, PLAYER, keys.info, fresh);
+    await applyPlayerWrite(client, PLAYER, keys.properties, fresh);
 
-    expect(client.getQueryData(keys.info)).toEqual(fresh);
-    expect(invalidated(client, keys.info)).toBe(false);
-    expect(invalidated(client, keys.recent)).toBe(true);
+    expect(client.getQueryData(keys.properties)).toEqual(fresh);
+    expect(invalidated(client, keys.properties)).toBe(false);
+    expect(invalidated(client, keys.info)).toBe(true);
+    expect(invalidated(client, keys.recent)).toBe(false);
+    expect(invalidated(client, keys.rank)).toBe(false);
     expect(invalidated(client, keys.otherInfo)).toBe(false);
-    expect(invalidated(client, keys.leaderboard)).toBe(false);
   });
 });

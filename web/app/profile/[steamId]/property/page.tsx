@@ -1,30 +1,22 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import { ApiError } from '@/app/lib/api';
-import {
-  fetchPlayerProperties,
-  resetProperties,
-  upgradeProperty,
-  type PlayerInfo,
-} from '@/app/lib/player-info';
-import { invalidatePlayer } from '@/app/lib/queries';
+import { resetProperties, upgradeProperty, type PlayerInfo } from '@/app/lib/player-info';
+import { applyPlayerWrite, playerPropertiesQuery } from '@/app/lib/queries';
 import { PROPERTY_GROUPS, PROPERTY_LIST, type PropertyDef } from '@/config/properties';
 
 import PointsCard from './PointsCard';
 import PropertyCard from './PropertyCard';
 import ResetDialog from './ResetDialog';
 
-// 带上请求时用的 steamId，换一个玩家时旧结果立刻失效
-type LoadResult =
-  | { steamId: string; status: 'failed'; httpStatus: number }
-  | { steamId: string; status: 'ready'; info: PlayerInfo };
+type LoadResult = { status: 'failed'; httpStatus: number } | { status: 'ready'; info: PlayerInfo };
 
 const FAILURE_KEY: Record<number, string> = {
   403: 'private',
@@ -38,7 +30,7 @@ export default function PropertyPage() {
   const { steamId } = useParams<{ steamId: string }>();
 
   const queryClient = useQueryClient();
-  const [result, setResult] = useState<LoadResult | null>(null);
+  const query = useQuery(playerPropertiesQuery(steamId));
   // 属性名 → 还没提交的档数
   const [pending, setPending] = useState<Record<string, number>>({});
   // 正在提交的属性名，或 RESET_KEY；同一时刻只允许一个请求在飞
@@ -46,42 +38,18 @@ export default function PropertyPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [failedAction, setFailedAction] = useState<string | null>(null);
 
-  const loaded = result?.steamId === steamId ? result : null;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchPlayerProperties(steamId)
-      .then((info) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', info });
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setResult({
-            steamId,
-            status: 'failed',
-            httpStatus: error instanceof ApiError ? error.status : 0,
-          });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
+  const loaded: LoadResult | null = query.data
+    ? { status: 'ready', info: query.data }
+    : query.isError
+      ? { status: 'failed', httpStatus: query.error instanceof ApiError ? query.error.status : 0 }
+      : null;
 
   /** 请求失败后重新拉一次，免得界面停在已经不成立的数值上 */
   const resync = useCallback(async () => {
-    try {
-      const info = await fetchPlayerProperties(steamId);
-      setResult({ steamId, status: 'ready', info });
-    } catch {
-      // 连重新拉取都失败时保留原来的画面，错误提示已经给过了
-    }
+    // 连重新拉取都失败时保留原来的画面，错误提示已经给过了
+    await queryClient.refetchQueries({ queryKey: playerPropertiesQuery(steamId).queryKey });
     setPending({});
-  }, [steamId]);
+  }, [queryClient, steamId]);
 
   const handleUpgrade = useCallback(
     async (def: PropertyDef, targetLevel: number) => {
@@ -89,8 +57,7 @@ export default function PropertyPage() {
       setFailedAction(null);
       try {
         const info = await upgradeProperty(steamId, def.name, targetLevel);
-        setResult({ steamId, status: 'ready', info });
-        void invalidatePlayer(queryClient, steamId);
+        void applyPlayerWrite(queryClient, steamId, playerPropertiesQuery(steamId).queryKey, info);
         setPending((current) => {
           const next = { ...current };
           delete next[def.name];
@@ -112,8 +79,7 @@ export default function PropertyPage() {
       setFailedAction(null);
       try {
         const info = await resetProperties(steamId, useMemberPoint);
-        setResult({ steamId, status: 'ready', info });
-        void invalidatePlayer(queryClient, steamId);
+        void applyPlayerWrite(queryClient, steamId, playerPropertiesQuery(steamId).queryKey, info);
         setPending({});
         setDialogOpen(false);
       } catch {
