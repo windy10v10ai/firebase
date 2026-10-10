@@ -1,6 +1,6 @@
 # 批次 19：技能与物品图鉴
 
-> 状态：进行中。批次 A 技能页、批次 B 物品页。长期规范见 [docs/web/README.md](../../web/README.md) 第 3、4 节、[ability-tooltip.md](../../web/ability-tooltip.md)、[design-system.md](../../web/design-system.md) 第 6 节「抽选档位」。
+> 状态：已完成。长期规范见 [docs/web/README.md](../../web/README.md) 第 3、4 节、[ability-tooltip.md](../../web/ability-tooltip.md)、[design-system.md](../../web/design-system.md) 第 6 节「抽选档位」。
 
 玩家在游戏里抽到技能、开到物品时只看得到名字和图标，想提前知道池子里有什么、某个技能具体做什么，只能进游戏试。#1309 把抽选池整份搬上网站。
 
