@@ -30,7 +30,7 @@ import {
   LauncherRoom,
   LauncherRoomPlayer,
 } from './entities/launcher-room.entity';
-import { LauncherRelayService } from './launcher-relay.service';
+import { LauncherRelayService, ROUTE_CHECK } from './launcher-relay.service';
 
 // 去掉 0 O 1 I L，玩家转述房间码时不会看错
 const ROOM_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -102,6 +102,14 @@ export class LauncherRoomService {
       }
     }
     await this.bigQueryService.recordConnectionQuality(room, qualities);
+    const routeChecks = [];
+    for (const check of dto.routeChecks ?? []) {
+      const join = await this.joinRepository.findById(check.joinId);
+      if (join?.roomId === room.roomId && !join.probe) {
+        routeChecks.push({ join, check });
+      }
+    }
+    await this.bigQueryService.recordRouteChecks(room, routeChecks);
 
     // 开局后房主仍每次轮询都报名单，只在名单变了时才查加入记录换昵称头像
     const playersChanged =
@@ -205,13 +213,15 @@ export class LauncherRoomService {
         self: {},
       };
     }
+    const relay = this.relayService.issue(join.id, 'j', now, relayOrder ?? []);
     return {
       joinId: join.id,
       joinToken: join.joinToken,
       hostCandidates: room.hostCandidates,
       host: { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
       self: profile,
-      relay: this.relayService.issue(join.id, 'j', now, relayOrder ?? []),
+      relay,
+      routeCheck: relay ? ROUTE_CHECK : undefined,
     };
   }
 
