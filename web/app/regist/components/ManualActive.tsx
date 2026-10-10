@@ -11,7 +11,7 @@ import Field from '@/app/components/ui/field';
 import Input from '@/app/components/ui/input';
 import { apiFetch } from '@/app/lib/api';
 import { useAuth } from '@/app/lib/auth';
-import { invalidatePlayer } from '@/app/lib/queries';
+import { invalidatePlayerState } from '@/app/lib/queries';
 
 import ActiveResult from './ActiveResult';
 import {
@@ -90,7 +90,7 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
 
       setActivationResult({ success: response.result });
       if (response.result) {
-        void invalidatePlayer(queryClient, formValues.steamId);
+        void invalidatePlayerState(queryClient, formValues.steamId);
       }
     } catch (error) {
       setActivationResult({

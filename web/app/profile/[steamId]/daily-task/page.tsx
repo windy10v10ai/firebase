@@ -1,22 +1,23 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import { ApiError } from '@/app/lib/api';
-import { fetchDailyTask, refreshDailyTask, type DailyTaskSnapshot } from '@/app/lib/daily-task';
+import { refreshDailyTask, type DailyTaskSnapshot } from '@/app/lib/daily-task';
+import { dailyTaskQuery } from '@/app/lib/queries';
 
 import HistoryCard from './HistoryCard';
 import SummaryCard from './SummaryCard';
 import TodayCard from './TodayCard';
 
-// 带上请求时用的 steamId，换一个玩家时旧结果立刻失效
 type LoadResult =
-  | { steamId: string; status: 'failed'; httpStatus: number }
-  | { steamId: string; status: 'ready'; snapshot: DailyTaskSnapshot };
+  | { status: 'failed'; httpStatus: number }
+  | { status: 'ready'; snapshot: DailyTaskSnapshot };
 
 const FAILURE_KEY: Record<number, string> = {
   403: 'private',
@@ -27,35 +28,16 @@ export default function DailyTaskPage() {
   const t = useTranslations('dailyTask');
   const { steamId } = useParams<{ steamId: string }>();
 
-  const [result, setResult] = useState<LoadResult | null>(null);
+  const queryClient = useQueryClient();
+  const query = useQuery(dailyTaskQuery(steamId));
   const [refreshing, setRefreshing] = useState(false);
   const [refreshFailed, setRefreshFailed] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchDailyTask(steamId)
-      .then((snapshot) => {
-        if (!cancelled) {
-          setResult({ steamId, status: 'ready', snapshot });
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setResult({
-            steamId,
-            status: 'failed',
-            httpStatus: error instanceof ApiError ? error.status : 0,
-          });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [steamId]);
-
-  const loaded = result?.steamId === steamId ? result : null;
+  const loaded: LoadResult | null = query.data
+    ? { status: 'ready', snapshot: query.data }
+    : query.isError
+      ? { status: 'failed', httpStatus: query.error instanceof ApiError ? query.error.status : 0 }
+      : null;
   const snapshot = loaded?.status === 'ready' ? loaded.snapshot : null;
 
   const handleRefresh = useCallback(async () => {
@@ -67,17 +49,16 @@ export default function DailyTaskPage() {
     try {
       const next = await refreshDailyTask(steamId, snapshot.dayId);
       // 刷新的响应不带 history，手上那份仍然有效，不为了一次刷新重拉整页
-      setResult({
-        steamId,
-        status: 'ready',
-        snapshot: { ...next, history: next.history ?? snapshot.history },
+      queryClient.setQueryData(dailyTaskQuery(steamId).queryKey, {
+        ...next,
+        history: next.history ?? snapshot.history,
       });
     } catch {
       setRefreshFailed(true);
     } finally {
       setRefreshing(false);
     }
-  }, [snapshot, steamId]);
+  }, [queryClient, snapshot, steamId]);
 
   if (loaded?.status === 'failed') {
     // 页面不判断登录，看得到看不到由接口说了算
