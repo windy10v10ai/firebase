@@ -102,7 +102,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
                 {member ? t(`member.${status}`) : null}
               </span>
               <span className="min-h-5 truncate text-sm text-muted">
-                {member ? t('member.expireDate', { date: member.expireDateString }) : null}
+                {member ? t('member.expireDate', { date: member.expireDateString ?? '' }) : null}
               </span>
             </p>
           </div>
@@ -129,12 +129,12 @@ export default function PlayerSummary({ uid }: { uid: string }) {
         />
         <StatRow
           label={t('battlePoint')}
-          value={valueOf((loaded) => loaded.useableSeasonPoint)}
+          value={valueOf((loaded) => loaded.useableSeasonPoint ?? 0)}
           className="text-season"
         />
         <StatRow
           label={t('memberPoint')}
-          value={valueOf((loaded) => loaded.useableMemberPoint)}
+          value={valueOf((loaded) => loaded.useableMemberPoint ?? 0)}
           className="text-member"
         />
       </dl>

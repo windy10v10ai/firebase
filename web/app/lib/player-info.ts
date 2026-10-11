@@ -2,10 +2,11 @@ import { apiFetch } from './api';
 
 export const MEMBER_LEVEL_PREMIUM = 2;
 
-// 以下类型照抄 API 响应，字段名保留 season；转成「勇士」只发生在界面文案里
+// 以下类型照抄 API 响应，字段名保留 season；转成「勇士」只发生在界面文案里。
+// 标了可选的私密字段只在本人访问时返回，别人看主页时没有
 export interface MemberInfo {
   enable: boolean;
-  expireDateString: string;
+  expireDateString?: string;
   level: number;
 }
 
@@ -46,21 +47,23 @@ export interface PlayerInfo {
   id: string;
   matchCount: number;
   winCount: number;
-  conductPoint: number;
+  conductPoint?: number;
   commendCount: number;
   reportCount: number;
   seasonLevel: number;
   seasonPointTotal: number;
   seasonCurrrentLevelPoint: number;
   seasonNextLevelPoint: number;
-  useableSeasonPoint: number;
+  useableSeasonPoint?: number;
   memberLevel: number;
   memberPointTotal: number;
   memberCurrentLevelPoint: number;
   memberNextLevelPoint: number;
-  useableMemberPoint: number;
+  useableMemberPoint?: number;
   totalLevel: number;
   useableLevel: number;
+  usedLevel?: number;
+  profileHidden?: boolean;
   member?: MemberInfo;
   statsLifetime?: StatsLifetime;
   properties?: PropertyItem[];
@@ -96,6 +99,14 @@ export function fetchPlayerMember(steamId: string) {
 /** 属性页要的数据，等级与可用积分本来就在响应里，一次请求够了 */
 export function fetchPlayerProperties(steamId: string) {
   return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=property`);
+}
+
+/** 打开或关闭别人看自己主页的权限 */
+export function updateProfileVisibility(steamId: string, profileHidden: boolean) {
+  return apiFetch<{ profileHidden: boolean }>(`/api/player/${steamId}/profile-visibility`, {
+    method: 'PUT',
+    body: JSON.stringify({ profileHidden }),
+  });
 }
 
 /** 领取今日签到与补签的积分，响应里带回刷新后的玩家信息 */

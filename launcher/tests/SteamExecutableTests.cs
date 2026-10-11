@@ -19,6 +19,7 @@ namespace Windy10v10AI.Launcher.Tests
                 ReturnsNullWhenClientsAreMissing();
                 Console.WriteLine("PASS Steam executable tests (" + culture + ")");
                 RelayTests.RunAll();
+                LocalGateTests.RunAll();
                 return 0;
             }
             catch (Exception error)

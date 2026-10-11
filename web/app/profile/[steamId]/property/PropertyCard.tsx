@@ -25,6 +25,8 @@ interface PropertyCardProps {
   /** 剩下的属性点还够不够再加一档 */
   canAdd: boolean;
   busy: boolean;
+  /** 别人看时只画等级，不放加点按钮 */
+  readOnly: boolean;
   onPendingChange: (cells: number) => void;
   onUpgrade: (targetLevel: number) => void;
 }
@@ -98,6 +100,7 @@ export default function PropertyCard({
   pendingCells,
   canAdd,
   busy,
+  readOnly,
   onPendingChange,
   onUpgrade,
 }: PropertyCardProps) {
@@ -137,7 +140,10 @@ export default function PropertyCard({
   }`;
 
   return (
-    <div className="card-container card-pad-sm flex flex-col gap-3">
+    // 别人看时没加过的属性压暗，加在哪一眼就能看出来
+    <div
+      className={`card-container card-pad-sm flex flex-col gap-3 ${readOnly && known && current === 0 ? 'opacity-55' : ''}`}
+    >
       <div className="flex items-center gap-3">
         <span
           className={`flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-panel-soft ${current > 0 ? 'text-content' : 'text-muted'}`}
@@ -215,7 +221,7 @@ export default function PropertyCard({
         )}
       </div>
 
-      {full ? (
+      {readOnly ? null : full ? (
         // 满级不留按钮，同高的一条让同一行的卡片仍然对齐
         <p className="flex min-h-11 items-center justify-center rounded-[7px] bg-panel-soft text-sm text-muted">
           {t('card.maxed')}

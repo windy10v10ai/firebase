@@ -10,8 +10,10 @@ import { playerPagePath } from '@/app/lib/player-path';
 /** 数值为 null 表示数据还没到 */
 interface PointsCardProps {
   steamId: string;
-  /** 扣掉待提交的档数之后还剩多少 */
+  /** 本人看：扣掉待提交的档数之后还剩多少；别人看：已经加了多少 */
   usableLevel: number | null;
+  /** 别人看时没有重置按钮 */
+  readOnly: boolean;
   totalLevel: number | null;
   seasonLevel: number | null;
   memberLevel: number | null;
@@ -32,6 +34,7 @@ export default function PointsCard({
   totalLevel,
   seasonLevel,
   memberLevel,
+  readOnly,
   onReset,
 }: PointsCardProps) {
   const t = useTranslations('property.points');
@@ -41,19 +44,21 @@ export default function PointsCard({
     <section className="card-container card-pad flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <h2 className="title-secondary">{t('title')}</h2>
-        <button
-          type="button"
-          onClick={onReset}
-          className="ml-auto flex min-h-11 items-center gap-2 rounded-[7px] border border-danger/50 bg-danger/8 px-4 text-sm text-danger transition-colors hover:bg-danger/15"
-        >
-          <RotateCcw className="size-4" />
-          {t('reset')}
-        </button>
+        {readOnly ? null : (
+          <button
+            type="button"
+            onClick={onReset}
+            className="ml-auto flex min-h-11 items-center gap-2 rounded-[7px] border border-danger/50 bg-danger/8 px-4 text-sm text-danger transition-colors hover:bg-danger/15"
+          >
+            <RotateCcw className="size-4" />
+            {t('reset')}
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 md:flex-row">
         <div className={BOX_CLASS}>
-          <span className="text-base text-muted">{t('usable')}</span>
+          <span className="text-base text-muted">{t(readOnly ? 'used' : 'usable')}</span>
           <span className="flex items-baseline gap-1">
             {/* 加载中用一整块代替「可用 / 总数」，宽度与常见数值相当，标签不会因此换行 */}
             {usableLevel === null ? (

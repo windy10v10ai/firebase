@@ -7,9 +7,10 @@ import { useTranslations } from 'next-intl';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
+import PrivateProfileNotice from '@/app/components/PrivateProfileNotice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
-import { useAuth } from '@/app/lib/auth';
+import { useIsSelf } from '@/app/lib/auth';
 import { formatBattleRank } from '@/app/lib/leaderboard';
 import { playerPagePath } from '@/app/lib/player-path';
 import { applyPlayerWrite, battleRankQuery, dailyTaskPreviewQuery, playerInfoQuery } from '@/app/lib/queries';
@@ -25,24 +26,28 @@ import RecentMatchesCard from './RecentMatchesCard';
 import StatsCard from './StatsCard';
 
 const FAILURE_KEY: Record<number, string> = {
-  403: 'private',
   404: 'noRecord',
 };
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
   const { steamId } = useParams<{ steamId: string }>();
-  const auth = useAuth();
+  // 本人版与访客版的结构差异只看这一个值，首屏就由提示 cookie 定下，不等接口返回
+  const isSelf = useIsSelf(steamId);
   const queryClient = useQueryClient();
   const infoQuery = useQuery(playerInfoQuery(steamId));
   // 昵称头像与名次各自单独请求：一个要向 Steam 取数，一个要在库里数人数，快慢都不该拖住整页
   const profile = useSteamProfile(steamId);
   const rankQuery = useQuery(battleRankQuery(steamId));
-  const dailyTaskQuery = useQuery(dailyTaskPreviewQuery(steamId));
-
-  // 个人主页能看别人的，签到入口只给本人
-  const isSelf = auth.status === 'authenticated' && auth.uid === steamId;
+  // 每日任务不对别人开放，它的读取还会替玩家生成当天任务
+  const dailyTaskQuery = useQuery({ ...dailyTaskPreviewQuery(steamId), enabled: isSelf });
   const info = infoQuery.data ?? null;
+  const rankBadge =
+    rankQuery.data !== undefined ? (
+      t('entries.leaderboard.badge', { rank: formatBattleRank(rankQuery.data) })
+    ) : rankQuery.isError ? undefined : (
+      <Skeleton>{t('entries.leaderboard.badge', { rank: '000' })}</Skeleton>
+    );
 
   const dailyTaskBadge = (done: number) => {
     const text = t('entries.dailyTask.badge', { done, total: ROUNDS_PER_DAY });
@@ -61,6 +66,9 @@ export default function ProfilePage() {
     // 页面不判断登录，看得到看不到由接口说了算
     if (httpStatus === 401) {
       return <LoginPanel />;
+    }
+    if (httpStatus === 403) {
+      return <PrivateProfileNotice />;
     }
     const key = FAILURE_KEY[httpStatus] ?? 'failed';
     return (
@@ -82,23 +90,23 @@ export default function ProfilePage() {
         steamId={steamId}
         info={info}
         profile={profile}
-        onCheckInClaimed={
-          isSelf
-            ? (player) => {
-                void applyPlayerWrite(queryClient, steamId, playerInfoQuery(steamId).queryKey, player);
-              }
-            : undefined
-        }
+        isSelf={isSelf}
+        rankBadge={rankBadge}
+        onCheckInClaimed={(player) => {
+          void applyPlayerWrite(queryClient, steamId, playerInfoQuery(steamId).queryKey, player);
+        }}
       />
       <div className="grid min-w-0 content-start gap-6 lg:col-span-2">
-        <LevelCard info={info} />
+        <LevelCard info={info} isSelf={isSelf} />
         <div className="grid min-w-0 gap-2 md:grid-cols-2 md:gap-4">
           <FeatureEntryCard
             tone="property"
             Icon={CirclePlus}
             title={t('entries.property.title')}
             badge={
-              info ? (
+              info && !isSelf ? (
+                t('entries.property.badgeOthers', { count: info.usedLevel ?? 0 })
+              ) : info ? (
                 info.useableLevel > 0 ? (
                   t('entries.property.badge', { count: info.useableLevel })
                 ) : (
@@ -128,42 +136,44 @@ export default function ProfilePage() {
             }
             href={playerPagePath(steamId, 'awaken')}
           />
-          <FeatureEntryCard
-            tone="dailyTask"
-            Icon={CalendarCheck}
-            title={t('entries.dailyTask.title')}
-            badge={
-              dailyTaskQuery.data ? (
-                dailyTaskBadge(Math.min(dailyTaskQuery.data.completedTasks.length, ROUNDS_PER_DAY))
-              ) : dailyTaskQuery.isError ? undefined : (
-                <Skeleton>{t('entries.dailyTask.badge', { done: 0, total: ROUNDS_PER_DAY })}</Skeleton>
-              )
-            }
-            href={playerPagePath(steamId, 'daily-task')}
-          />
-          <FeatureEntryCard
-            tone="leaderboard"
-            Icon={Trophy}
-            title={t('entries.leaderboard.title')}
-            badge={
-              rankQuery.data !== undefined ? (
-                t('entries.leaderboard.badge', { rank: formatBattleRank(rankQuery.data) })
-              ) : rankQuery.isError ? undefined : (
-                <Skeleton>{t('entries.leaderboard.badge', { rank: '000' })}</Skeleton>
-              )
-            }
-            href="/leaderboard"
-          />
+          {isSelf ? (
+            <FeatureEntryCard
+              tone="dailyTask"
+              Icon={CalendarCheck}
+              title={t('entries.dailyTask.title')}
+              badge={
+                dailyTaskQuery.data ? (
+                  dailyTaskBadge(Math.min(dailyTaskQuery.data.completedTasks.length, ROUNDS_PER_DAY))
+                ) : dailyTaskQuery.isError ? undefined : (
+                  <Skeleton>{t('entries.dailyTask.badge', { done: 0, total: ROUNDS_PER_DAY })}</Skeleton>
+                )
+              }
+              href={playerPagePath(steamId, 'daily-task')}
+            />
+          ) : null}
+          {/* 别人看时名次并进身份卡，入口卡只剩两张，正好排满一行 */}
+          {isSelf ? (
+            <FeatureEntryCard
+              tone="leaderboard"
+              Icon={Trophy}
+              title={t('entries.leaderboard.title')}
+              badge={rankBadge}
+              href="/leaderboard"
+            />
+          ) : null}
         </div>
       </div>
       <RadarCard steamId={steamId} />
       <div className="min-w-0 lg:col-span-2">
-        <StatsCard info={info} />
+        <StatsCard info={info} showConduct={isSelf} />
       </div>
-      <div className="lg:col-span-3">
-        {/* 自己发一次请求：满员 50 场约 50 KB，挂在首屏那次请求上会拖慢整页 */}
-        <RecentMatchesCard steamId={steamId} />
-      </div>
+      {/* 一串连续的对局会暴露玩家什么时候在玩，只给本人看 */}
+      {isSelf ? (
+        <div className="lg:col-span-3">
+          {/* 自己发一次请求：满员 50 场约 50 KB，挂在首屏那次请求上会拖慢整页 */}
+          <RecentMatchesCard steamId={steamId} />
+        </div>
+      ) : null}
     </div>
   );
 }
