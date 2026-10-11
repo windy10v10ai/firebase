@@ -1240,11 +1240,10 @@ namespace Windy10v10AI.Launcher
         LaunchError ServerExitError()
         {
             if (!AddonCorrupt(ReadShared(logFile))) return new LaunchError(Strings.ServerExited, true);
-            var id = MapId;
-            return new LaunchError(Strings.MapCorrupt, false) { Button = Strings.OpenWorkshop, OnClick = () => OpenUrl("steam://url/CommunityFilePage/" + id) };
+            return new LaunchError(Strings.MapCorrupt, false) { Button = Strings.VerifyFiles, OnClick = () => OpenUrl("steam://validate/570") };
         }
 
-        // A half-downloaded Workshop map only shows up as a fatal content error in the server log, and resubscribing is the one fix
+        // A damaged Workshop map only shows up as a fatal content error in the server log
         internal static bool AddonCorrupt(string log)
         {
             foreach (var line in log.Split('\n'))
