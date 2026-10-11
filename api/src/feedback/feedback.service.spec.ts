@@ -112,6 +112,14 @@ describe('FeedbackService', () => {
     expect(report.launcherVersion).toBeUndefined();
   });
 
+  it('网站登录来源的 ID 标记为可信，不需要启动器版本', async () => {
+    const { launcherVersion: _, ...fromWeb } = PROBLEM;
+    await service.create({ ...fromWeb, source: 'web' }, {}, true);
+
+    const [report] = [...reports.docs.values()];
+    expect(report).toMatchObject({ source: 'web', steamId: 1001, steamIdVerified: true });
+  });
+
   it('提建议必须写描述，日志必须是 gzip', async () => {
     await expect(
       service.create({ ...PROBLEM, type: 'suggestion', description: '  ' }, {}),

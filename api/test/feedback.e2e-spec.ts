@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
+import { createIdTokenForSteamId } from './util/util-auth';
 import { initTest } from './util/util-http';
 
 describe('Feedback (e2e)', () => {
@@ -45,6 +46,15 @@ describe('Feedback (e2e)', () => {
     await send({ ...base, source: 'game', gameState: { items: Array(7).fill('') } }).expect(400);
     await send({ ...base, source: 'game', gameState: { difficulty: 9 } }).expect(400);
     await send({ ...base, source: 'launcher' }).expect(400);
-    await send({ ...base, source: 'web' }).expect(400);
+    await send({ ...base, source: 'web' }).expect(204);
+  });
+
+  it('网站登录入口要带登录态', async () => {
+    const post = () => request(app.getHttpServer()).post('/api/feedback/web');
+    const body = { type: 'suggestion', topics: ['web'], description: '想看更多统计' };
+    const idToken = await createIdTokenForSteamId(300000103);
+
+    await post().set('Authorization', `Bearer ${idToken}`).send(body).expect(204);
+    await post().send(body).expect(401);
   });
 });

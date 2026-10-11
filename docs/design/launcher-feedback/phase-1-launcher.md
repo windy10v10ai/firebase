@@ -22,5 +22,4 @@
 
 ## 后续事项
 
-- 网站反馈 #1379
 - 游戏内反馈 [game#2540](https://github.com/windy10v10ai/game/issues/2540)：接口已支持 `source: game`

@@ -28,6 +28,9 @@ export default async function Footer() {
             <Link href="/launch" prefetch={false} className="text-content link-hover">
               {t('launch')}
             </Link>
+            <Link href="/feedback" prefetch={false} className="text-content link-hover">
+              {t('feedback')}
+            </Link>
             <Link href="/legal/disclosure" prefetch={false} className="text-content link-hover">
               {t('disclosure')}
             </Link>

@@ -1,11 +1,13 @@
 ---
 name: feedback-review
-description: 汇总、分析玩家从启动器（以后还有网站）提交的反馈时加载——「看看最近的反馈」「汇总这周的报告」「AI 发呆的反馈有哪些」「把反馈整理成 issue」「上次的反馈处理得怎么样了」。包含跟踪 issue 的读写、报告与日志存在哪、用 gcloud 怎么读、怎么按分类汇总、怎么转成 game / firebase 仓库的 issue。
+description: 汇总、分析玩家从启动器、游戏内与网站提交的反馈时加载——「看看最近的反馈」「汇总这周的报告」「AI 发呆的反馈有哪些」「把反馈整理成 issue」「上次的反馈处理得怎么样了」。包含跟踪 issue 的读写、报告与日志存在哪、用 gcloud 怎么读、怎么按分类汇总、怎么转成 game / firebase 仓库的 issue。
 ---
 
 # 玩家反馈的汇总与分析
 
 接口约束见 [docs/api/README.md](../../../docs/api/README.md) 的 `POST /api/feedback`，设计取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../../../docs/design/launcher-feedback/phase-1-launcher.md)。
+
+报告的 `source` 是 `launcher`、`game` 或 `web`，只有启动器带日志；`steamIdVerified` 为 true 的是网站登录后提交的，ID 可直接当本人对照，其余的 ID 是客户端自己报的或玩家填的。
 
 报告的 `type` 是 `problem`（报告问题）或 `suggestion`（提出建议）；`topics` 是玩家选的「相关内容」，最多 2 个，一个都不选即「其他」；`tags` 玩家提交时为空，汇总时补更细的标签。`topics` 与仓库标签的对应：
 

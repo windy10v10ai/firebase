@@ -1,6 +1,6 @@
 import { Collection } from 'fireorm';
 
-export const FEEDBACK_SOURCES = ['launcher', 'game'] as const;
+export const FEEDBACK_SOURCES = ['launcher', 'game', 'web'] as const;
 export type FeedbackSource = (typeof FEEDBACK_SOURCES)[number];
 
 export const FEEDBACK_TYPES = ['problem', 'suggestion'] as const;
@@ -82,7 +82,7 @@ export class FeedbackReport {
   tags: string[];
   description: string;
   steamId?: number;
-  /** 启动器读注册表上报的 ID 可以伪造，只有登录态给的才可信 */
+  /** 请求体里带的 ID 可以伪造，只有网站登录态给的才可信 */
   steamIdVerified: boolean;
   launcherVersion?: string;
   mapVersion?: string;

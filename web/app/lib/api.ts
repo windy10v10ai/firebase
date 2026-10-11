@@ -1,7 +1,11 @@
 import { auth } from '@/config/firebase';
 
 export class ApiError extends Error {
-  constructor(public readonly status: number) {
+  constructor(
+    public readonly status: number,
+    /** 接口返回的 message，同一状态码下要分情况提示时用它区分 */
+    public readonly code?: string,
+  ) {
     super(`Request failed with status code ${status}`);
     this.name = 'ApiError';
   }
@@ -26,8 +30,15 @@ export const apiFetch = async <Response>(path: string, init: RequestInit = {}) =
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status);
+    const body = (await response.json().catch(() => null)) as { message?: unknown } | null;
+    throw new ApiError(
+      response.status,
+      typeof body?.message === 'string' ? body.message : undefined,
+    );
   }
 
+  if (response.status === 204) {
+    return undefined as Response;
+  }
   return (await response.json()) as Response;
 };

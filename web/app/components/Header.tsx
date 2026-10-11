@@ -7,6 +7,7 @@ import {
   Crown,
   ExternalLink,
   LogOut,
+  MessageSquareText,
   Play,
   Sparkles,
   Trophy,
@@ -19,7 +20,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/app/lib/auth';
 import { EXTERNAL_LINKS } from '@/config/links';
-import { SITE_NAV_ITEMS } from '@/config/nav';
+import { NAV_MENU_GROUPS, SITE_NAV_ITEMS } from '@/config/nav';
 import { LOCALES } from '@/i18n/locales';
 
 import AuthStatus from './AuthStatus';
@@ -41,8 +42,9 @@ const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: strin
   membership: { Icon: Crown, className: 'text-member-strong' },
   leaderboard: { Icon: Trophy, className: 'text-season' },
   wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
-  // 启动游戏不属于任何一块玩家数据，用中性色
+  // 启动游戏与反馈不属于任何一块玩家数据，用中性色
   launch: { Icon: Play, className: 'text-content' },
+  feedback: { Icon: MessageSquareText, className: 'text-content' },
 };
 
 export default function Header() {
@@ -190,49 +192,55 @@ export default function Header() {
             id="header-menu"
             className="absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 md:left-auto md:right-4 md:w-72 md:rounded-[10px] md:border md:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)]"
           >
-            {SITE_NAV_ITEMS.map((item) => {
-              if (item.href === null) {
-                return null;
-              }
-              const { Icon, className } = SITE_NAV_ICONS[item.key]!;
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  prefetch={false}
-                  onClick={() => setMenuOpen(false)}
-                  aria-current={
-                    isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
-                  }
-                  className="nav-menu-item"
-                >
-                  <Icon
-                    className={`size-[19px] shrink-0 ${className}`}
-                    strokeWidth={1.7}
-                    aria-hidden="true"
-                  />
-                  <span className="flex-1">{t(item.fullLabelKey)}</span>
-                </Link>
-              );
-            })}
-            <div className="my-1 h-px bg-line" aria-hidden="true" />
-            {EXTERNAL_LINKS.map((link) => {
-              const Icon = EXTERNAL_LINK_ICONS[link.labelKey]!;
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setMenuOpen(false)}
-                  className="nav-menu-item"
-                >
-                  <Icon className="size-[19px] shrink-0" />
-                  <span className="flex-1">{t(link.labelKey)}</span>
-                  <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
-                </a>
-              );
-            })}
+            {NAV_MENU_GROUPS.map((group, index) => (
+              <div key={group} role="group" aria-labelledby={`header-menu-${group}`}>
+                {index > 0 ? <div className="my-1 h-px bg-line" aria-hidden="true" /> : null}
+                <p id={`header-menu-${group}`} className="pt-2 pb-0.5 text-xs text-muted">
+                  {t(`menuGroups.${group}`)}
+                </p>
+                {SITE_NAV_ITEMS.filter((item) => item.group === group).map((item) => {
+                  const { Icon, className } = SITE_NAV_ICONS[item.key]!;
+                  return (
+                    <Link
+                      key={item.key}
+                      href={item.href}
+                      prefetch={false}
+                      onClick={() => setMenuOpen(false)}
+                      aria-current={
+                        isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                      }
+                      className="nav-menu-item"
+                    >
+                      <Icon
+                        className={`size-[19px] shrink-0 ${className}`}
+                        strokeWidth={1.7}
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1">{t(item.fullLabelKey)}</span>
+                    </Link>
+                  );
+                })}
+                {group === 'community'
+                  ? EXTERNAL_LINKS.map((link) => {
+                      const Icon = EXTERNAL_LINK_ICONS[link.labelKey]!;
+                      return (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setMenuOpen(false)}
+                          className="nav-menu-item"
+                        >
+                          <Icon className="size-[19px] shrink-0" />
+                          <span className="flex-1">{t(link.labelKey)}</span>
+                          <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
+                        </a>
+                      );
+                    })
+                  : null}
+              </div>
+            ))}
             {auth.status === 'authenticated' ? (
               <>
                 {/* 电脑宽度头部账号控件里也有退出，菜单照样保留，所有宽度都能在同一处找到 */}
