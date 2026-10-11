@@ -44,6 +44,7 @@ namespace Windy10v10AI.Launcher
         public static string NextGamePick { get { return Pick("游戏已结束，选难度启动下一局", "Game over. Pick a difficulty to start the next game.", "Игра окончена. Выберите сложность для следующей игры."); } }
         public static string NextGameHint { get { return Pick("房间里的人会自动进入", "Everyone in the room joins automatically", "Все в комнате войдут автоматически"); } }
         public static string StartingNextGame { get { return Pick("正在启动下一局（{0}）", "Starting the next game ({0})", "Запуск следующей игры ({0})"); } }
+        public static string NextGameMapOutdated { get { return Pick("地图正在等待 Steam 更新，更新完成后再启动下一局", "The map is waiting for a Steam update. Start the next game once it finishes.", "Карта ждёт обновления в Steam. Начните следующую игру после обновления."); } }
         public static string AutoEnter { get { return Pick("房主启动下一局时自动进入", "Join when the host starts the next game", "Входить, когда хост начнёт следующую игру"); } }
         public static string NewGameStarted { get { return Pick("房主已启动新游戏", "The host started a new game", "Хост начал новую игру"); } }
         public static string Cancel { get { return Pick("取消", "Cancel", "Отмена"); } }

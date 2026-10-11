@@ -59,6 +59,8 @@ namespace Windy10v10AI.Launcher
         const int ClosingGraceMs = 60000;
         // Steam hands a running Dota over within a second or two when it works at all
         const int SteamEnterMs = 5000;
+        // The host sends its roster every two seconds
+        const int JoinStateWaitMs = 5000;
         static readonly string ConnectCommand = "connect 127.0.0.1:" + LocalGate.Port;
         // Long enough for Steam to apply a pending update before signing in
         const int SteamSignInMs = 90000;
@@ -1349,7 +1351,10 @@ namespace Windy10v10AI.Launcher
                 }
                 var watch = new ClientWatch();
                 clientWatch = watch;
-                EnterGame(install, watch, -1);
+                // The host's first roster round says which game the room is on and whether its server is up yet
+                for (var waited = 0; waited < JoinStateWaitMs && !tunnel.HasRoster && !stopping; waited += 200) Thread.Sleep(200);
+                var entered = tunnel.GameReady && !tunnel.GameEnded;
+                if (entered) EnterGame(install, watch, -1);
 
                 UI(() =>
                 {
@@ -1359,7 +1364,7 @@ namespace Windy10v10AI.Launcher
                     lastConnection = null;
                     RefreshRoute(true);
                 });
-                WatchJoin(tunnel, install, watch, code);
+                WatchJoin(tunnel, install, watch, code, entered);
             }
             catch (LaunchError error)
             {
@@ -1375,13 +1380,12 @@ namespace Windy10v10AI.Launcher
 
         // The tunnel outlives Dota and each game, so a joiner who left can go back into the same match, and stays in
         // the room for the host's next game until leaving the room
-        void WatchJoin(JoinTunnel tunnel, DotaInstall install, ClientWatch client, string code)
+        void WatchJoin(JoinTunnel tunnel, DotaInstall install, ClientWatch client, string code, bool entered)
         {
             var title = string.Format(Strings.Joined, code);
             Presence? shown = null;
             var game = tunnel.Game;
             var waitingShown = false;
-            var entered = true;
             while (!stopping)
             {
                 Thread.Sleep(1000);
@@ -1400,6 +1404,7 @@ namespace Windy10v10AI.Launcher
                 }
                 if (tunnel.GameEnded || !tunnel.GameReady)
                 {
+                    entered = false;
                     endNotice = Strings.GameEnded;
                     if (waitingShown) continue;
                     waitingShown = true;
@@ -1470,6 +1475,7 @@ namespace Windy10v10AI.Launcher
                     game = roomGame;
                     started = false;
                     since = DateTime.UtcNow;
+                    roomStartedAt = null;
                 }
                 var elapsed = DateTime.UtcNow - since;
                 if (!started && elapsed >= PauseAfter())
@@ -2036,6 +2042,15 @@ namespace Windy10v10AI.Launcher
 
         void PickNextGame(int index)
         {
+            DotaInstall checkedInstall;
+            var state = DotaInstall.Check(MapId, out checkedInstall);
+            // Everyone must run the same map, and Steam rewriting it mid-load stalls the server
+            if (state == MapState.Outdated || state == MapState.Missing)
+            {
+                ShowNotice(NoticeKind.Warning, Strings.NextGameMapOutdated, null, null);
+                return;
+            }
+            HideNotice();
             pickingNext = false;
             endNotice = null;
             saving = false;
@@ -2063,16 +2078,21 @@ namespace Windy10v10AI.Launcher
                 KillQuietly(old);
                 WaitQuietly(old);
             }
+            var addon = PrepareAddon(install, workshopId);
+            // Starting the server clears the finished game's log, which the poll thread must not read as the new game's
+            server = StartServer(install, addon, MapKeys[mode], true);
             roomEnded = false;
-            roomStartedAt = null;
             roomMap = MapNames[mode];
+            // The poll thread copies this body, so it gets a new one rather than a change under its feet
+            var body = new Dictionary<string, object>(roomBody);
+            body["mapVersion"] = install.InstalledManifest(workshopId);
+            roomBody = body;
             tunnel.GameEnded = false;
             tunnel.GameReady = false;
             roomGame = roomGame + 1;
             tunnel.Game = roomGame;
             roster.SetAll(PlayerStatus.Waiting);
-            var addon = PrepareAddon(install, workshopId);
-            server = StartServer(install, addon, MapKeys[mode], true);
+            if (!Settings.AutoStartDota && !DotaClientRunning(server.Id)) roster.SetStatus("host", PlayerStatus.InRoom);
             WaitForMap(MapKeys[mode]);
             tunnel.GameReady = true;
             // A Dota that is open follows the room; a closed one only starts when the host asked for that

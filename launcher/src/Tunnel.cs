@@ -381,10 +381,11 @@ namespace Windy10v10AI.Launcher
                     {
                         foreach (var peer in peers.Values)
                         {
+                            // A joiner waits for the roster before entering, so the game it belongs to goes out first
+                            if (Game > 1) SendTo(peer, Packet.NextGame, EncodeGame(Game, GameReady));
                             // Roster packets go out every two seconds, so they also keep the route open
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
-                            if (GameEnded) SendTo(peer, Packet.GameEnded, new byte[0]);
-                            if (Game > 1) SendTo(peer, Packet.NextGame, EncodeGame(Game, GameReady));
+                            if (GameEnded) SendTo(peer, Packet.GameEnded, BitConverter.GetBytes(Game));
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                             // A joiner that left or dropped stops being measured once Dota itself would give up on it
                             if (ping && peer.Remote != null && (DateTime.UtcNow - peer.LastReceived).TotalMilliseconds < SilenceMs)
@@ -858,6 +859,11 @@ namespace Windy10v10AI.Launcher
             return null;
         }
 
+        public bool HasRoster
+        {
+            get { lock (sync) return rosterCount >= 0; }
+        }
+
         public List<RosterEntry> Roster()
         {
             lock (sync)
@@ -1160,6 +1166,8 @@ namespace Windy10v10AI.Launcher
                 }
                 if (data[0] == Packet.GameEnded)
                 {
+                    // Older hosts send no game number; a newer one's late packet about a finished game is dropped
+                    if (data.Length >= 5 && BitConverter.ToInt32(data, 1) < Game) return;
                     GameEnded = true;
                     return;
                 }

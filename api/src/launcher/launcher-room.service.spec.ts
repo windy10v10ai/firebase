@@ -361,6 +361,16 @@ describe('LauncherRoomService', () => {
     expect(rooms.docs.get(room.code)).toMatchObject({ started: true, startedAt });
   });
 
+  it('新的一局按房主报的地图版本比对加入者，同一局里不改', async () => {
+    const room = await service.host({ ...HOST, mapVersion: 'old' });
+    const poll = { ...HOST, code: room.code, token: room.token };
+    await service.host({ ...poll, mapVersion: 'new', game: 1 });
+    expect(rooms.docs.get(room.code)).toMatchObject({ mapVersion: 'old' });
+
+    await service.host({ ...poll, mapVersion: 'new', game: 2 });
+    expect(rooms.docs.get(room.code)).toMatchObject({ mapVersion: 'new' });
+  });
+
   it('房主 2 分钟没轮询，加入返回 404', async () => {
     const room = await service.host(HOST);
 

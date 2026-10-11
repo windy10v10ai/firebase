@@ -119,6 +119,10 @@ export class LauncherRoomService {
       room.started = false;
       room.startedAt = FieldValue.delete() as unknown as undefined;
       room.ended = false;
+      // 两局之间创意工坊可能更新了地图，加入者按新一局的版本比对
+      if (dto.mapVersion) {
+        room.mapVersion = dto.mapVersion;
+      }
     }
 
     // 开局后房主仍每次轮询都报名单，只在名单变了时才查加入记录换昵称头像
