@@ -3,3 +3,11 @@
 # cpu 与 memory 不写，沿用 App Hosting 默认值。
 runConfig:
   maxInstances: 5
+
+env:
+  # 代发上游请求时，部分响应到达本服务时带有超过 Node 默认 16KB 上限的头，
+  # 超限时转发直接失败成 500。
+  - variable: NODE_OPTIONS
+    value: --max-http-header-size=65536
+    availability:
+      - RUNTIME

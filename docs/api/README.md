@@ -15,6 +15,7 @@ API 是一个 NestJS 应用，部署在第二代 Cloud Functions（Node.js 24，
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
 - 网站的转发直接打函数自己的地址，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting
+- **转发服务器的响应头上限调到 64KB**（`web/apphosting.yaml` 的 `NODE_OPTIONS`）：上游响应到达转发服务器时偶尔带着超过 Node 默认 16KB 的头，API 自己发的头只有几百字节，从外网直连也复现不出来；超限时转发直接回 500。换掉转发实现时同样要放宽这个上限
 - 支付宝的回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，开放平台后台配的只是兜底；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
 - **只有直连 API 域名的请求带着玩家自己的来源信息。**经网站域名转发进来的，边缘看到的是转发服务器的地址，`cf-connecting-ip` 与 `cf-ipcountry` 不代表玩家。依赖真实来源的功能只能挂在直连的那条路上
 
