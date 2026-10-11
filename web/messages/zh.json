@@ -885,7 +885,7 @@
       "abilities": "技能百科",
       "items": "物品百科"
     },
-    "description": "游戏里能抽到的全部技能与物品，档位越高越难抽到。",
+    "description": "游戏里能抽到的全部技能与物品，T1 最稀有，越往后越容易抽到。",
     "tabs": {
       "abilities": "技能",
       "items": "物品"

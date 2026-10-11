@@ -20,8 +20,8 @@ export const LAUNCHER_RELAYS: LauncherRelay[] = [
   // 南京锐驰型，包月不另收流量费
   { address: '118.195.194.163:27200', priority: 1 },
 ];
-// 掉线重连要拿同一张通行证重新认领，有效期要盖住一整局
-export const RELAY_TICKET_TTL_MS = 6 * 60 * 60 * 1000;
+// 掉线重连要拿同一张通行证重新认领，房间跨局保留时加入者会连着打很多局，有效期按一整天算
+export const RELAY_TICKET_TTL_MS = 24 * 60 * 60 * 1000;
 // 加入前的回声测试包数少，丢包到这个程度基本是线路在丢，进游戏也好不了
 const RELAY_LOSS_LIMIT_PCT = 10;
 // 同优先级之外再让一步：优先的那台慢太多时，延迟比优先级更影响手感

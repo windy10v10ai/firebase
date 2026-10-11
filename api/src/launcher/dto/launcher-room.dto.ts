@@ -266,6 +266,18 @@ export class HostRoomDto extends LauncherPeerDto {
 
   @ApiPropertyOptional({
     description:
+      '房主报的第几局，跨局保留的房间每启动下一局加一，开始、结束状态随之清零；旧版启动器不报',
+    minimum: 1,
+    maximum: 1000,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  game?: number;
+
+  @ApiPropertyOptional({
+    description:
       '房里还在的加入者的 32 位账号 ID，不含房主；开局前是已连上的人，开局后是还在游戏里的人',
     type: [Number],
   })

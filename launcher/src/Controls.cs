@@ -740,6 +740,10 @@ namespace Windy10v10AI.Launcher
                     dot = Theme.Error; statusColor = ErrorText; nameColor = Theme.Muted; text = Strings.StatusFailed; fade = 100; break;
                 case PlayerStatus.Left:
                     dot = statusColor = nameColor = Theme.Faint; text = Strings.StatusLeft; fade = 90; break;
+                case PlayerStatus.InRoom:
+                    dot = Theme.Faint; statusColor = Theme.Muted; text = Strings.StatusInRoom; break;
+                case PlayerStatus.Waiting:
+                    dot = ring = Loading; statusColor = LoadingText; text = Strings.StatusWaiting; break;
                 default:
                     dot = Theme.Ok; statusColor = Theme.Muted; text = Strings.StatusInGame; break;
             }
@@ -830,6 +834,42 @@ namespace Windy10v10AI.Launcher
             set { quiet = value; Invalidate(); }
         }
 
+        // The copy button gives its place to other actions, so the code itself always copies
+        readonly Timer copiedTimer = new Timer { Interval = 1200 };
+
+        public CodeDisplay()
+        {
+            Cursor = Cursors.Hand;
+            copiedTimer.Tick += delegate
+            {
+                copiedTimer.Stop();
+                Invalidate();
+            };
+        }
+
+        public void CopyToClipboard()
+        {
+            if (code.Length == 0) return;
+            try
+            {
+                Clipboard.SetText(code);
+            }
+            catch (Exception)
+            {
+                // Another program holds the clipboard; the code is on screen to type
+                return;
+            }
+            copiedTimer.Stop();
+            copiedTimer.Start();
+            Invalidate();
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            base.OnClick(e);
+            CopyToClipboard();
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = Prepare(e);
@@ -838,7 +878,7 @@ namespace Windy10v10AI.Launcher
             {
                 using (var small = new Font(Theme.FontName, 9f))
                 {
-                    TextRenderer.DrawText(g, Strings.RoomCode + "  " + code, small, ClientRectangle, Theme.Faint,
+                    TextRenderer.DrawText(g, Strings.RoomCode + "  " + (copiedTimer.Enabled ? Strings.Copied : code), small, ClientRectangle, Theme.Faint,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
                 }
                 return;
@@ -851,6 +891,15 @@ namespace Windy10v10AI.Launcher
                 g.DrawPath(pen, path);
             }
             if (code.Length == 0) return;
+            if (copiedTimer.Enabled)
+            {
+                using (var font = new Font(Theme.FontName, 11f))
+                {
+                    TextRenderer.DrawText(g, Strings.Copied, font, ClientRectangle, Theme.Text,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                }
+                return;
+            }
             using (var font = new Font("Consolas", 15f))
             {
                 var cell = (Width - 24 * s) / code.Length;

@@ -31,6 +31,8 @@ export class LauncherRoom {
   hostSymmetricNat?: boolean;
   protocolVersion: number;
   mapVersion?: string;
+  /** 房主报的第几局，开始、结束状态只记这一局；缺省是第一局或旧版启动器 */
+  game?: number;
   /** 进入选英雄后不再接受加入 */
   started: boolean;
   startedAt?: Date;
