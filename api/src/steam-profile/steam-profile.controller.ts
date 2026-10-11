@@ -1,6 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { AllowViewOthers } from '../util/auth/allow-view-others.decorator';
 import { AllowWeb } from '../util/auth/allow-web.decorator';
 
 import { SteamProfileDto } from './dto/steam-profile.dto';
@@ -14,6 +15,7 @@ export class SteamProfileController {
 
   // 只给网站用：游戏侧从 Dota2 官方接口就能拿到昵称头像，不挂 AllowLocal
   @AllowWeb()
+  @AllowViewOthers()
   @Get(':steamId/steam-profile')
   @ApiOperation({ summary: 'Get Steam persona name and avatar url' })
   async getSteamProfile(@Param('steamId', ParseIntPipe) steamId: number): Promise<SteamProfileDto> {

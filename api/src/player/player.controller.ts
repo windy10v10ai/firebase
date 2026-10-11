@@ -13,6 +13,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { AllowViewOthers } from '../util/auth/allow-view-others.decorator';
 import { AllowWeb } from '../util/auth/allow-web.decorator';
 import { Public } from '../util/auth/public.decorator';
 
@@ -22,6 +23,7 @@ import { PlayerStatsRadarResponse } from './dto/player-stats-radar.response';
 import { PlayerStatsRecentResponse } from './dto/player-stats-recent.response';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
+import { UpdateProfileVisibilityDto } from './dto/update-profile-visibility.dto';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
@@ -55,6 +57,7 @@ export class PlayerController {
   }
 
   @AllowWeb()
+  @AllowViewOthers()
   @Get(':steamId/ranking')
   @ApiOperation({ summary: 'Get live rank of a player by total battle points' })
   getPlayerRank(@Param('steamId') steamId: string): Promise<PlayerRankDto> {
@@ -63,6 +66,7 @@ export class PlayerController {
 
   // 单独一条而不是并进 /:steamId/info：满员 50 场约 50 KB，挂在首屏依赖上会拖慢整页
   @AllowWeb()
+  @AllowViewOthers()
   @Get(':steamId/stats/recent')
   @ApiOperation({ summary: 'Get recent matches' })
   async getStatsRecent(
@@ -78,12 +82,24 @@ export class PlayerController {
   // 游戏服务端读取，启动器开的本地主机局也要能取到
   @AllowLocal()
   @AllowWeb()
+  @AllowViewOthers()
   @Get(':steamId/stats/radar')
   @ApiOperation({ summary: 'Get radar chart scores compared with the difficulty baseline' })
   getStatsRadar(
     @Param('steamId', ParseIntPipe) steamId: number,
   ): Promise<PlayerStatsRadarResponse> {
     return this.playerStatsRadarService.getRadar(steamId);
+  }
+
+  @AllowWeb()
+  @Put(':steamId/profile-visibility')
+  @ApiOperation({ summary: 'Show or hide the player profile from other viewers' })
+  async updateProfileVisibility(
+    @Param('steamId', ParseIntPipe) steamId: number,
+    @Body() dto: UpdateProfileVisibilityDto,
+  ): Promise<UpdateProfileVisibilityDto> {
+    await this.playerService.setProfileHidden(steamId, dto.profileHidden);
+    return { profileHidden: dto.profileHidden };
   }
 
   @Get(':id/setting')

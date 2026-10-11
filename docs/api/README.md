@@ -45,6 +45,7 @@ API 自己往外调的第三方服务：
 - 服务端来源用 `x-api-key`，网站用 `Authorization: Bearer`，判定都在 `api/src/util/auth/auth.guard.ts`。公开端点挂 `@Public()`，网站要调的挂 `@AllowWeb()`
 - **装饰器是加法，不是排他**：不挂任何装饰器的路由，官方服务器的 key 就能调；`@AllowWeb()` 额外放行网页，`@AllowLocal()` 额外放行打包进地图、随时可能泄露的本地主机 key。所以路由本身不代表来源，要区分来源取 `@CurrentServerType()`
 - **归属校验只看路由参数 `:steamId`，不看请求体**。所以同一个动作给网站开放时，要新开一条把 steamId 放在路径上的路由，而不是给收 body 的那条补 `@AllowWeb()`——后者等于任何登录玩家都能操作别人的账号。每日任务的刷新就是这样分成两条：游戏内用 `POST /daily-task/refresh`（body 带 steamId，`@AllowLocal()`），网站用 `POST /daily-task/:steamId/refresh`（`@AllowWeb()`）
+- **看别人的主页走 `@AllowViewOthers()`**：挂了它的只读路由，网站上未登录（什么凭据都不带）或别人的 token 也能读 `:steamId` 的数据；写接口一律不挂，仍只认本人。玩家关闭公开（`Player.profileHidden`）时访客一律 403，这个判断放在 guard 里，新加的只读路由挂上装饰器就受约束，不会漏；代价是访客每次请求多读一次玩家文档，本人与游戏服务器不多读。返回里只给本人的字段（可用积分、行为分、掉线数、会员有效期、签到、设置等）由 `@CanViewPrivate()` 判断后在 service 里裁掉。每日任务不对访客开放：它的读取会替玩家生成当天任务
 - **`GET /daily-task/:steamId` 有写库副作用**：跨天归档是取快照时懒触发的，纯读会漏掉「昨天打完、今天还没开过游戏」这一段。由此网站来访就会给从没开过局的人建一个空文档，**「有每日任务文档」不等于「这人打过游戏」**，别拿它当活跃口径
 - **游戏端新增的请求体字段，后端一律按选填接收并给出兜底**：玩家不重启 Dota 就一直跑旧版地图，旧版会持续好几天。改成必填等于让旧版的请求整条 400，结算这类接口会直接丢分
 - **请求体校验失败记一行 warn 日志**（`request validation failed`，带不合格的字段路径、`version` 与报文里的 steamId）：游戏端只知道请求失败、看不到原因，HTTP 日志里也没有请求体
