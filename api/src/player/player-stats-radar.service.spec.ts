@@ -18,6 +18,7 @@ const halfZeroHealing = [...Array(11).fill(0), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const baseline: DifficultyBaseline = {
   sampleCount: 500,
+  playerCount: 100,
   damage: evenQuantiles(2000),
   gold: evenQuantiles(1000),
   participation: evenQuantiles(1),
@@ -158,10 +159,10 @@ describe('PlayerStatsRadarService.refreshBaseline', () => {
     return { service, dailyStatsService };
   }
 
-  it('丢掉样本不够的难度，整份写回每日统计', async () => {
+  it('丢掉分位点不全的难度，整份写回每日统计', async () => {
     const { service, dailyStatsService } = createService([
-      { difficulty: 5, sample_count: 500, ...baseline },
-      { difficulty: 1, sample_count: 3, ...baseline },
+      { difficulty: 5, sample_count: 500, player_count: 100, ...baseline },
+      { difficulty: 1, sample_count: 3, player_count: 1, ...baseline, stuns: [0, 1] },
     ]);
 
     await expect(service.refreshBaseline()).resolves.toEqual({ difficulties: 1 });
@@ -170,6 +171,7 @@ describe('PlayerStatsRadarService.refreshBaseline', () => {
     expect(id).toBe('radarBaseline');
     expect(Object.keys(saved.difficulties)).toEqual(['5']);
     expect(saved.difficulties['5'].damage).toHaveLength(21);
+    expect(saved.difficulties['5'].playerCount).toBe(100);
   });
 
   it('未连 BigQuery 时什么都不写', async () => {
