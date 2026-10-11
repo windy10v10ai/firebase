@@ -19,3 +19,8 @@ export const CanViewPrivate = createParamDecorator((_data: unknown, ctx: Executi
   const request = ctx.switchToHttp().getRequest<RequestWithServerType>();
   return request.serverType !== SERVER_TYPE.WEB || request.viewerUid === request.params.steamId;
 });
+
+export const CurrentViewerUid = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): string | undefined =>
+    ctx.switchToHttp().getRequest<RequestWithServerType>().viewerUid,
+);

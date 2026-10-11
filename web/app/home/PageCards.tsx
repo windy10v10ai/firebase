@@ -17,13 +17,13 @@ import Section from '@/app/components/Section';
 import { useAuth } from '@/app/lib/auth';
 import { playerPagePath } from '@/app/lib/player-path';
 
-// 顺序固定：第一行是玩家自己的东西，第二行是订阅与查阅，第三行是全服的榜单；图标颜色与头部菜单、个人主页入口卡一致
+// 顺序与头部菜单的分组一致：先是玩家自己的，再是人人一样的；图标颜色与头部菜单、个人主页入口卡一致
 const PAGE_CARDS = [
   { key: 'profile', Icon: UserRound, iconClass: 'text-content' },
   { key: 'property', Icon: CirclePlus, iconClass: 'text-feature-property' },
   { key: 'awaken', Icon: Sparkles, iconClass: 'text-feature-awaken' },
-  { key: 'membership', Icon: Crown, iconClass: 'text-member-strong' },
   { key: 'dailyTask', Icon: CalendarCheck, iconClass: 'text-feature-daily' },
+  { key: 'membership', Icon: Crown, iconClass: 'text-member-strong' },
   { key: 'wiki', Icon: BookOpen, iconClass: 'text-feature-wiki' },
   { key: 'leaderboard', Icon: Trophy, iconClass: 'text-season' },
 ] as const;

@@ -34,10 +34,15 @@ export class FeedbackService {
   ) {}
 
   /** 收下一份反馈：校验、限频、存日志与报告。 */
-  async create(dto: CreateFeedbackDto, origin: ClientOrigin): Promise<void> {
+  async create(
+    dto: CreateFeedbackDto,
+    origin: ClientOrigin,
+    steamIdVerified = false,
+  ): Promise<void> {
     const description = dto.description?.trim() ?? '';
-    if (dto.type === 'suggestion' && !description) {
-      throw new BadRequestException('description is required for suggestions');
+    // 网站来源没有日志与游戏现场，描述是唯一的信息
+    if ((dto.type === 'suggestion' || dto.source === 'web') && !description) {
+      throw new BadRequestException('description is required');
     }
     const serverLog = decodeLog(dto.serverLog);
     const clientLog = decodeLog(dto.clientLog);
@@ -72,7 +77,7 @@ export class FeedbackService {
       tags: [],
       description,
       ...(dto.steamId && { steamId: dto.steamId }),
-      steamIdVerified: false,
+      steamIdVerified,
       ...(dto.launcherVersion && { launcherVersion: dto.launcherVersion }),
       ...(dto.mapVersion && { mapVersion: dto.mapVersion }),
       ...(dto.windowsVersion && { windowsVersion: dto.windowsVersion }),

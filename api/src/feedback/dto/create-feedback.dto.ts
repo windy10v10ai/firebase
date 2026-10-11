@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -232,7 +232,10 @@ export class CreateFeedbackDto {
   @IsIn(FEEDBACK_TOPICS, { each: true })
   topics: FeedbackTopic[];
 
-  @ApiPropertyOptional({ description: '提建议时必填', maxLength: MAX_DESCRIPTION_LENGTH })
+  @ApiPropertyOptional({
+    description: '提建议或来源为网站时必填',
+    maxLength: MAX_DESCRIPTION_LENGTH,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(MAX_DESCRIPTION_LENGTH)
@@ -245,7 +248,7 @@ export class CreateFeedbackDto {
   steamId?: number;
 
   @ApiPropertyOptional({ description: '来源为启动器时必填' })
-  @ValidateIf((dto: CreateFeedbackDto) => dto.source !== 'game')
+  @ValidateIf((dto: CreateFeedbackDto) => (dto.source ?? 'launcher') === 'launcher')
   @IsString()
   @MaxLength(20)
   launcherVersion?: string;
@@ -300,3 +303,9 @@ export class CreateFeedbackDto {
   @MaxLength(MAX_LOG_BASE64_LENGTH)
   clientLog?: string;
 }
+
+export class CreateWebFeedbackDto extends PickType(CreateFeedbackDto, [
+  'type',
+  'topics',
+  'description',
+] as const) {}

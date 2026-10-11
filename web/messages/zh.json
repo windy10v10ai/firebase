@@ -20,9 +20,15 @@
     "membership": "会员订阅",
     "launch": "启动游戏",
     "launchShort": "启动游戏",
+    "feedback": "反馈问题 / 建议",
     "disclosure": "商业披露",
     "switchLanguage": "切换语言",
-    "menu": "菜单"
+    "menu": "菜单",
+    "menuGroups": {
+      "mine": "我的",
+      "game": "游戏",
+      "community": "社区与帮助"
+    }
   },
   "home": {
     "title": "DOTA2 10v10 AI 自定义地图",
@@ -30,6 +36,10 @@
       "title": "Steam 创意工坊",
       "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力",
       "subscribe": "获得地图"
+    },
+    "feedback": {
+      "title": "反馈问题 / 建议",
+      "description": "遇到问题或有好点子，告诉我们"
     },
     "github": {
       "title": "GitHub",
@@ -973,5 +983,48 @@
     "profileHeadline": "{name} 的 10v10 AI 战绩",
     "profileStats": "征战 {matches, number} 场，胜率 {winRate, number, percent}，来看看你的战绩",
     "profileNoMatches": "来看看 {name} 的战绩，你的战绩也在这里"
+  },
+  "feedback": {
+    "title": "反馈问题 / 建议",
+    "intro": "游戏里遇到的问题，用<launcher>启动器</launcher>反馈可以附带游戏日志，更快找到原因。",
+    "type": "类型",
+    "types": {
+      "problem": "报告问题",
+      "suggestion": "提出建议"
+    },
+    "topics": "相关内容",
+    "upToTwo": "最多 2 个",
+    "topicNames": {
+      "hero": "英雄",
+      "ability": "技能",
+      "awaken": "觉醒",
+      "item": "物品",
+      "bot": "电脑 AI",
+      "balance": "平衡",
+      "ui": "界面",
+      "member": "会员",
+      "lag": "卡顿 / 掉线",
+      "launcher": "启动器",
+      "web": "网站",
+      "game": "游戏"
+    },
+    "description": "描述",
+    "problemCue": "简单说说发生了什么，比如第几分钟、哪个英雄",
+    "suggestionCue": "说说你的想法，比如想加什么功能、哪里太强或太弱",
+    "steamId": "Dota2好友ID",
+    "steamIdPlaceholder": "请输入您的Dota2好友ID",
+    "steamIdHelp": "请输入正确的Dota2好友ID，格式为10位以下纯数字",
+    "signInInstead": "用 Steam 登录就不用填",
+    "privacy": "发送即表示同意<link>隐私政策</link>",
+    "send": "发送",
+    "sending": "发送中…",
+    "resend": "重新发送",
+    "thanks": "已收到你的反馈，谢谢！",
+    "another": "再写一条",
+    "errors": {
+      "failed": "发送失败，请检查网络后再试一次。",
+      "tooMany": "反馈太频繁了，请过一会儿再试。",
+      "dailyLimit": "今天收到的反馈太多了，请明天再试。"
+    }
   }
 }
