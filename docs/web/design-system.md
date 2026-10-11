@@ -1,6 +1,6 @@
 # 网站视觉规范：配色、按钮与可点击元素
 
-> 本文是网站长期有效的视觉规范：颜色怎么分工、取什么值，按钮怎么选，能点的东西长什么样。只在规范变更时更新，不因批次完成而增删。各项决定的来由见批次文档 [phase-11-clickable-polish.md](../design/web/phase-11-clickable-polish.md)、[phase-12-color-system.md](../design/web/phase-12-color-system.md)、[phase-12-controls.md](../design/web/phase-12-controls.md)；写代码时照着做的规约见 [web/CLAUDE.md](../../web/CLAUDE.md)「可点击元素」「颜色」「按钮」。
+> 本文是网站长期有效的视觉规范：颜色怎么分工、取什么值，按钮怎么选，能点的东西长什么样。只在规范变更时更新，不因批次完成而增删。写代码时照着做的规约见 [web/CLAUDE.md](../../web/CLAUDE.md)「可点击元素」「颜色」「按钮」。
 >
 > 取值的真相源是 `web/app/globals.css` 的 `@theme`，本文与它不一致时以代码为准，并回来改本文。
 
@@ -187,7 +187,6 @@
 
 - **加载与提交不盖整页遮罩**。遮罩把头部和底部一起盖住，画面上只剩一个转圈，玩家不知道在等什么
 - **等待超过几秒就把「在等什么、等了多久」写出来**，失败时给一块可截图的排查信息（卡在哪一步、错误码与细分原因、耗时、时间、玩家 ID）。玩家往往在转圈时就关掉页面，排查信息只在失败页出现是不够的
-- 登录回调的具体做法见 [phase-12-controls.md](../design/web/phase-12-controls.md)
 
 ## 6. 游戏语义色的破例
 

@@ -1,6 +1,6 @@
 'use client';
 
-/* eslint-disable @next/next/no-img-element -- 图标是本地静态文件、尺寸已经是目标尺寸，过一道 next/image 优化器只是白付 CPU；理由同 docs/design/web/phase-3b-awaken-page.md */
+/* eslint-disable @next/next/no-img-element -- 图标是本地静态文件、尺寸已经是目标尺寸，过一道 next/image 优化器只是白付 CPU */
 
 import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';

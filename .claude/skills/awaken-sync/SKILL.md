@@ -5,8 +5,7 @@ description: game 仓库新增或改动觉醒技能后，把数据与图片同�
 
 # 同步 game 的觉醒改动到网站
 
-网站的觉醒页数据全部由脚本从 game 仓库生成，**不手工维护**。设计与取舍见
-[docs/design/web/phase-3b-awaken-page.md](../../../docs/design/web/phase-3b-awaken-page.md)。
+网站的觉醒页数据全部由脚本从 game 仓库生成，**不手工维护**。
 
 ## 什么时候跑
 

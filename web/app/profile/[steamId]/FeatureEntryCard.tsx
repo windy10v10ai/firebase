@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import type { ReactNode } from 'react';
 
-// 功能色只上图标与图标底块，箭头与描边保持中性，见 docs/design/web/phase-12-color-system.md
+// 功能色只上图标与图标底块，箭头与描边保持中性，见 docs/web/design-system.md「功能色」
 const TONE_CLASS = {
   property: { box: 'bg-feature-property-soft', icon: 'text-feature-property' },
   awaken: { box: 'bg-feature-awaken-soft', icon: 'text-feature-awaken' },

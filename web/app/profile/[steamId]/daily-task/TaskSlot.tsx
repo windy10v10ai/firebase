@@ -5,7 +5,7 @@ import TaskIcon from './TaskIcon';
 
 import type { TaskCandidate } from '@/app/lib/daily-task';
 
-// 空槽与已完成的槽同高，一天只完成一条时另外两格照样占位，见 docs/design/web/phase-14-daily-task.md
+// 空槽与已完成的槽同高，一天只完成一条时另外两格照样占位
 const BASE_CLASS = 'flex rounded-[7px] px-2 py-1.5';
 
 // 一行三个时窄屏横着摆会把短名挤成省略号，改成竖排；单列的位置一律横排
