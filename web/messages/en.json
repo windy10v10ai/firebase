@@ -972,5 +972,12 @@
     "detailCatchUp": "Makeup x{days} day(s)",
     "detailNote": "Up to 7 makeup days; forfeited once membership expires",
     "failed": "Check-in failed, please try again"
+  },
+  "shareCard": {
+    "siteDescription": "Official site of the DOTA2 10v10 AI custom map: stats, attributes and hero awakening",
+    "playerFallback": "Player {steamId}",
+    "profileHeadline": "{name}’s 10v10 AI stats",
+    "profileStats": "Played {matches, plural, one {# game} other {# games}} with a {winRate, number, percent} win rate. Check out your stats",
+    "profileNoMatches": "See {name}’s stats. Yours are here too"
   }
 }

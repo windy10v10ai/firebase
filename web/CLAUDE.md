@@ -89,6 +89,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **语言清单只写在 `i18n/locales.ts`**：代码、单字标记、母语名在同一处，新增语言改这一个数组，探测、cookie 校验、切换列表跟着变
 - **新语言可以只译一部分**，`messages/<locale>.json` 缺的 key 由 `i18n/messages.ts` 合并英文补上；**`messages/en.json` 必须齐全**，它是兜底的那一份，缺 key 就没有东西可回落
 - **新页面要设标签页标题**：页面名取自现有的 i18n key（通常是导航文案），用 `app/lib/page-title.ts` 的 `pageTitle(namespace, key)` 生成 `generateMetadata`，品牌后缀由模板拼接，不手写。客户端页面导不出 metadata，在同目录加一个只返回 `children` 的 `layout.tsx` 来挂。标题格式的理由见 [docs/web/README.md](../docs/web/README.md) 第 6 节
+- **分享卡片的标签由根 layout 统一给出**，新页面不用写；要给某个页面换卡片时，`openGraph` / `twitter` 会整块覆盖上层，`siteName`、`images` 要带全。数据只能来自匿名读接口，字段限于访客能看的，规则与理由见 [docs/web/README.md](../docs/web/README.md)「链接分享卡片」
 - **组件里取语言用 `useLocale()`，cookie 名用 `LOCALE_COOKIE`**，不写字面量
 - **语言控件不得超过 44px 宽**，上限的来历见 [docs/web/README.md](../docs/web/README.md) 第 4 节「多语言」
 - **横排导航加项前先确认放得下**：768 最多四项，让位的项在 `config/nav.ts` 标 `desktopOnly`；新增语言要量 1024 已登录这一档，放不下六项就在 `i18n/locales.ts` 给它标 `compactNav`

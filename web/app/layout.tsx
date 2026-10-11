@@ -1,7 +1,7 @@
 import localFont from 'next/font/local';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 
 import Analytics from './components/Analytics';
 import Footer from './components/Footer';
@@ -15,6 +15,8 @@ import {
 } from './lib/auth-hint';
 import { SITE_NAME, TITLE_TEMPLATE } from './lib/page-title';
 import { QueryProvider } from './lib/query-client';
+import { requestOrigin } from './lib/request-origin';
+import { SHARE_IMAGE } from './lib/share-card';
 
 import './globals.css';
 
@@ -30,22 +32,19 @@ const headingFont = localFont({
   adjustFontFallback: false,
 });
 
-export const metadata: Metadata = {
-  title: { default: SITE_NAME, template: TITLE_TEMPLATE },
-  description: 'DOTA2 10v10 AI custom by windy',
-  icons: {
-    icon: '/images/launcher.webp',
-  },
-};
-
-// 同一份构建挂在多个域名下，Steam 回调地址要跟着玩家实际访问的域名走
-async function requestOrigin(): Promise<string> {
-  const headerList = await headers();
-  const host = (headerList.get('x-forwarded-host') ?? headerList.get('host') ?? '').split(',')[0].trim();
-  const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1');
-  const proto =
-    headerList.get('x-forwarded-proto')?.split(',')[0].trim() ?? (isLocal ? 'http' : 'https');
-  return `${proto}://${host}`;
+// 链接贴进聊天软件时显示的通用卡片，og:title 由 Next 取自标签页标题
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('shareCard');
+  return {
+    metadataBase: new URL(await requestOrigin()),
+    title: { default: SITE_NAME, template: TITLE_TEMPLATE },
+    description: t('siteDescription'),
+    icons: {
+      icon: '/images/launcher.webp',
+    },
+    openGraph: { type: 'website', siteName: SITE_NAME, images: [SHARE_IMAGE] },
+    twitter: { card: 'summary' },
+  };
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
