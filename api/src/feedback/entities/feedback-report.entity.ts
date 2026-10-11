@@ -6,7 +6,7 @@ export type FeedbackSource = (typeof FEEDBACK_SOURCES)[number];
 export const FEEDBACK_TYPES = ['problem', 'suggestion'] as const;
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 
-// 与 docs/design/launcher-feedback 的分类表一一对应，AI 汇总时据此转成仓库标签
+// 与 feedback-review 技能里的分类表一一对应，AI 汇总时据此转成仓库标签
 export const FEEDBACK_TOPICS = [
   'hero',
   'ability',
