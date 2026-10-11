@@ -5,7 +5,24 @@ description: 汇总、分析玩家从启动器（以后还有网站）提交的�
 
 # 玩家反馈的汇总与分析
 
-反馈的设计、分类与字段含义见 [docs/design/launcher-feedback/phase-1-launcher.md](../../../docs/design/launcher-feedback/phase-1-launcher.md)，接口约束见 [docs/api/README.md](../../../docs/api/README.md) 的 `POST /api/feedback`。
+接口约束见 [docs/api/README.md](../../../docs/api/README.md) 的 `POST /api/feedback`，设计取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../../../docs/design/launcher-feedback/phase-1-launcher.md)。
+
+报告的 `type` 是 `problem`（报告问题）或 `suggestion`（提出建议）；`topics` 是玩家选的「相关内容」，最多 2 个，一个都不选即「其他」；`tags` 玩家提交时为空，汇总时补更细的标签。`topics` 与仓库标签的对应：
+
+| `topics` | 玩家看到的 | 仓库与标签 |
+|---|---|---|
+| `hero` | 英雄 | game `hero` |
+| `ability` | 技能 | game `ability` `4+3` |
+| `awaken` | 觉醒 | game `awaken` |
+| `item` | 物品 | game `item` |
+| `bot` | 电脑 AI | game `bot` |
+| `balance` | 平衡 | game `balance` |
+| `ui` | 界面 | game `UI/UX` |
+| `member` | 会员 | game `member` |
+| `lag` | 卡顿 / 掉线 | game `system` |
+| `launcher` | 启动器 | firebase `launcher` |
+| `web` | 网站 | firebase `web` |
+| `game` | 游戏 | game，不加标签 |
 
 ## 一轮的流程
 
@@ -67,7 +84,7 @@ gcloud storage cp -q gs://windy10v10ai-feedback/2026-10-04/<报告ID>/server.log
 只在用户同意后做，**建之前先给用户一份清单确认**：每条写拟定的标题、仓库、类型、标签、对应报告 ID，以及哪些是补评论、哪些不建只记进跟踪 issue。用户确认或调整后再动手。
 
 - 先用 `gh issue list --search` 查有没有现成的 issue，有就在下面补评论，不重复建
-- `topics` 与仓库标签的对应见设计文档的分类表（`ui` 对应 game 的 `UI/UX`，`lag` 对应 `system`，`launcher` / `web` 进 firebase 仓库）
+- `topics` 与仓库标签的对应见上面的表
 - 每个 issue 都要设**类型**（issue type）：玩家报的故障是 `Bug`，要新增或改的功能是 `Feature`，需要评估、调研的是 `Task`。设置用 `gh api -X PATCH repos/<owner>/<repo>/issues/<编号> -f type=<类型名>`
 - 数值在哪个仓库就建在哪个仓库：每日任务等数值在 firebase，不在 game
 - issue 正文写现象与报告 ID，不贴 Steam ID 与日志原文
