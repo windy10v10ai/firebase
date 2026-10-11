@@ -30,6 +30,8 @@ namespace Windy10v10AI.Launcher
         public int Mode;
         public string GameDir;
         public FeedbackError Error;
+        // The joiner's route and its last minute, kept after leaving because players often report once the game is over
+        public Dictionary<string, object> Connection;
     }
 
     class FeedbackDraft
@@ -108,6 +110,7 @@ namespace Windy10v10AI.Launcher
             if (steamId > 0) body["steamId"] = steamId;
             if (!string.IsNullOrEmpty(context.MapVersion)) body["mapVersion"] = context.MapVersion;
             if (context.Mode >= 0 && context.Mode < Modes.Length) body["mode"] = Modes[context.Mode];
+            if (context.Connection != null) body["connection"] = context.Connection;
             var error = context.Error;
             if (error != null)
             {

@@ -67,7 +67,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 加载态
 
-页面一出现就是最终结构，之后只有数值在变；首屏打开与站内跳转都适用。为什么这样定见 [docs/web/README.md](../docs/web/README.md) 第 4 节「加载态」与 [phase-10-first-paint.md](../docs/design/web/phase-10-first-paint.md)。
+页面一出现就是最终结构，之后只有数值在变；首屏打开与站内跳转都适用。为什么这样定见 [docs/web/README.md](../docs/web/README.md) 第 4 节「加载态」。
 
 - **登录形态直接读 `useAuth()`，不写加载中分支。** `AuthState` 只有 `authenticated` / `unauthenticated` 两态，首屏初值来自根 layout 读到的 `player-uid` cookie。这个 cookie 只在 `AuthProvider` 的 `onAuthStateChanged` 里写和删；它不是凭据，不得用于鉴权、跳转或归属判断
 - **请求不等登录态。** `apiFetch` 取 token 前已经 `await auth.authStateReady()`，页面不写「登录态恢复后再发请求」的判断
@@ -89,7 +89,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **新语言可以只译一部分**，`messages/<locale>.json` 缺的 key 由 `i18n/messages.ts` 合并英文补上；**`messages/en.json` 必须齐全**，它是兜底的那一份，缺 key 就没有东西可回落
 - **新页面要设标签页标题**：页面名取自现有的 i18n key（通常是导航文案），用 `app/lib/page-title.ts` 的 `pageTitle(namespace, key)` 生成 `generateMetadata`，品牌后缀由模板拼接，不手写。客户端页面导不出 metadata，在同目录加一个只返回 `children` 的 `layout.tsx` 来挂。标题格式的理由见 [docs/web/README.md](../docs/web/README.md) 第 6 节
 - **组件里取语言用 `useLocale()`，cookie 名用 `LOCALE_COOKIE`**，不写字面量
-- **语言控件不得超过 44px 宽**，上限的来历见 [phase-2g-header-layout.md](../docs/design/web/phase-2g-header-layout.md)
+- **语言控件不得超过 44px 宽**，上限的来历见 [docs/web/README.md](../docs/web/README.md) 第 4 节「多语言」
 - **横排导航加项前先确认放得下**：768 最多四项，让位的项在 `config/nav.ts` 标 `desktopOnly`；新增语言要量 1024 已登录这一档，放不下六项就在 `i18n/locales.ts` 给它标 `compactNav`
 - **俄文译法先查 game 仓库的 `game/resource/addon_russian.txt`**，游戏里已有的说法照搬；游戏俄文里保持英文的专有名词（Battle Points、Member Points、Battle Level、Member Level）网站也不译
 - **俄文里带数量的句子用 ICU plural 写全 `one` / `few` / `many` / `other`**，英文原文没有 plural 也一样；传入的参数必须是数字，不能是 `toLocaleString()` 之后的字符串
@@ -164,6 +164,18 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **请求进行中用 `Button` 的 `loading`**：按钮内转圈并禁用，文案由调用方换成进行时。不盖整页遮罩
 - **游戏按钮（`.btn-season`、`.btn-member`）的取值照搬游戏仓库的 `buttons.less`，不改**，属性、觉醒页要与游戏内同名操作长得一样
 - **标题字体只收了顶栏与页面大标题的字**（`font-heading`，`.title-primary` 已带上）。改了 `navigation.*`、键名为 `title` 或以 `Title` 结尾的文案，或语言名，跑 `npm run font:heading` 并提交 `app/fonts/` 下的产物，CI 的 `font:heading:check` 会拦下漏跑的情况。文案带接口数据（玩家昵称、英雄名等）的位置不用 `font-heading`，收不全的字会退回系统字体，一行里混两种字形。理由见 [docs/web/README.md](../docs/web/README.md) 的字体一行
+
+## 数据同步
+
+游戏里的名字、图标、技能说明都由 `scripts/` 下的脚本从 game 仓库生成，产物不手改：
+
+- **每日任务池加了英雄**：`npm run heroes`
+- **抽选池、技能或物品的数值与描述变了**：`npm run wiki:sync`；缺图标先跑 `npm run items`
+- **觉醒有改动**：按 [awaken-sync](../.claude/skills/awaken-sync/SKILL.md) 技能走
+
+## 升级依赖
+
+- **纯升级的 PR 不改页面，改页面的 PR 不升级**：混在一起，线上出了差异分不清是升级带来的还是改动带来的
 
 ## 校验
 

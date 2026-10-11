@@ -64,6 +64,13 @@ export interface GameState {
   abilities?: string[];
 }
 
+export interface FeedbackConnection {
+  path: string;
+  rttMs?: number;
+  lossPct?: number;
+  roomCode?: string;
+}
+
 /** 玩家的一份问题报告或建议。 */
 @Collection('FeedbackReports')
 export class FeedbackReport {
@@ -82,6 +89,8 @@ export class FeedbackReport {
   windowsVersion?: string;
   mode?: LauncherMode;
   launcherError?: LauncherError;
+  /** 只有加入别人房间时才有 */
+  connection?: FeedbackConnection;
   /** 只有来源为游戏时才有 */
   gameState?: GameState;
   /** gs:// 路径 */

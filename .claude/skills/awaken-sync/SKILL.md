@@ -5,8 +5,7 @@ description: game 仓库新增或改动觉醒技能后，把数据与图片同�
 
 # 同步 game 的觉醒改动到网站
 
-网站的觉醒页数据全部由脚本从 game 仓库生成，**不手工维护**。设计与取舍见
-[docs/design/web/phase-3b-awaken-page.md](../../../docs/design/web/phase-3b-awaken-page.md)。
+网站的觉醒页数据全部由脚本从 game 仓库生成，**不手工维护**。
 
 ## 什么时候跑
 
@@ -41,7 +40,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 
 ## 产物里的技能提示框数据
 
-每个英雄除了名字、标题、描述，还有 `ability` 字段：技能属性、数值行、冷却、耗蓝、背景故事，供觉醒卡的悬浮提示和详情弹窗用。**取数规则以 [docs/web/ability-tooltip.md](../../../docs/web/ability-tooltip.md) 第 5 节为准**，要改规则先改文档，再改 `web/scripts/dota-ability.mjs`（技能与物品图鉴的 `npm run wiki:sync` 共用这份取数，改完两边都要重跑）。
+每个英雄除了名字、标题、描述，还有 `ability` 字段：技能属性、数值行、冷却、耗蓝、背景故事，供觉醒卡的悬浮提示和详情弹窗用。**取数规则以 [docs/web/ability-tooltip.md](../../../docs/web/ability-tooltip.md) 第 5 节为准**，要改规则先改文档，再改 `web/scripts/dota-ability.mjs`（百科的 `npm run wiki:sync` 共用这份取数，改完两边都要重跑）。
 
 - 某个技能在网站上少了一行数值，先查 game 本地化有没有 `DOTA_Tooltip_ability_<技能名>_<key>` 标签：没有标签的数值按规则不展示，要回 game 补标签，不要在网站侧放宽
 - 属性（技能、影响、伤害类型等）的文案在 `web/messages/*.json` 的 `ability` 命名空间，不来自同步；KV 出现新的取值时脚本输出 `null`，页面不显示该项，要在脚本与文案里一起补
@@ -69,7 +68,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 
 **取图报「取不到」的图标，停下来向用户要图**，不要留占位上线，也不要拿同名原版图顶替——长得和游戏内不一样。这类多是 CDN 没有的饰品图标（`AbilityTextureName` 带目录的那种），只能从 Dota 客户端的 `dota 2 beta/game/dota/pak01_dir.vpk` 导出。问的时候逐个列出：英雄中文名、包内路径 `panorama/images/spellicons/<AbilityTextureName>_png.vtex_c`。
 
-收到的 PNG 按贴图路径原样放进 `web/scripts/awaken-icons/`，文件名去掉 `_png`，如 `bristleback/bb_2022_immortal_ability_icon/bb_2022_immortal_bristleback.png`，再跑第 5 步。有导出文件时脚本优先用它，清单里已有的旧图会被替换；导出的原图要进 git，下次重跑才取得到。
+收到的 PNG 按贴图路径原样放进 `web/scripts/awaken-icons/`，文件名去掉 `_png`，如 `bristleback/bb_2022_immortal_ability_icon/bb_2022_immortal_bristleback.png`，再跑第 5 步。有导出文件时脚本优先用它，清单里已有的旧图会被替换；导出的原图要进 git，下次重跑才取得到。百科的 `npm run items` 也从这个目录取技能图标。
 
 ## 不要做的事
 

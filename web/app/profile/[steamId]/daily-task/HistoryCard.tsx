@@ -17,7 +17,7 @@ function formatDayId(dayId: string): string {
 
 /**
  * 30 天历史。日期不连续：没完成任务的日子根本不进历史，跳过的就是不出现，
- * 所以不做日历格子也不补空日，理由见 docs/design/web/phase-14-daily-task.md。
+ * 所以不做日历格子也不补空日：日历会把「没打游戏」和「打了但没完成」画成同一个空格。
  */
 export default function HistoryCard({ entries }: { entries: DailyTaskHistoryEntry[] | null }) {
   const t = useTranslations('dailyTask');

@@ -10,7 +10,7 @@ import {
 } from './dota-ability.mjs';
 
 /**
- * 从 game 仓库重新生成图鉴的数据 web/config/wiki-abilities.json、wiki-items.json。
+ * 从 game 仓库重新生成百科的数据 web/config/wiki-abilities.json、wiki-items.json。
  * 名单与档位读抽选池，提示框数据与觉醒页同一套取数规则；名字与图标查 config/abilities.json、items.json，不重复存。
  *
  * 跑法：cd web && npm run wiki:sync

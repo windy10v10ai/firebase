@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { SECRET } from '../util/secret/secret.service';
 
-import { RelayDto, RelayProbeDto } from './dto/launcher-room.dto';
+import { RelayDto, RelayProbeDto, RouteCheckDto } from './dto/launcher-room.dto';
 
 export interface LauncherRelay {
   address: string;
@@ -26,6 +26,9 @@ export const RELAY_TICKET_TTL_MS = 6 * 60 * 60 * 1000;
 const RELAY_LOSS_LIMIT_PCT = 10;
 // 同优先级之外再让一步：优先的那台慢太多时，延迟比优先级更影响手感
 const RELAY_SLOWER_LIMIT_MS = 30;
+
+// 加入后实测选线的阈值：直连丢包到这个程度且中转够干净才改走中转，只看丢包不看延迟
+export const ROUTE_CHECK: RouteCheckDto = { directLossPct: 5, relayLossPct: 2 };
 
 export type RelayRole = 'h' | 'j';
 

@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.5.3.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.5.3.0")]
+[assembly: System.Reflection.AssemblyVersion("0.5.4.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.5.4.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.5.3";
+        const string Version = "0.5.4";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -77,6 +77,9 @@ namespace Windy10v10AI.Launcher
         const int QualityWindowMs = 300000;
         // Matches the API's cap, so rows piling up while the API is unreachable are dropped oldest first
         const int MaxPendingQuality = 50;
+        const int RouteRefreshMs = 5000;
+        // The same line the route check draws for the direct route, so a warning on the status line means the game will stutter
+        const int RouteWarnLossPct = 5;
         const int FastPollMinutes = 5;
         // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
         const int PauseMinutes = 15;
@@ -98,6 +101,14 @@ namespace Windy10v10AI.Launcher
         readonly NoticeBar notice = new NoticeBar();
         readonly ModeButton[] modes = { new ModeButton(), new ModeButton(), new ModeButton() };
         readonly Label status = new Label();
+        // The joiner's route and how it is doing, on the right of the status line
+        readonly Panel routeDot = new Panel();
+        readonly Label routeLabel = new Label();
+        bool routeShown;
+        bool routeWasChecking;
+        string joinedCode;
+        Dictionary<string, object> lastConnection;
+        DateTime routeRefreshed;
         readonly MarqueeBar marquee = new MarqueeBar();
         readonly Label hint = new Label();
         readonly FlatButton action = new FlatButton();
@@ -226,6 +237,10 @@ namespace Windy10v10AI.Launcher
             status.Font = new Font(Theme.FontName, 9f);
             hint.ForeColor = Theme.Muted;
             hint.Font = new Font(Theme.FontName, 9f);
+            routeLabel.ForeColor = Theme.Muted;
+            routeLabel.Font = new Font(Theme.FontName, 9f);
+            routeLabel.TextAlign = ContentAlignment.MiddleRight;
+            routeDot.Visible = routeLabel.Visible = false;
             marquee.Visible = false;
             hint.Visible = false;
             action.Visible = false;
@@ -297,6 +312,7 @@ namespace Windy10v10AI.Launcher
             rosterTimer.Tick += delegate
             {
                 RefreshPlayers();
+                RefreshRoute(false);
                 if (Hosting && browser != null) UpdateRoomList();
             };
             thanksTimer.Tick += delegate
@@ -375,7 +391,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, routeDot, routeLabel, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -485,6 +501,14 @@ namespace Windy10v10AI.Launcher
             hostGuide.SetBounds(P(20), P(y), P(440), P(52));
             status.Visible = !notice.Visible && !hostGuide.Visible;
             status.SetBounds(P(20), P(y), P(440), P(20));
+            routeDot.Visible = routeLabel.Visible = routeShown && status.Visible && !hostCode.Visible;
+            if (routeLabel.Visible)
+            {
+                var routeWidth = TextRenderer.MeasureText(routeLabel.Text, routeLabel.Font).Width + P(4);
+                routeLabel.SetBounds(P(460) - routeWidth, P(y), routeWidth, P(20));
+                routeDot.SetBounds(routeLabel.Left - P(10), P(y + 6), P(8), P(8));
+                status.Width = routeDot.Left - P(8) - status.Left;
+            }
             var actionWidth = Math.Max(P(80), TextRenderer.MeasureText(action.Text, action.Font).Width + P(28));
             var secondaryWidth = Math.Max(P(80), TextRenderer.MeasureText(secondary.Text, secondary.Font).Width + P(28));
             if (hostCode.Visible)
@@ -534,6 +558,7 @@ namespace Windy10v10AI.Launcher
             var round = new System.Drawing.Drawing2D.GraphicsPath();
             round.AddEllipse(0, 0, P(8), P(8));
             mapDot.Region = new Region(round);
+            routeDot.Region = new Region(round);
             Relayout();
         }
 
@@ -1268,6 +1293,9 @@ namespace Windy10v10AI.Launcher
                 if (stopping) throw new OperationCanceledException();
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (path == null) throw new LaunchError(Strings.ConnectFailed, false);
+                // Runs while Dota restarts, so the route is usually settled before the game connects
+                tunnel.Thresholds = RouteThresholds.Read(joined);
+                tunnel.StartRouteCheck();
 
                 var running = DotaProcesses();
                 foreach (var p in running) KillQuietly(p);
@@ -1284,7 +1312,14 @@ namespace Windy10v10AI.Launcher
                 }
                 StartClient(install);
 
-                UI(() => ShowProgress(string.Format(Strings.Joined, code), Strings.JoinedHint, Strings.LeaveRoom, false));
+                UI(() =>
+                {
+                    ShowProgress(string.Format(Strings.Joined, code), Strings.JoinedHint, Strings.LeaveRoom, false);
+                    routeShown = true;
+                    joinedCode = code;
+                    lastConnection = null;
+                    RefreshRoute(true);
+                });
                 WatchJoin(tunnel, install);
             }
             catch (LaunchError error)
@@ -1346,6 +1381,8 @@ namespace Windy10v10AI.Launcher
             var started = false;
             var qualitySince = DateTime.UtcNow;
             var quality = new List<Dictionary<string, object>>();
+            var routeChecks = new List<Dictionary<string, object>>();
+            var own = hostTunnel;
             while (!stopping)
             {
                 var elapsed = DateTime.UtcNow - since;
@@ -1358,7 +1395,8 @@ namespace Windy10v10AI.Launcher
                 Thread.Sleep(started ? GamePollMs : (elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs));
                 var tunnel = hostTunnel;
                 var roster = hostRoster;
-                if (tunnel == null || roster == null || stopping) return;
+                // A room reopened during the sleep has a poller of its own, and this one would mark it started
+                if (tunnel == null || tunnel != own || roster == null || stopping) return;
                 var startedNow = started || ReadShared(logFile).Contains(HeroSelection);
                 var body = new Dictionary<string, object>(roomBody);
                 body["code"] = roomCode;
@@ -1388,10 +1426,14 @@ namespace Windy10v10AI.Launcher
                     if (quality.Count > MaxPendingQuality) quality.RemoveRange(0, quality.Count - MaxPendingQuality);
                 }
                 if (quality.Count > 0) body["quality"] = quality.ToArray();
+                routeChecks.AddRange(tunnel.TakeRouteChecks());
+                if (routeChecks.Count > MaxPendingQuality) routeChecks.RemoveRange(0, routeChecks.Count - MaxPendingQuality);
+                if (routeChecks.Count > 0) body["routeChecks"] = routeChecks.ToArray();
                 try
                 {
                     var answer = RoomApi.Host(body);
                     quality.Clear();
+                    routeChecks.Clear();
                     started = startedNow;
                     foreach (Dictionary<string, object> join in (object[])answer["joins"])
                     {
@@ -1915,6 +1957,7 @@ namespace Windy10v10AI.Launcher
                 AllowRoomBrowsing(false);
                 secondary.Visible = false;
                 hostCode.Visible = false;
+                routeShown = false;
                 hostingReady = false;
                 clientClosed = false;
                 saving = false;
@@ -1957,6 +2000,47 @@ namespace Windy10v10AI.Launcher
             Relayout();
         }
 
+        // Numbers move every few seconds at most, so they stay readable; the end of the route check shows at once
+        void RefreshRoute(bool force)
+        {
+            var tunnel = joinTunnel;
+            if (!routeShown || tunnel == null) return;
+            var checking = tunnel.Checking;
+            if (!force && checking == routeWasChecking && (DateTime.UtcNow - routeRefreshed).TotalMilliseconds < RouteRefreshMs) return;
+            routeWasChecking = checking;
+            routeRefreshed = DateTime.UtcNow;
+            string path;
+            var quality = tunnel.Status(out path);
+            if (path != null)
+            {
+                lastConnection = new Dictionary<string, object> { { "path", PathType.Report(path) }, { "roomCode", joinedCode } };
+                if (quality.Samples > 0)
+                {
+                    lastConnection["lossPct"] = quality.Loss;
+                    if (quality.Rtt >= 0) lastConnection["rttMs"] = quality.Rtt;
+                }
+            }
+            var color = Theme.Muted;
+            var dot = Theme.Ok;
+            string text;
+            if (checking)
+            {
+                text = Strings.RouteChecking;
+                dot = Theme.Faint;
+            }
+            else
+            {
+                var name = path == PathType.Lan ? Strings.RouteLan : path == PathType.Relay ? Strings.RouteRelay : Strings.RouteDirect;
+                text = quality.Samples == 0 ? name : string.Format(Strings.RouteQuality, name, quality.Rtt < 0 ? "—" : quality.Rtt.ToString(), quality.Loss);
+                if (quality.Samples > 0 && quality.Loss >= RouteWarnLossPct) color = dot = Theme.Warning;
+            }
+            if (text == routeLabel.Text && color == routeLabel.ForeColor && dot == routeDot.BackColor) return;
+            routeLabel.Text = text;
+            routeLabel.ForeColor = color;
+            routeDot.BackColor = dot;
+            Relayout();
+        }
+
         void UI(Action work)
         {
             if (IsDisposed) return;
@@ -1993,6 +2077,7 @@ namespace Windy10v10AI.Launcher
                 Mode = modeBar.Selected,
                 GameDir = install == null ? null : install.Game,
                 Error = error,
+                Connection = modeBar.Selected == 2 ? lastConnection : null,
             };
             using (var dialog = new FeedbackDialog(context))
             {

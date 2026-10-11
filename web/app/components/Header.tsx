@@ -32,7 +32,7 @@ const EXTERNAL_LINK_ICONS: Record<string, typeof GithubIcon> = {
   github: GithubIcon,
 };
 
-// 每个功能一个颜色，与首页、个人主页的入口卡一致，见 docs/design/web/phase-12-color-system.md
+// 每个功能一个颜色，与首页、个人主页的入口卡一致，见 docs/web/design-system.md「功能色」
 const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: string }> = {
   profile: { Icon: UserRound, className: 'text-content' },
   property: { Icon: CirclePlus, className: 'text-feature-property' },

@@ -1345,19 +1345,6 @@ namespace Windy10v10AI.Launcher
             var s = DpiScale;
             int mapLeft, countLeft, pingLeft, buttonLeft;
             Columns(out mapLeft, out countLeft, out pingLeft, out buttonLeft);
-            const TextFormatFlags line = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
-            using (var small = new Font(Theme.FontName, 8.25f))
-            {
-                if (banner != null)
-                {
-                    TextRenderer.DrawText(g, banner, small, new Rectangle(0, 0, Width, BannerHeight - (int)(4 * s)), Theme.Warning, line | TextFormatFlags.Left);
-                }
-                var header = new Rectangle(0, BannerHeight, 0, (int)(18 * s));
-                TextRenderer.DrawText(g, Strings.ColumnMap, small, new Rectangle(mapLeft, header.Y, countLeft - mapLeft, header.Height), Theme.Muted, line | TextFormatFlags.Left);
-                TextRenderer.DrawText(g, Strings.ColumnPlayers, small, new Rectangle(countLeft, header.Y, pingLeft - countLeft - (int)(6 * s), header.Height), Theme.Muted, line | TextFormatFlags.Right);
-                TextRenderer.DrawText(g, Strings.ColumnPing, small, new Rectangle(pingLeft - (int)(10 * s), header.Y, (int)(60 * s), header.Height), Theme.Muted, line | TextFormatFlags.HorizontalCenter);
-            }
-
             var box = new RectangleF(0.5f, BoxTop + 0.5f, Width - 1.5f, Height - BoxTop - 1.5f);
             using (var path = Theme.Rounded(box, 6 * s))
             using (var brush = new SolidBrush(Theme.Panel))
@@ -1375,6 +1362,7 @@ namespace Windy10v10AI.Launcher
                     TextRenderer.DrawText(g, message, font, Rectangle.Round(box), Theme.Muted,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
                 }
+                DrawHeader(g, mapLeft, countLeft, pingLeft);
                 return;
             }
 
@@ -1391,6 +1379,26 @@ namespace Windy10v10AI.Launcher
                 DrawRow(g, rooms[i], row, i == hoverRow, mapLeft, countLeft, pingLeft, separator);
             }
             g.ResetClip();
+            DrawHeader(g, mapLeft, countLeft, pingLeft);
+        }
+
+        // Drawn after the rows on a cleared strip: TextRenderer ignores the rounded clip, so a row scrolled half out of the box would print over the column names
+        void DrawHeader(Graphics g, int mapLeft, int countLeft, int pingLeft)
+        {
+            var s = DpiScale;
+            const TextFormatFlags line = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis;
+            using (var brush = new SolidBrush(BackColor)) g.FillRectangle(brush, 0, 0, Width, BoxTop);
+            using (var small = new Font(Theme.FontName, 8.25f))
+            {
+                if (banner != null)
+                {
+                    TextRenderer.DrawText(g, banner, small, new Rectangle(0, 0, Width, BannerHeight - (int)(4 * s)), Theme.Warning, line | TextFormatFlags.Left);
+                }
+                var header = new Rectangle(0, BannerHeight, 0, (int)(18 * s));
+                TextRenderer.DrawText(g, Strings.ColumnMap, small, new Rectangle(mapLeft, header.Y, countLeft - mapLeft, header.Height), Theme.Muted, line | TextFormatFlags.Left);
+                TextRenderer.DrawText(g, Strings.ColumnPlayers, small, new Rectangle(countLeft, header.Y, pingLeft - countLeft - (int)(6 * s), header.Height), Theme.Muted, line | TextFormatFlags.Right);
+                TextRenderer.DrawText(g, Strings.ColumnPing, small, new Rectangle(pingLeft - (int)(10 * s), header.Y, (int)(60 * s), header.Height), Theme.Muted, line | TextFormatFlags.HorizontalCenter);
+            }
         }
 
         void DrawRow(Graphics g, RoomRow room, Rectangle row, bool hot, int mapLeft, int countLeft, int pingLeft, bool separator)

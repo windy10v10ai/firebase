@@ -15,9 +15,11 @@ import { Player } from '../player/entities/player.entity';
 import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
 import {
   ConnectionQualityRecord,
+  RouteCheckRecord,
   buildConnectionQualityRow,
   buildJoinResultRow,
   buildRoomCreatedRow,
+  buildRouteCheckRow,
 } from './launcher-room-rows';
 import { buildMemberHistoryRow } from './member-history-rows';
 import { PointChangeSource, buildPointHistoryRows } from './point-history-rows';
@@ -104,6 +106,15 @@ export class BigQueryService {
     await this.insert(
       LAUNCHER_ROOM_EVENTS_TABLE,
       records.map((record) => buildConnectionQualityRow(room, record, now)),
+    );
+  }
+
+  /** 记录加入者连通后实测直连与中转的结果，一次轮询带来的几条写成几行。 */
+  async recordRouteChecks(room: LauncherRoom, records: RouteCheckRecord[]): Promise<void> {
+    const now = new Date();
+    await this.insert(
+      LAUNCHER_ROOM_EVENTS_TABLE,
+      records.map((record) => buildRouteCheckRow(room, record, now)),
     );
   }
 

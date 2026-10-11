@@ -61,6 +61,7 @@ describe('LauncherRoomService', () => {
     recordRoomCreated: jest.Mock;
     recordJoinResult: jest.Mock;
     recordConnectionQuality: jest.Mock;
+    recordRouteChecks: jest.Mock;
   };
   let relay: { issue: jest.Mock; address: jest.Mock; addresses: jest.Mock; order: jest.Mock };
   let service: LauncherRoomService;
@@ -73,6 +74,7 @@ describe('LauncherRoomService', () => {
       recordRoomCreated: jest.fn(),
       recordJoinResult: jest.fn(),
       recordConnectionQuality: jest.fn(),
+      recordRouteChecks: jest.fn(),
     };
     const steamProfile = {
       findBySteamId: jest.fn(async (steamId: number) => ({
@@ -282,6 +284,38 @@ describe('LauncherRoomService', () => {
           join: expect.objectContaining({ id: joined.joinId }),
           quality: expect.objectContaining({ path: 'punch', lost: 30 }),
           relayAddress: undefined,
+        },
+      ],
+    );
+  });
+
+  it('发了中转通行证才下发选线阈值，加入者的实测结果经房主转报写进统计，别的房间的不写', async () => {
+    const room = await service.host(HOST);
+    const withoutRelay = await service.join(room.code, JOINER);
+    relay.issue.mockReturnValue({ address: 'a', addresses: ['a'], ticket: 't' });
+    const joined = await service.join(room.code, { ...JOINER, steamId: 2003 });
+    const other = await service.host({ ...HOST, steamId: 3003 });
+    const otherJoin = await service.join(other.code, JOINER);
+    const check = { path: 'relay', directLossPct: 8, directRttMs: 30, relayLossPct: 0 } as const;
+
+    await service.host({
+      ...HOST,
+      code: room.code,
+      token: room.token,
+      routeChecks: [
+        { joinId: joined.joinId, ...check },
+        { joinId: otherJoin.joinId, ...check },
+      ],
+    });
+
+    expect(withoutRelay.routeCheck).toBeUndefined();
+    expect(joined.routeCheck).toEqual({ directLossPct: 5, relayLossPct: 2 });
+    expect(bigQuery.recordRouteChecks).toHaveBeenCalledWith(
+      expect.objectContaining({ id: room.code }),
+      [
+        {
+          join: expect.objectContaining({ id: joined.joinId }),
+          check: expect.objectContaining(check),
         },
       ],
     );

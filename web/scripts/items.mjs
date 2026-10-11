@@ -7,7 +7,7 @@ import { resolveGameRepo } from './dota-ability.mjs';
 
 /**
  * 取物品与抽选技能的图标和三语名字，产出清单 config/items.json、config/abilities.json。
- * 按内部名索引、每类一个目录，与英雄头像同一套结构：战绩出装与日后的物品图鉴查的是同一份。
+ * 按内部名索引、每类一个目录，与英雄头像同一套结构：战绩出装与百科查的是同一份。
  *
  * 跑法：cd web && npm run items [-- 物品统计导出.csv]
  * 带上 GA 导出的物品表（第一列是物品名）时，表里玩家真买过、配置推不出来的物品也一起收进清单。
@@ -16,6 +16,8 @@ import { resolveGameRepo } from './dota-ability.mjs';
 const WEB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.resolve(WEB, '..');
 
+// 从游戏包导出的图，CDN 与 game 仓库都没有的饰品、野怪图标只能这样取，觉醒取图共用这一份
+const EXPORTED_ICON_DIR = path.join(WEB, 'scripts/awaken-icons');
 const CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react';
 const DATAFEED = 'https://www.dota2.com/datafeed';
 const LANGUAGES = { zh: 'schinese', en: 'english', ru: 'russian' };
@@ -90,11 +92,11 @@ function readKvDir(dir, files) {
   return merged;
 }
 
-/** 注释掉的行不算，所以先去掉行注释再找 */
+/** 注释掉的行不算，所以先去掉行注释再找；game 在 Windows 上检出是 CRLF，断行要连 \r 一起去掉，否则行尾的 $ 匹配不到 */
 function readListed(file, pattern) {
   const text = fs
     .readFileSync(file, 'utf8')
-    .split('\n')
+    .split(/\r?\n/)
     .map((line) => line.replace(/\/\/.*$/, ''))
     .join('\n');
   return [...text.matchAll(pattern)].map((m) => m[1]);
@@ -150,10 +152,14 @@ async function fetchPng(url) {
 }
 
 /**
- * 图标按顺序找：game 自带的图（自定义、换皮的都在这），再到 Dota CDN 依次试贴图名、基类、本名。
+ * 图标按顺序找：从游戏包导出的图，game 自带的图（自定义、换皮的都在这），再到 Dota CDN 依次试贴图名、基类、本名。
  * 贴图名常是饰品路径，CDN 上只有对应的原版技能图，所以取路径最后一段、去掉饰品后缀再试。
  */
-async function resolveIcon(name, texture, baseClass, gameDir, cdnDir) {
+async function resolveIcon(name, texture, baseClass, exportedDir, gameDir, cdnDir) {
+  const exported = exportedDir && path.join(exportedDir, `${texture}.png`);
+  if (exported && fs.existsSync(exported)) {
+    return { buf: fs.readFileSync(exported), from: 'exported' };
+  }
   const local = path.join(gameDir, `${texture}.png`);
   if (fs.existsSync(local)) return { buf: fs.readFileSync(local), from: 'game' };
   const leaf = texture.split('/').pop();
@@ -175,6 +181,7 @@ async function buildManifest({
   kind,
   names,
   kv,
+  exportedIconDir,
   gameIconDir,
   cdnDir,
   stripPrefix,
@@ -191,7 +198,7 @@ async function buildManifest({
   fs.mkdirSync(outDir, { recursive: true });
 
   const manifest = {};
-  const count = { game: 0, cdn: 0, kept: 0 };
+  const count = { exported: 0, game: 0, cdn: 0, kept: 0 };
   const missing = [];
 
   for (const name of [...names].sort()) {
@@ -201,14 +208,24 @@ async function buildManifest({
     const baseClass = kv.get(name)?.BaseClass;
     const cdnBase = baseClass && !/lua|datadriven/.test(baseClass) ? unprefix(baseClass) : null;
     const kept = previous[name]?.icon;
-    let icon = kept && fs.existsSync(path.join(outDir, kept)) ? kept : null;
+    // 导出图是人工挑过的，放进来就要替换旧图
+    const hasExported =
+      exportedIconDir && fs.existsSync(path.join(exportedIconDir, `${texture}.png`));
+    let icon = !hasExported && kept && fs.existsSync(path.join(outDir, kept)) ? kept : null;
 
     if (icon) {
       count.kept++;
     } else {
-      const found = await resolveIcon(short, texture, cdnBase, gameIconDir, cdnDir);
+      const found = await resolveIcon(
+        short,
+        texture,
+        cdnBase,
+        exportedIconDir,
+        gameIconDir,
+        cdnDir,
+      );
       if (found) {
-        // 统一成官方图的原尺寸再转 webp：图鉴放大展示也不糊，体积仍只有 PNG 的一成
+        // 统一成官方图的原尺寸再转 webp：百科放大展示也不糊，体积仍只有 PNG 的一成
         const buf = await sharp(found.buf)
           .resize(size.width, size.height, { fit: 'cover' })
           .webp({ quality: 82 })
@@ -245,7 +262,7 @@ async function buildManifest({
     .reduce((sum, f) => sum + fs.statSync(path.join(outDir, f)).size, 0);
 
   console.log(
-    `${kind} ${names.size} 个：取自 game ${count.game}，取自 CDN ${count.cdn}，沿用 ${count.kept}，` +
+    `${kind} ${names.size} 个：取自导出 ${count.exported}，取自 game ${count.game}，取自 CDN ${count.cdn}，沿用 ${count.kept}，` +
       `清掉旧文件 ${pruned}，共 ${(total / 1024).toFixed(0)}KB`,
   );
   if (missing.length) console.log(`缺：${missing.join('、')}`);
@@ -253,7 +270,7 @@ async function buildManifest({
 
 /**
  * 物品栏的通用图：空槽底图与通用配方图，照游戏结算界面画空格和配方。
- * 不进物品清单，那份按物品索引，图鉴列物品时不该列出这两张。
+ * 不进物品清单，那份按物品索引，百科列物品时不该列出这两张。
  */
 async function buildSlotAssets(sharp) {
   const outDir = path.join(WEB, 'public/item-slots');
@@ -347,6 +364,7 @@ async function main() {
     kind: 'abilities',
     names: abilities,
     kv: readKvDir(npc, ABILITY_KV_FILES),
+    exportedIconDir: EXPORTED_ICON_DIR,
     gameIconDir: path.join(resource, 'flash3/images/spellicons'),
     cdnDir: 'abilities',
     stripPrefix: false,

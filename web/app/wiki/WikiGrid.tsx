@@ -1,6 +1,6 @@
 'use client';
 
-/* eslint-disable @next/next/no-img-element -- 图标是本地静态文件、尺寸已经是目标尺寸，过一道 next/image 优化器只是白付 CPU；理由同 docs/design/web/phase-3b-awaken-page.md */
+/* eslint-disable @next/next/no-img-element -- 图标是本地静态文件、尺寸已经是目标尺寸，过一道 next/image 优化器只是白付 CPU */
 
 import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -56,7 +56,7 @@ const ICON_CLASS = {
 };
 
 /**
- * 图鉴页的主体：搜索框、按分区与档位排开的图标墙、电脑档悬浮提示与点开的详情弹窗。
+ * 百科页的主体：搜索框、按分区与档位排开的图标墙、电脑档悬浮提示与点开的详情弹窗。
  * 档位从高到低排，同档内保持 game 抽选池里的顺序。
  */
 export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProps) {
