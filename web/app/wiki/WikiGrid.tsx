@@ -14,6 +14,7 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { pickText } from '@/app/lib/ability-text';
 
 import { DETAIL_LOADERS, type WikiDetail } from './details';
+import { tierLabel } from './tier';
 import WikiTabs from './WikiTabs';
 
 import type { AbilityLocale } from '@/app/lib/ability-text';
@@ -184,7 +185,7 @@ export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProp
               <span
                 className={`inline-flex h-6 min-w-9 items-center justify-center self-start rounded-md px-2 text-[13px] font-bold ${TIER_CLASS[tier].badge}`}
               >
-                T{tier}
+                {tierLabel(tier)}
               </span>
               <ul className="grid grid-cols-4 gap-x-1.5 gap-y-3.5 md:grid-cols-8 lg:grid-cols-12 lg:gap-x-2 lg:gap-y-4">
                 {items.map((entry) => (

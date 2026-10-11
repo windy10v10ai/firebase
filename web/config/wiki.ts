@@ -15,7 +15,7 @@ export interface WikiEntryData<Group extends string = string> {
   name: string;
   /** 页面上的分区；物品不分区，全是 all */
   group: Group;
-  /** 抽选档位 1–5，越高越难抽到 */
+  /** 抽选池档位 1–5，越高越难抽到；页面显示的编号是反过来的 */
   tier: number;
   /** 完整描述，%占位符% 已在生成时换成真实数值；纯加属性的物品为空串 */
   desc: WikiText;
