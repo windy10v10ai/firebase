@@ -353,6 +353,10 @@ export class RouteCheckDto {
   directLossPct: number;
   @ApiProperty({ description: '中转丢包不超过这个百分比才改过去' })
   relayLossPct: number;
+  @ApiPropertyOptional({
+    description: '中转往返比直连多出不超过这个毫秒数才改过去，省略时不看延迟；0.6.0 及更早忽略',
+  })
+  relayExtraRttMs?: number;
 }
 
 export class RelayDto {

@@ -66,7 +66,7 @@ describe('LauncherRelayService', () => {
       ]);
     });
 
-    it('丢包太多或没测到的排最后，优先的那台慢太多时改用最快的', () => {
+    it('丢包太多或没测到的排最后，优先的那台算上丢包后慢太多时改用最好的', () => {
       use([
         { address: 'a', priority: 1 },
         { address: 'b', priority: 2 },
@@ -82,6 +82,13 @@ describe('LauncherRelayService', () => {
       expect(
         service.order([probe('a', 20), probe('b', 10)], [probe('a', 20), probe('b', 10)]),
       ).toEqual(['a', 'b']);
+      // 双方各丢 8% 折算 160 ms，干净的那台慢 40 ms 也排到前面；只丢 5% 时延迟优势仍够
+      expect(
+        service.order([probe('a', 30, 8), probe('b', 50)], [probe('a', 30, 8), probe('b', 50)]),
+      ).toEqual(['b', 'a']);
+      expect(
+        service.order([probe('a', 25, 5), probe('b', 80)], [probe('a', 25), probe('b', 80)]),
+      ).toEqual(['a', 'b']);
     });
 
     it('列表清空即关掉中转', () => {
@@ -92,7 +99,7 @@ describe('LauncherRelayService', () => {
 
   describe('routeCheck', () => {
     const probe = (address: string, rtt: number | undefined) => ({ address, rtt, loss: 0 });
-    const thresholds = { directLossPct: 5, relayLossPct: 2 };
+    const thresholds = { directLossPct: 5, relayLossPct: 2, relayExtraRttMs: 50 };
 
     it('经第一台中转的估算延迟到 150 ms 就不下发选线阈值，估不出时照常下发', () => {
       expect(service.routeCheck([probe('a', 30)], [probe('a', 40)], 'a')).toEqual(thresholds);

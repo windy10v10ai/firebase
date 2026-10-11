@@ -28,9 +28,11 @@ export const RELAY_TICKET_TTL_MS = 24 * 60 * 60 * 1000;
 const RELAY_LOSS_LIMIT_PCT = 10;
 // 同优先级之外再让一步：优先的那台慢太多时，延迟比优先级更影响手感
 const RELAY_SLOWER_LIMIT_MS = 30;
+// 排序时每 1% 丢包（双方之和）折算的延迟：丢包几个百分点的线路比慢几十毫秒的干净线路更卡
+const RELAY_LOSS_COST_MS = 10;
 
-// 加入后实测选线的阈值：直连丢包到这个程度且中转够干净才改走中转，只看丢包不看延迟
-const ROUTE_CHECK: RouteCheckDto = { directLossPct: 5, relayLossPct: 2 };
+// 加入后实测选线的阈值：直连丢包到这个程度、中转够干净且不比直连慢太多才改走中转
+const ROUTE_CHECK: RouteCheckDto = { directLossPct: 5, relayLossPct: 2, relayExtraRttMs: 50 };
 // 中转估算延迟到这个程度就不做加入后选线：双方离中转都远，直连即使丢包也比绕远路好玩
 const ROUTE_CHECK_RELAY_RTT_LIMIT_MS = 150;
 
@@ -67,16 +69,19 @@ export class LauncherRelayService {
         j?.rtt !== undefined &&
         h.loss <= RELAY_LOSS_LIMIT_PCT &&
         j.loss <= RELAY_LOSS_LIMIT_PCT;
-      return { ...relay, usable, rtt: usable ? h.rtt! + j.rtt! : Number.POSITIVE_INFINITY };
+      const cost = usable
+        ? h.rtt! + j.rtt! + (h.loss + j.loss) * RELAY_LOSS_COST_MS
+        : Number.POSITIVE_INFINITY;
+      return { ...relay, usable, cost };
     });
     const usable = scored
       .filter((relay) => relay.usable)
-      .sort((a, b) => a.priority - b.priority || a.rtt - b.rtt);
+      .sort((a, b) => a.priority - b.priority || a.cost - b.cost);
     const fastest = usable.reduce<(typeof usable)[number] | undefined>(
-      (best, relay) => (!best || relay.rtt < best.rtt ? relay : best),
+      (best, relay) => (!best || relay.cost < best.cost ? relay : best),
       undefined,
     );
-    if (fastest && usable[0].rtt - fastest.rtt > RELAY_SLOWER_LIMIT_MS) {
+    if (fastest && usable[0].cost - fastest.cost > RELAY_SLOWER_LIMIT_MS) {
       usable.splice(usable.indexOf(fastest), 1);
       usable.unshift(fastest);
     }
