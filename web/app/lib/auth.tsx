@@ -67,6 +67,12 @@ export function AuthProvider({ initialUid, initialProfile, siteOrigin, children 
   );
 }
 
+/** 当前登录的是不是这个玩家本人；决定页面画本人版还是访客版，不做任何鉴权 */
+export function useIsSelf(steamId: string): boolean {
+  const auth = useAuth();
+  return auth.status === 'authenticated' && auth.uid === steamId;
+}
+
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {

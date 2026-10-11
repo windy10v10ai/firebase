@@ -55,8 +55,8 @@ export default function MemberStatusCard(props: MemberStatusCardProps) {
       : !member
         ? t('noneDescription')
         : member.enable
-          ? t('expireDate', { date: member.expireDateString })
-          : t('expiredOn', { date: member.expireDateString });
+          ? t('expireDate', { date: member.expireDateString ?? '' })
+          : t('expiredOn', { date: member.expireDateString ?? '' });
 
   return (
     <section className="card-container card-pad grid gap-6 lg:grid-cols-2 lg:gap-12">

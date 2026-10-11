@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
@@ -115,6 +115,15 @@ export class PlayerService {
 
   async findBySteamId(steamId: number): Promise<Player> {
     return await this.playerRepository.findById(steamId.toString());
+  }
+
+  async setProfileHidden(steamId: number, hidden: boolean): Promise<void> {
+    const player = await this.findBySteamId(steamId);
+    if (!player) {
+      throw new NotFoundException();
+    }
+    player.profileHidden = hidden;
+    await this.playerRepository.update(player);
   }
 
   async findByIds(ids: string[]): Promise<Player[]> {

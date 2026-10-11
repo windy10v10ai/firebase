@@ -27,7 +27,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## API 鉴权
 
-网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
+网站登录后请求带 `Authorization: Bearer <Firebase ID Token>`，uid 就是 Dota2 32 位账号 ID。**新调一个之前网站没用过的接口，要先确认 API 侧挂了 `@AllowWeb()`**，否则一律 401；这条挂在 [api/CLAUDE.md](../api/CLAUDE.md) 常见坑里。路由参数 `:steamId` 与 uid 不一致会被 guard 拒绝，网站不用自己做归属校验；个人主页、属性、觉醒的读接口例外，对别人开放并裁剪字段，见 [docs/web/README.md](../docs/web/README.md)「别人看到的个人主页」。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节。
 
 ## 统计
 
@@ -70,6 +70,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 页面一出现就是最终结构，之后只有数值在变；首屏打开与站内跳转都适用。为什么这样定见 [docs/web/README.md](../docs/web/README.md) 第 4 节「加载态」。
 
 - **登录形态直接读 `useAuth()`，不写加载中分支。** `AuthState` 只有 `authenticated` / `unauthenticated` 两态，首屏初值来自根 layout 读到的 `player-uid` cookie。这个 cookie 只在 `AuthProvider` 的 `onAuthStateChanged` 里写和删；它不是凭据，不得用于鉴权、跳转或归属判断
+- **本人版与访客版的结构差异只看 `useIsSelf(steamId)`**，不看接口返回里有没有某个字段：前者首屏就定，后者要等数据，会让块在加载后多出或消失
 - **请求不等登录态。** `apiFetch` 取 token 前已经 `await auth.authStateReady()`，页面不写「登录态恢复后再发请求」的判断
 - **加载中渲染真实布局，必有值的位置放骨架块。** 用 `app/components/ui/skeleton.tsx`，放在字段原位（`{value ?? <Skeleton />}`）。不写替换整页的占位组件：那是第二套布局，要手工与真实页面保持同尺寸，改一处就会跳
 - **可能本来就为空的位置不放骨架，只占位。** 如非会员的会员行：容器用 `min-h-*` 按行高留出空间，数据到了原地填入。骨架块预告「这里马上有内容」，内容可能不存在时会误导

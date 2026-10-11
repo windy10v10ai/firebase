@@ -6,6 +6,7 @@ import { SERVER_TYPE } from '../secret/secret.service';
 
 import { ALLOW_LOCAL_KEY } from './allow-local.decorator';
 import { ALLOW_QUERY_KEY_KEY } from './allow-query-key.decorator';
+import { ALLOW_VIEW_OTHERS_KEY } from './allow-view-others.decorator';
 import { ALLOW_WEB_KEY } from './allow-web.decorator';
 import { AuthGuard } from './auth.guard';
 import { IS_PUBLIC_KEY } from './public.decorator';
@@ -37,7 +38,7 @@ function createContext(
   return { context, request };
 }
 
-function createGuard(metadata: Record<string, boolean> = {}) {
+function createGuard(metadata: Record<string, boolean> = {}, hiddenSteamIds: string[] = []) {
   const reflector = {
     getAllAndOverride: jest.fn((key: string) => metadata[key]),
   } as unknown as Reflector;
@@ -48,7 +49,13 @@ function createGuard(metadata: Record<string, boolean> = {}) {
       return SERVER_TYPE.UNKNOWN;
     }),
   };
-  return new AuthGuard(reflector, secretService as never);
+  const playerService = {
+    findBySteamId: jest.fn(async (steamId: number) => ({
+      id: `${steamId}`,
+      profileHidden: hiddenSteamIds.includes(`${steamId}`),
+    })),
+  };
+  return new AuthGuard(reflector, secretService as never, playerService as never);
 }
 
 describe('AuthGuard', () => {
@@ -112,6 +119,31 @@ describe('AuthGuard', () => {
     expect(request.serverType).toBeUndefined();
   });
 
+  describe('未登录的访客（不带任何凭据）', () => {
+    it('挂了 AllowViewOthers 时按网站来源放行', async () => {
+      const guard = createGuard({ [ALLOW_VIEW_OTHERS_KEY]: true });
+      const { context, request } = createContext({ steamId: '999999999' });
+
+      await expect(guard.canActivate(context)).resolves.toBe(true);
+      expect(request.serverType).toBe(SERVER_TYPE.WEB);
+      expect(request.viewerUid).toBeUndefined();
+    });
+
+    it('对方关闭公开时抛 403', async () => {
+      const guard = createGuard({ [ALLOW_VIEW_OTHERS_KEY]: true }, ['999999999']);
+      const { context } = createContext({ steamId: '999999999' });
+
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('没挂 AllowViewOthers 时照旧 401', async () => {
+      const guard = createGuard({ [ALLOW_WEB_KEY]: true });
+      const { context } = createContext({ steamId: '999999999' });
+
+      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
   describe('网站来源（Bearer ID Token）', () => {
     const verifyIdToken = getAuth as jest.MockedFunction<typeof getAuth>;
 
@@ -147,6 +179,31 @@ describe('AuthGuard', () => {
       const { context } = createContext({ bearerToken: 'valid-token', steamId: '999999999' });
 
       await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('挂了 AllowViewOthers，别人的 token 也能读公开的主页，并记下访客 uid', async () => {
+      mockVerify({ uid: '136407523' });
+      const guard = createGuard({ [ALLOW_WEB_KEY]: true, [ALLOW_VIEW_OTHERS_KEY]: true });
+      const { context, request } = createContext({
+        bearerToken: 'valid-token',
+        steamId: '999999999',
+      });
+
+      await expect(guard.canActivate(context)).resolves.toBe(true);
+      expect(request.viewerUid).toBe('136407523');
+    });
+
+    it('挂了 AllowViewOthers，对方关闭公开时别人抛 403、本人照常放行', async () => {
+      mockVerify({ uid: '136407523' });
+      const guard = createGuard({ [ALLOW_WEB_KEY]: true, [ALLOW_VIEW_OTHERS_KEY]: true }, [
+        '999999999',
+        '136407523',
+      ]);
+
+      const other = createContext({ bearerToken: 'valid-token', steamId: '999999999' });
+      await expect(guard.canActivate(other.context)).rejects.toThrow(ForbiddenException);
+      const self = createContext({ bearerToken: 'valid-token', steamId: '136407523' });
+      await expect(guard.canActivate(self.context)).resolves.toBe(true);
     });
 
     it('未挂 AllowWeb 的路由拒绝网站来源', async () => {

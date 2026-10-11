@@ -42,7 +42,7 @@ describe('CORS (e2e)', () => {
 
   it('鉴权失败的响应仍带 CORS 头，浏览器才能读到错误体', () => {
     return request(app.getHttpServer())
-      .get('/api/player/100/info')
+      .get('/api/daily-task/100')
       .set('Origin', ALLOWED_ORIGIN)
       .expect(401)
       .expect((res) => {
