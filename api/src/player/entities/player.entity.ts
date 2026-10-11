@@ -43,6 +43,9 @@ export class Player {
   // 最近一次游戏开始时间
   @ApiProperty()
   lastMatchTime: Date;
+  // 个人主页默认公开，只有玩家主动关闭才会写入 true
+  @ApiPropertyOptional()
+  profileHidden?: boolean;
 
   // 历史赛季等级（已弃用，未参与任何业务逻辑，保留仅为向后兼容旧文档）
   /** @deprecated 未使用，保留仅为兼容历史数据 */
