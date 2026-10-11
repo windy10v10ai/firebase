@@ -53,6 +53,7 @@ describe('FeedbackService', () => {
       {
         ...PROBLEM,
         launcherError: { message: '服务器意外退出', stage: 'start-server' },
+        connection: { path: 'relay', rttMs: 57, lossPct: 6, roomCode: 'Z82QCT' },
         serverLog: log.toString('base64'),
       },
       { ip: '1.2.3.4', country: 'CN' },
@@ -67,6 +68,7 @@ describe('FeedbackService', () => {
       steamId: 1001,
       steamIdVerified: false,
       launcherError: { message: '服务器意外退出', stage: 'start-server' },
+      connection: { path: 'relay', rttMs: 57, lossPct: 6, roomCode: 'Z82QCT' },
       serverLog: `gs://bucket/2026-10-04/${report.id}/server.log.gz`,
       country: 'CN',
     });

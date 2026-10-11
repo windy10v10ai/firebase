@@ -1,4 +1,8 @@
-import { ConnectionQualityDto, JoinPath } from '../launcher/dto/launcher-room.dto';
+import {
+  ConnectionQualityDto,
+  JoinPath,
+  RouteCheckResultDto,
+} from '../launcher/dto/launcher-room.dto';
 import { LauncherRoomJoin } from '../launcher/entities/launcher-room-join.entity';
 import { LauncherRoom } from '../launcher/entities/launcher-room.entity';
 
@@ -107,6 +111,42 @@ export function buildConnectionQualityRow(
     ping_lost: quality.lost,
     rtt_p50_ms: quality.rttP50 ?? null,
     rtt_p95_ms: quality.rttP95 ?? null,
+    launcher_version: join.launcherVersion,
+    country: join.country ?? null,
+    steam_id: join.steamId,
+    host_steam_id: room.hostSteamId,
+  };
+}
+
+export interface RouteCheckRecord {
+  join: LauncherRoomJoin;
+  check: RouteCheckResultDto;
+}
+
+/** 加入者连通后实测直连与中转的一次结果生成一行，身份取自加入时存下的记录。 */
+export function buildRouteCheckRow(
+  room: LauncherRoom,
+  record: RouteCheckRecord,
+  eventTime: Date,
+): Record<string, unknown> {
+  const { join, check } = record;
+  return {
+    event_time: eventTime.toISOString(),
+    event: 'route_checked',
+    room_id: room.roomId,
+    path: check.path,
+    elapsed_ms: null,
+    host_upnp: room.hostUpnp,
+    host_public_ip: room.hostPublicIp,
+    host_symmetric_nat: room.hostSymmetricNat ?? null,
+    joiner_upnp: join.upnp,
+    joiner_symmetric_nat: join.symmetricNat ?? null,
+    // 测的是双方认领到的那台，多数时候就是排在第一的
+    relay_address: join.relayOrder?.[0] ?? null,
+    direct_loss_pct: check.directLossPct,
+    direct_rtt_ms: check.directRttMs ?? null,
+    relay_loss_pct: check.relayLossPct,
+    relay_rtt_ms: check.relayRttMs ?? null,
     launcher_version: join.launcherVersion,
     country: join.country ?? null,
     steam_id: join.steamId,

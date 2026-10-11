@@ -18,6 +18,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import { JOIN_PATHS, JoinPath } from '../../launcher/dto/launcher-room.dto';
 import {
   FEEDBACK_SOURCES,
   FEEDBACK_TOPICS,
@@ -54,6 +55,32 @@ class LauncherErrorDto {
 }
 
 const ITEM_NAME_MAX_LENGTH = 64;
+
+class FeedbackConnectionDto {
+  @ApiProperty({ enum: JOIN_PATHS, description: '加入者当时在用的路' })
+  @IsIn(JOIN_PATHS)
+  path: JoinPath;
+
+  @ApiPropertyOptional({ description: '最近一分钟往返毫秒数的中位数，还没测到或全部丢失时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  rttMs?: number;
+
+  @ApiPropertyOptional({ description: '最近一分钟的丢包百分比，还没测到时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  lossPct?: number;
+
+  @ApiPropertyOptional({ description: '加入的房间码，用来对上统计里的那一局' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  roomCode?: string;
+}
 
 class GameOptionsDto {
   @ApiPropertyOptional()
@@ -245,6 +272,15 @@ export class CreateFeedbackDto {
   @ValidateNested()
   @Type(() => LauncherErrorDto)
   launcherError?: LauncherErrorDto;
+
+  @ApiPropertyOptional({
+    type: FeedbackConnectionDto,
+    description: '加入别人房间时附带当时的线路与质量，不给玩家看',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FeedbackConnectionDto)
+  connection?: FeedbackConnectionDto;
 
   @ApiPropertyOptional({ type: GameStateDto, description: '来源为游戏时附带' })
   @IsOptional()

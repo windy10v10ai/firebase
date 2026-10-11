@@ -106,6 +106,23 @@ namespace Windy10v10AI.Launcher
         }
     }
 
+    // Loss limits the API sends with a join for leaving the direct route; kept in the API so they change without a launcher release
+    class RouteThresholds
+    {
+        public int DirectLossPct;
+        public int RelayLossPct;
+
+        // Null when the API sent none, which leaves the route the handshake picked
+        public static RouteThresholds Read(Dictionary<string, object> answer)
+        {
+            object value;
+            var check = answer.TryGetValue("routeCheck", out value) ? value as Dictionary<string, object> : null;
+            object direct, relay;
+            if (check == null || !check.TryGetValue("directLossPct", out direct) || !check.TryGetValue("relayLossPct", out relay) || direct == null || relay == null) return null;
+            return new RouteThresholds { DirectLossPct = Convert.ToInt32(direct), RelayLossPct = Convert.ToInt32(relay) };
+        }
+    }
+
     // One relay's address and the launcher's own echo-test result against it
     class RelayLeg
     {

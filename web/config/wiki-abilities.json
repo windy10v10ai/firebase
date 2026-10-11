@@ -1,6 +1,6 @@
 {
   "source": {
-    "gameCommit": "410fa1db41262cc3acf62baad1bb464624ef5fa2",
+    "gameCommit": "e126c81ce5542327130d289a5e53ef70c8dfda90",
     "dotaVersion": "7.41f"
   },
   "abilities": [
@@ -3325,6 +3325,81 @@
           "zh": "冰川残骸，莉莱曾经的流放之地，早已变成她修炼寒冰魔法的场所。",
           "en": "Once the place of her exile, Icewrack has become an anchor for Rylai's frigid onslaught.",
           "ru": "Когда-то изгнанная в морозную пустошь, Рилай сделала ледяные бури тех краёв вершиной своей жестокой магии."
+        }
+      }
+    },
+    {
+      "name": "enigma_black_hole",
+      "group": "active",
+      "tier": 3,
+      "desc": {
+        "zh": "持续施法 - 召唤一个强引力漩涡吸住敌方单位。被黑洞影响的单位不能移动、攻击或施法。",
+        "en": "CHANNELED - Summons a vortex that sucks in nearby enemy units.  Enemies affected by Black Hole cannot move, attack, or cast spells.",
+        "ru": "ПРЕРЫВАЕМАЯ — образует воронку, всасывающую всех врагов в зоне действия. При этом они не могут двигаться, атаковать и применять способности."
+      },
+      "ability": {
+        "behavior": "channeled",
+        "targeting": null,
+        "damageType": "pure",
+        "piercesImmunity": "yes",
+        "dispellable": null,
+        "values": [
+          {
+            "label": {
+              "zh": "每秒伤害：",
+              "en": "DAMAGE PER SECOND:",
+              "ru": "УРОН В СЕКУНДУ:"
+            },
+            "levels": [
+              "100",
+              "150",
+              "200",
+              "250"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": true
+          },
+          {
+            "label": {
+              "zh": "作用范围：",
+              "en": "RADIUS:",
+              "ru": "РАДИУС:"
+            },
+            "levels": [
+              "420"
+            ],
+            "percent": false,
+            "aoe": true,
+            "spellAmp": false
+          },
+          {
+            "label": {
+              "zh": "持续时间：",
+              "en": "DURATION:",
+              "ru": "ДЛИТЕЛЬНОСТЬ:"
+            },
+            "levels": [
+              "4.0"
+            ],
+            "percent": false,
+            "aoe": false,
+            "spellAmp": false
+          }
+        ],
+        "cooldown": [
+          "120"
+        ],
+        "manaCost": [
+          "300",
+          "400",
+          "500",
+          "600"
+        ],
+        "lore": {
+          "zh": "谜团将毁灭的终极漩涡，具有毁天灭地力量的奇点进行引导，大地因此颤抖。",
+          "en": "The ground trembles as Enigma channels his ultimate vortex of destruction, a singularity with the power to end worlds.",
+          "ru": "Земля содрогается, когда предвечный создаёт всеразрушающую чёрную дыру, способную уничтожать миры."
         }
       }
     },

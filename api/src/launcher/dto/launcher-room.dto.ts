@@ -174,6 +174,42 @@ export class ConnectionQualityDto {
   rttP95?: number;
 }
 
+export class RouteCheckResultDto {
+  @ApiProperty()
+  @IsString()
+  joinId: string;
+
+  @ApiProperty({ enum: JOIN_PATHS, description: '测完之后用的路' })
+  @IsIn(JOIN_PATHS)
+  path: JoinPath;
+
+  @ApiProperty({ description: '直连这段时间的丢包百分比' })
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  directLossPct: number;
+
+  @ApiPropertyOptional({ description: '直连往返毫秒数的中位数，全部丢失时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  directRttMs?: number;
+
+  @ApiProperty({ description: '中转这段时间的丢包百分比' })
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  relayLossPct: number;
+
+  @ApiPropertyOptional({ description: '中转往返毫秒数的中位数，全部丢失时省略' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  relayRttMs?: number;
+}
+
 export class HostRoomDto extends LauncherPeerDto {
   @ApiPropertyOptional({ description: '省略时开新房，带上时为轮询' })
   @IsOptional()
@@ -206,6 +242,17 @@ export class HostRoomDto extends LauncherPeerDto {
   @ValidateNested({ each: true })
   @Type(() => ConnectionQualityDto)
   quality?: ConnectionQualityDto[];
+
+  @ApiPropertyOptional({
+    type: [RouteCheckResultDto],
+    description: '加入者连通后实测直连与中转的结果，由加入者经隧道交给房主转报',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_QUALITY)
+  @ValidateNested({ each: true })
+  @Type(() => RouteCheckResultDto)
+  routeChecks?: RouteCheckResultDto[];
 
   @ApiPropertyOptional({ description: '进入选英雄时传 true，之后不再接受加入' })
   @IsOptional()
@@ -289,6 +336,13 @@ export class LauncherProfileDto {
   avatarUrl?: string;
 }
 
+export class RouteCheckDto {
+  @ApiProperty({ description: '直连丢包达到这个百分比才考虑改走中转' })
+  directLossPct: number;
+  @ApiProperty({ description: '中转丢包不超过这个百分比才改过去' })
+  relayLossPct: number;
+}
+
 export class RelayDto {
   @ApiProperty({ description: '中转服务器的 IP:端口，即下面顺序里的第一台，旧版启动器只认它' })
   address: string;
@@ -348,6 +402,11 @@ export class JoinRoomResponse {
     description: '加入者的中转通行证，没配中转或测试连通时省略',
   })
   relay?: RelayDto;
+  @ApiPropertyOptional({
+    type: RouteCheckDto,
+    description: '连通后实测选线的阈值，没发中转通行证时省略，启动器据此不测',
+  })
+  routeCheck?: RouteCheckDto;
 }
 
 export class PublicRoomDto extends LauncherProfileDto {
