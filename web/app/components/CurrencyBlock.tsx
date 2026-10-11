@@ -17,8 +17,8 @@ interface CurrencyBlockProps {
   levelLabel: string;
   /** 数据没到时为 null */
   values: CurrencyValues | null;
-  /** 可用积分只给本人看；按页面是谁的决定，不看数据里有没有，免得数据到了才多出一行 */
-  showUsable?: boolean;
+  /** 累计积分、升级进度与可用积分只给本人看；按页面是谁的决定，不看数据里有没有，免得数据到了才多出几行 */
+  detailed?: boolean;
 }
 
 const TONE_TEXT = {
@@ -37,7 +37,7 @@ const TONE_BORDER = {
 } as const;
 
 /** 一套货币的等级、进度与积分，数据没到时各数值原位放骨架 */
-export default function CurrencyBlock({ tone, t, levelLabel, values, showUsable = true }: CurrencyBlockProps) {
+export default function CurrencyBlock({ tone, t, levelLabel, values, detailed = true }: CurrencyBlockProps) {
   // 满级或数据异常时不强行显示负数进度
   const progress = !values
     ? 0
@@ -62,11 +62,13 @@ export default function CurrencyBlock({ tone, t, levelLabel, values, showUsable 
       <div className="h-1.5 rounded-full bg-panel-soft">
         <div className={`h-full rounded-full ${TONE_BAR[tone]}`} style={{ width: `${progress}%` }} />
       </div>
-      <div className="flex items-center justify-between text-sm text-muted">
-        <span>{values ? cumulativeText : <Skeleton>{cumulativeText}</Skeleton>}</span>
-        <span>{values ? remainingText : <Skeleton>{remainingText}</Skeleton>}</span>
-      </div>
-      {showUsable ? (
+      {detailed ? (
+        <div className="flex items-center justify-between text-sm text-muted">
+          <span>{values ? cumulativeText : <Skeleton>{cumulativeText}</Skeleton>}</span>
+          <span>{values ? remainingText : <Skeleton>{remainingText}</Skeleton>}</span>
+        </div>
+      ) : null}
+      {detailed ? (
         <div
           className={`flex items-center justify-between rounded-[7px] border-l-2 bg-panel-soft py-2 pl-3 pr-4 ${TONE_BORDER[tone]}`}
         >
