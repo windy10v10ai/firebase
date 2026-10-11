@@ -14,6 +14,8 @@ namespace Windy10v10AI.Launcher
         public static int Mode;
         public static bool PublicRoom = true;
         public static int MaxPlayers = PlayerLimit;
+        public static bool AutoStartDota = true;
+        public static bool AutoEnter = true;
 
         public static string Folder
         {
@@ -41,6 +43,8 @@ namespace Windy10v10AI.Launcher
                 if (values.TryGetValue("mode", out value) && int.TryParse(value, out number) && number >= 0 && number <= 2) Mode = number;
                 if (values.TryGetValue("public", out value)) PublicRoom = value != "0";
                 if (values.TryGetValue("maxPlayers", out value) && int.TryParse(value, out number) && number >= MinPlayers && number <= PlayerLimit) MaxPlayers = number;
+                if (values.TryGetValue("autoStartDota", out value)) AutoStartDota = value != "0";
+                if (values.TryGetValue("autoEnter", out value)) AutoEnter = value != "0";
             }
             catch (Exception)
             {
@@ -57,6 +61,8 @@ namespace Windy10v10AI.Launcher
                     "mode=" + Mode,
                     "public=" + (PublicRoom ? "1" : "0"),
                     "maxPlayers=" + MaxPlayers,
+                    "autoStartDota=" + (AutoStartDota ? "1" : "0"),
+                    "autoEnter=" + (AutoEnter ? "1" : "0"),
                 });
             }
             catch (Exception)

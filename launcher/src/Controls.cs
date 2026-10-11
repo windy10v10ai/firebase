@@ -740,6 +740,10 @@ namespace Windy10v10AI.Launcher
                     dot = Theme.Error; statusColor = ErrorText; nameColor = Theme.Muted; text = Strings.StatusFailed; fade = 100; break;
                 case PlayerStatus.Left:
                     dot = statusColor = nameColor = Theme.Faint; text = Strings.StatusLeft; fade = 90; break;
+                case PlayerStatus.InRoom:
+                    dot = Theme.Faint; statusColor = Theme.Muted; text = Strings.StatusInRoom; break;
+                case PlayerStatus.Waiting:
+                    dot = ring = Loading; statusColor = LoadingText; text = Strings.StatusWaiting; break;
                 default:
                     dot = Theme.Ok; statusColor = Theme.Muted; text = Strings.StatusInGame; break;
             }

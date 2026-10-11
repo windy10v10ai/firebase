@@ -29,6 +29,8 @@ namespace Windy10v10AI.Launcher
         public const byte GameEnded = 11;
         // The joiner's measurement of the direct route against the relay, which the host passes on to the API; older launchers ignore it
         public const byte RouteCheck = 12;
+        // The number of the game the room is on and whether its server is ready, so joiners stay for the next game; older launchers ignore it
+        public const byte NextGame = 13;
     }
 
     // Recent round trip and loss on one route; Rtt is -1 when every reply was lost, Samples is 0 before anything was measured
@@ -64,6 +66,24 @@ namespace Windy10v10AI.Launcher
     abstract class Tunnel : IDisposable
     {
         public const int GamePort = 27015;
+
+        protected static byte[] EncodeGame(int game, bool ready)
+        {
+            var payload = new byte[5];
+            Array.Copy(BitConverter.GetBytes(game), payload, 4);
+            payload[4] = (byte)(ready ? 1 : 0);
+            return payload;
+        }
+
+        protected static bool DecodeGame(byte[] data, out int game, out bool ready)
+        {
+            game = 0;
+            ready = false;
+            if (data.Length < 6) return false;
+            game = BitConverter.ToInt32(data, 1);
+            ready = data[5] == 1;
+            return game >= 1;
+        }
         // Longer than the host's polling interval so the host joins in before the joiner gives up
         protected const int HandshakeMs = 15000;
         protected const int KeepaliveMs = 10000;
@@ -342,6 +362,8 @@ namespace Windy10v10AI.Launcher
         public event Action<string> JoinLeft;
         public Func<List<RosterEntry>> RosterSource;
         public volatile bool GameEnded;
+        public volatile int Game = 1;
+        public volatile bool GameReady = true;
 
         public HostTunnel()
         {
@@ -362,6 +384,7 @@ namespace Windy10v10AI.Launcher
                             // Roster packets go out every two seconds, so they also keep the route open
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (GameEnded) SendTo(peer, Packet.GameEnded, new byte[0]);
+                            if (Game > 1) SendTo(peer, Packet.NextGame, EncodeGame(Game, GameReady));
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                             // A joiner that left or dropped stops being measured once Dota itself would give up on it
                             if (ping && peer.Remote != null && (DateTime.UtcNow - peer.LastReceived).TotalMilliseconds < SilenceMs)
@@ -700,6 +723,8 @@ namespace Windy10v10AI.Launcher
         public volatile bool Lost;
         public volatile bool Kicked;
         public volatile bool GameEnded;
+        public volatile int Game = 1;
+        public volatile bool GameReady = true;
         readonly Dictionary<int, RosterEntry> roster = new Dictionary<int, RosterEntry>();
         int rosterCount = -1;
         // Shown until the host's own list arrives
@@ -1136,6 +1161,19 @@ namespace Windy10v10AI.Launcher
                 if (data[0] == Packet.GameEnded)
                 {
                     GameEnded = true;
+                    return;
+                }
+                if (data[0] == Packet.NextGame)
+                {
+                    int game;
+                    bool ready;
+                    if (!DecodeGame(data, out game, out ready) || game < Game) return;
+                    if (game > Game)
+                    {
+                        Game = game;
+                        GameEnded = false;
+                    }
+                    GameReady = ready;
                     return;
                 }
                 if (data[0] == Packet.Roster)

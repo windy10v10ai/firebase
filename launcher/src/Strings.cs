@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Windy10v10AI.Launcher
 {
@@ -38,6 +38,14 @@ namespace Windy10v10AI.Launcher
         public static string ConsoleTip { get { return Pick("按 \\ 没反应：在 Dota 2 设置的高级选项里勾选「启用控制台」", "If \\ does nothing, turn on Enable Console in Dota 2 settings", "Если \\ не работает, включите консоль в настройках Dota 2"); } }
         public static string CopyCommand { get { return Pick("复制命令", "Copy command", "Копировать"); } }
         public static string TryAgain { get { return Pick("再试一次", "Try again", "Повторить"); } }
+        public static string CloseRoom { get { return Pick("关闭房间", "Close room", "Закрыть комнату"); } }
+        public static string AutoStartDota { get { return Pick("开房后自动启动 Dota 2", "Start Dota 2 when the room opens", "Запускать Dota 2 при создании комнаты"); } }
+        public static string HostGuideServerOnly { get { return Pick("只开服务器，启动后可在房间里点「进入游戏」", "Only the server starts. Press Enter game in the room when you want to play.", "Запустится только сервер. Играть — «Войти в игру»."); } }
+        public static string NextGamePick { get { return Pick("游戏已结束，选难度启动下一局", "Game over. Pick a difficulty to start the next game.", "Игра окончена. Выберите сложность для следующей игры."); } }
+        public static string NextGameHint { get { return Pick("房间里的人会自动进入", "Everyone in the room joins automatically", "Все в комнате войдут автоматически"); } }
+        public static string StartingNextGame { get { return Pick("正在启动下一局（{0}）", "Starting the next game ({0})", "Запуск следующей игры ({0})"); } }
+        public static string AutoEnter { get { return Pick("房主启动下一局时自动进入", "Join when the host starts the next game", "Входить, когда хост начнёт следующую игру"); } }
+        public static string NewGameStarted { get { return Pick("房主已启动新游戏", "The host started a new game", "Хост начал новую игру"); } }
         public static string Cancel { get { return Pick("取消", "Cancel", "Отмена"); } }
         public static string StopServer { get { return Pick("关闭服务器", "Stop server", "Остановить сервер"); } }
 
@@ -137,11 +145,9 @@ namespace Windy10v10AI.Launcher
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
         public static string HostGuide { get { return Pick("人到齐后，在 Dota 2 里点「锁定并开始」", "Start the game in Dota 2 once everyone is in.", "Когда все зайдут, начните игру в Dota 2."); } }
         public static string SavingResults { get { return Pick("游戏已结束，正在保存结果", "Game over. Saving the results...", "Игра окончена. Сохраняем результаты…"); } }
-        public static string ResultsSaved { get { return Pick("结算已完成，可以关闭服务器。所有人退出 Dota 2 后会自动关闭", "Results saved. You can stop the server; it stops by itself once everyone leaves Dota 2.", "Результаты сохранены. Сервер можно остановить; он остановится сам, когда все выйдут из Dota 2."); } }
         public static string SavingCloseTitle { get { return Pick("结果还没保存完", "Results not saved yet", "Результаты ещё не сохранены"); } }
         public static string SavingCloseBody { get { return Pick("现在关闭服务器，这局的积分可能不会记录。", "Stopping the server now may lose this game's points.", "Если остановить сервер сейчас, очки за эту игру могут не засчитаться."); } }
         public static string StopAnyway { get { return Pick("仍然关闭", "Stop anyway", "Всё равно остановить"); } }
-        public static string GameEndedLeave { get { return Pick("游戏已结束，关闭 Dota 2 后自动退出房间", "Game over. You leave the room when you close Dota 2.", "Игра окончена. После закрытия Dota 2 вы выйдете из комнаты."); } }
         public static string GameEnded { get { return Pick("游戏已结束", "Game over", "Игра окончена"); } }
         public static string HostLost { get { return Pick("房主已关闭游戏，或连接已断开。", "The host closed the game or the connection was lost.", "Хост закрыл игру, или соединение потеряно."); } }
 
@@ -154,6 +160,8 @@ namespace Windy10v10AI.Launcher
         public static string StatusLoading { get { return Pick("已连通，正在载入", "Connected, loading", "Подключён, загрузка"); } }
         public static string StatusHostLoading { get { return Pick("正在载入", "Loading", "Загрузка"); } }
         public static string StatusInGame { get { return Pick("已进入游戏", "In game", "В игре"); } }
+        public static string StatusInRoom { get { return Pick("在房间里", "In the room", "В комнате"); } }
+        public static string StatusWaiting { get { return Pick("等待连接", "Waiting to connect", "Ожидает подключения"); } }
         public static string StatusFailed { get { return Pick("连接失败", "Could not connect", "Не удалось подключиться"); } }
         public static string StatusLeft { get { return Pick("已离开", "Left", "Вышел"); } }
         public static string HostSilent { get { return Pick("与房主的连接中断，正在重连…", "Lost contact with the host, reconnecting...", "Связь с хостом прервана, переподключение…"); } }

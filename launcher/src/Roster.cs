@@ -9,7 +9,8 @@ using System.Threading;
 
 namespace Windy10v10AI.Launcher
 {
-    enum PlayerStatus { Connecting, Loading, InGame, Failed, Left }
+    // Values travel to joiners as numbers, so new ones only go at the end; older launchers show them as in game
+    enum PlayerStatus { Connecting, Loading, InGame, Failed, Left, InRoom, Waiting }
 
     class RosterEntry
     {
@@ -99,6 +100,18 @@ namespace Windy10v10AI.Launcher
                 foreach (var entry in entries)
                 {
                     if (entry.SteamId == account && entry.Status != PlayerStatus.Left) entry.Status = PlayerStatus.InGame;
+                }
+            }
+        }
+
+        // Everyone still in the room between games, or waiting for the next game's server
+        public void SetAll(PlayerStatus status)
+        {
+            lock (sync)
+            {
+                foreach (var entry in entries)
+                {
+                    if (entry.Status != PlayerStatus.Failed && entry.Status != PlayerStatus.Left) entry.Status = status;
                 }
             }
         }
