@@ -40,8 +40,9 @@ export class FeedbackService {
     steamIdVerified = false,
   ): Promise<void> {
     const description = dto.description?.trim() ?? '';
-    if (dto.type === 'suggestion' && !description) {
-      throw new BadRequestException('description is required for suggestions');
+    // 网站来源没有日志与游戏现场，描述是唯一的信息
+    if ((dto.type === 'suggestion' || dto.source === 'web') && !description) {
+      throw new BadRequestException('description is required');
     }
     const serverLog = decodeLog(dto.serverLog);
     const clientLog = decodeLog(dto.clientLog);

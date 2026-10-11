@@ -46,7 +46,8 @@ describe('Feedback (e2e)', () => {
     await send({ ...base, source: 'game', gameState: { items: Array(7).fill('') } }).expect(400);
     await send({ ...base, source: 'game', gameState: { difficulty: 9 } }).expect(400);
     await send({ ...base, source: 'launcher' }).expect(400);
-    await send({ ...base, source: 'web' }).expect(204);
+    await send({ ...base, source: 'web', description: '网页打不开' }).expect(204);
+    await send({ ...base, source: 'web' }).expect(400);
   });
 
   it('网站登录入口要带登录态', async () => {

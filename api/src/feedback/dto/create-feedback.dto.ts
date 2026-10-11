@@ -232,7 +232,10 @@ export class CreateFeedbackDto {
   @IsIn(FEEDBACK_TOPICS, { each: true })
   topics: FeedbackTopic[];
 
-  @ApiPropertyOptional({ description: '提建议时必填', maxLength: MAX_DESCRIPTION_LENGTH })
+  @ApiPropertyOptional({
+    description: '提建议或来源为网站时必填',
+    maxLength: MAX_DESCRIPTION_LENGTH,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(MAX_DESCRIPTION_LENGTH)

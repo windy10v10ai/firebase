@@ -55,7 +55,7 @@ export default function FeedbackPage() {
   const signedIn = auth.status === 'authenticated';
   const suggesting = type === 'suggestion';
   const steamIdValid = signedIn || STEAM_ID_PATTERN.test(steamId.trim());
-  const canSend = (!suggesting || description.trim() !== '') && steamIdValid;
+  const canSend = description.trim() !== '' && steamIdValid;
   const topicsFull = topics.length >= MAX_TOPICS;
 
   const toggleTopic = (topic: FeedbackTopic) => {
@@ -160,7 +160,7 @@ export default function FeedbackPage() {
           </fieldset>
 
           <Field
-            required={suggesting}
+            required
             htmlFor="feedbackDescription"
             label={t('description')}
             messageId="feedbackDescriptionMessage"

@@ -120,9 +120,12 @@ describe('FeedbackService', () => {
     expect(report).toMatchObject({ source: 'web', steamId: 1001, steamIdVerified: true });
   });
 
-  it('提建议必须写描述，日志必须是 gzip', async () => {
+  it('提建议与网站来源必须写描述，日志必须是 gzip', async () => {
     await expect(
       service.create({ ...PROBLEM, type: 'suggestion', description: '  ' }, {}),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.create({ ...PROBLEM, source: 'web', description: '' }, {}),
     ).rejects.toThrow(BadRequestException);
     await expect(
       service.create({ ...PROBLEM, clientLog: Buffer.from('plain').toString('base64') }, {}),
