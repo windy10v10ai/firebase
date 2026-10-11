@@ -85,10 +85,12 @@ export default function Header() {
     (item): item is typeof item & { href: string } => item.href !== null && !('menuOnly' in item),
   );
   const githubLink = EXTERNAL_LINKS.find((link) => link.labelKey === 'github');
-  // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上
-  const profileSubPath = pathname.startsWith('/profile/')
-    ? pathname.split('/').slice(3).join('/')
-    : null;
+  // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上；看别人的主页不算停在自己的菜单项上
+  const ownProfilePrefix = auth.status === 'authenticated' ? `/profile/${auth.uid}` : null;
+  const profileSubPath =
+    ownProfilePrefix && (pathname === ownProfilePrefix || pathname.startsWith(`${ownProfilePrefix}/`))
+      ? pathname.split('/').slice(3).join('/')
+      : null;
   const isCurrent = (href: string) => {
     if (href.startsWith('/my')) {
       // 前缀匹配会让 /my/property 把「个人主页」也点亮，所以这一支只认整段相等

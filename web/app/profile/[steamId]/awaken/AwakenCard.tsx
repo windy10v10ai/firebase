@@ -27,7 +27,8 @@ interface AwakenCardProps {
   tooPoor: boolean;
   /** 已有请求在飞，全部卡片一起禁用 */
   busy: boolean;
-  onOpen: (hero: AwakenHero) => void;
+  /** 不传就只展示、不能点开觉醒，给别人看的页面用 */
+  onOpen?: (hero: AwakenHero) => void;
 }
 
 /**
@@ -44,6 +45,7 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
   const known = unlocked !== null;
   const dimmed = !unlocked && (tooPoor || busy);
   const { rowRef, nameRef, badgeRef, wrap } = useBadgeWrap<HTMLDivElement>(hero.freeTrial);
+  const Frame = onOpen ? 'button' : 'div';
 
   return (
     <AbilityHoverTip
@@ -69,10 +71,8 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
         />
       }
     >
-      <button
-        type="button"
-        onClick={() => onOpen(hero)}
-        disabled={!known}
+      <Frame
+        {...(onOpen ? { type: 'button' as const, onClick: () => onOpen(hero), disabled: !known } : {})}
         aria-label={hero.name[locale]}
         className={`relative block aspect-[145/190] w-full overflow-hidden rounded-[10px] border text-left transition-colors ${
           unlocked
@@ -160,7 +160,7 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
             {unlocked ? t('unlocked') : t('unlock')}
           </span>
         </div>
-      </button>
+      </Frame>
     </AbilityHoverTip>
   );
 }

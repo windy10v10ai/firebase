@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, ThumbsUp } from 'lucide-react';
+import { ChevronRight, Lock, ThumbsUp } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -11,16 +11,20 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
 import { type SteamProfile } from '@/app/lib/steam-profile';
 
+import ShareButton from './ShareButton';
+import VisibilitySwitch from './VisibilitySwitch';
+
 interface PlayerCardProps {
   steamId: string;
   info: PlayerInfo | null;
   profile: SteamProfile | undefined;
-  /** 只有本人的页面才传，别人的页面上整行不存在 */
-  onCheckInClaimed?: (player: PlayerInfo) => void;
+  /** 有效期、签到、公开开关、会员订阅入口只给本人；别人看到的地方换成分享按钮 */
+  isSelf: boolean;
+  onCheckInClaimed: (player: PlayerInfo) => void;
 }
 
 /** 身份卡：ID 取自地址，数据没到也能先显示；会员状态只做陈述，订阅入口是底部的文字链接 */
-export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }: PlayerCardProps) {
+export default function PlayerCard({ steamId, info, profile, isSelf, onCheckInClaimed }: PlayerCardProps) {
   const t = useTranslations('profile.identity');
   const tMember = useTranslations('profile.member');
   const member = info?.member;
@@ -38,7 +42,7 @@ export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }:
     return tMember(short && key === 'premium' ? 'premiumShort' : key);
   };
   const dateText = (short: boolean) => {
-    if (!member) {
+    if (!member?.expireDateString) {
       return null;
     }
     // 过期态的状态词已经说明了含义，日期不再配前缀
@@ -74,8 +78,8 @@ export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }:
               />
             )}
           </h1>
-          {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，两种情况卡片一样高 */}
-          <span className="min-h-5 min-w-0 truncate text-sm text-muted">
+          {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，两种情况卡片一样高。未公开的标签放这一行，放在标题旁会把昵称挤成省略号 */}
+          <span className="flex min-h-5 min-w-0 items-center gap-2 text-sm text-muted">
             {personaName ? (
               <IdWithCopy
                 id={steamId}
@@ -83,6 +87,12 @@ export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }:
                 copyTooltip={t('copyId.tooltip')}
                 copiedLabel={t('copyId.copied')}
               />
+            ) : null}
+            {isSelf && info?.profileHidden ? (
+              <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-md border border-line bg-panel-soft px-1.5 text-xs">
+                <Lock className="size-3" aria-hidden="true" />
+                {t('hiddenBadge')}
+              </span>
             ) : null}
           </span>
           {/*
@@ -101,14 +111,14 @@ export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }:
           <span className={`mt-1 hidden min-h-6 truncate lg:block ${statusClass}`}>
             {statusText(false)}
           </span>
-          <span className="hidden min-h-5 truncate text-sm text-muted lg:block">
-            {dateText(false)}
-          </span>
+          {isSelf ? (
+            <span className="hidden min-h-5 truncate text-sm text-muted lg:block">
+              {dateText(false)}
+            </span>
+          ) : null}
         </div>
       </div>
-      {onCheckInClaimed ? (
-        <CheckInRow info={info} steamId={steamId} onClaimed={onCheckInClaimed} />
-      ) : null}
+      {isSelf ? <CheckInRow info={info} steamId={steamId} onClaimed={onCheckInClaimed} /> : null}
       <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
         <div className="flex items-center gap-1.5 text-content" title={t('conductNet')}>
           <ThumbsUp className="size-4 text-success" aria-hidden="true" />
@@ -117,14 +127,25 @@ export default function PlayerCard({ steamId, info, profile, onCheckInClaimed }:
           </span>
           <span className="sr-only">{t('conductNet')}</span>
         </div>
-        <Link
-          href="/membership"
-          className="inline-flex items-center gap-1 text-sm whitespace-nowrap text-link transition-colors hover:text-link-hover"
-        >
-          {tMember('link')}
-          <ChevronRight className="size-4" aria-hidden="true" />
-        </Link>
+        {isSelf ? (
+          <Link
+            href="/membership"
+            className="inline-flex items-center gap-1 text-sm whitespace-nowrap text-link transition-colors hover:text-link-hover"
+          >
+            {tMember('link')}
+            <ChevronRight className="size-4" aria-hidden="true" />
+          </Link>
+        ) : (
+          <ShareButton steamId={steamId} />
+        )}
       </div>
+      {isSelf ? (
+        // 开关紧贴文字靠左、分享靠右，和上一行右侧的会员订阅错开
+        <div className="-mt-2 flex items-center justify-between gap-4 border-t border-line pt-3">
+          <VisibilitySwitch steamId={steamId} info={info} />
+          <ShareButton steamId={steamId} disabled={!!info?.profileHidden} />
+        </div>
+      ) : null}
     </section>
   );
 }

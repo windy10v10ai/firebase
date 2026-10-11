@@ -435,7 +435,8 @@
     "loading": "Loading player data",
     "private": {
       "title": "This player's profile is not public",
-      "description": "For now you can only view your own profile."
+      "description": "This player has chosen to keep it to themselves.",
+      "ownerHint": "Is this your profile?"
     },
     "noRecord": {
       "title": "No record for this player",
@@ -447,6 +448,7 @@
     },
     "identity": {
       "heading": "ID {id}",
+      "hiddenBadge": "Private",
       "copyId": {
         "tooltip": "Copy",
         "copied": "Copied"
@@ -458,6 +460,15 @@
       "remainingToLevel": "{amount} to level {level}",
       "usablePoints": "Usable Points"
     },
+    "visibility": {
+      "label": "Public profile",
+      "failed": "Couldn't save, try again"
+    },
+    "share": {
+      "label": "Share",
+      "copied": "Link copied"
+    },
+    "ownerLink": "{name}'s profile",
     "stats": {
       "title": "Stats",
       "games": "Games",
@@ -557,7 +568,8 @@
       "property": {
         "title": "Attributes",
         "badge": "Usable {count} points",
-        "badgeDone": "All points spent"
+        "badgeDone": "All points spent",
+        "badgeOthers": "{count} points spent"
       },
       "awaken": {
         "title": "Hero Awakening",
@@ -575,10 +587,6 @@
   },
   "property": {
     "loading": "Loading attributes",
-    "private": {
-      "title": "This profile is not visible",
-      "description": "Attributes can only be viewed and changed by the account owner."
-    },
     "noRecord": {
       "title": "No record for this player",
       "description": "Check that the ID is correct."
@@ -592,6 +600,7 @@
     "points": {
       "title": "Attribute points",
       "usable": "Usable / total",
+      "used": "Spent / total",
       "battleLevel": "Battle level",
       "memberLevel": "Member level",
       "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down.",
@@ -679,6 +688,7 @@
     "loading": "Loading awakenings",
     "unlock": "Awaken",
     "unlocked": "Awakened",
+    "emptyOthers": "No heroes awakened yet.",
     "freeTrial": "FREE",
     "iconMissing": "No icon",
     "rules": {
@@ -717,10 +727,6 @@
     "error": {
       "unlock": "Awakening failed. No points were spent. Please try again later.",
       "random": "Draw failed. No points were spent. Please try again later."
-    },
-    "private": {
-      "title": "Profile is private",
-      "description": "Only this player can see their awakenings."
     },
     "noRecord": {
       "title": "No record yet",
