@@ -7,8 +7,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
+import OwnerBackLink from '@/app/components/OwnerBackLink';
+import PrivateProfileNotice from '@/app/components/PrivateProfileNotice';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
+import { useIsSelf } from '@/app/lib/auth';
 import {
   AWAKEN_MEMBER_POINT_COST,
   AWAKEN_RANDOM_CANDIDATE_COUNT,
@@ -32,7 +35,6 @@ import type { PlayerInfo } from '@/app/lib/player-info';
 type LoadResult = { status: 'failed'; httpStatus: number } | { status: 'ready'; info: PlayerInfo };
 
 const FAILURE_KEY: Record<number, string> = {
-  403: 'private',
   404: 'noRecord',
 };
 
@@ -53,6 +55,7 @@ const BOX_CLASS =
 export default function AwakenPage() {
   const t = useTranslations('awaken');
   const { steamId } = useParams<{ steamId: string }>();
+  const isSelf = useIsSelf(steamId);
 
   const queryClient = useQueryClient();
   const query = useQuery(playerAwakeningQuery(steamId));
@@ -124,6 +127,9 @@ export default function AwakenPage() {
     if (loaded.httpStatus === 401) {
       return <LoginPanel />;
     }
+    if (loaded.httpStatus === 403) {
+      return <PrivateProfileNotice />;
+    }
     const key = FAILURE_KEY[loaded.httpStatus] ?? 'failed';
     return (
       <Notice title={t(`${key}.title`)}>
@@ -137,12 +143,12 @@ export default function AwakenPage() {
   const remaining = AWAKEN_HEROES.length - awakenedSet.size;
   const canAffordDirect =
     !!info &&
-    (info.useableSeasonPoint >= AWAKEN_SEASON_POINT_COST ||
-      info.useableMemberPoint >= AWAKEN_MEMBER_POINT_COST);
+    ((info.useableSeasonPoint ?? 0) >= AWAKEN_SEASON_POINT_COST ||
+      (info.useableMemberPoint ?? 0) >= AWAKEN_MEMBER_POINT_COST);
   const canAffordRandom =
     !!info &&
-    (info.useableSeasonPoint >= AWAKEN_RANDOM_SEASON_POINT_COST ||
-      info.useableMemberPoint >= AWAKEN_RANDOM_MEMBER_POINT_COST);
+    ((info.useableSeasonPoint ?? 0) >= AWAKEN_RANDOM_SEASON_POINT_COST ||
+      (info.useableMemberPoint ?? 0) >= AWAKEN_RANDOM_MEMBER_POINT_COST);
   const poolShort = !!info && remaining < AWAKEN_RANDOM_CANDIDATE_COUNT;
 
   return (
@@ -152,33 +158,38 @@ export default function AwakenPage() {
           {t('loading')}
         </p>
       )}
-      <h1 className="title-primary">{t('title')}</h1>
+      <div className="space-y-1.5">
+        {isSelf ? null : <OwnerBackLink steamId={steamId} />}
+        <h1 className="title-primary">{t('title')}</h1>
+      </div>
 
-      <section className="card-container card-pad">
-        <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>
-        {/* body 没有设默认文字色，富文本里没被 chunk 包住的那部分不给颜色就是黑字 */}
-        <div className="flex flex-col gap-1.5 leading-relaxed text-content">
-          <p>
-            <span className="font-bold text-heading">{t('rules.directLabel')}</span>
-            {t('rules.colon')}
-            {t.rich('rules.direct', {
-              season: (chunks) => <span className="text-season">{chunks}</span>,
-              member: (chunks) => <span className="text-member-strong">{chunks}</span>,
-              b: (chunks) => <b className="text-heading">{chunks}</b>,
-            })}
-          </p>
-          <p>
-            <span className="font-bold text-heading">{t('rules.randomLabel')}</span>
-            {t('rules.colon')}
-            {t.rich('rules.random', {
-              season: (chunks) => <span className="text-season">{chunks}</span>,
-              member: (chunks) => <span className="text-member-strong">{chunks}</span>,
-              b: (chunks) => <b className="text-heading">{chunks}</b>,
-            })}
-          </p>
-          <p className="mt-1.5 border-t border-line pt-2.5 text-sm text-muted">{t('rules.note')}</p>
-        </div>
-      </section>
+      {isSelf ? (
+        <section className="card-container card-pad">
+          <h2 className="title-secondary mb-3 text-lg">{t('rules.title')}</h2>
+          {/* body 没有设默认文字色，富文本里没被 chunk 包住的那部分不给颜色就是黑字 */}
+          <div className="flex flex-col gap-1.5 leading-relaxed text-content">
+            <p>
+              <span className="font-bold text-heading">{t('rules.directLabel')}</span>
+              {t('rules.colon')}
+              {t.rich('rules.direct', {
+                season: (chunks) => <span className="text-season">{chunks}</span>,
+                member: (chunks) => <span className="text-member-strong">{chunks}</span>,
+                b: (chunks) => <b className="text-heading">{chunks}</b>,
+              })}
+            </p>
+            <p>
+              <span className="font-bold text-heading">{t('rules.randomLabel')}</span>
+              {t('rules.colon')}
+              {t.rich('rules.random', {
+                season: (chunks) => <span className="text-season">{chunks}</span>,
+                member: (chunks) => <span className="text-member-strong">{chunks}</span>,
+                b: (chunks) => <b className="text-heading">{chunks}</b>,
+              })}
+            </p>
+            <p className="mt-1.5 border-t border-line pt-2.5 text-sm text-muted">{t('rules.note')}</p>
+          </div>
+        </section>
+      ) : null}
 
       {/* 积分是五位数，三个并排时 768 放不下「可用勇士积分」这种长标签，会折行、高度还随数值长度变；一直到电脑档才排成一行 */}
       <div className="flex flex-col gap-3 lg:flex-row">
@@ -200,18 +211,22 @@ export default function AwakenPage() {
             )}
           </span>
         </div>
-        <div className={BOX_CLASS}>
-          <span className="text-base text-muted">{t('stats.battlePoint')}</span>
-          <span className="text-3xl leading-none font-bold text-season">
-            {info ? info.useableSeasonPoint.toLocaleString() : <Skeleton>00,000</Skeleton>}
-          </span>
-        </div>
-        <div className={BOX_CLASS}>
-          <span className="text-base text-muted">{t('stats.memberPoint')}</span>
-          <span className="text-3xl leading-none font-bold text-member-strong">
-            {info ? info.useableMemberPoint.toLocaleString() : <Skeleton>00,000</Skeleton>}
-          </span>
-        </div>
+        {isSelf ? (
+          <>
+            <div className={BOX_CLASS}>
+              <span className="text-base text-muted">{t('stats.battlePoint')}</span>
+              <span className="text-3xl leading-none font-bold text-season">
+                {info ? (info.useableSeasonPoint ?? 0).toLocaleString() : <Skeleton>00,000</Skeleton>}
+              </span>
+            </div>
+            <div className={BOX_CLASS}>
+              <span className="text-base text-muted">{t('stats.memberPoint')}</span>
+              <span className="text-3xl leading-none font-bold text-member-strong">
+                {info ? (info.useableMemberPoint ?? 0).toLocaleString() : <Skeleton>00,000</Skeleton>}
+              </span>
+            </div>
+          </>
+        ) : null}
       </div>
 
       {failed ? (
@@ -220,24 +235,43 @@ export default function AwakenPage() {
         </p>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
-        <RandomCard
-          preview={RANDOM_PREVIEW}
-          enabled={!busy && canAffordRandom && !poolShort}
-          poolShort={poolShort}
-          onClick={handleRandom}
-        />
-        {AWAKEN_HEROES.map((hero) => (
-          <AwakenCard
-            key={hero.heroName}
-            hero={hero}
-            unlocked={info ? awakenedSet.has(hero.heroName) : null}
-            tooPoor={!!info && !canAffordDirect}
-            busy={busy}
-            onOpen={(picked) => setTarget({ hero: picked, fromRandom: false })}
+      {isSelf ? null : info && awakenedSet.size === 0 ? (
+        <p className="text-muted">{t('emptyOthers')}</p>
+      ) : (
+        // 别人只关心他觉醒了哪些，未觉醒的卡对访客只是噪音
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+          {AWAKEN_HEROES.filter((hero) => awakenedSet.has(hero.heroName)).map((hero) => (
+            <AwakenCard
+              key={hero.heroName}
+              hero={hero}
+              unlocked
+              tooPoor={false}
+              busy={false}
+            />
+          ))}
+        </div>
+      )}
+
+      {isSelf ? (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+          <RandomCard
+            preview={RANDOM_PREVIEW}
+            enabled={!busy && canAffordRandom && !poolShort}
+            poolShort={poolShort}
+            onClick={handleRandom}
           />
-        ))}
-      </div>
+          {AWAKEN_HEROES.map((hero) => (
+            <AwakenCard
+              key={hero.heroName}
+              hero={hero}
+              unlocked={info ? awakenedSet.has(hero.heroName) : null}
+              tooPoor={!!info && !canAffordDirect}
+              busy={busy}
+              onOpen={(picked) => setTarget({ hero: picked, fromRandom: false })}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <CandidatesDialog
         open={candidatesOpen}
@@ -247,14 +281,14 @@ export default function AwakenPage() {
         onClose={() => setCandidatesOpen(false)}
       />
 
-      {info ? (
+      {info && isSelf ? (
         <AwakenDialog
           hero={target?.hero ?? null}
           unlocked={target ? awakenedSet.has(target.hero.heroName) : false}
           fromRandom={target?.fromRandom ?? false}
           busy={busy}
-          useableSeasonPoint={info.useableSeasonPoint}
-          useableMemberPoint={info.useableMemberPoint}
+          useableSeasonPoint={info.useableSeasonPoint ?? 0}
+          useableMemberPoint={info.useableMemberPoint ?? 0}
           onClose={() => setTarget(null)}
           onConfirm={handleConfirm}
         />

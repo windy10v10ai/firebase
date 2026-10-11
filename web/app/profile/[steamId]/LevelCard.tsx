@@ -6,7 +6,7 @@ import CurrencyBlock from '@/app/components/CurrencyBlock';
 
 import type { PlayerInfo } from '@/app/lib/player-info';
 
-export default function LevelCard({ info }: { info: PlayerInfo | null }) {
+export default function LevelCard({ info, isSelf }: { info: PlayerInfo | null; isSelf: boolean }) {
   const t = useTranslations('profile.identity');
 
   return (
@@ -16,6 +16,7 @@ export default function LevelCard({ info }: { info: PlayerInfo | null }) {
           tone="season"
           t={t}
           levelLabel={t('battleLevel')}
+          showUsable={isSelf}
           values={
             info && {
               level: info.seasonLevel,
@@ -30,6 +31,7 @@ export default function LevelCard({ info }: { info: PlayerInfo | null }) {
           tone="member"
           t={t}
           levelLabel={t('memberLevel')}
+          showUsable={isSelf}
           values={
             info && {
               level: info.memberLevel,

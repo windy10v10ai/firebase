@@ -86,7 +86,8 @@ function conductColorClass(score: number): string | undefined {
   return undefined;
 }
 
-export default function StatsCard({ info }: { info: PlayerInfo | null }) {
+/** 行为分只给本人看 */
+export default function StatsCard({ info, showConduct }: { info: PlayerInfo | null; showConduct: boolean }) {
   const t = useTranslations('profile.stats');
 
   const overview = [
@@ -105,7 +106,7 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
   return (
     <section className="card-container card-pad @container space-y-6">
       <h2 className="title-secondary">{t('title')}</h2>
-      <dl className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
+      <dl className={`grid grid-cols-1 gap-3 ${showConduct ? '@sm:grid-cols-3' : '@sm:grid-cols-2'}`}>
         {overview.map(({ label, value }) => (
           <div
             key={label}
@@ -115,41 +116,43 @@ export default function StatsCard({ info }: { info: PlayerInfo | null }) {
             <dd className="text-2xl font-bold tabular-nums text-heading">{value ?? <Skeleton />}</dd>
           </div>
         ))}
-        <div className="flex items-center justify-between gap-3 box-pad rounded-[10px] border border-line bg-panel-soft">
-          <dt className="flex items-center gap-1.5 text-sm text-muted">
-            {t('conduct')}
-            <InfoPopover label={t('conductInfo.ariaLabel')}>
-              <p className="text-content">{t('conductInfo.intro')}</p>
-              <div className="mt-3 flex flex-col gap-1">
-                <span className="text-xs font-medium text-muted">{t('conductInfo.changesTitle')}</span>
-                <p className="leading-relaxed text-content">
-                  • {t.rich('conductInfo.changesFinish', { pos: positive })}
-                  <br />• {t.rich('conductInfo.changesEarlyLeave', { neg: negative })}
-                  <br />• {t.rich('conductInfo.changesCommend', { pos: positive, neg: negative })}
-                </p>
-              </div>
-              <div className="mt-3 border-t border-line-strong pt-3">
-                <span className="text-xs font-medium text-muted">{t('conductInfo.multiplierTitle')}</span>
-                <ul className="mt-2 flex flex-col gap-1.5">
-                  {CONDUCT_TIERS.map(({ key, multiplier, colorClass, dotClass }) => (
-                    <li key={key} className="flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-1.5 text-content">
-                        <span className={`size-2 shrink-0 rounded-full ${dotClass}`} aria-hidden="true" />
-                        {t(`conductInfo.${key}`)}
-                      </span>
-                      <span className={`font-bold tabular-nums ${colorClass}`}>{multiplier}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </InfoPopover>
-          </dt>
-          <dd
-            className={`text-2xl font-bold tabular-nums ${info ? (conductColorClass(info.conductPoint) ?? 'text-heading') : 'text-heading'}`}
-          >
-            {info ? String(info.conductPoint) : <Skeleton />}
-          </dd>
-        </div>
+        {showConduct ? (
+          <div className="flex items-center justify-between gap-3 box-pad rounded-[10px] border border-line bg-panel-soft">
+            <dt className="flex items-center gap-1.5 text-sm text-muted">
+              {t('conduct')}
+              <InfoPopover label={t('conductInfo.ariaLabel')}>
+                <p className="text-content">{t('conductInfo.intro')}</p>
+                <div className="mt-3 flex flex-col gap-1">
+                  <span className="text-xs font-medium text-muted">{t('conductInfo.changesTitle')}</span>
+                  <p className="leading-relaxed text-content">
+                    • {t.rich('conductInfo.changesFinish', { pos: positive })}
+                    <br />• {t.rich('conductInfo.changesEarlyLeave', { neg: negative })}
+                    <br />• {t.rich('conductInfo.changesCommend', { pos: positive, neg: negative })}
+                  </p>
+                </div>
+                <div className="mt-3 border-t border-line-strong pt-3">
+                  <span className="text-xs font-medium text-muted">{t('conductInfo.multiplierTitle')}</span>
+                  <ul className="mt-2 flex flex-col gap-1.5">
+                    {CONDUCT_TIERS.map(({ key, multiplier, colorClass, dotClass }) => (
+                      <li key={key} className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-1.5 text-content">
+                          <span className={`size-2 shrink-0 rounded-full ${dotClass}`} aria-hidden="true" />
+                          {t(`conductInfo.${key}`)}
+                        </span>
+                        <span className={`font-bold tabular-nums ${colorClass}`}>{multiplier}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </InfoPopover>
+            </dt>
+            <dd
+              className={`text-2xl font-bold tabular-nums ${info ? (conductColorClass(info.conductPoint ?? 0) ?? 'text-heading') : 'text-heading'}`}
+            >
+              {info ? String(info.conductPoint ?? 0) : <Skeleton />}
+            </dd>
+          </div>
+        ) : null}
       </dl>
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-muted">{t('lifetime')}</h3>

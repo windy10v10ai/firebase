@@ -7,7 +7,10 @@ import { useCallback, useState } from 'react';
 
 import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
+import OwnerBackLink from '@/app/components/OwnerBackLink';
+import PrivateProfileNotice from '@/app/components/PrivateProfileNotice';
 import { ApiError } from '@/app/lib/api';
+import { useIsSelf } from '@/app/lib/auth';
 import { resetProperties, upgradeProperty, type PlayerInfo } from '@/app/lib/player-info';
 import { applyPlayerWrite, playerPropertiesQuery } from '@/app/lib/queries';
 import { PROPERTY_GROUPS, PROPERTY_LIST, type PropertyDef } from '@/config/properties';
@@ -19,7 +22,6 @@ import ResetDialog from './ResetDialog';
 type LoadResult = { status: 'failed'; httpStatus: number } | { status: 'ready'; info: PlayerInfo };
 
 const FAILURE_KEY: Record<number, string> = {
-  403: 'private',
   404: 'noRecord',
 };
 
@@ -28,6 +30,7 @@ const RESET_KEY = 'reset';
 export default function PropertyPage() {
   const t = useTranslations('property');
   const { steamId } = useParams<{ steamId: string }>();
+  const isSelf = useIsSelf(steamId);
 
   const queryClient = useQueryClient();
   const query = useQuery(playerPropertiesQuery(steamId));
@@ -98,6 +101,9 @@ export default function PropertyPage() {
     if (loaded.httpStatus === 401) {
       return <LoginPanel />;
     }
+    if (loaded.httpStatus === 403) {
+      return <PrivateProfileNotice />;
+    }
     const key = FAILURE_KEY[loaded.httpStatus] ?? 'failed';
     return (
       <Notice title={t(`${key}.title`)}>
@@ -124,13 +130,15 @@ export default function PropertyPage() {
         </p>
       )}
       <div className="space-y-1.5">
+        {isSelf ? null : <OwnerBackLink steamId={steamId} />}
         <h1 className="title-primary">{t('title')}</h1>
         <p className="text-sm text-muted">{t('intro')}</p>
       </div>
 
       <PointsCard
         steamId={steamId}
-        usableLevel={usableLevel}
+        readOnly={!isSelf}
+        usableLevel={isSelf ? usableLevel : info ? (info.usedLevel ?? 0) : null}
         totalLevel={info?.totalLevel ?? null}
         seasonLevel={info?.seasonLevel ?? null}
         memberLevel={info?.memberLevel ?? null}
@@ -168,6 +176,7 @@ export default function PropertyPage() {
                     pendingCells={pendingCells}
                     canAdd={usableLevel !== null && usableLevel >= def.levelPerStep}
                     busy={busy !== null}
+                    readOnly={!isSelf}
                     onPendingChange={(cells) =>
                       setPending((current) => ({ ...current, [def.name]: cells }))
                     }
@@ -180,12 +189,12 @@ export default function PropertyPage() {
         );
       })}
 
-      {info ? (
+      {info && isSelf ? (
         <ResetDialog
           open={dialogOpen}
           busy={busy === RESET_KEY}
-          useableSeasonPoint={info.useableSeasonPoint}
-          useableMemberPoint={info.useableMemberPoint}
+          useableSeasonPoint={info.useableSeasonPoint ?? 0}
+          useableMemberPoint={info.useableMemberPoint ?? 0}
           onClose={() => setDialogOpen(false)}
           onConfirm={handleReset}
         />
