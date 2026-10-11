@@ -1103,6 +1103,7 @@ namespace Windy10v10AI.Launcher
                     hostTunnel.RosterSource = roster.Snapshot;
                     hostTunnel.JoinFinished += OnJoinFinished;
                     hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
+                    hostTunnel.GameTraffic += roster.SetEntering;
                     hostTunnel.Start();
                     var relays = RelayTicket.ReadAddresses(opened, "relayAddresses", "relayAddress");
                     if (relays.Count > 0)
