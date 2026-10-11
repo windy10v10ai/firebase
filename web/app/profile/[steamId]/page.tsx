@@ -91,8 +91,7 @@ export default function ProfilePage() {
       />
       <div className="grid min-w-0 content-start gap-6 lg:col-span-2">
         <LevelCard info={info} isSelf={isSelf} />
-        {/* 别人看时少了每日任务卡，三张排一行 */}
-        <div className={`grid min-w-0 gap-2 md:gap-4 ${isSelf ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
+        <div className="grid min-w-0 gap-2 md:grid-cols-2 md:gap-4">
           <FeatureEntryCard
             tone="property"
             Icon={CirclePlus}
@@ -164,10 +163,13 @@ export default function ProfilePage() {
       <div className="min-w-0 lg:col-span-2">
         <StatsCard info={info} showConduct={isSelf} />
       </div>
-      <div className="lg:col-span-3">
-        {/* 自己发一次请求：满员 50 场约 50 KB，挂在首屏那次请求上会拖慢整页 */}
-        <RecentMatchesCard steamId={steamId} />
-      </div>
+      {/* 一串连续的对局会暴露玩家什么时候在玩，只给本人看 */}
+      {isSelf ? (
+        <div className="lg:col-span-3">
+          {/* 自己发一次请求：满员 50 场约 50 KB，挂在首屏那次请求上会拖慢整页 */}
+          <RecentMatchesCard steamId={steamId} />
+        </div>
+      ) : null}
     </div>
   );
 }
