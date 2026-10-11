@@ -127,8 +127,8 @@ namespace Windy10v10AI.Launcher
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string Copied { get { return Pick("已复制", "Copied", "Скопировано"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
-        public static string PublicHostingHint { get { return Pick("其他玩家能在列表里看到这个房间，人到齐后在游戏里点「锁定并开始」", "Other players can find this room in the list. Start in game once everyone is in.", "Комнату видно в списке. Начните игру, когда все зайдут."); } }
-        public static string PrivateHostingHint { get { return Pick("不在列表里显示，只有拿到房间码的朋友能加入，人到齐后在游戏里点「锁定并开始」", "Hidden from the list; only friends with the code can join. Start in game once everyone is in.", "Комнаты нет в списке, войти можно только по коду. Начните игру, когда все зайдут."); } }
+        public static string PublicHostingHint { get { return Pick("等待其他玩家加入后，再到 Dota 2 里点「锁定并开始」", "Wait for other players to join, then start the game in Dota 2.", "Дождитесь других игроков, затем начните игру в Dota 2."); } }
+        public static string PrivateHostingHint { get { return Pick("把房间码发给好友，等他们加入后，再到 Dota 2 里点「锁定并开始」", "Send the code to your friends. Once they join, start the game in Dota 2.", "Отправьте код друзьям. Когда они зайдут, начните игру в Dota 2."); } }
         public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
         public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
         public static string Connecting { get { return Pick("正在连接房主…", "Connecting to the host...", "Подключение к хосту…"); } }

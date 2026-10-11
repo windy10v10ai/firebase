@@ -255,6 +255,8 @@ namespace Windy10v10AI.Launcher
             status.Font = new Font(Theme.FontName, 9f);
             hint.ForeColor = Theme.Muted;
             hint.Font = new Font(Theme.FontName, 9f);
+            // Hosts tend to start alone at once, so the wait for other players stands out from the grey hints
+            hint.TextChanged += delegate { hint.ForeColor = hint.Text == Strings.PublicHostingHint || hint.Text == Strings.PrivateHostingHint ? Theme.Text : Theme.Muted; };
             routeLabel.ForeColor = Theme.Muted;
             routeLabel.Font = new Font(Theme.FontName, 9f);
             routeLabel.TextAlign = ContentAlignment.MiddleRight;
@@ -561,7 +563,7 @@ namespace Windy10v10AI.Launcher
                 hostCode.SetBounds(P(20), P(row + 24), P(150), P(36));
                 secondary.SetBounds(P(178), P(row + 24), secondaryWidth, P(36));
                 action.SetBounds(P(460) - actionWidth, P(row + 24), actionWidth, P(36));
-                // The hosting hint runs to two lines in every language
+                // The hosting hint runs to two lines in the longer languages
                 hint.SetBounds(P(20), P(row + 66), P(440), P(38));
                 y = row;
             }
@@ -730,7 +732,7 @@ namespace Windy10v10AI.Launcher
             }
             var state = source.Loaded ? RoomList.ListState.Ready : (source.LoadFailed ? RoomList.ListState.Failed : RoomList.ListState.Loading);
             roomList.SetRooms(rows, state, null);
-            if (source.Loaded) ShowBadge(waiting.Count + (own.Count > 0 && Settings.PublicRoom ? 1 : 0));
+            if (source.Loaded) ShowBadge(waiting.Count);
         }
 
         List<RoomRow> OwnRows()
@@ -795,12 +797,18 @@ namespace Windy10v10AI.Launcher
             if (modeBar.Selected == 2 || WindowState == FormWindowState.Minimized) return;
             if (Interlocked.Exchange(ref badgeLoading, 1) == 1) return;
             var body = ListBody();
+            // The badge counts rooms the player could join, so a host's own room is left out
+            var own = Hosting ? roomCode : null;
             new Thread(() =>
             {
                 try
                 {
                     var answer = RoomApi.List(body);
-                    var count = ((object[])answer["rooms"]).Length;
+                    var count = 0;
+                    foreach (Dictionary<string, object> room in (object[])answer["rooms"])
+                    {
+                        if ((string)room["code"] != own) count++;
+                    }
                     UI(() => ShowBadge(count));
                 }
                 catch (Exception)
