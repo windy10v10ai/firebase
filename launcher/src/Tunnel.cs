@@ -338,6 +338,7 @@ namespace Windy10v10AI.Launcher
             public bool Echoed;
             public int Sent;
             public readonly List<int> Rtts = new List<int>();
+            public int TrafficGame;
         }
 
         // A probe only measures the route, and its token is forgotten shortly after so it cannot be used to play
@@ -360,6 +361,8 @@ namespace Windy10v10AI.Launcher
         // joinId, the reported path or null when the handshake failed, the relay address used when the path is relay, and milliseconds taken
         public event Action<string, string, string, int> JoinFinished;
         public event Action<string> JoinLeft;
+        // Between games no handshake marks a joiner as entering, so its first packet to the new server does
+        public event Action<string> GameTraffic;
         public Func<List<RosterEntry>> RosterSource;
         public volatile bool GameEnded;
         public volatile int Game = 1;
@@ -611,6 +614,13 @@ namespace Windy10v10AI.Launcher
                     }
                     catch (Exception)
                     {
+                    }
+                    // Packets before the new server is up may still be aimed at the finished game
+                    if (GameReady && peer.TrafficGame != Game)
+                    {
+                        peer.TrafficGame = Game;
+                        var traffic = GameTraffic;
+                        if (traffic != null) traffic(joinIds[owner]);
                     }
                 }
             }
