@@ -22,9 +22,10 @@ import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
+import { AllowViewOthers } from '../util/auth/allow-view-others.decorator';
 import { AllowWeb } from '../util/auth/allow-web.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
-import { CurrentServerType } from '../util/auth/server-type.decorator';
+import { CanViewPrivate, CurrentServerType } from '../util/auth/server-type.decorator';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { PlayerInfoInclude } from './assemblers/player-dto.assembler';
@@ -45,6 +46,7 @@ export class PlayerInfoController {
 
   @AllowLocal()
   @AllowWeb()
+  @AllowViewOthers()
   @Get(':steamId/info')
   @ApiOperation({ summary: 'Get player info with optional includes' })
   @ApiQuery({
@@ -57,7 +59,11 @@ export class PlayerInfoController {
     @Param('steamId', ParseIntPipe) steamId: number,
     @Query('include', new ParseArrayPipe({ items: String, separator: ',', optional: true }))
     include: PlayerInfoInclude[] = [],
+    @CanViewPrivate() canViewPrivate: boolean,
   ): Promise<PlayerInfoDto> {
+    if (!canViewPrivate) {
+      return this.playerInfoService.findPublicPlayerInfoBySteamId(steamId, include);
+    }
     return this.playerInfoService.findPlayerInfoBySteamId(steamId, include);
   }
 

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { Member, MemberLevel } from '../entities/members.entity';
 import { MembersService } from '../members.service';
@@ -8,8 +8,9 @@ export class MemberDto {
   steamId!: number;
   @ApiProperty()
   enable!: boolean;
-  @ApiProperty()
-  expireDateString!: string;
+  // 有效期反映付费节奏，访客看别人的主页时不返回
+  @ApiPropertyOptional()
+  expireDateString?: string;
   @ApiProperty({ enum: MemberLevel })
   level!: MemberLevel;
 

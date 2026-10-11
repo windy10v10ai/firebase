@@ -9,6 +9,17 @@ import { SERVER_TYPE } from '../util/secret/secret.service';
 import { PlayerDtoAssembler, PlayerInfoInclude } from './assemblers/player-dto.assembler';
 import { PlayerInfoDto } from './dto/player-info.dto';
 
+const PRIVATE_FIELDS = [
+  'useableSeasonPoint',
+  'useableMemberPoint',
+  'usedSeasonPoint',
+  'usedMemberPoint',
+  'conductPoint',
+  'disconnectCount',
+  'lastMatchTime',
+  'checkIn',
+] as const;
+
 @Injectable()
 export class PlayerInfoService {
   constructor(
@@ -24,6 +35,24 @@ export class PlayerInfoService {
     const player = await this.playerService.findBySteamId(steamId);
     if (!player) throw new NotFoundException();
     return this.playerDtoAssembler.assemblePlayerInfoDto(player, include);
+  }
+
+  /** 访客看到的玩家信息：去掉积分余额、行为分、会员有效期等只给本人的字段 */
+  async findPublicPlayerInfoBySteamId(
+    steamId: number,
+    include: PlayerInfoInclude[],
+  ): Promise<PlayerInfoDto> {
+    const dto = await this.findPlayerInfoBySteamId(
+      steamId,
+      include.filter((item) => item !== 'setting'),
+    );
+    for (const field of PRIVATE_FIELDS) {
+      delete dto[field];
+    }
+    if (dto.member) {
+      delete dto.member.expireDateString;
+    }
+    return dto;
   }
 
   async findPlayerInfoBySteamIds(
