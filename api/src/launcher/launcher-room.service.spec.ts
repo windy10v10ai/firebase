@@ -1,4 +1,5 @@
 import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { FieldValue } from 'firebase-admin/firestore';
 
 import { BigQueryService } from '../bigquery/bigquery.service';
 
@@ -115,9 +116,11 @@ describe('LauncherRoomService', () => {
     );
   });
 
-  it('房间码被一天内开的房间占着时换一个码', async () => {
+  it('房间码被一天内还在轮询的房间占着时换一个码，开房多久不论', async () => {
     const first = await service.host(HOST);
-    rooms.findById.mockResolvedValueOnce(rooms.docs.get(first.code)!);
+    const occupying = rooms.docs.get(first.code)!;
+    occupying.createdAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    rooms.findById.mockResolvedValueOnce(occupying);
 
     const second = await service.host(HOST);
 
@@ -328,6 +331,44 @@ describe('LauncherRoomService', () => {
     await expect(service.join(room.code, JOINER)).rejects.toThrow(ConflictException);
     jest.advanceTimersByTime(ROOM_ALIVE_MS + 1);
     await expect(service.join(room.code, JOINER)).rejects.toThrow(ConflictException);
+  });
+
+  it('房主报的局数变大时开始、结束状态清零，加入请求重新交给房主；同一局或不报局数时不变', async () => {
+    const room = await service.host({ ...HOST, public: true });
+    const poll = { ...HOST, code: room.code, token: room.token };
+    await service.host({ ...poll, started: true, game: 1 });
+    await service.host({ ...poll, ended: true, game: 1 });
+    await service.host(poll);
+    expect(rooms.docs.get(room.code)).toMatchObject({ started: true, ended: true });
+    await expect(service.join(room.code, JOINER)).rejects.toThrow(ConflictException);
+
+    await service.host({ ...poll, game: 2 });
+    const joined = await service.join(room.code, JOINER);
+    const polled = await service.host({ ...poll, game: 2 });
+
+    const saved = rooms.docs.get(room.code)!;
+    expect(saved).toMatchObject({ game: 2, started: false, ended: false });
+    expect(FieldValue.delete().isEqual(saved.startedAt as never)).toBe(true);
+    expect(polled.joins.map((join) => join.joinId)).toEqual([joined.joinId]);
+    const listed = await service.list({ steamId: 3003, protocolVersion: 1 });
+    expect(listed.rooms.map((listedRoom) => listedRoom.code)).toEqual([room.code]);
+
+    jest.advanceTimersByTime(60 * 1000);
+    await service.host({ ...poll, started: true, game: 2 });
+    const startedAt = new Date();
+    jest.advanceTimersByTime(60 * 1000);
+    await service.host({ ...poll, game: 2 });
+    expect(rooms.docs.get(room.code)).toMatchObject({ started: true, startedAt });
+  });
+
+  it('新的一局按房主报的地图版本比对加入者，同一局里不改', async () => {
+    const room = await service.host({ ...HOST, mapVersion: 'old' });
+    const poll = { ...HOST, code: room.code, token: room.token };
+    await service.host({ ...poll, mapVersion: 'new', game: 1 });
+    expect(rooms.docs.get(room.code)).toMatchObject({ mapVersion: 'old' });
+
+    await service.host({ ...poll, mapVersion: 'new', game: 2 });
+    expect(rooms.docs.get(room.code)).toMatchObject({ mapVersion: 'new' });
   });
 
   it('房主 2 分钟没轮询，加入返回 404', async () => {

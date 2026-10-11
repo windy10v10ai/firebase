@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.5.4.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.5.4.0")]
+[assembly: System.Reflection.AssemblyVersion("0.6.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.6.0.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.5.4";
+        const string Version = "0.6.0";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -59,6 +59,8 @@ namespace Windy10v10AI.Launcher
         const int ClosingGraceMs = 60000;
         // Steam hands a running Dota over within a second or two when it works at all
         const int SteamEnterMs = 5000;
+        // The host sends its roster every two seconds
+        const int JoinStateWaitMs = 5000;
         static readonly string ConnectCommand = "connect 127.0.0.1:" + LocalGate.Port;
         // Long enough for Steam to apply a pending update before signing in
         const int SteamSignInMs = 90000;
@@ -175,6 +177,14 @@ namespace Windy10v10AI.Launcher
         bool clientClosed;
         LocalGate gate;
         ClientWatch clientWatch;
+        readonly ToggleBox autoStartBox = new ToggleBox();
+        readonly ToggleBox autoEnterBox = new ToggleBox();
+        // Set once the results are saved, so the mode buttons start the next game of the open room
+        bool pickingNext;
+        // The mode the host picked for the next game, taken by the room's watch thread
+        volatile int nextMode = -1;
+        volatile int roomGame = 1;
+        bool joinEnded;
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
         string endNotice;
@@ -257,7 +267,6 @@ namespace Windy10v10AI.Launcher
                 if (saving && !ConfirmDialog.Ask(this, Strings.SavingCloseTitle, Strings.SavingCloseBody, Strings.StopAnyway)) return;
                 StopServer();
             };
-            hostGuide.Show(NoticeKind.Success, Strings.HostGuide, null);
             hostGuide.Visible = false;
 
             divider.BackColor = Theme.Border;
@@ -293,6 +302,23 @@ namespace Windy10v10AI.Launcher
 
             // Only the screen comes back; a room is never opened without a click
             Settings.Load();
+            autoStartBox.Text = Strings.AutoStartDota;
+            autoStartBox.Checked = Settings.AutoStartDota;
+            autoStartBox.CheckedChanged += delegate
+            {
+                Settings.AutoStartDota = autoStartBox.Checked;
+                Settings.Save();
+                hostGuide.Show(NoticeKind.Success, HostGuideText(), null);
+            };
+            hostGuide.Show(NoticeKind.Success, HostGuideText(), null);
+            autoEnterBox.Text = Strings.AutoEnter;
+            autoEnterBox.Checked = Settings.AutoEnter;
+            autoEnterBox.Visible = false;
+            autoEnterBox.CheckedChanged += delegate
+            {
+                Settings.AutoEnter = autoEnterBox.Checked;
+                Settings.Save();
+            };
             modeBar.Items = new[] { Strings.Solo, Strings.HostRoom, Strings.JoinRoom };
             modeBar.Badge = 2;
             badgeTimer.Tick += delegate { RefreshBadge(); };
@@ -399,7 +425,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, routeDot, routeLabel, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, routeDot, routeLabel, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, autoStartBox, autoEnterBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -479,14 +505,16 @@ namespace Windy10v10AI.Launcher
             var browsing = joining && !replaced;
             // A host cannot join anyone, so a room code has nowhere to go
             var typing = browsing && !Hosting;
-            foreach (var mode in modes) mode.Visible = !joining && !replaced;
+            // After a game the host picks the next one's difficulty below the player list
+            var picking = pickingNext && showPlayers;
+            foreach (var mode in modes) mode.Visible = (!joining && !replaced) || picking;
             foreach (var control in new Control[] { roomsTitle, refresh, roomList }) control.Visible = browsing;
             codeBox.Visible = joinButton.Visible = typing;
             players.Visible = showPlayers;
             mapCard.Visible = cardShown && !showPlayers;
-            players.SetBounds(P(20), P(y), P(440), P(168));
+            players.SetBounds(P(20), P(y), P(440), P(picking ? 130 : 168));
             mapCard.SetBounds(P(20), P(y), P(440), P(118));
-            for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(y), P(140), P(84));
+            for (var i = 0; i < modes.Length; i++) modes[i].SetBounds(P(20 + i * 150), P(picking ? y + 142 : y), P(140), P(84));
             var titleWidth = TextRenderer.MeasureText(roomsTitle.Text, roomsTitle.Font).Width + P(4);
             roomsTitle.SetBounds(P(20), P(y), titleWidth, P(28));
             var refreshWidth = Math.Max(P(64), TextRenderer.MeasureText(refresh.Text, refresh.Font).Width + P(24));
@@ -495,7 +523,14 @@ namespace Windy10v10AI.Launcher
             var below = y + 34 + ListHeight + 10;
             codeBox.SetBounds(P(20), P(below), P(350), P(36));
             joinButton.SetBounds(P(378), P(below), P(82), P(36));
-            y += showPlayers ? 180 : (cardShown ? 130 : (browsing ? 34 + ListHeight + 10 + (typing ? 36 + 12 : 0) : 96));
+            y += showPlayers ? (picking ? 142 + 96 : 180) : (cardShown ? 130 : (browsing ? 34 + ListHeight + 10 + (typing ? 36 + 12 : 0) : 96));
+            // The host decides before opening whether its own Dota starts too
+            autoStartBox.Visible = modeBar.Selected == 1 && !busy && !cardShown;
+            if (autoStartBox.Visible)
+            {
+                autoStartBox.SetBounds(P(20), P(y - 4), autoStartBox.PreferredWidth + P(2), P(22));
+                y += 26;
+            }
             pauseBar.Visible = showPlayers && paused;
             if (pauseBar.Visible)
             {
@@ -540,6 +575,8 @@ namespace Windy10v10AI.Launcher
                 var actionLeft = secondary.Visible ? P(20) + secondaryWidth + P(8) : P(20);
                 secondary.SetBounds(P(20), P(row + 62), secondaryWidth, P(30));
                 action.SetBounds(actionLeft, P(row + 62), actionWidth, P(30));
+                autoEnterBox.Visible = joinEnded && busy && modeBar.Selected == 2;
+                if (autoEnterBox.Visible) autoEnterBox.SetBounds(action.Right + P(16), P(row + 66), autoEnterBox.PreferredWidth + P(2), P(22));
             }
             // A host looking at the public list leaves its own room controls on the host tab
             var away = Hosting && joining;
@@ -547,7 +584,7 @@ namespace Windy10v10AI.Launcher
             // An idle join page only ever shows a notice in this area, so it needs less room than a launch in progress
             y += away ? 0 : (browsing && !busy ? 60 : 124);
             // Keeps the solo tab as tall as the host tab's room settings row, so switching between them does not resize the window
-            if (modeBar.Selected == 0 && !cardShown) y += 42;
+            if (modeBar.Selected == 0 && !cardShown) y += 42 + (busy ? 0 : 26);
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
             mapDot.SetBounds(P(20), P(y + 16), P(8), P(8));
             var devWidth = TextRenderer.MeasureText(devLink.Text, devLink.Font).Width + P(4);
@@ -979,7 +1016,11 @@ namespace Windy10v10AI.Launcher
 
         void OnModeClick(int index)
         {
-            if (busy) return;
+            if (busy)
+            {
+                if (pickingNext && hostTunnel != null) PickNextGame(index);
+                return;
+            }
             var state = RefreshMapState();
             // An outdated map only warns, so an unfinished or failed version check does not block starting either
             if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing) return;
@@ -1016,6 +1057,7 @@ namespace Windy10v10AI.Launcher
 
                 if (stopping) throw new OperationCanceledException();
                 var manifest = install.InstalledManifest(id);
+                var workshopId = id;
                 id = PrepareAddon(install, id);
 
                 string code = null, token = null;
@@ -1048,7 +1090,7 @@ namespace Windy10v10AI.Launcher
                         throw new LaunchError(Strings.OpenRoomFailed, false);
                     }
                     var roster = new HostRoster();
-                    roster.Add(new RosterEntry { SteamId = selfId, Key = "host", Name = Field(opened, "personaName"), AvatarUrl = Field(opened, "avatarUrl"), Status = PlayerStatus.Loading, IsHost = true });
+                    roster.Add(new RosterEntry { SteamId = selfId, Key = "host", Name = Field(opened, "personaName"), AvatarUrl = Field(opened, "avatarUrl"), Status = Settings.AutoStartDota ? PlayerStatus.Loading : PlayerStatus.InRoom, IsHost = true });
                     hostRoster = roster;
                     hostTunnel.RosterSource = roster.Snapshot;
                     hostTunnel.JoinFinished += OnJoinFinished;
@@ -1082,29 +1124,8 @@ namespace Windy10v10AI.Launcher
                     });
                 }
 
-                logFile = Path.Combine(install.Game, @"dota\dedicated.log");
-                if (File.Exists(logFile)) File.Delete(logFile);
-
-                server = StartDota(new ProcessStartInfo
-                {
-                    FileName = install.Exe,
-                    WorkingDirectory = install.Game,
-                    Arguments = "-dedicated -console -allow_no_lobby_connect -ip 127.0.0.1 -port " + Port +
-                        " -con_logfile dedicated.log +sv_hibernate_when_empty 0 +dota_quit_after_game 0" +
-                        (room ? " +hostname " + RoomHostname : "") +
-                        " \"+map " + map + " gamemode=15 customgamemode=" + id + " nomapvalidation=1\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                });
-                // The host's own Dota renders on the same PC, and a starved server stalls every player's connection
-                try
-                {
-                    server.PriorityClass = ProcessPriorityClass.AboveNormal;
-                }
-                catch (Exception)
-                {
-                }
+                roomGame = 1;
+                server = StartServer(install, id, map, room);
 
                 // The code is shown as soon as the room opens, so friends may join while the server is still loading
                 if (code != null)
@@ -1126,7 +1147,8 @@ namespace Windy10v10AI.Launcher
                 }
                 var watch = new ClientWatch();
                 clientWatch = watch;
-                EnterGame(install, watch, server.Id);
+                // A host who only runs the server goes in later from the room, if at all
+                if (code == null || Settings.AutoStartDota) EnterGame(install, watch, server.Id);
 
                 UI(() =>
                 {
@@ -1138,11 +1160,11 @@ namespace Windy10v10AI.Launcher
                     if (code == null) return;
                     hostingReady = true;
                     UpdateHostingHint();
-                    action.Text = Strings.StopServer;
+                    action.Text = Strings.CloseRoom;
                     Relayout();
                 });
                 if (code == null) WatchSolo(install, watch);
-                else WatchRoom(install, watch);
+                else WatchRoom(install, workshopId, watch);
             }
             catch (LaunchError error)
             {
@@ -1154,6 +1176,33 @@ namespace Windy10v10AI.Launcher
                 failureCause = error;
                 Finish(Strings.LaunchFailed + error.Message, logFile != null);
             }
+        }
+
+        Process StartServer(DotaInstall install, string addon, string map, bool room)
+        {
+            logFile = Path.Combine(install.Game, @"dota\dedicated.log");
+            if (File.Exists(logFile)) File.Delete(logFile);
+            var process = StartDota(new ProcessStartInfo
+            {
+                FileName = install.Exe,
+                WorkingDirectory = install.Game,
+                Arguments = "-dedicated -console -allow_no_lobby_connect -ip 127.0.0.1 -port " + Port +
+                    " -con_logfile dedicated.log +sv_hibernate_when_empty 0 +dota_quit_after_game 0" +
+                    (room ? " +hostname " + RoomHostname : "") +
+                    " \"+map " + map + " gamemode=15 customgamemode=" + addon + " nomapvalidation=1\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            });
+            // The host's own Dota renders on the same PC, and a starved server stalls every player's connection
+            try
+            {
+                process.PriorityClass = ProcessPriorityClass.AboveNormal;
+            }
+            catch (Exception)
+            {
+            }
+            return process;
         }
 
         static void LinkAddon(string addonDir, string vpk)
@@ -1302,7 +1351,10 @@ namespace Windy10v10AI.Launcher
                 }
                 var watch = new ClientWatch();
                 clientWatch = watch;
-                EnterGame(install, watch, -1);
+                // The host's first roster round says which game the room is on and whether its server is up yet
+                for (var waited = 0; waited < JoinStateWaitMs && !tunnel.HasRoster && !stopping; waited += 200) Thread.Sleep(200);
+                var entered = tunnel.GameReady && !tunnel.GameEnded;
+                if (entered) EnterGame(install, watch, -1);
 
                 UI(() =>
                 {
@@ -1312,7 +1364,7 @@ namespace Windy10v10AI.Launcher
                     lastConnection = null;
                     RefreshRoute(true);
                 });
-                WatchJoin(tunnel, install, watch, code);
+                WatchJoin(tunnel, install, watch, code, entered);
             }
             catch (LaunchError error)
             {
@@ -1326,42 +1378,84 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        // The tunnel outlives Dota, so a joiner who left the game can go back into the same match
-        void WatchJoin(JoinTunnel tunnel, DotaInstall install, ClientWatch client, string code)
+        // The tunnel outlives Dota and each game, so a joiner who left can go back into the same match, and stays in
+        // the room for the host's next game until leaving the room
+        void WatchJoin(JoinTunnel tunnel, DotaInstall install, ClientWatch client, string code, bool entered)
         {
+            var title = string.Format(Strings.Joined, code);
             Presence? shown = null;
-            var ended = false;
+            var game = tunnel.Game;
+            var waitingShown = false;
             while (!stopping)
             {
                 Thread.Sleep(1000);
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
-                var presence = Judge(client, -1);
-                // Nothing is left to rejoin after the game, so leaving the room is the only next step
-                if (tunnel.GameEnded)
+                if (tunnel.Lost)
                 {
+                    // The host closing the room after a game is the normal way the room ends
+                    if (tunnel.GameEnded || !tunnel.GameReady) break;
+                    throw new LaunchError(Strings.HostLost, false);
+                }
+                if (tunnel.Game != game)
+                {
+                    game = tunnel.Game;
+                    entered = false;
+                    waitingShown = false;
+                }
+                if (tunnel.GameEnded || !tunnel.GameReady)
+                {
+                    entered = false;
                     endNotice = Strings.GameEnded;
-                    if (!DotaClientRunning(-1) || tunnel.Lost) break;
-                    if (ended) continue;
-                    ended = true;
+                    if (waitingShown) continue;
+                    waitingShown = true;
+                    shown = null;
                     UI(() =>
                     {
-                        if (!busy) return;
-                        secondary.Visible = false;
-                        hint.Visible = false;
-                        ShowNotice(NoticeKind.Success, Strings.GameEndedLeave, null, null);
+                        if (busy) ShowJoinEnded(title);
                     });
                     continue;
                 }
-                if (tunnel.Lost) throw new LaunchError(Strings.HostLost, false);
+                if (!entered)
+                {
+                    entered = true;
+                    endNotice = null;
+                    if (Settings.AutoEnter && DotaClientRunning(-1)) EnterGame(install, client, -1);
+                    else
+                    {
+                        shown = Presence.Out;
+                        UI(() =>
+                        {
+                            if (busy) ShowJoinNewGame(title, install);
+                        });
+                        continue;
+                    }
+                }
+                var presence = Judge(client, -1);
                 if (presence == shown) continue;
                 shown = presence;
                 UI(() =>
                 {
-                    if (!busy || tunnel.GameEnded) return;
-                    ShowPresence(presence, string.Format(Strings.Joined, code), Strings.LeaveRoom, install, -1);
+                    if (!busy) return;
+                    joinEnded = false;
+                    ShowPresence(presence, title, Strings.LeaveRoom, install, -1);
                 });
             }
             Finish(null, false);
+        }
+
+        void ShowJoinEnded(string title)
+        {
+            joinEnded = true;
+            ShowProgress(title, Strings.GameEnded, Strings.LeaveRoom, false);
+            secondary.Visible = false;
+            Relayout();
+        }
+
+        void ShowJoinNewGame(string title, DotaInstall install)
+        {
+            joinEnded = false;
+            ShowProgress(title, Strings.NewGameStarted, Strings.LeaveRoom, false);
+            ShowSecondary(Strings.EnterGame, EnterAction(install, -1), true);
         }
 
         // The API answers the same room again once the host polls with its token, even after the room lapsed while paused
@@ -1373,8 +1467,16 @@ namespace Windy10v10AI.Launcher
             var quality = new List<Dictionary<string, object>>();
             var routeChecks = new List<Dictionary<string, object>>();
             var own = hostTunnel;
+            var game = roomGame;
             while (!stopping)
             {
+                if (roomGame != game)
+                {
+                    game = roomGame;
+                    started = false;
+                    since = DateTime.UtcNow;
+                    roomStartedAt = null;
+                }
                 var elapsed = DateTime.UtcNow - since;
                 if (!started && elapsed >= PauseAfter())
                 {
@@ -1382,7 +1484,9 @@ namespace Windy10v10AI.Launcher
                     UI(() => { if (busy && hostTunnel != null) ShowPause(true); });
                     return;
                 }
-                Thread.Sleep(started ? GamePollMs : (elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs));
+                var wait = started ? GamePollMs : (elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs);
+                // The next game reopens the room to joiners, so its first poll goes out without waiting out a long interval
+                for (var waited = 0; waited < wait && roomGame == game && !stopping; waited += 500) Thread.Sleep(500);
                 var tunnel = hostTunnel;
                 var roster = hostRoster;
                 // A room reopened during the sleep has a poller of its own, and this one would mark it started
@@ -1392,6 +1496,7 @@ namespace Windy10v10AI.Launcher
                 body["code"] = roomCode;
                 body["token"] = roomToken;
                 body["started"] = startedNow;
+                body["game"] = game;
                 if (startedNow && roomStartedAt == null) roomStartedAt = DateTime.UtcNow;
                 if (roomEnded) body["ended"] = true;
                 AddRoomState(body, roster.ActiveCount());
@@ -1873,9 +1978,9 @@ namespace Windy10v10AI.Launcher
             Relayout();
         }
 
-        // Friends are still playing on this server, so closing the host's own Dota never stops it; only the host
-        // does, or the room itself once the results are saved and everyone has left
-        void WatchRoom(DotaInstall install, ClientWatch client)
+        // Friends are still playing on this server, so closing the host's own Dota never stops it. The room outlives
+        // each game: once the results are saved the host picks the next difficulty, and only the host closes the room
+        void WatchRoom(DotaInstall install, string workshopId, ClientWatch client)
         {
             var serverId = server.Id;
             long logOffset = 0;
@@ -1884,10 +1989,21 @@ namespace Windy10v10AI.Launcher
             while (!stopping)
             {
                 Thread.Sleep(1000);
-                var text = ReadFrom(logFile, ref logOffset);
                 var roster = hostRoster;
                 var tunnel = hostTunnel;
                 if (roster == null || tunnel == null) break;
+                var mode = nextMode;
+                if (mode >= 0)
+                {
+                    nextMode = -1;
+                    StartNextGame(install, workshopId, mode, client, tunnel, roster);
+                    serverId = server.Id;
+                    logOffset = 0;
+                    shown = null;
+                    end = new GameEnd();
+                    continue;
+                }
+                var text = ReadFrom(logFile, ref logOffset);
                 foreach (Match match in Regex.Matches(text, @"Adding player SteamID (\d+)"))
                 {
                     roster.SetInGame(long.Parse(match.Groups[1].Value));
@@ -1901,23 +2017,103 @@ namespace Windy10v10AI.Launcher
                         roomEnded = true;
                         UI(() => ShowRoomEnd(false));
                     }
-                    if (end.Saved) UI(() => ShowRoomEnd(true));
+                    if (end.Saved)
+                    {
+                        roster.SetAll(PlayerStatus.InRoom);
+                        UI(() => ShowRoomEnd(true));
+                    }
                 }
+                // A server left running after its game fails within minutes, which is harmless once the game is over
                 if (server.HasExited)
                 {
-                    if (end.Ended) break;
+                    if (end.Ended) continue;
                     throw new LaunchError(Strings.ServerExited, true);
                 }
                 NativeMethods.HideWindowsOf(serverId);
+                if (end.Ended) continue;
 
                 var presence = Judge(client, serverId);
-                if (end.Saved && presence != Presence.InGame && roster.GuestCount() == 0) break;
                 if (presence == shown) continue;
                 shown = presence;
-                var ended = end.Ended;
-                UI(() => ShowHostPresence(presence, ended, install, serverId));
+                UI(() => ShowHostPresence(presence, false, install, serverId));
             }
             Finish(null, false);
+        }
+
+        void PickNextGame(int index)
+        {
+            DotaInstall checkedInstall;
+            var state = DotaInstall.Check(MapId, out checkedInstall);
+            // Everyone must run the same map, and Steam rewriting it mid-load stalls the server
+            if (state == MapState.Outdated || state == MapState.Missing)
+            {
+                ShowNotice(NoticeKind.Warning, Strings.NextGameMapOutdated, null, null);
+                return;
+            }
+            HideNotice();
+            pickingNext = false;
+            endNotice = null;
+            saving = false;
+            clientClosed = true;
+            action.MakePlain();
+            for (var i = 0; i < modes.Length; i++)
+            {
+                modes[i].Active = i == index;
+                modes[i].Dimmed = i != index;
+                modes[i].ActiveSub = Strings.StartingSub;
+                modes[i].Invalidate();
+            }
+            status.Text = string.Format(Strings.StartingNextGame, modes[index].Title);
+            hint.Text = "";
+            Relayout();
+            nextMode = index;
+        }
+
+        // Replaces the finished game's server in the same room; the tunnels stay up, so joiners only need their Dota moved over
+        void StartNextGame(DotaInstall install, string workshopId, int mode, ClientWatch client, HostTunnel tunnel, HostRoster roster)
+        {
+            var old = server;
+            if (old != null)
+            {
+                KillQuietly(old);
+                WaitQuietly(old);
+            }
+            var addon = PrepareAddon(install, workshopId);
+            // Starting the server clears the finished game's log, which the poll thread must not read as the new game's
+            server = StartServer(install, addon, MapKeys[mode], true);
+            roomEnded = false;
+            roomMap = MapNames[mode];
+            // The poll thread copies this body, so it gets a new one rather than a change under its feet
+            var body = new Dictionary<string, object>(roomBody);
+            body["mapVersion"] = install.InstalledManifest(workshopId);
+            roomBody = body;
+            tunnel.GameEnded = false;
+            tunnel.GameReady = false;
+            roomGame = roomGame + 1;
+            tunnel.Game = roomGame;
+            roster.SetAll(PlayerStatus.Waiting);
+            if (!Settings.AutoStartDota && !DotaClientRunning(server.Id)) roster.SetStatus("host", PlayerStatus.InRoom);
+            WaitForMap(MapKeys[mode]);
+            tunnel.GameReady = true;
+            // A Dota that is open follows the room; a closed one only starts when the host asked for that
+            if (Settings.AutoStartDota || DotaClientRunning(server.Id)) EnterGame(install, client, server.Id);
+            UI(() =>
+            {
+                if (!busy) return;
+                foreach (var m in modes)
+                {
+                    m.ActiveSub = Strings.InGame;
+                    m.Invalidate();
+                }
+                clientClosed = false;
+                UpdateHostingHint();
+                ApplyRoomType();
+            });
+        }
+
+        string HostGuideText()
+        {
+            return Settings.AutoStartDota ? Strings.HostGuide : Strings.HostGuideServerOnly;
         }
 
         void ShowHostPresence(Presence presence, bool ended, DotaInstall install, int serverId)
@@ -1943,7 +2139,7 @@ namespace Windy10v10AI.Launcher
             }
             ApplyRoomType();
         }
-        // Runs when the game ends and again once its results are saved
+        // Runs when the game ends and again once its results are saved, when the host can start the next game
         void ShowRoomEnd(bool saved)
         {
             if (!busy || !hostCode.Visible) return;
@@ -1952,9 +2148,24 @@ namespace Windy10v10AI.Launcher
             clientClosed = false;
             secondary.Visible = false;
             pauseBar.Visible = false;
-            hint.Visible = false;
-            ShowNotice(saved ? NoticeKind.Success : NoticeKind.Warning, saved ? Strings.ResultsSaved : Strings.SavingResults, null, null);
-            if (saved) action.MakePrimary();
+            if (!saved)
+            {
+                hint.Visible = false;
+                ShowNotice(NoticeKind.Warning, Strings.SavingResults, null, null);
+                Relayout();
+                return;
+            }
+            HideNotice();
+            pickingNext = true;
+            status.Text = Strings.NextGamePick;
+            hint.Text = Strings.NextGameHint;
+            hint.Visible = true;
+            for (var i = 0; i < modes.Length; i++)
+            {
+                modes[i].Active = false;
+                modes[i].Dimmed = false;
+                modes[i].Invalidate();
+            }
             Relayout();
         }
 
@@ -1966,9 +2177,8 @@ namespace Windy10v10AI.Launcher
             if (endNotice == null && !clientClosed)
             {
                 status.Text = Settings.PublicRoom ? "" : Strings.RoomCode;
-                var code = hostCode.Code;
                 if (Settings.PublicRoom) secondary.Visible = false;
-                else ShowSecondary(Strings.Copy, () => Clipboard.SetText(code), false);
+                else ShowSecondary(Strings.Copy, hostCode.CopyToClipboard, false);
             }
             Relayout();
         }
@@ -2022,6 +2232,9 @@ namespace Windy10v10AI.Launcher
                 hostingReady = false;
                 clientClosed = false;
                 saving = false;
+                pickingNext = false;
+                nextMode = -1;
+                joinEnded = false;
                 action.MakePlain();
                 var ended = endNotice;
                 endNotice = null;
