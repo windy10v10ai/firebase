@@ -42,6 +42,12 @@ export default function ProfilePage() {
   // 每日任务不对别人开放，它的读取还会替玩家生成当天任务
   const dailyTaskQuery = useQuery({ ...dailyTaskPreviewQuery(steamId), enabled: isSelf });
   const info = infoQuery.data ?? null;
+  const rankBadge =
+    rankQuery.data !== undefined ? (
+      t('entries.leaderboard.badge', { rank: formatBattleRank(rankQuery.data) })
+    ) : rankQuery.isError ? undefined : (
+      <Skeleton>{t('entries.leaderboard.badge', { rank: '000' })}</Skeleton>
+    );
 
   const dailyTaskBadge = (done: number) => {
     const text = t('entries.dailyTask.badge', { done, total: ROUNDS_PER_DAY });
@@ -85,6 +91,7 @@ export default function ProfilePage() {
         info={info}
         profile={profile}
         isSelf={isSelf}
+        rankBadge={rankBadge}
         onCheckInClaimed={(player) => {
           void applyPlayerWrite(queryClient, steamId, playerInfoQuery(steamId).queryKey, player);
         }}
@@ -144,19 +151,16 @@ export default function ProfilePage() {
               href={playerPagePath(steamId, 'daily-task')}
             />
           ) : null}
-          <FeatureEntryCard
-            tone="leaderboard"
-            Icon={Trophy}
-            title={t('entries.leaderboard.title')}
-            badge={
-              rankQuery.data !== undefined ? (
-                t('entries.leaderboard.badge', { rank: formatBattleRank(rankQuery.data) })
-              ) : rankQuery.isError ? undefined : (
-                <Skeleton>{t('entries.leaderboard.badge', { rank: '000' })}</Skeleton>
-              )
-            }
-            href="/leaderboard"
-          />
+          {/* 别人看时名次并进身份卡，入口卡只剩两张，正好排满一行 */}
+          {isSelf ? (
+            <FeatureEntryCard
+              tone="leaderboard"
+              Icon={Trophy}
+              title={t('entries.leaderboard.title')}
+              badge={rankBadge}
+              href="/leaderboard"
+            />
+          ) : null}
         </div>
       </div>
       <RadarCard steamId={steamId} />

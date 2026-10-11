@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Lock, ThumbsUp } from 'lucide-react';
+import { ChevronRight, Lock, ThumbsUp, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -20,14 +20,17 @@ interface PlayerCardProps {
   profile: SteamProfile | undefined;
   /** 有效期、签到、公开开关、会员订阅入口只给本人；别人看到的地方换成分享按钮 */
   isSelf: boolean;
+  /** 别人看时名次显示在身份卡里；本人的名次在入口卡上 */
+  rankBadge: React.ReactNode;
   onCheckInClaimed: (player: PlayerInfo) => void;
 }
 
 /** 身份卡：ID 取自地址，数据没到也能先显示；会员状态只做陈述，订阅入口是底部的文字链接 */
-export default function PlayerCard({ steamId, info, profile, isSelf, onCheckInClaimed }: PlayerCardProps) {
+export default function PlayerCard({ steamId, info, profile, isSelf, rankBadge, onCheckInClaimed }: PlayerCardProps) {
   const t = useTranslations('profile.identity');
   const tMember = useTranslations('profile.member');
-  const member = info?.member;
+  // 别人只看得到有效的会员身份，过期的不显示，免得把付费经历摆出来
+  const member = isSelf || info?.member?.enable ? info?.member : undefined;
   const idText = t('heading', { id: steamId });
   const personaName = profile?.personaName ?? null;
   // 金色代表会员有效，过期了照样上金会让人以为还在生效
@@ -136,7 +139,19 @@ export default function PlayerCard({ steamId, info, profile, isSelf, onCheckInCl
             <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         ) : (
-          <ShareButton steamId={steamId} />
+          <>
+            {rankBadge === undefined ? null : (
+              <Link
+                href="/leaderboard"
+                className="group mr-auto inline-flex min-w-0 items-center gap-1.5 text-sm text-content transition-colors hover:text-heading"
+              >
+                <Trophy className="size-4 shrink-0 text-season" aria-hidden="true" />
+                <span className="truncate">{rankBadge}</span>
+                <ChevronRight className="size-4 shrink-0 text-muted group-hover:text-heading" aria-hidden="true" />
+              </Link>
+            )}
+            <ShareButton steamId={steamId} />
+          </>
         )}
       </div>
       {isSelf ? (

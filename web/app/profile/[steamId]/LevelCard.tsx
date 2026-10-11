@@ -16,7 +16,7 @@ export default function LevelCard({ info, isSelf }: { info: PlayerInfo | null; i
           tone="season"
           t={t}
           levelLabel={t('battleLevel')}
-          showUsable={isSelf}
+          detailed={isSelf}
           values={
             info && {
               level: info.seasonLevel,
@@ -31,7 +31,7 @@ export default function LevelCard({ info, isSelf }: { info: PlayerInfo | null; i
           tone="member"
           t={t}
           levelLabel={t('memberLevel')}
-          showUsable={isSelf}
+          detailed={isSelf}
           values={
             info && {
               level: info.memberLevel,
