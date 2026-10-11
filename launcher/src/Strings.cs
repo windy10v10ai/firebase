@@ -34,8 +34,8 @@ namespace Windy10v10AI.Launcher
         public static string LeftGame { get { return Pick("你已离开游戏，游戏还在进行", "You left the game, which is still going", "Вы вышли из игры, она продолжается"); } }
         public static string HostNotInGame { get { return Pick("你不在游戏里，服务器仍在运行", "You are not in the game; the server is still running", "Вы не в игре, сервер продолжает работать"); } }
         public static string EnterGame { get { return Pick("进入游戏", "Enter game", "Войти в игру"); } }
-        public static string ConsoleSteps { get { return Pick("Dota 2 没有自动进入。按 \\ 打开控制台，输入 connect 127.0.0.1:27016 后回车", "Dota 2 did not join by itself. Press \\ to open the console, enter connect 127.0.0.1:27016 and press Enter.", "Dota 2 не вошла сама. Нажмите \\, чтобы открыть консоль, введите connect 127.0.0.1:27016 и нажмите Enter."); } }
-        public static string ConsoleTip { get { return Pick("按 \\ 没反应：在 Dota 2 设置的高级选项里勾选「启用控制台」", "If \\ does nothing, turn on Enable Console in Dota 2's advanced options", "Если \\ не работает, включите консоль в расширенных настройках Dota 2"); } }
+        public static string ConsoleSteps { get { return Pick("Dota 2 没有自动进入。按 \\ 打开控制台，输入 connect 127.0.0.1:27016 后回车", "Dota 2 did not join. Press \\ and enter connect 127.0.0.1:27016 in the console", "Dota 2 не вошла сама. Нажмите \\ и введите в консоли connect 127.0.0.1:27016"); } }
+        public static string ConsoleTip { get { return Pick("按 \\ 没反应：在 Dota 2 设置的高级选项里勾选「启用控制台」", "If \\ does nothing, turn on Enable Console in Dota 2 settings", "Если \\ не работает, включите консоль в настройках Dota 2"); } }
         public static string CopyCommand { get { return Pick("复制命令", "Copy command", "Копировать"); } }
         public static string TryAgain { get { return Pick("再试一次", "Try again", "Повторить"); } }
         public static string Cancel { get { return Pick("取消", "Cancel", "Отмена"); } }
