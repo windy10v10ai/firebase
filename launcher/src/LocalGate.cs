@@ -95,6 +95,7 @@ namespace Windy10v10AI.Launcher
     class LocalGate : IDisposable
     {
         public const int Port = 27016;
+        const int SioUdpConnReset = -1744830452;
         // A reconnect comes from a new port, so a client quiet this long is gone for good
         const int SessionIdleMs = 120000;
 
@@ -120,6 +121,8 @@ namespace Windy10v10AI.Launcher
             target = new IPEndPoint(IPAddress.Loopback, targetPort);
             socket = new UdpClient(new IPEndPoint(IPAddress.Loopback, listenPort));
             NativeMethods.KeepPrivate(socket.Client);
+            // A closed Dota's port would otherwise fail every following receive
+            socket.Client.IOControl(SioUdpConnReset, new byte[] { 0 }, null);
             new Thread(Receive) { IsBackground = true }.Start();
         }
 
@@ -162,6 +165,7 @@ namespace Windy10v10AI.Launcher
             var key = from.ToString();
             lock (sync)
             {
+                if (closed) throw new ObjectDisposedException("LocalGate");
                 Session session;
                 if (sessions.TryGetValue(key, out session))
                 {

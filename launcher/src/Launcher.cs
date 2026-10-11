@@ -53,8 +53,10 @@ namespace Windy10v10AI.Launcher
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
-        // Dota keeps sending while it loads, so a longer silence means it left the game
-        const int OutAfterMs = 15000;
+        // Dota keeps sending while it loads, so a longer silence means it left the game; a slow PC gets room to spare
+        const int OutAfterMs = 30000;
+        // Dota can take a while to exit after the player quits from inside the game
+        const int ClosingGraceMs = 60000;
         // Steam hands a running Dota over within a second or two when it works at all
         const int SteamEnterMs = 5000;
         static readonly string ConnectCommand = "connect 127.0.0.1:" + LocalGate.Port;
@@ -1612,7 +1614,7 @@ namespace Windy10v10AI.Launcher
         {
             var steam = DotaInstall.SteamExecutable();
             if (steam == null) throw new LaunchError(Strings.SteamClientMissing, false);
-            // A leftover log from the last game would be mistaken for this one's
+            // Feedback reports attach this log, so it holds only the latest game
             try
             {
                 var clientLog = Path.Combine(install.Game, @"dota\client.log");
@@ -1714,7 +1716,7 @@ namespace Windy10v10AI.Launcher
             // Steam moves a Dota that is already open; one it has to start has no deadline, a slow PC can take minutes
             public bool ViaSteam;
             public bool Seen;
-            public bool WasInGame;
+            public DateTime? InGameAt;
             public bool ClosedInGame;
         }
         // A server that keeps running after its lobby is gone fails within minutes, so it is closed once the results
@@ -1752,22 +1754,25 @@ namespace Windy10v10AI.Launcher
             var running = DotaClientRunning(serverId);
             var last = LastDotaPacket();
             var now = DateTime.UtcNow;
-            if (running) watch.Seen = true;
-            else if (watch.Seen)
+            lock (watch)
             {
-                watch.Seen = false;
-                watch.AskedAt = null;
-                if (watch.WasInGame) watch.ClosedInGame = true;
+                if (running) watch.Seen = true;
+                else if (watch.Seen)
+                {
+                    watch.Seen = false;
+                    watch.AskedAt = null;
+                    if (watch.InGameAt != null && (now - watch.InGameAt.Value).TotalMilliseconds <= ClosingGraceMs) watch.ClosedInGame = true;
+                }
+                var asked = watch.AskedAt;
+                var answered = asked != null && last != null && last.Value >= asked.Value;
+                if (answered) watch.AskedAt = null;
+                Presence presence;
+                if (running && last != null && (now - last.Value).TotalMilliseconds <= OutAfterMs && (asked == null || answered)) presence = Presence.InGame;
+                else if (asked != null && !answered) presence = watch.ViaSteam && (now - asked.Value).TotalMilliseconds > SteamEnterMs ? Presence.Stuck : Presence.Entering;
+                else presence = Presence.Out;
+                if (presence == Presence.InGame) watch.InGameAt = now;
+                return presence;
             }
-            var asked = watch.AskedAt;
-            var answered = asked != null && last != null && last.Value >= asked.Value;
-            if (answered) watch.AskedAt = null;
-            Presence presence;
-            if (running && last != null && (now - last.Value).TotalMilliseconds <= OutAfterMs && (asked == null || answered)) presence = Presence.InGame;
-            else if (asked != null && !answered) presence = watch.ViaSteam && (now - asked.Value).TotalMilliseconds > SteamEnterMs ? Presence.Stuck : Presence.Entering;
-            else presence = Presence.Out;
-            watch.WasInGame = presence == Presence.InGame;
-            return presence;
         }
 
         static bool DotaClientRunning(int serverId)
@@ -1783,34 +1788,66 @@ namespace Windy10v10AI.Launcher
             return j == null ? null : j.LastDotaPacket;
         }
 
-        // Steam moves a Dota that is already open onto the local port; one that is closed starts already pointed at it
+        // Steam moves a Dota that is already open onto the local port; one that is closed starts already pointed at it.
+        // A failure to start Dota at all is thrown, so the first entry fails the launch the way it always has
         void EnterGame(DotaInstall install, ClientWatch watch, int serverId)
         {
             if (watch == null) return;
             var running = DotaClientRunning(serverId);
-            watch.ViaSteam = running;
-            watch.AskedAt = DateTime.UtcNow;
+            if (!running)
+            {
+                StartClient(install);
+                lock (watch)
+                {
+                    watch.ViaSteam = false;
+                    watch.AskedAt = DateTime.UtcNow;
+                }
+                return;
+            }
+            lock (watch)
+            {
+                watch.ViaSteam = true;
+                watch.AskedAt = DateTime.UtcNow;
+            }
             try
             {
-                if (running) Process.Start(new ProcessStartInfo("steam://connect/127.0.0.1:" + LocalGate.Port) { UseShellExecute = true });
-                else StartClient(install);
-            }
-            catch (LaunchError error)
-            {
-                watch.AskedAt = null;
-                UI(() => ShowNotice(NoticeKind.Error, error.Message, false));
+                Process.Start(new ProcessStartInfo("steam://connect/127.0.0.1:" + LocalGate.Port) { UseShellExecute = true });
             }
             catch (Exception)
             {
                 // Without a handler for steam:// the console command is the only way in
-                watch.ViaSteam = true;
-                watch.AskedAt = DateTime.UtcNow.AddMilliseconds(-SteamEnterMs);
+                lock (watch) watch.AskedAt = DateTime.UtcNow.AddMilliseconds(-SteamEnterMs);
             }
+        }
+
+        // The button stays the way back in; a failure to start Dota stays on screen because nothing else changes
+        Action EnterAction(DotaInstall install, int serverId)
+        {
+            return () =>
+            {
+                secondary.Visible = false;
+                Relayout();
+                try
+                {
+                    EnterGame(install, clientWatch, serverId);
+                }
+                catch (LaunchError error)
+                {
+                    ShowNotice(NoticeKind.Error, error.Message, false);
+                }
+            };
         }
 
         static void CopyConnect()
         {
-            Clipboard.SetText(ConnectCommand);
+            try
+            {
+                Clipboard.SetText(ConnectCommand);
+            }
+            catch (Exception)
+            {
+                // Another program holds the clipboard; the command is on screen to type
+            }
         }
 
         // The status area of a solo game, or of a joiner when the room title is given
@@ -1825,7 +1862,7 @@ namespace Windy10v10AI.Launcher
             if (title == null) ShowProgress(text, presence == Presence.InGame ? Strings.InGameHint : "", button, animate);
             else ShowProgress(title, text, button, animate);
             secondary.Visible = false;
-            Action enter = () => EnterGame(install, clientWatch, serverId);
+            var enter = EnterAction(install, serverId);
             if (presence == Presence.Out) ShowSecondary(Strings.EnterGame, enter, true);
             if (presence == Presence.Stuck)
             {
@@ -1886,7 +1923,7 @@ namespace Windy10v10AI.Launcher
         void ShowHostPresence(Presence presence, bool ended, DotaInstall install, int serverId)
         {
             if (!busy || !hostCode.Visible || ended) return;
-            Action enter = () => EnterGame(install, clientWatch, serverId);
+            var enter = EnterAction(install, serverId);
             clientClosed = presence != Presence.InGame;
             secondary.Visible = false;
             if (presence == Presence.Stuck)
