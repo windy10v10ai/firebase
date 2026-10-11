@@ -165,6 +165,7 @@ describe('PlayerStatsRecent (e2e)', () => {
           difficulties: {
             '3': {
               sampleCount: 500,
+              playerCount: 100,
               damage: quantiles,
               gold: quantiles,
               participation: quantiles,

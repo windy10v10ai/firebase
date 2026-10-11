@@ -11,6 +11,7 @@ function createBaseline(sampleCount: number): RadarBaseline {
     difficulties: {
       '3': {
         sampleCount,
+        playerCount: sampleCount,
         damage: quantiles,
         gold: quantiles,
         participation: quantiles,

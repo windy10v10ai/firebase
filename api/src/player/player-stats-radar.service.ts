@@ -18,7 +18,7 @@ import {
   RADAR_HEALING_AVERAGE_MULTIPLIER,
   RADAR_MIN_MATCHES,
   RadarAxis,
-  STATS_BASELINE_MIN_SAMPLES,
+  STATS_BASELINE_MIN_PLAYER_MATCHES,
   STATS_BASELINE_QUANTILE_STEPS,
   STATS_BASELINE_WINDOW_DAYS,
 } from './player-stats-radar.constants';
@@ -40,6 +40,7 @@ export class PlayerStatsRadarService {
       maxMultiplierRadiant: STATS_LIFETIME_MAX_RADIANT_MULTIPLIER,
       maxMultiplierDire: STATS_LIFETIME_MAX_DIRE_MULTIPLIER,
       minRespawnTimePct: STATS_LIFETIME_MIN_RESPAWN_TIME_PCT,
+      minMatchesPerPlayer: STATS_BASELINE_MIN_PLAYER_MATCHES,
       quantileSteps: STATS_BASELINE_QUANTILE_STEPS,
     });
     if (!rows) {
@@ -48,11 +49,13 @@ export class PlayerStatsRadarService {
 
     const difficulties: Record<string, DifficultyBaseline> = {};
     for (const row of rows) {
-      if (row.sample_count < STATS_BASELINE_MIN_SAMPLES) {
+      // 分位点不全时百分位会整体错位，宁可这个难度不出图
+      if (!RADAR_AXES.every((axis) => row[axis]?.length === STATS_BASELINE_QUANTILE_STEPS + 1)) {
         continue;
       }
       difficulties[row.difficulty.toString()] = {
         sampleCount: row.sample_count,
+        playerCount: row.player_count,
         damage: row.damage,
         gold: row.gold,
         participation: row.participation,

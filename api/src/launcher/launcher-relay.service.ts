@@ -19,6 +19,8 @@ export const LAUNCHER_RELAYS: LauncherRelay[] = [
   { address: '123.207.219.78:27200', priority: 2 },
   // 南京锐驰型，包月不另收流量费
   { address: '118.195.194.163:27200', priority: 1 },
+  // 新加坡轻量入门型，流量包有上限；排最后，只在比国内两台快得多时被提前
+  { address: '43.134.232.163:27200', priority: 3 },
 ];
 // 掉线重连要拿同一张通行证重新认领，房间跨局保留时加入者会连着打很多局，有效期按一整天算
 export const RELAY_TICKET_TTL_MS = 24 * 60 * 60 * 1000;
@@ -28,7 +30,9 @@ const RELAY_LOSS_LIMIT_PCT = 10;
 const RELAY_SLOWER_LIMIT_MS = 30;
 
 // 加入后实测选线的阈值：直连丢包到这个程度且中转够干净才改走中转，只看丢包不看延迟
-export const ROUTE_CHECK: RouteCheckDto = { directLossPct: 5, relayLossPct: 2 };
+const ROUTE_CHECK: RouteCheckDto = { directLossPct: 5, relayLossPct: 2 };
+// 中转估算延迟到这个程度就不做加入后选线：双方离中转都远，直连即使丢包也比绕远路好玩
+const ROUTE_CHECK_RELAY_RTT_LIMIT_MS = 150;
 
 export type RelayRole = 'h' | 'j';
 
@@ -78,6 +82,21 @@ export class LauncherRelayService {
     }
     // 测得差的排在最后：前面的都满了时，差的线路总比连不上强
     return [...usable, ...scored.filter((relay) => !relay.usable)].map((relay) => relay.address);
+  }
+
+  /** 给一次加入挑选线阈值，经这台中转太慢时返回 undefined，启动器就不再从直连换到中转。 */
+  routeCheck(
+    host: RelayProbeDto[] | undefined,
+    joiner: RelayProbeDto[] | undefined,
+    address: string,
+  ): RouteCheckDto | undefined {
+    const hostRtt = host?.find((probe) => probe.address === address)?.rtt;
+    const joinerRtt = joiner?.find((probe) => probe.address === address)?.rtt;
+    // 一方是旧版、没报测量时估不出，照常下发，不因对方版本旧让新版加入者失去选线
+    if (hostRtt === undefined || joinerRtt === undefined) {
+      return ROUTE_CHECK;
+    }
+    return hostRtt + joinerRtt >= ROUTE_CHECK_RELAY_RTT_LIMIT_MS ? undefined : ROUTE_CHECK;
   }
 
   /** 给一次加入的房主或加入者签中转通行证，顺序为空或没配私钥时返回 undefined。 */

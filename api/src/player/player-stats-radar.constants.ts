@@ -47,8 +47,8 @@ export const RADAR_HEALING_AVERAGE_MULTIPLIER = 5;
 
 /** 基准统计的时间窗，版本改动后基准要能跟着变 */
 export const STATS_BASELINE_WINDOW_DAYS = 30;
-// 样本太少的难度，分位点被个别局左右，算出来的百分位没有意义
-export const STATS_BASELINE_MIN_SAMPLES = 100;
+// 只打一两局的表现偶然性大，每人一票时会把基准压低
+export const STATS_BASELINE_MIN_PLAYER_MATCHES = 3;
 // 分位点太疏分不出高低，太密会让基准文档变大
 export const STATS_BASELINE_QUANTILE_STEPS = 20;
 export const RADAR_MIN_MATCHES = 10;
