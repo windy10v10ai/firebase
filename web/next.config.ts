@@ -1,3 +1,4 @@
+import { HTML_LIMITED_BOT_UA_RE } from 'next/dist/shared/lib/router/utils/html-bots';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 import type { NextConfig } from 'next';
@@ -14,6 +15,9 @@ if (!apiOrigin) {
 const config: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: __dirname,
+  // 微信、QQ 生成链接卡片时用的是内置浏览器的 UA，不在 Next 的爬虫名单里；
+  // 不加进来它们拿到的分享元数据排在 body 末尾，可能读不到
+  htmlLimitedBots: new RegExp(`${HTML_LIMITED_BOT_UA_RE.source}|MicroMessenger|\\bQQ/`, 'i'),
   /*
    * 取图脚本产出的游戏图（觉醒立绘、英雄头像、技能与物品图标、物品栏底图）文件名都带内容 hash，
    * 内容一变文件名必变，所以可以永久缓存。

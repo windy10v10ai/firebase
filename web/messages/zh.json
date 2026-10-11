@@ -961,5 +961,12 @@
     "detailCatchUp": "补签 {days} 天",
     "detailNote": "补签最多 7 天，会员过期后作废",
     "failed": "签到失败，请重试"
+  },
+  "shareCard": {
+    "siteDescription": "DOTA2 10v10 AI 自定义地图官网：查看战绩、属性加点、英雄觉醒",
+    "playerFallback": "玩家 {steamId}",
+    "profileTitle": "{name} 的 10v10 AI 战绩",
+    "profileStats": "{matches, number} 场，胜率 {winRate, number, percent}。来看看你的",
+    "profileNoMatches": "来看看 {name} 的战绩，你的战绩也在这里"
   }
 }
