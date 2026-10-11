@@ -127,8 +127,8 @@ namespace Windy10v10AI.Launcher
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string Copied { get { return Pick("已复制", "Copied", "Скопировано"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
-        public static string PublicHostingHint { get { return Pick("等待其他玩家加入后，再到 Dota 2 里点「锁定并开始」", "Wait for other players to join, then start the game in Dota 2.", "Дождитесь других игроков, затем начните игру в Dota 2."); } }
-        public static string PrivateHostingHint { get { return Pick("把房间码发给好友，等他们加入后，再到 Dota 2 里点「锁定并开始」", "Send the code to your friends. Once they join, start the game in Dota 2.", "Отправьте код друзьям. Когда они зайдут, начните игру в Dota 2."); } }
+        public static string PublicHostingHint { get { return Pick("等待其他玩家加入后，从 Dota 2 里点「锁定并开始」", "Once other players join, start the game in Dota 2.", "Когда игроки зайдут, начните игру в Dota 2."); } }
+        public static string PrivateHostingHint { get { return Pick("房间码发给好友，等待加入后，从 Dota 2 里点「锁定并开始」", "Send friends the code. Once they join, start the game in Dota 2.", "Отправьте код друзьям. Когда зайдут, начните игру в Dota 2."); } }
         public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
         public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
         public static string Connecting { get { return Pick("正在连接房主…", "Connecting to the host...", "Подключение к хосту…"); } }
@@ -145,7 +145,7 @@ namespace Windy10v10AI.Launcher
         public static string RouteRelay { get { return Pick("中转", "Relay", "Через сервер"); } }
         public static string RouteQuality { get { return Pick("{0} · {1} ms · 丢包 {2}%", "{0} · {1} ms · {2}% loss", "{0} · {1} мс · потери {2}%"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
-        public static string HostGuide { get { return Pick("人到齐后，在 Dota 2 里点「锁定并开始」", "Start the game in Dota 2 once everyone is in.", "Когда все зайдут, начните игру в Dota 2."); } }
+        public static string HostGuide { get { return Pick("等待玩家加入后，从 Dota 2 里点「锁定并开始」", "Once players join, start the game in Dota 2.", "Когда игроки зайдут, начните игру в Dota 2."); } }
         public static string SavingResults { get { return Pick("游戏已结束，正在保存结果", "Game over. Saving the results...", "Игра окончена. Сохраняем результаты…"); } }
         public static string SavingCloseTitle { get { return Pick("结果还没保存完", "Results not saved yet", "Результаты ещё не сохранены"); } }
         public static string SavingCloseBody { get { return Pick("现在关闭服务器，这局的积分可能不会记录。", "Stopping the server now may lose this game's points.", "Если остановить сервер сейчас, очки за эту игру могут не засчитаться."); } }
