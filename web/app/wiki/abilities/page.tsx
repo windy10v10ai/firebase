@@ -5,6 +5,7 @@ import { pageTitle } from '@/app/lib/page-title';
 import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { WIKI_ABILITIES } from '@/config/wiki';
 
+import { tierLabel } from '../tier';
 import WikiGrid, { type WikiEntry } from '../WikiGrid';
 
 export const generateMetadata = pageTitle('wiki', 'pageTitle.abilities');
@@ -20,7 +21,7 @@ export default async function WikiAbilitiesPage() {
       group: entry.group,
       tier: entry.tier,
       label: abilityLabel(entry.name, locale),
-      tag: `${t(`poolShort.${entry.group}`)} · T${entry.tier}`,
+      tag: `${t(`poolShort.${entry.group}`)} · ${tierLabel(entry.tier)}`,
       icon: asset?.icon ? abilityIconPath(asset.icon) : null,
       // 搜索不分界面语言：玩家记得的可能是游戏里另一种语言的名字
       search: [asset?.zh, asset?.en, asset?.ru].filter(Boolean).join('\n').toLowerCase(),

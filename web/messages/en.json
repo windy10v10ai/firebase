@@ -891,7 +891,7 @@
       "abilities": "Abilities Wiki",
       "items": "Items Wiki"
     },
-    "description": "Every ability and item you can draw in the game. Higher tiers are rarer.",
+    "description": "Every ability and item you can draw in the game. T1 is the rarest; higher numbers are easier to draw.",
     "tabs": {
       "abilities": "Abilities",
       "items": "Items"
