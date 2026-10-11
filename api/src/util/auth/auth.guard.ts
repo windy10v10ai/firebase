@@ -131,7 +131,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  // 开关在这里统一判断，新增的只读路由挂上装饰器就受它约束，不会漏
+  // 公开开关统一由 guard 判断，新增的只读路由挂上装饰器就受它约束，不会漏
   private async assertProfileVisible(steamId: string | undefined): Promise<void> {
     if (steamId === undefined || !/^\d+$/.test(steamId)) {
       return;
