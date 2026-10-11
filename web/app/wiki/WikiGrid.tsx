@@ -56,7 +56,7 @@ const ICON_CLASS = {
 };
 
 /**
- * 图鉴页的主体：搜索框、按分区与档位排开的图标墙、电脑档悬浮提示与点开的详情弹窗。
+ * 百科页的主体：搜索框、按分区与档位排开的图标墙、电脑档悬浮提示与点开的详情弹窗。
  * 档位从高到低排，同档内保持 game 抽选池里的顺序。
  */
 export default function WikiGrid({ kind, groups, entries, locale }: WikiGridProps) {
