@@ -9,10 +9,11 @@
 
 ## 文案
 
-- 对 Dota 2 说「启动」，不说「打开」；进游戏的按钮不管第几次进都叫「进入游戏」
+- 对 Dota 2 说「启动」，不说「打开」，说的是动作；描述 Dota 2 正在运行的状态说「开着」，避免和「启动器」撞字；进游戏的按钮不管第几次进都叫「进入游戏」
 - 房间跨局：房主「启动下一局」「关闭房间」，加入者「离开房间」；游戏结束写「游戏已结束」，对已经开始的这一局不说「下一局」
 - 玩家状态：两局之间写「在房间里」，服务器启动中写「等待连接」
 - 提示只写玩家下一步要做什么，一句话；玩家没得选的事不解释
+- 等人开局的提示写成「等待……加入后，从 Dota 2 里点「锁定并开始」」
 
 ## 网络
 
@@ -38,6 +39,8 @@ VirusTotal 的 Microsoft 一栏报 `!ml` 时，由 Claude 用 Claude in Chrome �
 - 上传框藏在 `vt-ui-main-upload-form` 的 shadow DOM 里，`find` / `file_upload` 拿不到 ref。先用 `javascript_tool` 往 `document.body` 插一个带 `aria-label` 的 `<input type="file">`，`file_upload` 传给它，再用 `DataTransfer` 把文件赋给 shadow DOM 里的第二个 file input 并派发 `change`，页面会弹出「Confirm upload」，同样在 shadow DOM 里找到这个按钮调 `click()` 即开始扫描
 - 应用内置浏览器（`mcp__Claude_Browser__*`）没有 `file_upload`，本机文件进不了页面，只能请用户手动选文件
 - 扫描完成后页面跳到 `/gui/file/<sha256>`，单次 `javascript_tool` 超过 45 秒会超时，等跳转要分几次轮询；结果在 shadow DOM 里，`get_page_text` 读不到，用 `javascript_tool` 递归拼 `shadowRoot` 的文本，取检出数与 Microsoft 一栏
+
+发版第 5 步的下载验证用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 看有没有这个下载地址的新记录；有记录即被拦。
 
 ## PR 截图
 

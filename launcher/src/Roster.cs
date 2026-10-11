@@ -91,6 +91,18 @@ namespace Windy10v10AI.Launcher
             }
         }
 
+        // Only players still in the room between games, so a player who left is not brought back
+        public void SetEntering(string key)
+        {
+            lock (sync)
+            {
+                foreach (var entry in entries)
+                {
+                    if (entry.Key == key && (entry.Status == PlayerStatus.Waiting || entry.Status == PlayerStatus.InRoom)) entry.Status = PlayerStatus.Loading;
+                }
+            }
+        }
+
         // The dedicated server logs 64-bit Steam IDs; the API uses the 32-bit account ID
         public void SetInGame(long steamId64)
         {

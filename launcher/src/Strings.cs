@@ -66,10 +66,12 @@ namespace Windy10v10AI.Launcher
         public static string NoMap { get { return Pick("没有找到地图，请先订阅 10v10 AI，等待 Steam 下载完成。", "Map not found. Subscribe to 10v10 AI and wait for Steam to download it.", "Карта не найдена. Подпишитесь на 10v10 AI и дождитесь загрузки в Steam."); } }
         public static string Timeout { get { return Pick("启动失败：服务器没有按时启动完成。请再试一次；多次失败请点「反馈问题」告诉我们。", "Launch failed: the server did not start in time. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер не запустился вовремя. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить»."); } }
         public static string ServerExited { get { return Pick("服务器意外退出。请再试一次；多次失败请点「反馈问题」告诉我们。", "The server stopped unexpectedly. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер неожиданно остановился. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить»."); } }
+        public static string MapCorrupt { get { return Pick("地图文件已损坏。请关闭 Dota 2 后点「验证文件」；还不行就在创意工坊重新订阅 10v10 AI。", "The map files are damaged. Close Dota 2 and press Verify files; if that fails, resubscribe to 10v10 AI in the Workshop.", "Файлы карты повреждены. Закройте Dota 2 и нажмите «Проверить»; если не поможет, переподпишитесь на 10v10 AI в Мастерской."); } }
         public static string DotaBlocked { get { return Pick("启动失败：Dota 2 没能启动，可能被杀毒软件拦截了。请在杀毒软件里把 Windy10v10AI.exe 加入信任，再试一次。", "Launch failed: Dota 2 could not start, possibly blocked by antivirus. Allow Windy10v10AI.exe in your antivirus, then try again.", "Не удалось запустить Dota 2 — возможно, её блокирует антивирус. Разрешите Windy10v10AI.exe в антивирусе и попробуйте снова."); } }
         public static string DotaNeedsAdmin { get { return Pick("启动失败：Steam 或 Dota 2 被设置成「以管理员身份运行」。请右键 Windy10v10AI.exe 选「以管理员身份运行」，或在 Steam、Dota 2 的属性里取消这个选项。", "Launch failed: Steam or Dota 2 is set to run as administrator. Right-click Windy10v10AI.exe and choose Run as administrator, or turn that option off in the properties of Steam and Dota 2.", "Не удалось запустить: Steam или Dota 2 настроены на запуск от имени администратора. Запустите Windy10v10AI.exe от имени администратора или отключите этот параметр в свойствах Steam и Dota 2."); } }
         public static string PortInUse { get { return Pick("启动失败：本机的 27015 或 27016 端口被其他程序占用。请完全退出 Steam 再试，还不行就重启电脑。", "Launch failed: port 27015 or 27016 on this PC is used by another program. Fully exit Steam and try again, or restart the PC if that does not help.", "Не удалось запустить: порт 27015 или 27016 на этом компьютере занят другой программой. Полностью закройте Steam и попробуйте снова, а если не поможет — перезагрузите компьютер."); } }
         public static string LaunchFailed { get { return Pick("启动失败：", "Launch failed: ", "Не удалось запустить: "); } }
+        public static string VerifyFiles { get { return Pick("验证文件", "Verify files", "Проверить"); } }
         public static string OpenWorkshop { get { return Pick("打开创意工坊", "Open Workshop", "Открыть Мастерскую"); } }
         public static string Subscribe { get { return Pick("订阅地图", "Subscribe", "Подписаться"); } }
         public static string ReportProblem { get { return Pick("反馈问题", "Report problem", "Сообщить"); } }
@@ -127,8 +129,8 @@ namespace Windy10v10AI.Launcher
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
         public static string Copied { get { return Pick("已复制", "Copied", "Скопировано"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
-        public static string PublicHostingHint { get { return Pick("其他玩家能在列表里看到这个房间，人到齐后在游戏里点「锁定并开始」", "Other players can find this room in the list. Start in game once everyone is in.", "Комнату видно в списке. Начните игру, когда все зайдут."); } }
-        public static string PrivateHostingHint { get { return Pick("不在列表里显示，只有拿到房间码的朋友能加入，人到齐后在游戏里点「锁定并开始」", "Hidden from the list; only friends with the code can join. Start in game once everyone is in.", "Комнаты нет в списке, войти можно только по коду. Начните игру, когда все зайдут."); } }
+        public static string PublicHostingHint { get { return Pick("等待其他玩家加入后，从 Dota 2 里点「锁定并开始」", "Once other players join, start the game in Dota 2.", "Когда игроки зайдут, начните игру в Dota 2."); } }
+        public static string PrivateHostingHint { get { return Pick("房间码发给好友，等待加入后，从 Dota 2 里点「锁定并开始」", "Send friends the code. Once they join, start the game in Dota 2.", "Отправьте код друзьям. Когда зайдут, начните игру в Dota 2."); } }
         public static string OpenRoomFailed { get { return Pick("开房失败，请检查网络后重试。", "Could not open a room. Check your network and try again.", "Не удалось открыть комнату. Проверьте сеть и попробуйте снова."); } }
         public static string InvalidCode { get { return Pick("请输入 6 位房间码。", "Enter the 6-character room code.", "Введите 6-значный код комнаты."); } }
         public static string Connecting { get { return Pick("正在连接房主…", "Connecting to the host...", "Подключение к хосту…"); } }
@@ -145,7 +147,7 @@ namespace Windy10v10AI.Launcher
         public static string RouteRelay { get { return Pick("中转", "Relay", "Через сервер"); } }
         public static string RouteQuality { get { return Pick("{0} · {1} ms · 丢包 {2}%", "{0} · {1} ms · {2}% loss", "{0} · {1} мс · потери {2}%"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
-        public static string HostGuide { get { return Pick("人到齐后，在 Dota 2 里点「锁定并开始」", "Start the game in Dota 2 once everyone is in.", "Когда все зайдут, начните игру в Dota 2."); } }
+        public static string HostGuide { get { return Pick("等待玩家加入后，从 Dota 2 里点「锁定并开始」", "Once players join, start the game in Dota 2.", "Когда игроки зайдут, начните игру в Dota 2."); } }
         public static string SavingResults { get { return Pick("游戏已结束，正在保存结果", "Game over. Saving the results...", "Игра окончена. Сохраняем результаты…"); } }
         public static string SavingCloseTitle { get { return Pick("结果还没保存完", "Results not saved yet", "Результаты ещё не сохранены"); } }
         public static string SavingCloseBody { get { return Pick("现在关闭服务器，这局的积分可能不会记录。", "Stopping the server now may lose this game's points.", "Если остановить сервер сейчас, очки за эту игру могут не засчитаться."); } }

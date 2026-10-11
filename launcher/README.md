@@ -28,6 +28,7 @@
 - **房间跨局保留，下一局由房主手动启动**：结算保存后房主点难度，启动器关掉旧服务器、开新的，房间码、隧道和加入的人不变；只有房主关闭房间或关掉启动器，房间才结束。不自动开下一局：什么时候开、开什么难度是房主的事。
 - **房间按局记「已开始」**：房主每局上报局数，API 看到局数变大就清零开始、结束状态，房间重新开放加入；旧版启动器不报局数，照旧一局一个房间。
 - **两个勾选框，默认都勾上并记住**：房主「开房后自动启动 Dota 2」，不勾就只开服务器，由第一个进入服务器的玩家当游戏内房主；加入者「房主启动下一局时自动进入」，不勾或 Dota 没开时只显示「进入游戏」，不替玩家启动 Dota，以免把正在玩别的游戏的人拽出来。
+- **房主一进 Dota 就点开始的问题不靠改默认解决**：多数房主本来一个人玩，默认不启动 Dota 会让他们每局多一步；改为启动器白字提示先等人，游戏选队界面在只有房主时点「锁定并开始」先确认。
 - **房主是唯一的状态来源**：玩家名单、游戏结束与结算完成都由房主读专用服日志得出，再经隧道发给加入者，两边看到的一致。不跟踪 Dota 内的掉线与重连。
 - **联机要求地图最新**：双方地图版本不同进游戏可能出错。
 - **开房与加入要先等 Steam 登录**：房间按 Steam 账号区分玩家。
@@ -53,11 +54,12 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
 
 1. 代码 PR：按 [CLAUDE.md](CLAUDE.md) 的「版本号」升版本，合进 `develop`。可以攒几个 PR 共用一个未发布的版本号。
 2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。发布的 exe 必须来自这里，不用本机编译的。
-3. 没有代码签名，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可发版；报具体病毒家族、或大量引擎一起报时先停下排查。
+3. 没有代码签名，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可继续；报具体病毒家族、或大量引擎一起报时先停下排查。
 4. 发版 PR：
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。
    - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只列对玩家影响大的变化，小修小改合成一句；未发布的版本并进本版。
+5. 发版 PR 合进 `develop` 后，从 dev 站（`https://dev--windy10v10ai.asia-east1.hosted.app/launch`）实际下载一次，Defender 不拦截才请用户审批 Release PR。下载时的云端判定与 VirusTotal 上的 Microsoft 一栏不是同一条，前面两项都干净也可能被拦；被拦就到误报申报页提交，等微软放行、重新下载不报再上线。
 
 同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。发版 PR 合进 `develop` 后由用户审批 Release PR 上线（见根目录 [CLAUDE.md](../.claude/CLAUDE.md) 的「合并方式」）；请用户审批前，确认 `web/public/downloads/` 里只有这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。

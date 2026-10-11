@@ -15,6 +15,7 @@ API 是一个 NestJS 应用，部署在第二代 Cloud Functions（Node.js 24，
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
 - 网站的转发直接打函数自己的地址，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting
+- **转发服务器的响应头上限调到 64KB**（`web/apphosting.yaml` 的 `NODE_OPTIONS`）：上游响应到达转发服务器时偶尔带着超过 Node 默认 16KB 的头，API 自己发的头只有几百字节，从外网直连也复现不出来；超限时转发直接回 500。换掉转发实现时同样要放宽这个上限
 - 支付宝的回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，开放平台后台配的只是兜底；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
 - **只有直连 API 域名的请求带着玩家自己的来源信息。**经网站域名转发进来的，边缘看到的是转发服务器的地址，`cf-connecting-ip` 与 `cf-ipcountry` 不代表玩家。依赖真实来源的功能只能挂在直连的那条路上
 
@@ -53,7 +54,7 @@ API 自己往外调的第三方服务：
 - **`GET /api/launcher/version` 与 `GET /api/launcher/download/:version` 是启动器自我更新用的公开端点**：版本号与 exe 哈希写死在代码里，查版本不读任何文件；下载只接受当前版本，由函数从官网取 exe、核对哈希后返回。两者都靠 CDN 缓存挡住重复请求，下载地址带版本号可以永久缓存，所以哈希不符时宁可失败也不返回。放在 API 下而不是只放官网，是因为国内代理只转发 `/api/`
 - **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API；加入的响应还带加入后实测选线的丢包阈值，加入者的测量结果由房主随轮询转报。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，30 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
 - **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。只列 30 秒内有心跳的可加入房间；另列出 90 秒内仍有心跳、已开局未结束的游戏，公开的带地图、玩家昵称头像与已进行分钟数，好友房只给人数与分钟数。加入者的昵称头像由 API 从加入记录取，不用房主上报的资料。旧版启动器读的局数与玩家数字段仍保留，只算公开游戏。整份候选房间在函数实例的内存里缓存 3 秒、所有请求共用，Firestore 只按心跳时间一个条件查，其余条件在内存里筛，不建组合索引。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
-- **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源，不传按启动器处理以兼容旧版；游戏来源不带日志，带 `gameState`（游戏现场：人数、难度 N1～N8 与自定义、游戏选项、英雄的等级、出装与抽选技能、是否本地主机、是否离线，字段名与结算一致），不要求启动器版本：报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都 90 天删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：每人每小时 3 次、每天 10 次，有 Steam ID 按 ID 计、否则按 IP 计（国内代理转发的请求共用代理 IP）；全站每天 500 次，Steam ID 能伪造，这是存储费用的上限。日志只认 gzip、单份压缩后 1MB，服务端不解压。分类与设计见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
+- **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源，不传按启动器处理以兼容旧版；游戏来源不带日志，带 `gameState`（游戏现场：人数、难度 N1～N8 与自定义、游戏选项、英雄的等级、出装与抽选技能、是否本地主机、是否离线，字段名与结算一致），不要求启动器版本：报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都 90 天删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：每人每小时 3 次、每天 10 次，有 Steam ID 按 ID 计、否则按 IP 计（国内代理转发的请求共用代理 IP）；全站每天 500 次，Steam ID 能伪造，这是存储费用的上限。日志只认 gzip、单份压缩后 1MB，服务端不解压。分类与仓库标签的对应见 [feedback-review](../../.claude/skills/feedback-review/SKILL.md) 技能，取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
 - 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由同上一节最后一条；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
 
@@ -90,6 +91,17 @@ API 自己往外调的第三方服务：
 - **429 限频按 message 映射成专用错误码**：`POST /feedback` 的 `too_many_reports`（个人限频）与 `daily_limit_reached`（全站日上限）在代发路由上变成 `ERR:too_many_reports`、`ERR:daily_limit_reached`，游戏据此给玩家不同提示；其他 429 仍归 `internal`
 - **title 上限 4096，随天数增长的字段不进开局包**：`/game/start` 与 `POST /daily-task/refresh` 的每日任务快照都不带 `history`（30 天可到 17000 字符），历史由 `GET /daily-task/:steamId` 单独取，它回带 30 天历史的完整快照，网站每日任务页也用它。代发版 `/proxy/daily-task` 只回最近 5 天历史、不含今日字段（开局时已下发），5 天实测标题 2723 字符，留约三成余量。取快照才会触发跨天归档，所以这条 GET 有写库副作用，不能改成纯读。超限时 `buildProxySuccessHtml` 记 warn 日志（`[Proxy] title too long`）
 
+## 启动器联机
+
+三个 `/api/launcher/rooms` 端点见上面「路由与认证」，启动器侧的结构见 [launcher/README.md](../../launcher/README.md) 的「联机」。这里记跨仓库的约定和代码里读不出的规则。
+
+- **房间码就是凭证**：知道码就能发起加入，专用服仍校验每个人的 Steam 账号。不做限流：码空间大、同时开着的房间少，函数又拿不到可信 IP，Steam ID 是自报的
+- **房间靠房主轮询续命**：轮询同时是心跳，超时视为关闭，房主崩溃、开新房都靠它让旧房间失效，不另设关房请求；过期由 API 自己判断，不等 Firestore TTL
+- **房主与加入者互相能看到对方 IP**：打洞要求互知地址，所有点对点联机都这样
+- **中转通行证是 API 与中转服务器（server 仓库）之间的约定**：`base64url(载荷).base64url(签名)`，载荷 JSON `{"j":"<joinId>","r":"h"|"j","e":<过期 Unix 秒>}`，Ed25519 签名。同一 `joinId` 的房主与加入者配成一对，同一身份重复认领以最新地址为准，用于掉线重连；通行证不绑中转地址。私钥在 Secret Manager，中转的配置里只放公钥 `MCowBQYDK2VwAyEA5jg6ifgT3iL6fUxsjeymZy9x4Ni1BnPTrMocZfhxrpc=`
+- **通行证不是防滥用的边界**：任何人都能自己开房、自己加入拿到一对，费用靠中转自身的限速、端口数上限与云服务器的带宽上限封顶
+- **中转列表与选线阈值都在 API**：增减中转、调优先级、改阈值只部署 API，不用发启动器。没配私钥就不发通行证，响应里没有阈值就不实测选线，这两处也是关掉对应功能的开关
+
 ## 分析数据（BigQuery）
 
 跨局统计、长期分析、积分核对都以 BigQuery 数据集 `game_data`（`asia-northeast1`）为准。GA4 只用来看用户趋势，`firestore_export` 是插件同步的文档快照，两者都不作为分析的原始数据。
@@ -108,6 +120,17 @@ API 自己往外调的第三方服务：
 - **生产数据不设过期**。本地开发写同一项目里的 `game_data_dev`，分区保留 30 天；测试与 CI 不连 BigQuery。数据集由 `BIGQUERY_DATASET` 指定，未设置时不写
 - **接口不直接查这里**：展示用的统计先预先算好、写回 Firestore，见「预先汇总」
 - 表结构与建表脚本在仓库根目录的 `bigquery/`，改表先改那里的 SQL
+
+### `launcher_room_events` 的字段
+
+一行一个事件，用开房时生成的 `room_id` 关联房主与加入者，不用房间码：码过期后会复用。看字段名猜不出的几处：
+
+- **`event`**：`room_created` 开房；`join_succeeded` / `join_failed` 加入结果；`connection_quality` 游戏中每名加入者每 5 分钟一行线路质量；`route_checked` 加入后实测选线一行。后三种都由房主随轮询上报，房主崩溃时会丢
+- **`path`**：连通所走的路 `lan` / `punch` / `relay`，`upnp` 只出现在 0.3.5 的数据里。`connection_quality` 里是这段时间实际在用的路，`route_checked` 里是测完后选定的路
+- **`*_upnp` 从 0.4.0 起恒为 false**；`host_public_ip` 表示房主网卡地址就是公网地址；`*_symmetric_nat` 为真时打洞基本必败，只拿到一个 STUN 结果时为空
+- **`steam_id` 是上报者**，开房是房主、加入是加入者，启动器从注册表读、可伪造，只用于排查；`host_steam_id` 由 API 从房间文档取
+- **丢包率按 `SUM(ping_lost) / SUM(ping_sent)` 汇总**，不要平均百分比。测的是两个启动器之间一来一回，游廊开局没有这一段
+- **不记 IP**：按地区分析时查 Firestore 加入记录里的候选地址，只留 30 天
 
 ### 预先汇总
 
@@ -130,6 +153,20 @@ API 自己往外调的第三方服务：
 | `stuns` | 眩晕时长 | 每分钟 |
 
 设计取舍见 [docs/design/bigquery/phase-2-radar.md](../design/bigquery/phase-2-radar.md)。
+
+## 每日任务
+
+每天 3 轮，每轮 3 个候选三选一，单局达标才算完成。玩法与界面在 game 仓库，这里记前后端怎么分工、为什么。
+
+- **候选由服务端生成，判定与计分在客户端**：候选必须在服务端抽，否则玩家可以自称抽到了最容易的；达标判定与加分沿用结算积分的信任模型（结算经 key 校验），奖励直接计入本局 `battlePoints`。结算时服务端只记一轮完成，不重算候选、不校验 taskId 与数值
+- **候选不落库，每次确定性重算**：输入是日期、steamId、轮次、本轮刷新次数与当天已完成的任务，没完成时连续几局算出逐字段相同的候选。只存已完成任务的 `{ taskId, star }`，历史要还原当时的目标与奖励。任务池可以随时改，最坏是玩家下一局看到的候选变了
+- **taskId 就是幂等键**：当天完成过的任务不再出现在后续轮次，按任务排除、不分星级；重复上报直接忽略
+- **每轮三个候选固定 1★ / 2★ / 3★ 各一**，必有一个通用、一个英雄专属，第三个随机，两个英雄专属指向不同英雄。固定星级让每轮都有 1★，不会卡在一轮全是难任务；候选在选英雄前下发，玩家可以按任务选英雄
+- **只在预设难度生效**：客户端按地图名判断，`custom` 地图与作弊模式不显示、不判定、不上报，玩家不损失轮次。掉线的玩家两端都不算完成、不加分，否则客户端加了分而服务端没记轮次，同一任务能拿两次分
+- **日期归属看开局时下发的 `dayId`**，跨午夜的一局算前一天；`dayId` 用 UTC 日界，与排行榜、会员签到一致
+- **每轮免费刷新一次，不分会员**：刷新是给抽到不称心任务的补偿，不当付费点。刷新不排除刚才那组，偶尔刷回同一条通用任务：要排除就得回算上一组，生成器不再是单向的纯函数
+- **新指标的任务等客户端发布后再进任务池**；客户端拿到不认识的任务或指标时不展示或标为不可完成，不连累同组其他候选
+- **客户端不为每日任务加定时器、伤害过滤或高频事件监听**：指标只用结算时能从 `PlayerResource` 一次读出的，10v10 后期事件太密，逐事件回调都是卡顿风险
 
 ## 每日任务数值
 
