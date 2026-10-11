@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   const t = await getTranslations('shareCard');
   const name = share.personaName ?? t('playerFallback', { steamId });
-  const title = t('profileTitle', { name });
+  const title = t('profileHeadline', { name });
   const description =
     share.matchCount > 0
       ? t('profileStats', { matches: share.matchCount, winRate: share.winCount / share.matchCount })

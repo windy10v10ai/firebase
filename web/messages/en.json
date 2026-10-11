@@ -971,8 +971,8 @@
   "shareCard": {
     "siteDescription": "Official site of the DOTA2 10v10 AI custom map: stats, attributes and hero awakening",
     "playerFallback": "Player {steamId}",
-    "profileTitle": "{name}’s 10v10 AI stats",
-    "profileStats": "{matches, plural, one {# game} other {# games}}, {winRate, number, percent} win rate. Check yours",
+    "profileHeadline": "{name}’s 10v10 AI stats",
+    "profileStats": "Played {matches, plural, one {# game} other {# games}} with a {winRate, number, percent} win rate. Check out your stats",
     "profileNoMatches": "See {name}’s stats. Yours are here too"
   }
 }
