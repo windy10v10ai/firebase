@@ -149,6 +149,11 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_6_0": [
+          "Enter games while Dota 2 is running, no restart needed",
+          "Stay in the room after a game; the host can start the next one right away",
+          "Switches to a relay automatically when the direct route loses too many packets"
+        ],
         "v0_5_3": [
           "Improved online play routes"
         ],
