@@ -40,6 +40,8 @@ VirusTotal 的 Microsoft 一栏报 `!ml` 时，由 Claude 用 Claude in Chrome �
 - 应用内置浏览器（`mcp__Claude_Browser__*`）没有 `file_upload`，本机文件进不了页面，只能请用户手动选文件
 - 扫描完成后页面跳到 `/gui/file/<sha256>`，单次 `javascript_tool` 超过 45 秒会超时，等跳转要分几次轮询；结果在 shadow DOM 里，`get_page_text` 读不到，用 `javascript_tool` 递归拼 `shadowRoot` 的文本，取检出数与 Microsoft 一栏
 
+发版第 5 步的下载验证用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 看有没有这个下载地址的新记录；有记录即被拦。
+
 ## PR 截图
 
 改了玩家能看到的窗口或文案时，PR 放改动后的截图，中、英、俄三种语言各一张，默认不拍改动前。
