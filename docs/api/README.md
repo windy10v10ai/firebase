@@ -36,6 +36,7 @@ API 自己往外调的第三方服务：
 两条只对 Steam Web API 成立、但必须守住的规矩：
 
 - **key 只存在于服务端**：不下发给浏览器，也不做让浏览器间接打到 Steam 的转发。配额是 10 万次/天，靠上面那层缓存，实际调用量按「一天内被看过的不同玩家数」计
+- **登录签发 Custom Token 要 `signBlob` 权限**：`createCustomToken` 用运行时服务账号签名，默认没有这个权限，要给 `<项目编号>-compute@developer.gserviceaccount.com` 授予它自身的 Service Account Token Creator 角色，否则线上登录报 `Permission 'iam.serviceAccounts.signBlob' denied`
 - **头像图片不经过 API**：接口只返回 `avatars.steamstatic.com` 上的地址，图片字节由浏览器直接取，我们既不付流量也不占函数调用
 
 ## 路由与认证

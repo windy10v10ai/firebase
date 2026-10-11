@@ -7,7 +7,7 @@ import { resolveGameRepo } from './dota-ability.mjs';
 
 /**
  * 取物品与抽选技能的图标和三语名字，产出清单 config/items.json、config/abilities.json。
- * 按内部名索引、每类一个目录，与英雄头像同一套结构：战绩出装与日后的物品图鉴查的是同一份。
+ * 按内部名索引、每类一个目录，与英雄头像同一套结构：战绩出装与百科查的是同一份。
  *
  * 跑法：cd web && npm run items [-- 物品统计导出.csv]
  * 带上 GA 导出的物品表（第一列是物品名）时，表里玩家真买过、配置推不出来的物品也一起收进清单。
@@ -225,7 +225,7 @@ async function buildManifest({
         cdnDir,
       );
       if (found) {
-        // 统一成官方图的原尺寸再转 webp：图鉴放大展示也不糊，体积仍只有 PNG 的一成
+        // 统一成官方图的原尺寸再转 webp：百科放大展示也不糊，体积仍只有 PNG 的一成
         const buf = await sharp(found.buf)
           .resize(size.width, size.height, { fit: 'cover' })
           .webp({ quality: 82 })
@@ -270,7 +270,7 @@ async function buildManifest({
 
 /**
  * 物品栏的通用图：空槽底图与通用配方图，照游戏结算界面画空格和配方。
- * 不进物品清单，那份按物品索引，图鉴列物品时不该列出这两张。
+ * 不进物品清单，那份按物品索引，百科列物品时不该列出这两张。
  */
 async function buildSlotAssets(sharp) {
   const outDir = path.join(WEB, 'public/item-slots');
