@@ -125,6 +125,7 @@ namespace Windy10v10AI.Launcher
         public static string Join { get { return Pick("加入", "Join", "Войти"); } }
         public static string Paste { get { return Pick("粘贴", "Paste", "Вставить"); } }
         public static string Copy { get { return Pick("复制", "Copy", "Копировать"); } }
+        public static string Copied { get { return Pick("已复制", "Copied", "Скопировано"); } }
         public static string RoomStartingHint { get { return Pick("Windows 可能询问是否允许联网，请点允许", "Windows may ask whether to allow network access. Please allow it.", "Windows может запросить доступ к сети — разрешите его."); } }
         public static string PublicHostingHint { get { return Pick("其他玩家能在列表里看到这个房间，人到齐后在游戏里点「锁定并开始」", "Other players can find this room in the list. Start in game once everyone is in.", "Комнату видно в списке. Начните игру, когда все зайдут."); } }
         public static string PrivateHostingHint { get { return Pick("不在列表里显示，只有拿到房间码的朋友能加入，人到齐后在游戏里点「锁定并开始」", "Hidden from the list; only friends with the code can join. Start in game once everyone is in.", "Комнаты нет в списке, войти можно только по коду. Начните игру, когда все зайдут."); } }
