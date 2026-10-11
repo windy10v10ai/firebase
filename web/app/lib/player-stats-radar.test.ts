@@ -15,13 +15,15 @@ const base: PlayerStatsRadar = {
 };
 
 describe('battleRadarCorners', () => {
-  it('辅助取治疗、助攻里较高的一项，控制只占一点', () => {
-    const healer = battleRadarCorners({ ...base, healing: 90, assists: 20, stuns: 40 });
+  it('辅助以治疗、助攻里较高的一项为主，另一项加分，控制只占一点', () => {
     const assister = battleRadarCorners({ ...base, healing: 0, assists: 90, stuns: 40 });
-    const stunner = battleRadarCorners({ ...base, healing: 10, assists: 20, stuns: 90 });
+    const balanced = battleRadarCorners({ ...base, healing: 60, assists: 60, stuns: 40 });
+    const stunner = battleRadarCorners({ ...base, healing: 0, assists: 20, stuns: 90 });
+    const capped = battleRadarCorners({ ...base, healing: 100, assists: 80, stuns: 50 });
 
-    expect(healer.support).toBe(85);
     expect(assister.support).toBe(85);
+    expect(balanced.support).toBe(74);
     expect(stunner.support).toBe(27);
+    expect(capped.support).toBe(95);
   });
 });
