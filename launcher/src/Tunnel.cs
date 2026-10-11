@@ -695,6 +695,7 @@ namespace Windy10v10AI.Launcher
         IPEndPoint dota;
         DateTime lastReceived;
         DateTime lastSent;
+        DateTime? lastFromDota;
 
         public volatile bool Lost;
         public volatile bool Kicked;
@@ -853,10 +854,16 @@ namespace Windy10v10AI.Launcher
             get { lock (sync) return host != null && (DateTime.UtcNow - lastReceived).TotalMilliseconds > QuietMs; }
         }
 
+        // When Dota last sent anything into the game, or null before it ever did
+        public DateTime? LastDotaPacket
+        {
+            get { lock (sync) return lastFromDota; }
+        }
+
         // Opens the local port Dota connects to and starts watching the link
         public void Forward()
         {
-            local = new UdpClient(new IPEndPoint(IPAddress.Loopback, GamePort));
+            local = new UdpClient(new IPEndPoint(IPAddress.Loopback, LocalGate.Port));
             NativeMethods.KeepPrivate(local.Client);
             new Thread(() =>
             {
@@ -866,9 +873,15 @@ namespace Windy10v10AI.Launcher
                     {
                         var from = new IPEndPoint(IPAddress.Any, 0);
                         var payload = local.Receive(ref from);
+                        if (SteamQuery.IsQuery(payload))
+                        {
+                            SteamQuery.Reply(local, payload, from);
+                            continue;
+                        }
                         lock (sync)
                         {
                             dota = from;
+                            lastFromDota = DateTime.UtcNow;
                             if (host == null) continue;
                             Send(Packet.Data, payload, host);
                             lastSent = DateTime.UtcNow;
