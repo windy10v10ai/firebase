@@ -71,6 +71,7 @@ namespace Windy10v10AI.Launcher
         // The game turns off its auto start when the dedicated server carries this name
         const string RoomHostname = "windy10v10ai-room";
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
+        const string CorruptContent = "FATAL ERROR: Content file";
         // The game sends its results the moment a team wins, a few seconds before the post-game state
         const string ResultsSent = "/api/game/end";
         const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
@@ -1221,7 +1222,7 @@ namespace Windy10v10AI.Launcher
             while (true)
             {
                 if (stopping) throw new OperationCanceledException();
-                if (server.HasExited) throw new LaunchError(Strings.ServerExited, true);
+                if (server.HasExited) throw ServerExitError();
                 NativeMethods.HideWindowsOf(server.Id);
                 if (ReadShared(logFile).Contains(ready))
                 {
@@ -1234,6 +1235,22 @@ namespace Windy10v10AI.Launcher
                 UI(() => hint.Text = text);
                 Thread.Sleep(1000);
             }
+        }
+
+        LaunchError ServerExitError()
+        {
+            if (!AddonCorrupt(ReadShared(logFile))) return new LaunchError(Strings.ServerExited, true);
+            return new LaunchError(Strings.MapCorrupt, false) { Button = Strings.VerifyFiles, OnClick = () => OpenUrl("steam://validate/570") };
+        }
+
+        // A damaged Workshop map only shows up as a fatal content error in the server log
+        internal static bool AddonCorrupt(string log)
+        {
+            foreach (var line in log.Split('\n'))
+            {
+                if (line.Contains(CorruptContent) && line.Contains("dota_addons")) return true;
+            }
+            return false;
         }
 
         void OnJoinClick(string code)
