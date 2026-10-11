@@ -99,13 +99,14 @@ describe('LauncherRelayService', () => {
 
   describe('routeCheck', () => {
     const probe = (address: string, rtt: number | undefined) => ({ address, rtt, loss: 0 });
-    const thresholds = { directLossPct: 5, relayLossPct: 2, relayExtraRttMs: 50 };
+    const scoring = { lossCostMs: 10, switchMarginMs: 30 };
+    const thresholds = { directLossPct: 5, relayLossPct: 2, ...scoring };
 
-    it('经第一台中转的估算延迟到 150 ms 就不下发选线阈值，估不出时照常下发', () => {
+    it('经第一台中转的估算延迟到 150 ms 就去掉 0.6.0 的丢包阈值，估不出时照常下发', () => {
       expect(service.routeCheck([probe('a', 30)], [probe('a', 40)], 'a')).toEqual(thresholds);
       expect(
         service.routeCheck([probe('a', 70), probe('b', 5)], [probe('a', 80), probe('b', 5)], 'a'),
-      ).toBeUndefined();
+      ).toEqual(scoring);
       expect(service.routeCheck(undefined, [probe('a', 300)], 'a')).toEqual(thresholds);
     });
   });

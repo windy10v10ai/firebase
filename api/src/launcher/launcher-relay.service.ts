@@ -26,14 +26,19 @@ export const LAUNCHER_RELAYS: LauncherRelay[] = [
 export const RELAY_TICKET_TTL_MS = 24 * 60 * 60 * 1000;
 // 加入前的回声测试包数少，丢包到这个程度基本是线路在丢，进游戏也好不了
 const RELAY_LOSS_LIMIT_PCT = 10;
-// 同优先级之外再让一步：优先的那台慢太多时，延迟比优先级更影响手感
-const RELAY_SLOWER_LIMIT_MS = 30;
-// 排序时每 1% 丢包（双方之和）折算的延迟：丢包几个百分点的线路比慢几十毫秒的干净线路更卡
-const RELAY_LOSS_COST_MS = 10;
+// 线路得分 = 延迟 + 丢包百分比 × 这个毫秒数，排中转与加入后选线共用：丢包几个百分点比慢几十毫秒更卡
+const LOSS_COST_MS = 10;
+// 得分好出这么多才放弃优先的那台中转或直连，差不多时不为一点差距多占中转
+const SWITCH_MARGIN_MS = 30;
 
-// 加入后实测选线的阈值：直连丢包到这个程度、中转够干净且不比直连慢太多才改走中转
-const ROUTE_CHECK: RouteCheckDto = { directLossPct: 5, relayLossPct: 2, relayExtraRttMs: 50 };
-// 中转估算延迟到这个程度就不做加入后选线：双方离中转都远，直连即使丢包也比绕远路好玩
+// 0.6.0 只认这两个丢包阈值，不看延迟
+const LEGACY_ROUTE_CHECK = { directLossPct: 5, relayLossPct: 2 };
+const ROUTE_CHECK: RouteCheckDto = {
+  ...LEGACY_ROUTE_CHECK,
+  lossCostMs: LOSS_COST_MS,
+  switchMarginMs: SWITCH_MARGIN_MS,
+};
+// 中转估算延迟到这个程度就不让 0.6.0 选线：双方离中转都远，直连即使丢包也比绕远路好玩
 const ROUTE_CHECK_RELAY_RTT_LIMIT_MS = 150;
 
 export type RelayRole = 'h' | 'j';
@@ -70,7 +75,7 @@ export class LauncherRelayService {
         h.loss <= RELAY_LOSS_LIMIT_PCT &&
         j.loss <= RELAY_LOSS_LIMIT_PCT;
       const cost = usable
-        ? h.rtt! + j.rtt! + (h.loss + j.loss) * RELAY_LOSS_COST_MS
+        ? h.rtt! + j.rtt! + (h.loss + j.loss) * LOSS_COST_MS
         : Number.POSITIVE_INFINITY;
       return { ...relay, usable, cost };
     });
@@ -81,7 +86,7 @@ export class LauncherRelayService {
       (best, relay) => (!best || relay.cost < best.cost ? relay : best),
       undefined,
     );
-    if (fastest && usable[0].cost - fastest.cost > RELAY_SLOWER_LIMIT_MS) {
+    if (fastest && usable[0].cost - fastest.cost > SWITCH_MARGIN_MS) {
       usable.splice(usable.indexOf(fastest), 1);
       usable.unshift(fastest);
     }
@@ -89,7 +94,7 @@ export class LauncherRelayService {
     return [...usable, ...scored.filter((relay) => !relay.usable)].map((relay) => relay.address);
   }
 
-  /** 给一次加入挑选线阈值，经这台中转太慢时返回 undefined，启动器就不再从直连换到中转。 */
+  /** 给一次加入挑选线阈值，经这台中转太慢时去掉 0.6.0 认的丢包阈值，让它不再从直连换到中转。 */
   routeCheck(
     host: RelayProbeDto[] | undefined,
     joiner: RelayProbeDto[] | undefined,
@@ -101,7 +106,11 @@ export class LauncherRelayService {
     if (hostRtt === undefined || joinerRtt === undefined) {
       return ROUTE_CHECK;
     }
-    return hostRtt + joinerRtt >= ROUTE_CHECK_RELAY_RTT_LIMIT_MS ? undefined : ROUTE_CHECK;
+    if (hostRtt + joinerRtt < ROUTE_CHECK_RELAY_RTT_LIMIT_MS) {
+      return ROUTE_CHECK;
+    }
+    // 新版按得分比较时自己会发现中转太慢，照常下发
+    return { lossCostMs: LOSS_COST_MS, switchMarginMs: SWITCH_MARGIN_MS };
   }
 
   /** 给一次加入的房主或加入者签中转通行证，顺序为空或没配私钥时返回 undefined。 */

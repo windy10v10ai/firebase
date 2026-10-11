@@ -349,14 +349,14 @@ export class LauncherProfileDto {
 }
 
 export class RouteCheckDto {
-  @ApiProperty({ description: '直连丢包达到这个百分比才考虑改走中转' })
-  directLossPct: number;
-  @ApiProperty({ description: '中转丢包不超过这个百分比才改过去' })
-  relayLossPct: number;
-  @ApiPropertyOptional({
-    description: '中转往返比直连多出不超过这个毫秒数才改过去，省略时不看延迟；0.6.0 及更早忽略',
-  })
-  relayExtraRttMs?: number;
+  @ApiPropertyOptional({ description: '0.6.0：直连丢包达到这个百分比才考虑改走中转' })
+  directLossPct?: number;
+  @ApiPropertyOptional({ description: '0.6.0：中转丢包不超过这个百分比才改过去' })
+  relayLossPct?: number;
+  @ApiProperty({ description: '线路得分里每 1% 丢包折算的毫秒数，得分 = 延迟 + 丢包百分比 × 它' })
+  lossCostMs: number;
+  @ApiProperty({ description: '中转得分比直连低这么多毫秒以上才改走中转' })
+  switchMarginMs: number;
 }
 
 export class RelayDto {
