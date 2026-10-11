@@ -26,16 +26,15 @@ export type BattleRadarCorner = 'damage' | 'participation' | 'gold' | 'push' | '
 
 // 承伤与死亡各占一半：只看死亡，躲在后排不上前的人得分最高
 const SURVIVAL_TANK_WEIGHT = 0.5;
-// 治疗和助攻最能分出辅助；控制单人局也打得出来，单人玩家这一项不至于是 0
-const SUPPORT_WEIGHTS = { healing: 0.4, assists: 0.4, stuns: 0.2 } as const;
+// 治疗型和助攻型辅助很少两项都高，取较高的一项才不会互相拖低；控制人人都有，只占一点，免得单靠控制就像辅助
+const SUPPORT_STUNS_WEIGHT = 0.1;
 
 /** 把接口的各项合成六边形的六个角。 */
 export function battleRadarCorners(radar: PlayerStatsRadar): Record<BattleRadarCorner, number> {
   const survival = SURVIVAL_TANK_WEIGHT * radar.tank + (1 - SURVIVAL_TANK_WEIGHT) * radar.deaths;
   const support =
-    SUPPORT_WEIGHTS.healing * radar.healing +
-    SUPPORT_WEIGHTS.assists * radar.assists +
-    SUPPORT_WEIGHTS.stuns * radar.stuns;
+    (1 - SUPPORT_STUNS_WEIGHT) * Math.max(radar.healing, radar.assists) +
+    SUPPORT_STUNS_WEIGHT * radar.stuns;
   return {
     damage: radar.damage,
     participation: radar.participation,
