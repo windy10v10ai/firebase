@@ -20,9 +20,15 @@
     "membership": "Membership",
     "launch": "Start the game",
     "launchShort": "Launch",
+    "feedback": "Report / Suggest",
     "disclosure": "Business Disclosure",
     "switchLanguage": "Switch language",
-    "menu": "Menu"
+    "menu": "Menu",
+    "menuGroups": {
+      "mine": "My account",
+      "game": "Game",
+      "community": "Community & help"
+    }
   },
   "home": {
     "title": "DOTA2 10v10 AI Custom Map",
@@ -30,6 +36,10 @@
       "title": "Steam Workshop",
       "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates.",
       "subscribe": "Get the map"
+    },
+    "feedback": {
+      "title": "Report / Suggest",
+      "description": "Found a problem or have an idea? Let us know"
     },
     "github": {
       "title": "GitHub",
@@ -979,5 +989,48 @@
     "profileHeadline": "{name}’s 10v10 AI stats",
     "profileStats": "Played {matches, plural, one {# game} other {# games}} with a {winRate, number, percent} win rate. Check out your stats",
     "profileNoMatches": "See {name}’s stats. Yours are here too"
+  },
+  "feedback": {
+    "title": "Report / Suggest",
+    "intro": "For problems in the game, reporting from the <launcher>launcher</launcher> can attach game logs, so we find the cause faster.",
+    "type": "Type",
+    "types": {
+      "problem": "Report a problem",
+      "suggestion": "Suggest an idea"
+    },
+    "topics": "Related to",
+    "upToTwo": "Up to 2",
+    "topicNames": {
+      "hero": "Hero",
+      "ability": "Ability",
+      "awaken": "Awakening",
+      "item": "Item",
+      "bot": "Bot AI",
+      "balance": "Balance",
+      "ui": "UI",
+      "member": "Membership",
+      "lag": "Lag / Disconnect",
+      "launcher": "Launcher",
+      "web": "Website",
+      "game": "Game"
+    },
+    "description": "Description",
+    "problemCue": "Briefly say what happened, e.g. which minute or which hero",
+    "suggestionCue": "Tell us your idea, e.g. a feature you want or something too strong or too weak",
+    "steamId": "Dota2 Friend ID",
+    "steamIdPlaceholder": "Please enter your Dota2 friend ID",
+    "steamIdHelp": "Please enter a valid Dota2 friend ID, format: numbers only, up to 10 digits",
+    "signInInstead": "Sign in with Steam to skip this",
+    "privacy": "By sending, you agree to the <link>Privacy Policy</link>",
+    "send": "Send",
+    "sending": "Sending...",
+    "resend": "Send again",
+    "thanks": "Feedback received, thank you!",
+    "another": "Send another",
+    "errors": {
+      "failed": "Could not send. Check your network and try again.",
+      "tooMany": "Too many reports. Please try again in a while.",
+      "dailyLimit": "We received too many reports today. Please try again tomorrow."
+    }
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { EXTERNAL_LINKS } from '@/config/links';
@@ -32,7 +33,11 @@ export default function Home() {
 
       <LaunchCard />
 
-      <section className="space-y-6">
+      <section className="grid gap-6 md:grid-cols-2">
+        <Link href="/feedback" className="block card-container card-pad card-hover">
+          <h2 className="title-secondary mb-2">{t('home.feedback.title')}</h2>
+          <p className="text-content">{t('home.feedback.description')}</p>
+        </Link>
         {OTHER_LINKS.map((link) => (
           <Card
             key={link.href}
