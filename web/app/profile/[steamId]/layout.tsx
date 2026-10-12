@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
-import { pageTitle, SITE_NAME } from '@/app/lib/page-title';
+import { NO_INDEX, pageTitle, SITE_NAME } from '@/app/lib/page-title';
 import { fetchProfileShare, SHARE_IMAGE } from '@/app/lib/share-card';
 
 import type { Metadata } from 'next';
@@ -15,7 +15,8 @@ export async function generateMetadata({
   params: Promise<{ steamId: string }>;
 }): Promise<Metadata> {
   const { steamId } = await params;
-  const [base, share] = await Promise.all([profileTitle(), fetchProfileShare(steamId)]);
+  const [pageMeta, share] = await Promise.all([profileTitle(), fetchProfileShare(steamId)]);
+  const base = { ...pageMeta, ...NO_INDEX };
   if (!share) {
     return base;
   }
