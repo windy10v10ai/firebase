@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.6.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.6.0.0")]
+[assembly: System.Reflection.AssemblyVersion("0.6.1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.6.1.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.6.0";
+        const string Version = "0.6.1";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -82,7 +82,7 @@ namespace Windy10v10AI.Launcher
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
-        const int GamePollMs = 30000;
+        const int GamePollMs = 60000;
         // Keeps BigQuery rows few, at the cost of losing up to this much when the host crashes
         const int QualityWindowMs = 300000;
         // Matches the API's cap, so rows piling up while the API is unreachable are dropped oldest first
@@ -93,7 +93,7 @@ namespace Windy10v10AI.Launcher
         const int FastPollMinutes = 5;
         // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
         const int PauseMinutes = 15;
-        const int ListRefreshMs = 30000;
+        const int ListRefreshMs = 60000;
         const int BadgeRefreshMs = 60000;
         // A join page left open in the background stops asking the API for the list
         const int BrowseMinutes = 5;
@@ -795,7 +795,7 @@ namespace Windy10v10AI.Launcher
         // The count of rooms open to join, kept current while the player is on another tab
         void RefreshBadge()
         {
-            if (modeBar.Selected == 2 || WindowState == FormWindowState.Minimized) return;
+            if (modeBar.Selected == 2 || WindowState == FormWindowState.Minimized || ActiveForm != this) return;
             if (Interlocked.Exchange(ref badgeLoading, 1) == 1) return;
             var body = ListBody();
             // The badge counts rooms the player could join, so a host's own room is left out
