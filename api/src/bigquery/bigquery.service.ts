@@ -12,7 +12,7 @@ import { Member } from '../members/entities/members.entity';
 import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
 
-import { GameEndRecordContext, buildGameEndRows } from './game-end-rows';
+import { GameEndRecordContext, buildGameEndRows, buildGamePerfRow } from './game-end-rows';
 import {
   ConnectionQualityRecord,
   RouteCheckRecord,
@@ -32,6 +32,7 @@ import {
 const BIGQUERY_PROJECT_ID = 'windy10v10ai';
 const BIGQUERY_LOCATION = 'asia-northeast1';
 const GAME_END_PLAYERS_TABLE = 'game_end_players';
+const GAME_PERF_TABLE = 'game_perf';
 const POINT_HISTORY_TABLE = 'point_history';
 const MEMBER_HISTORY_TABLE = 'member_history';
 const LAUNCHER_ROOM_EVENTS_TABLE = 'launcher_room_events';
@@ -43,9 +44,14 @@ export class BigQueryService {
   private readonly datasetId = process.env.BIGQUERY_DATASET;
   private readonly client = new BigQuery({ projectId: BIGQUERY_PROJECT_ID });
 
-  /** 把一次已接受的结算按玩家逐行写入战绩表。 */
+  /** 把一次已接受的结算按玩家逐行写入战绩表，带卡顿统计时另写一行卡顿表。 */
   async recordGameEnd(gameEnd: GameEndDto, context: GameEndRecordContext): Promise<void> {
-    await this.insert(GAME_END_PLAYERS_TABLE, buildGameEndRows(gameEnd, context, new Date()));
+    const endedAt = new Date();
+    const perfRow = buildGamePerfRow(gameEnd, context, endedAt);
+    await Promise.all([
+      this.insert(GAME_END_PLAYERS_TABLE, buildGameEndRows(gameEnd, context, endedAt)),
+      this.insert(GAME_PERF_TABLE, perfRow ? [perfRow] : []),
+    ]);
   }
 
   /** 把一次积分变动写入积分记录表。 */

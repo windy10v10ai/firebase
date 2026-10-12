@@ -1,7 +1,7 @@
 import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
-import { buildGameEndRows } from './game-end-rows';
+import { buildGameEndRows, buildGamePerfRow } from './game-end-rows';
 
 describe('buildGameEndRows', () => {
   const endedAt = new Date('2026-09-30T00:00:00Z');
@@ -89,5 +89,32 @@ describe('buildGameEndRows', () => {
       matchId: '0',
       player: { heroName: 'npc_dota_hero_lina' },
     });
+  });
+
+  it('卡顿统计一局一行，没带时不写', () => {
+    const perf = {
+      host: 'local',
+      realSec: 1850.5,
+      units: 512,
+      modifiers: 4810,
+      segments: [{ ratio: 1.003, units: 210.4, modifiers: 1500 }],
+    };
+    const row = buildGamePerfRow(
+      { ...gameEnd, dotaTimeMsec: 1_800_000, perf } as GameEndDto,
+      { ...context, route: 'proxy' },
+      endedAt,
+    );
+
+    expect(row).toMatchObject({
+      game_id: 'game-id',
+      route: 'proxy',
+      host: 'local',
+      player_count: 1,
+      dota_time_msec: 1_800_000,
+      real_sec: 1850.5,
+      segments: [{ ratio: 1.003, units: 210, modifiers: 1500 }],
+    });
+    expect(JSON.parse(row!.raw as string)).toEqual(perf);
+    expect(buildGamePerfRow(gameEnd, context, endedAt)).toBeNull();
   });
 });
