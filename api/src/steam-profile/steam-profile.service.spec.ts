@@ -30,7 +30,7 @@ function createService(
     repository as never,
     apiService as unknown as SteamProfileApiService,
   );
-  return { service, apiService, store };
+  return { service, apiService, store, repository };
 }
 
 describe('SteamProfileService', () => {
@@ -70,5 +70,16 @@ describe('SteamProfileService', () => {
 
     expect(dto).toEqual({ steamId: `${STEAM_ID}`, personaName: null, avatarUrl: null });
     expect(store.get(`${STEAM_ID}`)?.fetchedAt).toBeInstanceOf(Date);
+  });
+
+  it('同时到达的首次请求输掉写入时，已存在的报错不外抛', async () => {
+    const { service, repository } = createService(undefined, SUMMARY);
+    repository.create.mockRejectedValueOnce(
+      new Error(`A document with id ${STEAM_ID} already exists.`),
+    );
+
+    const dto = await service.findBySteamId(STEAM_ID);
+
+    expect(dto.personaName).toBe(SUMMARY.personaName);
   });
 });

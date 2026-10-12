@@ -39,10 +39,21 @@ export class SteamProfileService {
     if (cached) {
       await this.steamProfileRepository.update(refreshed);
     } else {
-      await this.steamProfileRepository.create(refreshed);
+      await this.createIfAbsent(refreshed);
     }
 
     return this.toDto(id, refreshed);
+  }
+
+  // 同一玩家的首次请求可能同时到达，输掉的那几个写入的是同一份资料，已存在就不必再报错
+  private async createIfAbsent(profile: SteamProfile): Promise<void> {
+    try {
+      await this.steamProfileRepository.create(profile);
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes('already exists'))) {
+        throw error;
+      }
+    }
   }
 
   private isExpired(profile: SteamProfile): boolean {
