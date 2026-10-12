@@ -69,6 +69,37 @@ export function buildGameEndRows(
   }));
 }
 
+/** 带整局卡顿统计的结算写一行，没带时返回空。 */
+export function buildGamePerfRow(
+  gameEnd: GameEndDto,
+  context: GameEndRecordContext,
+  endedAt: Date,
+): Record<string, unknown> | null {
+  const perf = gameEnd.perf;
+  if (!perf) return null;
+  return {
+    game_id: context.gameId,
+    match_id: String(gameEnd.matchId),
+    ended_at: endedAt.toISOString(),
+    version: gameEnd.version,
+    difficulty: toInt(gameEnd.difficulty),
+    server_type: context.serverType,
+    route: context.route,
+    host: perf.host,
+    player_count: toInt(gameEnd.playerCount),
+    dota_time_msec: toInt(gameEnd.dotaTimeMsec),
+    real_sec: toFloat(perf.realSec),
+    units: toInt(perf.units),
+    modifiers: toInt(perf.modifiers),
+    segments: perf.segments.map((segment) => ({
+      ratio: toFloat(segment.ratio),
+      units: toInt(segment.units),
+      modifiers: toInt(segment.modifiers),
+    })),
+    raw: JSON.stringify(perf),
+  };
+}
+
 function buildPlayerColumns(player: GameEndPlayerDto, winnerTeamId: number) {
   return {
     steam_id: toInt(player.steamId) ?? 0,
