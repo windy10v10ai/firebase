@@ -1,7 +1,7 @@
 'use client';
 
 import { signInWithCustomToken } from 'firebase/auth';
-import { Circle, CircleCheck, CircleX, LoaderCircle, TriangleAlert } from 'lucide-react';
+import { Circle, CircleCheck, CircleX, Info, LoaderCircle, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -18,8 +18,8 @@ interface SteamVerifyResponse {
   customToken: string;
 }
 
-// 换登录态要连 Firebase，这一步在部分网络下不稳；退避重试能盖掉短暂抖动
-const SIGN_IN_RETRY_DELAYS_MS = [400, 1200];
+// 部分网络下请求偶尔连不上，退避重试能盖掉短暂抖动
+const RETRY_DELAYS_MS = [400, 1200];
 // 接口不响应时 fetch 会一直挂着，不设上限页面就只剩转圈，玩家截图里没有任何信息
 const VERIFY_TIMEOUT_MS = 20_000;
 // 正常登录一两秒就结束，过了这个时长才显示已等秒数
@@ -95,19 +95,27 @@ function describeError(error: unknown): Pick<Failure, 'code' | 'detail'> {
   return { code: 'unknown', detail: null };
 }
 
-async function signInWithRetry(customToken: string, onRetry: (attempt: number) => void) {
+async function withRetry<T>(
+  task: () => Promise<T>,
+  canRetry: (error: unknown) => boolean,
+  onRetry: (attempt: number) => void,
+): Promise<T> {
   for (let attempt = 1; ; attempt += 1) {
     try {
-      await signInWithCustomToken(auth, customToken);
-      return;
+      return await task();
     } catch (error) {
-      if (attempt > SIGN_IN_RETRY_DELAYS_MS.length) {
+      if (attempt > RETRY_DELAYS_MS.length || !canRetry(error)) {
         throw error;
       }
-      await new Promise((resolve) => setTimeout(resolve, SIGN_IN_RETRY_DELAYS_MS[attempt - 1]));
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt - 1]));
       onRetry(attempt + 1);
     }
   }
+}
+
+// 请求没发出去时 Steam 的一次性参数还没被用掉，可以再发；超时的请求可能已到后端，重发必然被判签名无效
+function isUnsent(error: unknown): boolean {
+  return error instanceof TypeError;
 }
 
 // 回调参数里带着 Steam 的 64 位 ID，换算成 Dota2 ID 才能对上生产日志；只用于显示，不做校验
@@ -178,12 +186,16 @@ function LoginCallbackContent() {
       enterStage('signIn');
       let attempts = 1;
       try {
-        await signInWithRetry(customToken, (nextAttempt) => {
-          attempts = nextAttempt;
-          if (runRef.current === run) {
-            setAttempt(nextAttempt);
-          }
-        });
+        await withRetry(
+          () => signInWithCustomToken(auth, customToken),
+          () => true,
+          (nextAttempt) => {
+            attempts = nextAttempt;
+            if (runRef.current === run) {
+              setAttempt(nextAttempt);
+            }
+          },
+        );
         trackEvent('login', { method: 'steam' });
         enterStage('redirect');
         router.replace(next);
@@ -214,19 +226,28 @@ function LoginCallbackContent() {
 
     (async () => {
       let customToken: string;
+      let attempts = 1;
       try {
         // 原样透传查询串给后端二次核对签名，见 SteamVerifyDto 的说明
-        ({ customToken } = await apiFetch<SteamVerifyResponse>('/api/auth/steam/verify', {
-          method: 'POST',
-          body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
-          signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
-        }));
+        ({ customToken } = await withRetry(
+          () =>
+            apiFetch<SteamVerifyResponse>('/api/auth/steam/verify', {
+              method: 'POST',
+              body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
+              signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
+            }),
+          isUnsent,
+          (nextAttempt) => {
+            attempts = nextAttempt;
+            setAttempt(nextAttempt);
+          },
+        ));
       } catch (error) {
         console.error('[auth] Steam 回调核对失败', error);
         setFailure({
           stage: 'verify',
           ...describeError(error),
-          attempts: 1,
+          attempts,
           elapsedMs: Date.now() - startedAtRef.current,
           at: new Date(),
         });
@@ -259,6 +280,28 @@ function LoginCallbackContent() {
   const retryLabel = hasToken ? t('retry') : t('relogin');
   const waiting = !failure && stage !== 'redirect';
 
+  const diagLines = failure
+    ? [
+        t('diag.stuckAt', {
+          step: STEPS.indexOf(failure.stage) + 1,
+          name: t(`steps.${failure.stage}`),
+        }),
+        `${failure.code}${failure.detail ? ` · ${t(`diag.detail.${failure.detail}`)}` : ''}`,
+        t('diag.attempts', {
+          attempts: failure.attempts,
+          seconds: Math.round(failure.elapsedMs / 1000),
+        }),
+        `${formatWithZone(failure.at, locale)}${accountId ? ` · ${t('diag.player', { id: accountId })}` : ''}`,
+      ]
+    : [];
+  const feedbackParams = new URLSearchParams({
+    topic: 'web',
+    description: [t('feedbackSummary'), '', ...diagLines].join('\n'),
+    ...(accountId ? { id: accountId } : {}),
+  });
+  // 页面能打开而这条请求发不出去，多半是浏览器插件或安全软件按网址拦了它
+  const showBlockedHint = failure?.stage === 'verify' && failure.code === 'network';
+
   return (
     <section className="card-container card-pad mx-auto max-w-xl space-y-5" aria-live="polite">
       <span className="flex size-12 items-center justify-center rounded-full border border-line bg-panel-soft">
@@ -275,6 +318,13 @@ function LoginCallbackContent() {
           {t(failure ? (failure.stage === 'signIn' ? 'failSignIn' : 'failVerify') : 'description')}
         </p>
       </div>
+
+      {showBlockedHint ? (
+        <p className="flex items-start gap-2.5 rounded-[7px] border border-line bg-panel-soft px-3.5 py-3 text-sm text-content">
+          <Info className="mt-0.5 size-[18px] shrink-0 text-link" aria-hidden="true" />
+          {t('blockedHint')}
+        </p>
+      ) : null}
 
       <ol className="space-y-2.5 text-sm">
         {STEPS.map((step) => {
@@ -299,31 +349,17 @@ function LoginCallbackContent() {
         <>
           <div className="space-y-1.5">
             <div className="rounded-[7px] border border-line bg-panel-soft px-3 py-2.5 font-mono text-[13px] leading-5 text-[#a1a1aa] select-all">
-              <p>
-                {t('diag.stuckAt', {
-                  step: STEPS.indexOf(failure.stage) + 1,
-                  name: t(`steps.${failure.stage}`),
-                })}
-              </p>
-              <p>
-                {failure.code}
-                {failure.detail ? ` · ${t(`diag.detail.${failure.detail}`)}` : null}
-              </p>
-              <p>
-                {t('diag.attempts', {
-                  attempts: failure.attempts,
-                  seconds: Math.round(failure.elapsedMs / 1000),
-                })}
-              </p>
-              <p>
-                {formatWithZone(failure.at, locale)}
-                {accountId ? ` · ${t('diag.player', { id: accountId })}` : null}
-              </p>
+              {diagLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
             </div>
             <p className="text-xs text-muted">{t('diag.hint')}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={retry}>{retryLabel}</Button>
+            <Link href={`/feedback?${feedbackParams.toString()}`} className="btn-secondary">
+              {t('feedback')}
+            </Link>
             <Link href="/" className="btn-ghost">
               {t('home')}
             </Link>

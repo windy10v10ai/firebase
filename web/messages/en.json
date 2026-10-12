@@ -952,11 +952,14 @@
       "failTitle": "Sign-in didn't finish",
       "failVerify": "We couldn't confirm this Steam sign-in. Please sign in with Steam again.",
       "failSignIn": "We couldn't reach the sign-in service, most likely a network hiccup. Steam already confirmed you, so just try again.",
+      "blockedHint": "Try a different browser, or turn off ad blockers and the web protection in your security software.",
+      "feedback": "Report this problem",
+      "feedbackSummary": "Signing in to the website failed.",
       "diag": {
         "stuckAt": "Stuck at step {step} · {name}",
         "attempts": "{attempts, plural, one {# attempt} other {# attempts}} · {seconds}s total",
         "player": "ID {id}",
-        "hint": "When reporting a problem, include this box in your screenshot",
+        "hint": "\"Report this problem\" includes this box automatically",
         "detail": {
           "timeout": "timed out",
           "unreachable": "unreachable",
