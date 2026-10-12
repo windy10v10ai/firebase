@@ -1,34 +1,38 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Type } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
-import * as functions from 'firebase-functions';
 import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/scheduler';
 
 import { AfdianService } from './src/afdian/afdian.service';
-import { AppModule } from './src/app.module';
+import { AppModule, ClientAppModule } from './src/app.module';
 import { PlayerStatsRadarService } from './src/player/player-stats-radar.service';
 import { SECRET } from './src/util/secret/secret.service';
 import { AppGlobalSettings } from './src/util/settings';
 
-// Init NestJS app
-const server = express();
+type NestServer = { app: INestApplication; server: express.Express };
 
-const adapter = new ExpressAdapter(server);
-const createApp = async () => {
-  const app = await NestFactory.create(AppModule, adapter, {
+const createApp = async (module: Type): Promise<NestServer> => {
+  const server = express();
+  const app = await NestFactory.create(module, new ExpressAdapter(server), {
     bodyParser: false, // 禁用内置的 body parser，避免 router 检测带来的兼容性问题
   });
 
   AppGlobalSettings(app);
   await app.init();
-  return app;
+  return { app, server };
 };
 
-const promiseApplicationReady = createApp();
+// 每个函数的实例只建自己要用的那个应用，部署时 CLI 加载本文件分析函数列表也不会建应用
+const lazy = (module: Type) => {
+  let ready: Promise<NestServer> | undefined;
+  return () => (ready ??= createApp(module));
+};
+const getClientApp = lazy(ClientAppModule);
+const getAdminApp = lazy(AppModule);
 
 const isLocal = process.env.FUNCTIONS_EMULATOR === 'true';
 
@@ -60,25 +64,10 @@ export const client = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    const regex =
-      '^/api/(auth|game|afdian|analytics|player|kofi|alipay|daily-task|hello|proxy|launcher|feedback).*';
-    callServerWithRegex(regex, req, res);
+    const { server } = await getClientApp();
+    server(req, res);
   },
 );
-
-async function callServerWithRegex(
-  regex: string,
-  ...args: [req: functions.https.Request, resp: express.Response]
-) {
-  const path = args[0].path;
-  if (path.match(regex)) {
-    await promiseApplicationReady;
-    server(...args);
-  } else {
-    functions.logger.warn(`Abnormal request on API Cloud Function! Path: ${path}`);
-    args[1].status(403).send('Invalid path');
-  }
-}
 
 // function need authenticated
 export const admin = onRequest(
@@ -93,7 +82,7 @@ export const admin = onRequest(
     secrets: commonSecrets,
   },
   async (req, res) => {
-    await promiseApplicationReady;
+    const { server } = await getAdminApp();
     server(req, res);
   },
 );
@@ -109,7 +98,7 @@ export const scheduledOrderCheck = onSchedule(
   },
   async () => {
     logger.info('Schedule Function triggered');
-    const app = await promiseApplicationReady;
+    const { app } = await getClientApp();
     const result = await app.get(AfdianService).activeRecentOrder(10);
     if (result.activeTradeNos.length > 0) {
       logger.warn(`Active trade nos: ${result.activeTradeNos}`);
@@ -136,7 +125,7 @@ export const dailyJobs = onSchedule(
     secrets: commonSecrets,
   },
   async () => {
-    const app = await promiseApplicationReady;
+    const { app } = await getClientApp();
     for (const job of DAILY_JOBS) {
       // 一项失败不能挡住后面的任务
       try {

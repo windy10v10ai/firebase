@@ -2,20 +2,16 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { AfdianService } from '../afdian/afdian.service';
-import { ActiveAfdianOrderDto } from '../afdian/dto/active-afdian-order.dto';
 import { CreateMemberDto } from '../members/dto/create-member.dto';
 import { MembersService } from '../members/members.service';
 import { PlayerPropertyResetService } from '../player-property/player-property-reset.service';
 import { Public } from '../util/auth/public.decorator';
-
-import { AdminService } from './admin.service';
 
 @Public()
 @ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
   constructor(
-    private readonly adminService: AdminService,
     private readonly afdianService: AfdianService,
     private readonly membersService: MembersService,
     private readonly playerPropertyResetService: PlayerPropertyResetService,
@@ -31,22 +27,7 @@ export class AdminController {
     return this.afdianService.findFailed();
   }
 
-  @Post('/afdian/order/active')
-  activeOrder(@Body() dto: ActiveAfdianOrderDto) {
-    return this.afdianService.activeOrderManual(dto.outTradeNo, dto.steamId);
-  }
-
-  @Post('/afdian/order/active-recent')
-  activeRecentOrder() {
-    return this.afdianService.activeRecentOrder(100);
-  }
-
-  @Get('/kofi/order/null-email')
-  findKofiOrdersWithNullEmail() {
-    return this.adminService.findKofiOrdersWithNullEmail();
-  }
-
-  // 批量重置所有 usedLevel 与 PlayerProperty 不一致的玩家属性加点，供后续需要重置属性时复用
+  // 清空全服所有加过点的玩家的属性加点，用于调整属性数值后让全员重新分配，不只是修正数据不一致的玩家
   @Post('/player-property/reset')
   resetPlayerProperty() {
     return this.playerPropertyResetService.resetAll();
