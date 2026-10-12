@@ -97,6 +97,8 @@ namespace Windy10v10AI.Launcher
         const int BadgeRefreshMs = 60000;
         // A join page left open in the background stops asking the API for the list
         const int BrowseMinutes = 5;
+        // The API caches the list this long, so coming back to the window sooner than this asks for nothing new
+        const int ActivateRefreshSeconds = 10;
         const int ListHeight = 280;
         const int BannerHeight = 80;
 
@@ -174,6 +176,7 @@ namespace Windy10v10AI.Launcher
         readonly Dictionary<Control, bool> hiddenTabStops = new Dictionary<Control, bool>();
         readonly System.Windows.Forms.Timer badgeTimer = new System.Windows.Forms.Timer { Interval = BadgeRefreshMs };
         int badgeLoading;
+        DateTime badgeAsked;
         readonly NoticeBar hostGuide = new NoticeBar();
         bool clientClosed;
         LocalGate gate;
@@ -406,6 +409,7 @@ namespace Windy10v10AI.Launcher
             refresh.Text = Strings.Refresh;
             refresh.Click += delegate
             {
+                browseSince = DateTime.UtcNow;
                 if (browser == null) UpdateBrowsing();
                 else browser.Refresh();
             };
@@ -441,6 +445,13 @@ namespace Windy10v10AI.Launcher
             {
                 RefreshIdleMapState();
                 if (!busy && modeBar.Selected == 2) codeBox.FillFromClipboard();
+                // A player switching back is usually looking for a friend's room, so the list should not wait for the next tick
+                if (browser != null && !(busy && !Hosting))
+                {
+                    browseSince = DateTime.UtcNow;
+                    if ((DateTime.UtcNow - browser.LastAsked).TotalSeconds >= ActivateRefreshSeconds) browser.Refresh();
+                }
+                else if ((DateTime.UtcNow - badgeAsked).TotalSeconds >= ActivateRefreshSeconds) RefreshBadge();
             };
             Shown += delegate
             {
@@ -797,6 +808,7 @@ namespace Windy10v10AI.Launcher
         {
             if (modeBar.Selected == 2 || WindowState == FormWindowState.Minimized || ActiveForm != this) return;
             if (Interlocked.Exchange(ref badgeLoading, 1) == 1) return;
+            badgeAsked = DateTime.UtcNow;
             var body = ListBody();
             // The badge counts rooms the player could join, so a host's own room is left out
             var own = Hosting ? roomCode : null;
