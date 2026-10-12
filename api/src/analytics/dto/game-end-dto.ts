@@ -194,14 +194,67 @@ export class GameEndPlayerDto {
   dailyTask?: DailyTaskResultDto;
 }
 
+export const GAME_HOSTS = ['launcher', 'dedicated', 'local'] as const;
+export type GameHost = (typeof GAME_HOSTS)[number];
+// 游戏端按固定时长切段并封顶，上限兜住伪造的请求体
+const GAME_PERF_MAX_SEGMENTS = 24;
+
+export class GamePerfSegmentDto {
+  @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  ratio: number;
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  units: number;
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  modifiers: number;
+}
+
+/** 整局卡顿统计，游戏端一局只随一条结算发送 */
+export class GamePerfDto {
+  @ApiProperty({ enum: GAME_HOSTS })
+  @IsIn(GAME_HOSTS)
+  host: GameHost;
+  /** 号角到结算的真实秒数，扣除暂停，与 dotaTimeMsec 同一区间 */
+  @ApiProperty()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  realSec: number;
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  units: number;
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  modifiers: number;
+  @ApiProperty({ type: [GamePerfSegmentDto] })
+  @IsArray()
+  @ArrayMaxSize(GAME_PERF_MAX_SEGMENTS)
+  @ValidateNested({ each: true })
+  @Type(() => GamePerfSegmentDto)
+  segments: GamePerfSegmentDto[];
+}
+
 export class GameEndDto extends EventBaseDto {
   @ApiProperty({ type: GameEndGameOptionsDto })
   @Type(() => GameEndGameOptionsDto)
   gameOptions: GameEndGameOptionsDto;
   @ApiProperty({ default: 2 })
   winnerTeamId: number;
+  // FIXME: 值其实是号角起算的 DOTA 时间，名字有误；全部改读 dotaTimeMsec 后删除
   @ApiProperty()
   gameTimeMsec: number;
+  /** 号角起算的 DOTA 时间，不含选人与准备阶段；旧版游戏不发送 */
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  dotaTimeMsec?: number;
   @ApiProperty({ type: [GameEndPlayerDto], maxLength: 20 })
   @IsArray()
   @IsNotEmpty()
@@ -215,4 +268,9 @@ export class GameEndDto extends EventBaseDto {
   @IsInt()
   @Min(1)
   playerCount: number = 1;
+  @ApiProperty({ type: GamePerfDto, required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => GamePerfDto)
+  perf?: GamePerfDto;
 }
