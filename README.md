@@ -240,56 +240,6 @@ echo $(gcloud auth print-identity-token)
 
 Import `api/swagger-spec.yaml` to postman with variable `baseUrl` : `https://asia-northeast1-windy10v10ai.cloudfunctions.net/admin`
 
-# Extension
-
-## Export Firestore to Bigquery
-
-### Setup Stream Firestore to BigQuery
-
-```bash
-firebase ext:install firebase/firestore-bigquery-export
-```
-
-or Edit [firebase.json](/firebase.json) and create `extensions/firestore-bigquery-export-xxx.env`
-
-```json
-  "extensions": {
-    "firestore-bigquery-export-xxx": "firebase/firestore-bigquery-export@0.1.54"
-  }
-```
-
-### Deploy Firestore to BigQuery
-
-```bash
-firebase deploy --only extensions
-```
-
-### Import existing documents (need gcp auth)
-
-[Guides](https://github.com/firebase/extensions/blob/master/firestore-bigquery-export/guides/IMPORT_EXISTING_DOCUMENTS.md)
-
-Setup gcloud default auth
-
-```bash
-gcloud auth application-default login
-```
-
-Run import command
-
-```bash
-sh ./extensions/import-firestore-to-bigquery.sh
-```
-
-### Generate schema views
-
-Create schema file `table_name_schema.json` and run command.
-
-[How to create schema file](https://github.com/firebase/extensions/blob/next/firestore-bigquery-export/guides/GENERATE_SCHEMA_VIEWS.md#how-to-configure-schema-files)
-
-```bash
-sh ./extensions/generate-schema-views.sh
-```
-
 <br>
 
 ![](https://api.moedog.org/count/@windybirth.readme)
