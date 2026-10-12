@@ -159,6 +159,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_6_1": [
+          "Better route choice for online play"
+        ],
         "v0_6_0": [
           "Enter games while Dota 2 is running, no restart needed",
           "Stay in the room after a game; the host can start the next one right away",

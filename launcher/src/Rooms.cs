@@ -78,6 +78,7 @@ namespace Windy10v10AI.Launcher
         JoinTunnel tunnel;
         List<Candidate> candidates;
         int refreshing;
+        public DateTime LastAsked { get; private set; }
         volatile bool disposed;
         int relayMeasuring;
         List<RelayLeg> ownRelays = new List<RelayLeg>();
@@ -137,6 +138,7 @@ namespace Windy10v10AI.Launcher
         public void Refresh()
         {
             if (Interlocked.Exchange(ref refreshing, 1) == 1) return;
+            LastAsked = DateTime.UtcNow;
             new Thread(() =>
             {
                 try
