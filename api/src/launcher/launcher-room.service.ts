@@ -39,11 +39,12 @@ const ROOM_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 export const ROOM_ALIVE_MS = 2 * 60 * 1000;
 // 列表只容忍一次轮询整次失败，房主崩溃后房间很快从列表消失，凭码加入仍按上面的有效期
 export const ROOM_LIST_ALIVE_MS = 30 * 1000;
-// 开局后房主每 30 秒轮询、每 60 秒才写一次心跳，窗口要容得下漏掉一次心跳
+// 开局后房主 30 秒或 60 秒轮询一次，窗口要容得下漏掉一次心跳
 export const ACTIVE_GAME_ALIVE_MS = 150 * 1000;
 // 开局前每次轮询都写心跳会占掉大半写入量，10 秒一次仍短于列表存活窗口
 export const LOBBY_HEARTBEAT_MS = 10 * 1000;
-export const GAME_HEARTBEAT_MS = 60 * 1000;
+// 略小于 60 秒，60 秒一次的轮询受抖动影响也不会漏写
+export const GAME_HEARTBEAT_MS = 50 * 1000;
 // 加入者的握手窗口比它短，更早的加入请求已经失效
 export const PENDING_JOIN_MS = 30 * 1000;
 // 房间跨局保留可以开很久，房主停止轮询一天后房间码才重新分配；
