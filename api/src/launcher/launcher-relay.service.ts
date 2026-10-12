@@ -21,6 +21,8 @@ export const LAUNCHER_RELAYS: LauncherRelay[] = [
   { address: '118.195.194.163:27200', priority: 1 },
   // 新加坡轻量入门型，流量包有上限；排最后，只在比国内两台快得多时被提前
   { address: '43.134.232.163:27200', priority: 3 },
+  // 法兰克福 CVM，流量按 GB 计费；给俄语区用，与新加坡同为最低优先级
+  { address: '161.120.221.91:27200', priority: 4 },
 ];
 // 掉线重连要拿同一张通行证重新认领，房间跨局保留时加入者会连着打很多局，有效期按一整天算
 export const RELAY_TICKET_TTL_MS = 24 * 60 * 60 * 1000;

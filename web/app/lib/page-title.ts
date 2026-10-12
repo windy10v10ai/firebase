@@ -5,6 +5,9 @@ import type { Metadata } from 'next';
 export const SITE_NAME = 'Windy10v10AI';
 export const TITLE_TEMPLATE = `%s | ${SITE_NAME}`;
 
+/** 要登录才有内容或属于个人的页面，不让搜索引擎收录 */
+export const NO_INDEX: Metadata = { robots: { index: false } };
+
 /** 按当前语言取页面名作为标签页标题，品牌后缀由上层 layout 的模板拼接 */
 export function pageTitle(namespace: string, key: string) {
   return async (): Promise<Metadata> => {
