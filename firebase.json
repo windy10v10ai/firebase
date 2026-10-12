@@ -40,9 +40,5 @@
     "ui": {
       "enabled": true
     }
-  },
-  "extensions": {
-    "firestore-bigquery-export-players": "firebase/firestore-bigquery-export@0.2.5",
-    "firestore-bigquery-export-members": "firebase/firestore-bigquery-export@0.2.5"
   }
 }
