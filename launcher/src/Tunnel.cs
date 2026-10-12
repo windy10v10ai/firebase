@@ -687,8 +687,10 @@ namespace Windy10v10AI.Launcher
         // Gives up after this long without the host, which by then has most likely closed the game
         const int GiveUpMs = 90000;
         const int QuietMs = 7000;
-        // The lowest of a few round trips, so one packet delayed by the first hole punch does not set the latency
-        const int PingSamples = 3;
+        // The median of ten round trips per address after its first, which the first hole punch may have delayed
+        const int PingSamples = 10;
+        // The host forgets a probe five seconds after it answers, so a probe that keeps losing replies settles for what it has
+        const int ProbeSettleMs = 3000;
         // Twenty pings a second on each route for ten seconds tell 0% from 5% loss, and the game barely notices the extra packets
         const int CheckMs = 10000;
         const int CheckGapMs = 50;
@@ -702,10 +704,40 @@ namespace Windy10v10AI.Launcher
         const string RelayMeter = "~relay";
         const string StatusMeter = "~status";
 
-        class Probe
+        // Round trips per host address, since a host reachable on several addresses answers on each and the join takes the best one
+        internal class Probe
         {
-            public int Samples;
-            public int Rtt = -1;
+            public readonly Dictionary<IPEndPoint, List<int>> Rtts = new Dictionary<IPEndPoint, List<int>>();
+            public DateTime FirstReply = DateTime.MaxValue;
+
+            public bool Done
+            {
+                get
+                {
+                    if ((DateTime.UtcNow - FirstReply).TotalMilliseconds >= ProbeSettleMs) return true;
+                    foreach (var rtts in Rtts.Values)
+                    {
+                        if (rtts.Count > PingSamples) return true;
+                    }
+                    return false;
+                }
+            }
+
+            public int Rtt
+            {
+                get
+                {
+                    var best = -1;
+                    foreach (var rtts in Rtts.Values)
+                    {
+                        var kept = rtts.Count > 1 ? rtts.GetRange(1, rtts.Count - 1) : new List<int>(rtts);
+                        kept.Sort();
+                        var median = kept[(kept.Count - 1) / 2];
+                        if (best < 0 || median < best) best = median;
+                    }
+                    return best;
+                }
+            }
         }
 
         // Ping stamps sent on one route and the round trip of each that came back
@@ -768,7 +800,7 @@ namespace Windy10v10AI.Launcher
         {
             var probe = new Probe();
             lock (sync) probes[probeToken] = probe;
-            Burst(probeToken, hostCandidates, () => { lock (sync) return probe.Samples >= PingSamples; });
+            Burst(probeToken, hostCandidates, () => { lock (sync) return probe.Done; });
             lock (sync)
             {
                 probes.Remove(probeToken);
@@ -788,7 +820,7 @@ namespace Windy10v10AI.Launcher
             return now;
         }
 
-        void OnPong(byte[] data)
+        void OnPong(byte[] data, IPEndPoint from)
         {
             if (data.Length < 9) return;
             var id = Encoding.ASCII.GetString(data, 9, data.Length - 9);
@@ -802,8 +834,10 @@ namespace Windy10v10AI.Launcher
             }
             Probe probe;
             if (!probes.TryGetValue(id, out probe)) return;
-            probe.Samples++;
-            if (probe.Rtt < 0 || ms < probe.Rtt) probe.Rtt = ms;
+            List<int> rtts;
+            if (!probe.Rtts.TryGetValue(from, out rtts)) probe.Rtts[from] = rtts = new List<int>();
+            rtts.Add(ms);
+            if (probe.FirstReply == DateTime.MaxValue) probe.FirstReply = DateTime.UtcNow;
         }
 
         string Handshake()
@@ -1015,11 +1049,12 @@ namespace Windy10v10AI.Launcher
                     {
                         host = relayEnd;
                         route = PathType.Relay;
-                        meters.Remove(StatusMeter);
                         var index = new[] { (byte)Array.IndexOf(PathType.Preference, PathType.Relay) };
                         for (var i = 0; i < 3; i++) Send(Packet.Select, index, host);
                         lastSent = DateTime.UtcNow;
                     }
+                    // The check pinged the chosen route far more densely than the status line does, so its pings open the status window
+                    meters[StatusMeter] = route == PathType.Relay ? meters[RelayMeter] : meters[DirectMeter];
                     var report = new byte[7];
                     report[0] = (byte)Array.IndexOf(PathType.Preference, route);
                     report[1] = (byte)directQuality.Loss;
@@ -1153,7 +1188,7 @@ namespace Windy10v10AI.Launcher
                 }
                 if (data[0] == Packet.Pong)
                 {
-                    OnPong(data);
+                    OnPong(data, from);
                     return;
                 }
                 if (data[0] == Packet.Kicked && (from.Equals(host) || reached.ContainsKey(from)))
