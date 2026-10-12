@@ -946,11 +946,14 @@
       "failTitle": "登录没有完成",
       "failVerify": "没能确认这次 Steam 登录，需要重新去 Steam 登录一次。",
       "failSignIn": "没能连上登录服务，多半是网络不稳。Steam 那一步已经通过，直接再试一次就行。",
+      "blockedHint": "换个浏览器再试，或者关掉广告拦截插件和安全软件的网页防护。",
+      "feedback": "反馈这个问题",
+      "feedbackSummary": "登录网站失败。",
       "diag": {
         "stuckAt": "卡在 步骤 {step} · {name}",
         "attempts": "尝试 {attempts} 次 · 共等 {seconds} 秒",
         "player": "ID {id}",
-        "hint": "反馈问题时，截图请带上这一块",
+        "hint": "点「反馈这个问题」会自动带上这一块",
         "detail": {
           "timeout": "超时",
           "unreachable": "连不上",

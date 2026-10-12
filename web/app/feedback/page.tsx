@@ -2,7 +2,7 @@
 
 import { CircleCheckBig, Hash } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type FormEvent, useState } from 'react';
 
@@ -25,6 +25,10 @@ type SendError = 'tooMany' | 'dailyLimit' | 'failed';
 
 const STEAM_ID_PATTERN = /^[1-9]\d{0,9}$/;
 
+function isFeedbackTopic(value: string | null): value is FeedbackTopic {
+  return FEEDBACK_TOPICS.includes(value as FeedbackTopic);
+}
+
 function toSendError(error: unknown): SendError {
   if (error instanceof ApiError && error.status === 429) {
     return error.code === 'daily_limit_reached' ? 'dailyLimit' : 'tooMany';
@@ -43,10 +47,20 @@ export default function FeedbackPage() {
   const t = useTranslations('feedback');
   const auth = useAuth();
   const pathname = usePathname();
+  // 其他页面可以带着主题、ID 与描述跳进来，玩家只需补充几句
+  const searchParams = useSearchParams();
   const [type, setType] = useState<FeedbackType>('problem');
-  const [topics, setTopics] = useState<FeedbackTopic[]>([]);
-  const [description, setDescription] = useState('');
-  const [steamId, setSteamId] = useState('');
+  const [topics, setTopics] = useState<FeedbackTopic[]>(() => {
+    const topic = searchParams.get('topic');
+    return isFeedbackTopic(topic) ? [topic] : [];
+  });
+  const [description, setDescription] = useState(() =>
+    (searchParams.get('description') ?? '').slice(0, MAX_DESCRIPTION_LENGTH),
+  );
+  const [steamId, setSteamId] = useState(() => {
+    const id = searchParams.get('id') ?? '';
+    return STEAM_ID_PATTERN.test(id) ? id : '';
+  });
   const [steamIdTouched, setSteamIdTouched] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<SendError | null>(null);
