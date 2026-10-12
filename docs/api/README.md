@@ -42,7 +42,8 @@ API 自己往外调的第三方服务：
 
 ## 路由与认证
 
-- Hosting 只按 `^/api/.*` 放行，顶层路径前缀的白名单在 `api/index.ts` 的 `client` 函数里。新增顶层前缀两处都要改，漏了会在进入 NestJS 之前被 403
+- Hosting 只按 `^/api/.*` 放行，其余路由由 NestJS 自己决定，不存在的路径返回 404
+- **管理接口与公开接口分成两个应用**：公开的 `client` 函数只装 `ClientAppModule`，路由表里没有 `/api/admin`；`admin` 函数装全部模块，靠 `invoker: private` 只放行有 GCP 身份的调用。这样新增模块不用再登记任何名单，装错模块的后果是接口 404 而不是管理接口暴露，有单测守着这条
 - 服务端来源用 `x-api-key`，网站用 `Authorization: Bearer`，判定都在 `api/src/util/auth/auth.guard.ts`。公开端点挂 `@Public()`，网站要调的挂 `@AllowWeb()`
 - **装饰器是加法，不是排他**：不挂任何装饰器的路由，官方服务器的 key 就能调；`@AllowWeb()` 额外放行网页，`@AllowLocal()` 额外放行打包进地图、随时可能泄露的本地主机 key。所以路由本身不代表来源，要区分来源取 `@CurrentServerType()`
 - **归属校验只看路由参数 `:steamId`，不看请求体**。所以同一个动作给网站开放时，要新开一条把 steamId 放在路径上的路由，而不是给收 body 的那条补 `@AllowWeb()`——后者等于任何登录玩家都能操作别人的账号。每日任务的刷新就是这样分成两条：游戏内用 `POST /daily-task/refresh`（body 带 steamId，`@AllowLocal()`），网站用 `POST /daily-task/:steamId/refresh`（`@AllowWeb()`）
@@ -55,7 +56,7 @@ API 自己往外调的第三方服务：
 - **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API；加入的响应还带加入后实测选线的丢包阈值，加入者的测量结果由房主随轮询转报。房间与加入请求存 Firestore，带 IP，`expireAt` 是 TTL 字段，30 天后清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
 - **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。只列 30 秒内有心跳的可加入房间；另列出 90 秒内仍有心跳、已开局未结束的游戏，公开的带地图、玩家昵称头像与已进行分钟数，好友房只给人数与分钟数。加入者的昵称头像由 API 从加入记录取，不用房主上报的资料。旧版启动器读的局数与玩家数字段仍保留，只算公开游戏。整份候选房间在函数实例的内存里缓存 3 秒、所有请求共用，Firestore 只按心跳时间一个条件查，其余条件在内存里筛，不建组合索引。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源，不传按启动器处理以兼容旧版，只有启动器来源要求启动器版本，提建议或网站来源要求描述；网站已登录时改走 `POST /api/feedback/web`（`@AllowWeb()`），Steam ID 取登录态的 uid，报告的 `steamIdVerified` 只有这条路是 true，其余来源请求体里的 ID 都能伪造；游戏来源不带日志，带 `gameState`（游戏现场：人数、难度 N1～N8 与自定义、游戏选项、英雄的等级、出装与抽选技能、是否本地主机、是否离线，字段名与结算一致），不要求启动器版本：报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都 90 天删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：每人每小时 3 次、每天 10 次，有 Steam ID 按 ID 计、否则按 IP 计（国内代理转发的请求共用代理 IP）；全站每天 500 次，Steam ID 能伪造，这是存储费用的上限。日志只认 gzip、单份压缩后 1MB，服务端不解压。分类与仓库标签的对应见 [feedback-review](../../.claude/skills/feedback-review/SKILL.md) 技能，取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
-- 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配任何白名单，线上是 404
+- 探活用公开端点 `GET /api/hello`。裸 `/api` 不匹配 Hosting 的转发规则，线上是 404
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由同上一节最后一条；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
 
 ### 本地主机来源的限额

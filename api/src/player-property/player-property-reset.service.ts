@@ -17,9 +17,7 @@ export class PlayerPropertyResetService {
   ) {}
 
   /**
-   * 找出所有 usedLevel > 0 的玩家，对每个玩家执行 deleteBySteamId
-   *（删除 PlayerProperty 文档 + 将 player.usedLevel 重置为 0），可重复执行。
-   * 供运维在需要批量重置玩家属性加点时调用（例如直接操作数据后忘记同步 usedLevel）。
+   * 清空全服所有加过点的玩家的属性加点，并把已用等级归零，可重复执行。
    */
   async resetAll(): Promise<PlayerPropertyResetResult> {
     const players = await this.playerService.findAllWithUsedLevelGreaterThanZero();

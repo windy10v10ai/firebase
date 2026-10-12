@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { initializeApp } from 'firebase-admin/app';
+import { getApps, initializeApp } from 'firebase-admin/app';
 import { FireormModule } from 'nestjs-fireorm';
 
 import { AdminModule } from './admin/admin.module';
@@ -52,7 +52,6 @@ export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'win
     PlayerModule,
     PlayerInfoModule,
     PlayerPropertyModule,
-    AdminModule,
     EventRewardsModule,
     AnalyticsModule,
     AuthModule,
@@ -65,9 +64,17 @@ export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'win
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
 })
-export class AppModule {
+export class ClientAppModule {
   constructor() {
-    // Initialize the firebase admin app
-    initializeApp();
+    // 两个应用可能建在同一个进程里，不能重复初始化
+    if (getApps().length === 0) {
+      initializeApp();
+    }
   }
 }
+
+// 管理接口只装进这个模块，公开的 client 函数用 ClientAppModule，路由表里就没有 /api/admin
+@Module({
+  imports: [ClientAppModule, AdminModule],
+})
+export class AppModule {}

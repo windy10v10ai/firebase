@@ -56,8 +56,8 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - API 通过 `FIRESTORE_EMULATOR_HOST` 连本地 emulator；忘记设这个变量会去连生产 Firestore 然后失败（无凭证）
 - Firestore emulator 需要 Java JRE
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
+- **管理接口只能进 `AppModule`，不能进 `ClientAppModule`**（[app.module.ts](src/app.module.ts)）：公开的 `client` 函数只装后者，`app.module.spec.ts` 守着这条。新的业务模块放进 `ClientAppModule` 的 imports
 - **E2E 每个 jest worker 用一个独立的 Firestore project**（[setup-worker-project.ts](test/util/setup-worker-project.ts) 按 `JEST_WORKER_ID` 设 `E2E_FIRESTORE_PROJECT_ID`，[app.module.ts](src/app.module.ts) 读它）：并行的套件共用一个模拟器实例，不隔离的话全库级写操作（`POST /api/admin/player-property/reset` 就是一个）会删掉别的套件正在用的文档，套件之间撞 steamId 也会互相覆盖，症状是单跑必过、跑全量时随机挂。Auth 不跟着隔离，模拟器只按启动时的 project 签发 ID Token
-- **新增顶层路由前缀必须登记到 `api/index.ts` 中 `client` 函数的路径白名单**（那个 `regex` 常量，形如 `^/api/(game|player|...).*`）。不在白名单里的请求在进入 NestJS 之前就被 403 `Invalid path` 拦掉，服务端只留一条 `Abnormal request on API Cloud Function! Path: ...`，controller、guard、e2e 全都看不到任何痕迹——e2e 直连 Nest，不经过这层，所以测试全绿也可能线上 403
 - **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节
 - **`@AllowWeb()` 不等于「只有网站能调」**：不挂任何装饰器时，任何有效的官方服务器 key 都能调，它只是额外放行网页来源，`@AllowLocal()` 同理额外放行本地主机 key。要按来源区分行为或统计，用 `@CurrentServerType()` 取 guard 算出来的来源，不要靠路由挂了什么装饰器去推
 - **调用方带不了请求头时用 `@AllowQueryKey()`**（[allow-query-key.decorator.ts](src/util/auth/allow-query-key.decorator.ts)）：挂了这个装饰器的路由，`x-api-key` 请求头缺失时改读 query 的 `apiKey`；挂了但请求头存在时仍优先用请求头。`ProxyController`（[proxy.controller.ts](src/proxy/proxy.controller.ts)）是目前唯一用例——游戏内的 `DOTAHTMLPanel` 只能发不带头的 GET，且读不到非 200 状态码，所以这类路由还要配一个把所有异常转成 200 + 自定义错误格式的 `@UseFilters()` 过滤器，参考 `ProxyExceptionFilter`
@@ -66,7 +66,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - **给访客看的只读路由挂 `@AllowViewOthers()`，写接口不挂**：公开开关由 guard 统一判断，路由里只用 `@CanViewPrivate()` 决定要不要裁掉只给本人的字段。规则见 [docs/api/README.md](../docs/api/README.md) 的「路由与认证」
 - **给已有接口补挂 `@AllowWeb()` 不需要新开 e2e 用例**：归属校验（自己 200 / 别人 403 / 无 token 401；挂了 `@AllowViewOthers()` 的看公开开关）是 `auth.guard.ts` 里对所有带 `:steamId` 路由的通用逻辑，已在 [player-info-web.e2e-spec.ts](test/player-info-web.e2e-spec.ts) 验证过一次，不必逐个接口重复验证。只有装饰器改动之外还有新业务逻辑时才写新用例
 - **改了 `api/index.ts` 的函数定义，推送前先 `npm run build && node -e "require('./dist/index.js')"` 加载一遍**：`onSchedule` 等函数的选项（如 `timeoutSeconds`）由 `firebase-functions` 在模块加载时校验，不合法就抛异常，部署报 `Functions codebase could not be analyzed successfully`。lint、单测、e2e 都不加载这个入口文件，全绿也拦不住。定时函数的 `timeoutSeconds` 上限按事件函数算，是 540，不是 firebase-tools 源码里写的 1800
-- **裸 `/api` 在线上到不了**：Hosting rewrite 是 `^/api/.*`、函数白名单是 `^/api/(game|player|...)`，两个都不匹配，实测 404。要探活用公开端点 `GET /api/hello`
+- **裸 `/api` 在线上到不了**：Hosting rewrite 是 `^/api/.*`，不匹配，实测 404。要探活用公开端点 `GET /api/hello`
 - **functions emulator 会伪造 CORS 头**：它给所有请求套了一层 `cors({ origin: true })`，预检由它直接答、任何 `Origin` 都放行。经 `localhost:5000` 的链路只能验通路，验不了白名单——白名单以 e2e（直连 Nest）和线上为准
 - 改了 CORS、鉴权、响应格式这类会影响网站页面行为的东西，最终验证要在浏览器里实际操作页面，做法见 [web/CLAUDE.md](../web/CLAUDE.md) 的「浏览器验证」
 - **网站域名的 `/api` 转发驮着支付宝回调**：`ALIPAY_NOTIFY_URL` 指向 `windy10v10ai.com`，请求经 `web/next.config.ts` 的 rewrite 进函数。改那条 rewrite 的目的地要连收款一起验，入口清单见 [docs/api/README.md](../docs/api/README.md) 的「对外入口」
@@ -127,4 +127,3 @@ preset[dto.map] = undefined;
 3. `foo.service.ts` — 业务逻辑，`getOrGenerateDefault` 负责首次创建
 4. `player.module.ts` — `FireormModule.forFeature` 注册 entity，`providers`/`exports` 注册 service
 5. `player.controller.ts` — 添加路由，鉴权与现有接口一致
-6. 若新增的是**顶层路由前缀**（不在既有 `game`/`player`/`alipay` 等之下），同步更新 `api/index.ts` 的路径白名单（见「常见坑」）
