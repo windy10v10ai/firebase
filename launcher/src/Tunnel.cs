@@ -93,8 +93,8 @@ namespace Windy10v10AI.Launcher
         const int MaxLanCandidates = 6;
         const int SioUdpConnReset = -1744830452;
         const int RelayRetryMs = 500;
-        // Twenty echoes resolve loss to five percent while the whole probe stays under three seconds
-        const int RelayProbeCount = 20;
+        // Forty echoes resolve loss to two and a half percent, fine enough to tell relays apart once loss is priced into their score
+        const int RelayProbeCount = 40;
         const int RelayProbeGapMs = 50;
         const int RelayProbeWaitMs = 1000;
 
@@ -976,7 +976,7 @@ namespace Windy10v10AI.Launcher
             new Thread(CheckRoute) { IsBackground = true }.Start();
         }
 
-        // Measures the direct route against the relay right after connecting and moves to the relay when only the direct one loses packets.
+        // Measures the direct route against the relay right after connecting and moves to the relay when it scores clearly better.
         // The choice holds for the rest of the game; the host follows whichever route our packets arrive on
         void CheckRoute()
         {
@@ -1011,7 +1011,7 @@ namespace Windy10v10AI.Launcher
                     var relayQuality = Measure(meters[RelayMeter], 0);
                     // A reconnect during the check already picked a route of its own
                     if (Closed || !direct.Equals(host)) return;
-                    if (directQuality.Loss >= limits.DirectLossPct && relayQuality.Loss <= limits.RelayLossPct)
+                    if (limits.PrefersRelay(directQuality, relayQuality))
                     {
                         host = relayEnd;
                         route = PathType.Relay;
