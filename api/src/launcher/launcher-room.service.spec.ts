@@ -7,6 +7,9 @@ import { HostRoomDto, JoinRoomDto } from './dto/launcher-room.dto';
 import { LauncherRoomJoin } from './entities/launcher-room-join.entity';
 import { LauncherRoom } from './entities/launcher-room.entity';
 import {
+  ACTIVE_GAME_ALIVE_MS,
+  GAME_HEARTBEAT_MS,
+  LOBBY_HEARTBEAT_MS,
   LauncherRoomService,
   PENDING_JOIN_MS,
   ROOM_ALIVE_MS,
@@ -369,6 +372,44 @@ describe('LauncherRoomService', () => {
     expect(rooms.docs.get(room.code)).toMatchObject({ started: true, startedAt });
   });
 
+  it('房主轮询无变化时按心跳间隔写入，状态变化立刻写，只有中转数据在变不算变化', async () => {
+    const room = await service.host({ ...HOST, public: true, playerCount: 1 });
+    const poll = { ...HOST, code: room.code, token: room.token, public: true, playerCount: 1 };
+    rooms.update.mockClear();
+
+    jest.advanceTimersByTime(LOBBY_HEARTBEAT_MS - 1);
+    await service.host({ ...poll, relayRtt: 40, relays: [{ address: 'a:1', rtt: 40, loss: 0 }] });
+    expect(rooms.update).not.toHaveBeenCalled();
+
+    await service.host({ ...poll, playerCount: 2 });
+    expect(rooms.update).toHaveBeenCalledTimes(1);
+    expect(rooms.docs.get(room.code)).toMatchObject({ playerCount: 2 });
+
+    jest.advanceTimersByTime(LOBBY_HEARTBEAT_MS);
+    await service.host({ ...poll, playerCount: 2 });
+    expect(rooms.update).toHaveBeenCalledTimes(2);
+  });
+
+  it('开局后的心跳间隔更长，开始与结束立刻写', async () => {
+    const room = await service.host({ ...HOST, public: true });
+    const poll = { ...HOST, code: room.code, token: room.token, public: true };
+    rooms.update.mockClear();
+
+    await service.host({ ...poll, started: true });
+    expect(rooms.update).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(GAME_HEARTBEAT_MS - 1);
+    await service.host({ ...poll, started: true });
+    expect(rooms.update).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(1);
+    await service.host({ ...poll, started: true });
+    expect(rooms.update).toHaveBeenCalledTimes(2);
+
+    await service.host({ ...poll, started: true, ended: true });
+    expect(rooms.update).toHaveBeenCalledTimes(3);
+  });
+
   it('新的一局按房主报的地图版本比对加入者，同一局里不改', async () => {
     const room = await service.host({ ...HOST, mapVersion: 'old' });
     const poll = { ...HOST, code: room.code, token: room.token };
@@ -536,7 +577,7 @@ describe('LauncherRoomService', () => {
       started: true,
       playerCount: 6,
     });
-    rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - 90 * 1000 - 1);
+    rooms.docs.get(stale.code)!.lastSeenAt = new Date(Date.now() - ACTIVE_GAME_ALIVE_MS - 1);
 
     const res = await service.list({ steamId: 2002, protocolVersion: 1 });
 
