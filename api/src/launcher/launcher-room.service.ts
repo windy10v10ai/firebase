@@ -39,7 +39,11 @@ const ROOM_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 export const ROOM_ALIVE_MS = 2 * 60 * 1000;
 // 列表只容忍一次轮询整次失败，房主崩溃后房间很快从列表消失，凭码加入仍按上面的有效期
 export const ROOM_LIST_ALIVE_MS = 30 * 1000;
-export const ACTIVE_GAME_ALIVE_MS = 90 * 1000;
+// 开局后房主每 30 秒轮询、每 60 秒才写一次心跳，窗口要容得下漏掉一次心跳
+export const ACTIVE_GAME_ALIVE_MS = 150 * 1000;
+// 开局前每次轮询都写心跳会占掉大半写入量，10 秒一次仍短于列表存活窗口
+export const LOBBY_HEARTBEAT_MS = 10 * 1000;
+export const GAME_HEARTBEAT_MS = 60 * 1000;
 // 加入者的握手窗口比它短，更早的加入请求已经失效
 export const PENDING_JOIN_MS = 30 * 1000;
 // 房间跨局保留可以开很久，房主停止轮询一天后房间码才重新分配；
@@ -47,7 +51,9 @@ export const PENDING_JOIN_MS = 30 * 1000;
 const CODE_REUSE_MS = 24 * 60 * 60 * 1000;
 const RECORD_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 // 所有请求共用一份查询结果，Firestore 读取量不随看列表的人数增长
-export const ROOM_LIST_CACHE_MS = 3 * 1000;
+export const ROOM_LIST_CACHE_MS = 10 * 1000;
+// 中转延迟丢包每次轮询都在变，只随心跳写入，不算状态变化
+const HEARTBEAT_ONLY_FIELDS = ['relays', 'relayRtt', 'relayLoss'];
 
 @Injectable()
 export class LauncherRoomService {
@@ -113,6 +119,7 @@ export class LauncherRoomService {
     }
     await this.bigQueryService.recordRouteChecks(room, routeChecks);
 
+    const previousGame = room.game;
     // 房主启动下一局，开始、结束状态按新的一局重新算；旧版启动器不报局数，房间只有一局
     if (dto.game !== undefined && dto.game > (room.game ?? 1)) {
       room.game = dto.game;
@@ -134,14 +141,32 @@ export class LauncherRoomService {
       room.players = dto.players!.map((steamId) => profileOf(steamId, roomJoins));
     }
 
-    room.lastSeenAt = now;
+    const settings = roomSettings(dto);
+    const settingsChanged = Object.entries(settings).some(
+      ([key, value]) =>
+        !HEARTBEAT_ONLY_FIELDS.includes(key) &&
+        JSON.stringify(value) !== JSON.stringify(room[key as keyof LauncherRoom]),
+    );
+    const stateChanged =
+      playersChanged ||
+      settingsChanged ||
+      room.game !== previousGame ||
+      (!room.started && dto.started === true) ||
+      (!room.ended && dto.ended === true);
+
     if (!room.started && dto.started === true) {
       room.startedAt = now;
     }
     room.started = room.started || dto.started === true;
     room.ended = room.ended || dto.ended === true;
-    Object.assign(room, roomSettings(dto));
-    await this.roomRepository.update(room);
+    Object.assign(room, settings);
+
+    // 无变化时只按心跳间隔写，轮询本身照常读加入请求
+    const heartbeatMs = room.started ? GAME_HEARTBEAT_MS : LOBBY_HEARTBEAT_MS;
+    if (stateChanged || now.getTime() - room.lastSeenAt.getTime() >= heartbeatMs) {
+      room.lastSeenAt = now;
+      await this.roomRepository.update(room);
+    }
 
     const joins = room.started
       ? []
