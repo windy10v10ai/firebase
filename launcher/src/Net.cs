@@ -106,20 +106,50 @@ namespace Windy10v10AI.Launcher
         }
     }
 
-    // Loss limits the API sends with a join for leaving the direct route; kept in the API so they change without a launcher release
+    // Limits the API sends with a join for leaving the direct route; kept in the API so they change without a launcher release
     class RouteThresholds
     {
-        public int DirectLossPct;
-        public int RelayLossPct;
+        public int DirectLossPct = -1;
+        public int RelayLossPct = -1;
+        public int LossCostMs = -1;
+        public int SwitchMarginMs = -1;
 
         // Null when the API sent none, which leaves the route the handshake picked
         public static RouteThresholds Read(Dictionary<string, object> answer)
         {
             object value;
             var check = answer.TryGetValue("routeCheck", out value) ? value as Dictionary<string, object> : null;
-            object direct, relay;
-            if (check == null || !check.TryGetValue("directLossPct", out direct) || !check.TryGetValue("relayLossPct", out relay) || direct == null || relay == null) return null;
-            return new RouteThresholds { DirectLossPct = Convert.ToInt32(direct), RelayLossPct = Convert.ToInt32(relay) };
+            if (check == null) return null;
+            var limits = new RouteThresholds
+            {
+                DirectLossPct = Field(check, "directLossPct"),
+                RelayLossPct = Field(check, "relayLossPct"),
+                LossCostMs = Field(check, "lossCostMs"),
+                SwitchMarginMs = Field(check, "switchMarginMs"),
+            };
+            var scored = limits.LossCostMs >= 0 && limits.SwitchMarginMs >= 0;
+            var legacy = limits.DirectLossPct >= 0 && limits.RelayLossPct >= 0;
+            return scored || legacy ? limits : null;
+        }
+
+        static int Field(Dictionary<string, object> check, string name)
+        {
+            object value;
+            return check.TryGetValue(name, out value) && value != null ? Convert.ToInt32(value) : -1;
+        }
+
+        // Scores each route as latency plus weighted loss, the same rule the API ranks relays by, and falls back to loss limits for an older API
+        public bool PrefersRelay(RouteQuality direct, RouteQuality relay)
+        {
+            if (direct.Samples == 0 || relay.Samples == 0 || relay.Rtt < 0) return false;
+            if (LossCostMs < 0 || SwitchMarginMs < 0) return direct.Loss >= DirectLossPct && relay.Loss <= RelayLossPct;
+            return Score(direct) - Score(relay) > SwitchMarginMs;
+        }
+
+        // A direct route that never answered has no latency to add, and its full loss already outweighs any usable relay
+        int Score(RouteQuality quality)
+        {
+            return Math.Max(quality.Rtt, 0) + quality.Loss * LossCostMs;
         }
     }
 

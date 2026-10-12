@@ -15,6 +15,9 @@ namespace Windy10v10AI.Launcher.Tests
             EstimateUsesTheLowestMatchingRelayPair();
             EstimateIgnoresLossyLegs();
             EstimateFallsBackToTheLegacyFigure();
+            RouteCheckReadsScoreAndLegacyLimits();
+            RouteCheckSwitchesOnScore();
+            RouteCheckFallsBackToLossLimits();
             Console.WriteLine("PASS Relay tests");
         }
 
@@ -115,6 +118,56 @@ namespace Windy10v10AI.Launcher.Tests
             var row = new RoomRow { HostRelayRtt = 50 };
             var own = new List<RelayLeg> { Leg("1.1.1.1:1", 30, 0) };
             Equal(80, RoomBrowser.EstimateRelayRtt(row, own), "adds the legacy host figure to our own first relay");
+        }
+
+        static void RouteCheckReadsScoreAndLegacyLimits()
+        {
+            Yes(RouteThresholds.Read(new Dictionary<string, object>()) == null, "no route check without the field");
+            Yes(RouteThresholds.Read(Answer(new Dictionary<string, object>())) == null, "no route check with an empty field");
+            var scored = RouteThresholds.Read(Answer(new Dictionary<string, object> { { "lossCostMs", 10 }, { "switchMarginMs", 30 } }));
+            Equal(10, scored.LossCostMs, "reads the loss cost alone");
+            Equal(-1, scored.DirectLossPct, "leaves the legacy limit unset");
+            var legacy = RouteThresholds.Read(Answer(new Dictionary<string, object> { { "directLossPct", 5 }, { "relayLossPct", 2 } }));
+            Equal(5, legacy.DirectLossPct, "reads the legacy limits alone");
+        }
+
+        static void RouteCheckSwitchesOnScore()
+        {
+            var limits = new RouteThresholds { DirectLossPct = 5, RelayLossPct = 2, LossCostMs = 10, SwitchMarginMs = 30 };
+            Yes(limits.PrefersRelay(Route(40, 8), Route(50, 0)), "leaves a lossy direct route for a near relay");
+            No(limits.PrefersRelay(Route(180, 6), Route(500, 0)), "keeps a lossy direct route over a far relay");
+            Yes(limits.PrefersRelay(Route(200, 30), Route(170, 1)), "leaves a very lossy direct route for a slower but clean relay");
+            Yes(limits.PrefersRelay(Route(60, 3), Route(50, 0)), "switches below the legacy loss limit when the relay scores clearly better");
+            No(limits.PrefersRelay(Route(60, 0), Route(40, 0)), "stays when the relay is better by no more than the margin");
+            Yes(limits.PrefersRelay(Route(-1, 100), Route(80, 0)), "leaves a direct route that stopped answering");
+            No(limits.PrefersRelay(Route(40, 50), Route(-1, 100)), "never moves to a relay that never answered");
+        }
+
+        static void RouteCheckFallsBackToLossLimits()
+        {
+            var limits = new RouteThresholds { DirectLossPct = 5, RelayLossPct = 2 };
+            Yes(limits.PrefersRelay(Route(180, 6), Route(500, 0)), "an older API still switches on loss alone");
+            No(limits.PrefersRelay(Route(60, 3), Route(50, 0)), "an older API keeps a direct route under its loss limit");
+        }
+
+        static Dictionary<string, object> Answer(Dictionary<string, object> check)
+        {
+            return new Dictionary<string, object> { { "routeCheck", check } };
+        }
+
+        static RouteQuality Route(int rtt, int loss)
+        {
+            return new RouteQuality { Rtt = rtt, Loss = loss, Samples = 200 };
+        }
+
+        static void Yes(bool actual, string name)
+        {
+            if (!actual) throw new Exception(name + ": expected true");
+        }
+
+        static void No(bool actual, string name)
+        {
+            if (actual) throw new Exception(name + ": expected false");
         }
 
         static RelayLeg Leg(string address, int rtt, int loss)
