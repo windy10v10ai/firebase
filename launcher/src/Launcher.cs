@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.6.1.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.6.1.0")]
+[assembly: System.Reflection.AssemblyVersion("0.6.2.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.6.2.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -26,6 +26,12 @@ namespace Windy10v10AI.Launcher
         [STAThread]
         static void Main()
         {
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length == 3 && args[1] == WorkshopDownload.Flag)
+            {
+                Environment.Exit(WorkshopDownload.RunChild(args[2]));
+                return;
+            }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             JoinTunnel.RelayOnly = Array.IndexOf(Environment.GetCommandLineArgs(), "--relay-only") > 0;
@@ -49,7 +55,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.6.1";
+        const string Version = "0.6.2";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -198,6 +204,9 @@ namespace Windy10v10AI.Launcher
         Action noticeAction;
         // Launch failures stay on screen until the player acts; map checks may replace any other notice
         bool stickyNotice;
+        bool mapUpdating;
+        // After Steam's forced download leaves the map outdated, resubscribing in the Workshop is the last thing to try
+        string mapUpdateFailed;
         string logFile;
         // The last launch failure, so a report started from its notice can carry it
         FeedbackError failure;
@@ -348,7 +357,7 @@ namespace Windy10v10AI.Launcher
                 UpdateBrowsing();
                 if (modeBar.Selected == 2) codeBox.FillFromClipboard();
             };
-            mapCard.Action.Click += delegate { OpenUrl("steam://url/CommunityFilePage/" + MapId); };
+            mapCard.Action.Click += delegate { UpdateOrOpenWorkshop(); };
             rosterTimer.Tick += delegate
             {
                 RefreshPlayers();
@@ -478,7 +487,7 @@ namespace Windy10v10AI.Launcher
 
         void RefreshIdleMapState()
         {
-            if (busy || (notice.Visible && stickyNotice)) return;
+            if (busy || mapUpdating || (notice.Visible && stickyNotice)) return;
             RefreshMapState();
         }
 
@@ -649,8 +658,9 @@ namespace Windy10v10AI.Launcher
                     break;
                 case MapState.Outdated:
                     SetFooter(Theme.Warning, Strings.MapOutdated);
-                    if (modeBar.Selected == 0) ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.OpenWorkshop, () => OpenUrl("steam://url/CommunityFilePage/" + id));
-                    else ShowIdleNotice();
+                    if (modeBar.Selected != 0) ShowIdleNotice();
+                    else if (mapUpdateFailed == id) ShowNotice(NoticeKind.Warning, Strings.MapUpdateFailed, Strings.OpenWorkshop, UpdateOrOpenWorkshop);
+                    else ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.UpdateMap, UpdateOrOpenWorkshop);
                     break;
                 case MapState.Missing:
                     SetFooter(Theme.Error, Strings.MapMissing);
@@ -669,11 +679,35 @@ namespace Windy10v10AI.Launcher
             return state;
         }
 
+        void UpdateOrOpenWorkshop()
+        {
+            var id = MapId;
+            if (mapUpdateFailed == id)
+            {
+                OpenUrl("steam://url/CommunityFilePage/" + id);
+                return;
+            }
+            if (mapUpdating || busy) return;
+            mapUpdating = true;
+            SetFooter(Theme.Warning, Strings.MapUpdating);
+            new Thread(() =>
+            {
+                var asked = WorkshopDownload.Run(id);
+                UI(() =>
+                {
+                    mapUpdating = false;
+                    DotaInstall checkedInstall;
+                    if (!asked || DotaInstall.Check(id, out checkedInstall) == MapState.Outdated) mapUpdateFailed = id;
+                    RefreshMapState();
+                });
+            }) { IsBackground = true }.Start();
+        }
+
         // Online play needs the latest map, so its tabs show why they cannot start as soon as they open
         void UpdateMapCard(MapState state)
         {
             var show = !busy && modeBar.Selected != 0 && state == MapState.Outdated;
-            if (show) mapCard.Show(Strings.MapCardTitle, modeBar.Selected == 1 ? Strings.MapCardHost : Strings.MapCardJoin, Strings.OpenWorkshop);
+            if (show) mapCard.Show(Strings.MapCardTitle, modeBar.Selected == 1 ? Strings.MapCardHost : Strings.MapCardJoin, mapUpdateFailed == MapId ? Strings.OpenWorkshop : Strings.UpdateMap);
             if (show == cardShown) return;
             cardShown = show;
             if (!busy) status.Text = IdleText();
@@ -1042,6 +1076,8 @@ namespace Windy10v10AI.Launcher
                 if (pickingNext && hostTunnel != null) PickNextGame(index);
                 return;
             }
+            // Steam rewriting the map mid-load stalls the server
+            if (mapUpdating) return;
             var state = RefreshMapState();
             // An outdated map only warns, so an unfinished or failed version check does not block starting either
             if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing) return;
@@ -1282,6 +1318,7 @@ namespace Windy10v10AI.Launcher
                 ShowNotice(NoticeKind.Error, Strings.InvalidCode, false);
                 return;
             }
+            if (mapUpdating) return;
             var state = RefreshMapState();
             // Mismatched map versions between host and joiner can break the game, so an outdated map blocks joining
             if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing || state == MapState.Outdated) return;
