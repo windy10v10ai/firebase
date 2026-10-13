@@ -665,7 +665,7 @@ namespace Windy10v10AI.Launcher
                     break;
                 case MapState.Missing:
                     SetFooter(Theme.Error, Strings.MapMissing);
-                    ShowNotice(NoticeKind.Error, Strings.NoMap, Strings.Subscribe, () => OpenUrl("steam://url/CommunityFilePage/" + id));
+                    ShowNotice(NoticeKind.Error, Strings.NoMap, Strings.Subscribe, () => OpenSteamUrl("steam://url/CommunityFilePage/" + id));
                     break;
                 case MapState.NoDota:
                     SetFooter(Theme.Error, Strings.MapUnknown);
@@ -685,7 +685,7 @@ namespace Windy10v10AI.Launcher
             var id = MapId;
             if (mapUpdateFailed == id)
             {
-                OpenUrl("steam://url/CommunityFilePage/" + id);
+                OpenSteamUrl("steam://url/CommunityFilePage/" + id);
                 return;
             }
             if (mapUpdating || busy) return;
@@ -1304,7 +1304,7 @@ namespace Windy10v10AI.Launcher
 
         static void VerifyFiles()
         {
-            OpenUrl("steam://validate/570");
+            OpenSteamUrl("steam://validate/570");
         }
 
         // Damaged files only show up in the log of a Dota that failed fatally; the corruption warning alone does not
@@ -2444,6 +2444,24 @@ namespace Windy10v10AI.Launcher
             catch (Exception)
             {
             }
+        }
+
+        // Steam China registers no handler for steam://, so the link goes to the Steam executable and the shell is only a fallback
+        static void OpenSteamUrl(string url)
+        {
+            var steam = DotaInstall.SteamExecutable();
+            if (steam != null)
+            {
+                try
+                {
+                    StartDota(new ProcessStartInfo { FileName = steam, Arguments = "\"" + url + "\"", UseShellExecute = false });
+                    return;
+                }
+                catch (Exception)
+                {
+                }
+            }
+            OpenUrl(url);
         }
 
         // Opens the feedback dialog; a launch failure passes its details along without showing them
