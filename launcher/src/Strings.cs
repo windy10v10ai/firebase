@@ -139,6 +139,8 @@ namespace Windy10v10AI.Launcher
         public static string GameStarted { get { return Pick("游戏已开始，无法加入。", "The game has already started.", "Игра уже началась."); } }
         public static string VersionMismatch { get { return Pick("双方启动器版本不同，请都更新到最新版本。", "Your launcher versions differ. Both of you need the latest version.", "Версии лаунчера отличаются. Обновите лаунчер у обоих."); } }
         public static string RoomNetwork { get { return Pick("连不上服务器，请检查网络后重试。", "Could not reach our server. Check your network and try again.", "Не удалось связаться с сервером. Проверьте сеть и попробуйте снова."); } }
+        public static string JoinNetworkBlocked { get { return Pick("当前网络连不通联机，请换个网络（如手机热点）再加入。", "Your network blocks multiplayer. Switch to another network, such as a phone hotspot, and join again.", "Ваша сеть блокирует совместную игру. Подключитесь к другой сети, например к точке доступа телефона, и зайдите снова."); } }
+        public static string HostNetworkBlocked { get { return Pick("当前网络连不通联机，好友进不来，请换个网络（如手机热点）再开房", "Your network blocks multiplayer, so friends cannot join. Switch to another network, such as a phone hotspot, and open the room again.", "Ваша сеть блокирует совместную игру, друзья не смогут зайти. Подключитесь к другой сети, например к точке доступа телефона, и откройте комнату снова."); } }
         public static string ConnectFailed { get { return Pick("连接失败，请稍后再试。", "Could not connect. Please try again later.", "Не удалось подключиться. Попробуйте позже."); } }
         public static string Joined { get { return Pick("已加入房间 {0}", "Joined room {0}", "Вы в комнате {0}"); } }
         public static string RouteChecking { get { return Pick("正在测线路…", "Checking the route...", "Проверяем маршрут…"); } }

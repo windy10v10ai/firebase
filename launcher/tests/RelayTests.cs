@@ -19,6 +19,7 @@ namespace Windy10v10AI.Launcher.Tests
             RouteCheckSwitchesOnScore();
             RouteCheckFallsBackToLossLimits();
             ProbeTakesTheBestAddressMedian();
+            AllBlockedNeedsEveryMeasuredRelayLost();
             Console.WriteLine("PASS Relay tests");
         }
 
@@ -164,6 +165,15 @@ namespace Windy10v10AI.Launcher.Tests
             Yes(probe.Done, "stops once an address has enough replies");
             probe = new JoinTunnel.Probe { FirstReply = DateTime.UtcNow.AddSeconds(-4) };
             Yes(probe.Done, "settles a while after the first reply even when replies keep getting lost");
+        }
+
+        static void AllBlockedNeedsEveryMeasuredRelayLost()
+        {
+            No(RelayLeg.AllBlocked(new List<RelayLeg>()), "no relay measured yet is not blocked");
+            No(RelayLeg.AllBlocked(new List<RelayLeg> { Leg("1.2.3.4:1", -1, -1) }), "an unmeasured relay is not blocked");
+            Yes(RelayLeg.AllBlocked(new List<RelayLeg> { Leg("1.2.3.4:1", 15, 97), Leg("5.6.7.8:1", 17, 95), Leg("9.9.9.9:1", -1, -1) }), "every measured relay answering only once is blocked");
+            Yes(RelayLeg.AllBlocked(new List<RelayLeg> { Leg("1.2.3.4:1", -1, 100) }), "a relay that never answers is blocked");
+            No(RelayLeg.AllBlocked(new List<RelayLeg> { Leg("1.2.3.4:1", 15, 97), Leg("5.6.7.8:1", 240, 50) }), "one lossy but answering relay keeps the network usable");
         }
 
         static Dictionary<string, object> Answer(Dictionary<string, object> check)

@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.6.1.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.6.1.0")]
+[assembly: System.Reflection.AssemblyVersion("0.6.2.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.6.2.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -49,7 +49,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.6.1";
+        const string Version = "0.6.2";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -260,7 +260,7 @@ namespace Windy10v10AI.Launcher
             hint.ForeColor = Theme.Muted;
             hint.Font = new Font(Theme.FontName, 9f);
             // Hosts tend to start alone at once, so the wait for other players stands out from the grey hints
-            hint.TextChanged += delegate { hint.ForeColor = hint.Text == Strings.PublicHostingHint || hint.Text == Strings.PrivateHostingHint ? Theme.Text : Theme.Muted; };
+            hint.TextChanged += delegate { hint.ForeColor = hint.Text == Strings.PublicHostingHint || hint.Text == Strings.PrivateHostingHint || hint.Text == Strings.HostNetworkBlocked ? Theme.Text : Theme.Muted; };
             routeLabel.ForeColor = Theme.Muted;
             routeLabel.Font = new Font(Theme.FontName, 9f);
             routeLabel.TextAlign = ContentAlignment.MiddleRight;
@@ -920,7 +920,9 @@ namespace Windy10v10AI.Launcher
 
         void UpdateHostingHint()
         {
-            if (hostingReady) hint.Text = Settings.PublicRoom ? Strings.PublicHostingHint : Strings.PrivateHostingHint;
+            if (!hostingReady) return;
+            if (RelayLeg.AllBlocked(hostRelays)) hint.Text = Strings.HostNetworkBlocked;
+            else hint.Text = Settings.PublicRoom ? Strings.PublicHostingHint : Strings.PrivateHostingHint;
         }
 
         void KickPlayer(string key)
@@ -1128,6 +1130,7 @@ namespace Windy10v10AI.Launcher
                             var legs = new List<RelayLeg>();
                             foreach (var relay in relays) legs.Add(new RelayLeg(relay) { Quality = measuring.MeasureRelay(relay) });
                             hostRelays = legs;
+                            UI(UpdateHostingHint);
                         }) { IsBackground = true }.Start();
                     }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
@@ -1373,7 +1376,7 @@ namespace Windy10v10AI.Launcher
                 var path = tunnel.Connect((string)joined["joinToken"], hostCandidates, RelayTicket.Read(joined));
                 if (stopping) throw new OperationCanceledException();
                 if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
-                if (path == null) throw new LaunchError(Strings.ConnectFailed, false);
+                if (path == null) throw new LaunchError(RelayLeg.AllBlocked(ownRelays) ? Strings.JoinNetworkBlocked : Strings.ConnectFailed, false);
                 // Runs while Dota restarts, so the route is usually settled before the game connects
                 tunnel.Thresholds = RouteThresholds.Read(joined);
                 tunnel.StartRouteCheck();

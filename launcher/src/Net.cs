@@ -205,6 +205,22 @@ namespace Windy10v10AI.Launcher
             }
             return result;
         }
+
+        // A network that lets only the first datagram of a flow through answers about one echo per relay, which no usable route does
+        const int BlockedLossPercent = 90;
+
+        // True when every relay measured so far is unusable, so neither punching nor relaying can reach the other launcher
+        internal static bool AllBlocked(List<RelayLeg> legs)
+        {
+            var measured = 0;
+            foreach (var leg in legs)
+            {
+                if (leg.Quality.Loss < 0) continue;
+                if (leg.Quality.Loss < BlockedLossPercent) return false;
+                measured++;
+            }
+            return measured > 0;
+        }
     }
 
     static class Net
