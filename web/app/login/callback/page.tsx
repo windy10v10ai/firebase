@@ -28,8 +28,12 @@ const SHOW_ELAPSED_AFTER_MS = 4_000;
 const SHOW_RETRY_AFTER_MS = 15_000;
 const STEAM_ID64_BASE = BigInt('76561197960265728');
 
-const STEPS = ['verify', 'signIn', 'redirect'] as const;
-type Stage = (typeof STEPS)[number];
+type Stage = 'verify' | 'signIn' | 'redirect';
+// 走到本页时 Steam 那一步已经完成，单列出来打勾，失败时玩家才不会以为是 Steam 连不上；
+// 核对与换登录态对玩家都是「网站这边」，合成一步，诊断块里再带上内部阶段名区分
+const STEPS = ['steam', 'site', 'redirect'] as const;
+type Step = (typeof STEPS)[number];
+const STEP_OF_STAGE: Record<Stage, Step> = { verify: 'site', signIn: 'site', redirect: 'redirect' };
 type StepState = 'done' | 'active' | 'failed' | 'pending';
 
 // 两种失败要分开：拿不到 token 只能重走 Steam，拿到了则手上的 token 还能再用一次
@@ -118,6 +122,11 @@ function isUnsent(error: unknown): boolean {
   return error instanceof TypeError;
 }
 
+// 接口明确拒绝说明这份参数已经不能用，只能重走 Steam；其余失败多半是请求没到后端，原样再交一次就能登录
+function needsRelogin(failure: Failure): boolean {
+  return failure.stage === 'verify' && failure.code.startsWith('api/4');
+}
+
 // 回调参数里带着 Steam 的 64 位 ID，换算成 Dota2 ID 才能对上生产日志；只用于显示，不做校验
 function accountIdFrom(claimedId: string | null): string | null {
   const id64 = claimedId?.match(/\/(\d+)$/)?.[1];
@@ -133,9 +142,9 @@ function formatWithZone(date: Date, locale: string): string {
   return `${date.toLocaleString(locale, { hour12: false })} (${zone})`;
 }
 
-function stepState(step: Stage, current: Stage, failed: boolean): StepState {
+function stepState(step: Step, current: Stage, failed: boolean): StepState {
   const order = STEPS.indexOf(step);
-  const currentOrder = STEPS.indexOf(current);
+  const currentOrder = STEPS.indexOf(STEP_OF_STAGE[current]);
   if (order < currentOrder) {
     return 'done';
   }
@@ -159,7 +168,6 @@ function LoginCallbackContent() {
   const [stage, setStage] = useState<Stage>('verify');
   const [attempt, setAttempt] = useState(1);
   const [stageElapsedMs, setStageElapsedMs] = useState(0);
-  const [hasToken, setHasToken] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
 
   const startedAtRef = useRef(0);
@@ -216,47 +224,59 @@ function LoginCallbackContent() {
     [enterStage, next, router],
   );
 
+  const verify = useCallback(async () => {
+    runRef.current += 1;
+    const run = runRef.current;
+    setFailure(null);
+    enterStage('verify');
+    let customToken: string;
+    let attempts = 1;
+    try {
+      // 原样透传查询串给后端二次核对签名，见 SteamVerifyDto 的说明
+      ({ customToken } = await withRetry(
+        () =>
+          apiFetch<SteamVerifyResponse>('/api/auth/steam/verify', {
+            method: 'POST',
+            body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
+            signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
+          }),
+        isUnsent,
+        (nextAttempt) => {
+          attempts = nextAttempt;
+          if (runRef.current === run) {
+            setAttempt(nextAttempt);
+          }
+        },
+      ));
+    } catch (error) {
+      console.error('[auth] Steam 回调核对失败', error);
+      if (runRef.current !== run) {
+        return;
+      }
+      setFailure({
+        stage: 'verify',
+        ...describeError(error),
+        attempts,
+        elapsedMs: Date.now() - startedAtRef.current,
+        at: new Date(),
+      });
+      return;
+    }
+    // 等待中再交一次时两轮都在路上，参数只能用一次，先拿到的 token 就是唯一有效的那份
+    if (customTokenRef.current) {
+      return;
+    }
+    customTokenRef.current = customToken;
+    await signIn(customToken);
+  }, [enterStage, searchParams, signIn]);
+
   useEffect(() => {
     if (hasRunRef.current) {
       return;
     }
     hasRunRef.current = true;
     startedAtRef.current = Date.now();
-    stageStartedAtRef.current = startedAtRef.current;
-
-    (async () => {
-      let customToken: string;
-      let attempts = 1;
-      try {
-        // 原样透传查询串给后端二次核对签名，见 SteamVerifyDto 的说明
-        ({ customToken } = await withRetry(
-          () =>
-            apiFetch<SteamVerifyResponse>('/api/auth/steam/verify', {
-              method: 'POST',
-              body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
-              signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
-            }),
-          isUnsent,
-          (nextAttempt) => {
-            attempts = nextAttempt;
-            setAttempt(nextAttempt);
-          },
-        ));
-      } catch (error) {
-        console.error('[auth] Steam 回调核对失败', error);
-        setFailure({
-          stage: 'verify',
-          ...describeError(error),
-          attempts,
-          elapsedMs: Date.now() - startedAtRef.current,
-          at: new Date(),
-        });
-        return;
-      }
-      customTokenRef.current = customToken;
-      setHasToken(true);
-      await signIn(customToken);
-    })();
+    void verify();
     // 只在挂载时核对一次，next/searchParams 变化不用重跑
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -270,21 +290,25 @@ function LoginCallbackContent() {
     return () => clearInterval(timer);
   }, [failure]);
 
+  const relogin = failure !== null && needsRelogin(failure);
   const retry = () => {
     if (customTokenRef.current) {
       void signIn(customTokenRef.current);
-    } else {
+    } else if (relogin) {
       window.location.href = loginUrl(next);
+    } else {
+      void verify();
     }
   };
-  const retryLabel = hasToken ? t('retry') : t('relogin');
+  const retryLabel = relogin ? t('relogin') : t('retry');
   const waiting = !failure && stage !== 'redirect';
 
   const diagLines = failure
     ? [
         t('diag.stuckAt', {
-          step: STEPS.indexOf(failure.stage) + 1,
-          name: t(`steps.${failure.stage}`),
+          step: STEPS.indexOf(STEP_OF_STAGE[failure.stage]) + 1,
+          name: t(`steps.${STEP_OF_STAGE[failure.stage]}`),
+          stage: failure.stage,
         }),
         `${failure.code}${failure.detail ? ` · ${t(`diag.detail.${failure.detail}`)}` : ''}`,
         t('diag.attempts', {
@@ -299,8 +323,19 @@ function LoginCallbackContent() {
     description: [t('feedbackSummary'), '', ...diagLines].join('\n'),
     ...(accountId ? { id: accountId } : {}),
   });
+  const verifyUnreached = failure?.stage === 'verify' && !relogin;
   // 页面能打开而这条请求发不出去，多半是浏览器插件或安全软件按网址拦了它
-  const showBlockedHint = failure?.stage === 'verify' && failure.code === 'network';
+  const showBlockedHint = verifyUnreached && failure?.code === 'network';
+  // 登录前提示过国内玩家开加速器上 Steam，回到本站这一步加速器反而容易让请求丢掉
+  const networkHint = (
+    <div className="flex items-start gap-2.5 rounded-[7px] border border-line bg-panel-soft px-3.5 py-3 text-sm text-content">
+      <Info className="mt-0.5 size-[18px] shrink-0 text-link" aria-hidden="true" />
+      <div className="space-y-1">
+        <p>{t('acceleratorOffHint')}</p>
+        {showBlockedHint ? <p>{t('blockedHint')}</p> : null}
+      </div>
+    </div>
+  );
 
   return (
     <section className="card-container card-pad mx-auto max-w-xl space-y-5" aria-live="polite">
@@ -315,16 +350,17 @@ function LoginCallbackContent() {
       <div className="space-y-2">
         <h1 className="title-primary">{t(failure ? 'failTitle' : 'title')}</h1>
         <p className="text-content">
-          {t(failure ? (failure.stage === 'signIn' ? 'failSignIn' : 'failVerify') : 'description')}
+          {t(
+            failure
+              ? failure.stage === 'signIn'
+                ? 'failSignIn'
+                : relogin
+                  ? 'failVerify'
+                  : 'failVerifyUnreached'
+              : 'description',
+          )}
         </p>
       </div>
-
-      {showBlockedHint ? (
-        <p className="flex items-start gap-2.5 rounded-[7px] border border-line bg-panel-soft px-3.5 py-3 text-sm text-content">
-          <Info className="mt-0.5 size-[18px] shrink-0 text-link" aria-hidden="true" />
-          {t('blockedHint')}
-        </p>
-      ) : null}
 
       <ol className="space-y-2.5 text-sm">
         {STEPS.map((step) => {
@@ -355,6 +391,7 @@ function LoginCallbackContent() {
             </div>
             <p className="text-xs text-muted">{t('diag.hint')}</p>
           </div>
+          {verifyUnreached ? networkHint : null}
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={retry}>{retryLabel}</Button>
             <Link href={`/feedback?${feedbackParams.toString()}`} className="btn-secondary">
@@ -366,9 +403,12 @@ function LoginCallbackContent() {
           </div>
         </>
       ) : waiting && stageElapsedMs >= SHOW_RETRY_AFTER_MS ? (
-        <Button variant="secondary" onClick={retry}>
-          {retryLabel}
-        </Button>
+        <>
+          {stage === 'verify' ? networkHint : null}
+          <Button variant="secondary" onClick={retry}>
+            {retryLabel}
+          </Button>
+        </>
       ) : null}
     </section>
   );

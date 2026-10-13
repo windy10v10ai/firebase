@@ -932,10 +932,10 @@
     "signOut": "退出",
     "callback": {
       "title": "正在登录",
-      "description": "已经从 Steam 回来，正在确认身份并进入网站，完成后自动回到刚才的页面。",
+      "description": "已经从 Steam 回来，正在登录网站，完成后自动回到刚才的页面。",
       "steps": {
-        "verify": "Steam 确认身份",
-        "signIn": "登录网站",
+        "steam": "Steam 登录",
+        "site": "登录网站",
         "redirect": "回到刚才的页面"
       },
       "waited": "已等 {seconds} 秒",
@@ -945,12 +945,14 @@
       "home": "返回首页",
       "failTitle": "登录没有完成",
       "failVerify": "没能确认这次 Steam 登录，需要重新去 Steam 登录一次。",
+      "failVerifyUnreached": "Steam 那一步已经通过，是网络没连上本站，再试一次就行。",
       "failSignIn": "没能连上登录服务，多半是网络不稳。Steam 那一步已经通过，直接再试一次就行。",
+      "acceleratorOffHint": "开着加速器的话，先关掉再点「再试一次」。",
       "blockedHint": "换个浏览器再试，或者关掉广告拦截插件和安全软件的网页防护。",
       "feedback": "反馈这个问题",
       "feedbackSummary": "登录网站失败。",
       "diag": {
-        "stuckAt": "卡在 步骤 {step} · {name}",
+        "stuckAt": "卡在 步骤 {step} · {name} · {stage}",
         "attempts": "尝试 {attempts} 次 · 共等 {seconds} 秒",
         "player": "ID {id}",
         "hint": "点「反馈这个问题」会自动带上这一块",

@@ -938,10 +938,10 @@
     "signOut": "Sign out",
     "callback": {
       "title": "Signing in",
-      "description": "You're back from Steam. We're confirming your identity and signing you in, then we'll take you back to where you were.",
+      "description": "You're back from Steam. We're signing you in to the site, then we'll take you back to where you were.",
       "steps": {
-        "verify": "Steam confirms your identity",
-        "signIn": "Sign in to the site",
+        "steam": "Steam sign-in",
+        "site": "Sign in to the site",
         "redirect": "Back to your page"
       },
       "waited": "waiting {seconds}s",
@@ -951,12 +951,14 @@
       "home": "Back to home",
       "failTitle": "Sign-in didn't finish",
       "failVerify": "We couldn't confirm this Steam sign-in. Please sign in with Steam again.",
+      "failVerifyUnreached": "Steam already confirmed you, but your network couldn't reach this site. Just try again.",
       "failSignIn": "We couldn't reach the sign-in service, most likely a network hiccup. Steam already confirmed you, so just try again.",
+      "acceleratorOffHint": "If you have an accelerator on, turn it off first, then click Try again.",
       "blockedHint": "Try a different browser, or turn off ad blockers and the web protection in your security software.",
       "feedback": "Report this problem",
       "feedbackSummary": "Signing in to the website failed.",
       "diag": {
-        "stuckAt": "Stuck at step {step} · {name}",
+        "stuckAt": "Stuck at step {step} · {name} · {stage}",
         "attempts": "{attempts, plural, one {# attempt} other {# attempts}} · {seconds}s total",
         "player": "ID {id}",
         "hint": "\"Report this problem\" includes this box automatically",
