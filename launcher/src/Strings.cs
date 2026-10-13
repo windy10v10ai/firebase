@@ -57,7 +57,7 @@ namespace Windy10v10AI.Launcher
         public static string MapMissing { get { return Pick("没有找到地图", "Map not found", "Карта не найдена"); } }
         public static string MapUnknown { get { return Pick("没有找到 Dota 2", "Dota 2 not found", "Dota 2 не найдена"); } }
 
-        public static string OutdatedNotice { get { return Pick("地图不是最新版本，需要更新。请在 Steam 里等待下载完成（期间不要打开 Dota 2），或打开 Dota 2 手动更新地图后再启动。", "The map is out of date. Wait for Steam to finish downloading it (keep Dota 2 closed), or open Dota 2 and update the map, then start again.", "Карта устарела. Дождитесь загрузки в Steam (не открывая Dota 2) или откройте Dota 2 и обновите карту, затем запустите снова."); } }
+        public static string OutdatedNotice { get { return Pick("地图不是最新版本，点「更新地图」下载新版后再启动。", "The map is out of date. Press Update map, then start.", "Карта устарела, обновите её."); } }
         public static string NoSteam { get { return Pick("没有找到 Steam，请先安装 Steam 和 Dota 2。", "Steam was not found. Install Steam and Dota 2 first.", "Steam не найден. Сначала установите Steam и Dota 2."); } }
         public static string StartingSteam { get { return Pick("正在启动 Steam…", "Starting Steam...", "Запуск Steam…"); } }
         public static string SteamNotSignedIn { get { return Pick("Steam 还没有登录。请打开 Steam 并登录，再试一次。", "Steam is not signed in. Open Steam, sign in, then try again.", "Вход в Steam не выполнен. Откройте Steam, войдите в аккаунт и попробуйте снова."); } }
@@ -74,6 +74,9 @@ namespace Windy10v10AI.Launcher
         public static string LaunchFailed { get { return Pick("启动失败：", "Launch failed: ", "Не удалось запустить: "); } }
         public static string VerifyFiles { get { return Pick("验证文件", "Verify files", "Проверить"); } }
         public static string OpenWorkshop { get { return Pick("打开创意工坊", "Open Workshop", "Открыть Мастерскую"); } }
+        public static string UpdateMap { get { return Pick("更新地图", "Update map", "Обновить карту"); } }
+        public static string MapUpdating { get { return Pick("正在更新地图…", "Updating the map...", "Обновление карты…"); } }
+        public static string MapUpdateFailed { get { return Pick("没能自动更新地图。请在 Dota 2 中更新地图（删除后重新安装），或打开创意工坊重新订阅 10v10 AI。", "Update failed. Reinstall the map in Dota 2, or resubscribe.", "Не удалось. Переустановите карту в Dota 2 или переподпишитесь."); } }
         public static string Subscribe { get { return Pick("订阅地图", "Subscribe", "Подписаться"); } }
         public static string ReportProblem { get { return Pick("反馈问题", "Report problem", "Сообщить"); } }
 
@@ -171,8 +174,8 @@ namespace Windy10v10AI.Launcher
         public static string StatusLeft { get { return Pick("已离开", "Left", "Вышел"); } }
         public static string HostSilent { get { return Pick("与房主的连接中断，正在重连…", "Lost contact with the host, reconnecting...", "Связь с хостом прервана, переподключение…"); } }
         public static string MapCardTitle { get { return Pick("联机需要最新版地图", "Online play needs the latest map", "Для игры по сети нужна последняя версия карты"); } }
-        public static string MapCardHost { get { return Pick("地图正在等待 Steam 更新。更新完成前不能创建房间，期间不要打开 Dota 2。", "The map is waiting for a Steam update. You can host once it finishes; keep Dota 2 closed until then.", "Карта ждёт обновления в Steam. Хостить можно после обновления; до этого не открывайте Dota 2."); } }
-        public static string MapCardJoin { get { return Pick("地图正在等待 Steam 更新。更新完成后这张卡片会自动消失，再点「加入」即可，期间不要打开 Dota 2。", "The map is waiting for a Steam update. This card disappears once it finishes; then press Join. Keep Dota 2 closed until then.", "Карта ждёт обновления в Steam. После обновления эта карточка исчезнет — нажмите «Войти». До этого не открывайте Dota 2."); } }
+        public static string MapCardHost { get { return Pick("地图不是最新版本，更新完成后才能创建房间。", "The map is out of date. You can host once it is updated.", "Карта устарела. Создать комнату можно после обновления."); } }
+        public static string MapCardJoin { get { return Pick("地图不是最新版本。更新完成后这张卡片会自动消失，再点「加入」即可。", "The map is out of date. This card disappears once it is updated; then press Join.", "Карта устарела. После обновления эта карточка исчезнет — нажмите «Войти»."); } }
         public static string MapHostOld { get { return Pick("房主的地图不是最新版本：请房主关掉服务器，等地图更新完成后重新开房（房间码会变）。", "The host's map is out of date. The host needs to stop the server, wait for the update and host again (the code will change).", "У хоста устаревшая карта. Хосту нужно остановить сервер, дождаться обновления и создать комнату заново (код изменится)."); } }
         public static string MapMismatch { get { return Pick("你和房主的地图版本不同：请两人都确认地图已更新到最新版。", "You and the host have different map versions. Both of you need the latest map.", "У вас и хоста разные версии карты. Обновите карту у обоих."); } }
 
