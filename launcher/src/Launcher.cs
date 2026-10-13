@@ -2007,11 +2007,14 @@ namespace Windy10v10AI.Launcher
             }
             try
             {
-                Process.Start(new ProcessStartInfo("steam://connect/127.0.0.1:" + LocalGate.Port) { UseShellExecute = true });
+                // Handed to the Steam executable rather than the shell, because Steam China registers no handler for steam://
+                var steam = DotaInstall.SteamExecutable();
+                if (steam == null) throw new LaunchError(Strings.SteamClientMissing, false);
+                StartDota(new ProcessStartInfo { FileName = steam, Arguments = "\"steam://connect/127.0.0.1:" + LocalGate.Port + "\"", UseShellExecute = false });
             }
             catch (Exception)
             {
-                // Without a handler for steam:// the console command is the only way in
+                // Without a way to reach Steam the console command is the only way in
                 lock (watch) watch.AskedAt = DateTime.UtcNow.AddMilliseconds(-SteamEnterMs);
             }
         }
