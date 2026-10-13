@@ -159,6 +159,10 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_6_2": [
+          "Added \"Update map\" button",
+          "Bug fixes"
+        ],
         "v0_6_1": [
           "Better route choice for online play"
         ],
