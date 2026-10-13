@@ -1,6 +1,6 @@
 # launcher/ 规约
 
-启动器做什么、发版流程与理由见 [README.md](README.md)。
+启动器做什么、发版流程与理由见 [README.md](README.md)。发版时加载 [launcher-release](../.claude/skills/launcher-release/SKILL.md) 技能：扫描、误报申报、下载验证的操作与更新日志写法都在那里。
 
 ## 版本号
 
@@ -23,24 +23,6 @@
 
 - `launcher\test.cmd` 通过
 - `launcher\build.cmd` 编译通过，并核对 `launcher/dist/Windy10v10AI.exe` 的文件版本等于 `Version`
-
-## VirusTotal 扫描
-
-本机 Defender 扫描用 `& "$env:ProgramFiles\Windows Defender\MpCmdRun.exe" -Scan -ScanType 3 -File <exe> -DisableRemediation`，输出 `found no threats` 即通过。
-
-VirusTotal 的 Microsoft 一栏报 `!ml` 时，由 Claude 用 Claude in Chrome 代为申报误报，用户的 Chrome 已登录微软账号：
-
-- 申报页选「Software developer」，产品选「Microsoft Defender Antivirus (Windows 11)」，Company Name 填 `Windy10v10AI`，「What do you believe this file is?」选「Incorrectly detected as malware/malicious」，Detection name 填 VirusTotal 上的检出名，Additional information 用英文写清这是本仓库的开源启动器、源码与下载地址、由 GitHub Actions 编译、本机 Defender 不报
-- 上传框是普通的 file input，`find` 拿到 ref 后直接 `file_upload`；文件要先复制到会话临时目录
-- 最后一页「Review your submission」有验证码，Claude 不能代填：滚到验证码处，请用户填验证码并点 Submit
-
-发版前的扫描（理由见 README「发布」第 3 步）用 Claude in Chrome 自动上传，不用 API（要填密钥）：
-
-- 上传框藏在 `vt-ui-main-upload-form` 的 shadow DOM 里，`find` / `file_upload` 拿不到 ref。先用 `javascript_tool` 往 `document.body` 插一个带 `aria-label` 的 `<input type="file">`，`file_upload` 传给它，再用 `DataTransfer` 把文件赋给 shadow DOM 里的第二个 file input 并派发 `change`，页面会弹出「Confirm upload」，同样在 shadow DOM 里找到这个按钮调 `click()` 即开始扫描
-- 应用内置浏览器（`mcp__Claude_Browser__*`）没有 `file_upload`，本机文件进不了页面，只能请用户手动选文件
-- 扫描完成后页面跳到 `/gui/file/<sha256>`，单次 `javascript_tool` 超过 45 秒会超时，等跳转要分几次轮询；结果在 shadow DOM 里，`get_page_text` 读不到，用 `javascript_tool` 递归拼 `shadowRoot` 的文本，取检出数与 Microsoft 一栏
-
-发版第 5 步的下载验证用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 看有没有这个下载地址的新记录；有记录即被拦。
 
 ## PR 截图
 
