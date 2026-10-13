@@ -78,6 +78,7 @@ namespace Windy10v10AI.Launcher
         const string RoomHostname = "windy10v10ai-room";
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
         const string CorruptContent = "FATAL ERROR: Content file";
+        const string LocalContentCorrupt = "Local content might be corrupt";
         // The game sends its results the moment a team wins, a few seconds before the post-game state
         const string ResultsSent = "/api/game/end";
         const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
@@ -1296,18 +1297,33 @@ namespace Windy10v10AI.Launcher
 
         LaunchError ServerExitError()
         {
-            if (!AddonCorrupt(ReadShared(logFile))) return new LaunchError(Strings.ServerExited, true);
-            return new LaunchError(Strings.MapCorrupt, false) { Button = Strings.VerifyFiles, OnClick = () => OpenUrl("steam://validate/570") };
+            var corrupt = CorruptFilesText(ReadShared(logFile));
+            if (corrupt == null) return new LaunchError(Strings.ServerExited, true);
+            return new LaunchError(corrupt, false) { Button = Strings.VerifyFiles, OnClick = VerifyFiles };
         }
 
-        // A damaged Workshop map only shows up as a fatal content error in the server log
-        internal static bool AddonCorrupt(string log)
+        static void VerifyFiles()
         {
+            OpenUrl("steam://validate/570");
+        }
+
+        // Damaged files only show up in the log of a Dota that failed fatally; the corruption warning alone does not
+        // stop the game, so it counts only next to a fatal error. Returns null when the log shows no damaged files
+        internal static string CorruptFilesText(string log)
+        {
+            var fatal = false;
+            var gameFiles = false;
             foreach (var line in log.Split('\n'))
             {
-                if (line.Contains(CorruptContent) && line.Contains("dota_addons")) return true;
+                if (line.Contains(CorruptContent))
+                {
+                    if (line.Contains("dota_addons") || line.Contains(@"workshop\content")) return Strings.MapCorrupt;
+                    gameFiles = true;
+                }
+                if (line.Contains(LocalContentCorrupt)) gameFiles = true;
+                if (line.Contains("FATAL ERROR")) fatal = true;
             }
-            return false;
+            return fatal && gameFiles ? Strings.GameFilesCorrupt : null;
         }
 
         void OnJoinClick(string code)
@@ -2043,7 +2059,20 @@ namespace Windy10v10AI.Launcher
             else ShowProgress(title, text, button, animate);
             secondary.Visible = false;
             var enter = EnterAction(install, serverId);
-            if (presence == Presence.Out) ShowSecondary(Strings.EnterGame, enter, true);
+            if (presence == Presence.Out)
+            {
+                ShowSecondary(Strings.EnterGame, enter, true);
+                // A damaged map on the joiner's own PC closes Dota right after it enters, which otherwise reads as leaving
+                string corrupt = null;
+                try
+                {
+                    corrupt = CorruptFilesText(ReadShared(Path.Combine(install.Game, @"dota\client.log")));
+                }
+                catch (IOException)
+                {
+                }
+                if (corrupt != null) ShowNotice(NoticeKind.Error, corrupt, Strings.VerifyFiles, VerifyFiles);
+            }
             if (presence == Presence.Stuck)
             {
                 ShowNotice(NoticeKind.Warning, Strings.ConsoleSteps, Strings.CopyCommand, CopyConnect);
