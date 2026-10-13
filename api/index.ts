@@ -59,6 +59,8 @@ export const client = onRequest(
     region: 'asia-northeast1',
     minInstances: 0,
     maxInstances: 10,
+    // 默认的 256MiB 常态占用已接近上限，实例会超限被重启；内存单价远低于 CPU，加倍对费用影响很小
+    memory: '512MiB',
     // 缩到零后的第一个请求要等冷启动，超时得把整个冷启动包进去
     timeoutSeconds: 15,
     secrets: commonSecrets,

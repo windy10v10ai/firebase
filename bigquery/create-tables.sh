@@ -25,3 +25,10 @@ for sql_file in "$SCRIPT_DIR"/tables/*.sql; do
   echo "建表：$(basename "$sql_file" .sql)"
   run_sql "$(sed -e "s/\${PROJECT_ID}/${PROJECT_ID}/g" -e "s/\${DATASET}/${DATASET}/g" "$sql_file")"
 done
+
+# 视图依赖表所以放后面；SQL 走标准输入，开头的注释才不会被 bq 当成参数
+for sql_file in "$SCRIPT_DIR"/views/*.sql; do
+  echo "建视图：$(basename "$sql_file" .sql)"
+  sed -e "s/\${PROJECT_ID}/${PROJECT_ID}/g" -e "s/\${DATASET}/${DATASET}/g" "$sql_file" \
+    | bq query --project_id="$PROJECT_ID" --location="$LOCATION" --use_legacy_sql=false --quiet
+done

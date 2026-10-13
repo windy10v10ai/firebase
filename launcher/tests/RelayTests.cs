@@ -18,6 +18,7 @@ namespace Windy10v10AI.Launcher.Tests
             RouteCheckReadsScoreAndLegacyLimits();
             RouteCheckSwitchesOnScore();
             RouteCheckFallsBackToLossLimits();
+            ProbeTakesTheBestAddressMedian();
             Console.WriteLine("PASS Relay tests");
         }
 
@@ -148,6 +149,21 @@ namespace Windy10v10AI.Launcher.Tests
             var limits = new RouteThresholds { DirectLossPct = 5, RelayLossPct = 2 };
             Yes(limits.PrefersRelay(Route(180, 6), Route(500, 0)), "an older API still switches on loss alone");
             No(limits.PrefersRelay(Route(60, 3), Route(50, 0)), "an older API keeps a direct route under its loss limit");
+        }
+
+        static void ProbeTakesTheBestAddressMedian()
+        {
+            var probe = new JoinTunnel.Probe();
+            Equal(-1, probe.Rtt, "a probe without replies has no latency");
+            probe.FirstReply = DateTime.UtcNow;
+            probe.Rtts[new IPEndPoint(IPAddress.Parse("1.2.3.4"), 1)] = new List<int> { 500, 40, 42, 41, 300, 43 };
+            probe.Rtts[new IPEndPoint(IPAddress.Parse("5.6.7.8"), 1)] = new List<int> { 90, 80, 85 };
+            Equal(42, probe.Rtt, "skips the first reply and takes the median of the best address");
+            No(probe.Done, "keeps probing until an address has enough replies");
+            probe.Rtts[new IPEndPoint(IPAddress.Parse("5.6.7.8"), 1)] = new List<int> { 90, 80, 85, 80, 85, 80, 85, 80, 85, 80, 85 };
+            Yes(probe.Done, "stops once an address has enough replies");
+            probe = new JoinTunnel.Probe { FirstReply = DateTime.UtcNow.AddSeconds(-4) };
+            Yes(probe.Done, "settles a while after the first reply even when replies keep getting lost");
         }
 
         static Dictionary<string, object> Answer(Dictionary<string, object> check)

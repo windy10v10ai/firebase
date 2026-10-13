@@ -160,6 +160,10 @@ jobs:
         run: launcher\build.cmd
         shell: cmd
 
+      - name: Test
+        run: launcher\test.cmd
+        shell: cmd
+
   ci:
     if: ${{ !cancelled() }}
     needs: [changes, api-quality, api-e2e, web-quality, launcher-build]
