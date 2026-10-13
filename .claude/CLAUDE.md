@@ -124,6 +124,8 @@
 
 **写或改 `docs/` 下任何文档之前，先用 Skill 工具加载 [design-docs](skills/design-docs/SKILL.md) 技能**，按它判断内容该进哪一类，不凭印象定路径。向用户承诺「会写进哪份文档」之前同样先加载。批次完成后怎么瘦身也见该技能。
 
+**用户纠正做法、补充新约定，或发现 `CLAUDE.md` / `SKILL.md` 与代码不符时，加载 [doc-update](skills/doc-update/SKILL.md) 技能沉淀**，作为完成改动的一部分；新建或改写 skill 时同样按它写。
+
 | 类型 | 路径 | 进 git |
 |---|---|---|
 | 框架性文档（某模块长期有效的架构、鉴权、技术选型、视觉等规范） | `docs/<模块>/README.md`，如 `docs/web/README.md`；专题内容多时另建 `docs/<模块>/<专题>.md`，如 `docs/web/design-system.md` | 是 |
