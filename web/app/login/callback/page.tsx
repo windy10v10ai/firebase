@@ -118,6 +118,11 @@ function isUnsent(error: unknown): boolean {
   return error instanceof TypeError;
 }
 
+// 接口明确拒绝说明这份参数已经不能用，只能重走 Steam；其余失败多半是请求没到后端，原样再交一次就能登录
+function needsRelogin(failure: Failure): boolean {
+  return failure.stage === 'verify' && failure.code.startsWith('api/4');
+}
+
 // 回调参数里带着 Steam 的 64 位 ID，换算成 Dota2 ID 才能对上生产日志；只用于显示，不做校验
 function accountIdFrom(claimedId: string | null): string | null {
   const id64 = claimedId?.match(/\/(\d+)$/)?.[1];
@@ -216,47 +221,60 @@ function LoginCallbackContent() {
     [enterStage, next, router],
   );
 
+  const verify = useCallback(async () => {
+    runRef.current += 1;
+    const run = runRef.current;
+    setFailure(null);
+    enterStage('verify');
+    let customToken: string;
+    let attempts = 1;
+    try {
+      // 原样透传查询串给后端二次核对签名，见 SteamVerifyDto 的说明
+      ({ customToken } = await withRetry(
+        () =>
+          apiFetch<SteamVerifyResponse>('/api/auth/steam/verify', {
+            method: 'POST',
+            body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
+            signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
+          }),
+        isUnsent,
+        (nextAttempt) => {
+          attempts = nextAttempt;
+          if (runRef.current === run) {
+            setAttempt(nextAttempt);
+          }
+        },
+      ));
+    } catch (error) {
+      console.error('[auth] Steam 回调核对失败', error);
+      if (runRef.current !== run) {
+        return;
+      }
+      setFailure({
+        stage: 'verify',
+        ...describeError(error),
+        attempts,
+        elapsedMs: Date.now() - startedAtRef.current,
+        at: new Date(),
+      });
+      return;
+    }
+    // 等待中再交一次时两轮都在路上，参数只能用一次，先拿到的 token 就是唯一有效的那份
+    if (customTokenRef.current) {
+      return;
+    }
+    customTokenRef.current = customToken;
+    setHasToken(true);
+    await signIn(customToken);
+  }, [enterStage, searchParams, signIn]);
+
   useEffect(() => {
     if (hasRunRef.current) {
       return;
     }
     hasRunRef.current = true;
     startedAtRef.current = Date.now();
-    stageStartedAtRef.current = startedAtRef.current;
-
-    (async () => {
-      let customToken: string;
-      let attempts = 1;
-      try {
-        // 原样透传查询串给后端二次核对签名，见 SteamVerifyDto 的说明
-        ({ customToken } = await withRetry(
-          () =>
-            apiFetch<SteamVerifyResponse>('/api/auth/steam/verify', {
-              method: 'POST',
-              body: JSON.stringify({ openidParams: `?${searchParams.toString()}` }),
-              signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
-            }),
-          isUnsent,
-          (nextAttempt) => {
-            attempts = nextAttempt;
-            setAttempt(nextAttempt);
-          },
-        ));
-      } catch (error) {
-        console.error('[auth] Steam 回调核对失败', error);
-        setFailure({
-          stage: 'verify',
-          ...describeError(error),
-          attempts,
-          elapsedMs: Date.now() - startedAtRef.current,
-          at: new Date(),
-        });
-        return;
-      }
-      customTokenRef.current = customToken;
-      setHasToken(true);
-      await signIn(customToken);
-    })();
+    void verify();
     // 只在挂载时核对一次，next/searchParams 变化不用重跑
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -270,14 +288,17 @@ function LoginCallbackContent() {
     return () => clearInterval(timer);
   }, [failure]);
 
+  const relogin = failure !== null && needsRelogin(failure);
   const retry = () => {
     if (customTokenRef.current) {
       void signIn(customTokenRef.current);
-    } else {
+    } else if (relogin) {
       window.location.href = loginUrl(next);
+    } else {
+      void verify();
     }
   };
-  const retryLabel = hasToken ? t('retry') : t('relogin');
+  const retryLabel = relogin ? t('relogin') : t('retry');
   const waiting = !failure && stage !== 'redirect';
 
   const diagLines = failure
@@ -299,8 +320,9 @@ function LoginCallbackContent() {
     description: [t('feedbackSummary'), '', ...diagLines].join('\n'),
     ...(accountId ? { id: accountId } : {}),
   });
+  const verifyUnreached = failure?.stage === 'verify' && !relogin;
   // 页面能打开而这条请求发不出去，多半是浏览器插件或安全软件按网址拦了它
-  const showBlockedHint = failure?.stage === 'verify' && failure.code === 'network';
+  const showBlockedHint = verifyUnreached && failure?.code === 'network';
 
   return (
     <section className="card-container card-pad mx-auto max-w-xl space-y-5" aria-live="polite">
@@ -315,15 +337,27 @@ function LoginCallbackContent() {
       <div className="space-y-2">
         <h1 className="title-primary">{t(failure ? 'failTitle' : 'title')}</h1>
         <p className="text-content">
-          {t(failure ? (failure.stage === 'signIn' ? 'failSignIn' : 'failVerify') : 'description')}
+          {t(
+            failure
+              ? failure.stage === 'signIn'
+                ? 'failSignIn'
+                : relogin
+                  ? 'failVerify'
+                  : 'failVerifyUnreached'
+              : 'description',
+          )}
         </p>
       </div>
 
-      {showBlockedHint ? (
-        <p className="flex items-start gap-2.5 rounded-[7px] border border-line bg-panel-soft px-3.5 py-3 text-sm text-content">
+      {/* 登录前提示过国内玩家开加速器上 Steam，回到本站这一步加速器反而容易让请求丢掉 */}
+      {verifyUnreached ? (
+        <div className="flex items-start gap-2.5 rounded-[7px] border border-line bg-panel-soft px-3.5 py-3 text-sm text-content">
           <Info className="mt-0.5 size-[18px] shrink-0 text-link" aria-hidden="true" />
-          {t('blockedHint')}
-        </p>
+          <div className="space-y-1">
+            <p>{t('acceleratorOffHint')}</p>
+            {showBlockedHint ? <p>{t('blockedHint')}</p> : null}
+          </div>
+        </div>
       ) : null}
 
       <ol className="space-y-2.5 text-sm">

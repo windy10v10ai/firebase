@@ -34,6 +34,7 @@ Firestore
 - API 侧新增来源类型 `WEB` 与 `@AllowWeb()`，只有显式声明的路由接受网站来源；路由里的 `:steamId` 必须等于 token 的 uid，由 guard 统一拦。
 - 不用 session cookie，也不加网站专用 API key。登录凭据只在 Firebase SDK 手里，门禁只能做在浏览器里。
 - **登录后回到原页**：登录按钮被点的那一刻记下当前地址，放进 `next` 查询参数；它参与 OpenID 签名，中途被改过核对会失败。回调页只接受以单个 `/` 开头的站内路径，挡掉 `//evil.com` 与带协议的地址；跳回用 `router.replace`，不在历史里留下回调页，按返回键不会再登录一次。
+- **回调核对失败时先在本页重试，不回 Steam。** Steam 的回调参数只能核对一次，但请求没到后端时它还没被用掉，原样再交一次就能登录；只有后端明确拒绝（4xx）才重走 Steam。国内玩家登录前被提示开加速器上 Steam，回到本站这一步加速器反而容易丢请求，所以失败页提示先关加速器再重试；国内关掉加速器后 Steam 页常打不开，重走 Steam 会再卡一次。
 - 另有一个 `player-uid` 提示 cookie，只供服务端决定首屏形态。**它不是凭据**：uid 本来就公开出现在地址里，API 只认 ID Token；任何鉴权、跳转、归属判断都不得依据它。
 - 同理有一个 `player-profile` 提示 cookie，把 Steam 昵称头像也搬到首屏渲染阶段，避免先出现 ID 再跳成昵称的闪烁；同样不是凭据，取值见「已定决策」。
 - **Firebase Auth 的请求走本站域名转发，不直连 Google。** 换登录态与续期 token 由 SDK 直接打到 `googleapis.com`，部分网络到不了那里，表现是后端已经签发了 token、页面仍然报登录失败。`config/firebase.ts` 把 SDK 的请求地址指到本站，`next.config.ts` 的 rewrites 再转发出去。
