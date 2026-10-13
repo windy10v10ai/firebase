@@ -938,10 +938,10 @@
     "signOut": "Sign out",
     "callback": {
       "title": "Signing in",
-      "description": "You're back from Steam. We're confirming your identity and signing you in, then we'll take you back to where you were.",
+      "description": "You're back from Steam. We're signing you in to the site, then we'll take you back to where you were.",
       "steps": {
-        "verify": "Steam confirms your identity",
-        "signIn": "Sign in to the site",
+        "steam": "Steam sign-in",
+        "site": "Sign in to the site",
         "redirect": "Back to your page"
       },
       "waited": "waiting {seconds}s",
@@ -958,7 +958,7 @@
       "feedback": "Report this problem",
       "feedbackSummary": "Signing in to the website failed.",
       "diag": {
-        "stuckAt": "Stuck at step {step} · {name}",
+        "stuckAt": "Stuck at step {step} · {name} · {stage}",
         "attempts": "{attempts, plural, one {# attempt} other {# attempts}} · {seconds}s total",
         "player": "ID {id}",
         "hint": "\"Report this problem\" includes this box automatically",

@@ -932,10 +932,10 @@
     "signOut": "退出",
     "callback": {
       "title": "正在登录",
-      "description": "已经从 Steam 回来，正在确认身份并进入网站，完成后自动回到刚才的页面。",
+      "description": "已经从 Steam 回来，正在登录网站，完成后自动回到刚才的页面。",
       "steps": {
-        "verify": "Steam 确认身份",
-        "signIn": "登录网站",
+        "steam": "Steam 登录",
+        "site": "登录网站",
         "redirect": "回到刚才的页面"
       },
       "waited": "已等 {seconds} 秒",
@@ -952,7 +952,7 @@
       "feedback": "反馈这个问题",
       "feedbackSummary": "登录网站失败。",
       "diag": {
-        "stuckAt": "卡在 步骤 {step} · {name}",
+        "stuckAt": "卡在 步骤 {step} · {name} · {stage}",
         "attempts": "尝试 {attempts} 次 · 共等 {seconds} 秒",
         "player": "ID {id}",
         "hint": "点「反馈这个问题」会自动带上这一块",
