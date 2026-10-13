@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Win32;
@@ -143,6 +146,147 @@ namespace Windy10v10AI.Launcher
         {
             var value = ReadValue(block, key);
             return value == null ? 0 : long.Parse(value);
+        }
+    }
+
+    // Has the running Steam client fetch the newest build of a Workshop item, talking to it through the Steam API that
+    // ships with Dota 2. Steam's periodic check reads an update feed that can lag a release by many minutes; subscribing
+    // to an item Steam already has makes it ask the server for that item directly.
+    static class WorkshopDownload
+    {
+        public const string Flag = "--update-workshop-item";
+        const uint Downloading = 16;
+        const uint DownloadPending = 32;
+        const int SubscribeTimeoutMs = 15000;
+        const int DownloadTimeoutMs = 10 * 60 * 1000;
+        const int ChildTimeoutMs = DownloadTimeoutMs + 60 * 1000;
+        const int ReleaseTimeoutMs = 30 * 1000;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern IntPtr LoadLibrary(string path);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        static extern IntPtr GetProcAddress(IntPtr module, string name);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int InitFn(StringBuilder error);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate void VoidFn();
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate IntPtr InterfaceFn();
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate ulong SubscribeFn(IntPtr ugc, ulong id);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] delegate bool CallDoneFn(IntPtr utils, ulong call, [MarshalAs(UnmanagedType.I1)] out bool failed);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] delegate bool DownloadFn(IntPtr ugc, ulong id, [MarshalAs(UnmanagedType.I1)] bool highPriority);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate uint StateFn(IntPtr ugc, ulong id);
+
+        // Returns false when Steam could not be asked. Steam counts every process that opens the Steam API as Dota 2
+        // running until it exits, which would stop the launcher from starting Dota, so the work runs in a child process.
+        public static bool Run(string id)
+        {
+            var steamWasRunningDota = DotaRunning();
+            int exitCode;
+            try
+            {
+                var start = new ProcessStartInfo(typeof(WorkshopDownload).Assembly.Location, Flag + " " + id) { UseShellExecute = false };
+                start.EnvironmentVariables["SteamAppId"] = "570";
+                using (var child = Process.Start(start))
+                {
+                    if (!child.WaitForExit(ChildTimeoutMs))
+                    {
+                        child.Kill();
+                        return false;
+                    }
+                    exitCode = child.ExitCode;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            // Steam notices the exit some seconds later, and a launch before that finds Dota still marked as running
+            var watch = Stopwatch.StartNew();
+            while (!steamWasRunningDota && DotaRunning() && watch.ElapsedMilliseconds < ReleaseTimeoutMs) Thread.Sleep(500);
+            return exitCode == 0;
+        }
+
+        static bool DotaRunning()
+        {
+            var running = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam\Apps\570", "Running", 0);
+            return running is int && (int)running != 0;
+        }
+
+        // Entry point of the child process; the Steam API identifies the game by the SteamAppId variable it was given
+        public static int RunChild(string id)
+        {
+            var install = DotaInstall.Find();
+            return install != null && Ask(install, id) ? 0 : 1;
+        }
+
+        static bool Ask(DotaInstall install, string id)
+        {
+            if (IntPtr.Size != 8) return false;
+            var lib = LoadLibrary(Path.Combine(install.Game, @"bin\win64\steam_api64.dll"));
+            if (lib == IntPtr.Zero) return false;
+            try
+            {
+                var init = Fn<InitFn>(lib, "SteamAPI_InitFlat");
+                var ugcFn = UgcInterface(lib);
+                if (init == null || ugcFn == null || init(new StringBuilder(1024)) != 0) return false;
+                try
+                {
+                    return Download(lib, ugcFn(), ulong.Parse(id));
+                }
+                finally
+                {
+                    Fn<VoidFn>(lib, "SteamAPI_Shutdown")();
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        static bool Download(IntPtr lib, IntPtr ugc, ulong id)
+        {
+            var run = Fn<VoidFn>(lib, "SteamAPI_RunCallbacks");
+            var utils = Fn<InterfaceFn>(lib, "SteamAPI_SteamUtils_v010")();
+            var callDone = Fn<CallDoneFn>(lib, "SteamAPI_ISteamUtils_IsAPICallCompleted");
+            var state = Fn<StateFn>(lib, "SteamAPI_ISteamUGC_GetItemState");
+
+            var call = Fn<SubscribeFn>(lib, "SteamAPI_ISteamUGC_SubscribeItem")(ugc, id);
+            var watch = Stopwatch.StartNew();
+            bool failed;
+            while (!callDone(utils, call, out failed) && watch.ElapsedMilliseconds < SubscribeTimeoutMs)
+            {
+                run();
+                Thread.Sleep(100);
+            }
+            if (!Fn<DownloadFn>(lib, "SteamAPI_ISteamUGC_DownloadItem")(ugc, id, true)) return false;
+
+            watch.Restart();
+            while (watch.ElapsedMilliseconds < DownloadTimeoutMs)
+            {
+                run();
+                // Steam may take a moment to queue the job after accepting the request
+                if (watch.ElapsedMilliseconds > 1000 && (state(ugc, id) & (Downloading | DownloadPending)) == 0) return true;
+                Thread.Sleep(500);
+            }
+            return true;
+        }
+
+        // Dota updates its copy of the Steam API now and then, which renames the versioned accessor
+        static InterfaceFn UgcInterface(IntPtr lib)
+        {
+            for (var version = 30; version >= 21; version--)
+            {
+                var accessor = Fn<InterfaceFn>(lib, "SteamAPI_SteamUGC_v" + version.ToString("000"));
+                if (accessor != null) return accessor;
+            }
+            return null;
+        }
+
+        static T Fn<T>(IntPtr lib, string name) where T : class
+        {
+            var address = GetProcAddress(lib, name);
+            return address == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer(address, typeof(T)) as T;
         }
     }
 
