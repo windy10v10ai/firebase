@@ -191,7 +191,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
-    starTargets: [4, 6, 7],
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_shadow_shaman',
   },
   {
@@ -728,7 +728,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
-    starTargets: [4, 6, 7],
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_death_prophet',
   },
   {
@@ -1012,7 +1012,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
-    starTargets: [4, 6, 7],
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_lycan',
   },
   {
@@ -1118,7 +1118,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.TOWER_KILLS,
     target: 4,
-    starTargets: [4, 6, 7],
+    starTargets: [4, 6, 8],
     heroName: 'npc_dota_hero_furion',
   },
   {
