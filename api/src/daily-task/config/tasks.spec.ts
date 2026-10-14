@@ -66,7 +66,7 @@ describe('daily task configuration', () => {
       [TaskMetric.KILLS]: 70,
       [TaskMetric.ASSISTS]: 40,
       [TaskMetric.LAST_HITS]: 200,
-      [TaskMetric.TOWER_KILLS]: 4,
+      [TaskMetric.TOWER_KILLS]: 3,
       [TaskMetric.HERO_DAMAGE]: 700_000,
       [TaskMetric.HEALING]: 40_000,
       [TaskMetric.TOTAL_GOLD_EARNED]: 240_000,
@@ -134,7 +134,7 @@ describe('daily task hero pool', () => {
     const targetBands: Partial<Record<TaskMetric, readonly [number, number]>> = {
       [TaskMetric.KILLS]: [40, 62],
       [TaskMetric.ASSISTS]: [30, 60],
-      [TaskMetric.TOWER_KILLS]: [3, 5],
+      [TaskMetric.TOWER_KILLS]: [2, 5],
       [TaskMetric.HERO_DAMAGE]: [300_000, 900_000],
       [TaskMetric.HEALING]: [10_000, 80_000],
       [TaskMetric.DAMAGE_TAKEN]: [120_000, 260_000],
@@ -169,7 +169,7 @@ describe('daily task hero pool', () => {
       target: 200,
     });
     expect(selectMetricTargets('shadow_shaman')).toEqual([
-      { metric: TaskMetric.TOWER_KILLS, target: 5 },
+      { metric: TaskMetric.TOWER_KILLS, target: 4 },
       { metric: TaskMetric.STUN_DURATION, target: 100 },
     ]);
     expect(selectMetricTargets('zuus')).toContainEqual({
@@ -236,6 +236,6 @@ describe('daily task numeric parameters', () => {
     }
 
     const towerTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.TOWER_KILLS);
-    expect(towerTask?.starTargets).toEqual([4, 6, 8]);
+    expect(towerTask?.starTargets).toEqual([3, 4, 6]);
   });
 });
