@@ -23,7 +23,7 @@ interface Cell {
 }
 
 const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
-  { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'no' } },
+  { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
   { labelKey: 'records', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
   {
     labelKey: 'stable',
@@ -32,10 +32,6 @@ const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
   },
   { labelKey: 'smooth', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
 ];
-
-// 两列各适合一种玩法，不分主次，所以徽章同色
-const HINT_CLASS =
-  'mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5';
 
 export default function LaunchPage() {
   const t = useTranslations('launch');
@@ -97,13 +93,11 @@ export default function LaunchPage() {
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.arcade')}
                   </span>
-                  <span className={HINT_CLASS}>{t('compare.arcadeHint')}</span>
                 </th>
                 <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.launcher')}
                   </span>
-                  <span className={HINT_CLASS}>{t('compare.launcherHint')}</span>
                 </th>
               </tr>
             </thead>

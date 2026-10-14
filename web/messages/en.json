@@ -118,9 +118,7 @@
     "compare": {
       "title": "Two ways to start",
       "arcade": "Arcade",
-      "arcadeHint": "Multiplayer",
       "launcher": "Launcher",
-      "launcherHint": "Solo",
       "multiplayer": "Multiplayer",
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",
@@ -133,7 +131,7 @@
     },
     "launcher": {
       "name": "Windy10v10AI Launcher",
-      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play.",
+      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play, or open a room for friends.",
       "download": "Download launcher",
       "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
       "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
@@ -209,7 +207,7 @@
     },
     "homeCard": {
       "title": "How to start the game",
-      "body": "Just launch from the Arcade: multiplayer works. Playing solo and want a smoother late game? Download the launcher."
+      "body": "Just launch from the Arcade. Want a smoother late game and a steadier connection? Download the launcher, which supports multiplayer too."
     }
   },
   "membership": {

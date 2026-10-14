@@ -118,9 +118,7 @@
     "compare": {
       "title": "两种启动方式",
       "arcade": "游廊",
-      "arcadeHint": "联机",
       "launcher": "启动器",
-      "launcherHint": "单人",
       "multiplayer": "多人联机",
       "records": "最新数据、结算积分、每日任务",
       "stable": "连接稳定",
@@ -133,7 +131,7 @@
     },
     "launcher": {
       "name": "Windy10v10AI 启动器",
-      "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏。",
+      "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏，也可以开房和朋友一起玩。",
       "download": "下载启动器",
       "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
       "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
@@ -207,7 +205,7 @@
     },
     "homeCard": {
       "title": "开局方式",
-      "body": "从游廊开局即可，支持多人。一个人玩、想要后期更流畅，可以下载启动器。"
+      "body": "从游廊开局即可。想要后期更流畅、连接更稳，可以下载启动器，同样支持多人联机。"
     }
   },
   "membership": {
