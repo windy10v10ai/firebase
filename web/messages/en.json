@@ -143,11 +143,9 @@
       "summary": "Don't want to download software? Start from the console",
       "badge": "Solo only",
       "intro": "Enter a command to start a game. Solo only. For multiplayer, start from the Arcade or use the launcher.",
-      "steps": [
-        "In Dota 2 settings, tick Enable Console and bind a key to Console",
-        "Back at the main menu, press that key to open the console",
-        "Enter one of the commands below for the difficulty you want"
-      ],
+      "step1": "In Dota 2 settings, tick Enable Console and bind a key to Console",
+      "step2": "Back at the main menu, press the hotkey (default <key>/</key>) to open the console",
+      "step3": "Enter one of the commands below for the difficulty you want",
       "difficulty": {
         "dota": "N1–N5",
         "hard": "N6–N8",

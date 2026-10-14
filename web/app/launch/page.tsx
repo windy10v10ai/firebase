@@ -46,6 +46,11 @@ const consoleCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_I
 export default function LaunchPage() {
   const t = useTranslations('launch');
 
+  const key = (chunks: React.ReactNode) => (
+    <code className="rounded border border-line bg-panel-soft px-1.5 py-0.5 font-mono text-[13px] text-danger">
+      {chunks}
+    </code>
+  );
   const mark = (chunks: React.ReactNode) => <span className="text-warning">{chunks}</span>;
   // 不换行：窄屏时图标和文字被拆到两行，读起来像两样东西
   const github = (chunks: React.ReactNode) => (
@@ -209,11 +214,9 @@ export default function LaunchPage() {
             {t('console.intro')}
           </p>
           <ol className="list-decimal space-y-2 pl-5 text-content marker:text-muted">
-            {(t.raw('console.steps') as string[]).map((step) => (
-              <li key={step} className="pl-1">
-                {step}
-              </li>
-            ))}
+            <li className="pl-1">{t('console.step1')}</li>
+            <li className="pl-1">{t.rich('console.step2', { key })}</li>
+            <li className="pl-1">{t('console.step3')}</li>
           </ol>
           <div className="space-y-2">
             {CONSOLE_MODES.map((mode) => (
