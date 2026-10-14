@@ -236,6 +236,6 @@ describe('daily task numeric parameters', () => {
     }
 
     const towerTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.TOWER_KILLS);
-    expect(towerTask?.starTargets).toEqual([4, 6, 8]);
+    expect(towerTask?.starTargets).toEqual([3, 4, 6]);
   });
 });
