@@ -116,6 +116,11 @@ namespace Windy10v10AI.Launcher
             }
         }
 
+        public bool InGame(string key)
+        {
+            lock (sync) return entries.Exists(e => e.Key == key && e.Status == PlayerStatus.InGame);
+        }
+
         // Everyone still in the room between games, or waiting for the next game's server
         public void SetAll(PlayerStatus status)
         {
