@@ -119,6 +119,7 @@
       "title": "Two ways to start",
       "arcade": "Arcade",
       "launcher": "Launcher",
+      "launcherHint": "Recommended",
       "multiplayer": "Multiplayer",
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",

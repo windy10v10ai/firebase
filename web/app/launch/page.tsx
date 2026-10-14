@@ -33,6 +33,9 @@ const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
   { labelKey: 'smooth', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
 ];
 
+const HINT_CLASS =
+  'mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5';
+
 export default function LaunchPage() {
   const t = useTranslations('launch');
 
@@ -98,6 +101,7 @@ export default function LaunchPage() {
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.launcher')}
                   </span>
+                  <span className={HINT_CLASS}>{t('compare.launcherHint')}</span>
                 </th>
               </tr>
             </thead>

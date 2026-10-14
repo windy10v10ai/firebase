@@ -119,6 +119,7 @@
       "title": "两种启动方式",
       "arcade": "游廊",
       "launcher": "启动器",
+      "launcherHint": "推荐",
       "multiplayer": "多人联机",
       "records": "最新数据、结算积分、每日任务",
       "stable": "连接稳定",
