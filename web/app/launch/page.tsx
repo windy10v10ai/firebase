@@ -1,7 +1,8 @@
-import { Check, Download, Triangle, X } from 'lucide-react';
+import { Check, ChevronRight, Download, Triangle, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import CopyIdButton from '../components/CopyIdButton';
 import GithubIcon from '../components/GithubIcon';
 import Section from '../components/Section';
 import { pageTitle } from '../lib/page-title';
@@ -30,6 +31,17 @@ const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
 
 const HINT_CLASS =
   'mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5';
+
+const CUSTOM_GAME_ID = '2307479570';
+
+// 三张地图对应三个难度档，地图名让玩家自己填等于多一步出错机会
+const CONSOLE_MODES = [
+  { key: 'dota', name: 'Dota', map: 'dota' },
+  { key: 'hard', name: 'Hard', map: 'hard' },
+  { key: 'custom', name: 'Custom', map: 'custom' },
+];
+
+const consoleCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID} ${map}`;
 
 export default function LaunchPage() {
   const t = useTranslations('launch');
@@ -178,6 +190,58 @@ export default function LaunchPage() {
           </p>
         </div>
       </Section>
+
+      <details className="group card-container card-pad">
+        <summary className="flex min-h-11 list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+          <ChevronRight
+            className="size-[18px] shrink-0 text-muted transition-transform group-open:rotate-90"
+            aria-hidden="true"
+          />
+          <span className="min-w-0 flex-1 text-base font-bold text-heading md:text-lg">
+            {t('console.title')}
+          </span>
+          <span className="shrink-0 rounded-full border border-line-strong px-2 text-xs leading-5 text-content">
+            {t('console.badge')}
+          </span>
+        </summary>
+        <div className="mt-4 space-y-4 md:pl-[30px]">
+          <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
+            {t('console.intro')}
+          </p>
+          <ol className="list-decimal space-y-2 pl-5 text-content marker:text-muted">
+            {(t.raw('console.steps') as string[]).map((step) => (
+              <li key={step} className="pl-1">
+                {step}
+              </li>
+            ))}
+          </ol>
+          <div className="space-y-2">
+            {CONSOLE_MODES.map((mode) => (
+              <div
+                key={mode.key}
+                className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
+              >
+                <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
+                  <span className="text-[15px] font-medium text-heading">
+                    {t(`console.difficulty.${mode.key}`)}
+                  </span>
+                  <span className="text-[13px] text-muted">{mode.name}</span>
+                </span>
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <code className="min-w-0 flex-1 font-mono text-sm break-words text-heading">
+                    {consoleCommand(mode.map)}
+                  </code>
+                  <CopyIdButton
+                    value={consoleCommand(mode.map)}
+                    tooltip={t('console.copy')}
+                    copiedLabel={t('console.copied')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </details>
 
       {/* 启动器右上角的版本号链接到这个锚点 */}
       <Section id="changelog" title={t('changelog.title')}>

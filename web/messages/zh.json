@@ -139,6 +139,24 @@
       "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
     },
+    "console": {
+      "title": "不想下载软件？用控制台命令开局",
+      "badge": "仅单人",
+      "intro": "在 Dota 2 的控制台里输入命令即可开局，只能一个人玩。想多人联机请从游廊开局或用启动器开局。",
+      "steps": [
+        "在 Dota 2 设置里搜「控制台」，勾上「启用控制台」",
+        "在快捷键设置里，给「控制台」设一个快捷键",
+        "回到 Dota 2 主界面，按快捷键打开控制台",
+        "按想玩的难度，选择下方一条命令输入控制台"
+      ],
+      "difficulty": {
+        "dota": "N1 ~ N5",
+        "hard": "N6 ~ N8",
+        "custom": "自定义难度"
+      },
+      "copy": "复制",
+      "copied": "已复制"
+    },
     "browserBlock": {
       "blocked": "已阻止可疑下载操作",
       "warning": "此文件不常被下载，可能具有危险性",
