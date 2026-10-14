@@ -196,8 +196,8 @@ export default function LaunchPage() {
         </div>
       </Section>
 
-      <details className="group card-container card-pad">
-        <summary className="flex min-h-11 list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+      <details className="group card-container">
+        <summary className="card-pad-sm flex list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
           <ChevronRight
             className="size-[18px] shrink-0 text-muted transition-transform group-open:rotate-90"
             aria-hidden="true"
@@ -209,7 +209,7 @@ export default function LaunchPage() {
             {t('console.badge')}
           </span>
         </summary>
-        <div className="mt-4 space-y-4 md:pl-[30px]">
+        <div className="card-pad-sm space-y-4 pt-0 md:pl-[46px]">
           <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
             {t('console.intro')}
           </p>
