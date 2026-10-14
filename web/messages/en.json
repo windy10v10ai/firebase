@@ -142,12 +142,11 @@
     "console": {
       "summary": "Don't want to download software? Start from the console",
       "badge": "Solo only",
-      "intro": "Type a command in the Dota 2 console to start a game. Solo only. For multiplayer, start from the Arcade or use the launcher.",
+      "intro": "Enter a command to start a game. Solo only. For multiplayer, start from the Arcade or use the launcher.",
       "steps": [
-        "In Dota 2 settings, search for \"console\" and tick Enable Console",
-        "In the hotkey settings, bind a key to Console",
-        "Back at the Dota 2 main menu, press that key to open the console",
-        "Pick the difficulty you want and enter one of the commands below in the console"
+        "In Dota 2 settings, tick Enable Console and bind a key to Console",
+        "Back at the main menu, press that key to open the console",
+        "Enter one of the commands below for the difficulty you want"
       ],
       "difficulty": {
         "dota": "N1–N5",

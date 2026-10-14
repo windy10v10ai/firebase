@@ -194,10 +194,10 @@ export default function LaunchPage() {
       <details className="group card-container card-pad">
         <summary className="flex min-h-11 list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
           <ChevronRight
-            className="size-[18px] shrink-0 text-muted transition-transform group-open:rotate-90"
+            className="size-[18px] shrink-0 text-muted group-open:rotate-90"
             aria-hidden="true"
           />
-          <span className="min-w-0 flex-1 text-base font-bold text-heading md:text-lg">
+          <span className="min-w-0 flex-1 text-lg font-bold text-heading md:text-2xl">
             {t('console.summary')}
           </span>
           <span className="shrink-0 rounded-full border border-line-strong px-2 text-xs leading-5 text-content">
