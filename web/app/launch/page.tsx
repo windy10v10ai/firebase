@@ -19,17 +19,12 @@ export const generateMetadata = pageTitle('launch', 'title');
 
 interface Cell {
   mark: 'yes' | 'partial' | 'no';
-  noteKey?: string;
 }
 
 const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
   { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
   { labelKey: 'records', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
-  {
-    labelKey: 'stable',
-    arcade: { mark: 'partial', noteKey: 'stableArcade' },
-    launcher: { mark: 'yes' },
-  },
+  { labelKey: 'stable', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
   { labelKey: 'smooth', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
 ];
 
@@ -76,9 +71,6 @@ export default function LaunchPage() {
           aria-label={t('compare.partial')}
         />
       )}
-      {cell.noteKey ? (
-        <span className="hidden text-sm text-muted md:inline">{t(`compare.${cell.noteKey}`)}</span>
-      ) : null}
     </span>
   );
 
