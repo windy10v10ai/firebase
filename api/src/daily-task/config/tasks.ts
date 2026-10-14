@@ -1483,13 +1483,6 @@ export const DAILY_TASKS: TaskDefinition[] = [
   {
     id: 'hero_tiny_1',
     scope: TaskScope.PERSONAL_HERO,
-    metric: TaskMetric.STUN_DURATION,
-    target: 40,
-    heroName: 'npc_dota_hero_tiny',
-  },
-  {
-    id: 'hero_tiny_2',
-    scope: TaskScope.PERSONAL_HERO,
     metric: TaskMetric.HERO_DAMAGE,
     target: 500_000,
     heroName: 'npc_dota_hero_tiny',
