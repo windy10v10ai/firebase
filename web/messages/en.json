@@ -118,13 +118,11 @@
     "compare": {
       "title": "Two ways to start",
       "arcade": "Arcade",
-      "arcadeHint": "Multiplayer",
       "launcher": "Launcher",
-      "launcherHint": "Solo",
+      "launcherHint": "Suggested",
       "multiplayer": "Multiplayer",
       "records": "Latest data, match points and daily tasks",
       "stable": "Stable connection",
-      "stableArcade": "May occasionally fail",
       "smooth": "Smooth late game",
       "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded.",
       "yes": "Yes",
@@ -133,13 +131,28 @@
     },
     "launcher": {
       "name": "Windy10v10AI Launcher",
-      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play.",
+      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play, or open a room for friends.",
       "download": "Download launcher",
       "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
       "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
       "codeSigning": "Privacy and safety",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
+    },
+    "console": {
+      "summary": "Don't want to download software? Start from the console",
+      "badge": "Solo only",
+      "intro": "Enter a command to start a game. Solo only. For multiplayer, start from the Arcade or use the launcher.",
+      "step1": "In Dota 2 settings, tick Enable Console and bind a key to Console",
+      "step2": "Back at the main menu, press the hotkey (default <key>/</key>) to open the console",
+      "step3": "Enter one of the commands below for the difficulty you want",
+      "difficulty": {
+        "dota": "N1–N5",
+        "hard": "N6–N8",
+        "custom": "Custom difficulty"
+      },
+      "copy": "Copy",
+      "copied": "Copied"
     },
     "browserBlock": {
       "blocked": "Suspicious download blocked",
@@ -209,7 +222,7 @@
     },
     "homeCard": {
       "title": "How to start the game",
-      "body": "Just launch from the Arcade: multiplayer works. Playing solo and want a smoother late game? Download the launcher."
+      "body": "Just launch from the Arcade. Want a smoother late game and a steadier connection? Download the launcher, which supports multiplayer too."
     }
   },
   "membership": {

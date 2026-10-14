@@ -1,7 +1,8 @@
-import { Check, Download, Triangle, X } from 'lucide-react';
+import { Check, ChevronRight, Download, Triangle, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import CopyIdButton from '../components/CopyIdButton';
 import GithubIcon from '../components/GithubIcon';
 import Section from '../components/Section';
 import { pageTitle } from '../lib/page-title';
@@ -19,27 +20,37 @@ export const generateMetadata = pageTitle('launch', 'title');
 
 interface Cell {
   mark: 'yes' | 'partial' | 'no';
-  noteKey?: string;
 }
 
 const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
-  { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'no' } },
+  { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
   { labelKey: 'records', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
-  {
-    labelKey: 'stable',
-    arcade: { mark: 'partial', noteKey: 'stableArcade' },
-    launcher: { mark: 'yes' },
-  },
+  { labelKey: 'stable', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
   { labelKey: 'smooth', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
 ];
 
-// 两列各适合一种玩法，不分主次，所以徽章同色
 const HINT_CLASS =
   'mt-1 inline-block rounded-full border border-success/40 bg-success/10 px-1.5 text-[10px] leading-4 font-medium text-success md:px-2 md:text-xs md:leading-5';
+
+const CUSTOM_GAME_ID = '2307479570';
+
+// 三张地图对应三个难度档，地图名让玩家自己填等于多一步出错机会
+const CONSOLE_MODES = [
+  { key: 'dota', name: 'Dota', map: 'dota' },
+  { key: 'hard', name: 'Hard', map: 'hard' },
+  { key: 'custom', name: 'Custom', map: 'custom' },
+];
+
+const consoleCommand = (map: string) => `dota_launch_custom_game ${CUSTOM_GAME_ID} ${map}`;
 
 export default function LaunchPage() {
   const t = useTranslations('launch');
 
+  const key = (chunks: React.ReactNode) => (
+    <code className="rounded border border-line bg-panel-soft px-1.5 py-0.5 font-mono text-[13px] text-danger">
+      {chunks}
+    </code>
+  );
   const mark = (chunks: React.ReactNode) => <span className="text-warning">{chunks}</span>;
   // 不换行：窄屏时图标和文字被拆到两行，读起来像两样东西
   const github = (chunks: React.ReactNode) => (
@@ -77,9 +88,6 @@ export default function LaunchPage() {
           aria-label={t('compare.partial')}
         />
       )}
-      {cell.noteKey ? (
-        <span className="hidden text-sm text-muted md:inline">{t(`compare.${cell.noteKey}`)}</span>
-      ) : null}
     </span>
   );
 
@@ -97,7 +105,6 @@ export default function LaunchPage() {
                   <span className="block text-sm font-bold text-heading md:text-lg">
                     {t('compare.arcade')}
                   </span>
-                  <span className={HINT_CLASS}>{t('compare.arcadeHint')}</span>
                 </th>
                 <th scope="col" className="w-[76px] px-1.5 py-3 text-center md:w-[26%] md:p-4">
                   <span className="block text-sm font-bold text-heading md:text-lg">
@@ -188,6 +195,57 @@ export default function LaunchPage() {
           </p>
         </div>
       </Section>
+
+      <details className="group card-container">
+        <summary className="card-pad-sm flex list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+          <ChevronRight
+            className="size-4 shrink-0 text-muted transition-transform group-open:rotate-90"
+            aria-hidden="true"
+          />
+          <span className="min-w-0 flex-1 text-[15px] font-bold text-heading md:text-base">
+            {t('console.summary')}
+          </span>
+          <span className="shrink-0 rounded-full border border-line-strong px-2 text-[11px] leading-[18px] text-content">
+            {t('console.badge')}
+          </span>
+        </summary>
+        <div className="card-pad-sm space-y-3 pt-1 md:space-y-3.5 md:pl-[44px]">
+          <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
+            {t('console.intro')}
+          </p>
+          <ol className="list-decimal pl-5 text-[15px] leading-6 text-content marker:text-muted md:text-base md:leading-7">
+            <li className="pl-1">{t('console.step1')}</li>
+            <li className="pl-1">{t.rich('console.step2', { key })}</li>
+            <li className="pl-1">{t('console.step3')}</li>
+          </ol>
+          <div className="space-y-2">
+            {CONSOLE_MODES.map((mode) => (
+              <div
+                key={mode.key}
+                className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3"
+              >
+                <span className="flex items-baseline gap-2 md:w-[150px] md:shrink-0">
+                  <span className="text-sm font-semibold text-heading">
+                    {t(`console.difficulty.${mode.key}`)}
+                  </span>
+                  <span className="text-xs text-muted">{mode.name}</span>
+                </span>
+                {/* 命令用深色底加红字，与左侧难度名区分开 */}
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-line bg-black/30 py-1.5 pr-1.5 pl-3 md:py-2 md:pr-2 md:pl-3.5">
+                  <code className="min-w-0 font-mono text-xs break-words text-danger md:text-[13px]">
+                    {consoleCommand(mode.map)}
+                  </code>
+                  <CopyIdButton
+                    value={consoleCommand(mode.map)}
+                    tooltip={t('console.copy')}
+                    copiedLabel={t('console.copied')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </details>
 
       {/* 启动器右上角的版本号链接到这个锚点 */}
       <Section id="changelog" title={t('changelog.title')}>
