@@ -196,24 +196,24 @@ export default function LaunchPage() {
         </div>
       </Section>
 
-      <details className="group card-container card-pad">
-        <summary className="flex min-h-11 list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+      <details className="group card-container">
+        <summary className="card-pad-sm flex list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
           <ChevronRight
-            className="size-[18px] shrink-0 text-muted transition-transform group-open:rotate-90"
+            className="size-4 shrink-0 text-muted transition-transform group-open:rotate-90"
             aria-hidden="true"
           />
-          <span className="min-w-0 flex-1 text-base font-bold text-heading md:text-lg">
+          <span className="min-w-0 flex-1 text-[15px] font-bold text-heading md:text-base">
             {t('console.summary')}
           </span>
-          <span className="shrink-0 rounded-full border border-line-strong px-2 text-xs leading-5 text-content">
+          <span className="shrink-0 rounded-full border border-line-strong px-2 text-[11px] leading-[18px] text-content">
             {t('console.badge')}
           </span>
         </summary>
-        <div className="mt-4 space-y-4 md:pl-[30px]">
+        <div className="card-pad-sm space-y-3 pt-1 md:space-y-3.5 md:pl-[44px]">
           <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
             {t('console.intro')}
           </p>
-          <ol className="list-decimal space-y-2 pl-5 text-content marker:text-muted">
+          <ol className="list-decimal pl-5 text-[15px] leading-6 text-content marker:text-muted md:text-base md:leading-7">
             <li className="pl-1">{t('console.step1')}</li>
             <li className="pl-1">{t.rich('console.step2', { key })}</li>
             <li className="pl-1">{t('console.step3')}</li>
@@ -222,16 +222,17 @@ export default function LaunchPage() {
             {CONSOLE_MODES.map((mode) => (
               <div
                 key={mode.key}
-                className="box-pad flex flex-col gap-1.5 rounded-[10px] border border-line bg-panel-soft md:flex-row md:items-center md:gap-4"
+                className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3"
               >
-                <span className="flex items-baseline gap-2 md:w-38 md:shrink-0 md:flex-col md:items-start md:gap-0">
-                  <span className="text-[15px] font-medium text-heading">
+                <span className="flex items-baseline gap-2 md:w-[150px] md:shrink-0">
+                  <span className="text-sm font-semibold text-heading">
                     {t(`console.difficulty.${mode.key}`)}
                   </span>
-                  <span className="text-[13px] text-muted">{mode.name}</span>
+                  <span className="text-xs text-muted">{mode.name}</span>
                 </span>
-                <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <code className="min-w-0 flex-1 font-mono text-sm break-words text-heading">
+                {/* 命令用深色底加红字，与左侧难度名区分开 */}
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-line bg-black/30 py-1.5 pr-1.5 pl-3 md:py-2 md:pr-2 md:pl-3.5">
+                  <code className="min-w-0 font-mono text-xs break-words text-danger md:text-[13px]">
                     {consoleCommand(mode.map)}
                   </code>
                   <CopyIdButton
