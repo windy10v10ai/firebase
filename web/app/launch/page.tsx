@@ -198,7 +198,7 @@ export default function LaunchPage() {
             aria-hidden="true"
           />
           <span className="min-w-0 flex-1 text-base font-bold text-heading md:text-lg">
-            {t('console.title')}
+            {t('console.summary')}
           </span>
           <span className="shrink-0 rounded-full border border-line-strong px-2 text-xs leading-5 text-content">
             {t('console.badge')}

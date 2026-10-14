@@ -140,7 +140,7 @@
       "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
     },
     "console": {
-      "title": "Don't want to download software? Start from the console",
+      "summary": "Don't want to download software? Start from the console",
       "badge": "Solo only",
       "intro": "Type a command in the Dota 2 console to start a game. Solo only. For multiplayer, start from the Arcade or use the launcher.",
       "steps": [
