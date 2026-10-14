@@ -118,13 +118,11 @@
     "compare": {
       "title": "两种启动方式",
       "arcade": "游廊",
-      "arcadeHint": "联机",
       "launcher": "启动器",
-      "launcherHint": "单人",
+      "launcherHint": "推荐",
       "multiplayer": "多人联机",
       "records": "最新数据、结算积分、每日任务",
       "stable": "连接稳定",
-      "stableArcade": "偶尔连不上",
       "smooth": "后期流畅",
       "noteOffline": "连不上服务器时是离线模式：会员、属性、觉醒沿用地图更新时的数据，积分与战绩不记录。",
       "yes": "支持",
@@ -133,13 +131,28 @@
     },
     "launcher": {
       "name": "Windy10v10AI 启动器",
-      "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏。",
+      "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏，也可以开房和朋友一起玩。",
       "download": "下载启动器",
       "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
       "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
       "codeSigning": "隐私与安全说明",
       "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
       "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
+    },
+    "console": {
+      "summary": "不想下载软件？用控制台命令开局",
+      "badge": "仅单人",
+      "intro": "输入命令开局，只能单人。想多人联机请从游廊开局或用启动器开局。",
+      "step1": "在 Dota 2 设置里勾上「启用控制台」，并给「控制台」设一个快捷键",
+      "step2": "回到主界面，按快捷键（默认 <key>/</key>）打开控制台",
+      "step3": "按想玩的难度，输入下方一条命令",
+      "difficulty": {
+        "dota": "N1 ~ N5",
+        "hard": "N6 ~ N8",
+        "custom": "自定义难度"
+      },
+      "copy": "复制",
+      "copied": "已复制"
     },
     "browserBlock": {
       "blocked": "已阻止可疑下载操作",
@@ -207,7 +220,7 @@
     },
     "homeCard": {
       "title": "开局方式",
-      "body": "从游廊开局即可，支持多人。一个人玩、想要后期更流畅，可以下载启动器。"
+      "body": "从游廊开局即可。想要后期更流畅、连接更稳，可以下载启动器，同样支持多人联机。"
     }
   },
   "membership": {
