@@ -72,7 +72,6 @@ describe('LauncherRoomService', () => {
     address: jest.Mock;
     addresses: jest.Mock;
     order: jest.Mock;
-    routeCheck: jest.Mock;
   };
   let service: LauncherRoomService;
 
@@ -98,7 +97,6 @@ describe('LauncherRoomService', () => {
       address: jest.fn(() => undefined),
       addresses: jest.fn(() => []),
       order: jest.fn(() => []),
-      routeCheck: jest.fn(() => ({ directLossPct: 5, relayLossPct: 2 })),
     };
     service = new LauncherRoomService(
       rooms as never,
@@ -322,8 +320,7 @@ describe('LauncherRoomService', () => {
     });
 
     expect(withoutRelay.routeCheck).toBeUndefined();
-    expect(joined.routeCheck).toEqual({ directLossPct: 5, relayLossPct: 2 });
-    expect(relay.routeCheck).toHaveBeenCalledWith(undefined, undefined, 'a');
+    expect(joined.routeCheck).toEqual({ lossCostMs: 10, switchMarginMs: 30 });
     expect(bigQuery.recordRouteChecks).toHaveBeenCalledWith(
       expect.objectContaining({ id: room.code }),
       [

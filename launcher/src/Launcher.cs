@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.6.2.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.6.2.0")]
+[assembly: System.Reflection.AssemblyVersion("0.6.3.0")]
+[assembly: System.Reflection.AssemblyFileVersion("0.6.3.0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -55,7 +55,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.6.2";
+        const string Version = "0.6.3";
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -67,6 +67,8 @@ namespace Windy10v10AI.Launcher
         const int SteamEnterMs = 5000;
         // The host sends its roster every two seconds
         const int JoinStateWaitMs = 5000;
+        // Dota gives the room's privileges to whoever loads in first, so joiners wait for the host, but not on a host that hangs
+        const int HostHeadStartMs = 30000;
         static readonly string ConnectCommand = "connect 127.0.0.1:" + LocalGate.Port;
         // Long enough for Steam to apply a pending update before signing in
         const int SteamSignInMs = 90000;
@@ -2093,6 +2095,7 @@ namespace Windy10v10AI.Launcher
             long logOffset = 0;
             Presence? shown = null;
             var end = new GameEnd();
+            var heldSince = DateTime.UtcNow;
             while (!stopping)
             {
                 Thread.Sleep(1000);
@@ -2104,6 +2107,7 @@ namespace Windy10v10AI.Launcher
                 {
                     nextMode = -1;
                     StartNextGame(install, workshopId, mode, client, tunnel, roster);
+                    heldSince = DateTime.UtcNow;
                     serverId = server.Id;
                     logOffset = 0;
                     shown = null;
@@ -2115,6 +2119,7 @@ namespace Windy10v10AI.Launcher
                 {
                     roster.SetInGame(long.Parse(match.Groups[1].Value));
                 }
+                if (!tunnel.GameReady && (roster.InGame("host") || (DateTime.UtcNow - heldSince).TotalMilliseconds >= HostHeadStartMs)) tunnel.GameReady = true;
                 var wasEnded = end.Ended;
                 if (end.Track(text))
                 {
@@ -2201,9 +2206,9 @@ namespace Windy10v10AI.Launcher
             roster.SetAll(PlayerStatus.Waiting);
             if (!Settings.AutoStartDota && !DotaClientRunning(server.Id)) roster.SetStatus("host", PlayerStatus.InRoom);
             WaitForMap(MapKeys[mode]);
-            tunnel.GameReady = true;
             // A Dota that is open follows the room; a closed one only starts when the host asked for that
             if (Settings.AutoStartDota || DotaClientRunning(server.Id)) EnterGame(install, client, server.Id);
+            else tunnel.GameReady = true;
             UI(() =>
             {
                 if (!busy) return;
