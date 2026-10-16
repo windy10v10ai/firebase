@@ -31,7 +31,7 @@ import {
   LauncherRoom,
   LauncherRoomPlayer,
 } from './entities/launcher-room.entity';
-import { LauncherRelayService } from './launcher-relay.service';
+import { LauncherRelayService, ROUTE_CHECK } from './launcher-relay.service';
 
 // 去掉 0 O 1 I L，玩家转述房间码时不会看错
 const ROOM_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -267,9 +267,7 @@ export class LauncherRoomService {
       host: { personaName: room.hostPersonaName, avatarUrl: room.hostAvatarUrl },
       self: profile,
       relay,
-      routeCheck: relay
-        ? this.relayService.routeCheck(room.relays, dto.relays, relay.address)
-        : undefined,
+      routeCheck: relay ? ROUTE_CHECK : undefined,
     };
   }
 

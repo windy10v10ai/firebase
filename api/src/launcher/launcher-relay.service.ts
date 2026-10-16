@@ -15,14 +15,12 @@ export interface LauncherRelay {
 // 清空列表就不发通行证，启动器只试局域网与打洞，中转出问题时用它关掉中转。
 // 第一台是 0.5.2 及更早的启动器唯一会测、会连的一台，它们没有备用线路，所以放最稳定、不按流量计费的那台
 export const LAUNCHER_RELAYS: LauncherRelay[] = [
-  // 南京锐驰型，包月不另收流量费
+  // 国内两台都是锐驰型，包月不限流量，同优先级让双方延迟合计更低的那台胜出；放在两地，一处线路出问题另一台还能接
   { address: '118.195.194.163:27200', priority: 1 },
-  // 上海 CVM，流量按 GB 计费
-  { address: '123.207.219.78:27200', priority: 2 },
-  // 新加坡轻量入门型，流量包有上限；排最后，只在比国内两台快得多时被提前
-  { address: '43.134.232.163:27200', priority: 3 },
-  // 法兰克福 CVM，流量按 GB 计费；给俄语区用，与新加坡同为最低优先级
-  { address: '161.120.221.91:27200', priority: 4 },
+  { address: '159.75.243.15:27200', priority: 1 },
+  // 海外两台是入门型，流量包有上限，只在比国内快得多时被提前；新加坡给东南亚、澳洲，法兰克福给俄语区
+  { address: '43.134.232.163:27200', priority: 2 },
+  { address: '43.131.58.91:27200', priority: 2 },
 ];
 // 掉线重连要拿同一张通行证重新认领，房间跨局保留时加入者会连着打很多局，有效期按一整天算
 export const RELAY_TICKET_TTL_MS = 24 * 60 * 60 * 1000;
@@ -33,15 +31,11 @@ const LOSS_COST_MS = 10;
 // 得分好出这么多才放弃优先的那台中转或直连，差不多时不为一点差距多占中转
 const SWITCH_MARGIN_MS = 30;
 
-// 0.6.0 只认这两个丢包阈值，不看延迟
-const LEGACY_ROUTE_CHECK = { directLossPct: 5, relayLossPct: 2 };
-const ROUTE_CHECK: RouteCheckDto = {
-  ...LEGACY_ROUTE_CHECK,
+// 0.6.0 只认丢包阈值、不看延迟，远距离时会换到绕路的中转，所以只发得分参数，它读不到就不做加入后选线
+export const ROUTE_CHECK: RouteCheckDto = {
   lossCostMs: LOSS_COST_MS,
   switchMarginMs: SWITCH_MARGIN_MS,
 };
-// 中转估算延迟到这个程度就不让 0.6.0 选线：双方离中转都远，直连即使丢包也比绕远路好玩
-const ROUTE_CHECK_RELAY_RTT_LIMIT_MS = 150;
 
 export type RelayRole = 'h' | 'j';
 
@@ -94,25 +88,6 @@ export class LauncherRelayService {
     }
     // 测得差的排在最后：前面的都满了时，差的线路总比连不上强
     return [...usable, ...scored.filter((relay) => !relay.usable)].map((relay) => relay.address);
-  }
-
-  /** 给一次加入挑选线阈值，经这台中转太慢时去掉 0.6.0 认的丢包阈值，让它不再从直连换到中转。 */
-  routeCheck(
-    host: RelayProbeDto[] | undefined,
-    joiner: RelayProbeDto[] | undefined,
-    address: string,
-  ): RouteCheckDto | undefined {
-    const hostRtt = host?.find((probe) => probe.address === address)?.rtt;
-    const joinerRtt = joiner?.find((probe) => probe.address === address)?.rtt;
-    // 一方是旧版、没报测量时估不出，照常下发，不因对方版本旧让新版加入者失去选线
-    if (hostRtt === undefined || joinerRtt === undefined) {
-      return ROUTE_CHECK;
-    }
-    if (hostRtt + joinerRtt < ROUTE_CHECK_RELAY_RTT_LIMIT_MS) {
-      return ROUTE_CHECK;
-    }
-    // 新版按得分比较时自己会发现中转太慢，照常下发
-    return { lossCostMs: LOSS_COST_MS, switchMarginMs: SWITCH_MARGIN_MS };
   }
 
   /** 给一次加入的房主或加入者签中转通行证，顺序为空或没配私钥时返回 undefined。 */
