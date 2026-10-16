@@ -31,15 +31,11 @@ const LOSS_COST_MS = 10;
 // 得分好出这么多才放弃优先的那台中转或直连，差不多时不为一点差距多占中转
 const SWITCH_MARGIN_MS = 30;
 
-// 0.6.0 只认这两个丢包阈值，不看延迟
-const LEGACY_ROUTE_CHECK = { directLossPct: 5, relayLossPct: 2 };
-const ROUTE_CHECK: RouteCheckDto = {
-  ...LEGACY_ROUTE_CHECK,
+// 0.6.0 只认丢包阈值、不看延迟，远距离时会换到绕路的中转，所以只发得分参数，它读不到就不做加入后选线
+export const ROUTE_CHECK: RouteCheckDto = {
   lossCostMs: LOSS_COST_MS,
   switchMarginMs: SWITCH_MARGIN_MS,
 };
-// 中转估算延迟到这个程度就不让 0.6.0 选线：双方离中转都远，直连即使丢包也比绕远路好玩
-const ROUTE_CHECK_RELAY_RTT_LIMIT_MS = 150;
 
 export type RelayRole = 'h' | 'j';
 
@@ -92,25 +88,6 @@ export class LauncherRelayService {
     }
     // 测得差的排在最后：前面的都满了时，差的线路总比连不上强
     return [...usable, ...scored.filter((relay) => !relay.usable)].map((relay) => relay.address);
-  }
-
-  /** 给一次加入挑选线阈值，经这台中转太慢时去掉 0.6.0 认的丢包阈值，让它不再从直连换到中转。 */
-  routeCheck(
-    host: RelayProbeDto[] | undefined,
-    joiner: RelayProbeDto[] | undefined,
-    address: string,
-  ): RouteCheckDto | undefined {
-    const hostRtt = host?.find((probe) => probe.address === address)?.rtt;
-    const joinerRtt = joiner?.find((probe) => probe.address === address)?.rtt;
-    // 一方是旧版、没报测量时估不出，照常下发，不因对方版本旧让新版加入者失去选线
-    if (hostRtt === undefined || joinerRtt === undefined) {
-      return ROUTE_CHECK;
-    }
-    if (hostRtt + joinerRtt < ROUTE_CHECK_RELAY_RTT_LIMIT_MS) {
-      return ROUTE_CHECK;
-    }
-    // 新版按得分比较时自己会发现中转太慢，照常下发
-    return { lossCostMs: LOSS_COST_MS, switchMarginMs: SWITCH_MARGIN_MS };
   }
 
   /** 给一次加入的房主或加入者签中转通行证，顺序为空或没配私钥时返回 undefined。 */
