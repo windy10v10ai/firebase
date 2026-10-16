@@ -51,10 +51,15 @@ export const PENDING_JOIN_MS = 30 * 1000;
 // 记录留一个月，候选地址里的公网 IP 用来按地区分析中转服务器选址
 const CODE_REUSE_MS = 24 * 60 * 60 * 1000;
 const RECORD_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-// 所有请求共用一份查询结果，Firestore 读取量不随看列表的人数增长
 export const ROOM_LIST_CACHE_MS = 10 * 1000;
+export const GAME_LIST_CACHE_MS = 60 * 1000;
 // 中转延迟丢包每次轮询都在变，只随心跳写入，不算状态变化
 const HEARTBEAT_ONLY_FIELDS = ['relays', 'relayRtt', 'relayLoss'];
+
+interface RoomListCache {
+  value?: { fetchedAt: number; rooms: LauncherRoom[] };
+  pending?: Promise<LauncherRoom[]>;
+}
 
 @Injectable()
 export class LauncherRoomService {
@@ -68,8 +73,8 @@ export class LauncherRoomService {
     private readonly relayService: LauncherRelayService,
   ) {}
 
-  // 放在实例上：函数实例处理完请求不会立刻销毁，实例回收或多开时只是多查一次
-  private aliveRoomsCache?: { fetchedAt: number; rooms: LauncherRoom[] };
+  private readonly waitingRoomsCache: RoomListCache = {};
+  private readonly gamesCache: RoomListCache = {};
 
   /** 房主开房、轮询新的加入请求或在开局时关房。 */
   async host(dto: HostRoomDto, country?: string): Promise<HostRoomResponse> {
@@ -133,13 +138,16 @@ export class LauncherRoomService {
       }
     }
 
-    // 开局后房主仍每次轮询都报名单，只在名单变了时才查加入记录换昵称头像
     const playersChanged =
       dto.players !== undefined &&
       dto.players.join() !== (room.players ?? []).map((player) => player.steamId).join();
-    const roomJoins = !room.started || playersChanged ? await this.findRoomJoins(room) : [];
     if (playersChanged) {
-      room.players = dto.players!.map((steamId) => profileOf(steamId, roomJoins));
+      room.players = await Promise.all(
+        dto.players!.map(async (steamId): Promise<LauncherRoomPlayer> => {
+          const existing = room.players?.find((player) => player.steamId === steamId);
+          return existing ?? { steamId, ...(await this.findProfile(steamId)) };
+        }),
+      );
     }
 
     const settings = roomSettings(dto);
@@ -169,9 +177,7 @@ export class LauncherRoomService {
       await this.roomRepository.update(room);
     }
 
-    const joins = room.started
-      ? []
-      : roomJoins.filter((join) => now.getTime() - join.createdAt.getTime() <= PENDING_JOIN_MS);
+    const joins = room.started ? [] : await this.findRoomJoins(room, now);
     return {
       code: room.id,
       token: room.hostToken,
@@ -287,12 +293,17 @@ export class LauncherRoomService {
   /** 列出请求者能加入的公开房间，不含候选地址与令牌。 */
   async list(dto: ListRoomsDto): Promise<ListRoomsResponse> {
     const now = Date.now();
-    const rooms = await this.findAliveRooms(now);
-    const games = rooms
-      .filter(
-        (room) =>
-          room.started && !room.ended && now - room.lastSeenAt.getTime() <= ACTIVE_GAME_ALIVE_MS,
-      )
+    const [waitingRooms, cachedGames] = await Promise.all([
+      this.findAliveRooms(false),
+      this.findAliveRooms(true),
+    ]);
+    const rooms = waitingRooms.filter(
+      (room) => now - room.lastSeenAt.getTime() <= ROOM_LIST_ALIVE_MS,
+    );
+    // 跨局时等待状态更及时，也要从游戏人数统计中移除同一房间。
+    const waitingCodes = new Set(rooms.map((room) => room.id));
+    const games = cachedGames
+      .filter((room) => !waitingCodes.has(room.id))
       .sort(
         (a, b) =>
           (a.startedAt?.getTime() ?? Number.MAX_SAFE_INTEGER) -
@@ -343,16 +354,31 @@ export class LauncherRoomService {
     };
   }
 
-  // 只按心跳一个条件查，其余条件在内存里筛，不用建组合索引
-  private async findAliveRooms(now: number): Promise<LauncherRoom[]> {
-    if (this.aliveRoomsCache && now - this.aliveRoomsCache.fetchedAt < ROOM_LIST_CACHE_MS) {
-      return this.aliveRoomsCache.rooms;
+  private async findAliveRooms(started: boolean): Promise<LauncherRoom[]> {
+    const cache = started ? this.gamesCache : this.waitingRoomsCache;
+    const ttl = started ? GAME_LIST_CACHE_MS : ROOM_LIST_CACHE_MS;
+    if (cache.value && Date.now() - cache.value.fetchedAt < ttl) {
+      return cache.value.rooms;
     }
-    const rooms = await this.roomRepository
-      .whereGreaterThan('lastSeenAt', new Date(now - ACTIVE_GAME_ALIVE_MS))
-      .find();
-    this.aliveRoomsCache = { fetchedAt: now, rooms };
-    return rooms;
+    if (cache.pending) {
+      return cache.pending;
+    }
+    const query = this.roomRepository.whereEqualTo('started', started);
+    if (started) {
+      query.whereEqualTo('ended', false);
+    }
+    const aliveMs = started ? ACTIVE_GAME_ALIVE_MS : ROOM_LIST_ALIVE_MS;
+    cache.pending = query
+      .whereGreaterThan('lastSeenAt', new Date(Date.now() - aliveMs))
+      .find()
+      .then((rooms) => {
+        cache.value = { fetchedAt: Date.now(), rooms };
+        return rooms;
+      })
+      .finally(() => {
+        cache.pending = undefined;
+      });
+    return cache.pending;
   }
 
   private async open(dto: HostRoomDto, now: Date, country?: string): Promise<HostRoomResponse> {
@@ -420,19 +446,12 @@ export class LauncherRoomService {
     }
   }
 
-  // 只按房间码等值查再在内存里筛，免得为这张小表建复合索引
-  private async findRoomJoins(room: LauncherRoom): Promise<LauncherRoomJoin[]> {
-    const joins = await this.joinRepository.whereEqualTo('roomCode', room.id).find();
-    return joins.filter((join) => join.roomId === room.roomId);
+  private async findRoomJoins(room: LauncherRoom, now: Date): Promise<LauncherRoomJoin[]> {
+    return this.joinRepository
+      .whereEqualTo('roomId', room.roomId)
+      .whereGreaterOrEqualThan('createdAt', new Date(now.getTime() - PENDING_JOIN_MS))
+      .find();
   }
-}
-
-// 同一个人可能加入过几次，取最近一次的资料；查不到就只留账号，列表照样算人数
-function profileOf(steamId: number, joins: LauncherRoomJoin[]): LauncherRoomPlayer {
-  const join = joins
-    .filter((candidate) => candidate.steamId === steamId && !candidate.probe)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-  return { steamId, personaName: join?.personaName, avatarUrl: join?.avatarUrl };
 }
 
 function hostAndPlayers(room: LauncherRoom): LauncherProfileDto[] {
