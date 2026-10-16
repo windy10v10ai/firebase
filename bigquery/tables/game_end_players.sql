@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS `${PROJECT_ID}.${DATASET}.game_end_players` (
   game_id STRING NOT NULL,
   match_id STRING,
+  custom_match_id STRING,
   ended_at TIMESTAMP NOT NULL,
   version STRING,
   difficulty INT64,
@@ -9,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `${PROJECT_ID}.${DATASET}.game_end_players` (
   country STRING,
   player_count INT64,
   winner_team_id INT64,
-  game_time_msec INT64,
+  dota_time_msec INT64,
   game_options STRUCT<
     multiplier_radiant FLOAT64,
     multiplier_dire FLOAT64,

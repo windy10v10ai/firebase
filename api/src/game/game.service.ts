@@ -19,6 +19,7 @@ import { SECRET, SERVER_TYPE, SecretService } from '../util/secret/secret.servic
 
 import { GA4ConfigDto } from './dto/ga4-config.dto';
 import { GameStart } from './dto/game-start.response';
+import { HeroItemUsageDto } from './dto/hero-item-usage.dto';
 import { PointInfoDto } from './dto/point-info.dto';
 @Injectable()
 export class GameService {
@@ -148,6 +149,11 @@ export class GameService {
         this.playerStatsRecentService.record(player, gameEnd),
       ]),
     ]);
+  }
+
+  /** 记录独立于积分结算的英雄出装统计。 */
+  async recordHeroItemUsage(usage: HeroItemUsageDto): Promise<void> {
+    await this.bigQueryService.recordHeroItemUsage(usage);
   }
 
   getOK(): string {

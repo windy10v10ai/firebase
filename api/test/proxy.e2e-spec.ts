@@ -93,6 +93,51 @@ describe('ProxyController (e2e)', () => {
     });
   });
 
+  it('accepts hero usage through POST and proxy, and validates nested items', async () => {
+    const usage = {
+      customMatchId: 'e2e-hero-usage',
+      version: 'test',
+      difficulty: 5,
+      dotaTimeMsec: 60000,
+      playerCount: 1,
+      playerId: 10,
+      steamId: 0,
+      heroName: 'npc_dota_hero_axe',
+      teamId: 3,
+      isWin: false,
+      items: [{ itemName: 'item_blink', durationSec: 120 }],
+    };
+    const direct = await request(app.getHttpServer())
+      .post('/api/game/hero-item-usage')
+      .set('x-api-key', localKey)
+      .send(usage);
+    expect(direct.status).toBe(201);
+    expect(direct.text).toBe('OK');
+    const proxy = await request(app.getHttpServer())
+      .get('/api/proxy/game-hero-item-usage-post')
+      .query({
+        requestId: 'usage_1',
+        apiKey: localKey,
+        body: Buffer.from(JSON.stringify({ ...usage, items: [] })).toString('base64url'),
+      });
+    expect(proxy.status).toBe(200);
+    expect(JSON.parse(decodeProxyTitle(proxy.text).data)).toEqual({});
+    const invalid = { ...usage, items: [{ itemName: 'item_blink', durationSec: -1 }] };
+    await request(app.getHttpServer())
+      .post('/api/game/hero-item-usage')
+      .set('x-api-key', localKey)
+      .send(invalid)
+      .expect(400);
+    const invalidProxy = await request(app.getHttpServer())
+      .get('/api/proxy/game-hero-item-usage-post')
+      .query({
+        requestId: 'usage_2',
+        apiKey: localKey,
+        body: Buffer.from(JSON.stringify(invalid)).toString('base64url'),
+      });
+    expect(invalidProxy.text).toContain('ERR:bad_request');
+  });
+
   describe('game-end-local-post', () => {
     const steamId = 310030002;
     const payload = {
