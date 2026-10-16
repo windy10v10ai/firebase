@@ -20,6 +20,11 @@ export class HeroItemDurationDto {
   @IsInt()
   @Min(0)
   durationSec: number;
+
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  lateDurationSec: number;
 }
 
 export class HeroItemUsageDto {

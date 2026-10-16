@@ -105,7 +105,7 @@ describe('ProxyController (e2e)', () => {
       heroName: 'npc_dota_hero_axe',
       teamId: 3,
       isWin: false,
-      items: [{ itemName: 'item_blink', durationSec: 120 }],
+      items: [{ itemName: 'item_blink', durationSec: 120, lateDurationSec: 30 }],
     };
     const direct = await request(app.getHttpServer())
       .post('/api/game/hero-item-usage')
@@ -122,7 +122,10 @@ describe('ProxyController (e2e)', () => {
       });
     expect(proxy.status).toBe(200);
     expect(JSON.parse(decodeProxyTitle(proxy.text).data)).toEqual({});
-    const invalid = { ...usage, items: [{ itemName: 'item_blink', durationSec: -1 }] };
+    const invalid = {
+      ...usage,
+      items: [{ itemName: 'item_blink', durationSec: 120, lateDurationSec: -1 }],
+    };
     await request(app.getHttpServer())
       .post('/api/game/hero-item-usage')
       .set('x-api-key', localKey)

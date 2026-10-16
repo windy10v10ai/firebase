@@ -14,7 +14,7 @@ it('maps one request to one row and preserves item durations', () => {
     heroName: 'npc_dota_hero_axe',
     teamId: 3,
     isWin: false,
-    items: [{ itemName: 'item_blink', durationSec: 120 }],
+    items: [{ itemName: 'item_blink', durationSec: 120, lateDurationSec: 30 }],
   };
   const recordedAt = new Date('2026-10-16T00:00:00Z');
   expect(buildHeroItemUsageRow(usage, recordedAt)).toEqual({
@@ -29,7 +29,7 @@ it('maps one request to one row and preserves item durations', () => {
     hero_name: 'npc_dota_hero_axe',
     team_id: 3,
     is_win: false,
-    items: [{ item_name: 'item_blink', duration_sec: 120 }],
+    items: [{ item_name: 'item_blink', duration_sec: 120, late_duration_sec: 30 }],
   });
   expect(buildHeroItemUsageRow({ ...usage, items: [] }, recordedAt).items).toEqual([]);
 });

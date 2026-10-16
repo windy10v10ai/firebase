@@ -19,6 +19,7 @@ export function buildHeroItemUsageRow(
     items: usage.items.map((item) => ({
       item_name: item.itemName,
       duration_sec: item.durationSec,
+      late_duration_sec: item.lateDurationSec,
     })),
   };
 }
