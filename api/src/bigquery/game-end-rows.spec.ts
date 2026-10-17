@@ -71,6 +71,8 @@ describe('buildGameEndRows', () => {
     expect(rows[0]).toMatchObject({
       game_id: 'game-id',
       match_id: '0',
+      custom_match_id: null,
+      dota_time_msec: 1_800_000,
       ended_at: '2026-09-30T00:00:00.000Z',
       route: 'local',
       server_type: 'LOCAL',
@@ -89,6 +91,15 @@ describe('buildGameEndRows', () => {
       matchId: '0',
       player: { heroName: 'npc_dota_hero_lina' },
     });
+  });
+
+  it('prefers Dota time and preserves the shared custom match ID', () => {
+    const rows = buildGameEndRows(
+      { ...gameEnd, dotaTimeMsec: 2000, customMatchId: 'custom-match' },
+      context,
+      endedAt,
+    );
+    expect(rows[0]).toMatchObject({ dota_time_msec: 2000, custom_match_id: 'custom-match' });
   });
 
   it('卡顿统计一局一行，没带时不写', () => {

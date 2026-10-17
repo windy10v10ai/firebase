@@ -4,6 +4,7 @@
 // 代发路由并入原路由统计，两边进的是同一段逻辑。结算的代发只报按玩家的 GA4 事件，耗时与直连差得多，单独成线
 const PROXY_TO_ORIGINAL: [string, string][] = [
   ['GET proxy/game-end-local-post', 'POST game/end/local（代发）'],
+  ['GET proxy/game-hero-item-usage-post', 'POST game/hero-item-usage'],
   ['GET proxy/game-start', 'GET game/start'],
   ['GET proxy/game-probe', 'GET game/probe'],
   ['GET proxy/player-info', 'GET player info'],

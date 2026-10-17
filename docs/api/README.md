@@ -54,7 +54,7 @@ Steam 这边必须守住的规矩：
 - **`GET /api/launcher/workshop/:id` 是公开端点**：启动器是发给玩家的 exe，放进去的 key 等于公开。它只接受正式图与测试图两个工坊 ID，其余 404，免得被当成通用的 Steam 代理。启动器先直连 Steam，失败才来这里
 - **`GET /api/launcher/version` 与 `GET /api/launcher/download/:version` 是启动器自我更新用的公开端点**：版本号与 exe 哈希写死在代码里；下载只接受当前版本，由函数从官网取 exe、核对哈希后返回。两者都靠 CDN 缓存挡住重复请求，下载地址带版本号可以永久缓存，所以哈希不符时宁可失败也不返回。放在 API 下而不是只放官网，是因为国内代理只转发 `/api/`
 - **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API；加入的响应还带加入后实测选线的得分参数，加入者的测量结果由房主随轮询转报。房间与加入请求存 Firestore，带 IP，按 TTL 字段 `expireAt` 清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
-- **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。列出心跳未过期的可加入房间，以及已开局未结束的游戏；好友房只给人数与已进行时间。加入者的昵称头像由 API 从加入记录取，不用房主上报的资料。整份候选房间在函数实例的内存里短暂缓存、所有请求共用，Firestore 只按心跳时间一个条件查，其余条件在内存里筛，不建组合索引。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
+- **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。列出心跳未过期的可加入房间，以及已开局未结束的游戏；好友房只给人数与已进行时间。玩家资料由 API 获取，不用房主上报的资料。等待房间与游戏分别缓存，游戏状态允许更长的展示延迟，以减少重复读取；跨局重叠时优先展示等待状态，避免列表与人数重复统计。握手仅处理有效窗口内的加入与测速请求，历史记录不参与轮询。新增查询索引须在 API 上线前就绪。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源；网站已登录时改走 `POST /api/feedback/web`（`@AllowWeb()`），Steam ID 取登录态，报告的 `steamIdVerified` 只有这条路是 true，其余来源请求体里的 ID 都能伪造。游戏来源不带日志，改带游戏现场 `gameState`，字段名与结算一致。报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都定期删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：个人按 Steam ID 限频，没有 ID 时按 IP（国内代理转发的请求共用代理 IP）；另有全站每日上限，Steam ID 能伪造，这是存储费用的封顶。分类与仓库标签的对应见 [feedback-review](../../.claude/skills/feedback-review/SKILL.md) 技能，取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由见「对外入口」；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
 
@@ -111,12 +111,15 @@ Steam 这边必须守住的规矩：
 | `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
 | `member_history` | 一次开通或续费会员，写入前后的等级与到期日都留下 | `created_at` 按天 / `steam_id` |
 | `launcher_room_events` | 启动器联机的一次开房或一次加入的连接结果，用来看打洞失败率 | `event_time` 按天 / `event` |
+| `hero_item_usage` | 一个英雄的一条装备使用统计，同一英雄一局可分条 | `recorded_at` 按天 / `hero_name`、`difficulty` |
 | `game_perf` | 一局的卡顿比值与单位规模 | `ended_at` 按天 / `host`、`route` |
 
-- **只在结算被接受后写入**：重复发送的请求由本地主机结算的冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
+- **战绩与卡顿只在结算被接受后写入**：重复发送的请求由本地主机结算的冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
 - **`game_id` 由服务端给每次结算生成**：用启动器开局时 `match_id` 恒为 `"0"`，不能用来区分不同的局。结算加分的那条积分记录，`ref` 就是这个 `game_id`，支付类的积分记录 `ref` 是订单号
+- **出装统计独立上报**：真人和电脑均可上报，直接写 BigQuery，不改 Firestore。允许分条、重复和丢失，不做限额、冷却、去重或分条合并，避免统计影响结算。装备时长按件数累计，另记号角起 30 分钟后的持有时长，卡顿从这时起明显上升；胜率、使用率和使用量在查询时计算，按整局标识与玩家槽位汇总分条，空装备记录也保留。
+- **游戏生成的整局标识关联结算与出装**：结算允许不带，不承担唯一性或去重约束。
 - **卡顿一局一行**：只随第一条结算发，那条被拒收时这局没有卡顿数据；整局一份，所以不和每人一行的战绩同表
-- **每行带一份原始报文（`raw`，JSON 列）**：游戏端新加的字段先落在这里，需要时再建列
+- **战绩与卡顿每行带一份原始报文（`raw`，JSON 列）**：游戏端新加的字段先落在这里，需要时再建列
 - **写入是 best-effort**：失败只记 `[BigQuery] insert failed` 日志，结算和支付照常完成。充值与会员核对以积分、会员记录为准，玩家文档被并发写覆盖丢掉的积分在这里看不出来
 - **生产数据不设过期**。本地开发写同一项目里的 `game_data_dev`，分区会过期；测试与 CI 不连 BigQuery。数据集由 `BIGQUERY_DATASET` 指定，未设置时不写
 - **接口不直接查这里**：展示用的统计先预先算好、写回 Firestore，见「预先汇总」

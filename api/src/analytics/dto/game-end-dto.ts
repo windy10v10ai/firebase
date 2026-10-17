@@ -246,9 +246,15 @@ export class GameEndDto extends EventBaseDto {
   gameOptions: GameEndGameOptionsDto;
   @ApiProperty({ default: 2 })
   winnerTeamId: number;
-  // FIXME: 值其实是号角起算的 DOTA 时间，名字有误；全部改读 dotaTimeMsec 后删除
-  @ApiProperty()
-  gameTimeMsec: number;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  gameTimeMsec?: number;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  customMatchId?: string;
   /** 号角起算的 DOTA 时间，不含选人与准备阶段；旧版游戏不发送 */
   @ApiProperty({ required: false })
   @IsOptional()
@@ -273,4 +279,8 @@ export class GameEndDto extends EventBaseDto {
   @ValidateNested()
   @Type(() => GamePerfDto)
   perf?: GamePerfDto;
+}
+
+export function getDotaTimeMsec(gameEnd: GameEndDto): number | undefined {
+  return gameEnd.dotaTimeMsec ?? gameEnd.gameTimeMsec;
 }

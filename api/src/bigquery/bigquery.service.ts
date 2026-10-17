@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { logger } from 'firebase-functions/v2';
 
 import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { HeroItemUsageDto } from '../game/dto/hero-item-usage.dto';
 import { JoinPath } from '../launcher/dto/launcher-room.dto';
 import { LauncherRoomJoin } from '../launcher/entities/launcher-room-join.entity';
 import { LauncherRoom } from '../launcher/entities/launcher-room.entity';
@@ -13,6 +14,7 @@ import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
 
 import { GameEndRecordContext, buildGameEndRows, buildGamePerfRow } from './game-end-rows';
+import { buildHeroItemUsageRow } from './hero-item-usage-row';
 import {
   ConnectionQualityRecord,
   RouteCheckRecord,
@@ -52,6 +54,11 @@ export class BigQueryService {
       this.insert(GAME_END_PLAYERS_TABLE, buildGameEndRows(gameEnd, context, endedAt)),
       this.insert(GAME_PERF_TABLE, perfRow ? [perfRow] : []),
     ]);
+  }
+
+  /** 记录一个英雄的一条装备使用统计。 */
+  async recordHeroItemUsage(usage: HeroItemUsageDto): Promise<void> {
+    await this.insert('hero_item_usage', [buildHeroItemUsageRow(usage, new Date())]);
   }
 
   /** 把一次积分变动写入积分记录表。 */
