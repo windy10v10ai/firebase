@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import * as prettier from 'prettier';
+
 import { loadAwakenSource } from './awaken-source.mjs';
 import { gameHead } from './dota-ability.mjs';
 
@@ -215,7 +217,7 @@ export const AWAKEN_HERO_COUNT = AWAKEN_HEROES.length;
 `;
 }
 
-function main() {
+async function main() {
   if (!fs.existsSync(MANIFEST)) {
     console.error(`缺少图片清单 ${path.relative(REPO, MANIFEST)}，先跑 npm run awaken:images`);
     process.exit(1);
@@ -241,7 +243,11 @@ function main() {
     process.exit(1);
   }
 
-  const next = render(source, assets, head);
+  // 产物也在 CI 的格式检查范围内，按仓库的 Prettier 规则输出，同步时的 diff 才只有数据变化
+  const next = await prettier.format(render(source, assets, head), {
+    ...(await prettier.resolveConfig(OUT)),
+    filepath: OUT,
+  });
   const changed = !fs.existsSync(OUT) || fs.readFileSync(OUT, 'utf8') !== next;
   fs.writeFileSync(OUT, next);
 
