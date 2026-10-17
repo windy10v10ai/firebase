@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Microsoft.Win32;
 
 namespace Windy10v10AI.Launcher
 {
@@ -324,13 +323,6 @@ namespace Windy10v10AI.Launcher
                 offset = value + ((length + 3) & ~3);
             }
             return null;
-        }
-
-        // The account Steam is signed in with, as the 32-bit ID the game API uses; 0 when Steam is not running
-        public static long SteamAccountId()
-        {
-            var value = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam\ActiveProcess", "ActiveUser", null);
-            return value is int ? (uint)(int)value : 0;
         }
     }
 }

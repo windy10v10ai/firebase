@@ -26,7 +26,14 @@ interface PlayerCardProps {
 }
 
 /** 身份卡：ID 取自地址，数据没到也能先显示；会员状态只做陈述，订阅入口是底部的文字链接 */
-export default function PlayerCard({ steamId, info, profile, isSelf, rankBadge, onCheckInClaimed }: PlayerCardProps) {
+export default function PlayerCard({
+  steamId,
+  info,
+  profile,
+  isSelf,
+  rankBadge,
+  onCheckInClaimed,
+}: PlayerCardProps) {
   const t = useTranslations('profile.identity');
   const tMember = useTranslations('profile.member');
   // 别人只看得到有效的会员身份，过期的不显示，免得把付费经历摆出来
@@ -147,7 +154,10 @@ export default function PlayerCard({ steamId, info, profile, isSelf, rankBadge, 
               >
                 <Trophy className="size-4 shrink-0 text-season" aria-hidden="true" />
                 <span className="truncate">{rankBadge}</span>
-                <ChevronRight className="size-4 shrink-0 text-muted group-hover:text-heading" aria-hidden="true" />
+                <ChevronRight
+                  className="size-4 shrink-0 text-muted group-hover:text-heading"
+                  aria-hidden="true"
+                />
               </Link>
             )}
             <ShareButton steamId={steamId} />

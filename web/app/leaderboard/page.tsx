@@ -53,7 +53,10 @@ export default function LeaderboardPage() {
                 />
               ))
             : Array.from({ length: PLACEHOLDER_ROWS }, (_, index) => (
-                <li key={index} className="flex h-13 items-center gap-3 border-b border-panel-raised px-3 md:h-14 md:px-4">
+                <li
+                  key={index}
+                  className="flex h-13 items-center gap-3 border-b border-panel-raised px-3 md:h-14 md:px-4"
+                >
                   <span className="w-11 shrink-0 text-center">
                     <Skeleton>00</Skeleton>
                   </span>

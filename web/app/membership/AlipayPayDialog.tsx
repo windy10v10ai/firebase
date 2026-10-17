@@ -12,11 +12,21 @@ import Button from '@/app/components/ui/button';
 import Skeleton from '@/app/components/ui/skeleton';
 import { createAlipayOrder, queryAlipayOrder } from '@/app/lib/alipay';
 import { ApiError } from '@/app/lib/api';
-import { ALIPAY_POLL_INTERVAL_MS, PLATFORM_ICONS, type AlipayProductCode } from '@/config/membership';
+import {
+  ALIPAY_POLL_INTERVAL_MS,
+  PLATFORM_ICONS,
+  type AlipayProductCode,
+} from '@/config/membership';
 
 export type AlipayRequest =
   | { productCode: AlipayProductCode; quantity: number; kind: 'member'; months: number }
-  | { productCode: AlipayProductCode; quantity: number; kind: 'points'; points: number; image: string };
+  | {
+      productCode: AlipayProductCode;
+      quantity: number;
+      kind: 'points';
+      points: number;
+      image: string;
+    };
 
 type PayState =
   | { step: 'creating' }
@@ -85,17 +95,20 @@ export default function AlipayPayDialog({
   }, [request]);
 
   // 进入「生成中」由调用方负责：打开弹窗时组件是新挂载的，初值就是它
-  const settle = useCallback((target: AlipayRequest) => {
-    if (!steamId) {
-      return;
-    }
-    const current = ++attempt.current;
-    placeOrder(steamId, target).then((next) => {
-      if (current === attempt.current) {
-        setState(next);
+  const settle = useCallback(
+    (target: AlipayRequest) => {
+      if (!steamId) {
+        return;
       }
-    });
-  }, [steamId]);
+      const current = ++attempt.current;
+      placeOrder(steamId, target).then((next) => {
+        if (current === attempt.current) {
+          setState(next);
+        }
+      });
+    },
+    [steamId],
+  );
 
   useEffect(() => {
     if (!request) {
@@ -159,7 +172,13 @@ export default function AlipayPayDialog({
 
   const header = (
     <div className="flex items-center gap-2.5 pe-10">
-      <img src={PLATFORM_ICONS.alipay} alt="" width={24} height={24} className="size-6 rounded-md" />
+      <img
+        src={PLATFORM_ICONS.alipay}
+        alt=""
+        width={24}
+        height={24}
+        className="size-6 rounded-md"
+      />
       <h2 className="text-base font-bold text-heading">{t('title')}</h2>
     </div>
   );
@@ -177,7 +196,9 @@ export default function AlipayPayDialog({
   const qrFrame = (content: ReactNode, framed: boolean) => (
     <div
       className={`mx-auto flex size-[236px] items-center justify-center rounded-xl ${
-        framed ? 'border-[3px] border-alipay bg-white p-3' : 'border border-dashed border-line-strong bg-panel-soft'
+        framed
+          ? 'border-[3px] border-alipay bg-white p-3'
+          : 'border border-dashed border-line-strong bg-panel-soft'
       }`}
     >
       {content}
@@ -207,7 +228,10 @@ export default function AlipayPayDialog({
             {subjectRow(state.step === 'waiting' ? state.totalAmount : null, true)}
             {state.step === 'waiting'
               ? qrFrame(<img src={state.qrImage} alt={t('qrAlt')} className="size-full" />, true)
-              : qrFrame(<LoaderCircle className="size-8 animate-spin text-link" aria-hidden="true" />, false)}
+              : qrFrame(
+                  <LoaderCircle className="size-8 animate-spin text-link" aria-hidden="true" />,
+                  false,
+                )}
             <div className="flex flex-col items-center gap-1 text-center">
               <span className="flex items-center gap-2 font-bold text-heading">
                 <LoaderCircle className="size-4 animate-spin text-link" aria-hidden="true" />
@@ -227,7 +251,13 @@ export default function AlipayPayDialog({
             <div className="flex flex-col items-center gap-3.5 py-4 text-center">
               {request.kind === 'member' ? (
                 <>
-                  <img src="/images/member/crown-gold.png" alt="" width={120} height={120} className="size-28" />
+                  <img
+                    src="/images/member/crown-gold.png"
+                    alt=""
+                    width={120}
+                    height={120}
+                    className="size-28"
+                  />
                   <p className="text-2xl font-extrabold text-heading">
                     {t.rich('memberPaid', {
                       months: tMember('months', { count: request.months }),
@@ -243,7 +273,13 @@ export default function AlipayPayDialog({
                 </>
               ) : (
                 <>
-                  <img src={request.image} alt="" width={180} height={120} className="h-28 w-44 object-contain" />
+                  <img
+                    src={request.image}
+                    alt=""
+                    width={180}
+                    height={120}
+                    className="h-28 w-44 object-contain"
+                  />
                   <p className="text-2xl font-extrabold text-heading">
                     {t.rich('pointsPaid', {
                       points: request.points.toLocaleString(),

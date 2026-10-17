@@ -172,8 +172,8 @@ namespace Windy10v10AI.Launcher
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate void VoidFn();
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate IntPtr InterfaceFn();
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate ulong SubscribeFn(IntPtr ugc, ulong id);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] delegate bool CallDoneFn(IntPtr utils, ulong call, [MarshalAs(UnmanagedType.I1)] out bool failed);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] delegate bool DownloadFn(IntPtr ugc, ulong id, [MarshalAs(UnmanagedType.I1)] bool highPriority);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)][return: MarshalAs(UnmanagedType.I1)] delegate bool CallDoneFn(IntPtr utils, ulong call, [MarshalAs(UnmanagedType.I1)] out bool failed);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)][return: MarshalAs(UnmanagedType.I1)] delegate bool DownloadFn(IntPtr ugc, ulong id, [MarshalAs(UnmanagedType.I1)] bool highPriority);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate uint StateFn(IntPtr ugc, ulong id);
 
         // Returns false when Steam could not be asked. Steam counts every process that opens the Steam API as Dota 2
@@ -296,7 +296,7 @@ namespace Windy10v10AI.Launcher
     {
         const string SteamUrl = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/";
         // Some networks in mainland China cannot reach Steam's API, so our backend asks Steam on their behalf
-        const string RelayUrl = Updater.RelayApi + "workshop/";
+        const string RelayUrl = LauncherApi.Relay + "workshop/";
         const int SteamTimeout = 4000;
         // Covers a cold start of the proxy and the backend behind it
         const int RelayTimeout = 8000;

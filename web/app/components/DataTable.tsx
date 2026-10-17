@@ -22,7 +22,9 @@ function ItemContent({ content }: { content: string[] }) {
 
 export default function DataTable({ items, className = '' }: DataTableProps) {
   return (
-    <div className={`w-full overflow-hidden rounded-[10px] border border-line bg-panel ${className}`}>
+    <div
+      className={`w-full overflow-hidden rounded-[10px] border border-line bg-panel ${className}`}
+    >
       <table className="hidden w-full md:table">
         <tbody>
           {items.map((item, index) => (

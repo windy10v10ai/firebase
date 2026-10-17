@@ -72,7 +72,9 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
       }
     >
       <Frame
-        {...(onOpen ? { type: 'button' as const, onClick: () => onOpen(hero), disabled: !known } : {})}
+        {...(onOpen
+          ? { type: 'button' as const, onClick: () => onOpen(hero), disabled: !known }
+          : {})}
         aria-label={hero.name[locale]}
         className={`relative block aspect-[145/190] w-full overflow-hidden rounded-[10px] border text-left transition-colors ${
           unlocked

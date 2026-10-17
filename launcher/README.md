@@ -17,6 +17,13 @@
 - **「更新地图」对已订阅的地图再订阅一次**：Steam 的更新列表比发布晚，直接下载只拿到旧版，订阅会让 Steam 单独问最新版本。调用接口的进程会被 Steam 当成 Dota 2 在运行，所以放在子进程里做完就退出。
 - **本机只存界面选择与头像缓存**：读写失败一律忽略，不用注册表。
 
+## 代码结构
+
+- **联机核心放 `core/`，Windows 与 Mac 共用一份**：房间、隧道、名单、本机入口这些与系统无关的代码只写一次，一边修好的联机问题另一边自动跟上。界面、启动 Dota、更新地图这些各平台自己写。
+- **核心用到系统的地方都经过 `Platform`**：每个平台编一份自己的实现，核心里不出现注册表、句柄这类 Windows 专用调用。
+- **核心只用 C# 5**：Windows 版靠系统自带的 .NET Framework 4 编译器做到免安装，核心必须能被它编译；新版 .NET 去掉的 JSON 类由 `core/dotnet/` 的替身补上，只在 Windows 以外的构建里编进去。
+- **版本号与 API 地址放在核心**：各平台发同一个版本号，连同一套国内外线路。
+
 ## 联机
 
 各阶段的取舍见 [docs/design/launcher-multiplayer/](../docs/design/launcher-multiplayer/)。
@@ -50,6 +57,12 @@ launcher\build.cmd
 ```
 
 产物在 `launcher/dist/Windy10v10AI.exe`。只依赖 Windows 自带的 .NET Framework 4 编译器，源码只能用 C# 5 语法。
+
+共用核心在 Mac 或 Linux 上用 .NET SDK 测试：
+
+```bash
+dotnet run --project launcher/core/tests/dotnet/CoreTests.csproj
+```
 
 ## 发布
 

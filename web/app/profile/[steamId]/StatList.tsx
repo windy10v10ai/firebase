@@ -16,7 +16,10 @@ export default function StatList({ items }: { items: StatItem[] }) {
   return (
     <dl className="grid gap-x-8 @sm:grid-cols-2">
       {items.map(({ key, label, value, valueClassName }) => (
-        <div key={key} className="flex items-baseline justify-between gap-4 border-b border-line py-2">
+        <div
+          key={key}
+          className="flex items-baseline justify-between gap-4 border-b border-line py-2"
+        >
           <dt className="flex items-center gap-1.5 text-muted">{label}</dt>
           <dd className={`font-medium tabular-nums ${valueClassName ?? 'text-content'}`}>
             {value ?? <Skeleton />}

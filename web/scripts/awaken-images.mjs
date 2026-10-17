@@ -19,7 +19,8 @@ const MANIFEST = path.join(WEB, 'config/awaken-assets.json');
 const CACHE = path.join(REPO, 'node_modules/.cache/awaken-renders');
 
 const CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react';
-const RENDER_CDN = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders';
+const RENDER_CDN =
+  'https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders';
 
 /** 立绘框 145×190 @2x */
 const W = 290;
@@ -60,12 +61,13 @@ const FROM_GAME_REPO = new Set([
   'juggernaut_blade_fury_immortal_crimson',
 ]);
 
-const BG = (w, h) => Buffer.from(
-  `<svg width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">` +
-    `<stop offset="0%" stop-color="#26202e"/><stop offset="55%" stop-color="#171320"/>` +
-    `<stop offset="100%" stop-color="#0d0b12"/></linearGradient></defs>` +
-    `<rect width="${w}" height="${h}" fill="url(#g)"/></svg>`,
-);
+const BG = (w, h) =>
+  Buffer.from(
+    `<svg width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">` +
+      `<stop offset="0%" stop-color="#26202e"/><stop offset="55%" stop-color="#171320"/>` +
+      `<stop offset="100%" stop-color="#0d0b12"/></linearGradient></defs>` +
+      `<rect width="${w}" height="${h}" fill="url(#g)"/></svg>`,
+  );
 
 async function loadSharp() {
   try {

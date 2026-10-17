@@ -19,7 +19,11 @@ const CHARS_OUT = path.join(OUT_DIR, 'heading-chars.txt');
 // 钉在 google/fonts 的某个提交上，同样的字符清单总是截出同一份字体
 const SOURCE_COMMIT = 'a85815a42757630ce188fdad368c2dfc444d4773';
 const SOURCE_URL = `https://raw.githubusercontent.com/google/fonts/${SOURCE_COMMIT}/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf`;
-const SOURCE_CACHE = path.join(WEB, 'node_modules/.cache/heading-font', `NotoSansSC-${SOURCE_COMMIT}.ttf`);
+const SOURCE_CACHE = path.join(
+  WEB,
+  'node_modules/.cache/heading-font',
+  `NotoSansSC-${SOURCE_COMMIT}.ttf`,
+);
 
 // 顶栏文字是常规粗细，logo 与标题是粗体，两端之间的字重都保留在可变字体里
 const WEIGHT_RANGE = { min: 400, max: 700 };
@@ -103,14 +107,18 @@ async function generate() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(FONT_OUT, font);
   fs.writeFileSync(CHARS_OUT, `${chars}\n`);
-  console.log(`${[...chars].length} 个字符，${(font.length / 1024).toFixed(1)} KB → ${path.relative(WEB, FONT_OUT)}`);
+  console.log(
+    `${[...chars].length} 个字符，${(font.length / 1024).toFixed(1)} KB → ${path.relative(WEB, FONT_OUT)}`,
+  );
 }
 
 function check() {
   const included = new Set(fs.readFileSync(CHARS_OUT, 'utf8').replace(/\n$/, ''));
   const missing = [...collectChars()].filter((ch) => !included.has(ch));
   if (missing.length > 0) {
-    console.error(`标题字体缺少这些字：${missing.join('')}\n跑 cd web && npm run font:heading 重新截取并提交产物`);
+    console.error(
+      `标题字体缺少这些字：${missing.join('')}\n跑 cd web && npm run font:heading 重新截取并提交产物`,
+    );
     process.exit(1);
   }
   console.log('标题字体覆盖了全部标题与导航文字');
