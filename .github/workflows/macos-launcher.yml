@@ -1,0 +1,59 @@
+name: macOS launcher
+
+on:
+  pull_request:
+    paths:
+      - launcher/macos/**
+      - .github/workflows/macos-launcher.yml
+  push:
+    paths:
+      - launcher/macos/**
+      - .github/workflows/macos-launcher.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-launcher-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: launcher/macos
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Offline protocol and lifecycle tests
+        run: ./test.sh
+      - name: Build Apple Silicon application
+        run: ./build.sh
+      - name: Verify signature and package
+        run: |
+          codesign --verify --deep --strict dist/WindyMac.app
+          ditto -c -k --sequesterRsrc --keepParent dist/WindyMac.app dist/WindyMac-osx-arm64.zip
+          shasum -a 256 dist/WindyMac-osx-arm64.zip > dist/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: WindyMac-osx-arm64
+          path: |
+            launcher/macos/dist/WindyMac-osx-arm64.zip
+            launcher/macos/dist/SHA256SUMS.txt
+
+  windows-regression:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build existing Windows launcher
+        shell: cmd
+        run: launcher\build.cmd
+      - name: Test existing Windows launcher
+        shell: cmd
+        run: launcher\test.cmd
