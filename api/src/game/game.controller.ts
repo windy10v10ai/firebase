@@ -12,6 +12,7 @@ import { timeStep } from '../util/request-timing';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { GameStart } from './dto/game-start.response';
+import { HeroItemUsageDto } from './dto/hero-item-usage.dto';
 import { ProbeResponse } from './dto/probe.response';
 import { GameService } from './game.service';
 
@@ -49,6 +50,13 @@ export class GameController {
     @CurrentServerType() serverType: SERVER_TYPE,
   ): Promise<GameStart> {
     return this.gameService.start(steamIds, matchId, version, serverType, GAME_START_INCLUDE);
+  }
+
+  @AllowLocal()
+  @Post('hero-item-usage')
+  async heroItemUsage(@Body() usage: HeroItemUsageDto): Promise<string> {
+    await this.gameService.recordHeroItemUsage(usage);
+    return this.gameService.getOK();
   }
 
   @ApiBody({ type: GameEndDto })

@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { logger } from 'firebase-functions';
 
-import { GameEndDto } from '../analytics/dto/game-end-dto';
+import { GameEndDto, getDotaTimeMsec } from '../analytics/dto/game-end-dto';
 
 import { decodeProxyBody } from './proxy-request.util';
 
@@ -40,6 +40,19 @@ describe('decodeProxyBody', () => {
     expect(dto).toBeInstanceOf(GameEndDto);
     expect(dto.players).toHaveLength(1);
     expect(dto.players[0].steamId).toBe(1001);
+  });
+
+  it.each([
+    [{ gameTimeMsec: 1000 }, 1000],
+    [{ dotaTimeMsec: 2000 }, 2000],
+    [{ gameTimeMsec: 1000, dotaTimeMsec: 0 }, 0],
+  ])('accepts both clock field names and prefers Dota time', async (clock, expected) => {
+    const dto = await decodeProxyBody(
+      GameEndDto,
+      encode({ ...BASE, ...clock, players: [player], customMatchId: 'custom-match' }),
+    );
+    expect(getDotaTimeMsec(dto)).toBe(expected);
+    expect(dto.customMatchId).toBe('custom-match');
   });
 
   it('含中文与 URL 不安全字符的内容也能往返', async () => {

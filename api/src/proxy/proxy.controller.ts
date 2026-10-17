@@ -19,6 +19,7 @@ import { RefreshDailyTaskDto } from '../daily-task/dto/refresh-daily-task.dto';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
 import { CreateFeedbackDto } from '../feedback/dto/create-feedback.dto';
 import { FeedbackService } from '../feedback/feedback.service';
+import { HeroItemUsageDto } from '../game/dto/hero-item-usage.dto';
 import { ProbeResponse } from '../game/dto/probe.response';
 import { GameService } from '../game/game.service';
 import { LocalHostService } from '../local-host/local-host.service';
@@ -179,6 +180,17 @@ export class ProxyController {
       );
     }
     return buildProxySuccessHtml(requestId, { recorded });
+  }
+
+  @Get('game-hero-item-usage-post')
+  async gameHeroItemUsagePost(
+    @Query('requestId') requestId: string,
+    @Query('body') body: string,
+  ): Promise<string> {
+    validateRequestId(requestId);
+    const usage = await decodeProxyBody(HeroItemUsageDto, body);
+    await this.gameService.recordHeroItemUsage(usage);
+    return buildProxySuccessHtml(requestId, {});
   }
 
   // 对应 PUT /player/:id/setting

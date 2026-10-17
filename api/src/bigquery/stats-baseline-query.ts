@@ -43,12 +43,12 @@ WITH matches AS (
     assists / minutes AS assists,
     stuns / minutes AS stuns
   FROM (
-    SELECT *, game_time_msec / 60000 AS minutes
+    SELECT *, dota_time_msec / 60000 AS minutes
     FROM \`${table}\`
     WHERE ended_at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL @windowDays DAY)
       AND steam_id > 0
       AND NOT IFNULL(is_disconnected, FALSE)
-      AND game_time_msec > 0
+      AND dota_time_msec > 0
       AND IFNULL(game_options.multiplier_radiant, 0) <= @maxMultiplierRadiant
       AND IFNULL(game_options.multiplier_dire, 0) <= @maxMultiplierDire
       AND IFNULL(game_options.respawn_time_pct, 100) >= @minRespawnTimePct

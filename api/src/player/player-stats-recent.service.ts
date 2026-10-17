@@ -3,7 +3,7 @@ import { logger } from 'firebase-functions';
 import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
-import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
+import { GameEndDto, GameEndPlayerDto, getDotaTimeMsec } from '../analytics/dto/game-end-dto';
 
 import { PlayerStatsRecent, PlayerStatsRecentMatch } from './entities/player-stats-recent.entity';
 import {
@@ -66,7 +66,7 @@ export class PlayerStatsRecentService {
       endedAt: new Date(),
       version: gameEnd.version,
       difficulty: this.numberOrZero(gameEnd.difficulty),
-      durationSec: Math.round(this.numberOrZero(gameEnd.gameTimeMsec) / 1000),
+      durationSec: Math.round(this.numberOrZero(getDotaTimeMsec(gameEnd)) / 1000),
       win: player.teamId === gameEnd.winnerTeamId,
       multiplierRadiant: this.numberOrZero(options?.multiplierRadiant),
       multiplierDire: this.numberOrZero(options?.multiplierDire),

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
+import { GameEndDto, GameEndPlayerDto, getDotaTimeMsec } from '../analytics/dto/game-end-dto';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
 export type GameEndRoute = 'official' | 'local' | 'proxy';
@@ -41,6 +41,7 @@ export function buildGameEndRows(
   const matchColumns = {
     game_id: context.gameId,
     match_id: String(gameEnd.matchId),
+    custom_match_id: gameEnd.customMatchId ?? null,
     ended_at: endedAt.toISOString(),
     version: gameEnd.version,
     difficulty: toInt(gameEnd.difficulty),
@@ -49,7 +50,7 @@ export function buildGameEndRows(
     country: gameEnd.countryCode ?? null,
     player_count: toInt(gameEnd.playerCount),
     winner_team_id: toInt(gameEnd.winnerTeamId),
-    game_time_msec: toInt(gameEnd.gameTimeMsec),
+    dota_time_msec: toInt(getDotaTimeMsec(gameEnd)),
     game_options: options
       ? {
           multiplier_radiant: toFloat(options.multiplierRadiant),
@@ -80,6 +81,7 @@ export function buildGamePerfRow(
   return {
     game_id: context.gameId,
     match_id: String(gameEnd.matchId),
+    custom_match_id: gameEnd.customMatchId ?? null,
     ended_at: endedAt.toISOString(),
     version: gameEnd.version,
     difficulty: toInt(gameEnd.difficulty),
@@ -87,7 +89,7 @@ export function buildGamePerfRow(
     route: context.route,
     host: perf.host,
     player_count: toInt(gameEnd.playerCount),
-    dota_time_msec: toInt(gameEnd.dotaTimeMsec),
+    dota_time_msec: toInt(getDotaTimeMsec(gameEnd)),
     real_sec: toFloat(perf.realSec),
     units: toInt(perf.units),
     modifiers: toInt(perf.modifiers),

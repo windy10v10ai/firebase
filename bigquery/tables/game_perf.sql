@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS `${PROJECT_ID}.${DATASET}.game_perf` (
   game_id STRING NOT NULL,
   match_id STRING,
+  custom_match_id STRING,
   ended_at TIMESTAMP NOT NULL,
   version STRING,
   difficulty INT64,
