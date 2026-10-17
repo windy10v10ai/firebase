@@ -58,7 +58,7 @@ curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H 
 - E2E 自管 emulator 生命周期；跑之前先杀掉占用 8080 的进程
 - **管理接口只能进 `AppModule`，不能进 `ClientAppModule`**（[app.module.ts](src/app.module.ts)）：公开的 `client` 函数只装后者，`app.module.spec.ts` 守着这条。新的业务模块放进 `ClientAppModule` 的 imports
 - **E2E 每个 jest worker 用一个独立的 Firestore project**（[setup-worker-project.ts](test/util/setup-worker-project.ts) 按 `JEST_WORKER_ID` 设 `E2E_FIRESTORE_PROJECT_ID`，[app.module.ts](src/app.module.ts) 读它）：并行的套件共用一个模拟器实例，不隔离的话全库级写操作（`POST /api/admin/player-property/reset` 就是一个）会删掉别的套件正在用的文档，套件之间撞 steamId 也会互相覆盖，症状是单跑必过、跑全量时随机挂。Auth 不跟着隔离，模拟器只按启动时的 project 签发 ID Token
-- **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/web/README.md](../docs/web/README.md) 第 2 节
+- **网站要调的接口必须显式挂 `@AllowWeb()`**（[auth.guard.ts](src/util/auth/auth.guard.ts)），否则网站带 `Authorization: Bearer` 的请求一律 401。架构见 [docs/web/README.md](../docs/web/README.md)「鉴权设计」
 - **`@AllowWeb()` 不等于「只有网站能调」**：不挂任何装饰器时，任何有效的官方服务器 key 都能调，它只是额外放行网页来源，`@AllowLocal()` 同理额外放行本地主机 key。要按来源区分行为或统计，用 `@CurrentServerType()` 取 guard 算出来的来源，不要靠路由挂了什么装饰器去推
 - **调用方带不了请求头时用 `@AllowQueryKey()`**（[allow-query-key.decorator.ts](src/util/auth/allow-query-key.decorator.ts)）：挂了这个装饰器的路由，`x-api-key` 请求头缺失时改读 query 的 `apiKey`；挂了但请求头存在时仍优先用请求头。`ProxyController`（[proxy.controller.ts](src/proxy/proxy.controller.ts)）是目前唯一用例——游戏内的 `DOTAHTMLPanel` 只能发不带头的 GET，且读不到非 200 状态码，所以这类路由还要配一个把所有异常转成 200 + 自定义错误格式的 `@UseFilters()` 过滤器，参考 `ProxyExceptionFilter`
 - **新增代理路由按原路由推名字**：`/proxy/` 加上原路径去掉路径参数后用连字符拍平，`GET /player/:steamId/info` → `/proxy/player-info`，路径参数改走 query。规则与理由见 [docs/api/README.md](../docs/api/README.md) 的「代理路由」

@@ -1,6 +1,6 @@
 # 近期战绩（playerStatsRecent）
 
-> 状态：已完成，对应 [#899](https://github.com/windy10v10ai/firebase/issues/899)。页面与接口见 [docs/web/README.md](../../web/README.md) 第 3 节「个人主页放什么」，配色与图标规则见 [docs/web/design-system.md](../../web/design-system.md)。
+> 状态：已完成，对应 [#899](https://github.com/windy10v10ai/firebase/issues/899)。页面与接口见 [docs/web/README.md](../../web/README.md)「个人主页」，配色与图标规则见 [docs/web/design-system.md](../../web/design-system.md)。
 
 生涯战绩只有累计值，结算界面上的单局数据关掉就没了。本批给每个玩家留最近 50 场的单场明细，在个人主页展示。
 
