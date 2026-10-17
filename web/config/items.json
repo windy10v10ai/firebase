@@ -965,6 +965,12 @@
     "en": "Excalibur",
     "ru": null
   },
+  "item_exchange": {
+    "icon": "exchange.116ca62d.webp",
+    "zh": "转换",
+    "en": "Exchange",
+    "ru": "Обмен"
+  },
   "item_faerie_fire": {
     "icon": "faerie_fire.e56e54ea.webp",
     "zh": "仙灵之火",
@@ -976,6 +982,12 @@
     "zh": "猎鹰战刃",
     "en": "Falcon Blade",
     "ru": "Falcon Blade"
+  },
+  "item_fall_fall_fall": {
+    "icon": "fall_fall_fall.c309964f.webp",
+    "zh": "落！落！落！刀",
+    "en": "Fall! Fall! Fall!",
+    "ru": "Бах! Бах! Бах!"
   },
   "item_fallen_sky": {
     "icon": "fallen_sky.3697c26b.webp",
