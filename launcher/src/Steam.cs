@@ -296,7 +296,7 @@ namespace Windy10v10AI.Launcher
     {
         const string SteamUrl = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/";
         // Some networks in mainland China cannot reach Steam's API, so our backend asks Steam on their behalf
-        const string RelayUrl = Updater.RelayApi + "workshop/";
+        const string RelayUrl = LauncherApi.Relay + "workshop/";
         const int SteamTimeout = 4000;
         // Covers a cold start of the proxy and the backend behind it
         const int RelayTimeout = 8000;

@@ -16,8 +16,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("Windy10v10AI")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2026 Windy10v10AI")]
 [assembly: System.Reflection.AssemblyDescription("Runs a local Dota 2 dedicated server for the 10v10 AI custom game")]
-[assembly: System.Reflection.AssemblyVersion("0.6.3.0")]
-[assembly: System.Reflection.AssemblyFileVersion("0.6.3.0")]
+[assembly: System.Reflection.AssemblyVersion(Windy10v10AI.Launcher.LauncherVersion.Current + ".0")]
+[assembly: System.Reflection.AssemblyFileVersion(Windy10v10AI.Launcher.LauncherVersion.Current + ".0")]
 
 namespace Windy10v10AI.Launcher
 {
@@ -55,7 +55,7 @@ namespace Windy10v10AI.Launcher
 
     class MainForm : Form
     {
-        const string Version = "0.6.3";
+        const string Version = LauncherVersion.Current;
         const string ReleaseId = "2307479570";
         const string TestId = "2636824668";
         const int Port = 27015;
@@ -912,7 +912,7 @@ namespace Windy10v10AI.Launcher
         {
             return new Dictionary<string, object>
             {
-                { "steamId", Net.SteamAccountId() },
+                { "steamId", Platform.SteamAccountId() },
                 { "protocolVersion", RoomApi.ProtocolVersion },
                 { "mapVersion", InstalledMapVersion() },
             };
@@ -1093,7 +1093,7 @@ namespace Windy10v10AI.Launcher
             var map = MapKeys[index];
             var room = modeBar.Selected == 1;
             roomMap = MapNames[index];
-            selfId = Net.SteamAccountId();
+            selfId = Platform.SteamAccountId();
             busy = true;
             stopping = false;
             for (var i = 0; i < modes.Length; i++)
@@ -1344,7 +1344,7 @@ namespace Windy10v10AI.Launcher
             DotaInstall install;
             DotaInstall.Check(MapId, out install);
             var id = MapId;
-            selfId = Net.SteamAccountId();
+            selfId = Platform.SteamAccountId();
             busy = true;
             stopping = false;
             foreach (var mode in modes)
@@ -1366,7 +1366,7 @@ namespace Windy10v10AI.Launcher
         {
             try
             {
-                if (Net.SteamAccountId() == 0)
+                if (Platform.SteamAccountId() == 0)
                 {
                     selfId = SignedInAccount();
                     UI(() => status.Text = Strings.Connecting);
@@ -1736,7 +1736,7 @@ namespace Windy10v10AI.Launcher
             return new Dictionary<string, object>
             {
                 { "mapVersion", mapVersion },
-                { "steamId", Net.SteamAccountId() },
+                { "steamId", Platform.SteamAccountId() },
                 { "candidates", candidates.ConvertAll(c => c.ToString()) },
                 // A required API field; this launcher never maps a router port
                 { "upnp", false },
@@ -1778,7 +1778,7 @@ namespace Windy10v10AI.Launcher
         // Rooms tell players apart by their Steam account, which is only known once Steam is running and signed in
         long SignedInAccount()
         {
-            var account = Net.SteamAccountId();
+            var account = Platform.SteamAccountId();
             if (account != 0) return account;
             var steam = DotaInstall.SteamExecutable();
             if (steam == null) throw new LaunchError(Strings.SteamClientMissing, false);
@@ -1788,7 +1788,7 @@ namespace Windy10v10AI.Launcher
             {
                 Thread.Sleep(1000);
                 if (stopping) throw new OperationCanceledException();
-                account = Net.SteamAccountId();
+                account = Platform.SteamAccountId();
                 if (account != 0) return account;
             }
             throw new LaunchError(Strings.SteamNotSignedIn, false);
@@ -2605,15 +2605,6 @@ namespace Windy10v10AI.Launcher
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool CreateHardLink(string fileName, string existingFileName, IntPtr securityAttributes);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool SetHandleInformation(IntPtr handle, uint mask, uint flags);
-
-        // Steam and Dota are started with inherited handles, and a socket they inherit keeps its port after the launcher exits
-        public static void KeepPrivate(System.Net.Sockets.Socket socket)
-        {
-            SetHandleInformation(socket.Handle, 1, 0);
-        }
 
         delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr param);
 

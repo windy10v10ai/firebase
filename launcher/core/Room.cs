@@ -52,7 +52,7 @@ namespace Windy10v10AI.Launcher
             // For local testing against an API on this machine
             var local = Environment.GetEnvironmentVariable("WINDY_API");
             var routes = string.IsNullOrEmpty(local)
-                ? new[] { Updater.DirectApi, Updater.RelayApi }
+                ? new[] { LauncherApi.Direct, LauncherApi.Relay }
                 : new[] { local.TrimEnd('/') + "/api/launcher/" };
             for (var i = 0; i < routes.Length; i++)
             {

@@ -69,7 +69,7 @@ namespace Windy10v10AI.Launcher
             // For local testing against an API on this machine
             var local = Environment.GetEnvironmentVariable("WINDY_API");
             var routes = string.IsNullOrEmpty(local)
-                ? new[] { Root(Updater.DirectApi), Root(Updater.RelayApi) }
+                ? new[] { Root(LauncherApi.Direct), Root(LauncherApi.Relay) }
                 : new[] { local.TrimEnd('/') + "/api/" };
             for (var i = 0; i < routes.Length; i++)
             {
@@ -106,7 +106,7 @@ namespace Windy10v10AI.Launcher
             };
             var description = (draft.Description ?? "").Trim();
             if (description.Length > 0) body["description"] = description;
-            var steamId = Net.SteamAccountId();
+            var steamId = Platform.SteamAccountId();
             if (steamId > 0) body["steamId"] = steamId;
             if (!string.IsNullOrEmpty(context.MapVersion)) body["mapVersion"] = context.MapVersion;
             if (context.Mode >= 0 && context.Mode < Modes.Length) body["mode"] = Modes[context.Mode];
