@@ -1,8 +1,0 @@
-is_global = true
-build_property.RootNamespace = FormatCheck
-build_property.ProjectDir = /Users/windy/Documents/GitHub/firebase/launcher/format/
-build_property.EnableComHosting = 
-build_property.EnableGeneratedComInterfaceComImportInterop = 
-build_property.CsWinRTUseWindowsUIXamlProjections = false
-build_property.EffectiveAnalysisLevelStyle = 
-build_property.EnableCodeStyleSeverity = 
