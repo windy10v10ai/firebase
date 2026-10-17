@@ -25,10 +25,10 @@ jobs:
         id: meta
         shell: pwsh
         run: |
-          $version = [regex]::Match((Get-Content launcher/src/Launcher.cs -Raw), 'const string Version = "([^"]+)"').Groups[1].Value
+          $version = [regex]::Match((Get-Content launcher/core/LauncherVersion.cs -Raw), 'const string Current = "([^"]+)"').Groups[1].Value
           $live = (Invoke-RestMethod https://api.windy10v10ai.com/api/launcher/version).version
           if ([version]$version -le [version]$live) {
-            "::error::Launcher version $version is not newer than live $live. Bump Version in launcher/src/Launcher.cs first."
+            "::error::Launcher version $version is not newer than live $live. Bump Current in launcher/core/LauncherVersion.cs first."
             exit 1
           }
           "version=$version" >> $env:GITHUB_OUTPUT

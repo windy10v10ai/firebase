@@ -91,7 +91,6 @@ namespace Windy10v10AI.Launcher
         protected const int SilenceMs = 30000;
         const int HelloIntervalMs = 200;
         const int MaxLanCandidates = 6;
-        const int SioUdpConnReset = -1744830452;
         const int RelayRetryMs = 500;
         // Forty echoes resolve loss to two and a half percent, fine enough to tell relays apart once loss is priced into their score
         const int RelayProbeCount = 40;
@@ -109,9 +108,9 @@ namespace Windy10v10AI.Launcher
         protected Tunnel()
         {
             Socket = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
-            NativeMethods.KeepPrivate(Socket.Client);
+            Platform.KeepPrivate(Socket.Client);
             // An unreachable candidate answers with ICMP, which Windows would otherwise raise on the next receive
-            Socket.Client.IOControl(SioUdpConnReset, new byte[] { 0 }, null);
+            Platform.IgnoreUnreachable(Socket.Client);
         }
 
         int Port { get { return ((IPEndPoint)Socket.Client.LocalEndPoint).Port; } }
@@ -632,7 +631,7 @@ namespace Windy10v10AI.Launcher
             Peer peer;
             if (peers.TryGetValue(token, out peer)) return peer;
             peer = new Peer { Local = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)) };
-            NativeMethods.KeepPrivate(peer.Local.Client);
+            Platform.KeepPrivate(peer.Local.Client);
             peer.Local.Connect(IPAddress.Loopback, GamePort);
             peers[token] = peer;
             new Thread(() =>
@@ -939,7 +938,7 @@ namespace Windy10v10AI.Launcher
         public void Forward()
         {
             local = new UdpClient(new IPEndPoint(IPAddress.Loopback, LocalGate.Port));
-            NativeMethods.KeepPrivate(local.Client);
+            Platform.KeepPrivate(local.Client);
             new Thread(() =>
             {
                 while (!Closed)

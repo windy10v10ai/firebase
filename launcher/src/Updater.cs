@@ -19,9 +19,6 @@ namespace Windy10v10AI.Launcher
     // Replaces the running exe with the latest release published on our API
     static class Updater
     {
-        public const string DirectApi = "https://api.windy10v10ai.com/api/launcher/";
-        // Some networks in mainland China cannot reach our API directly, so they go through the same China proxy the game uses
-        public const string RelayApi = "https://1491237865-7au6o0ylxt.ap-guangzhou.tencentscf.com/api/launcher/";
         public const string DownloadPage = "https://windy10v10ai.com/launch";
         const int DirectTimeout = 4000;
         // Covers a cold start of the proxy and the backend behind it
@@ -31,11 +28,11 @@ namespace Windy10v10AI.Launcher
         // Returns null when this build is already the latest or neither route answers
         public static Release FindNewer(string current)
         {
-            foreach (var api in new[] { DirectApi, RelayApi })
+            foreach (var api in new[] { LauncherApi.Direct, LauncherApi.Relay })
             {
                 try
                 {
-                    var json = Http.Json(api + "version", null, api == DirectApi ? DirectTimeout : RelayTimeout);
+                    var json = Http.Json(api + "version", null, api == LauncherApi.Direct ? DirectTimeout : RelayTimeout);
                     var version = Convert.ToString(json["version"]);
                     // Only newer, so a local build ahead of the published one never downgrades itself
                     if (new Version(version) <= new Version(current)) return null;
@@ -53,7 +50,7 @@ namespace Windy10v10AI.Launcher
         public static byte[] Download(Release release)
         {
             var apis = new List<string> { release.Api };
-            apis.Add(release.Api == DirectApi ? RelayApi : DirectApi);
+            apis.Add(release.Api == LauncherApi.Direct ? LauncherApi.Relay : LauncherApi.Direct);
             foreach (var api in apis)
             {
                 try
