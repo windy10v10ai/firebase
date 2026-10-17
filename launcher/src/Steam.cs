@@ -172,8 +172,8 @@ namespace Windy10v10AI.Launcher
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate void VoidFn();
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate IntPtr InterfaceFn();
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate ulong SubscribeFn(IntPtr ugc, ulong id);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] delegate bool CallDoneFn(IntPtr utils, ulong call, [MarshalAs(UnmanagedType.I1)] out bool failed);
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] delegate bool DownloadFn(IntPtr ugc, ulong id, [MarshalAs(UnmanagedType.I1)] bool highPriority);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)][return: MarshalAs(UnmanagedType.I1)] delegate bool CallDoneFn(IntPtr utils, ulong call, [MarshalAs(UnmanagedType.I1)] out bool failed);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)][return: MarshalAs(UnmanagedType.I1)] delegate bool DownloadFn(IntPtr ugc, ulong id, [MarshalAs(UnmanagedType.I1)] bool highPriority);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate uint StateFn(IntPtr ugc, ulong id);
 
         // Returns false when Steam could not be asked. Steam counts every process that opens the Steam API as Dota 2

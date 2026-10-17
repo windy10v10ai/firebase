@@ -7,9 +7,9 @@ interface CardProps {
 
 export default function Card({ title, description, href, className = '' }: CardProps) {
   return (
-    <a 
+    <a
       href={href}
-      target="_blank" 
+      target="_blank"
       rel="noopener noreferrer"
       className={`block card-container card-pad card-hover ${className}`}
     >
@@ -17,4 +17,4 @@ export default function Card({ title, description, href, className = '' }: CardP
       <p className="text-content">{description}</p>
     </a>
   );
-} 
+}

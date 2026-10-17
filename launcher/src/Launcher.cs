@@ -483,7 +483,8 @@ namespace Windy10v10AI.Launcher
                 {
                     var newer = Updater.FindNewer(Version);
                     if (newer != null) UI(() => { update = newer; RefreshIdleMapState(); });
-                }) { IsBackground = true }.Start();
+                })
+                { IsBackground = true }.Start();
             };
 #endif
         }
@@ -703,7 +704,8 @@ namespace Windy10v10AI.Launcher
                     if (!asked || DotaInstall.Check(id, out checkedInstall) == MapState.Outdated) mapUpdateFailed = id;
                     RefreshMapState();
                 });
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         // Online play needs the latest map, so its tabs show why they cannot start as soon as they open
@@ -869,7 +871,8 @@ namespace Windy10v10AI.Launcher
                 {
                     Interlocked.Exchange(ref badgeLoading, 0);
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         void ShowBadge(int count)
@@ -1062,7 +1065,8 @@ namespace Windy10v10AI.Launcher
                     ShowNotice(NoticeKind.Error, Strings.UpdateFailed, Strings.OpenDownloadPage, () => OpenUrl(Updater.DownloadPage));
                     stickyNotice = true;
                 });
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         void HideNotice()
@@ -1167,7 +1171,8 @@ namespace Windy10v10AI.Launcher
                             var legs = new List<RelayLeg>();
                             foreach (var relay in relays) legs.Add(new RelayLeg(relay) { Quality = measuring.MeasureRelay(relay) });
                             hostRelays = legs;
-                        }) { IsBackground = true }.Start();
+                        })
+                        { IsBackground = true }.Start();
                     }
                     rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
                     rosterServer.Start();

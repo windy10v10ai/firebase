@@ -189,7 +189,10 @@ export default function FeedbackPage() {
                 onChange={(event) => setDescription(event.target.value)}
                 className="min-h-36 resize-y bg-transparent px-3 py-2.5 outline-none placeholder:text-muted"
               />
-              <span aria-hidden="true" className="self-end px-3 pb-2 text-xs tabular-nums text-muted">
+              <span
+                aria-hidden="true"
+                className="self-end px-3 pb-2 text-xs tabular-nums text-muted"
+              >
                 {description.length} / {MAX_DESCRIPTION_LENGTH}
               </span>
             </div>

@@ -125,7 +125,8 @@ namespace Windy10v10AI.Launcher
                         Thread.Sleep(500);
                     }
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         static string Sha256(byte[] data)

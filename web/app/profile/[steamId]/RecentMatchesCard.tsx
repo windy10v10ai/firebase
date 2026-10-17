@@ -7,10 +7,7 @@ import { useState } from 'react';
 
 import InfoPopover from '@/app/components/InfoPopover';
 import Skeleton from '@/app/components/ui/skeleton';
-import {
-  RECENT_MATCH_LIMIT,
-  type RecentMatch,
-} from '@/app/lib/player-stats-recent';
+import { RECENT_MATCH_LIMIT, type RecentMatch } from '@/app/lib/player-stats-recent';
 import { recentMatchesQuery } from '@/app/lib/queries';
 import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { GAME_ICON } from '@/config/game-icons';
@@ -47,9 +44,7 @@ const HEAD_CENTER = `${HEAD_TRIGGER} justify-center`;
 const MIN_DIFFICULTY = 1;
 const MAX_DIFFICULTY = 8;
 
-type LoadResult =
-  | { status: 'failed' }
-  | { status: 'ready'; matches: RecentMatch[] };
+type LoadResult = { status: 'failed' } | { status: 'ready'; matches: RecentMatch[] };
 
 function formatDuration(durationSec: number): string {
   const minutes = Math.floor(durationSec / 60);
@@ -246,7 +241,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   const locale = useLocale();
   const query = useQuery(recentMatchesQuery(steamId));
   const [openRow, setOpenRow] = useState<number | null>(null);
-
 
   const loaded: LoadResult | null = query.data
     ? { status: 'ready', matches: query.data.matches }

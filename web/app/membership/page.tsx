@@ -71,7 +71,9 @@ export default function MembershipPage() {
     void invalidatePlayerState(queryClient, uid).then(() => {
       const state = queryClient.getQueryState(playerMemberQuery(uid).queryKey);
       // 重新请求失败时缓存里还是付款前的有效期，不能拿来当新的显示
-      setPaidExpireDate(state?.status === 'success' ? (state.data?.member?.expireDateString ?? null) : null);
+      setPaidExpireDate(
+        state?.status === 'success' ? (state.data?.member?.expireDateString ?? null) : null,
+      );
     });
   }, [uid, queryClient]);
 

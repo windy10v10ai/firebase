@@ -605,7 +605,8 @@ namespace Windy10v10AI.Launcher
                 {
                     // The window was disposed before the answer arrived
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         void SetSending(bool value)

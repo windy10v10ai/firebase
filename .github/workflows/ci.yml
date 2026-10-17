@@ -137,6 +137,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Format check
+        run: npm run format:check
+
       - name: Heading font coverage
         run: npm run font:heading:check
 
@@ -175,6 +178,9 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
+
+      - name: Format check
+        run: dotnet format whitespace launcher/format/FormatCheck.csproj --verify-no-changes
 
       - name: Test shared core
         run: dotnet run --project launcher/core/tests/dotnet/CoreTests.csproj

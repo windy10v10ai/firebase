@@ -19,9 +19,18 @@ interface FeatureEntryCardProps {
   href: string;
 }
 
-export default function FeatureEntryCard({ tone, Icon, title, badge, href }: FeatureEntryCardProps) {
+export default function FeatureEntryCard({
+  tone,
+  Icon,
+  title,
+  badge,
+  href,
+}: FeatureEntryCardProps) {
   return (
-    <Link href={href} className="card-container card-pad-sm card-hover flex min-w-0 items-center gap-3 md:gap-4">
+    <Link
+      href={href}
+      className="card-container card-pad-sm card-hover flex min-w-0 items-center gap-3 md:gap-4"
+    >
       <div
         className={`flex size-9 shrink-0 items-center justify-center rounded-[10px] md:size-10 ${TONE_CLASS[tone].box}`}
       >

@@ -6,7 +6,11 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { auth } from '@/config/firebase';
 
 import { setAnalyticsUserId } from './analytics';
-import { PLAYER_UID_COOKIE, PLAYER_UID_COOKIE_MAX_AGE_SECONDS, type PlayerProfileHint } from './auth-hint';
+import {
+  PLAYER_UID_COOKIE,
+  PLAYER_UID_COOKIE_MAX_AGE_SECONDS,
+  type PlayerProfileHint,
+} from './auth-hint';
 import { buildSteamLoginUrl } from './steam-login';
 
 type AuthState = { status: 'unauthenticated' } | { status: 'authenticated'; uid: string };
@@ -38,7 +42,12 @@ interface AuthProviderProps {
 }
 
 /** 首屏按服务端读到的提示 cookie 渲染，Firebase 恢复出结论后以它为准 */
-export function AuthProvider({ initialUid, initialProfile, siteOrigin, children }: AuthProviderProps) {
+export function AuthProvider({
+  initialUid,
+  initialProfile,
+  siteOrigin,
+  children,
+}: AuthProviderProps) {
   const [state, setState] = useState(() => toState(initialUid));
 
   useEffect(

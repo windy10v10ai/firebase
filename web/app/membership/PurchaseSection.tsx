@@ -108,7 +108,9 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
 
   const memberTitle = (
     <div className="flex flex-col gap-1">
-      <h2 className="text-xl font-extrabold text-member-strong lg:text-[22px]">{t('member.title')}</h2>
+      <h2 className="text-xl font-extrabold text-member-strong lg:text-[22px]">
+        {t('member.title')}
+      </h2>
       <p className="text-sm text-muted">
         {platform === 'alipay' ? t('member.subtitle') : t('member.monthly')}
       </p>
@@ -144,7 +146,9 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
         </s>
         <span className="col-start-2 row-start-2 flex items-center gap-1.5 justify-self-end whitespace-nowrap lg:col-span-2 lg:col-start-1 lg:row-start-3">
           <span className={DISCOUNT_CLASS}>-{tier.discountPercent}%</span>
-          <span className="text-base font-bold md:text-lg lg:text-xl">{money(tier.pricePerMonth)}</span>
+          <span className="text-base font-bold md:text-lg lg:text-xl">
+            {money(tier.pricePerMonth)}
+          </span>
           <span className="text-xs text-muted">{perMonth}</span>
         </span>
       </span>
@@ -275,7 +279,11 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
 
   return (
     <section className="card-container card-pad flex flex-col gap-4">
-      <div role="tablist" aria-label={t('platformLabel')} className="grid grid-cols-3 gap-2 lg:gap-3">
+      <div
+        role="tablist"
+        aria-label={t('platformLabel')}
+        className="grid grid-cols-3 gap-2 lg:gap-3"
+      >
         {PAYMENT_PLATFORMS.map((key) => {
           const on = key === platform;
           return (
@@ -299,7 +307,9 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
                 className="size-7 shrink-0 rounded-lg md:size-10"
               />
               <span className="flex min-w-0 flex-col">
-                <span className={`truncate text-sm font-bold md:text-base ${on ? 'text-heading' : 'text-content'}`}>
+                <span
+                  className={`truncate text-sm font-bold md:text-base ${on ? 'text-heading' : 'text-content'}`}
+                >
                   {t(`platforms.${key}.name`)}
                 </span>
                 <span
@@ -312,7 +322,9 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
           );
         })}
       </div>
-      <p className={`text-center text-[13px] md:hidden ${style.desc}`}>{t(`platforms.${platform}.desc`)}</p>
+      <p className={`text-center text-[13px] md:hidden ${style.desc}`}>
+        {t(`platforms.${platform}.desc`)}
+      </p>
 
       <div
         className={`flex flex-col gap-1 rounded-lg border px-4 py-3 text-sm text-content lg:h-12 lg:flex-row lg:items-center lg:gap-3 lg:py-0 ${style.note}`}

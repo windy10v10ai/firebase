@@ -88,7 +88,9 @@ export function memberStatusKey(member?: MemberInfo): string {
 
 /** 取个人主页要的全部数据，按 URL 里的 id 请求，不从登录态取 uid */
 export function fetchPlayerInfo(steamId: string) {
-  return apiFetch<PlayerInfo>(`/api/player/${steamId}/info?include=member,statsLifetime,heroAwakening`);
+  return apiFetch<PlayerInfo>(
+    `/api/player/${steamId}/info?include=member,statsLifetime,heroAwakening`,
+  );
 }
 
 /** 会员页要的数据：会员状态与会员积分 */
@@ -123,8 +125,7 @@ export function upgradeProperty(steamId: string, name: string, level: number) {
 }
 
 export function resetProperties(steamId: string, useMemberPoint: boolean) {
-  return apiFetch<PlayerInfo>(
-    `/api/player/${steamId}/property?useMemberPoint=${useMemberPoint}`,
-    { method: 'DELETE' },
-  );
+  return apiFetch<PlayerInfo>(`/api/player/${steamId}/property?useMemberPoint=${useMemberPoint}`, {
+    method: 'DELETE',
+  });
 }
