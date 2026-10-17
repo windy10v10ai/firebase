@@ -13,6 +13,7 @@ namespace Windy10v10AI.Launcher {
         public string Manifest {get;private set;}
         public string State {get;private set;}="idle";
         public bool Ready {get;private set;}
+        public bool Active {get{lock(runLock)return worker!=null&&!worker.IsCompleted;}}
         public bool HostInGame=>Roster.InGame("host");
         public string ServerLog {get;private set;}
         readonly Action<object> emit;
@@ -80,7 +81,7 @@ namespace Windy10v10AI.Launcher {
         }
         public static Dictionary<string,object> PeerBody(MacInstall i,List<Candidate> candidates,bool? symmetric) => new() {
             ["steamId"]=MacInstall.AccountId(),["candidates"]=candidates.Select(c=>c.ToString()).ToArray(),["upnp"]=false,
-            ["symmetricNat"]=symmetric,["protocolVersion"]=RoomApi.ProtocolVersion,["launcherVersion"]="0.6.3-mac.2",["mapVersion"]=i.Manifest
+            ["symmetricNat"]=symmetric,["protocolVersion"]=RoomApi.ProtocolVersion,["launcherVersion"]="0.6.3-mac.3",["mapVersion"]=i.Manifest
         };
         async Task Run(CancellationToken ct) {
             bool failed=false;string failure=null;

@@ -4,7 +4,7 @@
 
 联网行为、对电脑的改动与卸载方式见[代码签名政策](https://windy10v10ai.com/launch/code-signing)。
 
-Apple Silicon Mac 的实验性房主启动器见 [macos/README.md](macos/README.md)。它使用独立测试版本，跨平台完整游戏仍待验证，不替代本页 Windows 正式版与官网发布入口。
+Apple Silicon Mac 的实验性启动器见 [macos/README.md](macos/README.md)。它使用独立测试版本，跨平台完整游戏仍待验证，不替代本页 Windows 正式版与官网发布入口。
 
 ## 设计决定
 

@@ -9,6 +9,7 @@ namespace Windy10v10AI.Launcher {
             return result ?? await new NativeBridge().Run();
         }
         static async Task<int?> RunCommandLine(string[] args) {
+            if(args.Length==2&&args[0]=="--join-room-test")return await Tests.LiveJoinRoomTest.Run(args[1]);
             if(args.Contains("--signon-test"))return RunSignonTests();
             if(args.Contains("--self-test"))return await IntegrationTests.Run();
             if(args.Contains("--inspect"))return Inspect();

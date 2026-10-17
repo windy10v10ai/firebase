@@ -11,7 +11,7 @@ namespace Windy10v10AI.Launcher {
         static async Task Wait(Func<bool> condition,int seconds,string message) {var deadline=DateTime.UtcNow.AddSeconds(seconds);while(DateTime.UtcNow<deadline) {if(condition())return;await Task.Delay(100);}throw new Exception("TIMEOUT "+message);}
         public static async Task<int> Run() {
             try {
-                SignonTests.RunAll();LocalGateTests.RunAll();RelayTests.RunAll();
+                SignonTests.RunAll();LocalGateTests.RunAll();RelayTests.RunAll();await JoinSessionTests.RunAll();
                 // 动态端口使离线校验可与玩家房间同时运行。
                 using var fakeServer=new UdpClient(new IPEndPoint(IPAddress.Loopback,0));
                 using var host=new HostTunnel(((IPEndPoint)fakeServer.Client.LocalEndPoint).Port){GameReady=false};using var join=new JoinTunnel();

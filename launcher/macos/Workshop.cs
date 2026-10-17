@@ -19,7 +19,7 @@ namespace Windy10v10AI.Launcher {
                 if(p.ExitCode!=0)throw new Exception("Steam 未能完成地图更新。请确认 Steam 已登录，打开 Steam 的下载页面重试。");
                 // Steam 异步释放辅助进程的游戏会话，启动客户端前需留出时间。
                 await Task.Delay(5000,ct);
-                emit(new{type="state",state="idle",message="Steam 地图更新检查已完成，可以重新创建房间。",code="",log=""});
+                emit(new{type="state",state="idle",message="Steam 地图更新检查已完成，可以创建或加入房间。",code="",log=""});
             }catch(OperationCanceledException){emit(new{type="state",state="idle",message="地图更新检查已停止。Steam 已排队的下载可能继续。",code="",log=""});}
             catch(Exception e){emit(new{type="state",state="error",message=e.Message,code="",log=""});}
         }
