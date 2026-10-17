@@ -155,7 +155,7 @@ namespace Windy10v10AI.Launcher
             var key = from.ToString();
             lock (sync)
             {
-                if (closed) throw new ObjectDisposedException("LocalGate");
+                ObjectDisposedException.ThrowIf(closed, this);
                 Session session;
                 if (sessions.TryGetValue(key, out session))
                 {

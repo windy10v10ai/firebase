@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-
 namespace Windy10v10AI.Launcher
 {
     static class PathType
@@ -141,7 +140,7 @@ namespace Windy10v10AI.Launcher
         // 完全无响应的直连路径可仅按丢包惩罚评分，避免缺失延迟干扰比较。
         int Score(RouteQuality quality)
         {
-            return Math.Max(quality.Rtt, 0) + quality.Loss * LossCostMs;
+            return Math.Max(quality.Rtt, 0) + (quality.Loss * LossCostMs);
         }
     }
 

@@ -45,3 +45,15 @@ jobs:
           path: |
             launcher/macos/dist/WindyMac-osx-arm64.zip
             launcher/macos/dist/SHA256SUMS.txt
+
+  windows-regression:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build existing Windows launcher
+        shell: cmd
+        run: launcher\build.cmd
+      - name: Test existing Windows launcher
+        shell: cmd
+        run: launcher\test.cmd

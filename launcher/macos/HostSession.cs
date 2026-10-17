@@ -85,103 +85,142 @@ namespace Windy10v10AI.Launcher {
         async Task Run(CancellationToken ct) {
             bool failed=false;string failure=null;
             try {
-                Code=null;game=1;Ready=false;started=false;ended=false;saved=false;endedAt=null;seen.Clear();
-                while(results.TryDequeue(out _)){}while(next.TryDequeue(out _)){}
-                relays=new();Roster=new HostRoster();
+                ResetRoom();
                 Event("checking","检查 Steam、地图版本和本机端口…");
-                install=MacInstall.Find();Manifest=install.Manifest;
-                if(MacInstall.AccountId()<=0)throw new Exception("未找到最近登录的 Steam 账号。请先在 Steam 登录后重试。");
-                foreach(int port in new[]{27015,27016}) {using var probe=new UdpClient(new IPEndPoint(IPAddress.Loopback,port));}
-                var tcpProbe=new TcpListener(IPAddress.Loopback,27080);try{tcpProbe.Start();}finally{tcpProbe.Stop();}
-                // 线上版本查询失败不阻止开房，加入时仍会校验双方地图版本。
-                try {
-                    var version=LocalTestSkipLatestCheck ? new Dictionary<string,object>{{"manifest",install.Manifest}} : Http.Json(Updater.DirectApi+"workshop/"+MacInstall.MapId,null,4000);
-                    if(version.TryGetValue("manifest",out var latest)&&Convert.ToString(latest)!=install.Manifest)
-                        throw new MapOutdatedException();
-                } catch(MapOutdatedException) {throw new Exception("地图不是最新版本。请在 Steam 更新地图后重试，双方必须使用相同版本。");}
-                catch {Info("未能查询线上地图版本；加入时仍会检查双方地图版本是否一致。");}
+                CheckInstall();CheckLatestMap();
                 ct.ThrowIfCancellationRequested();
                 mount=install.Mount();
                 Tunnel=new HostTunnel{GameReady=false};
                 var candidates=Tunnel.Gather(out var publicIp);
                 ct.ThrowIfCancellationRequested();
                 body=PeerBody(install,candidates,Tunnel.SymmetricNat);body["publicIp"]=publicIp;
-                Event("opening","正在创建私密房间…");
-                var opened=RoomApi.Host(HostBody());Code=(string)opened["code"];token=(string)opened["token"];
-                Roster.Add(new RosterEntry{SteamId=MacInstall.AccountId(),Key="host",Name=Field(opened,"personaName")??"房主",IsHost=true,Status=PlayerStatus.Loading});
-                Tunnel.RosterSource=Roster.Snapshot;
-                Tunnel.JoinFinished+=(id,path,relay,ms)=> {
-                    var r=new Dictionary<string,object>{{"joinId",id},{"elapsedMs",ms}};
-                    if(path!=null)r["path"]=path;if(relay!=null)r["relayAddress"]=relay;
-                    results.Enqueue(r);Roster.SetStatus(id,path==null?PlayerStatus.Failed:PlayerStatus.Loading);
-                    Info(path==null?"一位玩家未能连通，可让对方重试。":"玩家网络已连通："+path);
-                };
-                Tunnel.JoinLeft+=id=>Roster.SetStatus(id,PlayerStatus.Left);
-                Tunnel.GameTraffic+=Roster.SetEntering;Tunnel.Start();
-                rosterServer=new RosterServer(Roster.Snapshot,()=>maxPlayers);rosterServer.Start();
-                gate=new LocalGate(27015);
-                var relayAddresses=RelayTicket.ReadAddresses(opened,"relayAddresses","relayAddress");
-                var measuring=Tunnel;
-                _=Task.Run(()=> {var legs=new List<RelayLeg>();foreach(var a in relayAddresses) {if(ct.IsCancellationRequested)break;legs.Add(new RelayLeg(a){Quality=measuring.MeasureRelay(a)});}relays=legs;});
+                OpenRoom(ct);
                 Event("loading","房间已创建，正在加载地图。可以先把房间码发给朋友。");
                 StartServer();
-                var pollAt=DateTime.UtcNow;var loadAt=DateTime.UtcNow;
-                var retryResults=new List<Dictionary<string,object>>();
-                var retryChecks=new List<Dictionary<string,object>>();
-                var qualityAt=DateTime.UtcNow;var retryQuality=new List<Dictionary<string,object>>();
-                bool autoAsked=false;
-                int pollFailures=0;
-                while(!ct.IsCancellationRequested) {
-                    ReadConsole();
-                    if(server.HasExited&&!ended)throw new Exception("专用服务器已退出，请打开日志查看原因。");
-                    if(!Ready&&!ended&&(DateTime.UtcNow-loadAt).TotalSeconds>180)throw new Exception("服务器加载超过 180 秒，请查看日志。");
-                    if(Ready&&!autoAsked) {autoAsked=true;Event("ready","等待朋友加入后，从 Dota 2 里点「锁定并开始」");if(autoEnter)Enter();}
-                    if(!Tunnel.GameReady&&Ready&&(HostInGame||(DateTime.UtcNow-readyAt).TotalSeconds>30))Tunnel.GameReady=true;
-                    if(ended&&!saved&&(DateTime.UtcNow-endedAt.Value).TotalSeconds>60)MarkSaved();
-                    if(saved&&next.TryDequeue(out var nextMode)) {
-                        mode=nextMode;Ready=false;started=false;ended=false;saved=false;endedAt=null;game++;
-                        Tunnel.Game=game;Tunnel.GameReady=false;Tunnel.GameEnded=false;Roster.SetAll(PlayerStatus.Waiting);
-                        StopServer();body["mapVersion"]=MacInstall.Find().Manifest;
-                        // 服务器停止后才能切换地图链接，避免读取中的资源发生变化。
-                        mount.Dispose();install=MacInstall.Find();mount=install.Mount();
-                        Event("loading","正在启动下一局…");StartServer();loadAt=DateTime.UtcNow;autoAsked=false;pollAt=DateTime.MinValue;
-                    }
-                    if(DateTime.UtcNow>=pollAt) {
-                        pollAt=DateTime.UtcNow.AddSeconds(started?10:2);
-                        var request=HostBody();
-                        while(results.TryDequeue(out var r))retryResults.Add(r);
-                        request["results"]=retryResults.ToArray();
-                        retryChecks.AddRange(Tunnel.TakeRouteChecks());if(retryChecks.Count>50)retryChecks.RemoveRange(0,retryChecks.Count-50);
-                        request["routeChecks"]=retryChecks.ToArray();
-                        if((DateTime.UtcNow-qualityAt).TotalSeconds>60) {retryQuality.AddRange(Tunnel.TakeQuality());qualityAt=DateTime.UtcNow;}
-                        if(retryQuality.Count>50)retryQuality.RemoveRange(0,retryQuality.Count-50);
-                        request["quality"]=retryQuality.ToArray();
-                        try {
-                            var answer=RoomApi.Host(request);retryResults.Clear();retryChecks.Clear();retryQuality.Clear();
-                            if(pollFailures>0)Info("房间服务连接已恢复。");pollFailures=0;
-                            foreach(Dictionary<string,object> join in (object[])answer["joins"]) {
-                                var id=(string)join["joinId"];if(!seen.Add(id))continue;
-                                bool probe=join.TryGetValue("probe",out var pv)&&true.Equals(pv);
-                                if(!probe)Roster.Add(new RosterEntry{Key=id,SteamId=Convert.ToInt64(join.GetValueOrDefault("steamId",0)),Name=Field(join,"personaName")??"玩家",AvatarUrl=Field(join,"avatarUrl"),Status=PlayerStatus.Connecting});
-                                var peers=((object[])join["candidates"]).Select(x=>Candidate.Parse((string)x)).ToList();
-                                Tunnel.AddJoin(id,(string)join["joinToken"],peers,probe,RelayTicket.Read(join));
-                            }
-                        } catch(Exception e) {pollFailures++;if(pollFailures==1||pollFailures%10==0)Info("房间服务暂时无法连接，将重试："+e.Message);}
-                        emit(new{type="roster",players=Roster.Snapshot().Select(e=>new{name=e.Name,status=(int)e.Status,host=e.IsHost}).ToArray()});
-                    }
-                    await Task.Delay(250,ct);
-                }
+                await MonitorRoom(ct);
             } catch(OperationCanceledException) {}catch(Exception e) {failed=true;failure=e.Message;}
-            finally {
-                Ready=false;
-                cancel?.Cancel();await entering;
-                if(Code!=null&&body!=null)try{var d=HostBody();d["public"]=false;d["ended"]=true;d["started"]=true;RoomApi.Host(d);}catch{}
-                Tunnel?.Dispose();Tunnel=null;gate?.Dispose();gate=null;rosterServer?.Dispose();rosterServer=null;
-                StopServer();try{mount?.Dispose();}catch(Exception e){Info("地图链接清理失败："+e.Message);}mount=null;
-                lock(logLock) {log?.Dispose();log=null;}
-                if(failed)Event("error",failure);else Event("idle","房间已关闭。");
-                Code=null;
+            finally {await CloseRoom(failed,failure);}
+        }
+        void ResetRoom() {
+            Code=null;game=1;Ready=false;started=false;ended=false;saved=false;endedAt=null;seen.Clear();
+            while(results.TryDequeue(out _)){}while(next.TryDequeue(out _)){}
+            relays=new();Roster=new HostRoster();
+        }
+        void CheckInstall() {
+            install=MacInstall.Find();Manifest=install.Manifest;
+            if(MacInstall.AccountId()<=0)throw new Exception("未找到最近登录的 Steam 账号。请先在 Steam 登录后重试。");
+            foreach(int port in new[]{27015,27016}) {using var probe=new UdpClient(new IPEndPoint(IPAddress.Loopback,port));}
+            var tcpProbe=new TcpListener(IPAddress.Loopback,27080);try{tcpProbe.Start();}finally{tcpProbe.Stop();}
+        }
+        void CheckLatestMap() {
+            // 线上版本查询失败不阻止开房，加入时仍会校验双方地图版本。
+            try {
+                var version=LocalTestSkipLatestCheck ? new Dictionary<string,object>{{"manifest",install.Manifest}} : Http.Json(Updater.DirectApi+"workshop/"+MacInstall.MapId,null,4000);
+                if(version.TryGetValue("manifest",out var latest)&&Convert.ToString(latest)!=install.Manifest)
+                    throw new MapOutdatedException();
+            } catch(MapOutdatedException) {throw new Exception("地图不是最新版本。请在 Steam 更新地图后重试，双方必须使用相同版本。");}
+            catch {Info("未能查询线上地图版本；加入时仍会检查双方地图版本是否一致。");}
+        }
+        void OpenRoom(CancellationToken ct) {
+            Event("opening","正在创建私密房间…");
+            var opened=RoomApi.Host(HostBody());Code=(string)opened["code"];token=(string)opened["token"];
+            Roster.Add(new RosterEntry{SteamId=MacInstall.AccountId(),Key="host",Name=Field(opened,"personaName")??"房主",IsHost=true,Status=PlayerStatus.Loading});
+            StartRoomNetwork();
+            MeasureRelays(RelayTicket.ReadAddresses(opened,"relayAddresses","relayAddress"),ct);
+        }
+        void StartRoomNetwork() {
+            Tunnel.RosterSource=Roster.Snapshot;
+            Tunnel.JoinFinished+=(id,path,relay,ms)=> {
+                var r=new Dictionary<string,object>{{"joinId",id},{"elapsedMs",ms}};
+                if(path!=null)r["path"]=path;if(relay!=null)r["relayAddress"]=relay;
+                results.Enqueue(r);Roster.SetStatus(id,path==null?PlayerStatus.Failed:PlayerStatus.Loading);
+                Info(path==null?"一位玩家未能连通，可让对方重试。":"玩家网络已连通："+path);
+            };
+            Tunnel.JoinLeft+=id=>Roster.SetStatus(id,PlayerStatus.Left);
+            Tunnel.GameTraffic+=Roster.SetEntering;Tunnel.Start();
+            rosterServer=new RosterServer(Roster.Snapshot,()=>maxPlayers);rosterServer.Start();
+            gate=new LocalGate(27015);
+        }
+        void MeasureRelays(List<IPEndPoint> addresses,CancellationToken ct) {
+            var measuring=Tunnel;
+            _=Task.Run(()=> {var legs=new List<RelayLeg>();foreach(var a in addresses) {if(ct.IsCancellationRequested)break;legs.Add(new RelayLeg(a){Quality=measuring.MeasureRelay(a)});}relays=legs;});
+        }
+        sealed class RoomPoll {
+            public DateTime PollAt=DateTime.UtcNow,LoadAt=DateTime.UtcNow;
+            public readonly List<Dictionary<string,object>> Results=new(),Checks=new();
+            public DateTime QualityAt=DateTime.UtcNow;
+            public readonly List<Dictionary<string,object>> Quality=new();
+            public bool AutoAsked;
+            public int Failures;
+        }
+        async Task MonitorRoom(CancellationToken ct) {
+            var poll=new RoomPoll();
+            while(!ct.IsCancellationRequested) {
+                ReadConsole();
+                UpdateGameState(poll);
+                if(saved&&next.TryDequeue(out var nextMode))StartNextGame(nextMode,poll);
+                if(DateTime.UtcNow>=poll.PollAt)PollRoom(poll);
+                await Task.Delay(250,ct);
             }
+        }
+        void UpdateGameState(RoomPoll poll) {
+            CheckServer(poll.LoadAt);
+            if(Ready&&!poll.AutoAsked) {poll.AutoAsked=true;Event("ready","等待朋友加入后，从 Dota 2 里点「锁定并开始」");if(autoEnter)Enter();}
+            ReleaseJoiningPlayers();
+            if(ended&&!saved&&(DateTime.UtcNow-endedAt.Value).TotalSeconds>60)MarkSaved();
+        }
+        void CheckServer(DateTime loadAt) {
+            if(server.HasExited&&!ended)throw new Exception("专用服务器已退出，请打开日志查看原因。");
+            if(!Ready&&!ended&&(DateTime.UtcNow-loadAt).TotalSeconds>180)throw new Exception("服务器加载超过 180 秒，请查看日志。");
+        }
+        void ReleaseJoiningPlayers() {
+            if(!Tunnel.GameReady&&Ready&&(HostInGame||(DateTime.UtcNow-readyAt).TotalSeconds>30))Tunnel.GameReady=true;
+        }
+        void StartNextGame(string nextMode,RoomPoll poll) {
+            mode=nextMode;Ready=false;started=false;ended=false;saved=false;endedAt=null;game++;
+            Tunnel.Game=game;Tunnel.GameReady=false;Tunnel.GameEnded=false;Roster.SetAll(PlayerStatus.Waiting);
+            StopServer();body["mapVersion"]=MacInstall.Find().Manifest;
+            // 服务器停止后才能切换地图链接，避免读取中的资源发生变化。
+            mount.Dispose();install=MacInstall.Find();mount=install.Mount();
+            Event("loading","正在启动下一局…");StartServer();poll.LoadAt=DateTime.UtcNow;poll.AutoAsked=false;poll.PollAt=DateTime.MinValue;
+        }
+        void PollRoom(RoomPoll poll) {
+            poll.PollAt=DateTime.UtcNow.AddSeconds(started?10:2);
+            var request=PollBody(poll);
+            try {
+                var answer=RoomApi.Host(request);poll.Results.Clear();poll.Checks.Clear();poll.Quality.Clear();
+                if(poll.Failures>0)Info("房间服务连接已恢复。");poll.Failures=0;
+                foreach(Dictionary<string,object> join in (object[])answer["joins"])AddJoin(join);
+            } catch(Exception e) {poll.Failures++;if(poll.Failures==1||poll.Failures%10==0)Info("房间服务暂时无法连接，将重试："+e.Message);}
+            emit(new{type="roster",players=Roster.Snapshot().Select(e=>new{name=e.Name,status=(int)e.Status,host=e.IsHost}).ToArray()});
+        }
+        Dictionary<string,object> PollBody(RoomPoll poll) {
+            var request=HostBody();
+            while(results.TryDequeue(out var r))poll.Results.Add(r);
+            request["results"]=poll.Results.ToArray();
+            poll.Checks.AddRange(Tunnel.TakeRouteChecks());if(poll.Checks.Count>50)poll.Checks.RemoveRange(0,poll.Checks.Count-50);
+            request["routeChecks"]=poll.Checks.ToArray();
+            if((DateTime.UtcNow-poll.QualityAt).TotalSeconds>60) {poll.Quality.AddRange(Tunnel.TakeQuality());poll.QualityAt=DateTime.UtcNow;}
+            if(poll.Quality.Count>50)poll.Quality.RemoveRange(0,poll.Quality.Count-50);
+            request["quality"]=poll.Quality.ToArray();
+            return request;
+        }
+        void AddJoin(Dictionary<string,object> join) {
+            var id=(string)join["joinId"];if(!seen.Add(id))return;
+            bool probe=join.TryGetValue("probe",out var pv)&&true.Equals(pv);
+            if(!probe)Roster.Add(new RosterEntry{Key=id,SteamId=Convert.ToInt64(join.GetValueOrDefault("steamId",0)),Name=Field(join,"personaName")??"玩家",AvatarUrl=Field(join,"avatarUrl"),Status=PlayerStatus.Connecting});
+            var peers=((object[])join["candidates"]).Select(x=>Candidate.Parse((string)x)).ToList();
+            Tunnel.AddJoin(id,(string)join["joinToken"],peers,probe,RelayTicket.Read(join));
+        }
+        async Task CloseRoom(bool failed,string failure) {
+            Ready=false;
+            cancel?.Cancel();await entering;
+            if(Code!=null&&body!=null)try{var d=HostBody();d["public"]=false;d["ended"]=true;d["started"]=true;RoomApi.Host(d);}catch{}
+            Tunnel?.Dispose();Tunnel=null;gate?.Dispose();gate=null;rosterServer?.Dispose();rosterServer=null;
+            StopServer();try{mount?.Dispose();}catch(Exception e){Info("地图链接清理失败："+e.Message);}mount=null;
+            lock(logLock) {log?.Dispose();log=null;}
+            if(failed)Event("error",failure);else Event("idle","房间已关闭。");
+            Code=null;
         }
         static string Field(Dictionary<string,object> d,string k)=>d.GetValueOrDefault(k) as string;
         void StartServer() {

@@ -370,7 +370,7 @@ namespace Windy10v10AI.Launcher
                             // 周期性名单报文同时维持 NAT 映射。
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (GameEnded) SendTo(peer, Packet.GameEnded, BitConverter.GetBytes(Game));
-                            if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
+                            if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, Array.Empty<byte>());
                             if (ping && peer.Remote != null && (DateTime.UtcNow - peer.LastReceived).TotalMilliseconds < SilenceMs)
                             {
                                 SendTo(peer, Packet.Ping, BitConverter.GetBytes(Stopwatch.GetTimestamp()));
@@ -492,7 +492,7 @@ namespace Windy10v10AI.Launcher
                     // 结束通知需要重复发送，避免丢包导致加入者持续重连。
                     foreach (var target in targets)
                     {
-                        for (var i = 0; i < 3; i++) Send(Packet.Kicked, new byte[0], target);
+                        for (var i = 0; i < 3; i++) Send(Packet.Kicked, Array.Empty<byte>(), target);
                     }
                     if (peer != null)
                     {
@@ -524,14 +524,7 @@ namespace Windy10v10AI.Launcher
         {
             lock (sync)
             {
-                if (data[0] == Packet.Hello || data[0] == Packet.Ack)
-                {
-                    var token = ReadToken(data);
-                    if (!joinIds.ContainsKey(token)) return;
-                    verified[from] = token;
-                    if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(token), from);
-                    return;
-                }
+                if (HandleHandshake(data, from)) return;
 
                 string owner;
                 if (!verified.TryGetValue(from, out owner)) return;
@@ -556,23 +549,7 @@ namespace Windy10v10AI.Launcher
                 }
                 else if (data[0] == Packet.RouteCheck && data.Length == 8)
                 {
-                    var copy = Convert.ToBase64String(data);
-                    string last;
-                    if (lastRouteCheck.TryGetValue(owner, out last) && last == copy) return;
-                    lastRouteCheck[owner] = copy;
-                    if (data[1] >= PathType.Preference.Length) return;
-                    var check = new Dictionary<string, object>
-                    {
-                        { "joinId", joinIds[owner] },
-                        { "path", PathType.Report(PathType.Preference[data[1]]) },
-                        { "directLossPct", (int)data[2] },
-                        { "relayLossPct", (int)data[3] },
-                    };
-                    var directRtt = BitConverter.ToUInt16(data, 4);
-                    var relayRtt = BitConverter.ToUInt16(data, 6);
-                    if (directRtt != ushort.MaxValue) check["directRttMs"] = (int)directRtt;
-                    if (relayRtt != ushort.MaxValue) check["relayRttMs"] = (int)relayRtt;
-                    routeChecks.Add(check);
+                    RecordRouteCheck(owner, data);
                 }
                 else if (data[0] == Packet.Bye)
                 {
@@ -582,22 +559,58 @@ namespace Windy10v10AI.Launcher
                 }
                 else if (data[0] == Packet.Data)
                 {
-                    try
-                    {
-                        var payload = Payload(data);
-                        peer.Local.Send(payload, payload.Length);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                    // 服务器就绪前的报文可能属于已结束的游戏，不能直接转发。
-                    if (GameReady && peer.TrafficGame != Game)
-                    {
-                        peer.TrafficGame = Game;
-                        var traffic = GameTraffic;
-                        if (traffic != null) traffic(joinIds[owner]);
-                    }
+                    ForwardGameData(peer, owner, data);
                 }
+            }
+        }
+
+        bool HandleHandshake(byte[] data, IPEndPoint from)
+        {
+            if (data[0] != Packet.Hello && data[0] != Packet.Ack) return false;
+            var token = ReadToken(data);
+            if (!joinIds.ContainsKey(token)) return true;
+            verified[from] = token;
+            if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(token), from);
+            return true;
+        }
+
+        void RecordRouteCheck(string owner, byte[] data)
+        {
+            var copy = Convert.ToBase64String(data);
+            string last;
+            if (lastRouteCheck.TryGetValue(owner, out last) && last == copy) return;
+            lastRouteCheck[owner] = copy;
+            if (data[1] >= PathType.Preference.Length) return;
+            var check = new Dictionary<string, object>
+            {
+                { "joinId", joinIds[owner] },
+                { "path", PathType.Report(PathType.Preference[data[1]]) },
+                { "directLossPct", (int)data[2] },
+                { "relayLossPct", (int)data[3] },
+            };
+            var directRtt = BitConverter.ToUInt16(data, 4);
+            var relayRtt = BitConverter.ToUInt16(data, 6);
+            if (directRtt != ushort.MaxValue) check["directRttMs"] = (int)directRtt;
+            if (relayRtt != ushort.MaxValue) check["relayRttMs"] = (int)relayRtt;
+            routeChecks.Add(check);
+        }
+
+        void ForwardGameData(Peer peer, string owner, byte[] data)
+        {
+            try
+            {
+                var payload = Payload(data);
+                peer.Local.Send(payload, payload.Length);
+            }
+            catch (Exception)
+            {
+            }
+            // 服务器就绪前的报文可能属于已结束的游戏，不能直接转发。
+            if (GameReady && peer.TrafficGame != Game)
+            {
+                peer.TrafficGame = Game;
+                var traffic = GameTraffic;
+                if (traffic != null) traffic(joinIds[owner]);
             }
         }
 
@@ -642,7 +655,7 @@ namespace Windy10v10AI.Launcher
             {
                 foreach (var peer in peers.Values)
                 {
-                    for (var i = 0; i < 3; i++) SendTo(peer, Packet.Bye, new byte[0]);
+                    for (var i = 0; i < 3; i++) SendTo(peer, Packet.Bye, Array.Empty<byte>());
                 }
             }
             base.Dispose();
@@ -944,7 +957,7 @@ namespace Windy10v10AI.Launcher
                 {
                     if (host != null && (DateTime.UtcNow - lastSent).TotalMilliseconds > KeepaliveMs)
                     {
-                        Send(Packet.Keepalive, new byte[0], host);
+                        Send(Packet.Keepalive, Array.Empty<byte>(), host);
                         lastSent = DateTime.UtcNow;
                     }
                     if (host != null) Ping(StatusMeter, host);
@@ -1081,10 +1094,10 @@ namespace Windy10v10AI.Launcher
         static RouteQuality Measure(Meter meter, int windowMs)
         {
             var now = Stopwatch.GetTimestamp();
-            var newest = windowMs == 0 ? long.MaxValue : now - Stopwatch.Frequency * LateReplyMs / 1000;
+            var newest = windowMs == 0 ? long.MaxValue : now - ((Stopwatch.Frequency * LateReplyMs) / 1000);
             if (windowMs > 0)
             {
-                var oldest = now - Stopwatch.Frequency * windowMs / 1000;
+                var oldest = now - ((Stopwatch.Frequency * windowMs) / 1000);
                 meter.Sent.RemoveAll(stamp =>
                 {
                     if (stamp >= oldest) return false;
@@ -1125,21 +1138,7 @@ namespace Windy10v10AI.Launcher
         {
             lock (sync)
             {
-                if (data[0] == Packet.Hello || data[0] == Packet.Ack)
-                {
-                    var received = ReadToken(data);
-                    var joining = token != null && received == token;
-                    if (!joining && !probes.ContainsKey(received)) return;
-                    // 强制中继测试需忽略直连握手，避免绕过待测路径。
-                    if (joining && RelayOnly && TypeOf(from) != PathType.Relay) return;
-                    if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(received), from);
-                    if (joining)
-                    {
-                        if (!reached.ContainsKey(from)) reached[from] = TypeOf(from);
-                    }
-                    else SendPing(received, from);
-                    return;
-                }
+                if (HandleHandshake(data, from)) return;
                 if (data[0] == Packet.Pong)
                 {
                     OnPong(data, from);
@@ -1158,60 +1157,92 @@ namespace Windy10v10AI.Launcher
                     return;
                 }
                 lastReceived = DateTime.UtcNow;
-                if (data[0] == Packet.Ping)
+                HandleHostPacket(data, from);
+            }
+        }
+
+        bool HandleHandshake(byte[] data, IPEndPoint from)
+        {
+            if (data[0] != Packet.Hello && data[0] != Packet.Ack) return false;
+            var received = ReadToken(data);
+            var joining = token != null && received == token;
+            if (!joining && !probes.ContainsKey(received)) return true;
+            // 强制中继测试需忽略直连握手，避免绕过待测路径。
+            if (joining && RelayOnly && TypeOf(from) != PathType.Relay) return true;
+            if (data[0] == Packet.Hello) Send(Packet.Ack, Encoding.ASCII.GetBytes(received), from);
+            if (joining)
+            {
+                if (!reached.ContainsKey(from)) reached[from] = TypeOf(from);
+            }
+            else SendPing(received, from);
+            return true;
+        }
+
+        void HandleHostPacket(byte[] data, IPEndPoint from)
+        {
+            if (data[0] == Packet.Ping)
+            {
+                Send(Packet.Pong, Payload(data), from);
+                return;
+            }
+            if (data[0] == Packet.GameEnded)
+            {
+                // 游戏编号用于过滤跨局延迟报文，同时保留对缺失编号的兼容。
+                if (data.Length >= 5 && BitConverter.ToInt32(data, 1) < Game) return;
+                GameEnded = true;
+                return;
+            }
+            if (data[0] == Packet.NextGame)
+            {
+                ReceiveGameState(data);
+                return;
+            }
+            if (data[0] == Packet.Roster)
+            {
+                ReceiveRoster(data);
+                return;
+            }
+            if (data[0] == Packet.Data && dota != null)
+            {
+                try
                 {
-                    Send(Packet.Pong, Payload(data), from);
-                    return;
+                    var payload = Payload(data);
+                    local.Send(payload, payload.Length, dota);
                 }
-                if (data[0] == Packet.GameEnded)
+                catch (Exception)
                 {
-                    // 游戏编号用于过滤跨局延迟报文，同时保留对缺失编号的兼容。
-                    if (data.Length >= 5 && BitConverter.ToInt32(data, 1) < Game) return;
-                    GameEnded = true;
-                    return;
                 }
-                if (data[0] == Packet.NextGame)
+            }
+        }
+
+        void ReceiveGameState(byte[] data)
+        {
+            int game;
+            bool ready;
+            if (!DecodeGame(data, out game, out ready) || game < Game) return;
+            if (game > Game)
+            {
+                Game = game;
+                GameEnded = false;
+            }
+            GameReady = ready;
+        }
+
+        void ReceiveRoster(byte[] data)
+        {
+            try
+            {
+                int index, count;
+                var entry = RosterEntry.Decode(data, 1, out index, out count);
+                if (count != rosterCount)
                 {
-                    int game;
-                    bool ready;
-                    if (!DecodeGame(data, out game, out ready) || game < Game) return;
-                    if (game > Game)
-                    {
-                        Game = game;
-                        GameEnded = false;
-                    }
-                    GameReady = ready;
-                    return;
+                    roster.Clear();
+                    rosterCount = count;
                 }
-                if (data[0] == Packet.Roster)
-                {
-                    try
-                    {
-                        int index, count;
-                        var entry = RosterEntry.Decode(data, 1, out index, out count);
-                        if (count != rosterCount)
-                        {
-                            roster.Clear();
-                            rosterCount = count;
-                        }
-                        roster[index] = entry;
-                    }
-                    catch (Exception)
-                    {
-                    }
-                    return;
-                }
-                if (data[0] == Packet.Data && dota != null)
-                {
-                    try
-                    {
-                        var payload = Payload(data);
-                        local.Send(payload, payload.Length, dota);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
+                roster[index] = entry;
+            }
+            catch (Exception)
+            {
             }
         }
 
@@ -1230,7 +1261,7 @@ namespace Windy10v10AI.Launcher
             {
                 if (host != null && !Closed)
                 {
-                    for (var i = 0; i < 3; i++) Send(Packet.Bye, new byte[0], host);
+                    for (var i = 0; i < 3; i++) Send(Packet.Bye, Array.Empty<byte>(), host);
                 }
             }
             base.Dispose();

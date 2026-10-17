@@ -89,41 +89,49 @@ namespace Windy10v10AI.Launcher {
             if(existing&&ClientExiting())throw new Exception("Dota 2 的窗口已关闭，但进程仍在退出。请等待退出完成后重试；启动器不会重复启动客户端。");
             if(existing)info("检测到 Dota 2 开着，正在连接房间…");
             if(!existing) {
-                clientLog=Path.Combine(Game,"dota","windymac-client-"+Guid.NewGuid().ToString("N")+".log");
-                // 游戏自带的启动脚本负责设置库路径和资源限制。
-                // 客户端独立持有日志流，避免启动器退出时破坏管道。
-                var script=Path.Combine(Game,"dota.sh");
-                if(!File.Exists(script))throw new Exception("未找到游戏自带的 dota.sh 启动脚本。");
-                Directory.CreateDirectory(HostSession.Logs);
-                var launch=new ProcessStartInfo("/bin/bash"){WorkingDirectory=Game,UseShellExecute=false};
-                foreach(var argument in new[]{"-c","exec /bin/bash \"$@\" >\"$WINDYMAC_CLIENT_LOG\" 2>&1 </dev/null","windymac",script,"-novid","-con_logfile",Path.GetFileName(clientLog),"+con_enable","1","+fs_async_threads","16","+fs_async_threads"})launch.ArgumentList.Add(argument);
-                launch.Environment["SteamAppId"]="570";launch.Environment["SteamGameId"]="570";
-                launch.Environment["WINDYMAC_CLIENT_LOG"]=Path.Combine(HostSession.Logs,"client-start-"+DateTime.Now.ToString("yyyyMMdd-HHmmss")+".log");
-                Process.Start(launch)?.Dispose();
+                clientLog=StartClient();
                 info("正在启动 Dota 2，等待主菜单加载完成后自动连接房间…");
-                bool ready=false;var deadline=DateTime.UtcNow.AddMinutes(6);
-                while(DateTime.UtcNow<deadline) {
-                    ct.ThrowIfCancellationRequested();
-                    if(File.Exists(clientLog)) {
-                        var text=File.ReadAllText(clientLog);
-                        if(text.Contains("DOTA_GAME_UI_STATE_LOADING_SCREEN -> DOTA_GAME_UI_STATE_DASHBOARD")&&text.Contains("OnSwitchLoopModeFinished( game : success )")){ready=true;break;}
-                    }
-                    await Task.Delay(1000,ct);
-                }
-                if(!ready)throw new Exception("等待 Dota 主菜单超时。请查看客户端日志，进入主菜单后再点进入游戏。");
-                await Task.Delay(5000,ct);
+                await WaitForDashboard(clientLog,ct);
             }
             ct.ThrowIfCancellationRequested();
             await OpenSteamUrl("steam://connect/127.0.0.1:27016",ct);
             info("已向 Dota 发送连接请求，等待服务器确认进图。");
-            if(clientLog!=null)_=Task.Run(async()=>{
-                try {
-                    Directory.CreateDirectory(HostSession.Logs);
-                    var archive=Path.Combine(HostSession.Logs,Path.GetFileName(clientLog));
-                    do {await Task.Delay(3000);File.Copy(clientLog,archive,true);}while(ClientRunning());
-                    File.Delete(clientLog);
-                }catch{}
-            });
+            if(clientLog!=null)_=Task.Run(()=>ArchiveClientLog(clientLog));
+        }
+        string StartClient() {
+            var clientLog=Path.Combine(Game,"dota","windymac-client-"+Guid.NewGuid().ToString("N")+".log");
+            // 游戏自带的启动脚本负责设置库路径和资源限制。
+            // 客户端独立持有日志流，避免启动器退出时破坏管道。
+            var script=Path.Combine(Game,"dota.sh");
+            if(!File.Exists(script))throw new Exception("未找到游戏自带的 dota.sh 启动脚本。");
+            Directory.CreateDirectory(HostSession.Logs);
+            var launch=new ProcessStartInfo("/bin/bash"){WorkingDirectory=Game,UseShellExecute=false};
+            foreach(var argument in new[]{"-c","exec /bin/bash \"$@\" >\"$WINDYMAC_CLIENT_LOG\" 2>&1 </dev/null","windymac",script,"-novid","-con_logfile",Path.GetFileName(clientLog),"+con_enable","1","+fs_async_threads","16","+fs_async_threads"})launch.ArgumentList.Add(argument);
+            launch.Environment["SteamAppId"]="570";launch.Environment["SteamGameId"]="570";
+            launch.Environment["WINDYMAC_CLIENT_LOG"]=Path.Combine(HostSession.Logs,"client-start-"+DateTime.Now.ToString("yyyyMMdd-HHmmss")+".log");
+            Process.Start(launch)?.Dispose();
+            return clientLog;
+        }
+        static async Task WaitForDashboard(string clientLog,CancellationToken ct) {
+            bool ready=false;var deadline=DateTime.UtcNow.AddMinutes(6);
+            while(DateTime.UtcNow<deadline) {
+                ct.ThrowIfCancellationRequested();
+                if(File.Exists(clientLog)) {
+                    var text=File.ReadAllText(clientLog);
+                    if(text.Contains("DOTA_GAME_UI_STATE_LOADING_SCREEN -> DOTA_GAME_UI_STATE_DASHBOARD")&&text.Contains("OnSwitchLoopModeFinished( game : success )")){ready=true;break;}
+                }
+                await Task.Delay(1000,ct);
+            }
+            if(!ready)throw new Exception("等待 Dota 主菜单超时。请查看客户端日志，进入主菜单后再点进入游戏。");
+            await Task.Delay(5000,ct);
+        }
+        static async Task ArchiveClientLog(string clientLog) {
+            try {
+                Directory.CreateDirectory(HostSession.Logs);
+                var archive=Path.Combine(HostSession.Logs,Path.GetFileName(clientLog));
+                do {await Task.Delay(3000);File.Copy(clientLog,archive,true);}while(ClientRunning());
+                File.Delete(clientLog);
+            }catch{}
         }
         static async Task OpenSteamUrl(string url,CancellationToken ct) {
             var pi=new ProcessStartInfo("/usr/bin/open"){UseShellExecute=false,RedirectStandardError=true};pi.ArgumentList.Add(url);
