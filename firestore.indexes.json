@@ -1,5 +1,31 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "LauncherRooms",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "started", "order": "ASCENDING" },
+        { "fieldPath": "lastSeenAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "LauncherRooms",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "started", "order": "ASCENDING" },
+        { "fieldPath": "ended", "order": "ASCENDING" },
+        { "fieldPath": "lastSeenAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "LauncherRoomJoins",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "roomId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "PlayerStatsRecents",

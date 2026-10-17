@@ -9,6 +9,7 @@ import { LauncherRoom } from './entities/launcher-room.entity';
 import {
   ACTIVE_GAME_ALIVE_MS,
   GAME_HEARTBEAT_MS,
+  GAME_LIST_CACHE_MS,
   LOBBY_HEARTBEAT_MS,
   LauncherRoomService,
   PENDING_JOIN_MS,
@@ -19,8 +20,29 @@ import {
 
 function memoryRepository<T extends { id: string }>() {
   const docs = new Map<string, T>();
+  const find = jest.fn(async (filters: Array<(doc: T) => boolean>) =>
+    [...docs.values()]
+      .filter((doc) => filters.every((filter) => filter(doc)))
+      .map((doc) => ({ ...doc })),
+  );
+  const query = (filters: Array<(doc: T) => boolean> = []) => ({
+    whereEqualTo(field: keyof T, value: unknown) {
+      filters.push((doc) => doc[field] === value);
+      return this;
+    },
+    whereGreaterThan(field: keyof T, value: Date) {
+      filters.push((doc) => (doc[field] as Date) > value);
+      return this;
+    },
+    whereGreaterOrEqualThan(field: keyof T, value: Date) {
+      filters.push((doc) => (doc[field] as Date) >= value);
+      return this;
+    },
+    find: () => find(filters),
+  });
   return {
     docs,
+    find,
     findById: jest.fn(async (id: string) => docs.get(id) ?? null),
     create: jest.fn(async (item: T) => {
       docs.set(item.id, { ...item });
@@ -30,12 +52,7 @@ function memoryRepository<T extends { id: string }>() {
       docs.set(item.id, { ...item });
       return item;
     }),
-    whereEqualTo: (field: keyof T, value: unknown) => ({
-      find: async () => [...docs.values()].filter((doc) => doc[field] === value),
-    }),
-    whereGreaterThan: jest.fn((field: keyof T, value: Date) => ({
-      find: async () => [...docs.values()].filter((doc) => (doc[field] as Date) > value),
-    })),
+    whereEqualTo: (field: keyof T, value: unknown) => query().whereEqualTo(field, value),
   };
 }
 
@@ -628,16 +645,65 @@ describe('LauncherRoomService', () => {
     ]);
   });
 
-  it('列表结果缓存 3 秒，期间不再查 Firestore', async () => {
+  it('等待列表与游戏列表独立缓存，并发请求共用查询', async () => {
     const query = { steamId: 2002, protocolVersion: 1 };
-    await service.list(query);
+    await Promise.all([service.list(query), service.list(query), service.list(query)]);
     await service.host({ ...HOST, public: true });
 
     expect((await service.list(query)).rooms).toEqual([]);
-    expect(rooms.whereGreaterThan).toHaveBeenCalledTimes(1);
+    expect(rooms.find).toHaveBeenCalledTimes(2);
 
     jest.advanceTimersByTime(ROOM_LIST_CACHE_MS);
     expect((await service.list(query)).rooms).toHaveLength(1);
-    expect(rooms.whereGreaterThan).toHaveBeenCalledTimes(2);
+    expect(rooms.find).toHaveBeenCalledTimes(3);
+
+    jest.advanceTimersByTime(GAME_LIST_CACHE_MS - ROOM_LIST_CACHE_MS);
+    await service.list(query);
+    expect(rooms.find).toHaveBeenCalledTimes(5);
+  });
+
+  it('跨局进入等待的房间优先展示，不重复计入缓存中的游戏', async () => {
+    const opened = await service.host({ ...HOST, public: true, playerCount: 3 });
+    const poll = { ...HOST, code: opened.code, token: opened.token };
+    await service.host({ ...poll, started: true });
+    const query = { steamId: 2002, protocolVersion: 1 };
+    expect((await service.list(query)).activeGames).toBe(1);
+    await service.host({ ...poll, game: 2 });
+    jest.advanceTimersByTime(ROOM_LIST_CACHE_MS);
+    const result = await service.list(query);
+    expect(result.rooms.map((room) => room.code)).toEqual([opened.code]);
+    expect(result.games).toEqual([]);
+    expect(result.activeGames).toBe(0);
+    expect(result.activePlayers).toBe(0);
+  });
+
+  it('缓存查询失败后可以重新查询，游戏在缓存有效期内不因旧心跳消失', async () => {
+    rooms.find.mockRejectedValueOnce(new Error('unavailable'));
+    const query = { steamId: 2002, protocolVersion: 1 };
+    await expect(service.list(query)).rejects.toThrow('unavailable');
+    const opened = await service.host({ ...HOST, public: true });
+    await service.host({ ...HOST, code: opened.code, token: opened.token, started: true });
+    jest.advanceTimersByTime(GAME_LIST_CACHE_MS);
+    rooms.docs.get(opened.code)!.lastSeenAt = new Date(Date.now() - ACTIVE_GAME_ALIVE_MS + 1000);
+    expect((await service.list(query)).games).toHaveLength(1);
+    jest.advanceTimersByTime(2000);
+    expect((await service.list(query)).games).toHaveLength(1);
+    jest.advanceTimersByTime(GAME_LIST_CACHE_MS);
+    expect((await service.list(query)).games).toEqual([]);
+  });
+
+  it('旧加入记录不参与握手，名单变化保留已有资料并获取新玩家资料', async () => {
+    const opened = await service.host(HOST);
+    await service.join(opened.code, JOINER);
+    const poll = { ...HOST, code: opened.code, token: opened.token };
+    jest.advanceTimersByTime(PENDING_JOIN_MS + 1);
+    const result = await service.host({ ...poll, players: [2002] });
+    expect(result.joins).toEqual([]);
+    expect(rooms.docs.get(opened.code)!.players).toEqual([
+      { steamId: 2002, personaName: 'CalmDown!', avatarUrl: undefined },
+    ]);
+    rooms.docs.get(opened.code)!.players![0].personaName = 'Saved name';
+    await service.host({ ...poll, players: [2002, 4004] });
+    expect(rooms.docs.get(opened.code)!.players![0].personaName).toBe('Saved name');
   });
 });
