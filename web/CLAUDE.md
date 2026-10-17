@@ -171,8 +171,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 游戏里的名字、图标、技能说明都由 `scripts/` 下的脚本从 game 仓库生成，产物不手改：
 
-- **每日任务池加了英雄**：`npm run heroes`
-- **抽选池、技能或物品的数值与描述变了**：`npm run wiki:sync`；缺图标先跑 `npm run items`
+- **物品、抽选技能、抽选池、英雄有改动**：按 [game-data-sync](../.claude/skills/game-data-sync/SKILL.md) 技能走
 - **觉醒有改动**：按 [awaken-sync](../.claude/skills/awaken-sync/SKILL.md) 技能走
 
 ## 升级依赖
