@@ -12,7 +12,6 @@ import StatList from './StatList';
 import type { PlayerInfo, StatsLifetime } from '@/app/lib/player-info';
 import type { LucideIcon } from 'lucide-react';
 
-
 const LIFETIME_KEYS = [
   'kills',
   'deaths',
@@ -55,7 +54,9 @@ function LifetimeIcon({ statKey }: { statKey: (typeof LIFETIME_KEYS)[number] }) 
   const entry = LIFETIME_ICON[statKey];
   if (entry.kind === 'dota') {
     // eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式
-    return <img src={entry.src} alt="" width={13} height={13} className="shrink-0 object-contain" />;
+    return (
+      <img src={entry.src} alt="" width={13} height={13} className="shrink-0 object-contain" />
+    );
   }
   const Icon = entry.Icon;
   return <Icon className="size-3.25 shrink-0" aria-hidden="true" />;
@@ -87,7 +88,13 @@ function conductColorClass(score: number): string | undefined {
 }
 
 /** 行为分只给本人看 */
-export default function StatsCard({ info, showConduct }: { info: PlayerInfo | null; showConduct: boolean }) {
+export default function StatsCard({
+  info,
+  showConduct,
+}: {
+  info: PlayerInfo | null;
+  showConduct: boolean;
+}) {
   const t = useTranslations('profile.stats');
 
   const overview = [
@@ -106,14 +113,18 @@ export default function StatsCard({ info, showConduct }: { info: PlayerInfo | nu
   return (
     <section className="card-container card-pad @container space-y-6">
       <h2 className="title-secondary">{t('title')}</h2>
-      <dl className={`grid grid-cols-1 gap-3 ${showConduct ? '@sm:grid-cols-3' : '@sm:grid-cols-2'}`}>
+      <dl
+        className={`grid grid-cols-1 gap-3 ${showConduct ? '@sm:grid-cols-3' : '@sm:grid-cols-2'}`}
+      >
         {overview.map(({ label, value }) => (
           <div
             key={label}
             className="flex items-center justify-between gap-3 box-pad rounded-[10px] border border-line bg-panel-soft"
           >
             <dt className="text-sm text-muted">{label}</dt>
-            <dd className="text-2xl font-bold tabular-nums text-heading">{value ?? <Skeleton />}</dd>
+            <dd className="text-2xl font-bold tabular-nums text-heading">
+              {value ?? <Skeleton />}
+            </dd>
           </div>
         ))}
         {showConduct ? (
@@ -123,7 +134,9 @@ export default function StatsCard({ info, showConduct }: { info: PlayerInfo | nu
               <InfoPopover label={t('conductInfo.ariaLabel')}>
                 <p className="text-content">{t('conductInfo.intro')}</p>
                 <div className="mt-3 flex flex-col gap-1">
-                  <span className="text-xs font-medium text-muted">{t('conductInfo.changesTitle')}</span>
+                  <span className="text-xs font-medium text-muted">
+                    {t('conductInfo.changesTitle')}
+                  </span>
                   <p className="leading-relaxed text-content">
                     • {t.rich('conductInfo.changesFinish', { pos: positive })}
                     <br />• {t.rich('conductInfo.changesEarlyLeave', { neg: negative })}
@@ -131,12 +144,17 @@ export default function StatsCard({ info, showConduct }: { info: PlayerInfo | nu
                   </p>
                 </div>
                 <div className="mt-3 border-t border-line-strong pt-3">
-                  <span className="text-xs font-medium text-muted">{t('conductInfo.multiplierTitle')}</span>
+                  <span className="text-xs font-medium text-muted">
+                    {t('conductInfo.multiplierTitle')}
+                  </span>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {CONDUCT_TIERS.map(({ key, multiplier, colorClass, dotClass }) => (
                       <li key={key} className="flex items-center justify-between gap-3">
                         <span className="flex items-center gap-1.5 text-content">
-                          <span className={`size-2 shrink-0 rounded-full ${dotClass}`} aria-hidden="true" />
+                          <span
+                            className={`size-2 shrink-0 rounded-full ${dotClass}`}
+                            aria-hidden="true"
+                          />
                           {t(`conductInfo.${key}`)}
                         </span>
                         <span className={`font-bold tabular-nums ${colorClass}`}>{multiplier}</span>
@@ -165,9 +183,7 @@ export default function StatsCard({ info, showConduct }: { info: PlayerInfo | nu
                 {t(key)}
               </>
             ),
-            value: info
-              ? Math.round(info.statsLifetime?.[key] ?? 0).toLocaleString()
-              : null,
+            value: info ? Math.round(info.statsLifetime?.[key] ?? 0).toLocaleString() : null,
             valueClassName: LIFETIME_VALUE_CLASS[key],
           }))}
         />

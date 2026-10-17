@@ -13,7 +13,12 @@ import { ApiError } from '@/app/lib/api';
 import { useIsSelf } from '@/app/lib/auth';
 import { formatBattleRank } from '@/app/lib/leaderboard';
 import { playerPagePath } from '@/app/lib/player-path';
-import { applyPlayerWrite, battleRankQuery, dailyTaskPreviewQuery, playerInfoQuery } from '@/app/lib/queries';
+import {
+  applyPlayerWrite,
+  battleRankQuery,
+  dailyTaskPreviewQuery,
+  playerInfoQuery,
+} from '@/app/lib/queries';
 import { useSteamProfile } from '@/app/lib/use-steam-profile';
 import { AWAKEN_HERO_COUNT } from '@/config/awaken';
 import { ROUNDS_PER_DAY } from '@/config/daily-task';
@@ -143,9 +148,13 @@ export default function ProfilePage() {
               title={t('entries.dailyTask.title')}
               badge={
                 dailyTaskQuery.data ? (
-                  dailyTaskBadge(Math.min(dailyTaskQuery.data.completedTasks.length, ROUNDS_PER_DAY))
+                  dailyTaskBadge(
+                    Math.min(dailyTaskQuery.data.completedTasks.length, ROUNDS_PER_DAY),
+                  )
                 ) : dailyTaskQuery.isError ? undefined : (
-                  <Skeleton>{t('entries.dailyTask.badge', { done: 0, total: ROUNDS_PER_DAY })}</Skeleton>
+                  <Skeleton>
+                    {t('entries.dailyTask.badge', { done: 0, total: ROUNDS_PER_DAY })}
+                  </Skeleton>
                 )
               }
               href={playerPagePath(steamId, 'daily-task')}

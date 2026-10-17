@@ -65,7 +65,8 @@ namespace Windy10v10AI.Launcher
                 {
                     // A damaged file keeps the initial
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
             return null;
         }
 
@@ -130,7 +131,8 @@ namespace Windy10v10AI.Launcher
                 {
                     // A file in use stays until a later start
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
     }
 }

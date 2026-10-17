@@ -62,11 +62,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} className={headingFont.variable}>
       <body className="min-h-screen bg-surface">
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <AuthProvider initialUid={initialUid} initialProfile={initialProfile} siteOrigin={siteOrigin}>
+          <AuthProvider
+            initialUid={initialUid}
+            initialProfile={initialProfile}
+            siteOrigin={siteOrigin}
+          >
             <QueryProvider>
               <div className="relative z-10 flex flex-col min-h-screen">
                 <Header />
-                <main className="mx-auto w-full max-w-7xl px-3 py-6 md:px-4 md:py-8 flex-1">{children}</main>
+                <main className="mx-auto w-full max-w-7xl px-3 py-6 md:px-4 md:py-8 flex-1">
+                  {children}
+                </main>
                 <Footer />
               </div>
             </QueryProvider>

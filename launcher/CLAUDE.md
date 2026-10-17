@@ -32,6 +32,7 @@
 - `launcher\test.cmd` 通过
 - `launcher\build.cmd` 编译通过，并核对 `launcher/dist/Windy10v10AI.exe` 的文件版本等于 `LauncherVersion.Current`
 - 改了 `core/` 时，`dotnet run --project launcher/core/tests/dotnet/CoreTests.csproj` 通过（Mac 或 Linux 上跑，CI 的 `launcher-core-mac` 任务也跑这一条）
+- `dotnet format whitespace launcher --folder --verify-no-changes` 通过（Mac 或 Linux 上跑，CI 的 `launcher-core-mac` 任务也跑这一条），检查 `launcher/` 下全部 `.cs`。规则在 `launcher/.editorconfig`；不通过时去掉 `--verify-no-changes` 自动修正
 
 ## PR 截图
 

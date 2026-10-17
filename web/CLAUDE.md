@@ -180,7 +180,11 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 校验
 
-`cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build`
+`cd web && npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`
+
+`format:check` 用 Prettier 查 `.ts` / `.tsx` / `.js` / `.mjs` / `.css`，沿用根目录 `.prettierrc`；不通过时跑 `npm run format` 自动修正。
+
+脚本生成的 `.ts` / `.js` 产物同样在检查范围内：生成脚本写文件前先用 Prettier 的 `format`（配合 `resolveConfig`）处理输出，不把生成文件加进忽略名单。
 
 单元测试（Vitest）只覆盖不依赖浏览器的纯逻辑，测试文件与被测文件同目录、命名 `*.test.ts`；页面行为照常靠下面的浏览器实测。
 

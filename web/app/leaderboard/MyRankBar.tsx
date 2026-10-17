@@ -81,9 +81,7 @@ export default function MyRankBar({ uid, loaded, listRank, myRowRef }: MyRankBar
         iconClassName="size-9 shrink-0 rounded-lg bg-panel-soft p-2 text-muted md:size-10"
       />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate font-bold text-heading">
-          {profile?.personaName || uid}
-        </span>
+        <span className="truncate font-bold text-heading">{profile?.personaName || uid}</span>
         <span className="text-xs text-muted">{t('myRank')}</span>
       </span>
     </>

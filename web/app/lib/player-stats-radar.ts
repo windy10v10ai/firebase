@@ -22,7 +22,8 @@ export interface PlayerStatsRadarResponse {
   radar: PlayerStatsRadar | null;
 }
 
-export type BattleRadarCorner = 'damage' | 'participation' | 'gold' | 'push' | 'survival' | 'support';
+export type BattleRadarCorner =
+  'damage' | 'participation' | 'gold' | 'push' | 'survival' | 'support';
 
 // 承伤与死亡各占一半：只看死亡，躲在后排不上前的人得分最高
 const SURVIVAL_TANK_WEIGHT = 0.5;

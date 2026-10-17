@@ -19,7 +19,11 @@ export interface AlipayOrderStatus {
 }
 
 /** 下单并拿到收款二维码内容；quantity 对会员是月数，对积分是份数 */
-export function createAlipayOrder(steamId: string, productCode: AlipayProductCode, quantity: number) {
+export function createAlipayOrder(
+  steamId: string,
+  productCode: AlipayProductCode,
+  quantity: number,
+) {
   return apiFetch<AlipayOrderCreated>('/api/alipay/order/create', {
     method: 'POST',
     body: JSON.stringify({ steamId: Number(steamId), productCode, quantity }),

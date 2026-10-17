@@ -286,7 +286,10 @@ function LoginCallbackContent() {
     if (failure) {
       return;
     }
-    const timer = setInterval(() => setStageElapsedMs(Date.now() - stageStartedAtRef.current), 1000);
+    const timer = setInterval(
+      () => setStageElapsedMs(Date.now() - stageStartedAtRef.current),
+      1000,
+    );
     return () => clearInterval(timer);
   }, [failure]);
 
@@ -368,7 +371,10 @@ function LoginCallbackContent() {
           const Icon = STEP_ICON[state];
           return (
             <li key={step} className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <Icon className={`size-[18px] shrink-0 ${STEP_ICON_CLASS[state]}`} aria-hidden="true" />
+              <Icon
+                className={`size-[18px] shrink-0 ${STEP_ICON_CLASS[state]}`}
+                aria-hidden="true"
+              />
               <span className={STEP_LABEL_CLASS[state]}>{t(`steps.${step}`)}</span>
               {state === 'active' && waiting && stageElapsedMs >= SHOW_ELAPSED_AFTER_MS ? (
                 <span className="text-muted">
