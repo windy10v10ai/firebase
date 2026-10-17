@@ -171,8 +171,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 游戏里的名字、图标、技能说明都由 `scripts/` 下的脚本从 game 仓库生成，产物不手改：
 
-- **Dota 出了新英雄，或 `api/src/daily-task/config/tasks.ts` 加了 `config/heroes.json` 里没有的英雄**：`npm run heroes`。英雄名单取自这份任务池，战绩卡也用这份头像
-- **物品、抽选技能或抽选池有改动**：按 [game-data-sync](../.claude/skills/game-data-sync/SKILL.md) 技能走
+- **物品、抽选技能、抽选池、英雄有改动**：按 [game-data-sync](../.claude/skills/game-data-sync/SKILL.md) 技能走
 - **觉醒有改动**：按 [awaken-sync](../.claude/skills/awaken-sync/SKILL.md) 技能走
 
 ## 升级依赖

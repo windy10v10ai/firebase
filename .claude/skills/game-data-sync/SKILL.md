@@ -1,16 +1,17 @@
 ---
 name: game-data-sync
-description: game 仓库新增或改动物品、抽选技能后，把图标、三语名字与百科数据同步进网站。用于「同步物品」「game 加了新物品」「百科数值改了网站没跟上」「抽选池改了」这类任务，也用于排查 items / wiki:sync 脚本报错。觉醒改动走 awaken-sync。
+description: game 仓库新增或改动物品、抽选技能、换皮英雄，或 Dota 出了新英雄后，把图标、名字与百科数据同步进网站。用于「同步物品」「game 加了新物品」「百科数值改了网站没跟上」「抽选池改了」「新英雄头像缺了」「换皮英雄名字不对」这类任务，也用于排查 items / wiki:sync / heroes 脚本报错。觉醒改动走 awaken-sync。
 ---
 
-# 同步 game 的物品与百科改动到网站
+# 同步 game 的物品、百科与英雄数据到网站
 
-网站上物品、技能的名字和图标（战绩出装、百科共用），以及百科的名单、档位、提示框，全部由脚本从 game 仓库生成，**不手工维护**。
+网站上物品、技能、英雄的名字和图标（战绩、百科、每日任务共用），以及百科的名单、档位、提示框，全部由脚本生成，**不手工维护**。
 
 | 命令 | 产物 | 管什么 |
 |---|---|---|
 | `npm run items` | `config/items.json`、`config/abilities.json`，图在 `public/items/`、`public/abilities/` | 物品与抽选技能的图标、三语名字 |
 | `npm run wiki:sync` | `config/wiki-items.json`、`config/wiki-abilities.json` | 百科名单、档位、描述与数值 |
+| `npm run heroes` | `config/heroes.json`，图在 `public/heroes/` | 英雄小头像与中英文名 |
 
 ## 先判断跑哪个
 
@@ -18,6 +19,7 @@ description: game 仓库新增或改动物品、抽选技能后，把图标、�
 - **抽选池（`lottery-items.ts`、`lottery-abilities.ts`）有改动，或池里条目的数值、描述变了**：跑 `wiki:sync`
 - **两者都沾**：先 `items` 再 `wiki:sync`。`wiki:sync` 查到池里条目不在 `items.json` 会直接失败
 - **不在抽选池里的新物品**（如商店物品）只跑 `items`
+- **英雄**：Dota 出了新英雄，或 game 换皮英雄改了名字、头像时跑 `heroes`。名单取自每日任务池 `api/src/daily-task/config/tasks.ts`，新英雄要先加进任务池；换皮的名字和头像手写在 `config/hero-overrides.json` 与 `config/hero-overrides/`，改完再跑
 
 不要靠「描述文件有没有改」判断百科要不要重跑：描述里带 `%占位符%`，只改一个 `AbilityValues` 数值也会变。拿不准就跑，产物没变化脚本会告诉你。
 
