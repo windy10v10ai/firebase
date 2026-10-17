@@ -136,7 +136,3 @@ docs/superpowers/
 
 # superpowers subagent-driven-development scratch
 .superpowers/
-
-# Format check project output
-launcher/format/bin/
-launcher/format/obj/
