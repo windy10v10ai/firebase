@@ -11,6 +11,10 @@ export interface CheckoutSessionParams {
   quantity: number;
   currency: string;
   productName: string;
+  productDescription: string;
+  productImageUrl: string;
+  submitMessage: string;
+  locale: Stripe.Checkout.SessionCreateParams.Locale;
   successUrl: string;
   cancelUrl: string;
 }
@@ -38,14 +42,26 @@ export class StripeApiService {
             price_data: {
               currency: params.currency,
               unit_amount: params.unitAmountCent,
-              product_data: { name: params.productName },
+              product_data: {
+                name: params.productName,
+                description: params.productDescription,
+                images: [params.productImageUrl],
+              },
             },
           },
         ],
         client_reference_id: params.orderId,
         metadata: { orderId: params.orderId, steamId: String(params.steamId) },
         payment_intent_data: { metadata: { orderId: params.orderId } },
-        locale: 'auto',
+        locale: params.locale,
+        custom_text: { submit: { message: params.submitMessage } },
+        // 外观随代码走，测试与正式账号不用各在后台配一遍
+        branding_settings: {
+          display_name: 'Windy10v10AI',
+          background_color: '#0f0f11',
+          button_color: '#2563eb',
+          border_style: 'rounded',
+        },
         success_url: params.successUrl,
         cancel_url: params.cancelUrl,
       },

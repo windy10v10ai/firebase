@@ -2,6 +2,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import React, { useCallback, useState } from 'react';
 
@@ -13,6 +14,9 @@ import Section from '../components/Section';
 import AlipayPayDialog, { type AlipayRequest } from './AlipayPayDialog';
 import MemberStatusCard from './MemberStatusCard';
 import PurchaseSection from './PurchaseSection';
+import StripeResultDialog from './StripeResultDialog';
+
+const STRIPE_ORDER_PARAM = 'stripeOrderId';
 
 // emoji 的字形画得比排版宽度宽，紧跟其后的汉字会被压住，所以让 emoji 单独占一列
 const LEADING_EMOJI = /^(\p{Extended_Pictographic}️?)\s*/u;
@@ -59,6 +63,9 @@ export default function MembershipPage() {
   const [payRequest, setPayRequest] = useState<AlipayRequest | null>(null);
   const [payKey, setPayKey] = useState(0);
   const [paidExpireDate, setPaidExpireDate] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const stripeOrderId = useSearchParams().get(STRIPE_ORDER_PARAM);
 
   // 没有玩家记录或取失败都按「没有会员、积分为零」显示，页面照常能买
   const info = uid ? (memberQuery.data ?? (memberQuery.isError ? null : undefined)) : undefined;
@@ -86,6 +93,12 @@ export default function MembershipPage() {
     setPayRequest(null);
     setPaidExpireDate(null);
   }, []);
+
+  // 弹窗跟着地址里的订单号走，关掉时去掉它，刷新页面不再弹出
+  const onCloseStripe = useCallback(() => {
+    setPaidExpireDate(null);
+    router.replace(pathname, { scroll: false });
+  }, [router, pathname]);
 
   return (
     <div className="space-y-6 lg:space-y-8">
@@ -141,6 +154,13 @@ export default function MembershipPage() {
         paidExpireDate={paidExpireDate}
         onPaid={onPaid}
         onClose={onClosePay}
+      />
+
+      <StripeResultDialog
+        orderId={stripeOrderId}
+        paidExpireDate={paidExpireDate}
+        onPaid={onPaid}
+        onClose={onCloseStripe}
       />
     </div>
   );

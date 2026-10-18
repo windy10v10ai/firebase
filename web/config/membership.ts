@@ -3,15 +3,15 @@
  * 原价取爱发电价：游戏里的折扣就是按它算的。
  */
 
-export type PaymentPlatform = 'alipay' | 'afdian' | 'kofi';
+export type PaymentPlatform = 'alipay' | 'afdian' | 'stripe' | 'kofi';
 
-export const PAYMENT_PLATFORMS: PaymentPlatform[] = ['alipay', 'afdian', 'kofi'];
+export const PAYMENT_PLATFORMS: PaymentPlatform[] = ['alipay', 'afdian', 'stripe', 'kofi'];
 
 // 默认选中各语言玩家最可能用的那家，标签顺序本身不随语言变
 export const DEFAULT_PLATFORM_BY_LOCALE: Record<string, PaymentPlatform> = {
   zh: 'alipay',
-  en: 'kofi',
-  ru: 'afdian',
+  en: 'stripe',
+  ru: 'stripe',
 };
 
 /** 与 API 的 AlipayProductCode 一致 */
@@ -33,6 +33,8 @@ export const ALIPAY_MEMBER_TIERS: MemberTier[] = [
 
 export const AFDIAN_MEMBER_PRICE = '29.80';
 export const KOFI_MEMBER_PRICE = '4.00';
+/** 与 API 的 STRIPE_PRODUCT_TABLE 一致，一次只卖一个月 */
+export const STRIPE_MEMBER_PRICE = '4';
 
 export interface PointsTier {
   points: number;
@@ -102,8 +104,21 @@ export function afdianPointsUrl(tier: PointsTier, steamId: string | null) {
 export const PLATFORM_ICONS: Record<PaymentPlatform, string> = {
   alipay: '/images/member/alipay.png',
   afdian: '/images/member/afdian.png',
+  stripe: '/images/member/stripe.svg',
   kofi: '/images/member/kofi.png',
 };
 
+/** Stripe 收银台支持的卡组织与钱包，按各家素材的宽高比给出显示高度 */
+export const STRIPE_PAY_LOGOS = [
+  { name: 'Visa', src: '/images/member/pay/visa.svg', height: 10 },
+  { name: 'Mastercard', src: '/images/member/pay/mastercard.svg', height: 15 },
+  { name: 'Apple Pay', src: '/images/member/pay/apple-pay.svg', height: 12 },
+  { name: 'Google Pay', src: '/images/member/pay/google-pay.png', height: 12 },
+];
+
 // 与游戏里支付宝面板的查单间隔一致
 export const ALIPAY_POLL_INTERVAL_MS = 2000;
+
+// 回调通常几秒内到，一分钟还没到多半是 Stripe 在重试，改由玩家手动刷新
+export const STRIPE_POLL_INTERVAL_MS = 2000;
+export const STRIPE_POLL_MAX_ATTEMPTS = 30;

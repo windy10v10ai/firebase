@@ -114,6 +114,8 @@ describe('StripeService', () => {
           quantity: 1,
           currency: 'usd',
           successUrl: `https://example.com/membership?stripeOrderId=${created.id}`,
+          locale: 'en',
+          productImageUrl: 'https://example.com/images/member/stripe-premium.png',
         }),
       );
       expect(repo.update).toHaveBeenCalledWith(
@@ -123,6 +125,15 @@ describe('StripeService', () => {
         orderId: created.id,
         checkoutUrl: 'https://checkout.stripe.com/c/pay/cs_test_1',
       });
+    });
+
+    it('收银台语言与商品文案跟随网站语言，并写明开通的 ID', async () => {
+      await service.createOrder(String(STEAM_ID), 'zh');
+
+      const params = apiService.createCheckoutSession.mock.calls[0][0];
+      expect(params).toMatchObject({ locale: 'zh', productName: '高级会员 · 1 个月' });
+      expect(params.productDescription).toContain('\u3000');
+      expect(params.submitMessage).toContain(String(STEAM_ID));
     });
   });
 
