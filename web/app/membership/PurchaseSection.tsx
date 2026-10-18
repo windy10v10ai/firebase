@@ -85,7 +85,7 @@ const PLATFORM_STYLE: Record<
 
 // 与启动器页的「推荐」同一枚绿色胶囊。窄屏压在标签右上角的边框上，外层垫一层不透明底，免得边框穿过文字
 const RECOMMEND_CLASS =
-  'absolute -end-1 -top-2.5 overflow-hidden rounded-full border border-success/40 bg-panel lg:static';
+  'absolute -end-1 -top-3 overflow-hidden rounded-full border border-success/40 bg-panel lg:static';
 
 const TIER_CLASS =
   'flex w-full min-w-0 rounded-xl border border-line border-t-[3px] bg-panel-soft text-start text-heading transition-colors hover:border-x-link-border hover:border-b-link-border hover:bg-control-hover';
