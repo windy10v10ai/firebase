@@ -97,13 +97,12 @@ export const STRIPE_PRODUCT_TABLE: Record<StripeProductCode, StripeProductSpec> 
       ],
     },
     imagePath: '/images/member/stripe-premium.png',
-    // 生产环境真卡测试的临时价，测完回滚本提交（#1565）
-    priceCentByQuantity: { 1: 51, 3: 52, 12: 53, 36: 54 },
+    priceCentByQuantity: { 1: 400, 3: 1149, 12: 4299, 36: 12199 },
     reward: { kind: 'member', level: MemberLevel.PREMIUM },
   },
-  [StripeProductCode.POINTS_TIER1]: pointsProduct(4000, 61, '/images/member/points-1.png'),
-  [StripeProductCode.POINTS_TIER2]: pointsProduct(12500, 62, '/images/member/points-2.png'),
-  [StripeProductCode.POINTS_TIER3]: pointsProduct(31000, 63, '/images/member/points-3.png'),
+  [StripeProductCode.POINTS_TIER1]: pointsProduct(4000, 1099, '/images/member/points-1.png'),
+  [StripeProductCode.POINTS_TIER2]: pointsProduct(12500, 3399, '/images/member/points-2.png'),
+  [StripeProductCode.POINTS_TIER3]: pointsProduct(31000, 8099, '/images/member/points-3.png'),
 };
 
 // 收银台会把普通换行合并成空格；一串全角空格比任意一行都宽，迫使下一项另起一行
