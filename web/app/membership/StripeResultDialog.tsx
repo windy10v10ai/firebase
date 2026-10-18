@@ -7,15 +7,16 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import Button from '@/app/components/ui/button';
-import { queryStripeOrder } from '@/app/lib/stripe';
+import Skeleton from '@/app/components/ui/skeleton';
+import { queryStripeOrder, type StripeOrderStatus } from '@/app/lib/stripe';
 import {
   PLATFORM_ICONS,
-  STRIPE_MEMBER_PRICE,
+  POINTS_TIERS,
   STRIPE_POLL_INTERVAL_MS,
   STRIPE_POLL_MAX_ATTEMPTS,
 } from '@/config/membership';
 
-import PayDialogShell, { MemberPaidResult } from './PayDialogShell';
+import PayDialogShell, { MemberPaidResult, PointsPaidResult } from './PayDialogShell';
 
 type ResultState = 'checking' | 'paid' | 'slow';
 
@@ -42,6 +43,8 @@ export default function StripeResultDialog({
   const tPay = useTranslations('membership.pay');
   const tMember = useTranslations('membership.member');
   const [state, setState] = useState<ResultState>('checking');
+  // 买了什么、付了多少都以查单结果为准，第一次查到之前放骨架
+  const [order, setOrder] = useState<StripeOrderStatus | null>(null);
   // 递增后重新开始一轮轮询
   const [round, setRound] = useState(0);
 
@@ -54,11 +57,12 @@ export default function StripeResultDialog({
     const poll = async () => {
       attempts++;
       try {
-        const { status } = await queryStripeOrder(orderId);
+        const result = await queryStripeOrder(orderId);
         if (stopped) {
           return;
         }
-        if (status === 'SUCCESS') {
+        setOrder(result);
+        if (result.status === 'SUCCESS') {
           stopped = true;
           window.clearInterval(timer);
           setState('paid');
@@ -87,13 +91,21 @@ export default function StripeResultDialog({
     setRound((value) => value + 1);
   };
 
+  const pointsTier = POINTS_TIERS.find((tier) => tier.stripeProductCode === order?.productCode);
+
   const subjectRow = (
     <div className="flex min-h-[42px] items-baseline justify-between gap-3">
       <span className="min-w-0 text-content">
-        {tPay('memberSubject', { months: tMember('months', { count: 1 }) })}
+        {!order ? (
+          <Skeleton>0000000000</Skeleton>
+        ) : pointsTier ? (
+          tPay('pointsSubject', { points: pointsTier.points.toLocaleString() })
+        ) : (
+          tPay('memberSubject', { months: tMember('months', { count: order.quantity }) })
+        )}
       </span>
       <span className="text-[28px] font-extrabold whitespace-nowrap text-heading">
-        US${STRIPE_MEMBER_PRICE}.00
+        {order ? `US$${(order.amountCent / 100).toFixed(2)}` : <Skeleton>US$00.00</Skeleton>}
       </span>
     </div>
   );
@@ -134,7 +146,11 @@ export default function StripeResultDialog({
       case 'paid':
         return (
           <>
-            <MemberPaidResult months={1} expireDate={paidExpireDate} />
+            {pointsTier ? (
+              <PointsPaidResult points={pointsTier.points} image={pointsTier.image} />
+            ) : (
+              <MemberPaidResult months={order?.quantity ?? 1} expireDate={paidExpireDate} />
+            )}
             <Button className="w-full" onClick={onClose}>
               {tPay('done')}
             </Button>

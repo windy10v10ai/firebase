@@ -56,6 +56,7 @@ describe('StripeService', () => {
   let repo: { create: jest.Mock; update: jest.Mock; findById: jest.Mock };
   let membersService: { createMember: jest.Mock };
   let analytics: { stripePurchase: jest.Mock };
+  let playerService: { upsertAddPoint: jest.Mock };
 
   beforeEach(async () => {
     process.env.WEB_ORIGIN = 'https://example.com';
@@ -72,6 +73,7 @@ describe('StripeService', () => {
     };
     membersService = { createMember: jest.fn().mockResolvedValue({}) };
     analytics = { stripePurchase: jest.fn().mockResolvedValue(undefined) };
+    playerService = { upsertAddPoint: jest.fn().mockResolvedValue({}) };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -79,7 +81,7 @@ describe('StripeService', () => {
         { provide: StripeApiService, useValue: apiService },
         { provide: getRepositoryToken(StripeOrder), useValue: repo },
         { provide: MembersService, useValue: membersService },
-        { provide: PlayerService, useValue: { upsertAddPoint: jest.fn() } },
+        { provide: PlayerService, useValue: playerService },
         { provide: AnalyticsPurchaseService, useValue: analytics },
       ],
     }).compile();
@@ -110,8 +112,7 @@ describe('StripeService', () => {
       expect(apiService.createCheckoutSession).toHaveBeenCalledWith(
         expect.objectContaining({
           orderId: created.id,
-          unitAmountCent: 400,
-          quantity: 1,
+          amountCent: 400,
           currency: 'usd',
           successUrl: `https://example.com/membership?stripeOrderId=${created.id}`,
           locale: 'en',
@@ -128,12 +129,53 @@ describe('StripeService', () => {
     });
 
     it('收银台语言与商品文案跟随网站语言，并写明开通的 ID', async () => {
-      await service.createOrder(String(STEAM_ID), 'zh');
+      await service.createOrder(String(STEAM_ID), { locale: 'zh' });
 
       const params = apiService.createCheckoutSession.mock.calls[0][0];
       expect(params).toMatchObject({ locale: 'zh', productName: '高级会员 · 1 个月' });
       expect(params.productDescription).toContain('\u3000');
       expect(params.submitMessage).toContain(String(STEAM_ID));
+    });
+
+    it('多月会员与积分包按档位总价下单', async () => {
+      await service.createOrder(String(STEAM_ID), {
+        productCode: StripeProductCode.MEMBER_PREMIUM,
+        quantity: 12,
+      });
+      await service.createOrder(String(STEAM_ID), {
+        productCode: StripeProductCode.POINTS_TIER3,
+        locale: 'ru',
+      });
+
+      expect(repo.create.mock.calls[0][0]).toMatchObject({ quantity: 12, amountCent: 4299 });
+      expect(apiService.createCheckoutSession.mock.calls[0][0]).toMatchObject({
+        amountCent: 4299,
+        productName: 'Premium Membership · 12 months',
+      });
+      expect(repo.create.mock.calls[1][0]).toMatchObject({
+        productCode: StripeProductCode.POINTS_TIER3,
+        quantity: 1,
+        amountCent: 8099,
+      });
+      expect(apiService.createCheckoutSession.mock.calls[1][0].productName).toBe(
+        'Member Points · 31\u00a0000',
+      );
+    });
+
+    it('价格表里没有的份数拒绝下单', async () => {
+      await expect(
+        service.createOrder(String(STEAM_ID), {
+          productCode: StripeProductCode.MEMBER_PREMIUM,
+          quantity: 2,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.createOrder(String(STEAM_ID), {
+          productCode: StripeProductCode.POINTS_TIER1,
+          quantity: 3,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(repo.create).not.toHaveBeenCalled();
     });
   });
 
@@ -143,6 +185,9 @@ describe('StripeService', () => {
       await expect(service.getOrderStatus(ORDER_ID, String(STEAM_ID))).resolves.toEqual({
         orderId: ORDER_ID,
         status: StripeOrderStatus.SUCCESS,
+        productCode: StripeProductCode.MEMBER_PREMIUM,
+        quantity: 1,
+        amountCent: 400,
       });
     });
 
@@ -184,6 +229,27 @@ describe('StripeService', () => {
         }),
       );
       expect(analytics.stripePurchase).toHaveBeenCalledTimes(1);
+    });
+
+    it('多月会员按月数开通，积分包发放对应积分', async () => {
+      apiService.constructEvent.mockReturnValue(completedEvent({ amount_total: 12199 }));
+      repo.findById.mockResolvedValue(buildOrder({ quantity: 36, amountCent: 12199 }));
+      await service.handleWebhook(RAW_BODY, 'sig');
+      expect(membersService.createMember).toHaveBeenCalledWith(
+        { steamId: STEAM_ID, month: 36, level: MemberLevel.PREMIUM },
+        { reason: 'stripe_member', ref: ORDER_ID },
+      );
+
+      apiService.constructEvent.mockReturnValue(completedEvent({ amount_total: 3399 }));
+      repo.findById.mockResolvedValue(
+        buildOrder({ productCode: StripeProductCode.POINTS_TIER2, amountCent: 3399 }),
+      );
+      await service.handleWebhook(RAW_BODY, 'sig');
+      expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
+        STEAM_ID,
+        { memberPointTotal: 12500 },
+        { reason: 'stripe_points', ref: ORDER_ID },
+      );
     });
 
     it.each([
