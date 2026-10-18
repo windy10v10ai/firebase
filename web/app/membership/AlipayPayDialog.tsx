@@ -18,7 +18,7 @@ import {
   type AlipayProductCode,
 } from '@/config/membership';
 
-import PayDialogShell, { MemberPaidResult } from './PayDialogShell';
+import PayDialogShell, { MemberPaidResult, PointsPaidResult } from './PayDialogShell';
 
 export type AlipayRequest =
   | { productCode: AlipayProductCode; quantity: number; kind: 'member'; months: number }
@@ -227,21 +227,7 @@ export default function AlipayPayDialog({
             {request.kind === 'member' ? (
               <MemberPaidResult months={request.months} expireDate={paidExpireDate} />
             ) : (
-              <div className="flex flex-col items-center gap-3.5 py-4 text-center">
-                <img
-                  src={request.image}
-                  alt=""
-                  width={180}
-                  height={120}
-                  className="h-28 w-44 object-contain"
-                />
-                <p className="text-2xl font-extrabold text-heading">
-                  {t.rich('pointsPaid', {
-                    points: request.points.toLocaleString(),
-                    em: (chunks) => <span className="text-member">{chunks}</span>,
-                  })}
-                </p>
-              </div>
+              <PointsPaidResult points={request.points} image={request.image} />
             )}
             <Button className="w-full" onClick={onClose}>
               {t('done')}

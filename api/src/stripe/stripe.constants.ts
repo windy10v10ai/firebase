@@ -11,26 +11,62 @@ export type StripeLocale = (typeof STRIPE_LOCALES)[number];
 export const DEFAULT_STRIPE_LOCALE: StripeLocale = 'en';
 
 export interface StripeProductSpec {
-  /** 收银台上显示的单份商品名，份数由 Stripe 按 quantity 显示 */
-  name: Record<StripeLocale, string>;
+  /** 收银台上显示的商品名，含份数 */
+  name: (locale: StripeLocale, quantity: number) => string;
   /** 收银台商品名下方的权益列表，每项一行 */
   benefits: Record<StripeLocale, string[]>;
   /** 网站公开目录下的商品图路径 */
   imagePath: string;
-  priceCentPerUnit: number;
+  /** 可买的份数及每档总价（分）；表里没有的份数不卖 */
+  priceCentByQuantity: Record<number, number>;
   reward: StripeReward;
 }
 
 export const STRIPE_CURRENCY = 'usd';
 
-// 会员单价与网站标价 US$4/月 一致；会员的一份就是一个月
+const RU_MONTHS = new Intl.PluralRules('ru');
+
+function memberName(locale: StripeLocale, months: number): string {
+  switch (locale) {
+    case 'zh':
+      return `高级会员 · ${months} 个月`;
+    case 'ru': {
+      const unit = { one: 'месяц', few: 'месяца' }[RU_MONTHS.select(months)] ?? 'месяцев';
+      return `Premium-подписка · ${months} ${unit}`;
+    }
+    default:
+      return `Premium Membership · ${months} ${months === 1 ? 'month' : 'months'}`;
+  }
+}
+
+const NUMBER_LOCALE: Record<StripeLocale, string> = { zh: 'zh-CN', en: 'en-US', ru: 'ru-RU' };
+
+function pointsProduct(points: number, priceCent: number, imagePath: string): StripeProductSpec {
+  const amount = (locale: StripeLocale) => points.toLocaleString(NUMBER_LOCALE[locale]);
+  return {
+    name: (locale) =>
+      locale === 'zh' ? `会员积分 · ${amount(locale)}` : `Member Points · ${amount(locale)}`,
+    benefits: {
+      zh: [`💎 付款后立即到账 ${amount('zh')} 会员积分`, '📈 用来提升会员等级、升级属性'],
+      en: [
+        `💎 ${amount('en')} Member Points, credited right after payment`,
+        '📈 Use them to raise your Member Level and upgrade attributes',
+      ],
+      ru: [
+        `💎 ${amount('ru')} Member Points сразу после оплаты`,
+        '📈 Поднимают Member Level и прокачивают атрибуты',
+      ],
+    },
+    imagePath,
+    priceCentByQuantity: { 1: priceCent },
+    reward: { kind: 'points', points },
+  };
+}
+
+// 美元价按支付宝的人民币价折算后取 .99 结尾；多月会员是固定档位，总价按档定，不按月价相乘
 export const STRIPE_PRODUCT_TABLE: Record<StripeProductCode, StripeProductSpec> = {
   [StripeProductCode.MEMBER_PREMIUM]: {
-    name: {
-      zh: '高级会员 · 1 个月',
-      en: 'Premium Membership · 1 month',
-      ru: 'Premium-подписка · 1 месяц',
-    },
+    name: memberName,
     benefits: {
       zh: [
         '💎 立即获得 1000 会员积分，每天签到再领 100',
@@ -61,9 +97,12 @@ export const STRIPE_PRODUCT_TABLE: Record<StripeProductCode, StripeProductSpec> 
       ],
     },
     imagePath: '/images/member/stripe-premium.png',
-    priceCentPerUnit: 400,
+    priceCentByQuantity: { 1: 400, 3: 1149, 12: 4299, 36: 12199 },
     reward: { kind: 'member', level: MemberLevel.PREMIUM },
   },
+  [StripeProductCode.POINTS_TIER1]: pointsProduct(4000, 1099, '/images/member/points-1.png'),
+  [StripeProductCode.POINTS_TIER2]: pointsProduct(12500, 3399, '/images/member/points-2.png'),
+  [StripeProductCode.POINTS_TIER3]: pointsProduct(31000, 8099, '/images/member/points-3.png'),
 };
 
 // 收银台会把普通换行合并成空格；一串全角空格比任意一行都宽，迫使下一项另起一行
@@ -73,14 +112,24 @@ export function joinStripeLines(lines: string[]): string {
   return lines.join(STRIPE_LINE_BREAK);
 }
 
-/** 付款按钮上方的提示，告诉玩家这单开给哪个账号 */
-export function stripeSubmitMessage(locale: StripeLocale, steamId: number): string {
+/** 付款按钮上方的提示，告诉玩家这单发给哪个账号 */
+export function stripeSubmitMessage(
+  locale: StripeLocale,
+  steamId: number,
+  kind: StripeReward['kind'],
+): string {
   switch (locale) {
     case 'zh':
-      return `将为 Dota2 ID ${steamId} 开通。付款成功后自动到账，返回网站即可查看。`;
+      return kind === 'member'
+        ? `将为 Dota2 ID ${steamId} 开通。付款成功后自动到账，返回网站即可查看。`
+        : `积分将发放到 Dota2 ID ${steamId}。付款成功后自动到账，返回网站即可查看。`;
     case 'ru':
-      return `Подписка будет активирована для Dota2 ID ${steamId}. После оплаты она начислится автоматически — вернитесь на сайт, чтобы проверить.`;
+      return kind === 'member'
+        ? `Подписка будет активирована для Dota2 ID ${steamId}. После оплаты она начислится автоматически — вернитесь на сайт, чтобы проверить.`
+        : `Очки будут начислены на Dota2 ID ${steamId}. После оплаты они придут автоматически — вернитесь на сайт, чтобы проверить.`;
     default:
-      return `This will be activated for Dota2 ID ${steamId}. It's credited automatically after payment — return to the website to check.`;
+      return kind === 'member'
+        ? `This will be activated for Dota2 ID ${steamId}. It's credited automatically after payment — return to the website to check.`
+        : `Points will be credited to Dota2 ID ${steamId} automatically after payment — return to the website to check.`;
   }
 }

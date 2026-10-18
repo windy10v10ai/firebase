@@ -15,6 +15,7 @@ import { MembersService } from '../members/members.service';
 import { PlayerService } from '../player/player.service';
 
 import { CreateStripeOrderResponseDto } from './dto/create-stripe-order-response.dto';
+import { CreateStripeOrderDto } from './dto/create-stripe-order.dto';
 import { QueryStripeOrderResponseDto } from './dto/query-stripe-order-response.dto';
 import { StripeOrder } from './entities/stripe-order.entity';
 import { StripeOrderStatus } from './enums/stripe-order-status.enum';
@@ -29,7 +30,6 @@ import {
   stripeSubmitMessage,
 } from './stripe.constants';
 
-// 网站首期只卖这一种，下单接口暂不接受商品与份数
 const DEFAULT_PRODUCT_CODE = StripeProductCode.MEMBER_PREMIUM;
 const DEFAULT_QUANTITY = 1;
 
@@ -49,7 +49,7 @@ export class StripeService {
   /** 为当前登录玩家创建订单，返回 Stripe 收银台地址。 */
   async createOrder(
     viewerUid: string | undefined,
-    locale: StripeLocale = DEFAULT_STRIPE_LOCALE,
+    dto: CreateStripeOrderDto = {},
   ): Promise<CreateStripeOrderResponseDto> {
     // 订单归属只认网站登录身份，游戏服务器的 key 调不了
     if (!viewerUid) {
@@ -61,9 +61,14 @@ export class StripeService {
       throw new InternalServerErrorException('WEB_ORIGIN is not defined');
     }
 
-    const productCode = DEFAULT_PRODUCT_CODE;
-    const quantity = DEFAULT_QUANTITY;
+    const productCode = dto.productCode ?? DEFAULT_PRODUCT_CODE;
+    const quantity = dto.quantity ?? DEFAULT_QUANTITY;
+    const locale: StripeLocale = dto.locale ?? DEFAULT_STRIPE_LOCALE;
     const spec = STRIPE_PRODUCT_TABLE[productCode];
+    const amountCent = spec.priceCentByQuantity[quantity];
+    if (amountCent === undefined) {
+      throw new BadRequestException(`Unsupported quantity ${quantity} for ${productCode}`);
+    }
     const steamId = Number(viewerUid);
     const orderId = this.generateOrderId(steamId);
     const now = new Date();
@@ -73,7 +78,7 @@ export class StripeService {
       steamId,
       productCode,
       quantity,
-      amountCent: spec.priceCentPerUnit * quantity,
+      amountCent,
       currency: STRIPE_CURRENCY,
       status: StripeOrderStatus.WAITING,
       createdAt: now,
@@ -83,13 +88,12 @@ export class StripeService {
     const session = await this.stripeApiService.createCheckoutSession({
       orderId,
       steamId,
-      unitAmountCent: spec.priceCentPerUnit,
-      quantity,
+      amountCent,
       currency: order.currency,
-      productName: spec.name[locale],
+      productName: spec.name(locale, quantity),
       productDescription: joinStripeLines(spec.benefits[locale]),
       productImageUrl: `${webOrigin}${spec.imagePath}`,
-      submitMessage: stripeSubmitMessage(locale, steamId),
+      submitMessage: stripeSubmitMessage(locale, steamId, spec.reward.kind),
       locale,
       successUrl: `${webOrigin}/membership?stripeOrderId=${orderId}`,
       cancelUrl: `${webOrigin}/membership`,
@@ -99,7 +103,7 @@ export class StripeService {
     order.updatedAt = new Date();
     await this.stripeOrderRepository.update(order);
 
-    logger.info('Stripe create order', { orderId, steamId });
+    logger.info('Stripe create order', { orderId, steamId, productCode, quantity });
     return { orderId, checkoutUrl: session.url };
   }
 
@@ -113,7 +117,13 @@ export class StripeService {
     if (!order || !viewerUid || String(order.steamId) !== viewerUid) {
       throw new NotFoundException(`Stripe order not found: ${orderId}`);
     }
-    return { orderId: order.id, status: order.status };
+    return {
+      orderId: order.id,
+      status: order.status,
+      productCode: order.productCode,
+      quantity: order.quantity,
+      amountCent: order.amountCent,
+    };
   }
 
   /**

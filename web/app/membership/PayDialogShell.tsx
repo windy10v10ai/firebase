@@ -111,3 +111,19 @@ export function MemberPaidResult({
     </div>
   );
 }
+
+/** 积分到账：积分包图与到账数量 */
+export function PointsPaidResult({ points, image }: { points: number; image: string }) {
+  const t = useTranslations('membership.pay');
+  return (
+    <div className="flex flex-col items-center gap-3.5 py-4 text-center">
+      <img src={image} alt="" width={180} height={120} className="h-28 w-44 object-contain" />
+      <p className="text-2xl font-extrabold text-heading">
+        {t.rich('pointsPaid', {
+          points: points.toLocaleString(),
+          em: (chunks) => <span className="text-member">{chunks}</span>,
+        })}
+      </p>
+    </div>
+  );
+}

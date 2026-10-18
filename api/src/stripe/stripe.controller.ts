@@ -22,7 +22,7 @@ export class StripeController {
     @CurrentViewerUid() viewerUid: string | undefined,
     @Body() dto: CreateStripeOrderDto,
   ): Promise<CreateStripeOrderResponseDto> {
-    return this.stripeService.createOrder(viewerUid, dto.locale);
+    return this.stripeService.createOrder(viewerUid, dto);
   }
 
   @AllowWeb()

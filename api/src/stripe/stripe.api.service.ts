@@ -7,8 +7,7 @@ import { SECRET, SecretService } from '../util/secret/secret.service';
 export interface CheckoutSessionParams {
   orderId: string;
   steamId: number;
-  unitAmountCent: number;
-  quantity: number;
+  amountCent: number;
   currency: string;
   productName: string;
   productDescription: string;
@@ -38,10 +37,11 @@ export class StripeApiService {
         allowed_payment_method_types: ['card', 'link'],
         line_items: [
           {
-            quantity: params.quantity,
+            // 多月会员按档定总价，摊不成整分的月价，所以整单作为一件商品
+            quantity: 1,
             price_data: {
               currency: params.currency,
-              unit_amount: params.unitAmountCent,
+              unit_amount: params.amountCent,
               product_data: {
                 name: params.productName,
                 description: params.productDescription,
