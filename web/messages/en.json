@@ -270,7 +270,7 @@
       "stripe": {
         "name": "Stripe",
         "desc": "Card · Apple Pay · Google Pay",
-        "note": "Payments are handled securely by Stripe. We never see your card number. Membership activates automatically, no ID needed",
+        "note": "Payments are handled securely by Stripe. We never see your card number. Purchases are credited automatically, no ID needed",
         "noteGuest": "Log in to pay. Payments are handled securely by Stripe, and we never see your card number"
       },
       "kofi": {

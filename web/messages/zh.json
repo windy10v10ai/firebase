@@ -268,7 +268,7 @@
       "stripe": {
         "name": "Stripe",
         "desc": "银行卡 · Apple Pay · Google Pay",
-        "note": "付款由 Stripe 安全处理，本站不保存卡号。付款后自动开通，无需填写 ID",
+        "note": "付款由 Stripe 安全处理，本站不保存卡号。付款后自动到账，无需填写 ID",
         "noteGuest": "登录后即可付款。付款由 Stripe 安全处理，本站不保存卡号"
       },
       "kofi": {
