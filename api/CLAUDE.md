@@ -33,11 +33,11 @@ NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用�
 
 手写文档的数据形状不经任何校验：字段名拼错、缺字段、类型不符都不会报错，测试通过也不能说明被测代码正确。走 API 时形状由生产代码产生，entity 变更后无需同步修改构造逻辑，并且顺带覆盖了上游链路。
 
-本地凭据在 `api/.env.local` 里，TEST 服务器的 key 是 `apikey`。造一个「已下单但没激活的会员」需要两步，都有现成接口：
+本地凭据在 `api/.env.local` 里，官方服务器的 key 是 `Invalid_NotOnDedicatedServer`。造一个「已下单但没激活的会员」需要两步，都有现成接口：
 
 ```bash
 # 建玩家（结算、激活等接口都要求玩家已存在）
-curl -H "x-api-key: apikey" "http://localhost:3001/api/game/start?steamIds=<id>&matchId=1&version=test"
+curl -H "x-api-key: Invalid_NotOnDedicatedServer" "http://localhost:3001/api/game/start?steamIds=<id>&matchId=1&version=test"
 # 造一张未激活订单：webhook 的 remark 不放 Dota2 ID，订单会存下来但激活失败
 curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H "Content-Type: application/json" -d '{...}'
 ```

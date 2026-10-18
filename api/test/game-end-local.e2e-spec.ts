@@ -8,7 +8,7 @@ import { LocalRateLimit } from '../src/local-host/entities/local-rate-limit.enti
 import {
   get,
   getLocalApiKey,
-  getTestApiKey,
+  getServerApiKey,
   initTest,
   mockDate,
   restoreDate,
@@ -86,7 +86,7 @@ function postAsOfficialHost(app: INestApplication, body: object): request.Test {
   return request(app.getHttpServer())
     .post(gameEndLocalUrl)
     .send(body)
-    .set('x-api-key', getTestApiKey());
+    .set('x-api-key', getServerApiKey());
 }
 
 describe('POST /api/game/end/local (e2e)', () => {

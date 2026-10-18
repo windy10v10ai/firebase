@@ -21,7 +21,7 @@ async function bootstrap() {
 - **Swagger UI**: [http://localhost:3001/api-doc](http://localhost:3001/api-doc)
 - **OpenAPI JSON Schema**: [http://localhost:3001/api-docs-json](http://localhost:3001/api-docs-json)
 
-在 Swagger UI 中点击 "Authorize" 按钮，输入测试用的 API Key: \`apikey\`
+在 Swagger UI 中点击 "Authorize" 按钮，输入测试用的 API Key: \`Invalid_NotOnDedicatedServer\`
       `,
       )
       .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')

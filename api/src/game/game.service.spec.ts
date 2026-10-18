@@ -188,28 +188,6 @@ describe('GameService', () => {
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
 
-    it('should return GA4 config for TEST server', () => {
-      const result = service.getGA4Config(SERVER_TYPE.TEST);
-
-      expect(result).toEqual({
-        measurementId: mockMeasurementId,
-        apiSecret: mockApiSecret,
-        serverType: SERVER_TYPE.TEST,
-      });
-      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
-    });
-
-    it('should return GA4 config for ANIME server', () => {
-      const result = service.getGA4Config(SERVER_TYPE.ANIME);
-
-      expect(result).toEqual({
-        measurementId: mockMeasurementId,
-        apiSecret: mockApiSecret,
-        serverType: SERVER_TYPE.ANIME,
-      });
-      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
-    });
-
     it('should return GA4 config for LOCAL server', () => {
       const result = service.getGA4Config(SERVER_TYPE.LOCAL);
 
@@ -284,7 +262,7 @@ describe('GameService', () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-09-25T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
-      const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
         steamId,

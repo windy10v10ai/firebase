@@ -3,8 +3,6 @@ import { logger } from 'firebase-functions';
 
 export enum SERVER_TYPE {
   WINDY = 'WINDY',
-  TEST = 'TEST',
-  ANIME = 'ANIME',
   LOCAL = 'LOCAL',
   WEB = 'WEB',
   UNKNOWN = 'UNKNOWN',
@@ -14,9 +12,8 @@ export enum SECRET {
   AFDIAN_WEBHOOK_TOKEN = 'AFDIAN_WEBHOOK_TOKEN',
   AFDIAN_API_TOKEN = 'AFDIAN_API_TOKEN',
   SERVER_APIKEY = 'SERVER_APIKEY',
-  SERVER_APIKEY_TEST = 'SERVER_APIKEY_TEST',
-  SERVER_APIKEY_ANIME = 'SERVER_APIKEY_ANIME',
-  LOCAL_APIKEY = 'LOCAL_APIKEY',
+  LOCAL_APIKEY_A = 'LOCAL_APIKEY_A',
+  LOCAL_APIKEY_B = 'LOCAL_APIKEY_B',
   GA4_API_SECRET = 'GA4_API_SECRET',
   KOFI_VERIFICATION_TOKEN = 'KOFI_VERIFICATION_TOKEN',
   ALIPAY_APP_ID = 'ALIPAY_APP_ID',
@@ -44,16 +41,13 @@ export class SecretService {
     if (apiKey === windyKey) {
       return SERVER_TYPE.WINDY;
     }
-    const testKey = this.getSecretValue(SECRET.SERVER_APIKEY_TEST);
-    if (apiKey === testKey) {
-      return SERVER_TYPE.TEST;
-    }
-    const animeKey = this.getSecretValue(SECRET.SERVER_APIKEY_ANIME);
-    if (apiKey === animeKey) {
-      return SERVER_TYPE.ANIME;
-    }
-    const localKey = this.getSecretValue(SECRET.LOCAL_APIKEY);
-    if (apiKey === localKey) {
+    // 本地 key 打包在地图里，定期轮替；两个槽位同时有效，轮替只覆盖当前发布版本没在用的那个，
+    // 未更新的玩家在下一次轮替前都不受影响
+    const localKeys = [
+      this.getSecretValue(SECRET.LOCAL_APIKEY_A),
+      this.getSecretValue(SECRET.LOCAL_APIKEY_B),
+    ];
+    if (localKeys.includes(apiKey)) {
       return SERVER_TYPE.LOCAL;
     }
 

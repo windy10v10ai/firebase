@@ -7,9 +7,8 @@ describe('SecretService', () => {
     process.env = {
       ...originalEnv,
       [SECRET.SERVER_APIKEY]: 'windy-key',
-      [SECRET.SERVER_APIKEY_TEST]: 'test-key',
-      [SECRET.SERVER_APIKEY_ANIME]: 'anime-key',
-      [SECRET.LOCAL_APIKEY]: 'local-key',
+      [SECRET.LOCAL_APIKEY_A]: 'local-key-a',
+      [SECRET.LOCAL_APIKEY_B]: 'local-key-b',
     };
   });
 
@@ -24,22 +23,10 @@ describe('SecretService', () => {
       expect(service.getServerTypeByApiKey('windy-key')).toBe(SERVER_TYPE.WINDY);
     });
 
-    it('should return TEST for the test server key', () => {
+    it.each(['local-key-a', 'local-key-b'])('should return LOCAL for local key slot %s', (key) => {
       const service = new SecretService();
 
-      expect(service.getServerTypeByApiKey('test-key')).toBe(SERVER_TYPE.TEST);
-    });
-
-    it('should return ANIME for the anime server key', () => {
-      const service = new SecretService();
-
-      expect(service.getServerTypeByApiKey('anime-key')).toBe(SERVER_TYPE.ANIME);
-    });
-
-    it('should return LOCAL for the local api key', () => {
-      const service = new SecretService();
-
-      expect(service.getServerTypeByApiKey('local-key')).toBe(SERVER_TYPE.LOCAL);
+      expect(service.getServerTypeByApiKey(key)).toBe(SERVER_TYPE.LOCAL);
     });
 
     it('should return UNKNOWN for the legacy dedicated server sentinel value', () => {
