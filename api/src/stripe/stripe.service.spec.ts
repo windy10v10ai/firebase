@@ -5,9 +5,11 @@ import { getRepositoryToken } from 'nestjs-fireorm';
 import { AnalyticsPurchaseService } from '../analytics/analytics.purchase.service';
 import { MemberLevel } from '../members/entities/members.entity';
 import { MembersService } from '../members/members.service';
+import { PlayerService } from '../player/player.service';
 
 import { StripeOrder } from './entities/stripe-order.entity';
 import { StripeOrderStatus } from './enums/stripe-order-status.enum';
+import { StripeProductCode } from './enums/stripe-product-code.enum';
 import { StripeApiService } from './stripe.api.service';
 import { StripeService } from './stripe.service';
 
@@ -19,8 +21,8 @@ function buildOrder(overrides: Partial<StripeOrder> = {}): StripeOrder {
   return {
     id: ORDER_ID,
     steamId: STEAM_ID,
-    level: MemberLevel.PREMIUM,
-    month: 1,
+    productCode: StripeProductCode.MEMBER_PREMIUM,
+    quantity: 1,
     amountCent: 400,
     currency: 'usd',
     status: StripeOrderStatus.WAITING,
@@ -77,6 +79,7 @@ describe('StripeService', () => {
         { provide: StripeApiService, useValue: apiService },
         { provide: getRepositoryToken(StripeOrder), useValue: repo },
         { provide: MembersService, useValue: membersService },
+        { provide: PlayerService, useValue: { upsertAddPoint: jest.fn() } },
         { provide: AnalyticsPurchaseService, useValue: analytics },
       ],
     }).compile();
@@ -95,8 +98,8 @@ describe('StripeService', () => {
       const created = repo.create.mock.calls[0][0];
       expect(created).toMatchObject({
         steamId: STEAM_ID,
-        level: MemberLevel.PREMIUM,
-        month: 1,
+        productCode: StripeProductCode.MEMBER_PREMIUM,
+        quantity: 1,
         amountCent: 400,
         currency: 'usd',
         status: StripeOrderStatus.WAITING,
@@ -107,7 +110,8 @@ describe('StripeService', () => {
       expect(apiService.createCheckoutSession).toHaveBeenCalledWith(
         expect.objectContaining({
           orderId: created.id,
-          amountCent: 400,
+          unitAmountCent: 400,
+          quantity: 1,
           currency: 'usd',
           successUrl: `https://example.com/membership?stripeOrderId=${created.id}`,
         }),

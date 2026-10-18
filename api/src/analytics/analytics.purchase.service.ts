@@ -6,7 +6,6 @@ import { AlipayOrder } from '../alipay/entities/alipay-order.entity';
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiType } from '../kofi/enums/kofi-type.enum';
 import { StripeOrder } from '../stripe/entities/stripe-order.entity';
-import { STRIPE_ANALYTICS_ITEM_ID } from '../stripe/stripe.constants';
 
 import { AnalyticsService } from './analytics.service';
 
@@ -153,12 +152,12 @@ export class AnalyticsPurchaseService {
       params: {
         items: [
           {
-            item_id: STRIPE_ANALYTICS_ITEM_ID,
-            item_name: `stripe-${STRIPE_ANALYTICS_ITEM_ID}`,
+            item_id: order.productCode,
+            item_name: `stripe-${order.productCode}`,
             affiliation: 'stripe',
-            price: value / order.month,
+            price: value / order.quantity,
             currency: 'USD',
-            quantity: order.month,
+            quantity: order.quantity,
           },
         ],
         affiliation: 'stripe',

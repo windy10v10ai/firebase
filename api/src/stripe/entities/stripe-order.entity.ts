@@ -1,15 +1,16 @@
 import { Collection } from 'fireorm';
 
-import { MemberLevel } from '../../members/entities/members.entity';
 import { StripeOrderStatus } from '../enums/stripe-order-status.enum';
+import { StripeProductCode } from '../enums/stripe-product-code.enum';
 
 @Collection()
 export class StripeOrder {
   /** 本地订单号，同时作为 Checkout 的 client_reference_id */
   id: string;
   steamId: number;
-  level: MemberLevel;
-  month: number;
+  productCode: StripeProductCode;
+  /** 会员按月数，积分包按份数 */
+  quantity: number;
   amountCent: number;
   currency: string;
   status: StripeOrderStatus;

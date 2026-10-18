@@ -7,7 +7,8 @@ import { SECRET, SecretService } from '../util/secret/secret.service';
 export interface CheckoutSessionParams {
   orderId: string;
   steamId: number;
-  amountCent: number;
+  unitAmountCent: number;
+  quantity: number;
   currency: string;
   productName: string;
   successUrl: string;
@@ -33,10 +34,10 @@ export class StripeApiService {
         allowed_payment_method_types: ['card', 'link'],
         line_items: [
           {
-            quantity: 1,
+            quantity: params.quantity,
             price_data: {
               currency: params.currency,
-              unit_amount: params.amountCent,
+              unit_amount: params.unitAmountCent,
               product_data: { name: params.productName },
             },
           },
