@@ -102,7 +102,7 @@ describe('StripeService', () => {
         steamId: STEAM_ID,
         productCode: StripeProductCode.MEMBER_PREMIUM,
         quantity: 1,
-        amountCent: 400,
+        amountCent: 51,
         currency: 'usd',
         status: StripeOrderStatus.WAITING,
       });
@@ -112,7 +112,7 @@ describe('StripeService', () => {
       expect(apiService.createCheckoutSession).toHaveBeenCalledWith(
         expect.objectContaining({
           orderId: created.id,
-          amountCent: 400,
+          amountCent: 51,
           currency: 'usd',
           successUrl: `https://example.com/membership?stripeOrderId=${created.id}`,
           locale: 'en',
@@ -147,15 +147,15 @@ describe('StripeService', () => {
         locale: 'ru',
       });
 
-      expect(repo.create.mock.calls[0][0]).toMatchObject({ quantity: 12, amountCent: 4299 });
+      expect(repo.create.mock.calls[0][0]).toMatchObject({ quantity: 12, amountCent: 53 });
       expect(apiService.createCheckoutSession.mock.calls[0][0]).toMatchObject({
-        amountCent: 4299,
+        amountCent: 53,
         productName: 'Premium Membership · 12 months',
       });
       expect(repo.create.mock.calls[1][0]).toMatchObject({
         productCode: StripeProductCode.POINTS_TIER3,
         quantity: 1,
-        amountCent: 8099,
+        amountCent: 63,
       });
       expect(apiService.createCheckoutSession.mock.calls[1][0].productName).toBe(
         'Member Points · 31\u00a0000',
