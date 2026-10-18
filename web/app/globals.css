@@ -63,6 +63,9 @@
   --color-afdian: #946ce6;
   --color-kofi: #29abe0;
   --color-alipay: #1677ff;
+  --color-stripe: #635bff;
+  /* 品牌原色压在深底上不到 4.5:1，文字用浅一档 */
+  --color-stripe-text: #8f89ff;
 
   --color-success: #7fd47f;
   --color-warning: #f5a623;

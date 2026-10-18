@@ -265,6 +265,12 @@
         "desc": "更多支付方式 · 人民币支付",
         "note": "点档位跳转到爱发电付款，付完自动到账"
       },
+      "stripe": {
+        "name": "Stripe",
+        "desc": "银行卡 · Apple Pay · Google Pay",
+        "note": "付款由 Stripe 安全处理，本站不保存卡号。付款后自动开通，无需填写 ID",
+        "noteGuest": "登录后即可付款。付款由 Stripe 安全处理，本站不保存卡号"
+      },
       "kofi": {
         "name": "Ko-fi",
         "desc": "海外用户 · 美元支付"
@@ -282,13 +288,28 @@
       "total": "共 {amount}",
       "perMonth": "/月",
       "subscribeAfdian": "前往爱发电订阅",
-      "subscribeKofi": "前往 Ko-fi 订阅"
+      "subscribeKofi": "前往 Ko-fi 订阅",
+      "oneTime": "一次性购买 · 不自动续费 · 到账即生效",
+      "pay": "去付款",
+      "redirecting": "正在跳转",
+      "orderFailed": "下单失败，请稍后再试"
     },
     "points": {
       "title": "购买会员积分",
       "subtitle": "已有会员？用积分快速提升会员等级、升级属性",
       "unit": "积分",
-      "save": "省 {amount}"
+      "save": "省 {amount}",
+      "stripeOnly": "Stripe 暂只支持开通会员。积分包请切换到 <kofi>Ko-fi</kofi> 或 <afdian>爱发电</afdian> 购买。"
+    },
+    "stripePay": {
+      "title": "Stripe 付款结果",
+      "checking": "正在开通会员",
+      "checkingHint": "付款已完成，通常几秒内到账。关闭本窗口也会自动开通。",
+      "slow": {
+        "title": "还在确认中",
+        "hint": "付款成功的订单一定会自动开通，可以稍后回来查看。"
+      },
+      "refresh": "刷新状态"
     },
     "pay": {
       "title": "支付宝扫码支付",

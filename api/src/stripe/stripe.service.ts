@@ -20,7 +20,14 @@ import { StripeOrder } from './entities/stripe-order.entity';
 import { StripeOrderStatus } from './enums/stripe-order-status.enum';
 import { StripeProductCode } from './enums/stripe-product-code.enum';
 import { StripeApiService } from './stripe.api.service';
-import { STRIPE_CURRENCY, STRIPE_PRODUCT_TABLE } from './stripe.constants';
+import {
+  DEFAULT_STRIPE_LOCALE,
+  STRIPE_CURRENCY,
+  STRIPE_PRODUCT_TABLE,
+  StripeLocale,
+  joinStripeLines,
+  stripeSubmitMessage,
+} from './stripe.constants';
 
 // 网站首期只卖这一种，下单接口暂不接受商品与份数
 const DEFAULT_PRODUCT_CODE = StripeProductCode.MEMBER_PREMIUM;
@@ -40,7 +47,10 @@ export class StripeService {
   ) {}
 
   /** 为当前登录玩家创建订单，返回 Stripe 收银台地址。 */
-  async createOrder(viewerUid: string | undefined): Promise<CreateStripeOrderResponseDto> {
+  async createOrder(
+    viewerUid: string | undefined,
+    locale: StripeLocale = DEFAULT_STRIPE_LOCALE,
+  ): Promise<CreateStripeOrderResponseDto> {
     // 订单归属只认网站登录身份，游戏服务器的 key 调不了
     if (!viewerUid) {
       throw new UnauthorizedException();
@@ -76,7 +86,11 @@ export class StripeService {
       unitAmountCent: spec.priceCentPerUnit,
       quantity,
       currency: order.currency,
-      productName: spec.name,
+      productName: spec.name[locale],
+      productDescription: joinStripeLines(spec.benefits[locale]),
+      productImageUrl: `${webOrigin}${spec.imagePath}`,
+      submitMessage: stripeSubmitMessage(locale, steamId),
+      locale,
       successUrl: `${webOrigin}/membership?stripeOrderId=${orderId}`,
       cancelUrl: `${webOrigin}/membership`,
     });

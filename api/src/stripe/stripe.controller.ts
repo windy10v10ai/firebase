@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Param, Post, RawBodyRequest, Req } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 
@@ -7,6 +7,7 @@ import { Public } from '../util/auth/public.decorator';
 import { CurrentViewerUid } from '../util/auth/server-type.decorator';
 
 import { CreateStripeOrderResponseDto } from './dto/create-stripe-order-response.dto';
+import { CreateStripeOrderDto } from './dto/create-stripe-order.dto';
 import { QueryStripeOrderResponseDto } from './dto/query-stripe-order-response.dto';
 import { StripeService } from './stripe.service';
 
@@ -19,8 +20,9 @@ export class StripeController {
   @Post('/order')
   async createOrder(
     @CurrentViewerUid() viewerUid: string | undefined,
+    @Body() dto: CreateStripeOrderDto,
   ): Promise<CreateStripeOrderResponseDto> {
-    return this.stripeService.createOrder(viewerUid);
+    return this.stripeService.createOrder(viewerUid, dto.locale);
   }
 
   @AllowWeb()
