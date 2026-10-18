@@ -241,6 +241,7 @@
       "kofi": "Ko-fi"
     },
     "platformLabel": "付款方式",
+    "recommended": "推荐",
     "status": {
       "loginTitle": "登录后查看会员状态",
       "loginDescription": "登录后才能购买会员与会员积分",

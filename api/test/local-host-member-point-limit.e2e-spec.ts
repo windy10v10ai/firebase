@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { getLocalApiKey, getTestApiKey, initTest } from './util/util-http';
+import { getLocalApiKey, getServerApiKey, initTest } from './util/util-http';
 import { createPlayer } from './util/util-player';
 
 const useUrl = '/api/player/member-points/use';
@@ -57,7 +57,7 @@ describe('本地 key 会员积分限额 (e2e)', () => {
   it('官方 key 不受限额约束', async () => {
     const res = await request(app.getHttpServer())
       .post(useUrl)
-      .set('x-api-key', getTestApiKey())
+      .set('x-api-key', getServerApiKey())
       .send({ steamId: STEAM_IDS.OFFICIAL_NOT_LIMITED, memberPoint: 200, reason: 'lottery' });
 
     expect(res.status).toBe(201);

@@ -50,7 +50,7 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
 
     const gameEnd = buildGameEnd([buildPlayer({ awaken: 1 })]);
-    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.TEST);
+    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.WINDY);
 
     expect(sendEventSpy).toHaveBeenCalledTimes(1);
     const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { awaken: number } };
@@ -62,7 +62,7 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
 
     const gameEnd = buildGameEnd([buildPlayer()]);
-    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.TEST);
+    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.WINDY);
 
     expect(sendEventSpy).toHaveBeenCalledTimes(1);
     const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { awaken: number } };
@@ -84,7 +84,7 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
         roshanKills: 1,
       }),
     ]);
-    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.TEST);
+    await service.gameEndPlayerBot(gameEnd, SERVER_TYPE.WINDY);
 
     const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { player_stats: string } };
     expect(JSON.parse(event.params.player_stats)).toEqual({
@@ -102,7 +102,7 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
     const service = new AnalyticsService(null);
     const sendEventSpy = jest.spyOn(service, 'sendEvent').mockResolvedValue(true);
 
-    await service.gameEndPlayerBot(buildGameEnd([buildPlayer()]), SERVER_TYPE.TEST);
+    await service.gameEndPlayerBot(buildGameEnd([buildPlayer()]), SERVER_TYPE.WINDY);
 
     const event = sendEventSpy.mock.calls[0][1] as unknown as { params: { player_stats: string } };
     const playerStats = JSON.parse(event.params.player_stats) as Record<string, number>;
@@ -122,7 +122,7 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
           assists: 13,
         }),
       ]),
-      SERVER_TYPE.TEST,
+      SERVER_TYPE.WINDY,
     );
 
     const event = sendEventSpy.mock.calls[0][1] as unknown as {
@@ -147,7 +147,7 @@ describe('AnalyticsService.gameEndPlayerBot', () => {
         }),
         buildPlayer({ steamId: 2, battlePoints: 120 }),
       ]),
-      SERVER_TYPE.TEST,
+      SERVER_TYPE.WINDY,
     );
 
     const firstEvent = sendEventSpy.mock.calls[0][1] as unknown as {
