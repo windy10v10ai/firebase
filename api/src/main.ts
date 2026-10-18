@@ -8,7 +8,8 @@ import { AppModule } from './app.module';
 import { AppGlobalSettings } from './util/settings';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Stripe 回调验签要用原始请求体；线上由 Cloud Functions 自带
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   AppGlobalSettings(app);
 
   if (process.env.ENVIRONMENT == 'local') {
