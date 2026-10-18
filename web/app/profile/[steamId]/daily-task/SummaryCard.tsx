@@ -5,7 +5,8 @@ import { HISTORY_DAY_LIMIT } from '@/config/daily-task';
 
 import type { DailyTaskHistoryEntry, DailyTaskSnapshot } from '@/app/lib/daily-task';
 
-const ROW_CLASS = 'flex items-baseline justify-between gap-3 border-t border-line py-2 first:border-t-0';
+const ROW_CLASS =
+  'flex items-baseline justify-between gap-3 border-t border-line py-2 first:border-t-0';
 
 /** 今天往前数满 `HISTORY_DAY_LIMIT` 个日历日的第一天，天号是定宽数字串，可以直接按字符串比较 */
 function windowStartDayId(today: string): string {
@@ -42,7 +43,9 @@ export default function SummaryCard({ snapshot }: { snapshot: DailyTaskSnapshot 
 
   return (
     <section className="card-container card-pad">
-      <h2 className="mb-2 text-lg font-bold text-heading">{t('title', { days: HISTORY_DAY_LIMIT })}</h2>
+      <h2 className="mb-2 text-lg font-bold text-heading">
+        {t('title', { days: HISTORY_DAY_LIMIT })}
+      </h2>
       <dl>
         <div className={ROW_CLASS}>
           <dt className="text-sm text-muted">{t('days')}</dt>

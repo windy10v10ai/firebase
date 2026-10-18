@@ -267,6 +267,12 @@
         "desc": "More payment options · CNY",
         "note": "Pick a plan to pay on Afdian, and it activates automatically"
       },
+      "stripe": {
+        "name": "Stripe",
+        "desc": "Card · Apple Pay · Google Pay",
+        "note": "Payments are handled securely by Stripe. We never see your card number. Purchases are credited automatically, no ID needed",
+        "noteGuest": "Log in to pay. Payments are handled securely by Stripe, and we never see your card number"
+      },
       "kofi": {
         "name": "Ko-fi",
         "desc": "Global users · Pay in USD"
@@ -284,13 +290,27 @@
       "total": "{amount} total",
       "perMonth": "/mo",
       "subscribeAfdian": "Subscribe on Afdian",
-      "subscribeKofi": "Subscribe on Ko-fi"
+      "subscribeKofi": "Subscribe on Ko-fi",
+      "oneTime": "One-time payment · No auto-renewal · Active once paid",
+      "redirecting": "Redirecting",
+      "orderFailed": "Couldn't create the order. Please try again later",
+      "perMonthApprox": "≈ {amount}/mo"
     },
     "points": {
       "title": "Buy Member Points",
       "subtitle": "Already a member? Use points to raise your Member Level and upgrade attributes",
       "unit": "points",
       "save": "Save {amount}"
+    },
+    "stripePay": {
+      "title": "Stripe payment result",
+      "checking": "Confirming your payment",
+      "checkingHint": "Payment received. It usually takes a few seconds. You can close this window, and it will still be credited automatically.",
+      "slow": {
+        "title": "Still confirming",
+        "hint": "Paid orders are always credited automatically. Check back later."
+      },
+      "refresh": "Refresh status"
     },
     "pay": {
       "title": "Pay with Alipay",

@@ -42,7 +42,16 @@ const HINT_CLASS =
   'inline-flex size-5 shrink-0 cursor-help items-center justify-center rounded-full bg-[#86c5f0]/15 text-[#86c5f0]';
 
 /** 按属性等级逐级取色，冰蓝过渡到勇士紫：只用一种紫，加满的页面就只剩黑和紫 */
-const LEVEL_COLORS = ['#86c5f0', '#8cb3f0', '#949ff0', '#9e8cec', '#a67be8', '#a26ae2', '#9b5de0', '#8d4dd4'];
+const LEVEL_COLORS = [
+  '#86c5f0',
+  '#8cb3f0',
+  '#949ff0',
+  '#9e8cec',
+  '#a67be8',
+  '#a26ae2',
+  '#9b5de0',
+  '#8d4dd4',
+];
 
 /** 升级按钮固定占一半宽：文字随暂存档数变化时，加减器和按钮都不跟着移动 */
 const ACTION_CLASS = 'w-1/2 shrink-0 px-3 whitespace-nowrap';
@@ -127,7 +136,10 @@ export default function PropertyCard({
 
   const hint =
     target > 0
-      ? t('card.effectNote', { level: targetFilled, heroLevel: heroLevelForCell(def, targetFilled) })
+      ? t('card.effectNote', {
+          level: targetFilled,
+          heroLevel: heroLevelForCell(def, targetFilled),
+        })
       : t('card.effectEmpty');
 
   // 只写当前等级，暂存后的变化已经由进度条、数值和按钮文字表达
@@ -156,7 +168,9 @@ export default function PropertyCard({
             {def.group === 'scaling' ? (
               <Hint Icon={TrendingUp} label={t('card.scalingBadge')} tip={hint} />
             ) : null}
-            {def.group === 'skill' ? <Hint Icon={Hourglass} label={t('card.skillBadge')} tip={hint} /> : null}
+            {def.group === 'skill' ? (
+              <Hint Icon={Hourglass} label={t('card.skillBadge')} tip={hint} />
+            ) : null}
           </div>
           <span className="text-xs text-muted">
             {known ? levelText : <Skeleton>{levelText}</Skeleton>}
@@ -252,7 +266,9 @@ export default function PropertyCard({
             >
               <Minus className="size-4" />
             </button>
-            <span className={`flex-1 text-center font-bold ${staged ? 'text-season' : 'text-muted'}`}>
+            <span
+              className={`flex-1 text-center font-bold ${staged ? 'text-season' : 'text-muted'}`}
+            >
               {staged ? `+${pendingCells}` : 0}
             </span>
             <button

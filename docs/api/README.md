@@ -10,13 +10,13 @@ API 是一个 NestJS 应用，部署在第二代 Cloud Functions，运行时由�
 |---|---|---|
 | 网站浏览器 | `windy10v10ai.com` | Cloudflare → App Hosting（`web/next.config.ts` 的 `/api` 转发）→ 函数 |
 | 游戏服务器 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
-| 支付宝 / 爱发电 / Ko-fi 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
+| 支付宝 / 爱发电 / Ko-fi / Stripe 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
 | 启动器（直连失败时） | 腾讯云 SCF 广州（与游戏的 `cn-proxy` 同一个地址） | SCF → `api.windy10v10ai.com` → 函数 |
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
 - 网站的转发直接打函数自己的地址，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting
 - **转发服务器放宽了响应头上限**（`web/apphosting.yaml` 的 `NODE_OPTIONS`）：上游响应偶尔带着超过 Node 默认上限的头，超限时转发直接回 500。换掉转发实现时同样要放宽
-- 支付宝的回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，开放平台后台配的只是兜底；爱发电与 Ko-fi 的配在各自平台的控制台，仓库里搜不到
+- 支付宝的回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，开放平台后台配的只是兜底；爱发电、Ko-fi 与 Stripe 的配在各自平台的控制台，仓库里搜不到
 - **只有直连 API 域名的请求带着玩家自己的来源信息。**经网站域名转发进来的，边缘看到的是转发服务器的地址，`cf-connecting-ip` 与 `cf-ipcountry` 不代表玩家。依赖真实来源的功能只能挂在直连的那条路上
 
 ## 对外依赖
@@ -30,6 +30,7 @@ API 自己往外调的第三方服务：
 | Steam Web API `GetPlayerSummaries`（批量） | 排行榜的昵称与头像 | 同上 | 存进当天的排行榜快照，每天只查一次 |
 | Steam Web API `GetPublishedFileDetails` | 启动器检测工坊地图是否最新 | 无 | 函数实例内存与 CDN |
 | 爱发电订单查询 | 补激活遗漏的订单 | `AFDIAN_API_TOKEN` | 无 |
+| Stripe Checkout | 网站会员付款的托管收银台 | `STRIPE_SECRET_KEY`；回调验签用 `STRIPE_WEBHOOK_SECRET` | 无 |
 | GA4 Measurement Protocol | 服务端埋点 | `GA4_API_SECRET` | 无 |
 | 启动器中转服务器（不调用，只签通行证） | 给联机加入签中转通行证 | `LAUNCHER_RELAY_PRIVATE_KEY` | 无 |
 | BigQuery 流式写入 | 战绩明细与积分记录，见「分析数据」 | 函数的运行时服务账号 | 无 |
@@ -250,6 +251,6 @@ gcloud monitoring uptime create "API hello" --resource-type=uptime-url --resourc
 
 **玩法数据**（战绩、积分、等级、任务进度）只做最终一致：读-改-写，不加事务、不加锁、不做失败补偿。一个玩家同一时刻只在一局游戏里，这些写入天然是顺序发生的，并发覆盖需要两条请求撞在同一个瞬间。真撞上了，代价是丢一次累加或一条记录，玩家继续玩就会被后面的数据盖过去。为这个概率引入事务，换来的是每次写入多一次读、多一条重试路径，以及测试里多一类几乎无法构造的场景。
 
-**金钱**（支付回调、订单激活、退款、会员积分消耗）不走这套。第三方回调会重复投递、会乱序、会在超时后重发，这些不是低概率事件而是常态，必须按幂等来设计。
+**金钱**（支付回调、订单激活、退款、会员积分消耗）不走这套。第三方回调会重复投递、会乱序、会在超时后重发，这些不是低概率事件而是常态，必须按幂等来设计。幂等靠订单状态：已成功的订单直接回成功，不重复发放。不为同一订单的并发回调加锁：第三方几乎不会同时重投同一单，真撞上的代价以一单的权益封顶；发放中途失败就回错误，靠第三方的重试补上。
 
 判断一条新逻辑落在哪边：**出错了玩家会不会损失已经付过的钱**。会 → 按金钱那套做；不会 → 按玩法数据那套做，选最简单能跑通的写法。

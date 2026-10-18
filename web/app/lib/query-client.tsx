@@ -23,7 +23,11 @@ export function createQueryClient() {
 }
 
 /** 换账号或退出时清空全部缓存：同一地址本人看与别人看的返回可能不同，公用电脑上也不该留给下一个人 */
-export function clearOnAccountChange(client: QueryClient, previousUid: string | null, uid: string | null) {
+export function clearOnAccountChange(
+  client: QueryClient,
+  previousUid: string | null,
+  uid: string | null,
+) {
   if (previousUid !== uid) {
     client.clear();
   }

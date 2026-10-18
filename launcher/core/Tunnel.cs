@@ -91,7 +91,6 @@ namespace Windy10v10AI.Launcher
         protected const int SilenceMs = 30000;
         const int HelloIntervalMs = 200;
         const int MaxLanCandidates = 6;
-        const int SioUdpConnReset = -1744830452;
         const int RelayRetryMs = 500;
         // Forty echoes resolve loss to two and a half percent, fine enough to tell relays apart once loss is priced into their score
         const int RelayProbeCount = 40;
@@ -109,9 +108,9 @@ namespace Windy10v10AI.Launcher
         protected Tunnel()
         {
             Socket = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
-            NativeMethods.KeepPrivate(Socket.Client);
+            Platform.KeepPrivate(Socket.Client);
             // An unreachable candidate answers with ICMP, which Windows would otherwise raise on the next receive
-            Socket.Client.IOControl(SioUdpConnReset, new byte[] { 0 }, null);
+            Platform.IgnoreUnreachable(Socket.Client);
         }
 
         int Port { get { return ((IPEndPoint)Socket.Client.LocalEndPoint).Port; } }
@@ -149,7 +148,8 @@ namespace Windy10v10AI.Launcher
                         // Closing the socket ends the loop; anything else is a bad packet
                     }
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         protected abstract void OnPacket(byte[] data, IPEndPoint from);
@@ -399,7 +399,8 @@ namespace Windy10v10AI.Launcher
                         }
                     }
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         public void AddJoin(string joinId, string token, List<Candidate> candidates, bool probe, RelayTicket relay)
@@ -429,7 +430,8 @@ namespace Windy10v10AI.Launcher
                         if (session == null) return;
                         lock (sync) relayUsed[token] = control.ToString();
                         lock (candidates) candidates.Add(new Candidate(PathType.Relay, session));
-                    }) { IsBackground = true }.Start();
+                    })
+                    { IsBackground = true }.Start();
                 }
                 // A kicked joiner's token is gone, which also ends its handshake
                 Burst(token, candidates, () => { lock (sync) return paths.ContainsKey(token) || !joinIds.ContainsKey(token); });
@@ -443,7 +445,8 @@ namespace Windy10v10AI.Launcher
                 }
                 var handler = JoinFinished;
                 if (handler != null && !Closed && !kicked) handler(joinId, path == null ? null : PathType.Report(path), path == PathType.Relay ? relayAddress : null, (int)(DateTime.UtcNow - started).TotalMilliseconds);
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         // Ping results per joiner since the last call, each with the route in use when it was taken
@@ -632,7 +635,7 @@ namespace Windy10v10AI.Launcher
             Peer peer;
             if (peers.TryGetValue(token, out peer)) return peer;
             peer = new Peer { Local = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)) };
-            NativeMethods.KeepPrivate(peer.Local.Client);
+            Platform.KeepPrivate(peer.Local.Client);
             peer.Local.Connect(IPAddress.Loopback, GamePort);
             peers[token] = peer;
             new Thread(() =>
@@ -650,7 +653,8 @@ namespace Windy10v10AI.Launcher
                         if (Closed || peer.Closed) return;
                     }
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
             return peer;
         }
 
@@ -857,12 +861,13 @@ namespace Windy10v10AI.Launcher
                     var session = ClaimRelay(ticket, out control);
                     if (session == null) return;
                     lock (sync)
-                    lock (hosts)
-                    {
-                        hosts.RemoveAll(c => c.Type == PathType.Relay);
-                        hosts.Add(new Candidate(PathType.Relay, session));
-                    }
-                }) { IsBackground = true }.Start();
+                        lock (hosts)
+                        {
+                            hosts.RemoveAll(c => c.Type == PathType.Relay);
+                            hosts.Add(new Candidate(PathType.Relay, session));
+                        }
+                })
+                { IsBackground = true }.Start();
             }
             var started = DateTime.UtcNow;
             var firstDirect = DateTime.MaxValue;
@@ -939,7 +944,7 @@ namespace Windy10v10AI.Launcher
         public void Forward()
         {
             local = new UdpClient(new IPEndPoint(IPAddress.Loopback, LocalGate.Port));
-            NativeMethods.KeepPrivate(local.Client);
+            Platform.KeepPrivate(local.Client);
             new Thread(() =>
             {
                 while (!Closed)
@@ -967,7 +972,8 @@ namespace Windy10v10AI.Launcher
                         if (Closed) return;
                     }
                 }
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
 
             new Thread(Watch) { IsBackground = true }.Start();
         }

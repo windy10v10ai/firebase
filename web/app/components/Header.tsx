@@ -90,7 +90,8 @@ export default function Header() {
   // /my/<页> 登录后会转到 /profile/<id>/<页>，两个地址算停在同一项上；看别人的主页不算停在自己的菜单项上
   const ownProfilePrefix = auth.status === 'authenticated' ? `/profile/${auth.uid}` : null;
   const profileSubPath =
-    ownProfilePrefix && (pathname === ownProfilePrefix || pathname.startsWith(`${ownProfilePrefix}/`))
+    ownProfilePrefix &&
+    (pathname === ownProfilePrefix || pathname.startsWith(`${ownProfilePrefix}/`))
       ? pathname.split('/').slice(3).join('/')
       : null;
   const isCurrent = (href: string) => {

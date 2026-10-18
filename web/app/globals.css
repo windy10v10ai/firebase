@@ -5,10 +5,9 @@
   /* 正文用系统字体：中文网页字体要拆成上百个分片按需下载，首次访问与缓存后看到的字体不一致 */
   /* 西文字体在前，汉字逐字回落到各平台的简体中文字体；emoji 落到兜底字体时比排版宽度宽，会压住后面的汉字，所以点名 emoji 字体 */
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC',
-    'Source Han Sans SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Noto Color Emoji';
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   --font-heading: var(--font-heading-face), var(--font-sans);
 
   --color-surface: #09090b;
@@ -64,6 +63,9 @@
   --color-afdian: #946ce6;
   --color-kofi: #29abe0;
   --color-alipay: #1677ff;
+  --color-stripe: #635bff;
+  /* 品牌原色压在深底上不到 4.5:1，文字用浅一档 */
+  --color-stripe-text: #8f89ff;
 
   --color-success: #7fd47f;
   --color-warning: #f5a623;

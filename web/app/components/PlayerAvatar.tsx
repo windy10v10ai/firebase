@@ -28,11 +28,6 @@ export default function PlayerAvatar({
     // 用原生 img 不用 next/image：后者会把图片拉到自己的服务器再转发，
     // 而这张图的全部价值就在于浏览器直连 Steam 的图床，我们不碰字节
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={avatarUrl}
-      alt=""
-      onError={() => setFailed(true)}
-      className={imageClassName}
-    />
+    <img src={avatarUrl} alt="" onError={() => setFailed(true)} className={imageClassName} />
   );
 }

@@ -22,6 +22,7 @@ import { PlayerInfoModule } from './player-info/player-info.module';
 import { PlayerPropertyModule } from './player-property/player-property.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { SteamProfileModule } from './steam-profile/steam-profile.module';
+import { StripeModule } from './stripe/stripe.module';
 import { AuthGuard } from './util/auth/auth.guard';
 import { SecretModule } from './util/secret/secret.module';
 
@@ -33,7 +34,8 @@ export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'win
   imports: [
     MembersModule,
     ConfigModule.forRoot({
-      envFilePath: `.env.${ENVIRONMENT}`,
+      // .secret.local 不进 git，放本地联调用的第三方测试密钥，同名变量优先于 .env
+      envFilePath: ['.secret.local', `.env.${ENVIRONMENT}`],
       isGlobal: true,
     }),
     FireormModule.forRoot({
@@ -48,6 +50,7 @@ export const FIRESTORE_PROJECT_ID = process.env.E2E_FIRESTORE_PROJECT_ID ?? 'win
     GameModule,
     AfdianModule,
     AlipayModule,
+    StripeModule,
     KofiModule,
     PlayerModule,
     PlayerInfoModule,

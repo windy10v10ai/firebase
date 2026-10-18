@@ -2,13 +2,16 @@
 
 /* eslint-disable @next/next/no-img-element -- 平台图标与积分图是本地静态小图，尺寸已经接近目标尺寸，不必过 next/image 优化器 */
 
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, LoaderCircle, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import CopyIdButton from '@/app/components/CopyIdButton';
 import SteamLoginButton from '@/app/components/SteamLoginButton';
+import { useAuth } from '@/app/lib/auth';
+import { createStripeOrder } from '@/app/lib/stripe';
 import {
   AFDIAN_MEMBER_PRICE,
   ALIPAY_MEMBER_TIERS,
@@ -18,17 +21,21 @@ import {
   PAYMENT_PLATFORMS,
   PLATFORM_ICONS,
   POINTS_TIERS,
+  STRIPE_MEMBER_TIERS,
+  STRIPE_PAY_LOGOS,
   afdianMemberUrl,
   afdianPointsUrl,
   type MemberTier,
   type PaymentPlatform,
   type PointsTier,
+  type StripeMemberTier,
+  type StripeProductCode,
 } from '@/config/membership';
 
 import type { AlipayRequest } from './AlipayPayDialog';
 
 interface PurchaseSectionProps {
-  /** 未登录时为 null：支付宝档位点了提示登录，爱发电、Ko-fi 照常跳转 */
+  /** 未登录时为 null：支付宝档位点了提示登录，Stripe 点了去登录，爱发电、Ko-fi 照常跳转 */
   steamId: string | null;
   onAlipay: (request: AlipayRequest) => void;
 }
@@ -57,6 +64,14 @@ const PLATFORM_STYLE: Record<
     link: 'text-afdian',
     currency: '¥',
   },
+  stripe: {
+    topBar: 'border-t-stripe',
+    tabOn: 'border-stripe bg-stripe/10',
+    desc: 'text-stripe-text',
+    note: 'border-stripe/35 bg-stripe/8',
+    link: 'text-stripe-text',
+    currency: 'US$',
+  },
   kofi: {
     topBar: 'border-t-kofi',
     tabOn: 'border-kofi bg-kofi/10',
@@ -73,13 +88,14 @@ const TIER_CLASS =
 interface TierProps {
   topBar: string;
   className: string;
-  /** 支付宝开弹窗，其他平台新窗口跳转 */
+  /** 支付宝开弹窗、Stripe 下单后跳收银台，其他平台新窗口跳转 */
   action: { onClick: () => void } | { href: string };
+  disabled?: boolean;
   children: ReactNode;
 }
 
 /** 档位本身就是付款入口 */
-function Tier({ topBar, className, action, children }: TierProps) {
+function Tier({ topBar, className, action, disabled, children }: TierProps) {
   const classes = `${TIER_CLASS} ${topBar} ${className}`;
   if ('href' in action) {
     return (
@@ -89,7 +105,12 @@ function Tier({ topBar, className, action, children }: TierProps) {
     );
   }
   return (
-    <button type="button" onClick={action.onClick} className={classes}>
+    <button
+      type="button"
+      onClick={action.onClick}
+      disabled={disabled}
+      className={`${classes} disabled:pointer-events-none`}
+    >
       {children}
     </button>
   );
@@ -105,14 +126,129 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
   const style = PLATFORM_STYLE[platform];
   const money = (amount: string) => `${style.currency}${amount}`;
   const perMonth = t('member.perMonth');
+  const pathname = usePathname();
+  const { loginUrl } = useAuth();
+  // 正在下单的档位与下单失败的区块；一次只下一单，下单中其他档位不可点
+  const [stripePending, setStripePending] = useState<string | null>(null);
+  const [stripeFailed, setStripeFailed] = useState<'member' | 'points' | null>(null);
+
+  // 从收银台按浏览器后退时页面可能取自往返缓存，按钮会停在跳转中
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setStripePending(null);
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
+  const startStripe = async (productCode: StripeProductCode, quantity: number) => {
+    if (!steamId) {
+      window.location.assign(loginUrl(pathname));
+      return;
+    }
+    setStripePending(`${productCode}-${quantity}`);
+    setStripeFailed(null);
+    try {
+      const { checkoutUrl } = await createStripeOrder({ productCode, quantity, locale });
+      window.location.assign(checkoutUrl);
+    } catch {
+      setStripePending(null);
+      setStripeFailed(productCode === 'MEMBER_PREMIUM' ? 'member' : 'points');
+    }
+  };
+
+  const redirecting = (
+    <span className="flex items-center gap-2 text-sm font-bold text-content">
+      <LoaderCircle className="size-4 animate-spin text-link" aria-hidden="true" />
+      {t('member.redirecting')}
+    </span>
+  );
+
+  const orderFailed = (kind: 'member' | 'points') =>
+    stripeFailed === kind ? (
+      <p role="alert" className="text-sm text-danger">
+        {t('member.orderFailed')}
+      </p>
+    ) : null;
+
+  const memberSubtitle =
+    platform === 'alipay'
+      ? t('member.subtitle')
+      : platform === 'stripe'
+        ? t('member.oneTime')
+        : t('member.monthly');
 
   const memberTitle = (
     <div className="flex flex-col gap-1">
-      <h2 className="text-xl font-extrabold text-member-strong lg:text-[22px]">{t('member.title')}</h2>
-      <p className="text-sm text-muted">
-        {platform === 'alipay' ? t('member.subtitle') : t('member.monthly')}
-      </p>
+      <h2 className="flex items-center gap-2 text-xl font-extrabold text-member-strong lg:text-[22px]">
+        <img
+          src="/images/member/crown-gold.png"
+          alt=""
+          width={30}
+          height={30}
+          className="size-[26px] shrink-0 lg:size-[30px]"
+        />
+        {t('member.title')}
+      </h2>
+      <p className="text-sm text-muted">{memberSubtitle}</p>
     </div>
+  );
+
+  const stripeMemberTier = (tier: StripeMemberTier) => {
+    const pending = stripePending === `MEMBER_PREMIUM-${tier.months}`;
+    const discounted = tier.discountPercent > 0;
+    return (
+      <Tier
+        key={tier.months}
+        topBar={style.topBar}
+        className="h-[72px] items-center px-4 lg:h-[104px]"
+        disabled={stripePending !== null}
+        action={{ onClick: () => void startStripe('MEMBER_PREMIUM', tier.months) }}
+      >
+        {/* 与支付宝档位同一套网格：电脑档月数单独占一行，原价在现价正上方 */}
+        <span className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5">
+          <span className="col-start-1 row-start-1 truncate text-base font-extrabold md:text-lg lg:col-span-2 lg:text-xl">
+            {t('member.months', { count: tier.months })}
+          </span>
+          <span className="col-start-1 row-start-2 truncate text-xs text-muted lg:text-[13px]">
+            {discounted ? t('member.perMonthApprox', { amount: money(tier.perMonth) }) : null}
+          </span>
+          {pending ? (
+            <span className="col-start-2 row-span-2 row-start-1 justify-self-end lg:col-span-2 lg:col-start-1 lg:row-span-1 lg:row-start-3 lg:justify-self-end">
+              {redirecting}
+            </span>
+          ) : (
+            <>
+              {discounted ? (
+                <s className="col-start-2 row-start-1 justify-self-end text-xs whitespace-nowrap text-muted lg:row-start-2">
+                  {money((Number(KOFI_MEMBER_PRICE) * tier.months).toFixed(2))}
+                </s>
+              ) : null}
+              <span className="col-start-2 row-start-2 flex items-center gap-1.5 justify-self-end whitespace-nowrap lg:col-span-2 lg:col-start-1 lg:row-start-3">
+                {discounted ? (
+                  <span className={DISCOUNT_CLASS}>-{tier.discountPercent}%</span>
+                ) : null}
+                <span className="text-base font-bold md:text-lg lg:text-xl">
+                  {money(tier.total)}
+                </span>
+              </span>
+            </>
+          )}
+        </span>
+      </Tier>
+    );
+  };
+
+  const payLogos = (
+    <span className="flex items-center gap-1.5">
+      {STRIPE_PAY_LOGOS.map((logo) => (
+        <span key={logo.name} className="flex h-6 items-center rounded bg-white px-1.5">
+          <img src={logo.src} alt={logo.name} style={{ height: logo.height }} className="w-auto" />
+        </span>
+      ))}
+    </span>
   );
 
   const alipayMemberTier = (tier: MemberTier) => (
@@ -144,7 +280,9 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
         </s>
         <span className="col-start-2 row-start-2 flex items-center gap-1.5 justify-self-end whitespace-nowrap lg:col-span-2 lg:col-start-1 lg:row-start-3">
           <span className={DISCOUNT_CLASS}>-{tier.discountPercent}%</span>
-          <span className="text-base font-bold md:text-lg lg:text-xl">{money(tier.pricePerMonth)}</span>
+          <span className="text-base font-bold md:text-lg lg:text-xl">
+            {money(tier.pricePerMonth)}
+          </span>
           <span className="text-xs text-muted">{perMonth}</span>
         </span>
       </span>
@@ -229,6 +367,36 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
       );
     }
 
+    if (platform === 'stripe') {
+      const pending = stripePending === `${tier.stripeProductCode}-1`;
+      const saved = (Number(tier.kofiPrice) - Number(tier.stripePrice)).toFixed(0);
+      return (
+        <Tier
+          key={tier.points}
+          {...shared}
+          disabled={stripePending !== null}
+          action={{ onClick: () => void startStripe(tier.stripeProductCode, 1) }}
+        >
+          {image}
+          {pointsBody(
+            pending ? (
+              redirecting
+            ) : (
+              <span className="flex flex-col items-end gap-0.5">
+                <s className="text-xs whitespace-nowrap text-muted">{money(tier.kofiPrice)}</s>
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <span className={DISCOUNT_CLASS}>
+                    {t('points.save', { amount: money(saved) })}
+                  </span>
+                  <span className="text-base font-bold lg:text-lg">{money(tier.stripePrice)}</span>
+                </span>
+              </span>
+            ),
+          )}
+        </Tier>
+      );
+    }
+
     const href = platform === 'afdian' ? afdianPointsUrl(tier, steamId) : tier.kofiUrl;
     const price = platform === 'afdian' ? tier.afdianPrice : tier.kofiPrice;
     return (
@@ -246,23 +414,29 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
 
   // 爱发电登录后链接自带 ID，其余情况都要玩家自己在留言里填 ID
   const asksForId = platform === 'kofi' || (platform === 'afdian' && !steamId);
-  const noteContent = !steamId ? (
-    t(asksForId ? 'idNoteGuest' : 'platforms.alipay.noteGuest')
-  ) : asksForId ? (
-    <>
-      {t('idNote')}
-      <span className="inline-flex items-center gap-1 font-bold text-heading">
-        {steamId}
-        <CopyIdButton
-          value={steamId}
-          tooltip={tIdentity('copyId.tooltip')}
-          copiedLabel={tIdentity('copyId.copied')}
-        />
+  const noteContent =
+    platform === 'stripe' ? (
+      <span className="flex items-start gap-2">
+        <Lock className={`mt-0.5 size-4 shrink-0 ${style.desc}`} aria-hidden="true" />
+        {t(steamId ? 'platforms.stripe.note' : 'platforms.stripe.noteGuest')}
       </span>
-    </>
-  ) : (
-    t(`platforms.${platform === 'alipay' ? 'alipay' : 'afdian'}.note`)
-  );
+    ) : !steamId ? (
+      t(asksForId ? 'idNoteGuest' : 'platforms.alipay.noteGuest')
+    ) : asksForId ? (
+      <>
+        {t('idNote')}
+        <span className="inline-flex items-center gap-1 font-bold text-heading">
+          {steamId}
+          <CopyIdButton
+            value={steamId}
+            tooltip={tIdentity('copyId.tooltip')}
+            copiedLabel={tIdentity('copyId.copied')}
+          />
+        </span>
+      </>
+    ) : (
+      t(`platforms.${platform === 'alipay' ? 'alipay' : 'afdian'}.note`)
+    );
 
   const manualActivate = (href: string) => (
     <span className="text-[13px] text-muted lg:ms-auto">
@@ -275,7 +449,11 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
 
   return (
     <section className="card-container card-pad flex flex-col gap-4">
-      <div role="tablist" aria-label={t('platformLabel')} className="grid grid-cols-3 gap-2 lg:gap-3">
+      <div
+        role="tablist"
+        aria-label={t('platformLabel')}
+        className="grid grid-cols-4 gap-2 lg:gap-3"
+      >
         {PAYMENT_PLATFORMS.map((key) => {
           const on = key === platform;
           return (
@@ -285,7 +463,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
               role="tab"
               aria-selected={on}
               onClick={() => setPlatform(key)}
-              className={`flex h-[72px] min-w-0 flex-col items-center justify-center gap-1 rounded-[10px] border px-2 text-center transition-colors md:flex-row md:justify-start md:gap-3 md:px-4 md:text-start ${
+              className={`flex h-[72px] min-w-0 flex-col items-center justify-center gap-1 rounded-[10px] border px-1 text-center transition-colors lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-start ${
                 on
                   ? `border-2 ${PLATFORM_STYLE[key].tabOn}`
                   : 'border-line bg-panel-soft hover:bg-control-hover'
@@ -296,14 +474,16 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
                 alt=""
                 width={40}
                 height={40}
-                className="size-7 shrink-0 rounded-lg md:size-10"
+                className="size-7 shrink-0 rounded-lg lg:size-10"
               />
               <span className="flex min-w-0 flex-col">
-                <span className={`truncate text-sm font-bold md:text-base ${on ? 'text-heading' : 'text-content'}`}>
+                <span
+                  className={`truncate text-sm font-bold lg:text-base ${on ? 'text-heading' : 'text-content'}`}
+                >
                   {t(`platforms.${key}.name`)}
                 </span>
                 <span
-                  className={`hidden text-[13px] leading-tight md:line-clamp-2 ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}
+                  className={`hidden text-[13px] leading-tight lg:line-clamp-2 ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}
                 >
                   {t(`platforms.${key}.desc`)}
                 </span>
@@ -312,16 +492,21 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
           );
         })}
       </div>
-      <p className={`text-center text-[13px] md:hidden ${style.desc}`}>{t(`platforms.${platform}.desc`)}</p>
+      <div className="flex flex-col items-center gap-2 lg:hidden">
+        <p className={`text-center text-[13px] ${style.desc}`}>{t(`platforms.${platform}.desc`)}</p>
+        {platform === 'stripe' ? payLogos : null}
+      </div>
 
       <div
-        className={`flex flex-col gap-1 rounded-lg border px-4 py-3 text-sm text-content lg:h-12 lg:flex-row lg:items-center lg:gap-3 lg:py-0 ${style.note}`}
+        className={`flex flex-col gap-1 rounded-lg border px-4 py-3 text-sm text-content lg:min-h-12 lg:flex-row lg:items-center lg:gap-3 lg:py-2 ${style.note}`}
       >
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">{noteContent}</span>
         {!steamId ? (
           <span className="self-start lg:ms-auto lg:self-auto">
             <SteamLoginButton />
           </span>
+        ) : platform === 'stripe' ? (
+          <span className="hidden lg:ms-auto lg:flex">{payLogos}</span>
         ) : platform === 'afdian' ? (
           manualActivate('/regist/afdian')
         ) : platform === 'kofi' ? (
@@ -335,6 +520,10 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
           <div className="grid gap-2.5 lg:grid-cols-4 lg:gap-4">
             {ALIPAY_MEMBER_TIERS.map(alipayMemberTier)}
           </div>
+        ) : platform === 'stripe' ? (
+          <div className="grid gap-2.5 lg:grid-cols-4 lg:gap-4">
+            {STRIPE_MEMBER_TIERS.map(stripeMemberTier)}
+          </div>
         ) : platform === 'afdian' ? (
           externalMemberTier(
             afdianMemberUrl(steamId),
@@ -344,6 +533,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
         ) : (
           externalMemberTier(KOFI_MEMBER_URL, KOFI_MEMBER_PRICE, t('member.subscribeKofi'))
         )}
+        {orderFailed('member')}
       </div>
 
       <hr className="mt-3 border-line" />
@@ -354,6 +544,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
           <p className="text-sm text-muted">{t('points.subtitle')}</p>
         </div>
         <div className="grid gap-2.5 lg:grid-cols-3 lg:gap-4">{POINTS_TIERS.map(pointsTier)}</div>
+        {orderFailed('points')}
       </div>
     </section>
   );

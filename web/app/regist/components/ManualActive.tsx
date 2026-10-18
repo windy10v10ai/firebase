@@ -14,10 +14,7 @@ import { useAuth } from '@/app/lib/auth';
 import { invalidatePlayerState } from '@/app/lib/queries';
 
 import ActiveResult from './ActiveResult';
-import {
-  type ManualActiveFormValues,
-  validateManualActiveForm,
-} from './manual-active-validation';
+import { type ManualActiveFormValues, validateManualActiveForm } from './manual-active-validation';
 
 import type { PlatformType } from '../../types/platform';
 
@@ -134,7 +131,9 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
         <section className="space-y-8">
           <div className="space-y-3">
             {/* 标题就是平台名，属于品牌标识，用平台自己的颜色 */}
-            <h1 className={`title-primary ${activeType === 'afdian' ? 'text-afdian' : 'text-kofi'}`}>
+            <h1
+              className={`title-primary ${activeType === 'afdian' ? 'text-afdian' : 'text-kofi'}`}
+            >
               {activeType === 'afdian' ? t('afdianTitle') : t('kofiTitle')}
             </h1>
             <p className="text-content">
@@ -229,7 +228,12 @@ const ManualActive = ({ activeType }: ManualActiveProps) => {
               />
             </Field>
 
-            <Button type="submit" loading={isLoading} disabled={!formValid} className="w-full md:w-auto">
+            <Button
+              type="submit"
+              loading={isLoading}
+              disabled={!formValid}
+              className="w-full md:w-auto"
+            >
               {isLoading ? t('submitButton.loadingText') : t('submitButton.buttonText')}
             </Button>
           </form>

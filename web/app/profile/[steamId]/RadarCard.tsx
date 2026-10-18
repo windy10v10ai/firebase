@@ -11,9 +11,7 @@ import {
 } from '@/app/lib/player-stats-radar';
 import { statsRadarQuery } from '@/app/lib/queries';
 
-type LoadResult =
-  | { status: 'failed' }
-  | { status: 'ready'; data: PlayerStatsRadarResponse };
+type LoadResult = { status: 'failed' } | { status: 'ready'; data: PlayerStatsRadarResponse };
 
 type LabelSide = 'top' | 'bottom' | 'left' | 'right';
 
@@ -79,7 +77,6 @@ export default function RadarCard({ steamId }: { steamId: string }) {
   const t = useTranslations('profile.radar');
   const query = useQuery(statsRadarQuery(steamId));
 
-
   const loaded: LoadResult | null = query.data
     ? { status: 'ready', data: query.data }
     : query.isError
@@ -127,11 +124,11 @@ export default function RadarCard({ steamId }: { steamId: string }) {
               strokeWidth={1.5}
             />
             <polygon
-            points={polygon(() => FLOOR_RATIO)}
-            className="fill-radar-grid/20 stroke-radar-grid/35"
-            strokeWidth={1}
-          />
-          {GRID_RATIOS.map((ratio) => (
+              points={polygon(() => FLOOR_RATIO)}
+              className="fill-radar-grid/20 stroke-radar-grid/35"
+              strokeWidth={1}
+            />
+            {GRID_RATIOS.map((ratio) => (
               <polygon
                 key={ratio}
                 points={polygon(() => ratio)}

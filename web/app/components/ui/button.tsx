@@ -47,7 +47,9 @@ const Button = ({
       className={`${VARIANT_CLASS[variant]} ${className}`}
       {...props}
     >
-      {loading ? <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden="true" /> : null}
+      {loading ? (
+        <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden="true" />
+      ) : null}
       {children}
     </button>
   );
