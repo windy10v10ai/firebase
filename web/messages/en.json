@@ -243,6 +243,7 @@
       "kofi": "Ko-fi"
     },
     "platformLabel": "Payment method",
+    "recommended": "Suggested",
     "status": {
       "loginTitle": "Log in to see your membership",
       "loginDescription": "Log in to buy a membership or Member Points",

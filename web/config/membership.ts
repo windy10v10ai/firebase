@@ -7,6 +7,9 @@ export type PaymentPlatform = 'alipay' | 'afdian' | 'stripe' | 'kofi';
 
 export const PAYMENT_PLATFORMS: PaymentPlatform[] = ['alipay', 'afdian', 'stripe', 'kofi'];
 
+// 付款后自动到账、不用填 ID 的平台标「推荐」
+export const RECOMMENDED_PLATFORMS: PaymentPlatform[] = ['alipay', 'stripe'];
+
 // 默认选中各语言玩家最可能用的那家，标签顺序本身不随语言变
 export const DEFAULT_PLATFORM_BY_LOCALE: Record<string, PaymentPlatform> = {
   zh: 'alipay',

@@ -21,6 +21,7 @@ import {
   PAYMENT_PLATFORMS,
   PLATFORM_ICONS,
   POINTS_TIERS,
+  RECOMMENDED_PLATFORMS,
   STRIPE_MEMBER_TIERS,
   STRIPE_PAY_LOGOS,
   afdianMemberUrl,
@@ -81,6 +82,10 @@ const PLATFORM_STYLE: Record<
     currency: '$',
   },
 };
+
+// 与启动器页的「推荐」同一枚绿色胶囊。窄屏压在标签右上角的边框上，外层垫一层不透明底，免得边框穿过文字
+const RECOMMEND_CLASS =
+  'absolute -end-1 -top-2.5 overflow-hidden rounded-full border border-success/40 bg-panel lg:static';
 
 const TIER_CLASS =
   'flex w-full min-w-0 rounded-xl border border-line border-t-[3px] bg-panel-soft text-start text-heading transition-colors hover:border-x-link-border hover:border-b-link-border hover:bg-control-hover';
@@ -463,7 +468,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
               role="tab"
               aria-selected={on}
               onClick={() => setPlatform(key)}
-              className={`flex h-[72px] min-w-0 flex-col items-center justify-center gap-1 rounded-[10px] border px-1 text-center transition-colors lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-start ${
+              className={`relative flex h-[72px] min-w-0 flex-col items-center justify-center gap-1 rounded-[10px] border px-1 text-center transition-colors lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-start ${
                 on
                   ? `border-2 ${PLATFORM_STYLE[key].tabOn}`
                   : 'border-line bg-panel-soft hover:bg-control-hover'
@@ -477,10 +482,19 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
                 className="size-7 shrink-0 rounded-lg lg:size-10"
               />
               <span className="flex min-w-0 flex-col">
-                <span
-                  className={`truncate text-sm font-bold lg:text-base ${on ? 'text-heading' : 'text-content'}`}
-                >
-                  {t(`platforms.${key}.name`)}
+                <span className="flex min-w-0 items-center gap-2">
+                  <span
+                    className={`truncate text-sm font-bold lg:text-base ${on ? 'text-heading' : 'text-content'}`}
+                  >
+                    {t(`platforms.${key}.name`)}
+                  </span>
+                  {RECOMMENDED_PLATFORMS.includes(key) ? (
+                    <span className={RECOMMEND_CLASS}>
+                      <span className="block bg-success/10 px-1.5 text-[11px] leading-4 font-medium whitespace-nowrap text-success lg:px-2 lg:text-xs lg:leading-5">
+                        {t('recommended')}
+                      </span>
+                    </span>
+                  ) : null}
                 </span>
                 <span
                   className={`hidden text-[13px] leading-tight lg:line-clamp-2 ${on ? PLATFORM_STYLE[key].desc : 'text-muted'}`}

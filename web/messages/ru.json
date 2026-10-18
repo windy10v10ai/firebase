@@ -243,6 +243,7 @@
       "kofi": "Ko-fi"
     },
     "platformLabel": "Способ оплаты",
+    "recommended": "Советуем",
     "status": {
       "loginTitle": "Войдите, чтобы увидеть подписку",
       "loginDescription": "Покупать подписку и Member Points можно после входа",
