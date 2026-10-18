@@ -41,8 +41,7 @@ export class SecretService {
     if (apiKey === windyKey) {
       return SERVER_TYPE.WINDY;
     }
-    // 本地 key 打包在地图里，定期轮替；两个槽位同时有效，轮替只覆盖当前发布版本没在用的那个，
-    // 未更新的玩家在下一次轮替前都不受影响
+    // 两个槽位同时有效，换 key 时未更新的玩家不受影响
     const localKeys = [
       this.getSecretValue(SECRET.LOCAL_APIKEY_A),
       this.getSecretValue(SECRET.LOCAL_APIKEY_B),

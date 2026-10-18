@@ -12,7 +12,7 @@ on:
       - '.cursor/**'
       - '.vscode/**'
       - '**.md'
-  # 函数部署时锁定 Secret 版本，轮替本地 API key 后靠手动重新部署才会读到新值
+  # 函数部署时锁定 Secret 版本，更新 Secret 后靠手动重新部署才会读到新值
   workflow_dispatch:
 
 permissions:
