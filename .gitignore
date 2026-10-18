@@ -136,3 +136,6 @@ docs/superpowers/
 
 # superpowers subagent-driven-development scratch
 .superpowers/
+
+# 本地联调用的第三方测试密钥（api/.secret.local）
+.secret.local

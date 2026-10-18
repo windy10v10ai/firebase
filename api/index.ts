@@ -50,6 +50,8 @@ const commonSecrets = isLocal
       defineSecret(SECRET.ALIPAY_APP_ID),
       defineSecret(SECRET.ALIPAY_APP_PRIVATE_KEY),
       defineSecret(SECRET.ALIPAY_PUBLIC_KEY),
+      defineSecret(SECRET.STRIPE_SECRET_KEY),
+      defineSecret(SECRET.STRIPE_WEBHOOK_SECRET),
       defineSecret(SECRET.STEAM_WEB_API_KEY),
       defineSecret(SECRET.LAUNCHER_RELAY_PRIVATE_KEY),
     ];
