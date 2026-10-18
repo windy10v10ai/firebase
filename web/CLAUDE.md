@@ -294,4 +294,4 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 
 图片用 `<img src="..." width="...">` 控制宽度，`![]()` 语法无法限制尺寸。
 
-**拍图这一步可以派给子代理**，前提与指令写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「把 PR 截图交给子代理」。验收仍归主会话。
+**浏览器验证与拍图都派子代理**，交接写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「交给子代理」。验收仍归主会话。
