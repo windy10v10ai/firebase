@@ -4,9 +4,9 @@
 
 import { ExternalLink, LoaderCircle, Lock } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import CopyIdButton from '@/app/components/CopyIdButton';
 import SteamLoginButton from '@/app/components/SteamLoginButton';
@@ -20,12 +20,14 @@ import {
   KOFI_MEMBER_URL,
   PAYMENT_PLATFORMS,
   PLATFORM_ICONS,
+  PLATFORM_PARAM,
   POINTS_TIERS,
   RECOMMENDED_PLATFORMS,
   STRIPE_MEMBER_TIERS,
   STRIPE_PAY_LOGOS,
   afdianMemberUrl,
   afdianPointsUrl,
+  isPaymentPlatform,
   type MemberTier,
   type PaymentPlatform,
   type PointsTier,
@@ -121,13 +123,37 @@ function Tier({ topBar, className, action, disabled, children }: TierProps) {
   );
 }
 
+// 本标签页的会话存储不会被别处改动，只在渲染时读一次
+const subscribeNothing = () => () => {};
+
+function readRememberedPlatform(): PaymentPlatform | null {
+  try {
+    const value = sessionStorage.getItem(PLATFORM_PARAM);
+    return isPaymentPlatform(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionProps) {
   const t = useTranslations('membership');
   const tIdentity = useTranslations('profile.identity');
   const locale = useLocale();
-  const [platform, setPlatform] = useState<PaymentPlatform>(
-    DEFAULT_PLATFORM_BY_LOCALE[locale] ?? 'kofi',
+  const param = useSearchParams().get(PLATFORM_PARAM);
+  const requestedPlatform = isPaymentPlatform(param) ? param : null;
+  const rememberedPlatform = useSyncExternalStore(
+    subscribeNothing,
+    readRememberedPlatform,
+    () => null,
   );
+  const [chosenPlatform, setPlatform] = useState<PaymentPlatform | null>(null);
+  const platform =
+    chosenPlatform ??
+    requestedPlatform ??
+    rememberedPlatform ??
+    DEFAULT_PLATFORM_BY_LOCALE[locale] ??
+    'kofi';
+  const sectionRef = useRef<HTMLElement>(null);
   const style = PLATFORM_STYLE[platform];
   const money = (amount: string) => `${style.currency}${amount}`;
   const perMonth = t('member.perMonth');
@@ -147,6 +173,20 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
     window.addEventListener('pageshow', onPageShow);
     return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
+
+  // 从游戏带着指定标签进来时，付款区在会员说明下方、首屏看不到，直接滚过去。
+  // 登录各入口回跳都只带路径，标签记在本标签页里，登录回来仍停在原标签
+  useEffect(() => {
+    if (!requestedPlatform) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(PLATFORM_PARAM, requestedPlatform);
+    } catch {
+      // 存储被禁用时只是登录回来落到默认标签
+    }
+    sectionRef.current?.scrollIntoView({ block: 'start' });
+  }, [requestedPlatform]);
 
   const startStripe = async (productCode: StripeProductCode, quantity: number) => {
     if (!steamId) {
@@ -453,7 +493,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
   );
 
   return (
-    <section className="card-container card-pad flex flex-col gap-4">
+    <section ref={sectionRef} className="card-container card-pad flex flex-col gap-4 scroll-mt-4">
       <div
         role="tablist"
         aria-label={t('platformLabel')}
