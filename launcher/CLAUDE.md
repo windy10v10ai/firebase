@@ -43,5 +43,6 @@
 - **每种语言单独起一个进程**，启动时先设 `CurrentUICulture`：`Strings` 在第一次被访问时就定下了语言
 - **窗口放到屏幕外，用 `ShowWindow(SW_SHOWNOACTIVATE)` 显示，用 `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT)` 出图**：不抢焦点，被全屏的游戏挡住也照样拍得到
 - **不调用会枚举或结束 `dota2` 进程的方法**（`OnModeClick`、`Run`）：开发者本机常开着 Dota 在测别的改动
+- **拍完逐张审图，不只确认拍到了**：对照设计稿或改动前的窗口看布局与对齐、文字（截断、意外折行、俄语撑出按钮或窗口、缺字）、图片（拉伸、挤压变形）。有问题先修再重拍，带问题的图不进 PR
 - 标题栏图标会显示成测试程序的图标，正文里注明一句
 - 图片存放与链接格式同 web，放 `assets` 分支的 `pr/<PR 编号>/`，见 [web/CLAUDE.md](../web/CLAUDE.md) 的「图片存放」
