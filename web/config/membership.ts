@@ -17,6 +17,13 @@ export const DEFAULT_PLATFORM_BY_LOCALE: Record<string, PaymentPlatform> = {
   ru: 'stripe',
 };
 
+/** 指定付款标签的地址参数，游戏内的付款按钮用它直接打开对应标签，不受网站语言影响 */
+export const PLATFORM_PARAM = 'platform';
+
+export function isPaymentPlatform(value: string | null): value is PaymentPlatform {
+  return PAYMENT_PLATFORMS.includes(value as PaymentPlatform);
+}
+
 /** 与 API 的 AlipayProductCode 一致 */
 export type AlipayProductCode = 'MEMBER_PREMIUM' | 'POINTS_TIER1' | 'POINTS_TIER2' | 'POINTS_TIER3';
 

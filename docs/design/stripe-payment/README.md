@@ -23,5 +23,5 @@
 
 ## 后续事项
 
-- 游戏内入口：网站稳定后再做（windy10v10ai/game#2601）
+- 游戏内入口：windy10v10ai/game#2601，按钮打开 `/membership?platform=stripe`
 - Stripe 账号以日元结算，美元收款有换汇费
