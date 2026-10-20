@@ -91,6 +91,9 @@ export function WikiIcon({
 }) {
   const t = useTranslations('wiki');
   const sizeClass = ICON_CLASS[kind][size];
+  // 物品的提示框与弹窗照游戏画，游戏里那里的图标不带档位框
+  const plain = kind === 'items' && size !== 'cell';
+  const frame = plain ? 'rounded-sm' : `rounded-md border-2 ${TIER_CLASS[entry.tier].border}`;
   return entry.icon ? (
     <img
       src={entry.icon}
@@ -100,11 +103,13 @@ export function WikiIcon({
       loading="lazy"
       decoding="async"
       draggable={false}
-      className={`${sizeClass} shrink-0 rounded-md border-2 object-cover ${TIER_CLASS[entry.tier].border}`}
+      className={`${sizeClass} shrink-0 object-cover ${frame}`}
     />
   ) : (
     <span
-      className={`${sizeClass} flex shrink-0 items-center justify-center rounded-md border-2 border-dashed bg-panel-soft text-[10px] text-muted ${TIER_CLASS[entry.tier].border}`}
+      className={`${sizeClass} flex shrink-0 items-center justify-center border-2 border-dashed bg-panel-soft text-[10px] text-muted ${
+        plain ? 'rounded-sm border-line' : `rounded-md ${TIER_CLASS[entry.tier].border}`
+      }`}
     >
       {t('iconMissing')}
     </span>
