@@ -31,38 +31,7 @@ interface AbilityDetailsProps {
  */
 export default function AbilityDetails({ ability, desc, locale, variant }: AbilityDetailsProps) {
   const t = useTranslations('ability');
-
-  const meta: [string, ReactNode][] = [];
-  if (ability.behavior) {
-    meta.push([t('behavior.label'), t(`behavior.${ability.behavior}`)]);
-  }
-  if (ability.targeting) {
-    meta.push([t('targeting.label'), t(`targeting.${ability.targeting}`)]);
-  }
-  if (ability.damageType) {
-    meta.push([
-      t('damageType.label'),
-      <span key="damage" className={DAMAGE_COLOR[ability.damageType]}>
-        {t(`damageType.${ability.damageType}`)}
-      </span>,
-    ]);
-  }
-  if (ability.piercesImmunity) {
-    meta.push([
-      t('piercesImmunity.label'),
-      <span key="immunity" className={ability.piercesImmunity === 'yes' ? 'text-success' : ''}>
-        {t(`piercesImmunity.${ability.piercesImmunity}`)}
-      </span>,
-    ]);
-  }
-  if (ability.dispellable) {
-    meta.push([
-      t('dispellable.label'),
-      <span key="dispel" className={ability.dispellable === 'soft' ? '' : 'text-danger'}>
-        {t(`dispellable.${ability.dispellable}`)}
-      </span>,
-    ]);
-  }
+  const meta = useAbilityMeta(ability);
 
   const sections: ReactNode[] = [];
   if (meta.length) {
@@ -139,8 +108,45 @@ export default function AbilityDetails({ ability, desc, locale, variant }: Abili
   ));
 }
 
+/** 施法方式、影响对象、伤害类型等属性行，每项是 [标签, 取值] */
+export function useAbilityMeta(ability: AbilityDetail): [string, ReactNode][] {
+  const t = useTranslations('ability');
+  const meta: [string, ReactNode][] = [];
+  if (ability.behavior) {
+    meta.push([t('behavior.label'), t(`behavior.${ability.behavior}`)]);
+  }
+  if (ability.targeting) {
+    meta.push([t('targeting.label'), t(`targeting.${ability.targeting}`)]);
+  }
+  if (ability.damageType) {
+    meta.push([
+      t('damageType.label'),
+      <span key="damage" className={DAMAGE_COLOR[ability.damageType]}>
+        {t(`damageType.${ability.damageType}`)}
+      </span>,
+    ]);
+  }
+  if (ability.piercesImmunity) {
+    meta.push([
+      t('piercesImmunity.label'),
+      <span key="immunity" className={ability.piercesImmunity === 'yes' ? 'text-success' : ''}>
+        {t(`piercesImmunity.${ability.piercesImmunity}`)}
+      </span>,
+    ]);
+  }
+  if (ability.dispellable) {
+    meta.push([
+      t('dispellable.label'),
+      <span key="dispel" className={ability.dispellable === 'soft' ? '' : 'text-danger'}>
+        {t(`dispellable.${ability.dispellable}`)}
+      </span>,
+    ]);
+  }
+  return meta;
+}
+
 /** 标签自带冒号；全角冒号本身带留白，半角冒号后补一个空隙。物品的标签里可能带 <font> 着色 */
-function Label({ text }: { text: string }) {
+export function Label({ text }: { text: string }) {
   return (
     <span className={`text-muted ${text.endsWith('：') ? '' : 'me-1'}`}>
       <GameText text={text} />
@@ -182,7 +188,7 @@ function ValueRow({
   );
 }
 
-function Levels({
+export function Levels({
   levels,
   percent = false,
   className = 'text-heading',
@@ -222,7 +228,7 @@ function ManaIcon({ label }: { label: string }) {
   );
 }
 
-function AoeIcon({ label }: { label: string }) {
+export function AoeIcon({ label }: { label: string }) {
   return (
     <svg
       viewBox="0 0 12 12"

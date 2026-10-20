@@ -368,12 +368,17 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
           unresolved.push(`${abilityName} 的 %${name}%`);
           return whole;
         }
-        return value;
+        // 游戏的物品提示把换进去的数值加粗，觉醒与抽选技能的说明保持原样
+        return kind === 'items' ? `<b>${value}</b>` : value;
       });
-      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换
+      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换。
+      // 游戏用 GameplayValues 的 span 包驱散类型这类取值，显示上与正文无异，去掉标记只留文字
       text[lang] = {
         title: titles[lang].replace(/\n/g, '<br>'),
-        desc: desc.replace(/\n/g, '<br>'),
+        desc: desc
+          .replace(/<\/b>%/g, '%</b>')
+          .replace(/<\/?span\b[^>]*>/gi, '')
+          .replace(/\n/g, '<br>'),
       };
     }
     for (const lang of langs) {

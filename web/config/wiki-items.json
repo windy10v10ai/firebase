@@ -421,6 +421,12 @@
       "tier": 3
     },
     {
+      "name": "item_bloodstone",
+      "section": "equipment",
+      "price": 8900,
+      "tier": 3
+    },
+    {
       "name": "item_adi_king_plus",
       "section": "equipment",
       "price": 9550,
@@ -475,13 +481,13 @@
       "tier": 3
     },
     {
-      "name": "item_wasp_despotic",
+      "name": "item_wasp_callous",
       "section": "equipment",
       "price": 10000,
       "tier": 3
     },
     {
-      "name": "item_wasp_callous",
+      "name": "item_wasp_despotic",
       "section": "equipment",
       "price": 10000,
       "tier": 3
@@ -494,6 +500,12 @@
     },
     {
       "name": "item_swift_blink_2",
+      "section": "equipment",
+      "price": 10600,
+      "tier": 4
+    },
+    {
+      "name": "item_arcane_blink",
       "section": "equipment",
       "price": 10600,
       "tier": 4
@@ -583,6 +595,12 @@
       "tier": 4
     },
     {
+      "name": "item_armlet_artifact",
+      "section": "equipment",
+      "price": 18500,
+      "tier": 4
+    },
+    {
       "name": "item_guardian_greaves_artifact",
       "section": "equipment",
       "price": 12800,
@@ -655,27 +673,21 @@
       "tier": 4
     },
     {
-      "name": "item_armlet_artifact",
-      "section": "equipment",
-      "price": 18500,
-      "tier": 4
-    },
-    {
       "name": "item_jump_jump_jump",
       "section": "equipment",
       "price": 18600,
       "tier": 4
     },
     {
-      "name": "item_refresh_core",
-      "section": "equipment",
-      "price": 19200,
-      "tier": 4
-    },
-    {
       "name": "item_fall_fall_fall",
       "section": "equipment",
       "price": 19600,
+      "tier": 4
+    },
+    {
+      "name": "item_refresh_core",
+      "section": "equipment",
+      "price": 19200,
       "tier": 4
     },
     {
@@ -709,9 +721,21 @@
       "tier": 5
     },
     {
+      "name": "item_rapier_ultra_bot",
+      "section": "equipment",
+      "price": 40000,
+      "tier": 5
+    },
+    {
       "name": "item_hawkeye_fighter",
       "section": "equipment",
       "price": 36300,
+      "tier": 5
+    },
+    {
+      "name": "item_hawkeye_turret",
+      "section": "equipment",
+      "price": 44700,
       "tier": 5
     },
     {
@@ -727,15 +751,15 @@
       "tier": 5
     },
     {
-      "name": "item_rapier_ultra_bot",
-      "section": "equipment",
-      "price": 40000,
-      "tier": 5
-    },
-    {
       "name": "item_shadow_impact",
       "section": "equipment",
       "price": 40400,
+      "tier": 5
+    },
+    {
+      "name": "item_shadow_judgment",
+      "section": "equipment",
+      "price": 47175,
       "tier": 5
     },
     {
@@ -751,21 +775,9 @@
       "tier": 5
     },
     {
-      "name": "item_hawkeye_turret",
-      "section": "equipment",
-      "price": 44700,
-      "tier": 5
-    },
-    {
       "name": "item_beast_armor",
       "section": "equipment",
       "price": 46000,
-      "tier": 5
-    },
-    {
-      "name": "item_shadow_judgment",
-      "section": "equipment",
-      "price": 47175,
       "tier": 5
     },
     {
@@ -851,6 +863,18 @@
       "section": "consumable",
       "price": 0,
       "tier": 5
+    },
+    {
+      "name": "item_light_part",
+      "section": "drop",
+      "price": null,
+      "tier": 4
+    },
+    {
+      "name": "item_dark_part",
+      "section": "drop",
+      "price": null,
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_1",
@@ -941,18 +965,6 @@
       "section": "drop",
       "price": null,
       "tier": 5
-    },
-    {
-      "name": "item_light_part",
-      "section": "drop",
-      "price": null,
-      "tier": 1
-    },
-    {
-      "name": "item_dark_part",
-      "section": "drop",
-      "price": null,
-      "tier": 1
     },
     {
       "name": "item_blessing_of_dragon",

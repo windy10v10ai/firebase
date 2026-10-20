@@ -8,8 +8,10 @@ import { useEffect, useState, type ReactNode } from 'react';
 import AbilityDetails from '@/app/components/AbilityDetails';
 import AbilityDialog from '@/app/components/AbilityDialog';
 import AbilityHoverTip from '@/app/components/AbilityHoverTip';
+import ItemDetails from '@/app/components/ItemDetails';
 import Skeleton from '@/app/components/ui/skeleton';
 import { pickText, type AbilityLocale } from '@/app/lib/ability-text';
+import { GAME_ICON } from '@/config/game-icons';
 
 import type { WikiEntry } from '@/app/wiki/entries';
 import type { WikiDetail } from '@/config/wiki';
@@ -28,7 +30,11 @@ export const TIER_CLASS: Record<number, { border: string; badge: string; text: s
 // 物品图是 88×64 的横图，技能图是方图；格子宽度一样，只有图标的形状不同
 export const ICON_CLASS = {
   abilities: { cell: 'size-14 lg:size-16', tip: 'size-11', dialog: 'size-16' },
-  items: { cell: 'h-10.5 w-14.5 lg:h-12 lg:w-16.5', tip: 'h-8 w-11', dialog: 'h-11.5 w-16' },
+  items: {
+    cell: 'h-10.5 w-14.5 lg:h-12 lg:w-16.5',
+    tip: 'h-12 w-16.5',
+    dialog: 'h-12 w-16.5 md:h-16 md:w-22',
+  },
 };
 
 type DetailMap = Map<string, WikiDetail>;
@@ -85,6 +91,9 @@ export function WikiIcon({
 }) {
   const t = useTranslations('wiki');
   const sizeClass = ICON_CLASS[kind][size];
+  // 物品的提示框与弹窗照游戏画，游戏里那里的图标不带档位框
+  const plain = kind === 'items' && size !== 'cell';
+  const frame = plain ? 'rounded-sm' : `rounded-md border-2 ${TIER_CLASS[entry.tier].border}`;
   return entry.icon ? (
     <img
       src={entry.icon}
@@ -94,11 +103,13 @@ export function WikiIcon({
       loading="lazy"
       decoding="async"
       draggable={false}
-      className={`${sizeClass} shrink-0 rounded-md border-2 object-cover ${TIER_CLASS[entry.tier].border}`}
+      className={`${sizeClass} shrink-0 object-cover ${frame}`}
     />
   ) : (
     <span
-      className={`${sizeClass} flex shrink-0 items-center justify-center rounded-md border-2 border-dashed bg-panel-soft text-[10px] text-muted ${TIER_CLASS[entry.tier].border}`}
+      className={`${sizeClass} flex shrink-0 items-center justify-center border-2 border-dashed bg-panel-soft text-[10px] text-muted ${
+        plain ? 'rounded-sm border-line' : `rounded-md ${TIER_CLASS[entry.tier].border}`
+      }`}
     >
       {t('iconMissing')}
     </span>
@@ -106,29 +117,46 @@ export function WikiIcon({
 }
 
 function DetailBlock({
+  kind,
   detail,
   locale,
   variant,
 }: {
+  kind: WikiKind;
   detail: WikiDetail | undefined;
   locale: AbilityLocale;
   variant: 'tooltip' | 'dialog';
 }) {
   if (!detail) {
     return (
-      <p className="text-[13px] leading-[1.65]">
+      <p className={`text-[13px] leading-[1.65] ${kind === 'items' ? 'p-3' : ''}`}>
         <Skeleton>0000000000000000000000000000000000000000000000000000000000</Skeleton>
       </p>
     );
   }
+  const Details = kind === 'items' ? ItemDetails : AbilityDetails;
   return (
-    <AbilityDetails
+    <Details
       ability={detail.ability}
       desc={pickText(detail.desc, locale)}
       locale={locale}
       variant={variant}
     />
   );
+}
+
+/** 标题下那一行：商店物品照游戏显示金币价格，其余显示来源与档位 */
+function Subtitle({ entry, large = false }: { entry: WikiEntry; large?: boolean }) {
+  if (entry.price !== undefined) {
+    const icon = large ? 'size-5' : 'size-4.5';
+    return (
+      <span className="flex items-center gap-1.5 font-bold text-game-gold tabular-nums">
+        <img src={GAME_ICON.gold} alt="" width={20} height={20} className={icon} />
+        {entry.price}
+      </span>
+    );
+  }
+  return <span className={`font-semibold ${TIER_CLASS[entry.tier].text}`}>{entry.tag}</span>;
 }
 
 /** 电脑档的悬浮说明，挂在 children 上；说明没到时先放骨架 */
@@ -149,8 +177,22 @@ export function WikiHoverTip({
     <AbilityHoverTip
       icon={<WikiIcon kind={kind} entry={entry} size="tip" />}
       title={entry.label}
-      subtitle={<span className={`font-semibold ${TIER_CLASS[entry.tier].text}`}>{entry.tag}</span>}
-      content={<DetailBlock detail={details?.get(entry.key)} locale={locale} variant="tooltip" />}
+      subtitle={
+        kind === 'items' ? (
+          <Subtitle entry={entry} />
+        ) : (
+          <span className={`font-semibold ${TIER_CLASS[entry.tier].text}`}>{entry.tag}</span>
+        )
+      }
+      content={
+        <DetailBlock
+          kind={kind}
+          detail={details?.get(entry.key)}
+          locale={locale}
+          variant="tooltip"
+        />
+      }
+      tone={kind === 'items' ? 'game' : 'site'}
     >
       {children}
     </AbilityHoverTip>
@@ -175,22 +217,34 @@ export function WikiDialog({
     <AbilityDialog
       openKey={entry?.key ?? null}
       onClose={onClose}
+      tone={kind === 'items' ? 'game' : 'site'}
       header={
         entry ? (
           <>
             <WikiIcon kind={kind} entry={entry} size="dialog" />
             <div className="min-w-0">
               <h2 className="text-lg leading-snug font-bold text-heading">{entry.label}</h2>
-              <div className={`mt-0.5 text-sm font-semibold ${TIER_CLASS[entry.tier].text}`}>
-                {entry.tag}
-              </div>
+              {kind === 'items' ? (
+                <div className="mt-0.5 text-base">
+                  <Subtitle entry={entry} large />
+                </div>
+              ) : (
+                <div className={`mt-0.5 text-sm font-semibold ${TIER_CLASS[entry.tier].text}`}>
+                  {entry.tag}
+                </div>
+              )}
             </div>
           </>
         ) : null
       }
       body={
         entry ? (
-          <DetailBlock detail={details?.get(entry.key)} locale={locale} variant="dialog" />
+          <DetailBlock
+            kind={kind}
+            detail={details?.get(entry.key)}
+            locale={locale}
+            variant="dialog"
+          />
         ) : null
       }
     />

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   createAbilityReader,
   gameHead,
+  parseFlatKv,
   readItemRecipes,
   resolveDotaVersion,
   resolveGameRepo,
@@ -47,6 +48,41 @@ const SHOP_EXCLUDED = [
   'item_wish_3',
   'item_wish_4',
 ];
+// game 把一些高级版与原版对调了名字，高级版写在原版覆盖文件里；凭 game 本地化给它起了自己的名字认出来
+const OVERRIDE_ITEM_KV = 'npc_items_override.txt';
+const ADDON_ZH = 'game/resource/addon_schinese.txt';
+// 同一系列在同一价格档里排在一起，系列内按升级顺序；跨档的仍各待各的档
+const SHOP_SERIES = [
+  ['item_overwhelming_blink_2', 'item_swift_blink_2', 'item_arcane_blink'],
+  ['item_jump_jump_jump', 'item_fall_fall_fall'],
+  [
+    'item_armlet_plus',
+    'item_armlet_pro_max',
+    'item_armlet_light',
+    'item_armlet_dark',
+    'item_armlet_artifact',
+  ],
+  ['item_kaya_and_sange_1', 'item_sange_and_yasha_1', 'item_yasha_and_kaya_1'],
+  ['item_wasp_callous', 'item_wasp_despotic', 'item_wasp_golden'],
+  ['item_shotgun', 'item_shotgun_v2'],
+  ['item_bloodstone_v2', 'item_bloodstone'],
+  ['item_adi_king', 'item_adi_king_plus'],
+  ['item_force_staff_2', 'item_force_staff_3'],
+  ['item_aether_lens_2', 'item_arcane_octarine_core', 'item_refresh_core'],
+  ['item_manta_1', 'item_manta_2'],
+  ['item_sphere_2', 'item_saint_orb'],
+  ['item_veil_of_discord_2', 'item_shivas_guard_2'],
+  ['item_blade_mail_2', 'item_force_field_ultra'],
+  ['item_dodo_desolator', 'item_infernal_desolator'],
+  ['item_magic_scepter', 'item_hallowed_scepter'],
+  ['item_quelling_blade_2_datadriven', 'item_bfury_ultra'],
+  ['item_monkey_king_bar_2', 'item_excalibur', 'item_rapier_ultra', 'item_rapier_ultra_bot'],
+  ['item_hurricane_pike_2', 'item_hydras_breath_2'],
+  ['item_hawkeye_fighter', 'item_hawkeye_turret'],
+  ['item_beast_armor', 'item_beast_shield'],
+  ['item_necronomicon_staff', 'item_shadow_impact', 'item_shadow_judgment'],
+  ['item_forbidden_staff', 'item_forbidden_blade'],
+];
 const SHOP_CONSUMABLES = [
   'item_candy_candy',
   'item_tome_of_strength',
@@ -58,8 +94,10 @@ const SHOP_CONSUMABLES = [
 ];
 // 不按价格上色的消耗道具：觉醒石不花钱，在游戏里却是最稀有的一档
 const CONSUMABLE_TIERS = { item_awaken_stone: 5 };
-// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类；没有价格，边框颜色按游戏里的稀有程度定
+// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类；没有价格，边框颜色按游戏里的稀有程度定，顺序即页面上的顺序
 const SHOP_DROP_TIERS = {
+  item_light_part: 4,
+  item_dark_part: 4,
   ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => [`item_dragon_ball_${n}`, 4])),
   ...Object.fromEntries(
     ['hawkeye', 'forbidden', 'brutal', 'beast', 'life', 'shadow', 'magic', 'agile'].map((n) => [
@@ -67,8 +105,6 @@ const SHOP_DROP_TIERS = {
       5,
     ]),
   ),
-  item_light_part: 1,
-  item_dark_part: 1,
   item_blessing_of_dragon: 5,
   item_blessing_of_dragon_1: 5,
   item_blessing_of_dragon_2: 5,
@@ -128,7 +164,12 @@ function readShop(game, version, lotteryNames, errors) {
   const inShop = [
     ...new Set([...shopText.matchAll(/"item"\s+"(item_[a-z0-9_]+)"/g)].map((m) => m[1])),
   ];
-  const isCustom = (name) => CUSTOM_ITEM_KV.has(kv.get(name)?.source);
+  const renamed = new Set(
+    [...parseFlatKv(path.join(game, ADDON_ZH)).keys()].map((key) => key.toLowerCase()),
+  );
+  const isCustom = (name) =>
+    CUSTOM_ITEM_KV.has(kv.get(name)?.source) ||
+    (kv.get(name)?.source === OVERRIDE_ITEM_KV && renamed.has(`dota_tooltip_ability_${name}`));
   const recipes = [...kv.entries()].filter(([, v]) => v.recipe && v.result);
 
   const obtainable = new Set([...inShop, ...lotteryNames, ...SHOP_DROPS]);
@@ -188,7 +229,10 @@ function readShop(game, version, lotteryNames, errors) {
     if (entry.price <= 0) errors.push(`${entry.name} 算不出价格`);
   }
   return [
-    ...equipment.map((entry) => ({ ...entry, tier: priceTier(entry.price) })),
+    ...groupSeries(
+      equipment.map((entry) => ({ ...entry, tier: priceTier(entry.price) })),
+      errors,
+    ),
     ...SHOP_CONSUMABLES.map((name) => {
       const price = priceOf(name);
       return {
@@ -205,6 +249,34 @@ function readShop(game, version, lotteryNames, errors) {
       tier: SHOP_DROP_TIERS[name],
     })),
   ];
+}
+
+/** 已按价格排好的装备里，同一档的系列成员挪到该系列在这一档最便宜那件的位置 */
+function groupSeries(equipment, errors) {
+  const names = new Set(equipment.map((entry) => entry.name));
+  const seriesOf = new Map();
+  for (const series of SHOP_SERIES) {
+    for (const name of series) {
+      if (!names.has(name)) errors.push(`系列名单里的 ${name} 不在商店装备里`);
+      seriesOf.set(name, series);
+    }
+  }
+  const placed = new Set();
+  const out = [];
+  for (const entry of equipment) {
+    if (placed.has(entry.name)) continue;
+    const series = seriesOf.get(entry.name);
+    const members = series
+      ? series
+          .map((name) => equipment.find((e) => e.name === name))
+          .filter((e) => e && e.tier === entry.tier)
+      : [entry];
+    for (const member of members) {
+      placed.add(member.name);
+      out.push(member);
+    }
+  }
+  return out;
 }
 
 /** 读每条的说明并自检；needsDesc 为 false 时纯加属性、只有数值的物品也放行 */
@@ -226,6 +298,12 @@ function readDetails(reader, names, kind, needsDesc, errors) {
     }
     for (const lang of LANGS) {
       if (desc[lang].includes('\\')) errors.push(`${name} 的 ${lang} 描述残留反斜杠转义`);
+      // 网站的说明渲染只认这几种标记，其余会原样显示成源码
+      for (const [tag] of desc[lang].matchAll(/<\/?[a-z0-9]+\b[^>]*>/gi)) {
+        if (!/^<\/?(br|b|h1|font)\b/i.test(tag)) {
+          errors.push(`${name} 的 ${lang} 描述有网站不认的标记 ${tag}`);
+        }
+      }
       if (ability.lore?.[lang].includes('\\')) {
         errors.push(`${name} 的 ${lang} 背景故事残留反斜杠转义`);
       }
