@@ -4357,6 +4357,87 @@
       "lore": null
     }
   },
+  "item_bloodstone": {
+    "desc": {
+      "zh": "<h1>主动：血之契约</h1>血精石的技能吸血效果提升至<b>60%</b>。持续<b>5</b>秒。<br><br><h1>被动：法术虚弱光环</h1>敌方单位承受的技能伤害增加<b>10%</b>。<br><br>作用范围：<b>1200</b>",
+      "en": "<h1>Active: Bloodpact</h1> Increases Bloodstone's Spell Lifesteal to <b>60%</b>. Lasts <b>5</b> seconds. <br><br><h1>Passive: Spell Weakness Aura</h1> Enemy units take <b>10%</b> increased damage from spells. <br><br>Radius: <b>1200</b>",
+      "ru": "<h1>Активное: Bloodpact</h1> Увеличивает вампиризм заклинаниями от этого предмета до <b>60%</b>. Длительность: <b>5</b> сек. <br><br><h1>Пассивное: Spell Weakness Aura</h1> Враги в радиусе <b>1200</b> получают на <b>10%</b> больше урона от заклинаний."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "生命值",
+            "en": "Health",
+            "ru": "к здоровью"
+          },
+          "sign": "+",
+          "levels": [
+            "1200"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法值",
+            "en": "Mana",
+            "ru": "к мане"
+          },
+          "sign": "+",
+          "levels": [
+            "1200"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "智力",
+            "en": "Intelligence",
+            "ru": "к интеллекту"
+          },
+          "sign": "+",
+          "levels": [
+            "15"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "技能吸血",
+            "en": "Spell Lifesteal",
+            "ru": "к вампиризму заклинаниями"
+          },
+          "sign": "+",
+          "levels": [
+            "40"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "35.0"
+      ],
+      "manaCost": null,
+      "lore": {
+        "zh": "血精石鲜红的色彩在战场上绝对不会被看错，拥有者似乎有无限的生命力和精力。",
+        "en": "The Bloodstone's bright ruby color is unmistakable on the battlefield, as the owner seems to have infinite vitality and spirit.",
+        "ru": "Багрянец этого камня легко приметить даже в разгаре битвы: он будто бы наделяет владельца безграничными жизненными и духовными силами."
+      }
+    }
+  },
   "item_adi_king_plus": {
     "desc": {
       "zh": "<h1><font color='#FFFF00'>主动：尼给路大有</font></h1>对自身施加弱驱散效果，<b>3</b>秒内会获得 <b>40%</b> 的移动速度加成和 <b>20%</b> 的闪避加成，并突破速度限制，零碰撞体积，可跨越地形。<br><h1><font color='#FFFF00'>被动：魔鬼的步伐</font></h1>产生光环效果，以自身为中心<b>600</b>范围内的友方单位得到 <b>8%</b> 的速度提升。",
@@ -5038,61 +5119,6 @@
       }
     }
   },
-  "item_wasp_despotic": {
-    "desc": {
-      "zh": "<h1>主动：暴虐</h1><b>4</b>秒内致命一击概率为<b>75%</b>，致命一击伤害为<b>200%</b>。<br><h1>被动：致命一击</h1>每次攻击有<b>30%</b>概率造成<b>250%</b>伤害。",
-      "en": "<h1>Active: Critical Ruling</h1>Critical Chance increases to <b>75%</b> for <b>4</b> seconds, but Critical Damage decreases to <b>200%</b>.<br><h1>Passive: Critical Strike</h1>Grants each attack a <b>30%</b> chance to deal <b>250%</b> damage.",
-      "ru": "<h1>Active: Critical Ruling</h1>Critical Chance increases to <b>75%</b> for <b>4</b> seconds, but Critical Damage decreases to <b>200%</b>.<br><h1>Passive: Critical Strike</h1>Grants each attack a <b>30%</b> chance to deal <b>250%</b> damage."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "攻击力",
-            "en": "Damage",
-            "ru": "к урону"
-          },
-          "sign": "+",
-          "levels": [
-            "120"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "敏捷",
-            "en": "Agility",
-            "ru": "к ловкости"
-          },
-          "sign": "+",
-          "levels": [
-            "30"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "30.0"
-      ],
-      "manaCost": [
-        "150"
-      ],
-      "lore": {
-        "zh": "黄金大核荣耀被拆分后的产物，代表暴虐的一面。",
-        "en": "The product of the ancient moon soul, it represents despotism.",
-        "ru": "The product of the ancient moon soul, it represents despotism."
-      }
-    }
-  },
   "item_wasp_callous": {
     "desc": {
       "zh": "<h1>主动：冷酷</h1><b>4</b>秒内闪避概率为<b>75%</b>，移动速度提升<b>20%</b>。<br><h1>被动：致命一击</h1>每次攻击有<b>30%</b>概率造成<b>180%</b>伤害。",
@@ -5176,6 +5202,61 @@
       }
     }
   },
+  "item_wasp_despotic": {
+    "desc": {
+      "zh": "<h1>主动：暴虐</h1><b>4</b>秒内致命一击概率为<b>75%</b>，致命一击伤害为<b>200%</b>。<br><h1>被动：致命一击</h1>每次攻击有<b>30%</b>概率造成<b>250%</b>伤害。",
+      "en": "<h1>Active: Critical Ruling</h1>Critical Chance increases to <b>75%</b> for <b>4</b> seconds, but Critical Damage decreases to <b>200%</b>.<br><h1>Passive: Critical Strike</h1>Grants each attack a <b>30%</b> chance to deal <b>250%</b> damage.",
+      "ru": "<h1>Active: Critical Ruling</h1>Critical Chance increases to <b>75%</b> for <b>4</b> seconds, but Critical Damage decreases to <b>200%</b>.<br><h1>Passive: Critical Strike</h1>Grants each attack a <b>30%</b> chance to deal <b>250%</b> damage."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "攻击力",
+            "en": "Damage",
+            "ru": "к урону"
+          },
+          "sign": "+",
+          "levels": [
+            "120"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "敏捷",
+            "en": "Agility",
+            "ru": "к ловкости"
+          },
+          "sign": "+",
+          "levels": [
+            "30"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "30.0"
+      ],
+      "manaCost": [
+        "150"
+      ],
+      "lore": {
+        "zh": "黄金大核荣耀被拆分后的产物，代表暴虐的一面。",
+        "en": "The product of the ancient moon soul, it represents despotism.",
+        "ru": "The product of the ancient moon soul, it represents despotism."
+      }
+    }
+  },
   "item_overwhelming_blink_2": {
     "desc": {
       "zh": "<h1>主动：泰森闪光</h1>传送到最远<b>1600</b>距离的位置。<br><br>传送后，<b>1200</b>范围内所有敌人受到<b>200</b> + <b>100%</b>力量值的瞬时伤害，并且额外持续受到总计为<b>200%</b>力量值的伤害，被减缓<b>80%</b>移动速度，降低<b>100</b>攻击速度，持续<b>6</b>秒。<br><br>受到来自敌方英雄或肉山的攻击时，盛势闪光将在<b>2.0</b>秒内无法使用。",
@@ -5251,6 +5332,45 @@
         "zh": "一把聪颖的战刃，可以预见佩戴者的动向并加以实现。",
         "en": "Become faster than the speed of light and electricity!",
         "ru": "Become faster than the speed of light and electricity!"
+      }
+    }
+  },
+  "item_arcane_blink": {
+    "desc": {
+      "zh": "<h1>主动：爱因斯坦闪光</h1>传送到最远<b>1800</b>距离的位置。<br><br>传送后回复<b>500</b>点生命和<b>200</b>点魔法。<br><br>受到来自敌方英雄或肉山的攻击时，秘奥闪光将在<b>0.2</b>秒内无法使用。",
+      "en": "<h1>Active: Blink of Einstein</h1> Teleport to a target point up to <b>1800</b> units away. <br><br>After teleportation, you restore <b>500</b> health and <b>200</b> mana.<br><br>Arcane Blink cannot be used for <b>0.2</b> seconds after taking damage from an enemy hero or Roshan.",
+      "ru": "<h1>Активное: Arcane Blink</h1> Мгновенно перемещает к указанной точке на расстоянии до <b>1800</b>.<br><br>Перемещение восстанавливает владельцу <b>500</b> здоровья и <b>200</b> маны.<br><br>Предмет нельзя использовать, если в последние <b>0.2</b> сек. его владелец получал урон от вражеских героев или Рошана."
+    },
+    "ability": {
+      "behavior": "point",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "智力",
+            "en": "Intelligence",
+            "ru": "к интеллекту"
+          },
+          "sign": "+",
+          "levels": [
+            "50"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "6.0"
+      ],
+      "manaCost": null,
+      "lore": {
+        "zh": "让人精神焕发的工具，可以帮忙分担施展奥术耗费的精力。",
+        "en": "The arcane arts' greatest contribution to assassination.",
+        "ru": "Живительный инструмент, который поможет вытерпеть затраты магической мощи."
       }
     }
   },
@@ -6444,6 +6564,85 @@
       }
     }
   },
+  "item_armlet_artifact": {
+    "desc": {
+      "zh": "<h1>开关：邪恶之力</h1>开启后邪恶之力将提供+<b>220</b>点攻击力，+<b>300</b>点力量，+<b>90%</b>减速抗性和+<b>48</b>点护甲，但每秒失去<b>450</b>点生命值。<br><br>开启邪恶之力后生命流失并不会导致死亡，关闭邪恶之力后力量降低也不会导致死亡。",
+      "en": "<h1>Toggle: Unholy Strength</h1>When active, Unholy Strength grants +<b>220</b> damage, +<b>300</b> strength, +<b>90%</b> slow resistance and +<b>48</b> armor, but drains <b>450</b> health per second.<br><br> You cannot die from the health drain when Unholy Strength is activated, nor from the strength loss when Unholy Strength is deactivated.",
+      "ru": "<h1>Toggle: Unholy Strength</h1>When active, Unholy Strength grants +<b>220</b> damage, +<b>300</b> strength, +<b>90%</b> slow resistance and +<b>48</b> armor, but drains <b>450</b> health per second.<br><br> You cannot die from the health drain when Unholy Strength is activated, nor from the strength loss when Unholy Strength is deactivated."
+    },
+    "ability": {
+      "behavior": "toggle",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "攻击力",
+            "en": "Damage",
+            "ru": "к урону"
+          },
+          "sign": "+",
+          "levels": [
+            "135"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "攻击速度",
+            "en": "Attack Speed",
+            "ru": "к скорости атаки"
+          },
+          "sign": "+",
+          "levels": [
+            "135"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "护甲",
+            "en": "Armor",
+            "ru": "к броне"
+          },
+          "sign": "+",
+          "levels": [
+            "54"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命恢复",
+            "en": "Health Regeneration",
+            "ru": "к восстановлению здоровья"
+          },
+          "sign": "+",
+          "levels": [
+            "45"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": null,
+      "manaCost": null,
+      "lore": {
+        "zh": "光明与黑暗，完美融合——持有者同时掌握两者之巅。",
+        "en": "Light and darkness, perfectly fused — the bearer gains the best of both worlds.",
+        "ru": "Light and darkness, perfectly fused — the bearer gains the best of both worlds."
+      }
+    }
+  },
   "item_guardian_greaves_artifact": {
     "desc": {
       "zh": "<h1>主动：修复</h1>使周围友军回复<b>1500</b>点生命 <font color='#00FF00'>+ <b>6%</b> 最大生命值</font> 和<b>1000</b>点魔法，并移除施法者身上大部分的负面效果。<br><br>作用范围：<b>1200</b><br>驱散类型：弱驱散<br><br><h1>被动：卫士光环</h1> 为周围友军提供<b>50</b>点/秒生命恢复和<b>30</b>点/秒魔法恢复。如果友方英雄的生命值低于<b>75%</b>，生命恢复将提升至<b>100</b>点/秒。<br><br>作用范围：<b>1200</b><br>多个鞋类物品提供的移动速度加成不叠加。",
@@ -7280,85 +7479,6 @@
       }
     }
   },
-  "item_armlet_artifact": {
-    "desc": {
-      "zh": "<h1>开关：邪恶之力</h1>开启后邪恶之力将提供+<b>220</b>点攻击力，+<b>300</b>点力量，+<b>90%</b>减速抗性和+<b>48</b>点护甲，但每秒失去<b>450</b>点生命值。<br><br>开启邪恶之力后生命流失并不会导致死亡，关闭邪恶之力后力量降低也不会导致死亡。",
-      "en": "<h1>Toggle: Unholy Strength</h1>When active, Unholy Strength grants +<b>220</b> damage, +<b>300</b> strength, +<b>90%</b> slow resistance and +<b>48</b> armor, but drains <b>450</b> health per second.<br><br> You cannot die from the health drain when Unholy Strength is activated, nor from the strength loss when Unholy Strength is deactivated.",
-      "ru": "<h1>Toggle: Unholy Strength</h1>When active, Unholy Strength grants +<b>220</b> damage, +<b>300</b> strength, +<b>90%</b> slow resistance and +<b>48</b> armor, but drains <b>450</b> health per second.<br><br> You cannot die from the health drain when Unholy Strength is activated, nor from the strength loss when Unholy Strength is deactivated."
-    },
-    "ability": {
-      "behavior": "toggle",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "攻击力",
-            "en": "Damage",
-            "ru": "к урону"
-          },
-          "sign": "+",
-          "levels": [
-            "135"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "攻击速度",
-            "en": "Attack Speed",
-            "ru": "к скорости атаки"
-          },
-          "sign": "+",
-          "levels": [
-            "135"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "护甲",
-            "en": "Armor",
-            "ru": "к броне"
-          },
-          "sign": "+",
-          "levels": [
-            "54"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命恢复",
-            "en": "Health Regeneration",
-            "ru": "к восстановлению здоровья"
-          },
-          "sign": "+",
-          "levels": [
-            "45"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": null,
-      "manaCost": null,
-      "lore": {
-        "zh": "光明与黑暗，完美融合——持有者同时掌握两者之巅。",
-        "en": "Light and darkness, perfectly fused — the bearer gains the best of both worlds.",
-        "ru": "Light and darkness, perfectly fused — the bearer gains the best of both worlds."
-      }
-    }
-  },
   "item_jump_jump_jump": {
     "desc": {
       "zh": "<h1>主动：跳！跳！跳！</h1>传送到目标位置并化身流星，<b>0.3</b>秒后砸落，期间无敌且无法行动。<br><br>落地后获得<b>60%</b>移动速度加成和相位移动状态，+<b>70</b>点敏捷，持续<b>7</b>秒。<br>落地后施法前摇减少<b>50%</b>，魔法消耗降低<b>25%</b>，持续<b>7</b>秒。<br>落地后回复<b>1000</b>点生命和<b>400</b>点魔法。<br><br>被流星砸中的敌人在眩晕结束后被减缓<b>80%</b>移动速度，降低<b>100</b>攻击速度，持续<b>6</b>秒。<br><br>受到来自敌方英雄或肉山的攻击时，将在<b>0.2</b>秒内无法使用。<br><h1>星落（按住Ctrl释放）</h1>不传送，召唤流星砸向目标位置，<b>0.5</b>秒后落地。<br>不提供传送后的增益，回复与减速。<br><br>施法距离：<b>900</b><br><h1>流星</h1>打击<b>400</b>范围内的敌人，眩晕<b>1.0</b>秒并造成冲击伤害。<br>之后持续燃烧<b>6</b>秒，非建筑单位在燃烧期间被减缓<b>40%</b>移动速度。<br><br>对建筑冲击伤害：<b>150</b> + <b>15%</b>全属性<br>对建筑持续伤害：<b>75</b><br><br>对非建筑冲击伤害：<b>300</b> + <b>30%</b>全属性<br>对非建筑持续伤害：<b>200</b>",
@@ -7453,6 +7573,103 @@
         "zh": "你问我闪现是什么？唔…我是铁血刀斯林，震怒！",
         "en": "You call it Flash? No, No, No! I'm a Dotaer, not a LOLer! It's Blink, man! BLINK!",
         "ru": "Ты называешь это Флешем? Нет, нет, нет! Я дотер, а не лолер! Это Блинк, чувак! БЛИНК!"
+      }
+    }
+  },
+  "item_fall_fall_fall": {
+    "desc": {
+      "zh": "<h1>主动：星落</h1>不传送，召唤流星砸向目标位置，<b>0.5</b>秒后落地。<br>不提供传送后的增益，回复与减速。<br><br>施法距离：<b>900</b><br><h1>跳！跳！跳！（按住Ctrl释放）</h1>传送到目标位置并化身流星，<b>0.3</b>秒后砸落，期间无敌且无法行动。<br><br>落地后获得<b>60%</b>移动速度加成和相位移动状态，+<b>70</b>点敏捷，持续<b>7</b>秒。<br>落地后施法前摇减少<b>50%</b>，魔法消耗降低<b>25%</b>，持续<b>7</b>秒。<br>落地后回复<b>1000</b>点生命和<b>400</b>点魔法。<br><br>被流星砸中的敌人在眩晕结束后被减缓<b>80%</b>移动速度，降低<b>100</b>攻击速度，持续<b>6</b>秒。<br><br>受到来自敌方英雄或肉山的攻击时，将在<b>0.2</b>秒内无法使用。<br><h1>流星</h1>打击<b>400</b>范围内的敌人，眩晕<b>1.0</b>秒并造成冲击伤害。<br>之后持续燃烧<b>6</b>秒，非建筑单位在燃烧期间被减缓<b>40%</b>移动速度。<br><br>对建筑冲击伤害：<b>150</b> + <b>15%</b>全属性<br>对建筑持续伤害：<b>75</b><br><br>对非建筑冲击伤害：<b>300</b> + <b>30%</b>全属性<br>对非建筑持续伤害：<b>200</b>",
+      "en": "<h1>Active: Asteroid Hammer</h1>Does not teleport. Summons a meteor at the target point that lands after <b>0.5</b> seconds.<br>Grants no teleport buff, restore or slow.<br><br>Cast Range: <b>900</b><br><h1>Megablink (Hold Ctrl to Cast)</h1>Teleport to the target point and transform into a meteor that lands after <b>0.3</b> seconds, invulnerable and unable to act meanwhile.<br><br>On landing, you gain <b>60%</b> phased movement speed and +<b>70</b> Agility for <b>7</b> seconds.<br>On landing, your cast time is reduced by <b>50%</b> and mana costs by <b>25%</b> for <b>7</b> seconds.<br>On landing, you restore <b>1000</b> health and <b>400</b> mana.<br><br>Enemies hit by the meteor have <b>80%</b> movement speed slow and <b>100</b> attack speed slow for <b>6</b> seconds after the stun ends.<br><br>Cannot be used for <b>0.2</b> seconds after taking damage from an enemy hero or Roshan.<br><h1>Meteor</h1>Strikes enemies in a <b>400</b> radius, stunning them for <b>1.0</b> seconds and dealing impact damage.<br>Then burns them for <b>6</b> seconds. Non-building units are slowed by <b>40%</b> while burning.<br><br>Building Impact Damage: <b>150</b> + <b>15%</b> of all Attributes<br>Building Damage Over Time: <b>75</b><br><br>Non-Building Impact Damage: <b>300</b> + <b>30%</b> of all Attributes<br>Non-Building Damage Over Time: <b>200</b>",
+      "ru": "<h1>Активное: Asteroid Hammer</h1>Без перемещения призывает метеорит в указанную точку, он падает через <b>0.5</b> сек.<br>Не даёт эффектов после перемещения, восстановления и замедления.<br><br>Дальность применения: <b>900</b><br><h1>Мегаблинк (с зажатым Ctrl)</h1>Мгновенно перемещает к указанной точке и превращает владельца в метеорит, который падает через <b>0.3</b> сек. В это время владелец неуязвим и не может действовать.<br><br>После приземления даёт <b>60%</b> скорости передвижения с беспрепятственным перемещением и +<b>70</b> к ловкости на <b>7</b> сек.<br>После приземления время применения сокращается на <b>50%</b>, а расход маны на <b>25%</b> на <b>7</b> сек.<br>После приземления восстанавливает <b>1000</b> здоровья и <b>400</b> маны.<br><br>Задетые метеоритом враги после оглушения замедляются на <b>80%</b> по скорости передвижения и на <b>100</b> по скорости атаки на <b>6</b> сек.<br><br>Предмет нельзя использовать в течение <b>0.2</b> сек. после получения урона от вражеских героев или Рошана.<br><h1>Метеорит</h1>Бьёт по врагам в радиусе <b>400</b>, оглушает их на <b>1.0</b> сек. и наносит урон при ударе.<br>Затем поджигает на <b>6</b> сек. Подожжённые существа (кроме построек) замедляются на <b>40%</b>.<br><br>Урон постройкам при ударе: <b>150</b> + <b>15%</b> суммы атрибутов<br>Периодический урон постройкам: <b>75</b><br><br>Урон существам при ударе: <b>300</b> + <b>30%</b> суммы атрибутов<br>Периодический урон существам: <b>200</b>"
+    },
+    "ability": {
+      "behavior": "point",
+      "targeting": null,
+      "damageType": "magical",
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "力量",
+            "en": "Strength",
+            "ru": "к силе"
+          },
+          "sign": "+",
+          "levels": [
+            "60"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "敏捷",
+            "en": "Agility",
+            "ru": "к ловкости"
+          },
+          "sign": "+",
+          "levels": [
+            "60"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "智力",
+            "en": "Intelligence",
+            "ru": "к интеллекту"
+          },
+          "sign": "+",
+          "levels": [
+            "60"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "技能增强",
+            "en": "Spell Damage",
+            "ru": "Усиление способностей"
+          },
+          "sign": "+",
+          "levels": [
+            "36"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法恢复增强",
+            "en": "Mana Regen Amplification",
+            "ru": "Усиление восстановления маны"
+          },
+          "sign": "+",
+          "levels": [
+            "50"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "12"
+      ],
+      "manaCost": [
+        "200"
+      ],
+      "lore": {
+        "zh": "想砸星落却跳进了人堆？换把刀吧。",
+        "en": "Meant to drop a meteor but blinked into five heroes? Swap the dagger.",
+        "ru": "Хотел уронить метеор, а прыгнул в толпу врагов? Смени кинжал."
       }
     }
   },
@@ -7564,103 +7781,6 @@
         "zh": "位于法术技艺核心的，是只有身负异能之人才能感知的光带。",
         "en": "At the core of spellcraft are spectrums only the very gifted can sense.",
         "ru": "At the core of spellcraft are spectrums only the very gifted can sense."
-      }
-    }
-  },
-  "item_fall_fall_fall": {
-    "desc": {
-      "zh": "<h1>主动：星落</h1>不传送，召唤流星砸向目标位置，<b>0.5</b>秒后落地。<br>不提供传送后的增益，回复与减速。<br><br>施法距离：<b>900</b><br><h1>跳！跳！跳！（按住Ctrl释放）</h1>传送到目标位置并化身流星，<b>0.3</b>秒后砸落，期间无敌且无法行动。<br><br>落地后获得<b>60%</b>移动速度加成和相位移动状态，+<b>70</b>点敏捷，持续<b>7</b>秒。<br>落地后施法前摇减少<b>50%</b>，魔法消耗降低<b>25%</b>，持续<b>7</b>秒。<br>落地后回复<b>1000</b>点生命和<b>400</b>点魔法。<br><br>被流星砸中的敌人在眩晕结束后被减缓<b>80%</b>移动速度，降低<b>100</b>攻击速度，持续<b>6</b>秒。<br><br>受到来自敌方英雄或肉山的攻击时，将在<b>0.2</b>秒内无法使用。<br><h1>流星</h1>打击<b>400</b>范围内的敌人，眩晕<b>1.0</b>秒并造成冲击伤害。<br>之后持续燃烧<b>6</b>秒，非建筑单位在燃烧期间被减缓<b>40%</b>移动速度。<br><br>对建筑冲击伤害：<b>150</b> + <b>15%</b>全属性<br>对建筑持续伤害：<b>75</b><br><br>对非建筑冲击伤害：<b>300</b> + <b>30%</b>全属性<br>对非建筑持续伤害：<b>200</b>",
-      "en": "<h1>Active: Asteroid Hammer</h1>Does not teleport. Summons a meteor at the target point that lands after <b>0.5</b> seconds.<br>Grants no teleport buff, restore or slow.<br><br>Cast Range: <b>900</b><br><h1>Megablink (Hold Ctrl to Cast)</h1>Teleport to the target point and transform into a meteor that lands after <b>0.3</b> seconds, invulnerable and unable to act meanwhile.<br><br>On landing, you gain <b>60%</b> phased movement speed and +<b>70</b> Agility for <b>7</b> seconds.<br>On landing, your cast time is reduced by <b>50%</b> and mana costs by <b>25%</b> for <b>7</b> seconds.<br>On landing, you restore <b>1000</b> health and <b>400</b> mana.<br><br>Enemies hit by the meteor have <b>80%</b> movement speed slow and <b>100</b> attack speed slow for <b>6</b> seconds after the stun ends.<br><br>Cannot be used for <b>0.2</b> seconds after taking damage from an enemy hero or Roshan.<br><h1>Meteor</h1>Strikes enemies in a <b>400</b> radius, stunning them for <b>1.0</b> seconds and dealing impact damage.<br>Then burns them for <b>6</b> seconds. Non-building units are slowed by <b>40%</b> while burning.<br><br>Building Impact Damage: <b>150</b> + <b>15%</b> of all Attributes<br>Building Damage Over Time: <b>75</b><br><br>Non-Building Impact Damage: <b>300</b> + <b>30%</b> of all Attributes<br>Non-Building Damage Over Time: <b>200</b>",
-      "ru": "<h1>Активное: Asteroid Hammer</h1>Без перемещения призывает метеорит в указанную точку, он падает через <b>0.5</b> сек.<br>Не даёт эффектов после перемещения, восстановления и замедления.<br><br>Дальность применения: <b>900</b><br><h1>Мегаблинк (с зажатым Ctrl)</h1>Мгновенно перемещает к указанной точке и превращает владельца в метеорит, который падает через <b>0.3</b> сек. В это время владелец неуязвим и не может действовать.<br><br>После приземления даёт <b>60%</b> скорости передвижения с беспрепятственным перемещением и +<b>70</b> к ловкости на <b>7</b> сек.<br>После приземления время применения сокращается на <b>50%</b>, а расход маны на <b>25%</b> на <b>7</b> сек.<br>После приземления восстанавливает <b>1000</b> здоровья и <b>400</b> маны.<br><br>Задетые метеоритом враги после оглушения замедляются на <b>80%</b> по скорости передвижения и на <b>100</b> по скорости атаки на <b>6</b> сек.<br><br>Предмет нельзя использовать в течение <b>0.2</b> сек. после получения урона от вражеских героев или Рошана.<br><h1>Метеорит</h1>Бьёт по врагам в радиусе <b>400</b>, оглушает их на <b>1.0</b> сек. и наносит урон при ударе.<br>Затем поджигает на <b>6</b> сек. Подожжённые существа (кроме построек) замедляются на <b>40%</b>.<br><br>Урон постройкам при ударе: <b>150</b> + <b>15%</b> суммы атрибутов<br>Периодический урон постройкам: <b>75</b><br><br>Урон существам при ударе: <b>300</b> + <b>30%</b> суммы атрибутов<br>Периодический урон существам: <b>200</b>"
-    },
-    "ability": {
-      "behavior": "point",
-      "targeting": null,
-      "damageType": "magical",
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "力量",
-            "en": "Strength",
-            "ru": "к силе"
-          },
-          "sign": "+",
-          "levels": [
-            "60"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "敏捷",
-            "en": "Agility",
-            "ru": "к ловкости"
-          },
-          "sign": "+",
-          "levels": [
-            "60"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "智力",
-            "en": "Intelligence",
-            "ru": "к интеллекту"
-          },
-          "sign": "+",
-          "levels": [
-            "60"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能增强",
-            "en": "Spell Damage",
-            "ru": "Усиление способностей"
-          },
-          "sign": "+",
-          "levels": [
-            "36"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复增强",
-            "en": "Mana Regen Amplification",
-            "ru": "Усиление восстановления маны"
-          },
-          "sign": "+",
-          "levels": [
-            "50"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "12"
-      ],
-      "manaCost": [
-        "200"
-      ],
-      "lore": {
-        "zh": "想砸星落却跳进了人堆？换把刀吧。",
-        "en": "Meant to drop a meteor but blinked into five heroes? Swap the dagger.",
-        "ru": "Хотел уронить метеор, а прыгнул в толпу врагов? Смени кинжал."
       }
     }
   },
@@ -8007,6 +8127,57 @@
       }
     }
   },
+  "item_rapier_ultra_bot": {
+    "desc": {
+      "zh": "<h1>被动：<font color='#a74abd'>永恒之力</font></h1>受到来自战争之神的神秘力量庇护，获得<font color='#f15b47'><b>100%</b></font>基础攻击力加成。<br><h1>被动：克敌机先</h1>攻击不会因闪避或其他效果而落空。<br><h1>被动：<font color='#e03e2e'>力量的代价（解放）</font></h1>过于强大力量总会有它的代价。<br><font color='#e03e2e'>但是解放之后就没有代价了</font>",
+      "en": "<h1>Passive: <font color='#a74abd'>Eternal</font></h1>Grants <font color='#f15b47'><b>100%</b></font> bonus Base Attack Damage. This item cannot be sold or destroyed.<br><h1>Passive: True Strike</h1>Attacks will never miss due to evasion or other effects, unless you attack structures.<br><h1>Passive: <font color='#e03e2e'>Price of Power (Liberated)</font></h1>Great power always comes with a price. <br><font color='#CC7A00'>But there is no price after liberation.</font>",
+      "ru": "<h1>Passive: <font color='#a74abd'>Eternal</font></h1>Grants <font color='#f15b47'><b>100%</b></font> bonus Base Attack Damage. This item cannot be sold or destroyed.<br><h1>Passive: True Strike</h1>Attacks will never miss due to evasion or other effects, unless you attack structures.<br><h1>Passive: <font color='#e03e2e'>Price of Power (Liberated)</font></h1>Great power always comes with a price. <br><font color='#CC7A00'>But there is no price after liberation.</font>"
+    },
+    "ability": {
+      "behavior": "passive",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "攻击力",
+            "en": "Damage",
+            "ru": "к урону"
+          },
+          "sign": "+",
+          "levels": [
+            "1000"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "技能伤害",
+            "en": "Spell Damage",
+            "ru": "к урону от заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "100"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": null,
+      "manaCost": null,
+      "lore": {
+        "zh": "解放后的诅咒圣剑不会摧毁",
+        "en": "You're silly. My cursed rapier is now permanent!",
+        "ru": "You're silly. My cursed rapier is now permanent!"
+      }
+    }
+  },
   "item_hawkeye_fighter": {
     "desc": {
       "zh": "<h1><font color='#FFFF00'>主动: 人形战斗机</font></h1>激活战机模式，获得高空视野和极高的机动性。持续<b>3</b>秒内，获得<b>40%</b>移速加成，变为飞行单位，无视地形移动，无视单位碰撞，无视移速上限，并施加弱驱散效果。<br><br>冷却时间：<b>15</b>秒<br><br>驱散类型：弱驱散",
@@ -8099,6 +8270,73 @@
         "zh": "化身战机,翱翔天际,无人能及。",
         "en": "Transform into a fighter, soaring through the skies, unmatched by anyone.",
         "ru": "Transform into a fighter, soaring through the skies, unmatched by anyone."
+      }
+    }
+  },
+  "item_hawkeye_turret": {
+    "desc": {
+      "zh": "<h1><font color='#FFFF00'>主动：人形炮台（仅限远程）</font></h1>化身炮台，变为飞行单位，获得高空视野。持续<b>6</b>秒，禁锢无法移动，获得额外攻击距离<b>600</b>，视野范围为攻击距离 + <b>300</b>。<br><br><font color='#FF6B6B'>近战英雄使用没有效果。</font><br><h1>被动：霰弹（仅限远程）</h1>对攻击目标周围<b>400</b>范围内的敌人造成<b>80%</b>溅射伤害。<br/>霰弹特效无法叠加，拥有<b>0.05</b>秒内置冷却。<br><h1>被动：绝对腐蚀</h1>物理攻击将降低目标<b>-45</b>点护甲，持续<b>7.0</b>秒。<br><br>每次有英雄死于毁蚀效果下就会+<b>10</b>点攻击力，最多获得<b>200</b>点。",
+      "en": "<h1><font color='#FFFF00'>Active: Humanoid Turret (Ranged Only)</font></h1>Transform into a flying turret, gaining high ground vision. Lasts <b>6</b> seconds, rooted and unable to move, gains bonus attack range of <b>600</b>, vision range equals attack range + <b>300</b>.<br><br><font color='#FF6B6B'>Has no effect when used by melee heroes.</font><br><h1>Passive: Buckshot (Ranged Only)</h1>Your attacks deal <b>80%</b> splash damage to enemies in a <b>400</b> radius around the attack target.<br/>Buckshot does not stack with itself, and has a <b>0.05</b> second internal cooldown.<br><h1>Passive: Absolute Corruption</h1>Physical attacks reduce the target's armor by <b>-45</b> for <b>7.0</b> seconds.<br><br>Gains +<b>10</b> damage every time an enemy hero dies while affected by Corruption, to a maximum of <b>200</b>.",
+      "ru": "<h1><font color='#FFFF00'>Active: Humanoid Turret (Ranged Only)</font></h1>Transform into a flying turret, gaining high ground vision. Lasts <b>6</b> seconds, rooted and unable to move, gains bonus attack range of <b>600</b>, vision range equals attack range + <b>300</b>.<br><br><font color='#FF6B6B'>Has no effect when used by melee heroes.</font><br><h1>Passive: Buckshot (Ranged Only)</h1>Your attacks deal <b>80%</b> splash damage to enemies in a <b>400</b> radius around the attack target.<br/>Buckshot does not stack with itself, and has a <b>0.05</b> second internal cooldown.<br><h1>Passive: Absolute Corruption</h1>Physical attacks reduce the target's armor by <b>-45</b> for <b>7.0</b> seconds.<br><br>Gains +<b>10</b> damage every time an enemy hero dies while affected by Corruption, to a maximum of <b>200</b>."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": "enemyUnits",
+      "damageType": "pure",
+      "piercesImmunity": "yes",
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "攻击力",
+            "en": "Damage",
+            "ru": "к урону"
+          },
+          "sign": "+",
+          "levels": [
+            "300"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": true
+        },
+        {
+          "label": {
+            "zh": "攻击距离<font color='#7d7d7d'>（近战/远程）</font>",
+            "en": "Attack Range <font color='#7d7d7d'>(Melee & Ranged)</font>",
+            "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем и дальнем бою)</font>"
+          },
+          "sign": "+",
+          "levels": [
+            "250"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "攻击速度",
+            "en": "Attack Speed",
+            "ru": "к скорости атаки"
+          },
+          "sign": "+",
+          "levels": [
+            "200"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "60"
+      ],
+      "manaCost": null,
+      "lore": {
+        "zh": "化身为固定炮台，以强大的火力压制敌人。",
+        "en": "Transform into a stationary turret, suppressing enemies with overwhelming firepower.",
+        "ru": "Transform into a stationary turret, suppressing enemies with overwhelming firepower."
       }
     }
   },
@@ -8266,57 +8504,6 @@
       }
     }
   },
-  "item_rapier_ultra_bot": {
-    "desc": {
-      "zh": "<h1>被动：<font color='#a74abd'>永恒之力</font></h1>受到来自战争之神的神秘力量庇护，获得<font color='#f15b47'><b>100%</b></font>基础攻击力加成。<br><h1>被动：克敌机先</h1>攻击不会因闪避或其他效果而落空。<br><h1>被动：<font color='#e03e2e'>力量的代价（解放）</font></h1>过于强大力量总会有它的代价。<br><font color='#e03e2e'>但是解放之后就没有代价了</font>",
-      "en": "<h1>Passive: <font color='#a74abd'>Eternal</font></h1>Grants <font color='#f15b47'><b>100%</b></font> bonus Base Attack Damage. This item cannot be sold or destroyed.<br><h1>Passive: True Strike</h1>Attacks will never miss due to evasion or other effects, unless you attack structures.<br><h1>Passive: <font color='#e03e2e'>Price of Power (Liberated)</font></h1>Great power always comes with a price. <br><font color='#CC7A00'>But there is no price after liberation.</font>",
-      "ru": "<h1>Passive: <font color='#a74abd'>Eternal</font></h1>Grants <font color='#f15b47'><b>100%</b></font> bonus Base Attack Damage. This item cannot be sold or destroyed.<br><h1>Passive: True Strike</h1>Attacks will never miss due to evasion or other effects, unless you attack structures.<br><h1>Passive: <font color='#e03e2e'>Price of Power (Liberated)</font></h1>Great power always comes with a price. <br><font color='#CC7A00'>But there is no price after liberation.</font>"
-    },
-    "ability": {
-      "behavior": "passive",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "攻击力",
-            "en": "Damage",
-            "ru": "к урону"
-          },
-          "sign": "+",
-          "levels": [
-            "1000"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能伤害",
-            "en": "Spell Damage",
-            "ru": "к урону от заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "100"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": null,
-      "manaCost": null,
-      "lore": {
-        "zh": "解放后的诅咒圣剑不会摧毁",
-        "en": "You're silly. My cursed rapier is now permanent!",
-        "ru": "You're silly. My cursed rapier is now permanent!"
-      }
-    }
-  },
   "item_shadow_impact": {
     "desc": {
       "zh": "<h1>主动：暗影冲击</h1>将目标变成无害的小动物。目标的基础移速变为<b>120</b>，并且被<font color='#6DB6E9'>沉默</font>，<font color='#C3E1DB'>锁闭</font>和<font color='#AFB912'>缴械</font>。<br><br>降低敌人 <b>-30%</b> 点的魔法抗性（减法叠加）。<br><br>敌人将会受到<b>0.5</b>x[自身属性总和]+<b>1000</b>点<font color='#05CAFF'>魔法伤害</font>，以及<b>400</b>点<font color='#FFE56E'>纯粹伤害</font>。<br><br>施法距离：<b>800</b><br>持续时间：<b>3.0</b>秒<br>冷却时间：<b>15</b>秒<br><h1>被动：法术强化</h1>下个对敌人施放的单体技能会单独对目标造成<b>600</b>点额外伤害，<font color='#DD621E'>禁用</font>其被动技能，并且减缓<b>50%</b>移动速度，持续<b>2</b>秒。<br><br>冷却时间：<b>0.1</b>秒。",
@@ -8467,6 +8654,159 @@
         "zh": "暗影的冲击,毁灭一切。",
         "en": "The shadow's curse brings annihilation.",
         "ru": "The shadow's curse brings annihilation."
+      }
+    }
+  },
+  "item_shadow_judgment": {
+    "desc": {
+      "zh": "<h1>主动：暗影审判</h1>对目标施加暗影审判，融合一闪，苍蓝幻想和变态辣的所有debuff效果。<br><br>一闪：瞬移到目标身后，眩晕<b>2.0</b>秒，造成<b>200</b>+<b>1.0</b>x[主属性]点纯粹伤害<br>苍蓝幻想：持续驱散增益，<b>4.0</b>秒禁用装备和被动，减速<b>-60%</b>，攻击速度减少<b>-200</b>，每秒造成<b>4%</b>最大生命值的纯粹伤害，降低<b>-80%</b>生命恢复<br>变态辣：沉默<b>5.0</b>秒，结束时造成期间受到伤害的<b>30%</b>作为额外魔法伤害<br><br>施法距离：<b>900</b>",
+      "en": "<h1>Active: Shadow Trial</h1>Afflicts the target with Shadow Trial, fusing all debuff effects from Flash, Blue Fantasy, and Ultra Bloodthorn.<br><br>Flash: Blinks behind the target and stuns for <b>2.0</b> seconds, dealing <b>200</b>+<b>1.0</b>x[Primary Attribute] pure damage<br>Blue Fantasy: Continuously dispels buffs, disables items and passives for <b>4.0</b> seconds, slows by <b>-60%</b>, reduces attack speed by <b>-200</b>, deals <b>4%</b> max health as pure damage per second, and reduces healing by <b>-80%</b><br>Ultra Bloodthorn: Silences for <b>5.0</b> seconds, dealing <b>30%</b> of damage taken during that time as bonus magic damage on expiry<br><br>Cast Range: <b>900</b>",
+      "ru": "<h1>Active: Shadow Trial</h1>Afflicts the target with Shadow Trial, fusing all debuff effects from Flash, Blue Fantasy, and Ultra Bloodthorn.<br><br>Flash: Blinks behind the target and stuns for <b>2.0</b> seconds, dealing <b>200</b>+<b>1.0</b>x[Primary Attribute] pure damage<br>Blue Fantasy: Continuously dispels buffs, disables items and passives for <b>4.0</b> seconds, slows by <b>-60%</b>, reduces attack speed by <b>-200</b>, deals <b>4%</b> max health as pure damage per second, and reduces healing by <b>-80%</b><br>Ultra Bloodthorn: Silences for <b>5.0</b> seconds, dealing <b>30%</b> of damage taken during that time as bonus magic damage on expiry<br><br>Cast Range: <b>900</b>"
+    },
+    "ability": {
+      "behavior": "target",
+      "targeting": "enemyUnits",
+      "damageType": null,
+      "piercesImmunity": "yes",
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "力量",
+            "en": "Strength",
+            "ru": "к силе"
+          },
+          "sign": "+",
+          "levels": [
+            "55"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "敏捷",
+            "en": "Agility",
+            "ru": "к ловкости"
+          },
+          "sign": "+",
+          "levels": [
+            "115"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "智力",
+            "en": "Intelligence",
+            "ru": "к интеллекту"
+          },
+          "sign": "+",
+          "levels": [
+            "85"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "攻击力",
+            "en": "Damage",
+            "ru": "к урону"
+          },
+          "sign": "+",
+          "levels": [
+            "360"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "护甲",
+            "en": "Armor",
+            "ru": "к броне"
+          },
+          "sign": "+",
+          "levels": [
+            "25"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "攻击速度",
+            "en": "Attack Speed",
+            "ru": "к скорости атаки"
+          },
+          "sign": "+",
+          "levels": [
+            "150"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命值",
+            "en": "Health",
+            "ru": "к здоровью"
+          },
+          "sign": "+",
+          "levels": [
+            "600"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法恢复",
+            "en": "Mana Regeneration",
+            "ru": "к восстановлению маны"
+          },
+          "sign": "+",
+          "levels": [
+            "25"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "技能伤害",
+            "en": "Spell Damage",
+            "ru": "к урону от заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "50"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "12"
+      ],
+      "manaCost": [
+        "800"
+      ],
+      "lore": {
+        "zh": "暗影的裁决，无人可逃。",
+        "en": "The shadow's judgment is absolute.",
+        "ru": "The shadow's judgment is absolute."
       }
     }
   },
@@ -8756,73 +9096,6 @@
       }
     }
   },
-  "item_hawkeye_turret": {
-    "desc": {
-      "zh": "<h1><font color='#FFFF00'>主动：人形炮台（仅限远程）</font></h1>化身炮台，变为飞行单位，获得高空视野。持续<b>6</b>秒，禁锢无法移动，获得额外攻击距离<b>600</b>，视野范围为攻击距离 + <b>300</b>。<br><br><font color='#FF6B6B'>近战英雄使用没有效果。</font><br><h1>被动：霰弹（仅限远程）</h1>对攻击目标周围<b>400</b>范围内的敌人造成<b>80%</b>溅射伤害。<br/>霰弹特效无法叠加，拥有<b>0.05</b>秒内置冷却。<br><h1>被动：绝对腐蚀</h1>物理攻击将降低目标<b>-45</b>点护甲，持续<b>7.0</b>秒。<br><br>每次有英雄死于毁蚀效果下就会+<b>10</b>点攻击力，最多获得<b>200</b>点。",
-      "en": "<h1><font color='#FFFF00'>Active: Humanoid Turret (Ranged Only)</font></h1>Transform into a flying turret, gaining high ground vision. Lasts <b>6</b> seconds, rooted and unable to move, gains bonus attack range of <b>600</b>, vision range equals attack range + <b>300</b>.<br><br><font color='#FF6B6B'>Has no effect when used by melee heroes.</font><br><h1>Passive: Buckshot (Ranged Only)</h1>Your attacks deal <b>80%</b> splash damage to enemies in a <b>400</b> radius around the attack target.<br/>Buckshot does not stack with itself, and has a <b>0.05</b> second internal cooldown.<br><h1>Passive: Absolute Corruption</h1>Physical attacks reduce the target's armor by <b>-45</b> for <b>7.0</b> seconds.<br><br>Gains +<b>10</b> damage every time an enemy hero dies while affected by Corruption, to a maximum of <b>200</b>.",
-      "ru": "<h1><font color='#FFFF00'>Active: Humanoid Turret (Ranged Only)</font></h1>Transform into a flying turret, gaining high ground vision. Lasts <b>6</b> seconds, rooted and unable to move, gains bonus attack range of <b>600</b>, vision range equals attack range + <b>300</b>.<br><br><font color='#FF6B6B'>Has no effect when used by melee heroes.</font><br><h1>Passive: Buckshot (Ranged Only)</h1>Your attacks deal <b>80%</b> splash damage to enemies in a <b>400</b> radius around the attack target.<br/>Buckshot does not stack with itself, and has a <b>0.05</b> second internal cooldown.<br><h1>Passive: Absolute Corruption</h1>Physical attacks reduce the target's armor by <b>-45</b> for <b>7.0</b> seconds.<br><br>Gains +<b>10</b> damage every time an enemy hero dies while affected by Corruption, to a maximum of <b>200</b>."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": "enemyUnits",
-      "damageType": "pure",
-      "piercesImmunity": "yes",
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "攻击力",
-            "en": "Damage",
-            "ru": "к урону"
-          },
-          "sign": "+",
-          "levels": [
-            "300"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": true
-        },
-        {
-          "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（近战/远程）</font>",
-            "en": "Attack Range <font color='#7d7d7d'>(Melee & Ranged)</font>",
-            "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем и дальнем бою)</font>"
-          },
-          "sign": "+",
-          "levels": [
-            "250"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "攻击速度",
-            "en": "Attack Speed",
-            "ru": "к скорости атаки"
-          },
-          "sign": "+",
-          "levels": [
-            "200"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "60"
-      ],
-      "manaCost": null,
-      "lore": {
-        "zh": "化身为固定炮台，以强大的火力压制敌人。",
-        "en": "Transform into a stationary turret, suppressing enemies with overwhelming firepower.",
-        "ru": "Transform into a stationary turret, suppressing enemies with overwhelming firepower."
-      }
-    }
-  },
   "item_beast_armor": {
     "desc": {
       "zh": "<h1>主动：不粘锅</h1>发出极寒冲击波，对<b>900</b>范围内敌人造成<b>800</b>点魔法伤害，降低<b>40%</b>移动速度和<b>100</b>攻击速度，降低<b>20%</b>魔法抗性。<br>同时反弹<b>100%</b>所有伤害并反弹指向性技能，持续<b>4</b>秒。<br><h1>被动：伤害反弹</h1>每次受到攻击时，反弹<b>60</b> + 所受攻击伤害的<b>20%</b>。<br><br>每<b>7</b>秒被动抵挡一次指向性法术。<br><h1>被动：辉耀灼烧</h1>每秒对<b>900</b>范围内敌军造成<b>120</b>点魔法伤害，并使其物理攻击有<b>10%</b>几率不会命中。",
@@ -8945,159 +9218,6 @@
         "zh": "集四大神器之力于一身的终极护甲，兽化符文赋予了它无与伦比的防御和反击能力。",
         "en": "The ultimate armor fused with the power of the four Artifacts; the Beast Rune grants it unparalleled defense and counterattack capabilities.",
         "ru": "The ultimate armor fused with the power of the four Artifacts; the Beast Rune grants it unparalleled defense and counterattack capabilities."
-      }
-    }
-  },
-  "item_shadow_judgment": {
-    "desc": {
-      "zh": "<h1>主动：暗影审判</h1>对目标施加暗影审判，融合一闪，苍蓝幻想和变态辣的所有debuff效果。<br><br>一闪：瞬移到目标身后，眩晕<b>2.0</b>秒，造成<b>200</b>+<b>1.0</b>x[主属性]点纯粹伤害<br>苍蓝幻想：持续驱散增益，<b>4.0</b>秒禁用装备和被动，减速<b>-60%</b>，攻击速度减少<b>-200</b>，每秒造成<b>4%</b>最大生命值的纯粹伤害，降低<b>-80%</b>生命恢复<br>变态辣：沉默<b>5.0</b>秒，结束时造成期间受到伤害的<b>30%</b>作为额外魔法伤害<br><br>施法距离：<b>900</b>",
-      "en": "<h1>Active: Shadow Trial</h1>Afflicts the target with Shadow Trial, fusing all debuff effects from Flash, Blue Fantasy, and Ultra Bloodthorn.<br><br>Flash: Blinks behind the target and stuns for <b>2.0</b> seconds, dealing <b>200</b>+<b>1.0</b>x[Primary Attribute] pure damage<br>Blue Fantasy: Continuously dispels buffs, disables items and passives for <b>4.0</b> seconds, slows by <b>-60%</b>, reduces attack speed by <b>-200</b>, deals <b>4%</b> max health as pure damage per second, and reduces healing by <b>-80%</b><br>Ultra Bloodthorn: Silences for <b>5.0</b> seconds, dealing <b>30%</b> of damage taken during that time as bonus magic damage on expiry<br><br>Cast Range: <b>900</b>",
-      "ru": "<h1>Active: Shadow Trial</h1>Afflicts the target with Shadow Trial, fusing all debuff effects from Flash, Blue Fantasy, and Ultra Bloodthorn.<br><br>Flash: Blinks behind the target and stuns for <b>2.0</b> seconds, dealing <b>200</b>+<b>1.0</b>x[Primary Attribute] pure damage<br>Blue Fantasy: Continuously dispels buffs, disables items and passives for <b>4.0</b> seconds, slows by <b>-60%</b>, reduces attack speed by <b>-200</b>, deals <b>4%</b> max health as pure damage per second, and reduces healing by <b>-80%</b><br>Ultra Bloodthorn: Silences for <b>5.0</b> seconds, dealing <b>30%</b> of damage taken during that time as bonus magic damage on expiry<br><br>Cast Range: <b>900</b>"
-    },
-    "ability": {
-      "behavior": "target",
-      "targeting": "enemyUnits",
-      "damageType": null,
-      "piercesImmunity": "yes",
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "力量",
-            "en": "Strength",
-            "ru": "к силе"
-          },
-          "sign": "+",
-          "levels": [
-            "55"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "敏捷",
-            "en": "Agility",
-            "ru": "к ловкости"
-          },
-          "sign": "+",
-          "levels": [
-            "115"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "智力",
-            "en": "Intelligence",
-            "ru": "к интеллекту"
-          },
-          "sign": "+",
-          "levels": [
-            "85"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "攻击力",
-            "en": "Damage",
-            "ru": "к урону"
-          },
-          "sign": "+",
-          "levels": [
-            "360"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "护甲",
-            "en": "Armor",
-            "ru": "к броне"
-          },
-          "sign": "+",
-          "levels": [
-            "25"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "攻击速度",
-            "en": "Attack Speed",
-            "ru": "к скорости атаки"
-          },
-          "sign": "+",
-          "levels": [
-            "150"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "600"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复",
-            "en": "Mana Regeneration",
-            "ru": "к восстановлению маны"
-          },
-          "sign": "+",
-          "levels": [
-            "25"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能伤害",
-            "en": "Spell Damage",
-            "ru": "к урону от заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "50"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "12"
-      ],
-      "manaCost": [
-        "800"
-      ],
-      "lore": {
-        "zh": "暗影的裁决，无人可逃。",
-        "en": "The shadow's judgment is absolute.",
-        "ru": "The shadow's judgment is absolute."
       }
     }
   },
