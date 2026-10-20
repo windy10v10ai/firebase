@@ -10,15 +10,15 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 | 命令 | 产物 | 管什么 |
 |---|---|---|
 | `npm run items` | `config/items.json`、`config/abilities.json`，图在 `public/items/`、`public/abilities/` | 物品与抽选技能的图标、三语名字 |
-| `npm run wiki:sync` | `config/wiki-items.json`、`config/wiki-abilities.json` | 百科名单、档位、描述与数值 |
+| `npm run wiki:sync` | `config/wiki-items.json`、`wiki-abilities.json`（名单、档位、价格），`config/wiki-item-details.json`、`wiki-ability-details.json`（描述与数值） | 百科名单、档位、描述与数值；战绩页点开的说明也用它 |
 | `npm run heroes` | `config/heroes.json`，图在 `public/heroes/` | 英雄小头像与中英文名 |
 
 ## 先判断跑哪个
 
 - **新增物品或技能、换了图标、改了名字**：跑 `items`
-- **抽选池（`lottery-items.ts`、`lottery-abilities.ts`）有改动，或池里条目的数值、描述变了**：跑 `wiki:sync`
+- **抽选池（`lottery-items.ts`、`lottery-abilities.ts`）、商店（`shops.txt`）或自定义物品的配方有改动，或百科收录条目的数值、描述变了**：跑 `wiki:sync`
 - **两者都沾**：先 `items` 再 `wiki:sync`。`wiki:sync` 查到池里条目不在 `items.json` 会直接失败
-- **不在抽选池里的新物品**（如商店物品）只跑 `items`
+- **新增或改动自定义物品**：先 `items` 再 `wiki:sync`，商店分类按商店与配方自动收录；只动了原版物品时跑 `items` 即可
 - **英雄**：Dota 出了新英雄，或 game 换皮英雄改了名字、头像时跑 `heroes`。名单取自每日任务池 `api/src/daily-task/config/tasks.ts`，新英雄要先加进任务池；换皮的名字和头像手写在 `config/hero-overrides.json` 与 `config/hero-overrides/`，改完再跑
 
 不要靠「描述文件有没有改」判断百科要不要重跑：描述里带 `%占位符%`，只改一个 `AbilityValues` 数值也会变。拿不准就跑，产物没变化脚本会告诉你。
@@ -41,6 +41,8 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
    | 不在 `config/<kind>.json` | 没先跑 `items` |
    | 在 KV 里找不到 | 池里写错了名字，或物品挪进了脚本没覆盖的 KV 文件（`items.mjs` 的 `ITEM_KV_FILES`） |
    | 缺 zh/en 描述、占位符取不到值 | game 本地化漏写或数值 key 改了名，回 game 修 |
+   | 商店名单里的 X 在 KV 里找不到、消耗道具 X 不在商店里 | game 删了或改名了 `wiki-sync.mjs` 里排除、消耗道具、掉落三份名单中的物品，名单跟着改 |
+   | X 算不出价格 | 新物品没写 `ItemCost`，配方材料也算不出价格，回 game 补 |
 
 4. **核对 diff**。新增条目的 `zh`、`en`、`ru` 都对，图标打开看一眼与游戏内一致。diff 里出现与本次无关的大量改动（成批改名、成批换图）先停下查原因再继续；零星一两条来自 Dota 官方数据的改名属于正常跟进，保留并在 PR 里写明。
    完成条件：每一行 diff 都能说出来源。

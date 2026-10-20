@@ -409,6 +409,37 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
 }
 
 /**
+ * 物品的价格与配方字段：game 的各份物品 KV 覆盖原版 items.txt。
+ * 返回物品名 → { cost, recipe, result, requirements }，requirements 是配方的各条合成路线，每条是材料名列表。
+ */
+export function readItemRecipes(game, version) {
+  const files = kvSourceFiles(game, version, 'items');
+  const out = new Map();
+  for (const file of [...files].reverse()) {
+    // 记下优先级最高的来源，调用方据此区分自定义物品与原版物品
+    const source = path.basename(file);
+    for (const [name, body] of blockBodies(readText(file))) {
+      if (!name.startsWith('item_')) continue;
+      const [[, fields]] = parseKv(`${body}}`);
+      const prev = out.get(name) ?? { cost: null, recipe: false, result: null, requirements: [] };
+      const next = { ...prev, source };
+      for (const [key, value] of fields) {
+        if (key === 'ItemCost' && typeof value === 'string') next.cost = Number(value);
+        if (key === 'ItemRecipe' && typeof value === 'string') next.recipe = value === '1';
+        if (key === 'ItemResult' && typeof value === 'string') next.result = value;
+        if (key === 'ItemRequirements' && Array.isArray(value)) {
+          next.requirements = value
+            .filter(([, v]) => typeof v === 'string')
+            .map(([, v]) => v.split(';').filter(Boolean));
+        }
+      }
+      out.set(name, next);
+    }
+  }
+  return out;
+}
+
+/**
  * 记进产物头部，供下次同步时 `git log <旧SHA>..HEAD` 生成变更说明。
  * `onDevelop` 判断的是提交在不在 origin/develop 上，不是分支叫不叫 develop——
  * 分支名在 detached HEAD 下只会得到 "HEAD"，而同步脚本从 worktree 跑是常态。
