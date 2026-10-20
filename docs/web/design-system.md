@@ -43,7 +43,7 @@
 
 勇士紫取自游戏的 season point 色，金取自游戏的 `@color-gold` 与 `@color-gold-muted`。
 
-`--color-dota-*`（伤害类型色、魔法消耗色）是游戏语义色，只用在技能提示框，取值与用法见 [ability-tooltip.md](ability-tooltip.md) 第 2 节。
+`--color-dota-*`（伤害类型色、魔法消耗色）是游戏语义色，只用在技能提示框，取值与用法见 [ability-tooltip.md](ability-tooltip.md) 第 2 节。`--color-game-*` 是物品提示框照游戏内物品提示的整套底色与文字色，只用在物品的悬浮提示与详情弹窗，取值与用法见 [ability-tooltip.md](ability-tooltip.md) 第 3 节「物品」。
 
 ### 网站主色（电光蓝）
 

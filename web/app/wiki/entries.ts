@@ -18,6 +18,8 @@ export interface WikiEntry {
   label: string;
   /** 提示框标题下那一行，如「主动 · T4」「商店 · 12,500 金」 */
   tag: string;
+  /** 商店里能买的才有，提示框标题下照游戏显示金币价格 */
+  price?: number;
   icon: string | null;
   /** 三语名字合在一起的小写串，搜索用 */
   search: string;
@@ -70,6 +72,7 @@ export function shopItemEntries(locale: string, t: WikiTranslate): WikiEntry[] {
     group: entry.section,
     tier: entry.tier,
     tag: entry.price === null ? t('tag.drop') : t('tag.shop', { price: entry.price }),
+    ...(entry.price === null ? {} : { price: entry.price }),
   }));
 }
 

@@ -226,6 +226,12 @@ function readDetails(reader, names, kind, needsDesc, errors) {
     }
     for (const lang of LANGS) {
       if (desc[lang].includes('\\')) errors.push(`${name} 的 ${lang} 描述残留反斜杠转义`);
+      // 网站的说明渲染只认这几种标记，其余会原样显示成源码
+      for (const [tag] of desc[lang].matchAll(/<\/?[a-z0-9]+\b[^>]*>/gi)) {
+        if (!/^<\/?(br|b|h1|font)\b/i.test(tag)) {
+          errors.push(`${name} 的 ${lang} 描述有网站不认的标记 ${tag}`);
+        }
+      }
       if (ability.lore?.[lang].includes('\\')) {
         errors.push(`${name} 的 ${lang} 背景故事残留反斜杠转义`);
       }

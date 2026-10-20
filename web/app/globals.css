@@ -103,6 +103,22 @@
   --color-tier-4-text: #ffd84d;
   --color-tier-5-text: #ff7a45;
 
+  /* 物品提示框照游戏内物品提示的配色：主动块蓝紫、被动块灰青，比站内面板偏冷偏蓝 */
+  --color-game-panel: #1b2126;
+  --color-game-head: #242c33;
+  --color-game-line: #3a444c;
+  --color-game-divider: #333c44;
+  --color-game-text: #c6cdd4;
+  --color-game-label: #9aa6b1;
+  --color-game-gold: #f2c94c;
+  --color-game-active-head: #363e70;
+  --color-game-active: #252b44;
+  --color-game-active-text: #cdd3e4;
+  --color-game-passive-head: #2d373e;
+  --color-game-passive: #20282e;
+  --color-game-lore: #141a1e;
+  --color-game-lore-text: #8f99a2;
+
   /* 滑动提示的箭头只轻轻上下动：幅度大了像在催促，还会和抽屉顶部的横杠抢眼 */
   --animate-scroll-hint: scroll-hint 1.6s ease-in-out infinite;
 
