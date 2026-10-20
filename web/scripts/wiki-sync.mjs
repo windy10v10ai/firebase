@@ -41,34 +41,41 @@ const SHOP_EXCLUDED = [
   'item_rune_transmuter_random',
   'item_rune_transmuter_advanced',
   'item_exchange',
+  // 只用来合成神龙赐福，玩家不单独查它
+  'item_wish_1',
+  'item_wish_2',
+  'item_wish_3',
+  'item_wish_4',
 ];
 const SHOP_CONSUMABLES = [
   'item_candy_candy',
   'item_tome_of_strength',
   'item_tome_of_agility',
   'item_tome_of_intelligence',
-  'item_tome_of_ability_reset',
   'item_tome_of_luoshu',
+  'item_tome_of_ability_reset',
   'item_awaken_stone',
 ];
-// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类
-const SHOP_DROPS = [
-  ...[1, 2, 3, 4, 5, 6, 7].map((n) => `item_dragon_ball_${n}`),
-  ...['hawkeye', 'forbidden', 'brutal', 'beast', 'life', 'shadow', 'magic', 'agile'].map(
-    (n) => `item_fusion_${n}`,
+// 不按价格上色的消耗道具：觉醒石不花钱，在游戏里却是最稀有的一档
+const CONSUMABLE_TIERS = { item_awaken_stone: 5 };
+// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类；没有价格，边框颜色按游戏里的稀有程度定
+const SHOP_DROP_TIERS = {
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => [`item_dragon_ball_${n}`, 4])),
+  ...Object.fromEntries(
+    ['hawkeye', 'forbidden', 'brutal', 'beast', 'life', 'shadow', 'magic', 'agile'].map((n) => [
+      `item_fusion_${n}`,
+      5,
+    ]),
   ),
-  'item_light_part',
-  'item_dark_part',
-  'item_wish_1',
-  'item_wish_2',
-  'item_wish_3',
-  'item_wish_4',
-  'item_blessing_of_dragon',
-  'item_blessing_of_dragon_1',
-  'item_blessing_of_dragon_2',
-  'item_blessing_of_dragon_3',
-  'item_blessing_of_dragon_4',
-];
+  item_light_part: 1,
+  item_dark_part: 1,
+  item_blessing_of_dragon: 5,
+  item_blessing_of_dragon_1: 5,
+  item_blessing_of_dragon_2: 5,
+  item_blessing_of_dragon_3: 5,
+  item_blessing_of_dragon_4: 5,
+};
+const SHOP_DROPS = Object.keys(SHOP_DROP_TIERS);
 // 与 bot 出装分档同一组边界，最后一档含 30000
 const PRICE_TIER_CEILINGS = [2000, 5000, 10000];
 const PRICE_TOP = 30000;
@@ -184,10 +191,19 @@ function readShop(game, version, lotteryNames, errors) {
     ...equipment.map((entry) => ({ ...entry, tier: priceTier(entry.price) })),
     ...SHOP_CONSUMABLES.map((name) => {
       const price = priceOf(name);
-      return { name, section: 'consumable', price, tier: priceTier(price) };
+      return {
+        name,
+        section: 'consumable',
+        price,
+        tier: CONSUMABLE_TIERS[name] ?? priceTier(price),
+      };
     }),
-    // 掉落材料没有价格，统一放最低一档的颜色
-    ...SHOP_DROPS.map((name) => ({ name, section: 'drop', price: null, tier: 1 })),
+    ...SHOP_DROPS.map((name) => ({
+      name,
+      section: 'drop',
+      price: null,
+      tier: SHOP_DROP_TIERS[name],
+    })),
   ];
 }
 

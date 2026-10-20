@@ -835,112 +835,112 @@
       "tier": 4
     },
     {
-      "name": "item_tome_of_ability_reset",
-      "section": "consumable",
-      "price": 20000,
-      "tier": 4
-    },
-    {
       "name": "item_tome_of_luoshu",
       "section": "consumable",
       "price": 60003,
       "tier": 5
     },
     {
+      "name": "item_tome_of_ability_reset",
+      "section": "consumable",
+      "price": 20000,
+      "tier": 4
+    },
+    {
       "name": "item_awaken_stone",
       "section": "consumable",
       "price": 0,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_dragon_ball_1",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_2",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_3",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_4",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_5",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_6",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_dragon_ball_7",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 4
     },
     {
       "name": "item_fusion_hawkeye",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_forbidden",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_brutal",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_beast",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_life",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_shadow",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_magic",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_fusion_agile",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_light_part",
@@ -955,58 +955,34 @@
       "tier": 1
     },
     {
-      "name": "item_wish_1",
-      "section": "drop",
-      "price": null,
-      "tier": 1
-    },
-    {
-      "name": "item_wish_2",
-      "section": "drop",
-      "price": null,
-      "tier": 1
-    },
-    {
-      "name": "item_wish_3",
-      "section": "drop",
-      "price": null,
-      "tier": 1
-    },
-    {
-      "name": "item_wish_4",
-      "section": "drop",
-      "price": null,
-      "tier": 1
-    },
-    {
       "name": "item_blessing_of_dragon",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_blessing_of_dragon_1",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_blessing_of_dragon_2",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_blessing_of_dragon_3",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     },
     {
       "name": "item_blessing_of_dragon_4",
       "section": "drop",
       "price": null,
-      "tier": 1
+      "tier": 5
     }
   ]
 }
