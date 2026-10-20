@@ -5,13 +5,15 @@ import { fileURLToPath } from 'node:url';
 import {
   createAbilityReader,
   gameHead,
+  readItemRecipes,
   resolveDotaVersion,
   resolveGameRepo,
 } from './dota-ability.mjs';
 
 /**
- * 从 game 仓库重新生成百科的数据 web/config/wiki-abilities.json、wiki-items.json。
- * 名单与档位读抽选池，提示框数据与觉醒页同一套取数规则；名字与图标查 config/abilities.json、items.json，不重复存。
+ * 从 game 仓库重新生成百科的数据：web/config/wiki-abilities.json、wiki-items.json 是名单与档位，
+ * wiki-ability-details.json、wiki-item-details.json 是提示框要的说明，页面按需加载。
+ * 技能与抽奖物品读抽选池，商店物品读商店与配方；说明与觉醒页同一套取数规则，名字与图标查 config/abilities.json、items.json，不重复存。
  *
  * 跑法：cd web && npm run wiki:sync
  */
@@ -22,20 +24,62 @@ const LANGS = ['zh', 'en', 'ru'];
 // 物品池最高到 T7，游戏里只看得出五种颜色，网站照玩家看到的并成五档
 const MAX_TIER = 5;
 
-const KINDS = {
-  abilities: {
-    pool: 'src/vscripts/modules/lottery/ability/lottery-abilities.ts',
-    groups: { abilityTiersActive: 'active', abilityTiersPassive: 'passive' },
-    min: 150,
-    // 技能都有描述；物品里纯加属性的那些游戏里本来就只有数值
-    needsDesc: true,
-  },
-  items: {
-    pool: 'src/vscripts/modules/lottery/item/lottery-items.ts',
-    groups: { itemTiers: 'all' },
-    min: 40,
-    needsDesc: false,
-  },
+const ABILITY_POOL = 'src/vscripts/modules/lottery/ability/lottery-abilities.ts';
+const ITEM_POOL = 'src/vscripts/modules/lottery/item/lottery-items.ts';
+const SHOP_FILE = 'game/scripts/shops.txt';
+const CUSTOM_ITEM_KV = new Set([
+  'npc_items_custom.txt',
+  'npc_items_artifact.txt',
+  'npc_items_clone.txt',
+]);
+
+// 下面三份名单是定下来的分区，写错名字或 game 删了物品时自检会报出来
+const SHOP_EXCLUDED = [
+  'item_arcane_blink_2',
+  'item_collector',
+  'item_skill_reset',
+  'item_rune_transmuter_random',
+  'item_rune_transmuter_advanced',
+  'item_exchange',
+];
+const SHOP_CONSUMABLES = [
+  'item_candy_candy',
+  'item_tome_of_strength',
+  'item_tome_of_agility',
+  'item_tome_of_intelligence',
+  'item_tome_of_ability_reset',
+  'item_tome_of_luoshu',
+  'item_awaken_stone',
+];
+// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类
+const SHOP_DROPS = [
+  ...[1, 2, 3, 4, 5, 6, 7].map((n) => `item_dragon_ball_${n}`),
+  ...['hawkeye', 'forbidden', 'brutal', 'beast', 'life', 'shadow', 'magic', 'agile'].map(
+    (n) => `item_fusion_${n}`,
+  ),
+  'item_light_part',
+  'item_dark_part',
+  'item_wish_1',
+  'item_wish_2',
+  'item_wish_3',
+  'item_wish_4',
+  'item_blessing_of_dragon',
+  'item_blessing_of_dragon_1',
+  'item_blessing_of_dragon_2',
+  'item_blessing_of_dragon_3',
+  'item_blessing_of_dragon_4',
+];
+// 与 bot 出装分档同一组边界，最后一档含 30000
+const PRICE_TIER_CEILINGS = [2000, 5000, 10000];
+const PRICE_TOP = 30000;
+const MIN_ABILITIES = 150;
+const MIN_LOTTERY_ITEMS = 40;
+const MIN_SHOP_ITEMS = 100;
+
+const priceTier = (price) => {
+  if (price >= PRICE_TOP) return 5;
+  const index = PRICE_TIER_CEILINGS.findIndex((ceiling) => price <= ceiling);
+  return index === -1 ? 4 : index + 1;
 };
 
 /** 按行扫抽选池：注释掉的条目不在池里，同一条出现在多个档位时按先出现的高档位算 */
@@ -45,7 +89,8 @@ function readPool(file, groups) {
   const seen = new Set();
   let group = null;
   let tier = null;
-  for (const raw of fs.readFileSync(file, 'utf8').split('\n')) {
+  // CRLF 检出时行尾的 \r 会让行注释的正则匹配不上，注释掉的条目会被当成在池里
+  for (const raw of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
     const line = raw.replace(/\/\/.*$/, '');
     const declared = line.match(/export const (\w+)/);
     if (declared) group = groups[declared[1]] ?? null;
@@ -61,54 +106,129 @@ function readPool(file, groups) {
       entries.push({ name: m[1], group, tier });
     }
   }
-  return { entries, duplicates };
+  for (const name of duplicates)
+    console.warn(`告警：${name} 在抽选池里出现了不止一次，按最高档位算`);
+  return entries;
 }
 
-function check(kind, entries, unresolved, assets) {
-  const errors = [];
-  const { min, needsDesc } = KINDS[kind];
+/**
+ * 商店分类收哪些物品：商店里的自定义物品，加上材料拿得到、靠配方合成的自定义物品（配方都能直接买），再加掉落名单，去掉排除名单。
+ * 价格按配方价加材料价逐层加总，与游戏里看到的一致。
+ */
+function readShop(game, version, lotteryNames, errors) {
+  const kv = readItemRecipes(game, version);
+  const shopText = fs.readFileSync(path.join(game, SHOP_FILE), 'utf8').replace(/\/\/[^\n]*/g, '');
+  const inShop = [
+    ...new Set([...shopText.matchAll(/"item"\s+"(item_[a-z0-9_]+)"/g)].map((m) => m[1])),
+  ];
+  const isCustom = (name) => CUSTOM_ITEM_KV.has(kv.get(name)?.source);
+  const recipes = [...kv.entries()].filter(([, v]) => v.recipe && v.result);
+
+  const obtainable = new Set([...inShop, ...lotteryNames, ...SHOP_DROPS]);
+  // 材料写成 item_xxx* 时表示同一系列任意一级都行
+  const have = (part) =>
+    part.endsWith('*')
+      ? [...obtainable].some((name) => name.startsWith(part.slice(0, -1)))
+      : obtainable.has(part);
+  // 抽奖池里也有的合成物品同样要收，所以按「合得出来」判断，不按「别处拿不到」
+  const crafted = [];
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const [, recipe] of recipes) {
+      if (crafted.includes(recipe.result)) continue;
+      if (recipe.requirements.some((route) => route.every(have))) {
+        obtainable.add(recipe.result);
+        crafted.push(recipe.result);
+        changed = true;
+      }
+    }
+  }
+
+  const recipeOf = new Map(recipes.map(([, v]) => [v.result, v]).reverse());
+  const prices = new Map();
+  const priceOf = (name, depth = 0) => {
+    if (prices.has(name)) return prices.get(name);
+    const recipe = recipeOf.get(name);
+    let price = kv.get(name)?.cost ?? 0;
+    if (recipe && depth < 20) {
+      const route = recipe.requirements[0] ?? [];
+      price =
+        (recipe.cost ?? 0) +
+        route.reduce((sum, part) => sum + priceOf(part.replace(/\*$/, ''), depth + 1), 0);
+    }
+    prices.set(name, price);
+    return price;
+  };
+
+  for (const name of [...SHOP_EXCLUDED, ...SHOP_CONSUMABLES, ...SHOP_DROPS]) {
+    if (!kv.has(name)) errors.push(`商店名单里的 ${name} 在 KV 里找不到`);
+  }
+  const excluded = new Set(SHOP_EXCLUDED);
+  const drops = new Set(SHOP_DROPS);
+  const consumables = new Set(SHOP_CONSUMABLES);
+  const names = [
+    ...new Set([...inShop, ...crafted].filter((name) => isCustom(name) && !kv.get(name)?.recipe)),
+  ].filter((name) => !excluded.has(name) && !drops.has(name));
+  for (const name of SHOP_CONSUMABLES) {
+    if (!names.includes(name)) errors.push(`消耗道具 ${name} 不在商店里`);
+  }
+
+  const equipment = names
+    .filter((name) => !consumables.has(name))
+    .map((name) => ({ name, section: 'equipment', price: priceOf(name) }))
+    .sort((a, b) => a.price - b.price);
+  for (const entry of equipment) {
+    if (entry.price <= 0) errors.push(`${entry.name} 算不出价格`);
+  }
+  return [
+    ...equipment.map((entry) => ({ ...entry, tier: priceTier(entry.price) })),
+    ...SHOP_CONSUMABLES.map((name) => {
+      const price = priceOf(name);
+      return { name, section: 'consumable', price, tier: priceTier(price) };
+    }),
+    // 掉落材料没有价格，统一放最低一档的颜色
+    ...SHOP_DROPS.map((name) => ({ name, section: 'drop', price: null, tier: 1 })),
+  ];
+}
+
+/** 读每条的说明并自检；needsDesc 为 false 时纯加属性、只有数值的物品也放行 */
+function readDetails(reader, names, kind, needsDesc, errors) {
+  const assets = JSON.parse(fs.readFileSync(path.join(WEB, `config/${kind}.json`), 'utf8'));
+  const details = {};
+  for (const name of names) {
+    const { found, text, ability } = reader.read(name);
+    const desc = {};
+    for (const lang of LANGS) desc[lang] = text[lang].desc;
+    if (!found) errors.push(`${name} 在 KV 里找不到`);
+    if (!assets[name]) errors.push(`${name} 不在 config/${kind}.json，先跑 npm run items`);
+    if (needsDesc) {
+      for (const lang of ['zh', 'en']) {
+        if (!desc[lang]) errors.push(`${name} 缺 ${lang} 描述`);
+      }
+    } else if (!desc.en && ability.values.length === 0) {
+      errors.push(`${name} 既没有描述也没有数值，提示框会是空的`);
+    }
+    for (const lang of LANGS) {
+      if (desc[lang].includes('\\')) errors.push(`${name} 的 ${lang} 描述残留反斜杠转义`);
+      if (ability.lore?.[lang].includes('\\')) {
+        errors.push(`${name} 的 ${lang} 背景故事残留反斜杠转义`);
+      }
+    }
+    details[name] = { desc, ability };
+  }
+  if (reader.unresolved.length) {
+    errors.push(`有占位符取不到值：${[...new Set(reader.unresolved)].join('、')}`);
+  }
+  return details;
+}
+
+function checkPool(entries, kind, min, errors) {
   if (entries.length < min) {
     errors.push(`${kind} 只解析出 ${entries.length} 条，少于下限 ${min}，多半是解析失效了`);
   }
   for (const entry of entries) {
-    if (!entry.found) errors.push(`${entry.name} 在 KV 里找不到`);
-    if (!assets[entry.name])
-      errors.push(`${entry.name} 不在 config/${kind}.json，先跑 npm run items`);
     if (entry.tier === null) errors.push(`${entry.name} 读不出档位`);
-    if (needsDesc) {
-      for (const lang of ['zh', 'en']) {
-        if (!entry.desc[lang]) errors.push(`${entry.name} 缺 ${lang} 描述`);
-      }
-    } else if (!entry.desc.en && entry.ability.values.length === 0) {
-      errors.push(`${entry.name} 既没有描述也没有数值，提示框会是空的`);
-    }
-    for (const lang of LANGS) {
-      if (entry.desc[lang].includes('\\'))
-        errors.push(`${entry.name} 的 ${lang} 描述残留反斜杠转义`);
-      if (entry.ability.lore?.[lang].includes('\\')) {
-        errors.push(`${entry.name} 的 ${lang} 背景故事残留反斜杠转义`);
-      }
-    }
   }
-  if (unresolved.length) {
-    errors.push(`有占位符取不到值：${[...new Set(unresolved)].join('、')}`);
-  }
-  return errors;
-}
-
-function build(game, version, kind) {
-  const { entries, duplicates } = readPool(path.join(game, KINDS[kind].pool), KINDS[kind].groups);
-  const reader = createAbilityReader(game, version, LANGS, kind);
-  const assets = JSON.parse(fs.readFileSync(path.join(WEB, `config/${kind}.json`), 'utf8'));
-  const rows = entries.map((entry) => {
-    const { found, text, ability } = reader.read(entry.name);
-    const desc = {};
-    for (const lang of LANGS) desc[lang] = text[lang].desc;
-    return { ...entry, found, desc, ability };
-  });
-  for (const name of duplicates)
-    console.warn(`告警：${name} 在抽选池里出现了不止一次，按最高档位算`);
-  return { rows, errors: check(kind, rows, reader.unresolved, assets) };
 }
 
 function main() {
@@ -124,31 +244,65 @@ function main() {
     process.exit(1);
   }
 
-  const built = Object.keys(KINDS).map((kind) => ({ kind, ...build(game, version, kind) }));
-  const errors = built.flatMap((b) => b.errors);
+  const errors = [];
+  const abilities = readPool(path.join(game, ABILITY_POOL), {
+    abilityTiersActive: 'active',
+    abilityTiersPassive: 'passive',
+  });
+  checkPool(abilities, 'abilities', MIN_ABILITIES, errors);
+  const lottery = readPool(path.join(game, ITEM_POOL), { itemTiers: 'all' }).map(
+    ({ name, tier }) => ({ name, tier }),
+  );
+  checkPool(lottery, 'lottery items', MIN_LOTTERY_ITEMS, errors);
+  const shop = readShop(
+    game,
+    version,
+    lottery.map((entry) => entry.name),
+    errors,
+  );
+  if (shop.length < MIN_SHOP_ITEMS) {
+    errors.push(`商店物品只算出 ${shop.length} 条，少于下限 ${MIN_SHOP_ITEMS}，多半是解析失效了`);
+  }
+
+  const abilityDetails = readDetails(
+    createAbilityReader(game, version, LANGS, 'abilities'),
+    abilities.map((entry) => entry.name),
+    'abilities',
+    true,
+    errors,
+  );
+  const itemDetails = readDetails(
+    createAbilityReader(game, version, LANGS, 'items'),
+    [...new Set([...lottery, ...shop].map((entry) => entry.name))],
+    'items',
+    false,
+    errors,
+  );
+
   if (errors.length) {
     console.error('自检未通过，没有生成任何文件：');
-    for (const error of errors) console.error(`  - ${error}`);
+    for (const error of [...new Set(errors)]) console.error(`  - ${error}`);
     process.exit(1);
   }
 
-  for (const { kind, rows } of built) {
-    const out = path.join(WEB, `config/wiki-${kind}.json`);
-    const next = `${JSON.stringify(
-      {
-        source: { gameCommit: head.commit, dotaVersion: version },
-        [kind]: rows.map(({ found: _found, ...rest }) => rest),
-      },
-      null,
-      2,
-    )}\n`;
+  const source = { gameCommit: head.commit, dotaVersion: version };
+  const outputs = {
+    'wiki-abilities.json': { source, abilities },
+    'wiki-items.json': { source, priceTiers: [...PRICE_TIER_CEILINGS, PRICE_TOP], lottery, shop },
+    'wiki-ability-details.json': abilityDetails,
+    'wiki-item-details.json': itemDetails,
+  };
+  for (const [file, data] of Object.entries(outputs)) {
+    const out = path.join(WEB, 'config', file);
+    const next = `${JSON.stringify(data, null, 2)}\n`;
     const changed = !fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== next;
     fs.writeFileSync(out, next);
-    console.log(
-      `${kind} ${rows.length} 条，Dota ${version}，` +
-        `game develop@${head.commit.slice(0, 9)} → ${changed ? '产物有变化' : '产物无变化'}`,
-    );
+    console.log(`${file} ${changed ? '有变化' : '无变化'}`);
   }
+  console.log(
+    `技能 ${abilities.length} 条，抽奖物品 ${lottery.length} 条，商店物品 ${shop.length} 条，` +
+      `Dota ${version}，game develop@${head.commit.slice(0, 9)}`,
+  );
 }
 
 main();

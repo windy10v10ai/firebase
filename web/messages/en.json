@@ -105,7 +105,7 @@
       },
       "wiki": {
         "title": "Wiki",
-        "description": "Abilities and items you can draw in the game"
+        "description": "Abilities and items in the game"
       },
       "leaderboard": {
         "title": "Leaderboard",
@@ -947,7 +947,7 @@
       "abilities": "Abilities Wiki",
       "items": "Items Wiki"
     },
-    "description": "Every ability and item you can draw in the game. T1 is the rarest; higher numbers are easier to draw.",
+    "description": "Abilities and items in the game. Shop items are grouped by price; in the lottery, T1 is the rarest.",
     "tabs": {
       "abilities": "Abilities",
       "items": "Items"
@@ -964,7 +964,29 @@
       "active": "Active",
       "passive": "Passive"
     },
+    "category": {
+      "label": "Item category",
+      "shop": "Shop",
+      "lottery": "Lottery"
+    },
+    "section": {
+      "equipment": "Equipment",
+      "consumable": "Consumables",
+      "drop": "Drops & crafting"
+    },
+    "price": {
+      "below": "{price, number} or less",
+      "range": "{min, number} – {max, number}",
+      "above": "{price, number}+"
+    },
+    "tag": {
+      "shop": "Shop · {price, number} gold",
+      "drop": "Shop · Drops & crafting",
+      "lottery": "Lottery · {tier}"
+    },
     "empty": "No results for “{query}”",
+    "emptyOther": "No “{query}” in {current}. {other} has {count, plural, one {# match} other {# matches}}.",
+    "switchTo": "Go to {other}",
     "iconMissing": "No icon"
   },
   "auth": {
