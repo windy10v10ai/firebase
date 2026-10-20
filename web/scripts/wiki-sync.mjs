@@ -94,8 +94,10 @@ const SHOP_CONSUMABLES = [
 ];
 // 不按价格上色的消耗道具：觉醒石不花钱，在游戏里却是最稀有的一档
 const CONSUMABLE_TIERS = { item_awaken_stone: 5 };
-// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类；没有价格，边框颜色按游戏里的稀有程度定
+// 打怪掉落，商店里买不到，要单独列出来才收得进商店分类；没有价格，边框颜色按游戏里的稀有程度定，顺序即页面上的顺序
 const SHOP_DROP_TIERS = {
+  item_light_part: 4,
+  item_dark_part: 4,
   ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => [`item_dragon_ball_${n}`, 4])),
   ...Object.fromEntries(
     ['hawkeye', 'forbidden', 'brutal', 'beast', 'life', 'shadow', 'magic', 'agile'].map((n) => [
@@ -103,8 +105,6 @@ const SHOP_DROP_TIERS = {
       5,
     ]),
   ),
-  item_light_part: 1,
-  item_dark_part: 1,
   item_blessing_of_dragon: 5,
   item_blessing_of_dragon_1: 5,
   item_blessing_of_dragon_2: 5,

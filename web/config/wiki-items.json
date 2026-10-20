@@ -865,6 +865,18 @@
       "tier": 5
     },
     {
+      "name": "item_light_part",
+      "section": "drop",
+      "price": null,
+      "tier": 4
+    },
+    {
+      "name": "item_dark_part",
+      "section": "drop",
+      "price": null,
+      "tier": 4
+    },
+    {
       "name": "item_dragon_ball_1",
       "section": "drop",
       "price": null,
@@ -953,18 +965,6 @@
       "section": "drop",
       "price": null,
       "tier": 5
-    },
-    {
-      "name": "item_light_part",
-      "section": "drop",
-      "price": null,
-      "tier": 1
-    },
-    {
-      "name": "item_dark_part",
-      "section": "drop",
-      "price": null,
-      "tier": 1
     },
     {
       "name": "item_blessing_of_dragon",
