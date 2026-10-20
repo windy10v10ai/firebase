@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 
-
 import { AoeIcon, Label, Levels, useAbilityMeta } from '@/app/components/AbilityDetails';
 import GameText from '@/app/components/GameText';
 import { type AbilityLocale, pickText } from '@/app/lib/ability-text';
