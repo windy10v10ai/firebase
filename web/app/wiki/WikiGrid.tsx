@@ -220,7 +220,8 @@ export default function WikiGrid({ kind, categories, locale }: WikiGridProps) {
                         <span className="rounded-md transition-[filter] group-hover:brightness-125">
                           <WikiIcon kind={kind} entry={entry} size="cell" />
                         </span>
-                        <span className="line-clamp-2 text-xs leading-4 text-content group-hover:text-heading">
+                        {/* 俄文长单词比格子还宽，不断词会压到相邻格子 */}
+                        <span className="line-clamp-2 w-full text-xs leading-4 [overflow-wrap:anywhere] text-content group-hover:text-heading">
                           {entry.label}
                         </span>
                       </button>
