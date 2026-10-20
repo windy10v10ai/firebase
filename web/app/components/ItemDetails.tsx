@@ -9,8 +9,8 @@ import { type AbilityLocale, pickText } from '@/app/lib/ability-text';
 import type { AbilityDetail } from '@/config/awaken';
 import type { ReactNode } from 'react';
 
-// 物品说明的段落标题里只有被动有固定前缀；主动、使用、开关之外还有「流星」这类自起名字的主动段
-const PASSIVE_TITLE = /^(被动|passive|пассивн)/i;
+// 段落标题里只有被动有固定前缀，主动段还有自起名字的；标题可能整段包在 <font> 里，跳过开头的标记再看前缀
+const PASSIVE_TITLE = /^(?:\s|<[^>]*>)*(被动|passive|пассивн)/i;
 
 interface DescSection {
   /** null 表示说明开头没有标题的那一段 */
@@ -31,11 +31,10 @@ function splitSections(desc: string): DescSection[] {
   }
   for (let i = 1; i < parts.length; i += 2) {
     const title = parts[i];
-    const plain = title.replace(/<[^>]+>/g, '').trim();
     sections.push({
       title,
       body: trimBreaks(parts[i + 1] ?? ''),
-      active: !PASSIVE_TITLE.test(plain),
+      active: !PASSIVE_TITLE.test(title),
     });
   }
   return sections;
