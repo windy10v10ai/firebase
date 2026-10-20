@@ -2213,12 +2213,6 @@
     "en": "Soul Ring",
     "ru": "Soul Ring"
   },
-  "item_soul_ring_1": {
-    "icon": "soul_ring_1.8e6a7d3c.webp",
-    "zh": "混沌·魂戒（娱乐道具）",
-    "en": "Chaotic Soul Ring",
-    "ru": null
-  },
   "item_specialists_array": {
     "icon": "specialists_array.c62788e9.webp",
     "zh": "行家阵列",

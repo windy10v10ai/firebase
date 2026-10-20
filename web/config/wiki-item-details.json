@@ -3005,59 +3005,6 @@
       }
     }
   },
-  "item_soul_ring_1": {
-    "desc": {
-      "zh": "<h1>主动：献身</h1> 消耗3000点生命值来暂时获取3000点魔法值。持续20秒。<br><br>如果获得魔法后超过了自身的魔法上限，多出来的魔法会加入上限，并优先被使用。",
-      "en": "<h1>Active: Sacrifice</h1> Consume 3000 health to temporarily gain 3000 mana.  Lasts 20 seconds.<br><br>If the mana gained cannot fit in your mana pool, it creates a buffer of mana that will be used before your mana pool.",
-      "ru": "<h1>Active: Sacrifice</h1> Consume 3000 health to temporarily gain 3000 mana.  Lasts 20 seconds.<br><br>If the mana gained cannot fit in your mana pool, it creates a buffer of mana that will be used before your mana pool."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "力量",
-            "en": "Strength",
-            "ru": "к силе"
-          },
-          "sign": "+",
-          "levels": [
-            "35"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "护甲",
-            "en": "Armor",
-            "ru": "к броне"
-          },
-          "sign": "+",
-          "levels": [
-            "15"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "6.0"
-      ],
-      "manaCost": null,
-      "lore": {
-        "zh": "一枚能吞噬佩带者灵魂的戒指。",
-        "en": "A ring that feeds on the souls of those who wear it.",
-        "ru": "A ring that feeds on the souls of those who wear it."
-      }
-    }
-  },
   "item_eternal_shroud_ultra": {
     "desc": {
       "zh": "<h1>被动：游泳</h1>受到敌人的技能伤害在减免前的30%会转化为自身的魔法。",
