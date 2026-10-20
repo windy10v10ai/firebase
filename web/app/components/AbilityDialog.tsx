@@ -32,7 +32,7 @@ interface AbilityDialogProps {
 }
 
 /**
- * 技能详情弹窗：手机是贴底抽屉，可从头部下拉关闭；平板起居中。
+ * 技能详情弹窗：手机是贴底抽屉，说明区在顶部时整张都能下拉关闭；平板起居中。
  * 用原生 <dialog> 白拿焦点陷阱和 Esc 关闭。说明放不下时直接滚动，触屏在底部渐隐里提示可以滑。
  * 规范见 docs/web/ability-tooltip.md 第 3、4 节。
  */
@@ -48,7 +48,6 @@ export default function AbilityDialog({
   const ref = useRef<HTMLDialogElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{
     pointerId: number;
     startY: number;
@@ -104,14 +103,20 @@ export default function AbilityDialog({
     return () => observer.disconnect();
   }, [openKey]);
 
-  // 拖动开始后拦下触摸滑动：浏览器一接管滑动就发 pointercancel 打断拖动，遮罩上又设不了 touch-action
+  // iOS Safari 的触摸滑动不认 html 上的 overflow: hidden，找不到能滚的元素就去滚背后的页面，所以只放行说明区自己的滚动；
+  // 拖动期间也要拦下：浏览器一接管滑动就发 pointercancel 打断拖动，遮罩上又设不了 touch-action
   useLayoutEffect(() => {
     const dialog = ref.current;
     if (!dialog) {
       return;
     }
     const onTouchMove = (event: TouchEvent) => {
-      if (drag.current) {
+      const scroller = bodyRef.current;
+      const scrollsItself =
+        scroller !== null &&
+        scroller.contains(event.target as Node) &&
+        scroller.scrollHeight > scroller.clientHeight;
+      if (drag.current || !scrollsItself) {
         event.preventDefault();
       }
     };
@@ -122,16 +127,18 @@ export default function AbilityDialog({
   const onDragStart = (event: PointerEvent<HTMLDialogElement>) => {
     suppressClick.current = false;
     const dialog = ref.current;
-    const head = headerRef.current;
-    if (busy || !dialog || !head || !window.matchMedia(SHEET_QUERY).matches) {
+    const scroller = bodyRef.current;
+    if (busy || !dialog || !scroller || !window.matchMedia(SHEET_QUERY).matches) {
       return;
     }
     const target = event.target as Node;
     // 按在遮罩上时事件落在 dialog 本身；只认抽屉上沿外那一段，其余遮罩只能点着关闭
     const top = dialog.getBoundingClientRect().top;
-    const onEdge =
-      target === dialog && event.clientY < top && event.clientY >= top - DRAG_EDGE_OUTSET;
-    if (!onEdge && !head.contains(target)) {
+    if (target === dialog && (event.clientY >= top || event.clientY < top - DRAG_EDGE_OUTSET)) {
+      return;
+    }
+    // 说明区没在顶部时往下拉是往回滚，不能当成拖抽屉
+    if (scroller.contains(target) && scroller.scrollTop > 0) {
       return;
     }
     drag.current = {
@@ -150,6 +157,11 @@ export default function AbilityDialog({
     }
     const distance = Math.max(0, event.clientY - current.startY);
     if (!current.active) {
+      // 先往上推就是要滚说明，交还给浏览器；要赶在同一次移动的 touchmove 之前放手，那里才不会拦下滚动
+      if (event.clientY < current.startY) {
+        drag.current = null;
+        return;
+      }
       if (distance < DRAG_START_DISTANCE) {
         return;
       }
@@ -223,13 +235,7 @@ export default function AbilityDialog({
             <X className="size-5" aria-hidden="true" />
           </button>
 
-          {/* 下拉关闭认头部整条：左右到抽屉边，往下带上与说明区之间的空隙；说明区不参与，展开后的滚动不会被当成下拉 */}
-          <div
-            ref={headerRef}
-            className="-mx-4 -mt-6 -mb-4.5 flex touch-none items-start gap-4 ps-4 pe-13 pt-6 pb-4.5 md:mx-0 md:mt-0 md:mb-0 md:touch-auto md:ps-0 md:pe-9 md:pt-0 md:pb-0 lg:pe-6"
-          >
-            {header}
-          </div>
+          <div className="flex items-start gap-4 pe-9 lg:pe-6">{header}</div>
 
           {/* 电脑档让说明区伸进右侧留白，滚动条贴着弹窗边缘；-me-8 与 card-pad 的 lg:p-8 对应 */}
           <div className="relative flex min-h-0 flex-auto flex-col lg:-me-8">

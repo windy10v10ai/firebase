@@ -81,13 +81,13 @@ namespace Windy10v10AI.Launcher
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
         const string CorruptContent = "FATAL ERROR: Content file";
         const string LocalContentCorrupt = "Local content might be corrupt";
-        // The game sends its results the moment a team wins, a few seconds before the post-game state
+        // The game sends its results as the ancient falls, in the same moment it enters the post-game state
         const string ResultsSent = "/api/game/end";
         const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
         // The game prints this once its results request has finally succeeded or failed
         const string ResultsDone = "[Game] end game callback";
-        // The callback is missing in an offline game and once every player has left, while the request itself settles within seconds
-        const int ResultsFallbackSeconds = 15;
+        // Game scripts stop in the post-game state, so the callback usually never shows, while the request itself reaches the API within a second or two
+        const int ResultsFallbackSeconds = 5;
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
