@@ -1,5 +1,5 @@
 ---
-name: settlement-abuse-handling
+name: cheat-handling
 description: 处理刷分、重放结算、篡改上报积分的账户时加载——用户给出 Steam ID 要求「处罚」「清空积分」「记录到封禁表」，或结算异常定时检查报出可疑账户之后。包含取证、处罚范围、生产库写入、记录表格与玩家公告。
 ---
 
