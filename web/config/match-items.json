@@ -1,0 +1,780 @@
+{
+  "source": {
+    "gameCommit": "7e39fcfccf22c7344253a1b6fa0f249892972da7",
+    "dotaVersion": "7.41f"
+  },
+  "items": [
+    {
+      "name": "item_abyssal_blade",
+      "price": 6250
+    },
+    {
+      "name": "item_aegis",
+      "price": null
+    },
+    {
+      "name": "item_aeon_disk",
+      "price": 3000
+    },
+    {
+      "name": "item_aether_lens",
+      "price": 2275
+    },
+    {
+      "name": "item_angels_demise",
+      "price": 5600
+    },
+    {
+      "name": "item_arcane_ring",
+      "price": null
+    },
+    {
+      "name": "item_armlet",
+      "price": 2500
+    },
+    {
+      "name": "item_ash_legion_shield",
+      "price": null
+    },
+    {
+      "name": "item_assault",
+      "price": 5125
+    },
+    {
+      "name": "item_ballista",
+      "price": null
+    },
+    {
+      "name": "item_basher",
+      "price": 2875
+    },
+    {
+      "name": "item_black_king_bar",
+      "price": 4050
+    },
+    {
+      "name": "item_blade_mail",
+      "price": 2400
+    },
+    {
+      "name": "item_blink",
+      "price": 2250
+    },
+    {
+      "name": "item_bloodthorn",
+      "price": 6400
+    },
+    {
+      "name": "item_boots_of_bearing",
+      "price": 4225
+    },
+    {
+      "name": "item_broom_handle",
+      "price": null
+    },
+    {
+      "name": "item_butterfly",
+      "price": 5450
+    },
+    {
+      "name": "item_ceremonial_robe",
+      "price": null
+    },
+    {
+      "name": "item_cheese",
+      "price": 1000
+    },
+    {
+      "name": "item_chipped_vest",
+      "price": null
+    },
+    {
+      "name": "item_cloak_of_flames",
+      "price": null
+    },
+    {
+      "name": "item_conjurers_catalyst",
+      "price": null
+    },
+    {
+      "name": "item_crimson_guard",
+      "price": 3725
+    },
+    {
+      "name": "item_crippling_crossbow",
+      "price": null
+    },
+    {
+      "name": "item_cyclone",
+      "price": 2600
+    },
+    {
+      "name": "item_dagger_of_ristul",
+      "price": null
+    },
+    {
+      "name": "item_dagon",
+      "price": 3000
+    },
+    {
+      "name": "item_dagon_2",
+      "price": 4100
+    },
+    {
+      "name": "item_dagon_3",
+      "price": 5200
+    },
+    {
+      "name": "item_dagon_4",
+      "price": 6300
+    },
+    {
+      "name": "item_dagon_5",
+      "price": 7400
+    },
+    {
+      "name": "item_dandelion_amulet",
+      "price": null
+    },
+    {
+      "name": "item_defiant_shell",
+      "price": null
+    },
+    {
+      "name": "item_demonicon",
+      "price": null
+    },
+    {
+      "name": "item_desolator",
+      "price": 3500
+    },
+    {
+      "name": "item_desolator_2",
+      "price": null
+    },
+    {
+      "name": "item_devastator",
+      "price": 5975
+    },
+    {
+      "name": "item_dezun_bloodrite",
+      "price": null
+    },
+    {
+      "name": "item_diffusal_blade",
+      "price": 2500
+    },
+    {
+      "name": "item_disperser",
+      "price": 6100
+    },
+    {
+      "name": "item_divine_regalia",
+      "price": null
+    },
+    {
+      "name": "item_divine_regalia_broken",
+      "price": null
+    },
+    {
+      "name": "item_dormant_curio",
+      "price": null
+    },
+    {
+      "name": "item_dragon_lance",
+      "price": 2000
+    },
+    {
+      "name": "item_duelist_gloves",
+      "price": null
+    },
+    {
+      "name": "item_echo_sabre",
+      "price": 2700
+    },
+    {
+      "name": "item_eldwurms_edda",
+      "price": null
+    },
+    {
+      "name": "item_enchanters_bauble",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_alert",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_audacious",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_boundless",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_brawny",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_crude",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_dominant",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_evolved",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_feverish",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_fierce",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_fleetfooted",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_greedy",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_hulking",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_keen_eyed",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_manic",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_mystical",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_nimble",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_quickened",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_restorative",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_thick",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_timeless",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_titanic",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_tough",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_vampiric",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_vast",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_vital",
+      "price": null
+    },
+    {
+      "name": "item_enhancement_wise",
+      "price": null
+    },
+    {
+      "name": "item_essence_ring",
+      "price": null
+    },
+    {
+      "name": "item_ethereal_blade",
+      "price": 5200
+    },
+    {
+      "name": "item_ex_machina",
+      "price": null
+    },
+    {
+      "name": "item_falcon_blade",
+      "price": 1125
+    },
+    {
+      "name": "item_fallen_sky",
+      "price": null
+    },
+    {
+      "name": "item_flayers_bota",
+      "price": null
+    },
+    {
+      "name": "item_foragers_health",
+      "price": null
+    },
+    {
+      "name": "item_foragers_kit",
+      "price": null
+    },
+    {
+      "name": "item_foragers_mana",
+      "price": null
+    },
+    {
+      "name": "item_foragers_stats",
+      "price": null
+    },
+    {
+      "name": "item_gale_guard",
+      "price": null
+    },
+    {
+      "name": "item_gem",
+      "price": 900
+    },
+    {
+      "name": "item_ghost",
+      "price": 1500
+    },
+    {
+      "name": "item_giant_maul",
+      "price": null
+    },
+    {
+      "name": "item_giants_ring",
+      "price": null
+    },
+    {
+      "name": "item_greater_crit",
+      "price": 5200
+    },
+    {
+      "name": "item_guardian_greaves",
+      "price": 4450
+    },
+    {
+      "name": "item_gungir",
+      "price": 4650
+    },
+    {
+      "name": "item_gunpowder_gauntlets",
+      "price": null
+    },
+    {
+      "name": "item_harmonizer",
+      "price": null
+    },
+    {
+      "name": "item_harpoon",
+      "price": 4700
+    },
+    {
+      "name": "item_havoc_hammer",
+      "price": null
+    },
+    {
+      "name": "item_heart",
+      "price": 5300
+    },
+    {
+      "name": "item_heavens_halberd",
+      "price": 3300
+    },
+    {
+      "name": "item_heavy_blade",
+      "price": null
+    },
+    {
+      "name": "item_hurricane_pike",
+      "price": 4550
+    },
+    {
+      "name": "item_idol_of_screeauk",
+      "price": null
+    },
+    {
+      "name": "item_imp_claw",
+      "price": null
+    },
+    {
+      "name": "item_invis_sword",
+      "price": 3250
+    },
+    {
+      "name": "item_jidi_pollen_bag",
+      "price": null
+    },
+    {
+      "name": "item_kaya",
+      "price": 2100
+    },
+    {
+      "name": "item_kobold_cup",
+      "price": null
+    },
+    {
+      "name": "item_lesser_crit",
+      "price": 2000
+    },
+    {
+      "name": "item_lotus_orb",
+      "price": 3850
+    },
+    {
+      "name": "item_maelstrom",
+      "price": 2950
+    },
+    {
+      "name": "item_mage_slayer",
+      "price": 3100
+    },
+    {
+      "name": "item_magic_stick",
+      "price": 200
+    },
+    {
+      "name": "item_magnifying_monocle",
+      "price": null
+    },
+    {
+      "name": "item_mana_draught",
+      "price": null
+    },
+    {
+      "name": "item_manta",
+      "price": 4650
+    },
+    {
+      "name": "item_mask_of_madness",
+      "price": 1900
+    },
+    {
+      "name": "item_medallion_of_courage",
+      "price": null
+    },
+    {
+      "name": "item_mekansm",
+      "price": 1775
+    },
+    {
+      "name": "item_metamorphic_mandible",
+      "price": null
+    },
+    {
+      "name": "item_meteor_hammer",
+      "price": 2850
+    },
+    {
+      "name": "item_minotaur_horn",
+      "price": null
+    },
+    {
+      "name": "item_mirror_shield",
+      "price": null
+    },
+    {
+      "name": "item_misericorde",
+      "price": null
+    },
+    {
+      "name": "item_mjollnir",
+      "price": 5500
+    },
+    {
+      "name": "item_monkey_king_bar",
+      "price": 5000
+    },
+    {
+      "name": "item_moon_shard",
+      "price": 4000
+    },
+    {
+      "name": "item_mysterious_hat",
+      "price": null
+    },
+    {
+      "name": "item_nemesis_curse",
+      "price": null
+    },
+    {
+      "name": "item_nullifier",
+      "price": 4350
+    },
+    {
+      "name": "item_octarine_core",
+      "price": 5100
+    },
+    {
+      "name": "item_orb_of_corrosion",
+      "price": 1050
+    },
+    {
+      "name": "item_orb_of_destruction",
+      "price": null
+    },
+    {
+      "name": "item_orchid",
+      "price": 3275
+    },
+    {
+      "name": "item_overwhelming_blink",
+      "price": 6800
+    },
+    {
+      "name": "item_paladin_sword",
+      "price": null
+    },
+    {
+      "name": "item_panic_button",
+      "price": null
+    },
+    {
+      "name": "item_partisans_brand",
+      "price": null
+    },
+    {
+      "name": "item_pavise",
+      "price": 1350
+    },
+    {
+      "name": "item_penta_edged_sword",
+      "price": null
+    },
+    {
+      "name": "item_phylactery",
+      "price": 6000
+    },
+    {
+      "name": "item_pipe",
+      "price": 3725
+    },
+    {
+      "name": "item_polliwog_charm",
+      "price": null
+    },
+    {
+      "name": "item_poor_mans_shield",
+      "price": null
+    },
+    {
+      "name": "item_possessed_mask",
+      "price": null
+    },
+    {
+      "name": "item_princes_knife",
+      "price": null
+    },
+    {
+      "name": "item_prophets_pendulum",
+      "price": null
+    },
+    {
+      "name": "item_quelling_blade",
+      "price": 100
+    },
+    {
+      "name": "item_radiance",
+      "price": 4700
+    },
+    {
+      "name": "item_rapier",
+      "price": 5600
+    },
+    {
+      "name": "item_rattlecage",
+      "price": null
+    },
+    {
+      "name": "item_refresher",
+      "price": 5000
+    },
+    {
+      "name": "item_refresher_shard",
+      "price": 1000
+    },
+    {
+      "name": "item_repair_kit",
+      "price": null
+    },
+    {
+      "name": "item_revenants_brooch",
+      "price": 3300
+    },
+    {
+      "name": "item_riftshadow_prism",
+      "price": null
+    },
+    {
+      "name": "item_ring_of_basilius",
+      "price": 425
+    },
+    {
+      "name": "item_rod_of_atos",
+      "price": 2250
+    },
+    {
+      "name": "item_royal_jelly",
+      "price": null
+    },
+    {
+      "name": "item_royale_with_cheese",
+      "price": 2
+    },
+    {
+      "name": "item_safety_bubble",
+      "price": null
+    },
+    {
+      "name": "item_sange",
+      "price": 2100
+    },
+    {
+      "name": "item_satanic",
+      "price": 5050
+    },
+    {
+      "name": "item_searing_signet",
+      "price": null
+    },
+    {
+      "name": "item_seeds_of_serenity",
+      "price": null
+    },
+    {
+      "name": "item_seer_stone",
+      "price": null
+    },
+    {
+      "name": "item_serrated_shiv",
+      "price": null
+    },
+    {
+      "name": "item_shadow_amulet",
+      "price": 900
+    },
+    {
+      "name": "item_sheepstick",
+      "price": 5200
+    },
+    {
+      "name": "item_shivas_guard",
+      "price": 4500
+    },
+    {
+      "name": "item_silver_edge",
+      "price": 5700
+    },
+    {
+      "name": "item_skadi",
+      "price": 5900
+    },
+    {
+      "name": "item_soul_ring",
+      "price": 805
+    },
+    {
+      "name": "item_spell_prism",
+      "price": null
+    },
+    {
+      "name": "item_spellslinger",
+      "price": null
+    },
+    {
+      "name": "item_sphere",
+      "price": 4800
+    },
+    {
+      "name": "item_spider_legs",
+      "price": null
+    },
+    {
+      "name": "item_spirit_vessel",
+      "price": 2725
+    },
+    {
+      "name": "item_stonefeather_satchel",
+      "price": null
+    },
+    {
+      "name": "item_stormcrafter",
+      "price": null
+    },
+    {
+      "name": "item_swift_blink",
+      "price": 6800
+    },
+    {
+      "name": "item_tranquil_boots",
+      "price": 900
+    },
+    {
+      "name": "item_travel_boots",
+      "price": 2500
+    },
+    {
+      "name": "item_trickster_cloak",
+      "price": null
+    },
+    {
+      "name": "item_ultimate_scepter",
+      "price": 4200
+    },
+    {
+      "name": "item_unrelenting_eye",
+      "price": null
+    },
+    {
+      "name": "item_urn_of_shadows",
+      "price": 825
+    },
+    {
+      "name": "item_vanguard",
+      "price": 1700
+    },
+    {
+      "name": "item_veil_of_discord",
+      "price": 1700
+    },
+    {
+      "name": "item_vladmir",
+      "price": 2200
+    },
+    {
+      "name": "item_weighted_dice",
+      "price": null
+    },
+    {
+      "name": "item_wind_waker",
+      "price": 6800
+    },
+    {
+      "name": "item_witch_blade",
+      "price": 2775
+    },
+    {
+      "name": "item_yasha",
+      "price": 2100
+    }
+  ]
+}

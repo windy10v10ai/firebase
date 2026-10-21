@@ -100,7 +100,7 @@ export default function AbilityHoverTip({
                 {icon}
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <div className="text-lg leading-6 font-bold text-heading">{title}</div>
-                  <div className="text-[15px] leading-5">{subtitle}</div>
+                  {subtitle ? <div className="text-[15px] leading-5">{subtitle}</div> : null}
                 </div>
               </div>
               <div className="overflow-hidden rounded-b-md">{content}</div>

@@ -11,6 +11,7 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 |---|---|---|
 | `npm run items` | `config/items.json`、`config/abilities.json`，图在 `public/items/`、`public/abilities/` | 物品与抽选技能的图标、三语名字 |
 | `npm run wiki:sync` | `config/wiki-items.json`、`wiki-abilities.json`（名单、档位、价格），`config/wiki-item-details.json`、`wiki-ability-details.json`（描述与数值） | 百科名单、档位、描述与数值；战绩页点开的说明也用它 |
+| `npm run wiki:sync` | `config/match-items.json`、`match-item-details.json` | 战绩专用物品名单、价格及说明；不进入百科 |
 | `npm run heroes` | `config/heroes.json`，图在 `public/heroes/` | 英雄小头像与中英文名 |
 
 ## 先判断跑哪个
@@ -18,7 +19,7 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 - **新增物品或技能、换了图标、改了名字**：跑 `items`
 - **抽选池（`lottery-items.ts`、`lottery-abilities.ts`）、商店（`shops.txt`）或自定义物品的配方有改动，或百科收录条目的数值、描述变了**：跑 `wiki:sync`
 - **两者都沾**：先 `items` 再 `wiki:sync`。`wiki:sync` 查到池里条目不在 `items.json` 会直接失败
-- **新增或改动自定义物品**：先 `items` 再 `wiki:sync`，商店分类按商店与配方自动收录；只动了原版物品时跑 `items` 即可
+- **新增或改动物品**：先 `items` 再 `wiki:sync`，原版与中立物品说明也由后者生成；商店分类按商店与配方自动收录
 - **英雄**：Dota 出了新英雄，或 game 换皮英雄改了名字、头像时跑 `heroes`。名单取自每日任务池 `api/src/daily-task/config/tasks.ts`，新英雄要先加进任务池；换皮的名字和头像手写在 `config/hero-overrides.json` 与 `config/hero-overrides/`，改完再跑
 
 不要靠「描述文件有没有改」判断百科要不要重跑：描述里带 `%占位符%`，只改一个 `AbilityValues` 数值也会变。拿不准就跑，产物没变化脚本会告诉你。
@@ -27,10 +28,10 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 
 ## 步骤
 
-1. **准备 game 仓库最新 develop**。脚本默认读与本仓库并列的 `../windy10v10ai` 或 `../game`，`AWAKEN_GAME_REPO` 可指向别的绝对路径。并列的 game checkout 在别的分支上或有未提交改动时，**不要切它的分支**，另开 worktree：
+1. **准备 game 数据源**。默认使用最新 develop；用户指定来源时按下述固定提交方式处理。脚本默认读与本仓库并列的 `../windy10v10ai` 或 `../game`，`AWAKEN_GAME_REPO` 可指向别的绝对路径。并列的 game checkout 在别的分支上或有未提交改动时，**不要切它的分支**，另开 worktree：
    `git -C ../windy10v10ai fetch origin develop && git -C ../windy10v10ai worktree add --detach ../windy10v10ai-develop-sync origin/develop`，跑脚本时加 `AWAKEN_GAME_REPO=<该 worktree 的绝对路径>`，用完 `git worktree remove`。
-   `wiki:sync` 会拒绝不在 `origin/develop` 上的提交；`items` 不检查，读到 feature 分支的数据也照样生成，所以这一步对它更要紧。
-   完成条件：脚本读到的 game 提交在 `origin/develop` 上。
+   `items` 与 `wiki:sync` 默认要求 HEAD 在 `origin/develop` 上，且已跟踪文件没有未提交改动。**用户明确指定未合并分支时**，在独立副本检出该提交，两条命令都追加 `-- --game-commit=<完整 SHA>`；参数必须匹配副本 HEAD。在 PR 写明来源与游戏发布依赖，不切换或修改正在测试的原 game checkout。原版参考数据若未跟踪，按对应 Dota 版本只读复制到独立副本。
+   完成条件：来源为默认 develop 或用户指定的固定提交，数据副本干净。
 2. **跑 `cd web && npm run items`**。取图要 `sharp`：缺时先 `npm i sharp --no-save`，**不要写进 `package.json`**。
    要补玩家买过、配置推不出来的物品时，带上 GA 导出的物品表：`npm run items -- <导出.csv>`（第一列是物品名）。
 3. **需要时跑 `npm run wiki:sync`**。自检不过就停下，把失败项原样报给用户，不要改产物或放宽自检。常见报错：
@@ -56,6 +57,6 @@ CDN 和 game 仓库都没有的图（多是饰品、野怪图标）只能从 Dot
 
 ## 不要做的事
 
-- **不要手改产物**（`config/items.json`、`abilities.json`、`wiki-*.json`）。下次同步会被覆盖。
+- **不要手改产物**（`config/items.json`、`abilities.json`、`wiki-*.json`、`match-*.json`）。下次同步会被覆盖。
 - **不要动 `public/items/`、`public/abilities/` 里的文件名**。名字里的 hash 是缓存策略的基础。
 - 提示框的取数规则以 [docs/web/ability-tooltip.md](../../../docs/web/ability-tooltip.md) 为准，与觉醒共用 `web/scripts/dota-ability.mjs`，改规则要两边都重跑。

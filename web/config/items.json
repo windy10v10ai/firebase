@@ -647,6 +647,12 @@
     "en": "Divine Regalia",
     "ru": "Divine Regalia"
   },
+  "item_divine_regalia_broken": {
+    "icon": "divine_regalia_broken.47ea8e9d.webp",
+    "zh": "失节华冠",
+    "en": "Disgraced Regalia",
+    "ru": "Disgraced Regalia"
+  },
   "item_dodo_desolator": {
     "icon": "dodo_desolator.9166d33e.webp",
     "zh": "黯灭头",
@@ -940,12 +946,6 @@
     "zh": "精华指环",
     "en": "Essence Ring",
     "ru": "Essence Ring"
-  },
-  "item_eternal_shroud_ultra": {
-    "icon": "eternal_shroud_ultra.7a848670.webp",
-    "zh": "法师泳衣",
-    "en": "Swimagicostume",
-    "ru": null
   },
   "item_ethereal_blade": {
     "icon": "ethereal_blade.b1cee7d7.webp",
