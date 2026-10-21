@@ -110,6 +110,7 @@ describe('Daily task Phase1 (e2e)', () => {
     const completedTaskIds: string[] = [];
     let snapshot = firstSnapshot;
     for (let round = 0; round < 3; round++) {
+      mockDate(new Date(Date.UTC(2026, 7, 16, 10, round * 5)).toISOString());
       const candidate = snapshot.candidates[0];
       completedTaskIds.push(candidate.taskId);
       const end = await post(

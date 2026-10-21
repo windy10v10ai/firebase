@@ -56,7 +56,7 @@ export class PlayerService {
     isDisconnect: boolean,
     calculateConductPoint: boolean,
     gameId: string,
-  ): Promise<void> {
+  ): Promise<number> {
     const normalizedPoints = this.normalizeBattlePoints(battlePoints);
     if (normalizedPoints !== battlePoints) {
       logger.warn('game/end: battlePoints out of range, normalizing', {
@@ -69,7 +69,7 @@ export class PlayerService {
     const player = await this.playerRepository.findById(steamId.toString());
     if (!player) {
       logger.warn('game/end: player not found, skip', { steamId });
-      return;
+      return 0;
     }
 
     player.matchCount++;
@@ -97,6 +97,7 @@ export class PlayerService {
       player,
       { reason: 'game_end', ref: gameId },
     );
+    return normalizedPoints;
   }
 
   // 仅供测试初始化使用，生产代码不应调用；matchCount 的正常变动走 upsertGameEnd。

@@ -12,7 +12,9 @@ import { MemberDto } from '../members/dto/member.dto';
 import { Member } from '../members/entities/members.entity';
 import { UpdatePlayerDto } from '../player/dto/update-player.dto';
 import { Player } from '../player/entities/player.entity';
+import { ClientOrigin } from '../util/auth/client-origin.decorator';
 
+import { GameEndAuditDecision, buildGameEndAuditRow } from './game-end-audit-row';
 import { GameEndRecordContext, buildGameEndRows, buildGamePerfRow } from './game-end-rows';
 import { buildHeroItemUsageRow } from './hero-item-usage-row';
 import {
@@ -54,6 +56,21 @@ export class BigQueryService {
       this.insert(GAME_END_PLAYERS_TABLE, buildGameEndRows(gameEnd, context, endedAt)),
       this.insert(GAME_PERF_TABLE, perfRow ? [perfRow] : []),
     ]);
+  }
+
+  /** 只写异常与拒绝判断。 */
+  async recordGameEndAudit(
+    gameEnd: GameEndDto,
+    context: GameEndRecordContext,
+    decisions: GameEndAuditDecision[],
+    origin: ClientOrigin,
+  ): Promise<void> {
+    if (!this.isEnabled() || decisions.length === 0) return;
+    const now = new Date();
+    await this.insert(
+      'game_end_players_audit',
+      decisions.map((decision) => buildGameEndAuditRow(gameEnd, context, decision, origin, now)),
+    );
   }
 
   /** 记录一个英雄的一条装备使用统计。 */

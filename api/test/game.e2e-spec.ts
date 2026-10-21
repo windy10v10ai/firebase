@@ -620,7 +620,11 @@ describe('PlayerController (e2e)', () => {
       ['单人结算 超过500分截断', 100000104, 501, 500],
       ['单人结算 低于0分截断', 100000105, -1, 0],
     ])('%s', async (_title, steamId, inputPoints, expectedPoints) => {
-      mockDate('2023-12-01T00:00:00.000Z');
+      mockDate(
+        _title === '单人结算 累加之前的积分'
+          ? '2023-12-01T00:05:00.000Z'
+          : '2023-12-01T00:00:00.000Z',
+      );
       const result = await post(app, gameEndUrl, {
         matchId: '8000000001',
         version: 'v4.05',
@@ -1002,6 +1006,14 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('/api/game/end (Post) PlayerStatsLifetime 累计战绩', () => {
+    beforeAll(async () => {
+      for (const steamId of [
+        100003001, 100003002, 100003003, 100003011, 100003012, 100003022, 100003023,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it('首次结算后 statsLifetime 正确写入', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100003001;
@@ -1033,6 +1045,7 @@ describe('PlayerController (e2e)', () => {
       const steamId = 100003002;
 
       await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
+      mockDate('2023-12-01T00:05:00.000Z');
       await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
 
       const stats = await getPlayerStatsLifetime(app, steamId);
@@ -1093,6 +1106,7 @@ describe('PlayerController (e2e)', () => {
         }),
       );
 
+      mockDate('2023-12-01T00:05:00.000Z');
       await post(app, gameEndUrl, {
         ...createGameEndPayload({ players: [{ steamId }] }),
         players: [
@@ -1142,6 +1156,7 @@ describe('PlayerController (e2e)', () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100003102;
 
+      await callGameStart(app, [steamId]);
       // 先打一局
       await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
 

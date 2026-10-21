@@ -170,16 +170,16 @@ export class ProxyController {
       throw new BadRequestException();
     }
     const context = createGameEndRecordContext(serverType, 'proxy');
-    const recorded = await timeStep('recordGameEnd', () =>
-      this.localHostService.recordGameEnd(gameEnd, context.gameId, origin),
+    const settlement = await timeStep('recordGameEnd', () =>
+      this.localHostService.recordGameEnd(gameEnd, context.gameId, origin, context),
     );
-    if (recorded) {
+    if (settlement.recorded) {
       await timeStep('playerStats', () => this.gameService.recordPlayerStats(gameEnd, context));
       await timeStep('ga4GameEnd', () =>
-        this.analyticsService.gameEndPlayerBot(gameEnd, serverType),
+        this.analyticsService.gameEndPlayerBot(settlement.analyticsGameEnd, serverType),
       );
     }
-    return buildProxySuccessHtml(requestId, { recorded });
+    return buildProxySuccessHtml(requestId, { recorded: settlement.recorded });
   }
 
   @Get('game-hero-item-usage-post')

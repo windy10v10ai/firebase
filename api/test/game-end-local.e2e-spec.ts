@@ -104,6 +104,51 @@ describe('POST /api/game/end/local (e2e)', () => {
     await app.close();
   });
 
+  it('官方结算与本地结算共享账户冷却，拒绝后不重复加分或写战绩', async () => {
+    const steamId = 105620031;
+    mockDate('2026-08-16T01:00:00.000Z');
+    await createPlayer(app, { steamId, matchCount: 20 });
+
+    const payload = createGameEndLocalPayload({
+      matchId: '9100000032',
+      players: [{ steamId, battlePoints: 200 }],
+    });
+    await request(app.getHttpServer())
+      .post('/api/game/end')
+      .set('x-api-key', getServerApiKey())
+      .send(payload)
+      .expect(201);
+
+    await postAsLocalHost(app, { ...payload, matchId: '9100000033' }).expect(201);
+    let player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(200);
+    expect(player.matchCount).toBe(21);
+    expect((await getPlayerStatsLifetime(app, steamId))?.kills).toBe(5);
+
+    mockDate('2026-08-16T01:05:00.000Z');
+    await postAsLocalHost(app, { ...payload, matchId: '9100000034' }).expect(201);
+    const proxyResult = await request(app.getHttpServer())
+      .get('/api/proxy/game-end-local-post')
+      .query({
+        requestId: 'audit_cooldown',
+        body: Buffer.from(JSON.stringify({ ...payload, matchId: '9100000036' })).toString(
+          'base64url',
+        ),
+      })
+      .set('x-api-key', localApiKey)
+      .expect(200);
+    expect(proxyResult.text).toContain('"recorded":false');
+    await request(app.getHttpServer())
+      .post('/api/game/end')
+      .set('x-api-key', getServerApiKey())
+      .send({ ...payload, matchId: '9100000035' })
+      .expect(201);
+    player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(400);
+    expect(player.matchCount).toBe(22);
+    expect((await getPlayerStatsLifetime(app, steamId))?.kills).toBe(10);
+  }, 60000);
+
   it('合法本地结算：累加积分与战绩，不动行为分', async () => {
     const steamId = 105620001;
     mockDate('2026-08-16T01:00:00.000Z');
@@ -229,7 +274,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player.matchCount).toBe(1);
   });
 
-  it('20 分钟内重复结算（不同 matchId）拒绝；满 20 分钟后再次结算成功', async () => {
+  it('5 分钟内重复结算（不同 matchId）拒绝；满 5 分钟后再次结算成功', async () => {
     const steamId = 105620005;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20 });
@@ -251,7 +296,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     let player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(200);
 
-    mockDate('2026-08-16T01:20:01.000Z');
+    mockDate('2026-08-16T01:05:00.000Z');
     await postAsLocalHost(
       app,
       createGameEndLocalPayload({
@@ -302,27 +347,37 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(okPlayer.seasonPointTotal).toBe(0);
   });
 
-  it('当日累计超过 5000：整条拒绝，不部分发放', async () => {
-    // 单局 battlePoints 会被 clamp 到 500，所以要连续 10 局（每局都过了冷却）
-    // 才能让累计打到当日 5000 上限，第 11 局再 + 500 = 5500 > 5000（拒绝）。
+  it('所有入口共享每日额度：剩余额度部分发放，用尽后仍记录战绩，次日重置', async () => {
     const steamId = 105620007;
     const firstMatchTime = new Date('2026-08-16T01:00:00.000Z').getTime();
-    const matchIntervalMs = 21 * 60 * 1000;
+    const matchIntervalMs = 5 * 60 * 1000;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20 });
 
+    const started = await get(app, gameStartUrl, { steamIds: [steamId], matchId: 9100000099 });
+    const snapshot = started.body.dailyTasks.find(
+      (task: { steamId: number }) => task.steamId === steamId,
+    );
+    const candidate = snapshot.candidates[0];
+
     for (let i = 0; i < 10; i++) {
       mockDate(new Date(firstMatchTime + i * matchIntervalMs).toISOString());
-      await postAsLocalHost(
-        app,
-        createGameEndLocalPayload({
-          matchId: `${9100000100 + i}`,
-          players: [{ steamId, battlePoints: 500 }],
-        }),
-      );
+      const payload = createGameEndLocalPayload({
+        matchId: `${9100000100 + i}`,
+        players: [{ steamId, battlePoints: i === 9 ? 450 : 500 }],
+      });
+      if (i % 2 === 0) {
+        await postAsLocalHost(app, payload).expect(201);
+      } else {
+        await request(app.getHttpServer())
+          .post('/api/game/end')
+          .set('x-api-key', getServerApiKey())
+          .send(payload)
+          .expect(201);
+      }
     }
     let player = await getPlayer(app, steamId);
-    expect(player.seasonPointTotal).toBe(5000);
+    expect(player.seasonPointTotal).toBe(4950);
 
     mockDate(new Date(firstMatchTime + 10 * matchIntervalMs).toISOString());
     await postAsLocalHost(
@@ -335,6 +390,57 @@ describe('POST /api/game/end/local (e2e)', () => {
 
     player = await getPlayer(app, steamId);
     expect(player.seasonPointTotal).toBe(5000);
+    expect(player.matchCount).toBe(31);
+
+    mockDate(new Date(firstMatchTime + 11 * matchIntervalMs).toISOString());
+    await request(app.getHttpServer())
+      .get('/api/proxy/game-end-local-post')
+      .query({
+        requestId: 'audit_daily_cap',
+        body: Buffer.from(
+          JSON.stringify(
+            createGameEndLocalPayload({
+              matchId: '9100000111',
+              players: [
+                {
+                  steamId,
+                  battlePoints: 500,
+                  dailyTask: {
+                    dayId: snapshot.dayId,
+                    taskId: candidate.taskId,
+                    star: candidate.star,
+                    seasonPoint: candidate.rewardSeasonPoint,
+                  },
+                },
+              ],
+            }),
+          ),
+        ).toString('base64url'),
+      })
+      .set('x-api-key', localApiKey)
+      .expect(200);
+    player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(5000);
+    expect(player.matchCount).toBe(32);
+    expect((await getPlayerStatsLifetime(app, steamId))?.kills).toBe(60);
+    const nextStart = await get(app, gameStartUrl, { steamIds: [steamId], matchId: 9100000113 });
+    const nextSnapshot = nextStart.body.dailyTasks.find(
+      (task: { steamId: number }) => task.steamId === steamId,
+    );
+    expect(nextSnapshot.completedTasks).toEqual([
+      expect.objectContaining({ taskId: candidate.taskId }),
+    ]);
+    expect(nextSnapshot.todaySeasonPoint).toBe(0);
+
+    mockDate('2026-08-17T01:00:00.000Z');
+    await postAsLocalHost(
+      app,
+      createGameEndLocalPayload({
+        matchId: '9100000112',
+        players: [{ steamId, battlePoints: 500 }],
+      }),
+    ).expect(201);
+    expect((await getPlayer(app, steamId)).seasonPointTotal).toBe(5500);
   });
 
   it('本地结算也会记录每日任务完成状态', async () => {
