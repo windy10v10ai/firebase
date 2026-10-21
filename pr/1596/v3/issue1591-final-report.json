@@ -1,0 +1,789 @@
+{
+  "build": "default Turbopack production",
+  "matchChunks": [
+    "37e3yvz7x71i-.js"
+  ],
+  "wikiChunks": [
+    "40x1tol3-3hq4.js"
+  ],
+  "runs": [
+    {
+      "locale": "zh",
+      "width": 375,
+      "layouts": [
+        {
+          "state": "expanded",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "regalia-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_black_king_bar",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_satanic",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_enhancement_boundless",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [
+            {
+              "tag": "DIV",
+              "cls": "pointer-events-none absolute top-full right-0 z-10 mt-2 whitespace-nowrap rounded-md border border-warning/50 bg-panel-r",
+              "left": -3.15625,
+              "right": 302
+            }
+          ],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [
+            {
+              "tag": "DIV",
+              "cls": "pointer-events-none absolute top-full right-0 z-10 mt-2 whitespace-nowrap rounded-md border border-warning/50 bg-panel-r",
+              "left": -3.15625,
+              "right": 302
+            }
+          ],
+          "headerCollisions": []
+        }
+      ],
+      "errors": [],
+      "badResponses": [],
+      "network": {
+        "initial": {
+          "match": [],
+          "wiki": []
+        },
+        "expanded": {
+          "match": [],
+          "wiki": []
+        },
+        "afterNeutral": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": []
+        },
+        "afterCustom": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-items": {
+          "match": [],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-abilities": {
+          "match": [],
+          "wiki": []
+        }
+      },
+      "regaliaText": "失节华冠\n技能：被动\n被动：堕落\n\n你已经阵亡过，因此不会获得任何东西。\n\n它无法忍受失败。\n\n滑动查看更多",
+      "beastText": "兽化盾\n42200\n技能：无目标\n+80 力量\n+1400 生命值\n+40 护甲\n+40% 魔法抗性\n+40 生命恢复\n+40 攻击速度\n+100 攻击力\n主动：人形肉盾\n300\n60.0\n\n获得减益免疫状态。进入防御姿态，所有被动属性加成提升100%，持续8秒。\n提供100%魔法抗性加成，并且免疫纯粹和反弹伤害。持续时间内敌方技能的负面效果不会生效。\n\n被动：强袭光环\n\n为附近友军提供10点护甲和50点攻击速度。降低附近敌军-10点护甲。\n\n作用范围：900\n\n融合了兽化符文力量的终极防御装备，能让使用者化身为不可摧毁的堡垒。\n\n滑动查看更多",
+      "sacredText": "六脉神剑\n42000\n技能：被动\n+160 全属性\n+100 攻击速度\n+40% 移动速度\n+46% 状态抗性\n+80% 生命回复\n+100% 魔法恢复增强\n+50% 技能增强\n+100 魔法伤害攻击\n+40% 魔法消耗/魔法损失降低\n+50% 施法速度加成\n\n由三把神器对剑与三叉戟合成，散华的坚韧，夜叉的迅捷，慧光的通明尽归一身。\n\n凌波微步以及北冥神功，都是大理皇室段誉的武门绝学，六脉神剑更是段氏一族的至高传承。\n\n滑动查看更多",
+      "focus": "撒旦之邪力"
+    },
+    {
+      "locale": "zh",
+      "width": 1280,
+      "layouts": [
+        {
+          "state": "expanded",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "regalia-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_black_king_bar",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_satanic",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_enhancement_boundless",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "bkb-hover",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        }
+      ],
+      "errors": [],
+      "badResponses": [],
+      "network": {
+        "initial": {
+          "match": [],
+          "wiki": []
+        },
+        "expanded": {
+          "match": [],
+          "wiki": []
+        },
+        "afterNeutral": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": []
+        },
+        "afterCustom": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-items": {
+          "match": [],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-abilities": {
+          "match": [],
+          "wiki": []
+        }
+      },
+      "regaliaText": "失节华冠\n技能：被动\n被动：堕落\n\n你已经阵亡过，因此不会获得任何东西。\n\n它无法忍受失败。",
+      "beastText": "兽化盾\n42200\n技能：无目标\n+80 力量\n+1400 生命值\n+40 护甲\n+40% 魔法抗性\n+40 生命恢复\n+40 攻击速度\n+100 攻击力\n主动：人形肉盾\n300\n60.0\n\n获得减益免疫状态。进入防御姿态，所有被动属性加成提升100%，持续8秒。\n提供100%魔法抗性加成，并且免疫纯粹和反弹伤害。持续时间内敌方技能的负面效果不会生效。\n\n被动：强袭光环\n\n为附近友军提供10点护甲和50点攻击速度。降低附近敌军-10点护甲。\n\n作用范围：900\n\n融合了兽化符文力量的终极防御装备，能让使用者化身为不可摧毁的堡垒。",
+      "sacredText": "六脉神剑\n42000\n技能：被动\n+160 全属性\n+100 攻击速度\n+40% 移动速度\n+46% 状态抗性\n+80% 生命回复\n+100% 魔法恢复增强\n+50% 技能增强\n+100 魔法伤害攻击\n+40% 魔法消耗/魔法损失降低\n+50% 施法速度加成\n\n由三把神器对剑与三叉戟合成，散华的坚韧，夜叉的迅捷，慧光的通明尽归一身。\n\n凌波微步以及北冥神功，都是大理皇室段誉的武门绝学，六脉神剑更是段氏一族的至高传承。",
+      "focus": "撒旦之邪力"
+    },
+    {
+      "locale": "en",
+      "width": 375,
+      "layouts": [
+        {
+          "state": "expanded",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "regalia-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_black_king_bar",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_satanic",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_enhancement_boundless",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        }
+      ],
+      "errors": [],
+      "badResponses": [],
+      "network": {
+        "initial": {
+          "match": [],
+          "wiki": []
+        },
+        "expanded": {
+          "match": [],
+          "wiki": []
+        },
+        "afterNeutral": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": []
+        },
+        "afterCustom": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-items": {
+          "match": [],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-abilities": {
+          "match": [],
+          "wiki": []
+        }
+      },
+      "regaliaText": "Disgraced Regalia\nABILITY:Passive\nPassive: Fallen\n\nYou have died and thus get nothing.\n\nIt cannot abide failure.\n\nSwipe for more",
+      "beastText": "Beast Shield\n42200\nABILITY:No Target\n+80 Strength\n+1400 Health\n+40 Armor\n+40% Magic Resistance\n+40 Health Regeneration\n+40 Attack Speed\n+100 Damage\nActive: Human Shield\n300\n60.0\n\nApplies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by 100%, for 8 seconds.\nGrants 100% Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.\n\nPassive: Assault Aura\n\nGrants 10 armor and 50 attack speed to nearby allies. Reduces -10 armor of nearby enemies.\n\nRadius: 900\n\nThe ultimate defensive equipment fused with the power of the beast rune, allowing the user to become an indestructible fortress.\n\nSwipe for more",
+      "sacredText": "Legendary Hexad\n42000\nABILITY:Passive\n+160 All Attributes\n+100 Attack Speed\n+40% Movement Speed\n+46% Status Resistance\n+80% Health Restoration\n+100% Mana Regen Amplification\n+50% Spell Damage\n+100 Magic Damage Attack\n+40% Mana Cost/Mana Loss Reduction\n+50% Cast Speed Bonus\n\nForged from all three artifact swords and the Holy Trinity, uniting Sange's resilience, Yasha's swiftness and Kaya's clarity in a single blade.\n\nTo gather all three legendary swords in their perfected form and forge them into one, the power within is beyond measure.\n\nSwipe for more",
+      "focus": "Satanic"
+    },
+    {
+      "locale": "en",
+      "width": 1280,
+      "layouts": [
+        {
+          "state": "expanded",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "regalia-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_black_king_bar",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_satanic",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_enhancement_boundless",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "bkb-hover",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        }
+      ],
+      "errors": [],
+      "badResponses": [],
+      "network": {
+        "initial": {
+          "match": [],
+          "wiki": []
+        },
+        "expanded": {
+          "match": [],
+          "wiki": []
+        },
+        "afterNeutral": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": []
+        },
+        "afterCustom": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-items": {
+          "match": [],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-abilities": {
+          "match": [],
+          "wiki": []
+        }
+      },
+      "regaliaText": "Disgraced Regalia\nABILITY:Passive\nPassive: Fallen\n\nYou have died and thus get nothing.\n\nIt cannot abide failure.",
+      "beastText": "Beast Shield\n42200\nABILITY:No Target\n+80 Strength\n+1400 Health\n+40 Armor\n+40% Magic Resistance\n+40 Health Regeneration\n+40 Attack Speed\n+100 Damage\nActive: Human Shield\n300\n60.0\n\nApplies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by 100%, for 8 seconds.\nGrants 100% Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.\n\nPassive: Assault Aura\n\nGrants 10 armor and 50 attack speed to nearby allies. Reduces -10 armor of nearby enemies.\n\nRadius: 900\n\nThe ultimate defensive equipment fused with the power of the beast rune, allowing the user to become an indestructible fortress.",
+      "sacredText": "Legendary Hexad\n42000\nABILITY:Passive\n+160 All Attributes\n+100 Attack Speed\n+40% Movement Speed\n+46% Status Resistance\n+80% Health Restoration\n+100% Mana Regen Amplification\n+50% Spell Damage\n+100 Magic Damage Attack\n+40% Mana Cost/Mana Loss Reduction\n+50% Cast Speed Bonus\n\nForged from all three artifact swords and the Holy Trinity, uniting Sange's resilience, Yasha's swiftness and Kaya's clarity in a single blade.\n\nTo gather all three legendary swords in their perfected form and forge them into one, the power within is beyond measure.",
+      "focus": "Satanic"
+    },
+    {
+      "locale": "ru",
+      "width": 375,
+      "layouts": [
+        {
+          "state": "expanded",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "regalia-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_black_king_bar",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_satanic",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_enhancement_boundless",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities",
+          "width": 375,
+          "scrollWidth": 375,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities-dialog",
+          "width": 375,
+          "scrollWidth": 360,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        }
+      ],
+      "errors": [],
+      "badResponses": [],
+      "network": {
+        "initial": {
+          "match": [],
+          "wiki": []
+        },
+        "expanded": {
+          "match": [],
+          "wiki": []
+        },
+        "afterNeutral": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": []
+        },
+        "afterCustom": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-items": {
+          "match": [],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-abilities": {
+          "match": [],
+          "wiki": []
+        }
+      },
+      "regaliaText": "Disgraced Regalia\nСПОСОБНОСТЬ:Пассивная\nПассивное: Fallen\n\nЭтот предмет опозорен смертью и потому не даёт ничего.\n\nОно не стерпело неудачи.\n\nЛистайте дальше",
+      "beastText": "Beast Shield\n42200\nСПОСОБНОСТЬ:Ненаправленная\n+80 к силе\n+1400 к здоровью\n+40 к броне\n+40% к сопротивлению магии\n+40 к восстановлению здоровья\n+40 к скорости атаки\n+100 к урону\nActive: Human Shield\n300\n60.0\n\nApplies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by 100%, for 8 seconds.\nGrants 100% Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.\n\nPassive: Assault Aura\n\nGrants 10 armor and 50 attack speed to nearby allies. Reduces -10 armor of nearby enemies.\n\nRadius: 900\n\nThe ultimate defensive equipment fused with the power of the beast rune, allowing the user to become an indestructible fortress.\n\nЛистайте дальше",
+      "sacredText": "Легендарная гексада\n42000\nСПОСОБНОСТЬ:Пассивная\n+160 ко всем атрибутам\n+100 к скорости атаки\n+40% к скорости передвижения\n+46% Сопротивление эффектам\n+80% к пополнению здоровья\n+100% Усиление регенерации маны\n+50% Усиление заклинаний\n+100 Магический урон от атак\n+40% Снижение затрат и потери маны\n+50% Скорость применения\n\nВыкован из трёх артефактных клинков и Священного трезубца, объединяя стойкость Sange, стремительность Yasha и ясность Kaya в одном оружии.\n\nСобрать все три легендарных клинка в их совершенной форме и сплавить их воедино, заключённая внутри сила безмерна.\n\nЛистайте дальше",
+      "focus": "Satanic"
+    },
+    {
+      "locale": "ru",
+      "width": 1280,
+      "layouts": [
+        {
+          "state": "expanded",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "regalia-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_black_king_bar",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_satanic",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "item_enhancement_boundless",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "bkb-hover",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-items-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities",
+          "width": 1280,
+          "scrollWidth": 1280,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        },
+        {
+          "state": "wiki-abilities-dialog",
+          "width": 1280,
+          "scrollWidth": 1265,
+          "overflow": [],
+          "hidden": [],
+          "headerCollisions": []
+        }
+      ],
+      "errors": [],
+      "badResponses": [],
+      "network": {
+        "initial": {
+          "match": [],
+          "wiki": []
+        },
+        "expanded": {
+          "match": [],
+          "wiki": []
+        },
+        "afterNeutral": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": []
+        },
+        "afterCustom": {
+          "match": [
+            "http://localhost:3191/_next/static/chunks/37e3yvz7x71i-.js"
+          ],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-items": {
+          "match": [],
+          "wiki": [
+            "http://localhost:3191/_next/static/chunks/40x1tol3-3hq4.js"
+          ]
+        },
+        "wiki-abilities": {
+          "match": [],
+          "wiki": []
+        }
+      },
+      "regaliaText": "Disgraced Regalia\nСПОСОБНОСТЬ:Пассивная\nПассивное: Fallen\n\nЭтот предмет опозорен смертью и потому не даёт ничего.\n\nОно не стерпело неудачи.",
+      "beastText": "Beast Shield\n42200\nСПОСОБНОСТЬ:Ненаправленная\n+80 к силе\n+1400 к здоровью\n+40 к броне\n+40% к сопротивлению магии\n+40 к восстановлению здоровья\n+40 к скорости атаки\n+100 к урону\nActive: Human Shield\n300\n60.0\n\nApplies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by 100%, for 8 seconds.\nGrants 100% Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.\n\nPassive: Assault Aura\n\nGrants 10 armor and 50 attack speed to nearby allies. Reduces -10 armor of nearby enemies.\n\nRadius: 900\n\nThe ultimate defensive equipment fused with the power of the beast rune, allowing the user to become an indestructible fortress.",
+      "sacredText": "Легендарная гексада\n42000\nСПОСОБНОСТЬ:Пассивная\n+160 ко всем атрибутам\n+100 к скорости атаки\n+40% к скорости передвижения\n+46% Сопротивление эффектам\n+80% к пополнению здоровья\n+100% Усиление регенерации маны\n+50% Усиление заклинаний\n+100 Магический урон от атак\n+40% Снижение затрат и потери маны\n+50% Скорость применения\n\nВыкован из трёх артефактных клинков и Священного трезубца, объединяя стойкость Sange, стремительность Yasha и ясность Kaya в одном оружии.\n\nСобрать все три легендарных клинка в их совершенной форме и сплавить их воедино, заключённая внутри сила безмерна.",
+      "focus": "Satanic"
+    }
+  ],
+  "screenshots": [
+    "zh-profile-375.png",
+    "zh-beast-375.png",
+    "zh-sacred-375.png",
+    "zh-wiki-items-375.png",
+    "zh-wiki-abilities-375.png",
+    "zh-profile-1280.png",
+    "zh-beast-1280.png",
+    "zh-sacred-1280.png",
+    "zh-wiki-items-1280.png",
+    "zh-wiki-abilities-1280.png",
+    "en-profile-375.png",
+    "en-beast-375.png",
+    "en-sacred-375.png",
+    "en-wiki-items-375.png",
+    "en-wiki-abilities-375.png",
+    "en-profile-1280.png",
+    "en-beast-1280.png",
+    "en-sacred-1280.png",
+    "en-wiki-items-1280.png",
+    "en-wiki-abilities-1280.png",
+    "ru-profile-375.png",
+    "ru-beast-375.png",
+    "ru-sacred-375.png",
+    "ru-wiki-items-375.png",
+    "ru-wiki-abilities-375.png",
+    "ru-profile-1280.png",
+    "ru-beast-1280.png",
+    "ru-sacred-1280.png",
+    "ru-wiki-items-1280.png",
+    "ru-wiki-abilities-1280.png"
+  ]
+}

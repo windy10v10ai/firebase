@@ -1,0 +1,37 @@
+[
+  {
+    "key": "item_black_king_bar",
+    "url": "http://localhost:3191/items/black_king_bar.2b6d0be6.webp",
+    "status": 200
+  },
+  {
+    "key": "item_satanic",
+    "url": "http://localhost:3191/items/satanic.93fe85de.webp",
+    "status": 200
+  },
+  {
+    "key": "item_beast_shield",
+    "url": "http://localhost:3191/items/beast_shield.94455679.webp",
+    "status": 200
+  },
+  {
+    "key": "item_sacred_six_vein",
+    "url": "http://localhost:3191/items/sacred_six_vein.74effef5.webp",
+    "status": 200
+  },
+  {
+    "key": "item_branches",
+    "url": "http://localhost:3191/items/branches.0f34241d.webp",
+    "status": 200
+  },
+  {
+    "key": "item_divine_regalia_broken",
+    "url": "http://localhost:3191/items/divine_regalia_broken.47ea8e9d.webp",
+    "status": 200
+  },
+  {
+    "key": "item_enhancement_boundless",
+    "url": "http://localhost:3191/items/enhancement_boundless.1bc54aa3.webp",
+    "status": 200
+  }
+]
