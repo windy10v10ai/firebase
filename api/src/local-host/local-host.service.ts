@@ -4,9 +4,14 @@ import { BaseFirestoreRepository } from 'fireorm';
 import { InjectRepository } from 'nestjs-fireorm';
 
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
+import { BigQueryService } from '../bigquery/bigquery.service';
+import { GameEndAuditDecision } from '../bigquery/game-end-audit-row';
+import { GameEndRecordContext } from '../bigquery/game-end-rows';
 import { DailyTaskService } from '../daily-task/services/daily-task.service';
+import { GameEndSettlement, buildSettledGameEnd } from '../game/game-end-settlement';
 import { PlayerService } from '../player/player.service';
 import { ClientOrigin } from '../util/auth/client-origin.decorator';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { IpActivityEntry, LocalRateLimit } from './entities/local-rate-limit.entity';
 import { normalizeIp } from './ip.helper';
@@ -132,40 +137,97 @@ export class LocalHostService {
     private readonly rateLimitRepository: BaseFirestoreRepository<LocalRateLimit>,
     private readonly playerService: PlayerService,
     private readonly dailyTaskService: DailyTaskService,
+    private readonly bigQueryService: BigQueryService,
   ) {}
 
-  /** 记录本地对局，返回这场比赛是否计入。 */
+  /** 所有游戏来源共用账户冷却与每日额度，返回实际发放的统计视图。 */
   async recordGameEnd(
     gameEnd: GameEndDto,
     gameId: string,
     origin: ClientOrigin = {},
-  ): Promise<boolean> {
+    context: GameEndRecordContext = { gameId, serverType: SERVER_TYPE.LOCAL, route: 'local' },
+  ): Promise<GameEndSettlement> {
     // 每个玩家要读限流记录和玩家档案各一次，10 人局顺序检查就是 20 次往返
     const qualifiedPlayers = gameEnd.players.filter((player) => player.steamId > 0);
     const checks = await Promise.all(
       qualifiedPlayers.map((player) => this.checkPlayerLimit(player)),
     );
-
     // 多人报文里有人不通过就整份拒绝，是为了省掉部分成功的处理，不是安全上的要求
     const rejected = checks.find((check) => !check.ok);
     if (rejected) {
-      logger.warn('game/end/local: rejected, no points or daily task recorded for this match', {
+      logger.warn('game/end: rejected, no points or daily task recorded for this match', {
+        gameId,
         matchId: gameEnd.matchId,
         steamId: rejected.steamId,
-        battlePoints: rejected.battlePoints,
         reason: rejected.reason,
+        serverType: context.serverType,
+        route: context.route,
         ip: origin.ip,
         country: origin.country,
       });
-      return false;
+      await this.recordSettlementAudit(gameEnd, context, checks, new Map(), false, origin);
+      return { recorded: false, analyticsGameEnd: buildSettledGameEnd(gameEnd, new Map()) };
     }
 
-    await Promise.all(
-      checks.map((check) => this.savePlayerGameEnd(check, gameEnd, gameId, origin)),
+    const awarded = await Promise.all(
+      checks.map(
+        async (check) =>
+          [
+            check.steamId,
+            await this.savePlayerGameEnd(check, gameEnd, gameId, origin, context),
+          ] as const,
+      ),
     );
+    const awards = new Map(awarded);
+    const analyticsGameEnd = buildSettledGameEnd(gameEnd, awards);
+    await this.dailyTaskService.recordGameEnd(analyticsGameEnd.players);
+    await this.recordSettlementAudit(gameEnd, context, checks, awards, true, origin);
+    return { recorded: true, analyticsGameEnd };
+  }
 
-    await this.dailyTaskService.recordGameEnd(gameEnd.players);
-    return true;
+  private async recordSettlementAudit(
+    gameEnd: GameEndDto,
+    context: GameEndRecordContext,
+    checks: PlayerCheck[],
+    awards: Map<number, number>,
+    accepted: boolean,
+    origin: ClientOrigin,
+  ): Promise<void> {
+    const decisions: GameEndAuditDecision[] = checks.flatMap((check) => {
+      const reasons: string[] = [];
+      if (
+        this.playerService.normalizeBattlePoints(check.player.battlePoints) !==
+        check.player.battlePoints
+      ) {
+        reasons.push('points_out_of_range');
+      }
+      if (check.reason) reasons.push(check.reason);
+      if (!accepted && check.ok) reasons.push('match_rejected');
+      if (reasons.length === 0) return [];
+      return [
+        {
+          player: check.player,
+          reasons,
+          accepted,
+          awardedPoints: awards.get(check.steamId) ?? 0,
+        },
+      ];
+    });
+    for (const decision of decisions) {
+      logger.warn('game/end: audit', {
+        gameId: context.gameId,
+        matchId: gameEnd.matchId,
+        steamId: decision.player.steamId,
+        serverType: context.serverType,
+        route: context.route,
+        reasons: decision.reasons,
+        requestedPoints: decision.player.battlePoints,
+        awardedPoints: decision.awardedPoints,
+        ip: origin.ip,
+        country: origin.country,
+      });
+    }
+    await this.bigQueryService.recordGameEndAudit(gameEnd, context, decisions, origin);
   }
 
   /** 本地来源消耗会员积分前的限额检查：单笔超限抛 400，当日累计超限返回 false。 */
@@ -267,17 +329,16 @@ export class LocalHostService {
     await this.saveDailyCounters(steamId, current, today, counters);
   }
 
-  // 只读检查，不写任何数据：依次检查玩家存在性/matchCount、冷却、当日上限。
-  // 不比对 matchId 去重——控制台启动的对局引擎给的 matchId 恒为 "0"，会把
-  // 不同对局误判为重放；冷却窗口已经足够防止短时间内重复结算。
+  // 不比对 matchId 去重：本机专用服的引擎会在不同局复用相同值。
   private async checkPlayerLimit(player: GameEndPlayerDto): Promise<PlayerCheck> {
     const steamId = player.steamId;
-    const battlePoints = this.playerService.normalizeBattlePoints(player.battlePoints);
+    let battlePoints = this.playerService.normalizeBattlePoints(player.battlePoints);
     const current = await this.rateLimitRepository.findById(steamId.toString());
     // 多人对局是先查完所有玩家再统一写回，两步之间可能跨过 UTC 零点；
     // today 由 check 算定并透传给 commit，避免写回时日期已经翻页，
     // 却带着查询时算出的旧一天的计数
     const today = getUtcMidnight(new Date());
+    const counters = getDailyCounters(current, today);
     const reject = (reason: string): PlayerCheck => ({
       player,
       steamId,
@@ -286,13 +347,12 @@ export class LocalHostService {
       reason,
       current,
       today,
-      counters: { gameEndSeasonPoint: 0, usedMemberPoint: 0, createdOrderCount: 0 },
+      counters,
     });
 
-    // 唯一的准入条件是玩家已由开局接口创建；伪造的 steamId 走不到开局，也就结算不了
     const existingPlayer = await this.playerService.findBySteamId(steamId);
     if (!existingPlayer) {
-      return reject('player not found');
+      return reject('player_not_found');
     }
     if (current?.lastRequestAt) {
       const elapsedMs = Date.now() - current.lastRequestAt.getTime();
@@ -301,12 +361,10 @@ export class LocalHostService {
       }
     }
 
-    const counters = getDailyCounters(current, today);
-    if (counters.gameEndSeasonPoint + battlePoints > DAILY_POINT_CAP) {
-      return reject('daily cap exceeded');
-    }
-
-    return { player, steamId, battlePoints, ok: true, current, counters, today };
+    const remaining = Math.max(0, DAILY_POINT_CAP - counters.gameEndSeasonPoint);
+    const reason = battlePoints > remaining ? 'daily_cap' : undefined;
+    battlePoints = Math.min(battlePoints, remaining);
+    return { player, steamId, battlePoints, ok: true, reason, current, counters, today };
   }
 
   // 唯一的写入口，要求调用方交出完整的三个计数：只更新其中一个再把 dailyDate 推到
@@ -333,13 +391,13 @@ export class LocalHostService {
     }
   }
 
-  // 写入限流文档 + 加分与战绩，只在 checkPlayerLimit 返回 ok 时调用。
   private async savePlayerGameEnd(
     check: PlayerCheck,
     gameEnd: GameEndDto,
     gameId: string,
     origin: ClientOrigin,
-  ): Promise<void> {
+    context: GameEndRecordContext,
+  ): Promise<number> {
     const counters = { ...check.counters };
     counters.gameEndSeasonPoint += check.battlePoints;
     await this.saveDailyCounters(check.steamId, check.current, check.today, counters, {
@@ -351,22 +409,27 @@ export class LocalHostService {
       }),
     });
 
-    await this.playerService.upsertGameEnd(
+    const awardedPoints = await this.playerService.upsertGameEnd(
       check.steamId,
       check.player.teamId === gameEnd.winnerTeamId,
       check.battlePoints,
       check.player.isDisconnected,
-      false,
+      context.route === 'official' &&
+        context.serverType !== SERVER_TYPE.LOCAL &&
+        gameEnd.playerCount >= 2,
       gameId,
     );
-    logger.info('game/end/local: recorded', {
+    logger.info('game/end: recorded', {
+      gameId,
       matchId: gameEnd.matchId,
       steamId: check.steamId,
       battlePoints: check.battlePoints,
       version: gameEnd.version,
-      serverType: 'LOCAL',
+      serverType: context.serverType,
+      route: context.route,
       ip: origin.ip,
       country: origin.country,
     });
+    return awardedPoints;
   }
 }

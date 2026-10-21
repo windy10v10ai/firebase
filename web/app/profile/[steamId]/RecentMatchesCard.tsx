@@ -3,12 +3,25 @@
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, Skull, TowerControl, Zap, type LucideIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import InfoPopover from '@/app/components/InfoPopover';
 import Skeleton from '@/app/components/ui/skeleton';
+import {
+  useWikiDetails,
+  WikiDialog,
+  WikiHoverTip,
+  type WikiKind,
+} from '@/app/components/WikiDetail';
+import { abilityLocale } from '@/app/lib/ability-text';
 import { RECENT_MATCH_LIMIT, type RecentMatch } from '@/app/lib/player-stats-recent';
 import { recentMatchesQuery } from '@/app/lib/queries';
+import {
+  abilityEntries,
+  lotteryItemEntries,
+  shopItemEntries,
+  type WikiEntry,
+} from '@/app/wiki/entries';
 import { abilityAsset, abilityIconPath, abilityLabel } from '@/config/abilities';
 import { GAME_ICON } from '@/config/game-icons';
 import { heroAsset, heroIconPath, heroLabel } from '@/config/heroes';
@@ -142,10 +155,59 @@ const SLOT_BOX =
   'flex shrink-0 items-center justify-center overflow-hidden border border-surface bg-surface';
 const SLOT_SIZE: Record<SlotKind, string> = { item: 'h-8 w-11', ability: 'size-8' };
 
+/** 百科收录的物品与技能能点开说明；说明包第一次悬停或点开时才加载，个人主页不因它变重 */
+interface SlotWiki {
+  entries: Record<SlotKind, Map<string, WikiEntry>>;
+  details: Record<SlotKind, ReturnType<typeof useWikiDetails>>;
+  /** 要用到某一类说明了，开始加载 */
+  want: (kind: SlotKind) => void;
+  open: (kind: SlotKind, entry: WikiEntry) => void;
+}
+
+const WIKI_KIND: Record<SlotKind, WikiKind> = { item: 'items', ability: 'abilities' };
+
 /** 空格也占位，六格一眼能看出这局有没有出满 */
-function LoadoutSlot({ kind, name, locale }: { kind: SlotKind; name?: string; locale: string }) {
+function LoadoutSlot({
+  kind,
+  name,
+  locale,
+  wiki,
+}: {
+  kind: SlotKind;
+  name?: string;
+  locale: string;
+  wiki: SlotWiki;
+}) {
   const t = useTranslations('profile.recent');
   const box = `${SLOT_BOX} ${SLOT_SIZE[kind]}`;
+  const entry = name ? wiki.entries[kind].get(name) : undefined;
+  if (entry) {
+    // 静止时与其他格子一样照搬结算界面，能点开的只在悬停时提亮
+    return (
+      <span onPointerEnter={() => wiki.want(kind)} onFocus={() => wiki.want(kind)}>
+        <WikiHoverTip
+          kind={WIKI_KIND[kind]}
+          entry={entry}
+          details={wiki.details[kind]}
+          locale={abilityLocale(locale)}
+        >
+          <button
+            type="button"
+            aria-label={entry.label}
+            onClick={() => wiki.open(kind, entry)}
+            className={`${box} transition-[border-color,filter] hover:border-line-strong hover:brightness-125`}
+          >
+            {entry.icon ? (
+              // eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式
+              <img src={entry.icon} alt="" className="size-full object-cover" />
+            ) : (
+              <span className="text-[13px] text-faint">?</span>
+            )}
+          </button>
+        </WikiHoverTip>
+      </span>
+    );
+  }
   if (!name) {
     // 技能没有空槽底图，画成和等级圈同样的凹陷
     return kind === 'item' ? (
@@ -241,6 +303,35 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   const locale = useLocale();
   const query = useQuery(recentMatchesQuery(steamId));
   const [openRow, setOpenRow] = useState<number | null>(null);
+  const tWiki = useTranslations('wiki');
+  const [wanted, setWanted] = useState({ item: false, ability: false });
+  const [opened, setOpened] = useState<{ kind: SlotKind; entry: WikiEntry } | null>(null);
+  const itemDetails = useWikiDetails('items', wanted.item);
+  const abilityDetails = useWikiDetails('abilities', wanted.ability);
+  // 一件物品既在商店又在抽奖池时，提示里写商店那一行
+  const wikiEntries = useMemo(
+    () => ({
+      item: new Map(
+        [...lotteryItemEntries(locale, tWiki), ...shopItemEntries(locale, tWiki)].map((e) => [
+          e.key,
+          e,
+        ]),
+      ),
+      ability: new Map(abilityEntries(locale, tWiki).map((e) => [e.key, e])),
+    }),
+    [locale, tWiki],
+  );
+  const want = (kind: SlotKind) =>
+    setWanted((prev) => (prev[kind] ? prev : { ...prev, [kind]: true }));
+  const wiki: SlotWiki = {
+    entries: wikiEntries,
+    details: { item: itemDetails, ability: abilityDetails },
+    want,
+    open: (kind, entry) => {
+      want(kind);
+      setOpened({ kind, entry });
+    },
+  };
 
   const loaded: LoadResult | null = query.data
     ? { status: 'ready', matches: query.data.matches }
@@ -501,15 +592,27 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                               <div className="flex gap-1">
                                 {/* 物品栏位置固定，下标就是格子的身份 */}
                                 {match.items.map((item, slot) => (
-                                  <LoadoutSlot key={slot} kind="item" name={item} locale={locale} />
+                                  <LoadoutSlot
+                                    key={slot}
+                                    kind="item"
+                                    name={item}
+                                    locale={locale}
+                                    wiki={wiki}
+                                  />
                                 ))}
                               </div>
                               <div className="flex gap-1">
-                                <LoadoutSlot kind="item" name={match.neutralItem} locale={locale} />
+                                <LoadoutSlot
+                                  kind="item"
+                                  name={match.neutralItem}
+                                  locale={locale}
+                                  wiki={wiki}
+                                />
                                 <LoadoutSlot
                                   kind="item"
                                   name={match.neutralPassiveItem}
                                   locale={locale}
+                                  wiki={wiki}
                                 />
                               </div>
                             </div>
@@ -526,6 +629,7 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
                                   kind="ability"
                                   name={ability}
                                   locale={locale}
+                                  wiki={wiki}
                                 />
                               ))}
                             </div>
@@ -540,6 +644,20 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
           })}
         </ul>
       )}
+      <WikiDialog
+        kind="items"
+        entry={opened?.kind === 'item' ? opened.entry : null}
+        details={itemDetails}
+        locale={abilityLocale(locale)}
+        onClose={() => setOpened(null)}
+      />
+      <WikiDialog
+        kind="abilities"
+        entry={opened?.kind === 'ability' ? opened.entry : null}
+        details={abilityDetails}
+        locale={abilityLocale(locale)}
+        onClose={() => setOpened(null)}
+      />
     </section>
   );
 }

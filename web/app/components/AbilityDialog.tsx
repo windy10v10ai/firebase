@@ -29,6 +29,8 @@ interface AbilityDialogProps {
   body: ReactNode;
   /** 固定在底部的操作区，如付费按钮；有它时平板起弹窗统一高度 */
   footer?: ReactNode;
+  /** game 照游戏内物品提示配色：头部是整条色带，说明区不留内边距，由 ItemDetails 自己分块 */
+  tone?: 'site' | 'game';
 }
 
 /**
@@ -43,7 +45,9 @@ export default function AbilityDialog({
   header,
   body,
   footer,
+  tone = 'site',
 }: AbilityDialogProps) {
+  const game = tone === 'game';
   const t = useTranslations('ability.dialog');
   const ref = useRef<HTMLDialogElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -212,7 +216,7 @@ export default function AbilityDialog({
       onPointerUp={onDragEnd}
       onPointerCancel={onDragEnd}
       // 手机是贴底的抽屉，按钮落在拇指区；有操作区时平板起统一高度，换技能时按钮不挪位置
-      className={`card-container m-0 mt-auto max-h-[calc(100dvh-3rem)] w-full max-w-none rounded-t-[14px] rounded-b-none border-b-0 p-0 text-content transition-[translate] duration-200 ease-out backdrop:bg-black/60 open:flex open:flex-col starting:open:translate-y-full md:m-auto md:w-[min(28rem,calc(100vw-2rem))] md:rounded-[10px] md:border-b md:transition-none md:starting:open:translate-y-0 ${
+      className={`${game ? 'overflow-hidden border border-game-line bg-game-panel' : 'card-container'} m-0 mt-auto max-h-[calc(100dvh-3rem)] w-full max-w-none rounded-t-[14px] rounded-b-none border-b-0 p-0 text-content transition-[translate] duration-200 ease-out backdrop:bg-black/60 open:flex open:flex-col starting:open:translate-y-full md:m-auto md:w-[min(28rem,calc(100vw-2rem))] md:rounded-[10px] md:border-b md:transition-none md:starting:open:translate-y-0 ${
         footer
           ? 'md:h-[min(40rem,calc(100dvh-4rem))] md:max-h-none'
           : 'md:max-h-[min(40rem,calc(100dvh-4rem))]'
@@ -220,7 +224,9 @@ export default function AbilityDialog({
     >
       {openKey ? (
         // 手机抽屉的高度随内容定，伸缩基准要按内容算：基准写成 0% 时 iOS Safari 当成 0 高，整张抽屉只剩内边距那一条
-        <div className="card-pad flex min-h-0 flex-auto flex-col gap-4.5 pt-6 lg:pt-8">
+        <div
+          className={`flex min-h-0 flex-auto flex-col ${game ? '' : 'card-pad gap-4.5 pt-6 lg:pt-8'}`}
+        >
           <span
             aria-hidden="true"
             className="pointer-events-none absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-line-strong md:hidden"
@@ -235,10 +241,18 @@ export default function AbilityDialog({
             <X className="size-5" aria-hidden="true" />
           </button>
 
-          <div className="flex items-start gap-4 pe-9 lg:pe-6">{header}</div>
+          <div
+            className={
+              game
+                ? 'flex items-center gap-3.5 bg-game-head px-4 pt-6 pb-4 pe-14 md:px-4.5 md:pt-4.5'
+                : 'flex items-start gap-4 pe-9 lg:pe-6'
+            }
+          >
+            {header}
+          </div>
 
           {/* 电脑档让说明区伸进右侧留白，滚动条贴着弹窗边缘；-me-8 与 card-pad 的 lg:p-8 对应 */}
-          <div className="relative flex min-h-0 flex-auto flex-col lg:-me-8">
+          <div className={`relative flex min-h-0 flex-auto flex-col ${game ? '' : 'lg:-me-8'}`}>
             <div
               ref={bodyRef}
               tabIndex={-1}
@@ -248,9 +262,9 @@ export default function AbilityDialog({
                   setHintDismissed(true);
                 }
               }}
-              className="min-h-0 flex-auto overflow-y-auto overscroll-contain outline-none lg:pe-8"
+              className={`min-h-0 flex-auto overflow-y-auto overscroll-contain outline-none ${game ? '' : 'lg:pe-8'}`}
             >
-              <div ref={contentRef} className="flex flex-col gap-4.5">
+              <div ref={contentRef} className={`flex flex-col ${game ? '' : 'gap-4.5'}`}>
                 {body}
               </div>
             </div>
@@ -258,7 +272,7 @@ export default function AbilityDialog({
             {moreBelow ? (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute start-0 end-0 bottom-0 h-12 bg-linear-to-b from-transparent to-panel lg:end-8"
+                className={`pointer-events-none absolute start-0 end-0 bottom-0 h-12 bg-linear-to-b from-transparent ${game ? 'to-game-panel' : 'to-panel lg:end-8'}`}
               />
             ) : null}
             {/* 触屏的滚动条平时藏着，光有渐隐看不出能滑；电脑档有滚轮，不提示。文案不写方向：写「向下滑」有人会往下拉，拉到头部就关掉了抽屉 */}

@@ -59,14 +59,14 @@ Steam 这边必须守住的规矩：
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源；网站已登录时改走 `POST /api/feedback/web`（`@AllowWeb()`），Steam ID 取登录态，报告的 `steamIdVerified` 只有这条路是 true，其余来源请求体里的 ID 都能伪造。游戏来源不带日志，改带游戏现场 `gameState`，字段名与结算一致。报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都定期删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：个人按 Steam ID 限频，没有 ID 时按 IP（国内代理转发的请求共用代理 IP）；另有全站每日上限，Steam ID 能伪造，这是存储费用的封顶。分类与仓库标签的对应见 [feedback-review](../../.claude/skills/feedback-review/SKILL.md) 技能，取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由见「对外入口」；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
 
-### 本地主机来源的限额
+### 游戏结算与本地主机来源的限额
 
-打包进地图的本地 key 一解包就泄露，后端不能相信它带来的 steamId。挂了 `@AllowLocal()` 的路由里，凡是能产出或消耗资源的都按 steamId 限额，只对 `LOCAL` 来源生效，官方服务器不受影响。计数存在 `LocalRateLimit`（文档 id 就是 steamId），判定与取值都在 `LocalHostService`。
+打包进地图的本地 key 一解包就泄露，后端不能相信它带来的 steamId。结算的单局上限、冷却和每日额度按账户跨所有游戏服务器与入口共用，避免切换来源绕过限制。会员积分消耗仍仅对 `LOCAL` 来源限额，订单次数沿用网站与本地共用的规则。计数存在 `LocalRateLimit`（文档 id 就是 steamId），判定与取值都在 `LocalHostService`。
 
 | 限额 | 超出时 |
 |---|---|
 | 结算冷却 | 整场拒绝，不加分也不记每日任务 |
-| 每日结算获得的勇士积分 | 同上，不做部分发放 |
+| 每日结算获得的勇士积分 | 只发剩余额度，用完后继续记战绩与任务完成 |
 | 单笔消耗会员积分 | 400 |
 | 每日消耗会员积分 | 200，但不扣分 |
 | 每日创建支付宝订单，网站来源（`WEB`）也计入同一份 | 400；支付成功时清零当日计数 |
@@ -109,18 +109,21 @@ Steam 这边必须守住的规矩：
 | 表 | 一行是什么 | 分区 / 聚类 |
 |---|---|---|
 | `game_end_players` | 一次结算里的一个玩家，电脑也写（`steam_id` 为 0） | `ended_at` 按天 / `steam_id`、`difficulty`、`hero_name` |
+| `game_end_players_audit` | 一个玩家的一次异常或拒绝结算判断 | `evaluated_at` 按天 / `steam_id`、`server_type` |
 | `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
 | `member_history` | 一次开通或续费会员，写入前后的等级与到期日都留下 | `created_at` 按天 / `steam_id` |
 | `launcher_room_events` | 启动器联机的一次开房或一次加入的连接结果，用来看打洞失败率 | `event_time` 按天 / `event` |
 | `hero_item_usage` | 一个英雄的一条装备使用统计，同一英雄一局可分条 | `recorded_at` 按天 / `hero_name`、`difficulty` |
 | `game_perf` | 一局的卡顿比值与单位规模 | `ended_at` 按天 / `host`、`route` |
 
-- **战绩与卡顿只在结算被接受后写入**：重复发送的请求由本地主机结算的冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
+- **战绩与卡顿只在结算被接受后写入**：重复发送的请求由共用的结算冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
 - **`game_id` 由服务端给每次结算生成**：用启动器开局时 `match_id` 恒为 `"0"`，不能用来区分不同的局。结算加分的那条积分记录，`ref` 就是这个 `game_id`，支付类的积分记录 `ref` 是订单号
 - **出装统计独立上报**：真人和电脑均可上报，直接写 BigQuery，不改 Firestore。允许分条、重复和丢失，不做限额、冷却、去重或分条合并，避免统计影响结算。装备时长按件数累计，另记号角起 30 分钟后的持有时长，卡顿从这时起明显上升；胜率、使用率和使用量在查询时计算，按整局标识与玩家槽位汇总分条，空装备记录也保留。
 - **游戏生成的整局标识关联结算与出装**：结算允许不带，不承担唯一性或去重约束。
 - **卡顿一局一行**：只随第一条结算发，那条被拒收时这局没有卡顿数据；整局一份，所以不和每人一行的战绩同表
-- **战绩与卡顿每行带一份原始报文（`raw`，JSON 列）**：游戏端新加的字段先落在这里，需要时再建列
+- **战绩、卡顿和审计保留原始报文**：正常结算的积分列与原始报文保留客户端值，实际到账查积分流水；GA4 只上报实际到账，基础积分与每日任务积分分开，避免异常原值污染图表。限额影响任务奖励时，任务存档中的获得积分也只记实际发放部分
+- **审计只补充异常与拒绝**：越界原值、冷却拒绝、每日额度截断和缺失玩家写逐玩家判断，带来源与服务端时间；同场拒绝影响的玩家也写原因。与战绩、账本共用服务端生成的结算标识。IP 是请求出口，可能为代理，账户字段也不证明操作者身份
+- **人工扫描不自动处罚**：[结算异常查询](../../bigquery/queries/settlement-anomalies.sql) 默认报告最近一周，结合更长窗口的重复战斗统计、领取节奏、短局高分、累计额度与审计信号筛选账户，附明细供核对
 - **写入是 best-effort**：失败只记 `[BigQuery] insert failed` 日志，结算和支付照常完成。充值与会员核对以积分、会员记录为准，玩家文档被并发写覆盖丢掉的积分在这里看不出来
 - **生产数据不设过期**。本地开发写同一项目里的 `game_data_dev`，分区会过期；测试与 CI 不连 BigQuery。数据集由 `BIGQUERY_DATASET` 指定，未设置时不写
 - **接口不直接查这里**：展示用的统计先预先算好、写回 Firestore，见「预先汇总」

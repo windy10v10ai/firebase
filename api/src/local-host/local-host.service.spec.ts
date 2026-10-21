@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { GameEndDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
+import { SERVER_TYPE } from '../util/secret/secret.service';
 
 import { LocalRateLimit } from './entities/local-rate-limit.entity';
 import { COOLDOWN_MS, LocalHostService } from './local-host.service';
@@ -81,17 +82,21 @@ describe('LocalHostService', () => {
       findBySteamId: jest.fn((steamId: number) =>
         Promise.resolve(steamId in existingPlayers ? existingPlayers[steamId] : { matchCount: 20 }),
       ),
-      upsertGameEnd: jest.fn().mockResolvedValue(undefined),
+      upsertGameEnd: jest
+        .fn()
+        .mockImplementation((_id, _winner, points) => Promise.resolve(points)),
     };
     const dailyTaskService = {
       recordGameEnd: jest.fn().mockResolvedValue(undefined),
     };
+    const bigQueryService = { recordGameEndAudit: jest.fn().mockResolvedValue(undefined) };
     const service = new LocalHostService(
       repository as never,
       playerService as never,
       dailyTaskService as never,
+      bigQueryService as never,
     );
-    return { service, store, playerService, dailyTaskService };
+    return { service, store, playerService, dailyTaskService, bigQueryService };
   }
 
   it('合法请求：加分、记录每日任务', async () => {
@@ -161,13 +166,11 @@ describe('LocalHostService', () => {
     }
   });
 
-  it('当日累计超过 5000 时整条拒绝，不部分发放', async () => {
+  it('当日额度用完后停止加分，继续记场次与任务', async () => {
     jest.useFakeTimers();
     try {
       const { service, playerService } = createService();
 
-      // 单局 battlePoints 会被 clamp 到 500，连续 10 局刚好打到 5000 上限
-      // （均不拒绝），第 11 局再 + 500 = 5500 > 5000，应被拒绝。
       for (let i = 0; i < 10; i++) {
         await service.recordGameEnd(
           createGameEndDto({
@@ -186,7 +189,15 @@ describe('LocalHostService', () => {
         GAME_ID,
       );
 
-      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(10);
+      expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(11);
+      expect(playerService.upsertGameEnd).toHaveBeenLastCalledWith(
+        1,
+        true,
+        0,
+        false,
+        false,
+        GAME_ID,
+      );
     } finally {
       jest.useRealTimers();
     }
@@ -256,6 +267,49 @@ describe('LocalHostService', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('剩余额度部分发放，官方与本地入口共用冷却，保留原值审计', async () => {
+    const { service, store, playerService, dailyTaskService, bigQueryService } = createService();
+    store.set('1', { id: '1', dailyDate: getUtcMidnightForTest(), dailyGameEndSeasonPoint: 4800 });
+    const gameEnd = createGameEndDto({
+      playerCount: 4,
+      players: [
+        createPlayerDto({
+          battlePoints: 20000000,
+          dailyTask: { dayId: '20261021', taskId: 'kills', star: 1, seasonPoint: 100 },
+        }),
+      ],
+    });
+    const context = { gameId: GAME_ID, serverType: SERVER_TYPE.WINDY, route: 'official' as const };
+    const result = await service.recordGameEnd(gameEnd, GAME_ID, { ip: '203.0.113.1' }, context);
+    expect(result.recorded).toBe(true);
+    expect(result.analyticsGameEnd.players[0].battlePoints).toBe(200);
+    expect(result.analyticsGameEnd.players[0].dailyTask.seasonPoint).toBe(0);
+    expect(dailyTaskService.recordGameEnd).toHaveBeenCalledWith(result.analyticsGameEnd.players);
+    expect(gameEnd.players[0].battlePoints).toBe(20000000);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1, true, 200, false, true, GAME_ID);
+    expect(store.get('1')?.dailyGameEndSeasonPoint).toBe(5000);
+    expect(bigQueryService.recordGameEndAudit).toHaveBeenLastCalledWith(
+      gameEnd,
+      context,
+      [
+        expect.objectContaining({
+          reasons: ['points_out_of_range', 'daily_cap'],
+          awardedPoints: 200,
+          accepted: true,
+        }),
+      ],
+      { ip: '203.0.113.1' },
+    );
+    const rejected = await service.recordGameEnd(gameEnd, 'next-id');
+    expect(rejected.recorded).toBe(false);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
+    expect(bigQueryService.recordGameEndAudit.mock.calls[1][2][0]).toMatchObject({
+      reasons: ['points_out_of_range', 'cooldown'],
+      awardedPoints: 0,
+      accepted: false,
+    });
   });
 
   describe('会员积分限额', () => {

@@ -368,12 +368,17 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
           unresolved.push(`${abilityName} 的 %${name}%`);
           return whole;
         }
-        return value;
+        // 游戏的物品提示把换进去的数值加粗，觉醒与抽选技能的说明保持原样
+        return kind === 'items' ? `<b>${value}</b>` : value;
       });
-      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换
+      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换。
+      // 游戏用 GameplayValues 的 span 包驱散类型这类取值，显示上与正文无异，去掉标记只留文字
       text[lang] = {
         title: titles[lang].replace(/\n/g, '<br>'),
-        desc: desc.replace(/\n/g, '<br>'),
+        desc: desc
+          .replace(/<\/b>%/g, '%</b>')
+          .replace(/<\/?span\b[^>]*>/gi, '')
+          .replace(/\n/g, '<br>'),
       };
     }
     for (const lang of langs) {
@@ -406,6 +411,37 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
   }
 
   return { read, locales, unresolved };
+}
+
+/**
+ * 物品的价格与配方字段：game 的各份物品 KV 覆盖原版 items.txt。
+ * 返回物品名 → { cost, recipe, result, requirements }，requirements 是配方的各条合成路线，每条是材料名列表。
+ */
+export function readItemRecipes(game, version) {
+  const files = kvSourceFiles(game, version, 'items');
+  const out = new Map();
+  for (const file of [...files].reverse()) {
+    // 记下优先级最高的来源，调用方据此区分自定义物品与原版物品
+    const source = path.basename(file);
+    for (const [name, body] of blockBodies(readText(file))) {
+      if (!name.startsWith('item_')) continue;
+      const [[, fields]] = parseKv(`${body}}`);
+      const prev = out.get(name) ?? { cost: null, recipe: false, result: null, requirements: [] };
+      const next = { ...prev, source };
+      for (const [key, value] of fields) {
+        if (key === 'ItemCost' && typeof value === 'string') next.cost = Number(value);
+        if (key === 'ItemRecipe' && typeof value === 'string') next.recipe = value === '1';
+        if (key === 'ItemResult' && typeof value === 'string') next.result = value;
+        if (key === 'ItemRequirements' && Array.isArray(value)) {
+          next.requirements = value
+            .filter(([, v]) => typeof v === 'string')
+            .map(([, v]) => v.split(';').filter(Boolean));
+        }
+      }
+      out.set(name, next);
+    }
+  }
+  return out;
 }
 
 /**

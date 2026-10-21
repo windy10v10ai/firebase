@@ -105,7 +105,7 @@
       },
       "wiki": {
         "title": "百科",
-        "description": "游戏里能抽到的技能与物品"
+        "description": "游戏里的技能与物品"
       },
       "leaderboard": {
         "title": "排行榜",
@@ -941,7 +941,7 @@
       "abilities": "技能百科",
       "items": "物品百科"
     },
-    "description": "游戏里能抽到的全部技能与物品，T1 最稀有，越往后越容易抽到。",
+    "description": "游戏里的技能与物品。商店物品按价格分档，抽奖物品 T1 最稀有。",
     "tabs": {
       "abilities": "技能",
       "items": "物品"
@@ -958,7 +958,29 @@
       "active": "主动",
       "passive": "被动"
     },
+    "category": {
+      "label": "物品分类",
+      "shop": "商店",
+      "lottery": "抽奖"
+    },
+    "section": {
+      "equipment": "装备",
+      "consumable": "消耗道具",
+      "drop": "掉落合成"
+    },
+    "price": {
+      "below": "{price, number} 以下",
+      "range": "{min, number} – {max, number}",
+      "above": "{price, number} 以上"
+    },
+    "tag": {
+      "shop": "商店 · {price, number} 金",
+      "drop": "商店 · 掉落合成",
+      "lottery": "抽奖 · {tier}"
+    },
     "empty": "没有找到「{query}」",
+    "emptyOther": "{current}里没有「{query}」，{other}里有 {count} 件",
+    "switchTo": "切到{other}",
     "iconMissing": "无图"
   },
   "auth": {
