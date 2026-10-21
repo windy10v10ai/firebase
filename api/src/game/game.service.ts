@@ -107,29 +107,7 @@ export class GameService {
     return response;
   }
 
-  /** 正式结算：累加每个玩家的战绩与积分，并记录每日任务。 */
-  async recordGameEnd(gameEnd: GameEndDto, gameId: string): Promise<void> {
-    const players = gameEnd.players.filter((player) => player.steamId > 0);
-    // 行为分只在组队局计算
-    const isParty = gameEnd.playerCount >= 2;
-
-    await Promise.all(
-      players.map((player) =>
-        this.playerService.upsertGameEnd(
-          player.steamId,
-          player.teamId === gameEnd.winnerTeamId,
-          player.battlePoints,
-          player.isDisconnected,
-          isParty,
-          gameId,
-        ),
-      ),
-    );
-
-    await this.dailyTaskService.recordGameEnd(gameEnd.players);
-  }
-
-  /** 上报对局级 GA4 事件（整场与按玩家），与结算规则无关。 */
+  /** 上报实际结算后的整场与逐玩家 GA4 事件。 */
   async recordMatchAnalytics(gameEnd: GameEndDto, serverType: SERVER_TYPE): Promise<void> {
     await Promise.all([
       this.analyticsService.gameEndMatch(gameEnd, serverType),

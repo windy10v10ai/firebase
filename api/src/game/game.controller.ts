@@ -2,7 +2,7 @@ import { Body, Controller, Get, ParseArrayPipe, ParseIntPipe, Post, Query } from
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { GameEndDto } from '../analytics/dto/game-end-dto';
-import { createGameEndRecordContext } from '../bigquery/game-end-rows';
+import { GameEndRoute, createGameEndRecordContext } from '../bigquery/game-end-rows';
 import { LocalHostService } from '../local-host/local-host.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
@@ -64,16 +64,11 @@ export class GameController {
   async end(
     @Body() gameEnd: GameEndDto,
     @CurrentServerType() serverType: SERVER_TYPE,
+    @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<string> {
-    const context = createGameEndRecordContext(serverType, 'official');
-    await timeStep('recordGameEnd', () => this.gameService.recordGameEnd(gameEnd, context.gameId));
-    await timeStep('playerStats', () => this.gameService.recordPlayerStats(gameEnd, context));
-    await timeStep('ga4GameEnd', () => this.gameService.recordMatchAnalytics(gameEnd, serverType));
-    return this.gameService.getOK();
+    return this.settle(gameEnd, serverType, origin, 'official');
   }
 
-  // 本地主机受限结算：带限额与冷却，且不计算行为分。官方来源不会走这条路，
-  // 真走了也只是拿到更严格的结算，没有损失，所以不额外区分来源。
   @AllowLocal()
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
@@ -82,14 +77,23 @@ export class GameController {
     @CurrentServerType() serverType: SERVER_TYPE,
     @CurrentClientOrigin() origin: ClientOrigin,
   ): Promise<string> {
-    const context = createGameEndRecordContext(serverType, 'local');
-    const recorded = await timeStep('recordGameEnd', () =>
-      this.localHostService.recordGameEnd(gameEnd, context.gameId, origin),
+    return this.settle(gameEnd, serverType, origin, 'local');
+  }
+
+  private async settle(
+    gameEnd: GameEndDto,
+    serverType: SERVER_TYPE,
+    origin: ClientOrigin,
+    route: GameEndRoute,
+  ): Promise<string> {
+    const context = createGameEndRecordContext(serverType, route);
+    const settlement = await timeStep('recordGameEnd', () =>
+      this.localHostService.recordGameEnd(gameEnd, context.gameId, origin, context),
     );
-    if (recorded) {
+    if (settlement.recorded) {
       await timeStep('playerStats', () => this.gameService.recordPlayerStats(gameEnd, context));
       await timeStep('ga4GameEnd', () =>
-        this.gameService.recordMatchAnalytics(gameEnd, serverType),
+        this.gameService.recordMatchAnalytics(settlement.analyticsGameEnd, serverType),
       );
     }
     return this.gameService.getOK();

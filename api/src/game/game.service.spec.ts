@@ -102,38 +102,6 @@ describe('GameService', () => {
     bigQueryService = moduleRef.get(BigQueryService);
   });
 
-  describe('recordGameEnd 组队判定', () => {
-    const player = { steamId: 1001, teamId: 2, battlePoints: 10, isDisconnected: false };
-    const build = (playerCount: number) =>
-      ({ winnerTeamId: 2, players: [player], playerCount }) as unknown as GameEndDto;
-
-    it('单玩家报文也能算组队局', async () => {
-      await service.recordGameEnd(build(4), 'game-id');
-
-      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(
-        1001,
-        true,
-        10,
-        false,
-        true,
-        'game-id',
-      );
-    });
-
-    it('全场只有一个真人时不算组队局', async () => {
-      await service.recordGameEnd(build(1), 'game-id');
-
-      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(
-        1001,
-        true,
-        10,
-        false,
-        false,
-        'game-id',
-      );
-    });
-  });
-
   describe('recordPlayerStats', () => {
     const gameEnd = {
       matchId: '1',
