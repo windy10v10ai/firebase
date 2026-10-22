@@ -19,5 +19,10 @@ namespace Windy10v10AI.Launcher
         public static void IgnoreUnreachable(Socket socket)
         {
         }
+        public static string OperatingSystemVersion()
+        {
+            return "Test OS";
+        }
+
     }
 }

@@ -5,6 +5,7 @@ import {
   Header,
   NotFoundException,
   Param,
+  Query,
   Res,
   StreamableFile,
 } from '@nestjs/common';
@@ -15,11 +16,7 @@ import { Public } from '../util/auth/public.decorator';
 
 import { LauncherReleaseDto } from './dto/launcher-release.dto';
 import { WorkshopVersionDto } from './dto/workshop-version.dto';
-import {
-  LAUNCHER_RELEASE,
-  LAUNCHER_VERSION_CACHE_SECONDS,
-  LauncherReleaseService,
-} from './launcher-release.service';
+import { LAUNCHER_VERSION_CACHE_SECONDS, LauncherReleaseService } from './launcher-release.service';
 import {
   LAUNCHER_WORKSHOP_IDS,
   LauncherWorkshopService,
@@ -54,8 +51,10 @@ export class LauncherController {
   @Get('version')
   @Header('Cache-Control', `public, max-age=${LAUNCHER_VERSION_CACHE_SECONDS}`)
   @ApiOperation({ summary: 'Get the latest launcher version for self-update' })
-  getVersion(): LauncherReleaseDto {
-    return LAUNCHER_RELEASE;
+  getVersion(@Query('platform') platform = 'windows'): LauncherReleaseDto {
+    const release = this.launcherReleaseService.getRelease(platform);
+    if (!release) throw new NotFoundException();
+    return platform === 'macos' ? { ...release, platform: 'macos' } : release;
   }
 
   // 国内代理只转发 /api/，大陆玩家经它下载新版只能走这里
@@ -63,12 +62,14 @@ export class LauncherController {
   @ApiOperation({ summary: 'Download the latest launcher exe' })
   async download(
     @Param('version') version: string,
+    @Query('platform') platform = 'windows',
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    if (version !== LAUNCHER_RELEASE.version) {
+    const release = this.launcherReleaseService.getRelease(platform);
+    if (!release || version !== release.version) {
       throw new NotFoundException();
     }
-    const exe = await this.launcherReleaseService.getExe();
+    const exe = await this.launcherReleaseService.getPackage(platform);
     if (!exe) {
       throw new BadGatewayException();
     }

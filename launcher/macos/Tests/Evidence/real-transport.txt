@@ -1,9 +1,0 @@
-PASS real room API and guest handshake (lan)
-PASS real-service roster delivery
-PASS real-route guest-to-host payload
-PASS real-route host-to-guest payload
-PASS real signed relay handshake
-PASS real-service roster delivery
-PASS real-route guest-to-host payload
-PASS real-route host-to-guest payload
-TRANSPORT TEST PASSED; no game server or remote Windows machine used

@@ -31,5 +31,25 @@ namespace Windy10v10AI.Launcher
         {
             socket.IOControl(SioUdpConnReset, new byte[] { 0 }, null);
         }
+        // 系统兼容声明可能让版本号失真，优先读取实际系统构建信息。
+        public static string OperatingSystemVersion()
+        {
+            try
+            {
+                const string key = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+                var build = Registry.GetValue(key, "CurrentBuild", null) as string;
+                if (!string.IsNullOrEmpty(build))
+                {
+                    var ubr = Registry.GetValue(key, "UBR", null);
+                    var display = Registry.GetValue(key, "DisplayVersion", null) as string;
+                    return "10.0." + build + (ubr == null ? "" : "." + ubr) + (string.IsNullOrEmpty(display) ? "" : " " + display);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return Environment.OSVersion.VersionString;
+        }
+
     }
 }

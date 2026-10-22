@@ -7,6 +7,10 @@
 - 改 `launcher/` 的 PR 只在当前版本号已经发布过时升版本：`core/LauncherVersion.cs` 的 `Current` 等于 `api/src/launcher/launcher-release.service.ts` 里的线上版本就升，已经比线上高（攒着还没发版）就不动。exe 的文件版本与各平台都从它取，不在别处另写版本号。修 bug 与小功能升第三位，明显改善玩家体验的新功能（如联机、公开房间）升第二位。拿不准时问用户
 - PR「概要」写明升级前后的版本与幅度，如「版本 0.3.2 → 0.3.3（修 bug，升第三位）」，review 时不用翻 diff 就能判断是小版本还是大版本；没升时写明并入哪个未发布的版本，如「并入未发布的 0.5.0」
 
+## 功能边界
+
+- Mac 功能以 Windows 为基准，必须保持对应功能；精简实现不等于删减功能。不直接接收移植版本独有功能，也不加入未被 Windows 功能或当前平台需求证明有必要的扩展。视觉重设计单独进行，当前只补齐功能所需控件与流程。
+
 ## 文案
 
 - 对 Dota 2 说「启动」，不说「打开」，说的是动作；描述 Dota 2 正在运行的状态说「开着」，避免和「启动器」撞字；进游戏的按钮不管第几次进都叫「进入游戏」
@@ -20,7 +24,7 @@
 `core/` 是 Windows 与 Mac 共用的联机代码，理由见 [README.md](README.md) 的「代码结构」。
 
 - `core/` 只用 C# 5 语法，不引用 Windows 专用 API（注册表、`DllImport`、WinForms、`System.Drawing`），也不引用 `src/` 里的类型
-- 核心要用到系统能力时，在 `Platform` 加方法，每个平台的实现都补上：Windows 是 `src/Platform.cs`，核心测试是 `core/tests/dotnet/TestPlatform.cs`
+- 核心要用到系统能力时，在 `Platform` 加方法，每个平台的实现都补上：Windows 是 `src/Platform.cs`，Mac 是 `macos/Platform.cs`，核心测试是 `core/tests/dotnet/TestPlatform.cs`
 - 与平台无关的测试放 `core/tests/`，并加进 `core/tests/dotnet/Program.cs` 与 `tests/SteamExecutableTests.cs` 两处入口
 
 ## 网络
@@ -28,6 +32,8 @@
 - 新建的 socket 都要调 `Platform.KeepPrivate`：启动器以继承句柄的方式启动 Steam 与 Dota，被继承的 socket 在启动器退出后仍占着端口
 
 ## 校验
+
+- PR 的 CI 只调用现有脚本做构建和测试；打包、上传安装包和发布验证放在官方发布工作流，避免重复维护。
 
 - `launcher\test.cmd` 通过
 - `launcher\build.cmd` 编译通过，并核对 `launcher/dist/Windy10v10AI.exe` 的文件版本等于 `LauncherVersion.Current`

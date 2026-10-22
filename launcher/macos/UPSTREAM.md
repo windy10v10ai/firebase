@@ -1,11 +1,7 @@
-# 上游出处与许可
+# 贡献来源与许可
 
-基于 Windy10v10AI Launcher，Copyright (C) 2022–2026 windy and contributors。
+Mac 平台实现基于 ZevaierZhan 在 [#1572](https://github.com/windy10v10ai/firebase/pull/1572) 提交的移植，参考提交 `94541c53387db73b1619559b40cd77a7cd890507`。保留其 AppKit 界面、平台进程管理、地图更新和测试的贡献记录。
 
-源版本：[windy10v10ai/firebase launcher，dfe5dc759ef0c6a99ad3397209ef40cae09ca1a0](https://github.com/windy10v10ai/firebase/tree/dfe5dc759ef0c6a99ad3397209ef40cae09ca1a0/launcher)。
+Windows 与 Mac 直接编译 `launcher/core` 的同一份联机代码，不维护复制核心。
 
-`Core/*.cs`、`Tests/LocalGateTests.cs` 和 `Tests/RelayTests.cs` 衍生自该版本。Mac 适配移除 Windows 注册表和 socket IOControl 依赖，保留协议 3 的报文格式、STUN 和中转握手；新增 macOS 生命周期管理、JSON 兼容层、AppKit 界面与集成测试。
-
-衍生源码使用同一 GPL-3.0 许可，并保留上游 Steam 分发附加许可，见 [LICENSE](LICENSE) 与 [LICENSE.EXCEPTIONS.md](LICENSE.EXCEPTIONS.md)。Microsoft 运行时的许可证和第三方声明见 `Notices/`；构建时一并复制进应用。
-
-这是独立的实验性 Mac 移植，不代表上游已接受或认可，也不替代上游 Windows 正式发布流程。应用不分发 Valve 游戏可执行文件；运行时从用户本机安装生成专用服临时副本。
+源码使用仓库根目录的 [GPL-3.0](../../LICENSE) 及 [Steam 分发附加许可](../../LICENSE.EXCEPTIONS.md)，构建时随应用保留。Microsoft 运行时的许可证与第三方声明见 `Notices/`，随应用保留。应用不分发 Valve 游戏文件。

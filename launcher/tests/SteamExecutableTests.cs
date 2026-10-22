@@ -20,6 +20,7 @@ namespace Windy10v10AI.Launcher.Tests
                 Console.WriteLine("PASS Steam executable tests (" + culture + ")");
                 RelayTests.RunAll();
                 LocalGateTests.RunAll();
+                TunnelPortTests.RunAll();
                 CorruptFilesTests.RunAll();
                 return 0;
             }

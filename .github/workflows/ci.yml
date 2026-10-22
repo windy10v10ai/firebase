@@ -171,7 +171,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.launcher == 'true'
     runs-on: macos-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
@@ -184,6 +184,12 @@ jobs:
 
       - name: Test shared core
         run: dotnet run --project launcher/core/tests/dotnet/CoreTests.csproj
+
+      - name: Test Mac launcher offline
+        run: bash launcher/macos/test.sh
+
+      - name: Build and verify Mac application
+        run: bash launcher/macos/build.sh
 
   ci:
     if: ${{ !cancelled() }}
