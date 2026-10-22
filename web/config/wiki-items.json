@@ -1,6 +1,6 @@
 {
   "source": {
-    "gameCommit": "29b82661ab4d9bfd67d3633a90a4d1a3be764b92",
+    "gameCommit": "7e39fcfccf22c7344253a1b6fa0f249892972da7",
     "dotaVersion": "7.41f"
   },
   "priceTiers": [
@@ -287,12 +287,6 @@
       "section": "equipment",
       "price": 4950,
       "tier": 2
-    },
-    {
-      "name": "item_eternal_shroud_ultra",
-      "section": "equipment",
-      "price": 5100,
-      "tier": 3
     },
     {
       "name": "item_force_staff_3",
@@ -769,12 +763,6 @@
       "tier": 5
     },
     {
-      "name": "item_withered_spring",
-      "section": "equipment",
-      "price": 42600,
-      "tier": 5
-    },
-    {
       "name": "item_beast_armor",
       "section": "equipment",
       "price": 46000,
@@ -783,7 +771,13 @@
     {
       "name": "item_beast_shield",
       "section": "equipment",
-      "price": 47300,
+      "price": 42200,
+      "tier": 5
+    },
+    {
+      "name": "item_withered_spring",
+      "section": "equipment",
+      "price": 42600,
       "tier": 5
     },
     {

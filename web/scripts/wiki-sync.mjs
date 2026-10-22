@@ -4,12 +4,13 @@ import { fileURLToPath } from 'node:url';
 
 import {
   createAbilityReader,
-  gameHead,
+  syncGameSource,
   parseFlatKv,
   readItemRecipes,
   resolveDotaVersion,
   resolveGameRepo,
 } from './dota-ability.mjs';
+import { matchItems } from './match-items.mjs';
 
 /**
  * 从 game 仓库重新生成百科的数据：web/config/wiki-abilities.json、wiki-items.json 是名单与档位，
@@ -328,15 +329,7 @@ function checkPool(entries, kind, min, errors) {
 function main() {
   const game = resolveGameRepo(REPO);
   const version = resolveDotaVersion(game);
-  const head = gameHead(game);
-  // feature 分支上的改动还可能被推翻或改写，据此生成的产物无从追溯
-  if (!head.onDevelop) {
-    console.error(
-      `game 的 ${head.commit.slice(0, 9)} 不在 origin/develop 上，没有生成任何文件。\n` +
-        '  先把 game 仓库切到 develop 并 git pull。',
-    );
-    process.exit(1);
-  }
+  const head = syncGameSource(game);
 
   const errors = [];
   const abilities = readPool(path.join(game, ABILITY_POOL), {
@@ -372,6 +365,19 @@ function main() {
     false,
     errors,
   );
+  const matches = matchItems(
+    readItemRecipes(game, version),
+    fs.readFileSync(path.join(game, 'game/scripts/npc/neutral_items.txt'), 'utf8'),
+    new Set(Object.keys(itemDetails)),
+    new Set(Object.keys(JSON.parse(fs.readFileSync(path.join(WEB, 'config/items.json'), 'utf8')))),
+  );
+  const matchDetails = readDetails(
+    createAbilityReader(game, version, LANGS, 'items'),
+    matches.map((entry) => entry.name),
+    'items',
+    false,
+    errors,
+  );
 
   if (errors.length) {
     console.error('自检未通过，没有生成任何文件：');
@@ -385,6 +391,8 @@ function main() {
     'wiki-items.json': { source, priceTiers: [...PRICE_TIER_CEILINGS, PRICE_TOP], lottery, shop },
     'wiki-ability-details.json': abilityDetails,
     'wiki-item-details.json': itemDetails,
+    'match-items.json': { source, items: matches },
+    'match-item-details.json': matchDetails,
   };
   for (const [file, data] of Object.entries(outputs)) {
     const out = path.join(WEB, 'config', file);
@@ -395,7 +403,7 @@ function main() {
   }
   console.log(
     `技能 ${abilities.length} 条，抽奖物品 ${lottery.length} 条，商店物品 ${shop.length} 条，` +
-      `Dota ${version}，game develop@${head.commit.slice(0, 9)}`,
+      `Dota ${version}，game@${head.commit.slice(0, 9)}`,
   );
 }
 

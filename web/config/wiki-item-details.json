@@ -3005,71 +3005,6 @@
       }
     }
   },
-  "item_eternal_shroud_ultra": {
-    "desc": {
-      "zh": "<h1>被动：游泳</h1>受到敌人的技能伤害在减免前的<b>30%</b>会转化为自身的魔法。",
-      "en": "<h1>Passive: Magical Swimming</h1> Converts <b>30%</b> of spell damage taken from enemies (before reductions) into mana.",
-      "ru": "<h1>Passive: Magical Swimming</h1> Converts <b>30%</b> of spell damage taken from enemies (before reductions) into mana."
-    },
-    "ability": {
-      "behavior": "passive",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "魔法抗性",
-            "en": "Magic Resistance",
-            "ru": "к сопротивлению магии"
-          },
-          "sign": "+",
-          "levels": [
-            "30"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "力量",
-            "en": "Strength",
-            "ru": "к силе"
-          },
-          "sign": "+",
-          "levels": [
-            "20"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "500"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": null,
-      "manaCost": null,
-      "lore": {
-        "zh": "在法师堆中畅泳吧！",
-        "en": "Swim freely among the mages' flow of spells and arcanery!",
-        "ru": "Swim freely among the mages' flow of spells and arcanery!"
-      }
-    }
-  },
   "item_force_staff_3": {
     "desc": {
       "zh": "<h1>主动：黄金之力</h1>将任何目标单位向其面对方向推进<b>1200</b>距离。<br><br>施法距离：<b>1200</b>",
@@ -8937,20 +8872,6 @@
         },
         {
           "label": {
-            "zh": "减速抗性",
-            "en": "Slow Resistance",
-            "ru": "Сопротивление замедлению"
-          },
-          "sign": "+",
-          "levels": [
-            "75"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
             "zh": "魔法消耗/魔法损失降低",
             "en": "Mana Cost/Mana Loss Reduction",
             "ru": "Снижение затрат и потери маны"
@@ -8984,115 +8905,6 @@
         "zh": "凌波微步以及北冥神功，都是大理皇室段誉的武门绝学，六脉神剑更是段氏一族的至高传承。",
         "en": "To gather all three legendary swords in their perfected form and forge them into one, the power within is beyond measure.",
         "ru": "Собрать все три легендарных клинка в их совершенной форме и сплавить их воедино, заключённая внутри сила безмерна."
-      }
-    }
-  },
-  "item_withered_spring": {
-    "desc": {
-      "zh": "<h1><font color='#90EE90'>主动：枯木逢春</font></h1>使自身和周围友军回复<b>2500</b>点生命 +<b>6%</b>最大生命值和<b>1500</b>点魔法，并移除施法者身上全部的负面效果。施法者在<b>3</b>秒内获得<b>20</b>点护甲和<b>300</b>点生命回复。<br><br>作用范围：<b>1200</b><br>驱散类型：强驱散<br><br><h1>被动：绝处逢生</h1>受到来自英雄的伤害并且生命值低于<b>40%</b>时自动触发以上效果，并在<b>3</b>秒内获得<b>80%</b><font color='#B99012'>状态抗性</font>，所受到和造成的伤害全部归零。",
-      "en": "<h1><font color='#90EE90'>Active: Withering Bloom</font></h1>Restores <b>2500</b> health +<b>6%</b> max health and <b>1500</b> mana to yourself and nearby allies, and removes all negative effects from the caster. Over the next <b>3</b> seconds, the caster gains <b>20</b> armor and <b>300</b> health regeneration.<br><br>Radius: <b>1200</b><br>Dispel Type: Strong Dispel<br><br><h1>Passive: Rebirth</h1>When you take damage from a hero and your health falls below <b>40%</b>, automatically triggers the effects above, and for <b>3</b> seconds you gain +<b>80%</b> <font color='#B99012'>Status Resistance</font> and all damage you deal and are dealt is reduced to zero.",
-      "ru": "<h1><font color='#90EE90'>Active: Withering Bloom</font></h1>Restores <b>2500</b> health +<b>6%</b> max health and <b>1500</b> mana to yourself and nearby allies, and removes all negative effects from the caster. Over the next <b>3</b> seconds, the caster gains <b>20</b> armor and <b>300</b> health regeneration.<br><br>Radius: <b>1200</b><br>Dispel Type: Strong Dispel<br><br><h1>Passive: Rebirth</h1>When you take damage from a hero and your health falls below <b>40%</b>, automatically triggers the effects above, and for <b>3</b> seconds you gain +<b>80%</b> <font color='#B99012'>Status Resistance</font> and all damage you deal and are dealt is reduced to zero."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "2500"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法值",
-            "en": "Mana",
-            "ru": "к мане"
-          },
-          "sign": "+",
-          "levels": [
-            "2500"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "最大生命值回复",
-            "en": "Max Health Regen",
-            "ru": "Max Health Regen"
-          },
-          "sign": "+",
-          "levels": [
-            "3"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "力量",
-            "en": "Strength",
-            "ru": "к силе"
-          },
-          "sign": "+",
-          "levels": [
-            "100"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "护甲",
-            "en": "Armor",
-            "ru": "к броне"
-          },
-          "sign": "+",
-          "levels": [
-            "20"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "闪避",
-            "en": "Evasion",
-            "ru": "к уклонению"
-          },
-          "sign": "+",
-          "levels": [
-            "20"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "60"
-      ],
-      "manaCost": null,
-      "lore": {
-        "zh": "饱含生命之力的树甲，枯木逢春，绝处逢生。",
-        "en": "From withered wood, spring blooms anew.",
-        "ru": "From withered wood, spring blooms anew."
       }
     }
   },
@@ -9223,9 +9035,9 @@
   },
   "item_beast_shield": {
     "desc": {
-      "zh": "<h1>主动：人形肉盾</h1>获得减益免疫状态。进入防御姿态，所有被动属性加成提升<b>100%</b>，持续<b>8</b>秒。<br>提供<b>100%</b>魔法抗性加成，并且免疫纯粹和反弹伤害。持续时间内敌方技能的负面效果不会生效。<br><h1>被动：游泳</h1>受到敌人的技能伤害在减免前的<b>30%</b>会转化为自身的魔法。<br><h1>被动：强袭光环</h1>为附近友军提供<b>10</b>点护甲和<b>50</b>点攻击速度。降低附近敌军<b>-10</b>点护甲。<br><br>作用范围：<b>900</b>",
-      "en": "<h1>Active: Human Shield</h1>Applies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by <b>100%</b>, for <b>8</b> seconds.<br>Grants <b>100%</b> Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.<br><h1>Passive: Swimming</h1><b>30%</b> of enemy skill damage is converted to magic before reduction.<br><h1>Passive: Assault Aura</h1>Grants <b>10</b> armor and <b>50</b> attack speed to nearby allies. Reduces <b>-10</b> armor of nearby enemies.<br><br>Radius: <b>900</b>",
-      "ru": "<h1>Active: Human Shield</h1>Applies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by <b>100%</b>, for <b>8</b> seconds.<br>Grants <b>100%</b> Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.<br><h1>Passive: Swimming</h1><b>30%</b> of enemy skill damage is converted to magic before reduction.<br><h1>Passive: Assault Aura</h1>Grants <b>10</b> armor and <b>50</b> attack speed to nearby allies. Reduces <b>-10</b> armor of nearby enemies.<br><br>Radius: <b>900</b>"
+      "zh": "<h1>主动：人形肉盾</h1>获得减益免疫状态。进入防御姿态，所有被动属性加成提升<b>100%</b>，持续<b>8</b>秒。<br>提供<b>100%</b>魔法抗性加成，并且免疫纯粹和反弹伤害。持续时间内敌方技能的负面效果不会生效。<br><h1>被动：强袭光环</h1>为附近友军提供<b>10</b>点护甲和<b>50</b>点攻击速度。降低附近敌军<b>-10</b>点护甲。<br><br>作用范围：<b>900</b>",
+      "en": "<h1>Active: Human Shield</h1>Applies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by <b>100%</b>, for <b>8</b> seconds.<br>Grants <b>100%</b> Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.<br><h1>Passive: Assault Aura</h1>Grants <b>10</b> armor and <b>50</b> attack speed to nearby allies. Reduces <b>-10</b> armor of nearby enemies.<br><br>Radius: <b>900</b>",
+      "ru": "<h1>Active: Human Shield</h1>Applies a basic dispel. Enter defensive stance, all passive attribute bonuses are increased by <b>100%</b>, for <b>8</b> seconds.<br>Grants <b>100%</b> Magic resistance and immunity to pure and reflected damage. For the duration of the effect, any negative effect from enemy spells has no effect.<br><h1>Passive: Assault Aura</h1>Grants <b>10</b> armor and <b>50</b> attack speed to nearby allies. Reduces <b>-10</b> armor of nearby enemies.<br><br>Radius: <b>900</b>"
     },
     "ability": {
       "behavior": "noTarget",
@@ -9343,6 +9155,115 @@
         "zh": "融合了兽化符文力量的终极防御装备，能让使用者化身为不可摧毁的堡垒。",
         "en": "The ultimate defensive equipment fused with the power of the beast rune, allowing the user to become an indestructible fortress.",
         "ru": "The ultimate defensive equipment fused with the power of the beast rune, allowing the user to become an indestructible fortress."
+      }
+    }
+  },
+  "item_withered_spring": {
+    "desc": {
+      "zh": "<h1><font color='#90EE90'>主动：枯木逢春</font></h1>使自身和周围友军回复<b>2500</b>点生命 +<b>6%</b>最大生命值和<b>1500</b>点魔法，并移除施法者身上全部的负面效果。施法者在<b>3</b>秒内获得<b>20</b>点护甲和<b>300</b>点生命回复。<br><br>作用范围：<b>1200</b><br>驱散类型：强驱散<br><br><h1>被动：绝处逢生</h1>受到来自英雄的伤害并且生命值低于<b>40%</b>时自动触发以上效果，并在<b>3</b>秒内获得<b>80%</b><font color='#B99012'>状态抗性</font>，所受到和造成的伤害全部归零。",
+      "en": "<h1><font color='#90EE90'>Active: Withering Bloom</font></h1>Restores <b>2500</b> health +<b>6%</b> max health and <b>1500</b> mana to yourself and nearby allies, and removes all negative effects from the caster. Over the next <b>3</b> seconds, the caster gains <b>20</b> armor and <b>300</b> health regeneration.<br><br>Radius: <b>1200</b><br>Dispel Type: Strong Dispel<br><br><h1>Passive: Rebirth</h1>When you take damage from a hero and your health falls below <b>40%</b>, automatically triggers the effects above, and for <b>3</b> seconds you gain +<b>80%</b> <font color='#B99012'>Status Resistance</font> and all damage you deal and are dealt is reduced to zero.",
+      "ru": "<h1><font color='#90EE90'>Active: Withering Bloom</font></h1>Restores <b>2500</b> health +<b>6%</b> max health and <b>1500</b> mana to yourself and nearby allies, and removes all negative effects from the caster. Over the next <b>3</b> seconds, the caster gains <b>20</b> armor and <b>300</b> health regeneration.<br><br>Radius: <b>1200</b><br>Dispel Type: Strong Dispel<br><br><h1>Passive: Rebirth</h1>When you take damage from a hero and your health falls below <b>40%</b>, automatically triggers the effects above, and for <b>3</b> seconds you gain +<b>80%</b> <font color='#B99012'>Status Resistance</font> and all damage you deal and are dealt is reduced to zero."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "生命值",
+            "en": "Health",
+            "ru": "к здоровью"
+          },
+          "sign": "+",
+          "levels": [
+            "2500"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法值",
+            "en": "Mana",
+            "ru": "к мане"
+          },
+          "sign": "+",
+          "levels": [
+            "2500"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "最大生命值回复",
+            "en": "Max Health Regen",
+            "ru": "Max Health Regen"
+          },
+          "sign": "+",
+          "levels": [
+            "3"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "力量",
+            "en": "Strength",
+            "ru": "к силе"
+          },
+          "sign": "+",
+          "levels": [
+            "100"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "护甲",
+            "en": "Armor",
+            "ru": "к броне"
+          },
+          "sign": "+",
+          "levels": [
+            "20"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "闪避",
+            "en": "Evasion",
+            "ru": "к уклонению"
+          },
+          "sign": "+",
+          "levels": [
+            "20"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "60"
+      ],
+      "manaCost": null,
+      "lore": {
+        "zh": "饱含生命之力的树甲，枯木逢春，绝处逢生。",
+        "en": "From withered wood, spring blooms anew.",
+        "ru": "From withered wood, spring blooms anew."
       }
     }
   },
