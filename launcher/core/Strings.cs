@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace Windy10v10AI.Launcher
 {
@@ -12,6 +12,51 @@ namespace Windy10v10AI.Launcher
             if (Lang == "ru" || Lang == "uk" || Lang == "be" || Lang == "kk") return ru;
             return en;
         }
+
+        public static string NextGame { get { return Pick("启动下一局", "Start next game", "Начать следующую игру"); } }
+        public static string Difficulty { get { return Pick("难度", "Difficulty", "Сложность"); } }
+        public static string NoRoom { get { return Pick("尚未连接房间", "Not in a room", "Вы не в комнате"); } }
+        public static string LauncherGuide { get { return Pick("创建房间邀请朋友，或输入朋友的房间码加入。", "Host a room for friends, or enter a room code to join.", "Создайте комнату для друзей или введите код комнаты."); } }
+        public static string StatusColumn { get { return Pick("状态", "Status", "Статус"); } }
+        public static string Logs { get { return Pick("运行记录", "Activity log", "Журнал"); } }
+        public static string OpenLogs { get { return Pick("打开日志文件夹", "Open log folder", "Открыть папку журналов"); } }
+        public static string About { get { return Pick("关于启动器", "About launcher", "О лаунчере"); } }
+        public static string Quit { get { return Pick("退出启动器", "Quit launcher", "Выйти из лаунчера"); } }
+        public static string Edit { get { return Pick("编辑", "Edit", "Правка"); } }
+        public static string Cut { get { return Pick("剪切", "Cut", "Вырезать"); } }
+        public static string SelectAll { get { return Pick("全选", "Select all", "Выбрать всё"); } }
+        public static string BackendExited { get { return Pick("启动器服务已退出，请重新打开应用。", "The launcher service stopped. Reopen the app.", "Служба лаунчера остановлена. Откройте приложение снова."); } }
+        public static string BackendStartFailed { get { return Pick("无法启动服务，请重新打开应用：{0}", "Could not start the service. Reopen the app: {0}", "Не удалось запустить службу. Откройте приложение снова: {0}"); } }
+        public static string CommandFailed { get { return Pick("发送操作失败：{0}", "Could not send the command: {0}", "Не удалось отправить команду: {0}"); } }
+        public static string RosterUnavailable { get { return Pick("服务已退出，房间状态无法继续更新。", "The service stopped. Room status is unavailable.", "Служба остановлена. Статус комнаты недоступен."); } }
+        public static string RosterPlaceholder { get { return Pick("连接房间后在这里查看玩家连接状态。", "Player connection status appears here after joining a room.", "После входа в комнату здесь появятся статусы игроков."); } }
+        public static string InstallationReady { get { return Pick("已找到 Dota 2 和地图。", "Dota 2 and the map were found.", "Dota 2 и карта найдены."); } }
+        public static string JoinGuide { get { return Pick("输入朋友分享的 6 位房间码，再加入房间。", "Enter your friend’s 6-character code to join.", "Введите 6-значный код друга для входа."); } }
+        public static string HostSetupGuide { get { return Pick("选择难度和人数上限，再创建房间。", "Choose the difficulty and player limit, then host a room.", "Выберите сложность и лимит игроков, затем создайте комнату."); } }
+        public static string LogsNotCreated { get { return Pick("创建房间后会生成服务器日志。", "Server logs are created when you host a room.", "Журналы сервера появятся после создания комнаты."); } }
+        public static string LauncherLicense { get { return Pick("基于 windy 及贡献者的 GPL-3.0 开源代码，保留 Steam 分发附加许可。", "GPL-3.0 software by windy and contributors, with the Steam distribution exception.", "Программа windy и участников под GPL-3.0 с исключением для распространения Steam."); } }
+
+        public static string InvalidDifficulty { get { return Pick("请选择有效难度。", "Choose a valid difficulty.", "Выберите допустимую сложность."); } }
+        public static string InvalidPlayerLimit { get { return Pick("人数须为 2–10 人。", "Choose 2–10 players.", "Выберите от 2 до 10 игроков."); } }
+        public static string SessionActive { get { return Pick("请先关闭或离开当前游戏。", "Close or leave the current game first.", "Сначала закройте текущую игру или выйдите из неё."); } }
+        public static string ServerNotReady { get { return Pick("请等待服务器准备好后再进入。", "Wait for the server to be ready before entering.", "Дождитесь готовности сервера перед входом."); } }
+        public static string HostOnly { get { return Pick("只有房主可以执行此操作。", "Only the host can do this.", "Это действие доступно только хосту."); } }
+        public static string WaitForResults { get { return Pick("请等待游戏结束并保存结果。", "Wait for the game to end and the results to be saved.", "Дождитесь окончания игры и сохранения результатов."); } }
+        public static string WaitForMapUpdate { get { return Pick("请等待地图更新完成。", "Wait for the map update to finish.", "Дождитесь завершения обновления карты."); } }
+        public static string MapCleanupFailed { get { return Pick("地图链接清理失败：", "Could not remove the map link: ", "Не удалось удалить ссылку карты: "); } }
+        public static string UnknownAction { get { return Pick("未知操作。", "Unknown action.", "Неизвестное действие."); } }
+        public static string JoinSelectedRoom { get { return Pick("加入所选房间", "Join selected room", "Войти в выбранную комнату"); } }
+        public static string ChooseRoom { get { return Pick("请选择一个房间。", "Select a room.", "Выберите комнату."); } }
+        public static string VersionCheck { get { return Pick("检查启动器更新", "Check launcher updates", "Проверить обновления лаунчера"); } }
+        public static string VersionCurrent { get { return Pick("启动器已是最新版本", "The launcher is up to date", "Лаунчер обновлён"); } }
+        public static string FeedbackDescriptionRequired { get { return Pick("请先填写描述。", "Enter a description first.", "Сначала введите описание."); } }
+        public static string VerifyStarted { get { return Pick("正在交给 Steam 验证游戏文件…", "Asking Steam to verify game files…", "Запрос проверки файлов игры в Steam…"); } }
+
+        public static string MapVersionMissing { get { return Pick("无法读取地图版本，请等待 Steam 完成下载。", "Could not read the map version. Wait for Steam to finish downloading.", "Не удалось прочитать версию карты. Дождитесь окончания загрузки в Steam."); } }
+        public static string MapBackupFound { get { return Pick("发现地图备份，请恢复后重试：{0}", "A map backup was found. Restore it and try again: {0}", "Найдена резервная копия карты. Восстановите её и повторите: {0}"); } }
+        public static string MapUpdateComplete { get { return Pick("地图更新检查完成", "Map update check completed", "Проверка обновления карты завершена"); } }
+        public static string MapUpdateStopped { get { return Pick("已停止检查，Steam 已排队的下载可能继续。", "Checking stopped. Downloads already queued in Steam may continue.", "Проверка остановлена. Загрузки в очереди Steam могут продолжиться."); } }
+        public static string MapUpdateHelperMissing { get { return Pick("地图更新工具缺失，请重新解压启动器。", "The map update tool is missing. Extract the launcher again.", "Отсутствует средство обновления карты. Распакуйте лаунчер снова."); } }
 
         public static string Title { get { return Pick("Windy10v10AI 启动器", "Windy10v10AI Launcher", "Windy10v10AI Лаунчер"); } }
         public static string Subtitle { get { return Pick("本地启动服务器，性能优化", "Local server for better performance", "Локальный сервер для лучшей производительности"); } }
