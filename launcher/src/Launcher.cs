@@ -81,13 +81,6 @@ namespace Windy10v10AI.Launcher
         const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
         const string CorruptContent = "FATAL ERROR: Content file";
         const string LocalContentCorrupt = "Local content might be corrupt";
-        // The game sends its results as the ancient falls, in the same moment it enters the post-game state
-        const string ResultsSent = "/api/game/end";
-        const string PostGame = "entering state 'DOTA_GAMERULES_STATE_POST_GAME'";
-        // The game prints this once its results request has finally succeeded or failed
-        const string ResultsDone = "[Game] end game callback";
-        // Game scripts stop in the post-game state, so the callback usually never shows, while the request itself reaches the API within a second or two
-        const int ResultsFallbackSeconds = 5;
         // Most friends join within minutes of the room opening, so polling is fast then and slower after
         const int FastPollMs = 2000;
         const int SlowPollMs = 5000;
@@ -1451,7 +1444,7 @@ namespace Windy10v10AI.Launcher
                 clientWatch = watch;
                 // The host's first roster round says which game the room is on and whether its server is up yet
                 for (var waited = 0; waited < JoinStateWaitMs && !tunnel.HasRoster && !stopping; waited += 200) Thread.Sleep(200);
-                var entered = tunnel.GameReady && !tunnel.GameEnded;
+                var entered = tunnel.HasRoster && tunnel.GameReady && !tunnel.GameEnded;
                 if (entered) EnterGame(install, watch, -1);
 
                 UI(() =>
@@ -1482,27 +1475,18 @@ namespace Windy10v10AI.Launcher
         {
             var title = string.Format(Strings.Joined, code);
             Presence? shown = null;
-            var game = tunnel.Game;
+            var lifecycle = new JoinLifecycle(tunnel.Game, entered);
             var waitingShown = false;
             while (!stopping)
             {
                 Thread.Sleep(1000);
-                if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
-                if (tunnel.Lost)
+                lifecycle.Observe(tunnel);
+                if (lifecycle.State == JoinState.Kicked) throw new LaunchError(Strings.KickedByHost, false);
+                if (lifecycle.State == JoinState.Closed) break;
+                if (lifecycle.State == JoinState.HostLost) throw new LaunchError(Strings.HostLost, false);
+                if (lifecycle.GameChanged) waitingShown = false;
+                if (lifecycle.State != JoinState.Ready)
                 {
-                    // The host closing the room after a game is the normal way the room ends
-                    if (tunnel.GameEnded || !tunnel.GameReady) break;
-                    throw new LaunchError(Strings.HostLost, false);
-                }
-                if (tunnel.Game != game)
-                {
-                    game = tunnel.Game;
-                    entered = false;
-                    waitingShown = false;
-                }
-                if (tunnel.GameEnded || !tunnel.GameReady)
-                {
-                    entered = false;
                     endNotice = Strings.GameEnded;
                     if (waitingShown) continue;
                     waitingShown = true;
@@ -1513,11 +1497,10 @@ namespace Windy10v10AI.Launcher
                     });
                     continue;
                 }
-                if (!entered)
+                if (lifecycle.NewGameReady)
                 {
-                    entered = true;
                     endNotice = null;
-                    if (Settings.AutoEnter && DotaClientRunning(-1)) EnterGame(install, client, -1);
+                    if (lifecycle.FirstGame || (Settings.AutoEnter && DotaClientRunning(-1))) EnterGame(install, client, -1);
                     else
                     {
                         shown = Presence.Out;
@@ -1922,34 +1905,6 @@ namespace Windy10v10AI.Launcher
             public DateTime? InGameAt;
             public bool ClosedInGame;
         }
-        // A server that keeps running after its lobby is gone fails within minutes, so it is closed once the results
-        // are saved and nobody is playing, and its exit after the game ended is not a failure
-        class GameEnd
-        {
-            public DateTime? EndedAt;
-            public bool Saved;
-
-            public bool Ended { get { return EndedAt != null; } }
-
-            // Returns whether this part of the server log moved the game to a later stage
-            public bool Track(string serverLog)
-            {
-                var changed = false;
-                if (EndedAt == null && (serverLog.Contains(ResultsSent) || serverLog.Contains(PostGame)))
-                {
-                    EndedAt = DateTime.UtcNow;
-                    changed = true;
-                }
-                if (EndedAt != null && !Saved &&
-                    (serverLog.Contains(ResultsDone) || (DateTime.UtcNow - EndedAt.Value).TotalSeconds > ResultsFallbackSeconds))
-                {
-                    Saved = true;
-                    changed = true;
-                }
-                return changed;
-            }
-        }
-
         // Dota is in the game while its packets reach the local port, which tells nothing apart from leaving and
         // dropping, so both read as out of the game
         Presence Judge(ClientWatch watch, int serverId)

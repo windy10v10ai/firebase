@@ -32,8 +32,10 @@ namespace Windy10v10AI.Launcher
         Dictionary<string, object> body;
         string token, mode, lastMessage;
         int maxPlayers, game;
-        bool started, ended, saved;
-        DateTime? endedAt;
+        bool started;
+        readonly GameEnd gameEnd = new();
+        bool ended => gameEnd.Ended;
+        bool saved => gameEnd.Saved;
         DateTime readyAt;
         bool autoEnter;
         public bool Solo { get; private set; }
@@ -177,7 +179,7 @@ namespace Windy10v10AI.Launcher
         }
         void ResetRoom()
         {
-            Code = null; body = null; game = 1; Ready = false; started = false; ended = false; saved = false; endedAt = null; seen.Clear(); kicked.Clear(); soloLifecycle.Reset(); Paused = false; roomOpenedAt = DateTime.UtcNow;
+            Code = null; body = null; game = 1; Ready = false; started = false; gameEnd.Reset(); seen.Clear(); kicked.Clear(); soloLifecycle.Reset(); Paused = false; roomOpenedAt = DateTime.UtcNow;
             while (results.TryDequeue(out _)) { } while (next.TryDequeue(out _)) { }
             relays = new(); Roster = new HostRoster();
         }
@@ -255,7 +257,7 @@ namespace Windy10v10AI.Launcher
             CheckServer(poll.LoadAt);
             if (Ready && !poll.AutoAsked) { poll.AutoAsked = true; Event("ready", Solo ? Strings.EnterGame : HostingHint()); if (autoEnter || (game > 1 && MacInstall.ClientRunning())) Enter(); }
             ReleaseJoiningPlayers();
-            if (ended && !saved && (DateTime.UtcNow - endedAt.Value).TotalSeconds > 5) MarkSaved();
+            if (gameEnd.Track("")) MarkSaved();
         }
         void CheckServer(DateTime loadAt)
         {
@@ -268,7 +270,7 @@ namespace Windy10v10AI.Launcher
         }
         void StartNextGame(string nextMode, RoomPoll poll)
         {
-            mode = nextMode; Ready = false; started = false; ended = false; saved = false; endedAt = null; game++;
+            mode = nextMode; Ready = false; started = false; gameEnd.Reset(); game++;
             Tunnel.Game = game; Tunnel.GameReady = false; Tunnel.GameEnded = false; Roster.SetAll(PlayerStatus.Waiting);
             StopServer();
             roomOpenedAt = DateTime.UtcNow; Paused = false;
@@ -365,13 +367,14 @@ namespace Windy10v10AI.Launcher
             var left = signon.Left(line);
             if (left != null) foreach (var player in Roster.Snapshot().Where(e => e.SteamId == left.Value - 76561197960265728)) Roster.SetStatus(player.Key, PlayerStatus.InRoom);
             if (entered != null) { Roster.SetInGame(entered.Value); emit(new { type = "playerConnected", hostInGame = HostInGame }); }
-            if (!ended && (line.Contains("/api/game/end") || line.Contains("entering state 'DOTA_GAMERULES_STATE_POST_GAME'")))
+            var wasEnded = ended;
+            if (gameEnd.Track(line))
             {
-                ended = true; endedAt = DateTime.UtcNow; if (Tunnel != null) Tunnel.GameEnded = true; Event("saving", Strings.SavingResults);
+                if (!wasEnded) { if (Tunnel != null) Tunnel.GameEnded = true; Event("saving", Strings.SavingResults); }
+                if (saved) MarkSaved();
             }
-            if (ended && line.Contains("[Game] end game callback")) MarkSaved();
         }
-        void MarkSaved() { if (saved) return; saved = true; Roster.SetAll(PlayerStatus.InRoom); Event("ended", Solo ? Strings.GameEnded : Strings.NextGamePick); }
+        void MarkSaved() { Roster.SetAll(PlayerStatus.InRoom); Event("ended", Solo ? Strings.GameEnded : Strings.NextGamePick); }
         void StopServer()
         {
             var p = server; server = null; if (p == null) { dedicated?.Dispose(); dedicated = null; return; }

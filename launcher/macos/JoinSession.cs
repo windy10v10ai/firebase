@@ -162,42 +162,31 @@ namespace Windy10v10AI.Launcher
         }
         async Task Watch(JoinTunnel current, CancellationToken ct)
         {
-            int game = current.Game;
-            bool entered = false, firstGame = true;
+            var lifecycle = new JoinLifecycle(current.Game, false);
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                if (RoomClosed(current)) return;
-                if (game != current.Game) { game = current.Game; entered = false; }
-                ShowReadiness(current);
-                if (Ready && !entered)
-                {
-                    entered = true;
-                    if (autoEnter && (firstGame || options.ClientRunning())) Enter();
-                    firstGame = false;
-                }
+                lifecycle.Observe(current);
+                if (lifecycle.State == JoinState.Kicked) throw new Exception(Strings.KickedByHost);
+                if (lifecycle.State == JoinState.Closed) return;
+                if (lifecycle.State == JoinState.HostLost) throw new Exception(Strings.HostLost);
+                ShowReadiness(lifecycle.State);
+                if (lifecycle.NewGameReady && autoEnter && (lifecycle.FirstGame || options.ClientRunning())) Enter();
                 EmitRoster(current);
                 EmitRoute(current);
                 await Task.Delay(options.MonitorIntervalMs, ct);
             }
         }
-        static bool RoomClosed(JoinTunnel current)
+        void ShowReadiness(JoinState state)
         {
-            if (current.Kicked) throw new Exception(Strings.KickedByHost);
-            if (!current.Lost) return false;
-            if (current.GameEnded || !current.GameReady) return true;
-            throw new Exception(Strings.HostLost);
-        }
-        void ShowReadiness(JoinTunnel current)
-        {
-            Ready = current.HasRoster && current.GameReady && !current.GameEnded;
+            Ready = state == JoinState.Ready;
             if (Ready)
             {
                 if (State != "ready") Event("ready", Strings.EnterGame);
                 return;
             }
-            string state = current.HasRoster && current.GameEnded ? "ended" : "waiting";
-            if (State != state) Event(state, state == "ended" ? Strings.GameEnded : Strings.StatusWaiting);
+            string nextState = state == JoinState.Ended ? "ended" : "waiting";
+            if (State != nextState) Event(nextState, state == JoinState.Ended ? Strings.GameEnded : Strings.StatusWaiting);
         }
         void EmitRoute(JoinTunnel current)
         {
