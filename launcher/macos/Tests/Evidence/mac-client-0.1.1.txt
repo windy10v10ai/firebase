@@ -1,0 +1,11 @@
+2026-10-17; M4 Mac; manifest 8467070687660283526
+Native GUI run, self-contained app:
+15:45:01 launch via installed dota.sh; one visible client process
+15:45:51 main menu ready
+15:45:56 automatic Steam connect URL delivered through LaunchServices
+15:47:36 authenticated host SPAWN -> FULL
+15:47:40 CUSTOM_GAME_SETUP
+15:48:27 HERO_SELECTION
+15:48:49 FULL -> NONE, NETWORK_DISCONNECT_DISCONNECT_BY_USER
+User confirmed manual exit. Connected about 73 seconds; no resource fatal or CPU overflow drop in this interval.
+90-second observation NOT completed. No remote Windows complete-match claim.
