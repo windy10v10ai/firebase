@@ -29,10 +29,12 @@ interface AbilityDialogProps {
   body: ReactNode;
   /** 固定在底部的操作区，如付费按钮；有它时平板起弹窗统一高度 */
   footer?: ReactNode;
+  /** game 照游戏内物品提示配色：头部是整条色带，说明区不留内边距，由 ItemDetails 自己分块 */
+  tone?: 'site' | 'game';
 }
 
 /**
- * 技能详情弹窗：手机是贴底抽屉，可从头部下拉关闭；平板起居中。
+ * 技能详情弹窗：手机是贴底抽屉，说明区在顶部时整张都能下拉关闭；平板起居中。
  * 用原生 <dialog> 白拿焦点陷阱和 Esc 关闭。说明放不下时直接滚动，触屏在底部渐隐里提示可以滑。
  * 规范见 docs/web/ability-tooltip.md 第 3、4 节。
  */
@@ -43,12 +45,13 @@ export default function AbilityDialog({
   header,
   body,
   footer,
+  tone = 'site',
 }: AbilityDialogProps) {
+  const game = tone === 'game';
   const t = useTranslations('ability.dialog');
   const ref = useRef<HTMLDialogElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{
     pointerId: number;
     startY: number;
@@ -104,14 +107,20 @@ export default function AbilityDialog({
     return () => observer.disconnect();
   }, [openKey]);
 
-  // 拖动开始后拦下触摸滑动：浏览器一接管滑动就发 pointercancel 打断拖动，遮罩上又设不了 touch-action
+  // iOS Safari 的触摸滑动不认 html 上的 overflow: hidden，找不到能滚的元素就去滚背后的页面，所以只放行说明区自己的滚动；
+  // 拖动期间也要拦下：浏览器一接管滑动就发 pointercancel 打断拖动，遮罩上又设不了 touch-action
   useLayoutEffect(() => {
     const dialog = ref.current;
     if (!dialog) {
       return;
     }
     const onTouchMove = (event: TouchEvent) => {
-      if (drag.current) {
+      const scroller = bodyRef.current;
+      const scrollsItself =
+        scroller !== null &&
+        scroller.contains(event.target as Node) &&
+        scroller.scrollHeight > scroller.clientHeight;
+      if (drag.current || !scrollsItself) {
         event.preventDefault();
       }
     };
@@ -122,16 +131,18 @@ export default function AbilityDialog({
   const onDragStart = (event: PointerEvent<HTMLDialogElement>) => {
     suppressClick.current = false;
     const dialog = ref.current;
-    const head = headerRef.current;
-    if (busy || !dialog || !head || !window.matchMedia(SHEET_QUERY).matches) {
+    const scroller = bodyRef.current;
+    if (busy || !dialog || !scroller || !window.matchMedia(SHEET_QUERY).matches) {
       return;
     }
     const target = event.target as Node;
     // 按在遮罩上时事件落在 dialog 本身；只认抽屉上沿外那一段，其余遮罩只能点着关闭
     const top = dialog.getBoundingClientRect().top;
-    const onEdge =
-      target === dialog && event.clientY < top && event.clientY >= top - DRAG_EDGE_OUTSET;
-    if (!onEdge && !head.contains(target)) {
+    if (target === dialog && (event.clientY >= top || event.clientY < top - DRAG_EDGE_OUTSET)) {
+      return;
+    }
+    // 说明区没在顶部时往下拉是往回滚，不能当成拖抽屉
+    if (scroller.contains(target) && scroller.scrollTop > 0) {
       return;
     }
     drag.current = {
@@ -150,6 +161,11 @@ export default function AbilityDialog({
     }
     const distance = Math.max(0, event.clientY - current.startY);
     if (!current.active) {
+      // 先往上推就是要滚说明，交还给浏览器；要赶在同一次移动的 touchmove 之前放手，那里才不会拦下滚动
+      if (event.clientY < current.startY) {
+        drag.current = null;
+        return;
+      }
       if (distance < DRAG_START_DISTANCE) {
         return;
       }
@@ -200,7 +216,7 @@ export default function AbilityDialog({
       onPointerUp={onDragEnd}
       onPointerCancel={onDragEnd}
       // 手机是贴底的抽屉，按钮落在拇指区；有操作区时平板起统一高度，换技能时按钮不挪位置
-      className={`card-container m-0 mt-auto max-h-[calc(100dvh-3rem)] w-full max-w-none rounded-t-[14px] rounded-b-none border-b-0 p-0 text-content transition-[translate] duration-200 ease-out backdrop:bg-black/60 open:flex open:flex-col starting:open:translate-y-full md:m-auto md:w-[min(28rem,calc(100vw-2rem))] md:rounded-[10px] md:border-b md:transition-none md:starting:open:translate-y-0 ${
+      className={`${game ? 'overflow-hidden border border-game-line bg-game-panel' : 'card-container'} m-0 mt-auto max-h-[calc(100dvh-3rem)] w-full max-w-none rounded-t-[14px] rounded-b-none border-b-0 p-0 text-content transition-[translate] duration-200 ease-out backdrop:bg-black/60 open:flex open:flex-col starting:open:translate-y-full md:m-auto md:w-[min(28rem,calc(100vw-2rem))] md:rounded-[10px] md:border-b md:transition-none md:starting:open:translate-y-0 ${
         footer
           ? 'md:h-[min(40rem,calc(100dvh-4rem))] md:max-h-none'
           : 'md:max-h-[min(40rem,calc(100dvh-4rem))]'
@@ -208,7 +224,9 @@ export default function AbilityDialog({
     >
       {openKey ? (
         // 手机抽屉的高度随内容定，伸缩基准要按内容算：基准写成 0% 时 iOS Safari 当成 0 高，整张抽屉只剩内边距那一条
-        <div className="card-pad flex min-h-0 flex-auto flex-col gap-4.5 pt-6 lg:pt-8">
+        <div
+          className={`flex min-h-0 flex-auto flex-col ${game ? '' : 'card-pad gap-4.5 pt-6 lg:pt-8'}`}
+        >
           <span
             aria-hidden="true"
             className="pointer-events-none absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-line-strong md:hidden"
@@ -223,16 +241,18 @@ export default function AbilityDialog({
             <X className="size-5" aria-hidden="true" />
           </button>
 
-          {/* 下拉关闭认头部整条：左右到抽屉边，往下带上与说明区之间的空隙；说明区不参与，展开后的滚动不会被当成下拉 */}
           <div
-            ref={headerRef}
-            className="-mx-4 -mt-6 -mb-4.5 flex touch-none items-start gap-4 ps-4 pe-13 pt-6 pb-4.5 md:mx-0 md:mt-0 md:mb-0 md:touch-auto md:ps-0 md:pe-9 md:pt-0 md:pb-0 lg:pe-6"
+            className={
+              game
+                ? 'flex items-center gap-3.5 bg-game-head px-4 pt-6 pb-4 pe-14 md:px-4.5 md:pt-4.5'
+                : 'flex items-start gap-4 pe-9 lg:pe-6'
+            }
           >
             {header}
           </div>
 
           {/* 电脑档让说明区伸进右侧留白，滚动条贴着弹窗边缘；-me-8 与 card-pad 的 lg:p-8 对应 */}
-          <div className="relative flex min-h-0 flex-auto flex-col lg:-me-8">
+          <div className={`relative flex min-h-0 flex-auto flex-col ${game ? '' : 'lg:-me-8'}`}>
             <div
               ref={bodyRef}
               tabIndex={-1}
@@ -242,9 +262,9 @@ export default function AbilityDialog({
                   setHintDismissed(true);
                 }
               }}
-              className="min-h-0 flex-auto overflow-y-auto overscroll-contain outline-none lg:pe-8"
+              className={`min-h-0 flex-auto overflow-y-auto overscroll-contain outline-none ${game ? '' : 'lg:pe-8'}`}
             >
-              <div ref={contentRef} className="flex flex-col gap-4.5">
+              <div ref={contentRef} className={`flex flex-col ${game ? '' : 'gap-4.5'}`}>
                 {body}
               </div>
             </div>
@@ -252,7 +272,7 @@ export default function AbilityDialog({
             {moreBelow ? (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute start-0 end-0 bottom-0 h-12 bg-linear-to-b from-transparent to-panel lg:end-8"
+                className={`pointer-events-none absolute start-0 end-0 bottom-0 h-12 bg-linear-to-b from-transparent ${game ? 'to-game-panel' : 'to-panel lg:end-8'}`}
               />
             ) : null}
             {/* 触屏的滚动条平时藏着，光有渐隐看不出能滑；电脑档有滚轮，不提示。文案不写方向：写「向下滑」有人会往下拉，拉到头部就关掉了抽屉 */}

@@ -37,7 +37,13 @@ const TONE_BORDER = {
 } as const;
 
 /** 一套货币的等级、进度与积分，数据没到时各数值原位放骨架 */
-export default function CurrencyBlock({ tone, t, levelLabel, values, detailed = true }: CurrencyBlockProps) {
+export default function CurrencyBlock({
+  tone,
+  t,
+  levelLabel,
+  values,
+  detailed = true,
+}: CurrencyBlockProps) {
   // 满级或数据异常时不强行显示负数进度
   const progress = !values
     ? 0
@@ -60,7 +66,10 @@ export default function CurrencyBlock({ tone, t, levelLabel, values, detailed = 
         </span>
       </div>
       <div className="h-1.5 rounded-full bg-panel-soft">
-        <div className={`h-full rounded-full ${TONE_BAR[tone]}`} style={{ width: `${progress}%` }} />
+        <div
+          className={`h-full rounded-full ${TONE_BAR[tone]}`}
+          style={{ width: `${progress}%` }}
+        />
       </div>
       {detailed ? (
         <div className="flex items-center justify-between text-sm text-muted">

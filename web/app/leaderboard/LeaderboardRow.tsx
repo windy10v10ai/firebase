@@ -44,7 +44,9 @@ export default function LeaderboardRow({ ref, rank, player, isMe }: LeaderboardR
         className="group flex h-13 items-center gap-3 px-3 transition-colors hover:bg-panel-soft md:h-14 md:px-4"
       >
         {/* 胶囊同宽、数字居中，位数从 1 位变到 3 位也不错位 */}
-        <span className={`inline-block h-6.5 w-11 shrink-0 rounded-full text-center text-sm leading-6.5 ${rankChipClass(rank)}`}>
+        <span
+          className={`inline-block h-6.5 w-11 shrink-0 rounded-full text-center text-sm leading-6.5 ${rankChipClass(rank)}`}
+        >
           {rank}
         </span>
         <PlayerAvatar
@@ -52,7 +54,9 @@ export default function LeaderboardRow({ ref, rank, player, isMe }: LeaderboardR
           imageClassName="size-9 shrink-0 rounded-lg md:size-10"
           iconClassName="size-9 shrink-0 rounded-lg bg-panel-soft p-2 text-muted md:size-10"
         />
-        <span className={`min-w-0 flex-1 truncate ${isMe ? 'font-bold text-heading' : 'text-content'}`}>
+        <span
+          className={`min-w-0 flex-1 truncate ${isMe ? 'font-bold text-heading' : 'text-content'}`}
+        >
           {player.personaName ?? player.steamId}
         </span>
         <ChevronRight

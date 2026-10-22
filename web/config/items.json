@@ -471,7 +471,7 @@
     "icon": "consecrated_wraps_2.dda0c91e.webp",
     "zh": "神器·急支糖衣",
     "en": "Artifact: Syrup-Coated Wraps",
-    "ru": null
+    "ru": "Артефакт: Обмотки в сиропе"
   },
   "item_consumable_gem": {
     "icon": "consumable_gem.d679387e.webp",
@@ -555,7 +555,7 @@
     "icon": "dagon_ultra.c0d90f8d.webp",
     "zh": "神器·一瞬千击",
     "en": "Artifact: Thousand Strikes",
-    "ru": null
+    "ru": "Артефакт: Тысяча ударов"
   },
   "item_dandelion_amulet": {
     "icon": "dandelion_amulet.f6292da3.webp",
@@ -639,13 +639,19 @@
     "icon": "disperser_chaos.469e07d6.webp",
     "zh": "混沌·散魂剑",
     "en": "Chaotic Disperser",
-    "ru": null
+    "ru": "Хаотический Disperser"
   },
   "item_divine_regalia": {
     "icon": "divine_regalia.f6d3e263.webp",
     "zh": "天赐华冠",
     "en": "Divine Regalia",
     "ru": "Divine Regalia"
+  },
+  "item_divine_regalia_broken": {
+    "icon": "divine_regalia_broken.47ea8e9d.webp",
+    "zh": "失节华冠",
+    "en": "Disgraced Regalia",
+    "ru": "Disgraced Regalia"
   },
   "item_dodo_desolator": {
     "icon": "dodo_desolator.9166d33e.webp",
@@ -941,12 +947,6 @@
     "en": "Essence Ring",
     "ru": "Essence Ring"
   },
-  "item_eternal_shroud_ultra": {
-    "icon": "eternal_shroud_ultra.7a848670.webp",
-    "zh": "法师泳衣",
-    "en": "Swimagicostume",
-    "ru": null
-  },
   "item_ethereal_blade": {
     "icon": "ethereal_blade.b1cee7d7.webp",
     "zh": "虚灵之刃",
@@ -965,6 +965,12 @@
     "en": "Excalibur",
     "ru": null
   },
+  "item_exchange": {
+    "icon": "exchange.116ca62d.webp",
+    "zh": "转换",
+    "en": "Exchange",
+    "ru": "Обмен"
+  },
   "item_faerie_fire": {
     "icon": "faerie_fire.e56e54ea.webp",
     "zh": "仙灵之火",
@@ -976,6 +982,12 @@
     "zh": "猎鹰战刃",
     "en": "Falcon Blade",
     "ru": "Falcon Blade"
+  },
+  "item_fall_fall_fall": {
+    "icon": "fall_fall_fall.c309964f.webp",
+    "zh": "落！落！落！刀",
+    "en": "Fall! Fall! Fall!",
+    "ru": "Бах! Бах! Бах!"
   },
   "item_fallen_sky": {
     "icon": "fallen_sky.3697c26b.webp",
@@ -1215,7 +1227,7 @@
     "icon": "hallowed_scepter.cdf17215.webp",
     "zh": "仙云法杖",
     "en": "Hallowed Scepter",
-    "ru": null
+    "ru": "Священный скипетр"
   },
   "item_hand_of_group": {
     "icon": "hand_of_group.dda5686a.webp",
@@ -1455,13 +1467,13 @@
     "icon": "magic_crit_blade.f65ad2b1.webp",
     "zh": "魔龙狂舞",
     "en": "Dragon Dance",
-    "ru": null
+    "ru": "Танец дракона"
   },
   "item_magic_scepter": {
     "icon": "magic_scepter.c7bb1215.webp",
     "zh": "魔云法杖",
     "en": "Magic Scepter",
-    "ru": null
+    "ru": "Магический скипетр"
   },
   "item_magic_stick": {
     "icon": "magic_stick.7e8dd269.webp",
@@ -2200,12 +2212,6 @@
     "zh": "灵魂之戒",
     "en": "Soul Ring",
     "ru": "Soul Ring"
-  },
-  "item_soul_ring_1": {
-    "icon": "soul_ring_1.8e6a7d3c.webp",
-    "zh": "混沌·魂戒（娱乐道具）",
-    "en": "Chaotic Soul Ring",
-    "ru": null
   },
   "item_specialists_array": {
     "icon": "specialists_array.c62788e9.webp",

@@ -40,9 +40,8 @@ const commonSecrets = isLocal
   ? [defineSecret(SECRET.AFDIAN_API_TOKEN)]
   : [
       defineSecret(SECRET.SERVER_APIKEY),
-      defineSecret(SECRET.SERVER_APIKEY_TEST),
-      defineSecret(SECRET.SERVER_APIKEY_ANIME),
-      defineSecret(SECRET.LOCAL_APIKEY),
+      defineSecret(SECRET.LOCAL_APIKEY_A),
+      defineSecret(SECRET.LOCAL_APIKEY_B),
       defineSecret(SECRET.AFDIAN_WEBHOOK_TOKEN),
       defineSecret(SECRET.AFDIAN_API_TOKEN),
       defineSecret(SECRET.GA4_API_SECRET),
@@ -50,6 +49,8 @@ const commonSecrets = isLocal
       defineSecret(SECRET.ALIPAY_APP_ID),
       defineSecret(SECRET.ALIPAY_APP_PRIVATE_KEY),
       defineSecret(SECRET.ALIPAY_PUBLIC_KEY),
+      defineSecret(SECRET.STRIPE_SECRET_KEY),
+      defineSecret(SECRET.STRIPE_WEBHOOK_SECRET),
       defineSecret(SECRET.STEAM_WEB_API_KEY),
       defineSecret(SECRET.LAUNCHER_RELAY_PRIVATE_KEY),
     ];

@@ -4,15 +4,7 @@ import request from 'supertest';
 import { MemberLevel } from '../src/members/entities/members.entity';
 
 import { getTestFirestore } from './util/util-firestore';
-import {
-  get,
-  getAnimeApiKey,
-  getTestApiKey,
-  initTest,
-  mockDate,
-  post,
-  restoreDate,
-} from './util/util-http';
+import { get, getServerApiKey, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { addMember } from './util/util-member';
 import {
   addPlayerProperty,
@@ -26,7 +18,7 @@ const gameStartUrl = '/api/game/start/';
 const gameEndUrl = '/api/game/end';
 
 function callGameStart(app: INestApplication, steamIds: number[]): request.Test {
-  const apiKey = getTestApiKey();
+  const apiKey = getServerApiKey();
   const countryCode = 'CN';
   const headers = {
     'x-api-key': apiKey,
@@ -42,21 +34,6 @@ function callGameStart(app: INestApplication, steamIds: number[]): request.Test 
 // 使用 windy 主机 API key 发起游戏开始请求
 function callGameStartAsWindyHost(app: INestApplication, steamIds: number[]): request.Test {
   const apiKey = process.env.SERVER_APIKEY ?? 'Invalid_NotOnDedicatedServer';
-  const countryCode = 'CN';
-  const headers = {
-    'x-api-key': apiKey,
-    'x-country-code': countryCode,
-  };
-
-  return request(app.getHttpServer())
-    .get(gameStartUrl)
-    .query({ steamIds, matchId: 1 })
-    .set(headers);
-}
-
-// 使用 anime 主机 API key 发起游戏开始请求
-function callGameStartAsAnimeHost(app: INestApplication, steamIds: number[]): request.Test {
-  const apiKey = getAnimeApiKey();
   const countryCode = 'CN';
   const headers = {
     'x-api-key': apiKey,
@@ -613,33 +590,6 @@ describe('PlayerController (e2e)', () => {
         expect(player.memberPointTotal).toEqual(0);
       });
 
-      it('anime主机 活动期间内首次登录 获得活动积分', async () => {
-        const steamId = 100000906;
-        // 活动期间内
-        mockDate('2026-09-25T00:00:00.000Z');
-
-        const result = await callGameStartAsAnimeHost(app, [steamId]);
-        expect(result.status).toEqual(200);
-
-        // 验证获得了活动积分
-        const pointInfo = result.body.pointInfo;
-        const eventReward = pointInfo.find(
-          (p: { steamId: number; seasonPoint?: number; memberPoint?: number }) =>
-            p.steamId === steamId && p.seasonPoint,
-        );
-        expect(eventReward).toBeDefined();
-        expect(eventReward.seasonPoint).toEqual(5000);
-
-        // 验证玩家积分
-        const player = await getPlayer(app, steamId);
-        expect(player.seasonPointTotal).toEqual(5000);
-        expect(player.memberPointTotal).toEqual(0);
-
-        // 验证鉴权放行且下发GA4配置
-        expect(result.body.ga4Config).toBeDefined();
-        expect(result.body.ga4Config.serverType).toEqual('ANIME');
-      });
-
       it('未知来源主机 返回 401', async () => {
         const steamId = 100000905;
 
@@ -670,7 +620,11 @@ describe('PlayerController (e2e)', () => {
       ['单人结算 超过500分截断', 100000104, 501, 500],
       ['单人结算 低于0分截断', 100000105, -1, 0],
     ])('%s', async (_title, steamId, inputPoints, expectedPoints) => {
-      mockDate('2023-12-01T00:00:00.000Z');
+      mockDate(
+        _title === '单人结算 累加之前的积分'
+          ? '2023-12-01T00:05:00.000Z'
+          : '2023-12-01T00:00:00.000Z',
+      );
       const result = await post(app, gameEndUrl, {
         matchId: '8000000001',
         version: 'v4.05',
@@ -1052,6 +1006,14 @@ describe('PlayerController (e2e)', () => {
   });
 
   describe('/api/game/end (Post) PlayerStatsLifetime 累计战绩', () => {
+    beforeAll(async () => {
+      for (const steamId of [
+        100003001, 100003002, 100003003, 100003011, 100003012, 100003022, 100003023,
+      ]) {
+        await createPlayer(app, { steamId });
+      }
+    });
+
     it('首次结算后 statsLifetime 正确写入', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100003001;
@@ -1083,6 +1045,7 @@ describe('PlayerController (e2e)', () => {
       const steamId = 100003002;
 
       await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
+      mockDate('2023-12-01T00:05:00.000Z');
       await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
 
       const stats = await getPlayerStatsLifetime(app, steamId);
@@ -1143,6 +1106,7 @@ describe('PlayerController (e2e)', () => {
         }),
       );
 
+      mockDate('2023-12-01T00:05:00.000Z');
       await post(app, gameEndUrl, {
         ...createGameEndPayload({ players: [{ steamId }] }),
         players: [
@@ -1192,6 +1156,7 @@ describe('PlayerController (e2e)', () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId = 100003102;
 
+      await callGameStart(app, [steamId]);
       // 先打一局
       await post(app, gameEndUrl, createGameEndPayload({ players: [{ steamId }] }));
 

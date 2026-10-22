@@ -186,7 +186,9 @@ export default function AwakenPage() {
                 b: (chunks) => <b className="text-heading">{chunks}</b>,
               })}
             </p>
-            <p className="mt-1.5 border-t border-line pt-2.5 text-sm text-muted">{t('rules.note')}</p>
+            <p className="mt-1.5 border-t border-line pt-2.5 text-sm text-muted">
+              {t('rules.note')}
+            </p>
           </div>
         </section>
       ) : null}
@@ -216,13 +218,21 @@ export default function AwakenPage() {
             <div className={BOX_CLASS}>
               <span className="text-base text-muted">{t('stats.battlePoint')}</span>
               <span className="text-3xl leading-none font-bold text-season">
-                {info ? (info.useableSeasonPoint ?? 0).toLocaleString() : <Skeleton>00,000</Skeleton>}
+                {info ? (
+                  (info.useableSeasonPoint ?? 0).toLocaleString()
+                ) : (
+                  <Skeleton>00,000</Skeleton>
+                )}
               </span>
             </div>
             <div className={BOX_CLASS}>
               <span className="text-base text-muted">{t('stats.memberPoint')}</span>
               <span className="text-3xl leading-none font-bold text-member-strong">
-                {info ? (info.useableMemberPoint ?? 0).toLocaleString() : <Skeleton>00,000</Skeleton>}
+                {info ? (
+                  (info.useableMemberPoint ?? 0).toLocaleString()
+                ) : (
+                  <Skeleton>00,000</Skeleton>
+                )}
               </span>
             </div>
           </>
@@ -241,13 +251,7 @@ export default function AwakenPage() {
         // 别人只关心他觉醒了哪些，未觉醒的卡对访客只是噪音
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
           {AWAKEN_HEROES.filter((hero) => awakenedSet.has(hero.heroName)).map((hero) => (
-            <AwakenCard
-              key={hero.heroName}
-              hero={hero}
-              unlocked
-              tooPoor={false}
-              busy={false}
-            />
+            <AwakenCard key={hero.heroName} hero={hero} unlocked tooPoor={false} busy={false} />
           ))}
         </div>
       )}

@@ -8,7 +8,10 @@ export default function Stars({ star }: { star: number }) {
   const filled = Math.min(Math.max(star, 0), MAX_STAR);
 
   return (
-    <span className="shrink-0 text-[11px] leading-none tracking-[1px]" title={t('star', { n: filled })}>
+    <span
+      className="shrink-0 text-[11px] leading-none tracking-[1px]"
+      title={t('star', { n: filled })}
+    >
       <span className="sr-only">{t('star', { n: filled })}</span>
       <span aria-hidden="true" className="text-heading">
         {'★'.repeat(filled)}

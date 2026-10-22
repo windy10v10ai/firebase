@@ -19,7 +19,9 @@ async function withPage(browser, viewport, fn, locale) {
   const context = await browser.newContext({ viewport });
   // 用 cookie 而不是 Accept-Language 指定语言：cookie 优先级最高，拍出来的语言不随本机设置变
   if (locale) {
-    await context.addCookies([{ name: 'NEXT_LOCALE', value: locale, domain: 'localhost', path: '/' }]);
+    await context.addCookies([
+      { name: 'NEXT_LOCALE', value: locale, domain: 'localhost', path: '/' },
+    ]);
   }
   const page = await context.newPage();
   const errors = [];

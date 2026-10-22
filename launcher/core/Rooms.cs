@@ -132,7 +132,8 @@ namespace Windy10v10AI.Launcher
                     ready.Set();
                 }
                 Raise();
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         public void Refresh()
@@ -187,7 +188,8 @@ namespace Windy10v10AI.Launcher
                     Interlocked.Exchange(ref refreshing, 0);
                 }
                 Raise();
-            }) { IsBackground = true }.Start();
+            })
+            { IsBackground = true }.Start();
         }
 
         static RoomRow Parse(Dictionary<string, object> room)

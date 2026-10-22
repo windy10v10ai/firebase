@@ -8,7 +8,8 @@ import { AppModule } from './app.module';
 import { AppGlobalSettings } from './util/settings';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Stripe 回调验签要用原始请求体；线上由 Cloud Functions 自带
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   AppGlobalSettings(app);
 
   if (process.env.ENVIRONMENT == 'local') {
@@ -20,7 +21,7 @@ async function bootstrap() {
 - **Swagger UI**: [http://localhost:3001/api-doc](http://localhost:3001/api-doc)
 - **OpenAPI JSON Schema**: [http://localhost:3001/api-docs-json](http://localhost:3001/api-docs-json)
 
-在 Swagger UI 中点击 "Authorize" 按钮，输入测试用的 API Key: \`apikey\`
+在 Swagger UI 中点击 "Authorize" 按钮，输入测试用的 API Key: \`Invalid_NotOnDedicatedServer\`
       `,
       )
       .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')

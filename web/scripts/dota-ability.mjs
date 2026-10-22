@@ -368,12 +368,17 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
           unresolved.push(`${abilityName} 的 %${name}%`);
           return whole;
         }
-        return value;
+        // 游戏的物品提示把换进去的数值加粗，觉醒与抽选技能的说明保持原样
+        return kind === 'items' ? `<b>${value}</b>` : value;
       });
-      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换
+      // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换。
+      // 游戏用 GameplayValues 的 span 包驱散类型这类取值，显示上与正文无异，去掉标记只留文字
       text[lang] = {
         title: titles[lang].replace(/\n/g, '<br>'),
-        desc: desc.replace(/\n/g, '<br>'),
+        desc: desc
+          .replace(/<\/b>%/g, '%</b>')
+          .replace(/<\/?span\b[^>]*>/gi, '')
+          .replace(/\n/g, '<br>'),
       };
     }
     for (const lang of langs) {
@@ -409,6 +414,37 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
 }
 
 /**
+ * 物品的价格与配方字段：game 的各份物品 KV 覆盖原版 items.txt。
+ * 返回物品名 → { cost, recipe, result, requirements }，requirements 是配方的各条合成路线，每条是材料名列表。
+ */
+export function readItemRecipes(game, version) {
+  const files = kvSourceFiles(game, version, 'items');
+  const out = new Map();
+  for (const file of [...files].reverse()) {
+    // 记下优先级最高的来源，调用方据此区分自定义物品与原版物品
+    const source = path.basename(file);
+    for (const [name, body] of blockBodies(readText(file))) {
+      if (!name.startsWith('item_')) continue;
+      const [[, fields]] = parseKv(`${body}}`);
+      const prev = out.get(name) ?? { cost: null, recipe: false, result: null, requirements: [] };
+      const next = { ...prev, source };
+      for (const [key, value] of fields) {
+        if (key === 'ItemCost' && typeof value === 'string') next.cost = Number(value);
+        if (key === 'ItemRecipe' && typeof value === 'string') next.recipe = value === '1';
+        if (key === 'ItemResult' && typeof value === 'string') next.result = value;
+        if (key === 'ItemRequirements' && Array.isArray(value)) {
+          next.requirements = value
+            .filter(([, v]) => typeof v === 'string')
+            .map(([, v]) => v.split(';').filter(Boolean));
+        }
+      }
+      out.set(name, next);
+    }
+  }
+  return out;
+}
+
+/**
  * 记进产物头部，供下次同步时 `git log <旧SHA>..HEAD` 生成变更说明。
  * `onDevelop` 判断的是提交在不在 origin/develop 上，不是分支叫不叫 develop——
  * 分支名在 detached HEAD 下只会得到 "HEAD"，而同步脚本从 worktree 跑是常态。
@@ -426,4 +462,28 @@ export function gameHead(game) {
     // 不是祖先，或本地根本没有 origin/develop
   }
   return { commit, onDevelop };
+}
+
+/** 固定提交可用于预同步尚未合并的 game 改动，工作区必须保持干净。 */
+export function syncGameSource(game) {
+  const head = gameHead(game);
+  const expected = process.argv.find((arg) => arg.startsWith('--game-commit='))?.split('=')[1];
+  if (expected) {
+    if (!/^[a-f0-9]{40}$/.test(expected) || expected !== head.commit) {
+      throw new Error('--game-commit 必须是当前 game HEAD 的完整提交号');
+    }
+  } else if (!head.onDevelop) {
+    throw new Error(
+      'game HEAD 不在 origin/develop 上；预同步时用 --game-commit=<完整提交号> 固定来源',
+    );
+  }
+  const changes = execFileSync(
+    'git',
+    ['-C', game, 'status', '--porcelain', '--untracked-files=no'],
+    {
+      encoding: 'utf8',
+    },
+  ).trim();
+  if (changes) throw new Error('game 有未提交改动，请使用独立的干净副本');
+  return head;
 }

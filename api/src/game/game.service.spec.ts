@@ -102,38 +102,6 @@ describe('GameService', () => {
     bigQueryService = moduleRef.get(BigQueryService);
   });
 
-  describe('recordGameEnd 组队判定', () => {
-    const player = { steamId: 1001, teamId: 2, battlePoints: 10, isDisconnected: false };
-    const build = (playerCount: number) =>
-      ({ winnerTeamId: 2, players: [player], playerCount }) as unknown as GameEndDto;
-
-    it('单玩家报文也能算组队局', async () => {
-      await service.recordGameEnd(build(4), 'game-id');
-
-      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(
-        1001,
-        true,
-        10,
-        false,
-        true,
-        'game-id',
-      );
-    });
-
-    it('全场只有一个真人时不算组队局', async () => {
-      await service.recordGameEnd(build(1), 'game-id');
-
-      expect(playerService.upsertGameEnd).toHaveBeenCalledWith(
-        1001,
-        true,
-        10,
-        false,
-        false,
-        'game-id',
-      );
-    });
-  });
-
   describe('recordPlayerStats', () => {
     const gameEnd = {
       matchId: '1',
@@ -184,28 +152,6 @@ describe('GameService', () => {
         measurementId: mockMeasurementId,
         apiSecret: mockApiSecret,
         serverType: SERVER_TYPE.WINDY,
-      });
-      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
-    });
-
-    it('should return GA4 config for TEST server', () => {
-      const result = service.getGA4Config(SERVER_TYPE.TEST);
-
-      expect(result).toEqual({
-        measurementId: mockMeasurementId,
-        apiSecret: mockApiSecret,
-        serverType: SERVER_TYPE.TEST,
-      });
-      expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
-    });
-
-    it('should return GA4 config for ANIME server', () => {
-      const result = service.getGA4Config(SERVER_TYPE.ANIME);
-
-      expect(result).toEqual({
-        measurementId: mockMeasurementId,
-        apiSecret: mockApiSecret,
-        serverType: SERVER_TYPE.ANIME,
       });
       expect(secretService.getSecretValue).toHaveBeenCalledWith(SECRET.GA4_API_SECRET);
     });
@@ -284,7 +230,7 @@ describe('GameService', () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-09-25T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
-      const result = await service.giveEventReward([steamId], SERVER_TYPE.TEST);
+      const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
 
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
         steamId,

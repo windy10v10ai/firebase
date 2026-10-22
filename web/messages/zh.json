@@ -105,7 +105,7 @@
       },
       "wiki": {
         "title": "百科",
-        "description": "游戏里能抽到的技能与物品"
+        "description": "游戏里的技能与物品"
       },
       "leaderboard": {
         "title": "排行榜",
@@ -241,6 +241,7 @@
       "kofi": "Ko-fi"
     },
     "platformLabel": "付款方式",
+    "recommended": "推荐",
     "status": {
       "loginTitle": "登录后查看会员状态",
       "loginDescription": "登录后才能购买会员与会员积分",
@@ -265,6 +266,12 @@
         "desc": "更多支付方式 · 人民币支付",
         "note": "点档位跳转到爱发电付款，付完自动到账"
       },
+      "stripe": {
+        "name": "Stripe",
+        "desc": "银行卡 · Apple Pay · Google Pay",
+        "note": "付款由 Stripe 安全处理，本站不保存卡号。付款后自动到账，无需填写 ID",
+        "noteGuest": "登录后即可付款。付款由 Stripe 安全处理，本站不保存卡号"
+      },
       "kofi": {
         "name": "Ko-fi",
         "desc": "海外用户 · 美元支付"
@@ -282,13 +289,27 @@
       "total": "共 {amount}",
       "perMonth": "/月",
       "subscribeAfdian": "前往爱发电订阅",
-      "subscribeKofi": "前往 Ko-fi 订阅"
+      "subscribeKofi": "前往 Ko-fi 订阅",
+      "oneTime": "一次性购买 · 不自动续费 · 到账即生效",
+      "redirecting": "正在跳转",
+      "orderFailed": "下单失败，请稍后再试",
+      "perMonthApprox": "约 {amount}/月"
     },
     "points": {
       "title": "购买会员积分",
       "subtitle": "已有会员？用积分快速提升会员等级、升级属性",
       "unit": "积分",
       "save": "省 {amount}"
+    },
+    "stripePay": {
+      "title": "Stripe 付款结果",
+      "checking": "正在确认付款",
+      "checkingHint": "付款已完成，通常几秒内到账。关闭本窗口也会自动到账。",
+      "slow": {
+        "title": "还在确认中",
+        "hint": "付款成功的订单一定会自动到账，可以稍后回来查看。"
+      },
+      "refresh": "刷新状态"
     },
     "pay": {
       "title": "支付宝扫码支付",
@@ -920,7 +941,7 @@
       "abilities": "技能百科",
       "items": "物品百科"
     },
-    "description": "游戏里能抽到的全部技能与物品，T1 最稀有，越往后越容易抽到。",
+    "description": "游戏里的技能与物品。商店物品按价格分档，抽奖物品 T1 最稀有。",
     "tabs": {
       "abilities": "技能",
       "items": "物品"
@@ -937,7 +958,29 @@
       "active": "主动",
       "passive": "被动"
     },
+    "category": {
+      "label": "物品分类",
+      "shop": "商店",
+      "lottery": "抽奖"
+    },
+    "section": {
+      "equipment": "装备",
+      "consumable": "消耗道具",
+      "drop": "掉落合成"
+    },
+    "price": {
+      "below": "{price, number} 以下",
+      "range": "{min, number} – {max, number}",
+      "above": "{price, number} 以上"
+    },
+    "tag": {
+      "shop": "商店 · {price, number} 金",
+      "drop": "商店 · 掉落合成",
+      "lottery": "抽奖 · {tier}"
+    },
     "empty": "没有找到「{query}」",
+    "emptyOther": "{current}里没有「{query}」，{other}里有 {count} 件",
+    "switchTo": "切到{other}",
     "iconMissing": "无图"
   },
   "auth": {

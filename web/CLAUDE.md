@@ -171,8 +171,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 游戏里的名字、图标、技能说明都由 `scripts/` 下的脚本从 game 仓库生成，产物不手改：
 
-- **每日任务池加了英雄**：`npm run heroes`
-- **抽选池、技能或物品的数值与描述变了**：`npm run wiki:sync`；缺图标先跑 `npm run items`
+- **物品、抽选技能、抽选池、英雄有改动**：按 [game-data-sync](../.claude/skills/game-data-sync/SKILL.md) 技能走
 - **觉醒有改动**：按 [awaken-sync](../.claude/skills/awaken-sync/SKILL.md) 技能走
 
 ## 升级依赖
@@ -181,7 +180,11 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 ## 校验
 
-`cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build`
+`cd web && npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`
+
+`format:check` 用 Prettier 查 `.ts` / `.tsx` / `.js` / `.mjs` / `.css`，沿用根目录 `.prettierrc`；不通过时跑 `npm run format` 自动修正。
+
+脚本生成的 `.ts` / `.js` 产物同样在检查范围内：生成脚本写文件前先用 Prettier 的 `format`（配合 `resolveConfig`）处理输出，不把生成文件加进忽略名单。
 
 单元测试（Vitest）只覆盖不依赖浏览器的纯逻辑，测试文件与被测文件同目录、命名 `*.test.ts`；页面行为照常靠下面的浏览器实测。
 
@@ -291,4 +294,4 @@ https://raw.githubusercontent.com/windy10v10ai/firebase/assets/pr/<PR 编号>/<�
 
 图片用 `<img src="..." width="...">` 控制宽度，`![]()` 语法无法限制尺寸。
 
-**拍图这一步可以派给子代理**，前提与指令写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「把 PR 截图交给子代理」。验收仍归主会话。
+**浏览器验证与拍图都派子代理**，交接写法见 [web-browser-verify](../.claude/skills/web-browser-verify/SKILL.md) 的「交给子代理」。验收仍归主会话。

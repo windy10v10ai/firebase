@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { createIdTokenForSteamId } from './util/util-auth';
 import { getTestFirestore } from './util/util-firestore';
-import { get, initTest, post } from './util/util-http';
+import { get, initTest, mockDate, post, restoreDate } from './util/util-http';
 import { createPlayer } from './util/util-player';
 
 const gameEndUrl = '/api/game/end';
@@ -88,6 +88,10 @@ describe('PlayerStatsRecent (e2e)', () => {
     await app.close();
   });
 
+  afterEach(() => {
+    restoreDate();
+  });
+
   it('结算后网站能取到这一局，含游戏端新发的出装与技能', async () => {
     const steamId = 200001201;
     await createPlayer(app, { steamId });
@@ -127,10 +131,13 @@ describe('PlayerStatsRecent (e2e)', () => {
 
   it('新场次排在最前，limit 只截断返回条数', async () => {
     const steamId = 200001202;
+    mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId });
     await post(app, gameEndUrl, createGameEndPayload(steamId, 'e2e-recent-old')).expect(201);
+    mockDate('2026-08-16T01:05:00.000Z');
     await post(app, gameEndUrl, createGameEndPayload(steamId, 'e2e-recent-new')).expect(201);
 
+    mockDate('2026-08-16T01:10:00.000Z');
     await post(app, gameEndUrl, createGameEndPayload(steamId, 'e2e-recent-newest')).expect(201);
 
     const all = await get(app, recentUrl(steamId)).expect(200);

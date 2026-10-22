@@ -2,8 +2,8 @@
 
 import { type ReactNode, useLayoutEffect, useRef, useState } from 'react';
 
-/** 与 w-85 一致 */
-const TOOLTIP_WIDTH = 340;
+/** 与 w-85、w-95 一致 */
+const TOOLTIP_WIDTH = { site: 340, game: 380 };
 const TOOLTIP_GAP = 10;
 const VIEWPORT_MARGIN = 8;
 // 悬浮提示靠鼠标才成立，平板和手机按触控处理，与 lg: 断点同一口径
@@ -18,6 +18,8 @@ interface AbilityHoverTipProps {
   subtitle: ReactNode;
   /** 标题块之下的技能块，通常是 AbilityDetails */
   content: ReactNode;
+  /** game 照游戏内物品提示配色，内容区不留内边距，由 ItemDetails 自己分块 */
+  tone?: 'site' | 'game';
 }
 
 /**
@@ -30,7 +32,9 @@ export default function AbilityHoverTip({
   title,
   subtitle,
   content,
+  tone = 'site',
 }: AbilityHoverTipProps) {
+  const game = tone === 'game';
   const rootRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
   const [tipSide, setTipSide] = useState<'left' | 'right' | null>(null);
@@ -41,7 +45,7 @@ export default function AbilityHoverTip({
       return;
     }
     const room = window.innerWidth - root.getBoundingClientRect().right - TOOLTIP_GAP;
-    setTipSide(room - VIEWPORT_MARGIN >= TOOLTIP_WIDTH ? 'right' : 'left');
+    setTipSide(room - VIEWPORT_MARGIN >= TOOLTIP_WIDTH[tone] ? 'right' : 'left');
   };
 
   // 高度要渲染出来才量得到：底边出屏就整体上移，箭头反向补偿，仍对着卡片上部
@@ -77,23 +81,42 @@ export default function AbilityHoverTip({
         <div
           ref={tipRef}
           aria-hidden="true"
-          className={`pointer-events-none absolute top-(--tip-shift) z-30 w-85 rounded-lg border border-line-strong bg-panel-soft text-content shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)] ${
-            tipSide === 'right' ? 'left-[calc(100%+10px)]' : 'right-[calc(100%+10px)]'
-          }`}
+          className={`pointer-events-none absolute top-(--tip-shift) z-30 shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)] ${
+            game
+              ? 'w-95 rounded-md border border-game-line bg-game-panel text-game-text'
+              : 'w-85 rounded-lg border border-line-strong bg-panel-soft text-content'
+          } ${tipSide === 'right' ? 'left-[calc(100%+10px)]' : 'right-[calc(100%+10px)]'}`}
         >
           <span
-            className={`absolute top-[calc(20px-var(--tip-shift))] size-2.75 rotate-45 border-line-strong bg-panel-raised ${
+            className={`absolute top-[calc(20px-var(--tip-shift))] size-2.75 rotate-45 ${
+              game ? 'border-game-line bg-game-head' : 'border-line-strong bg-panel-raised'
+            } ${
               tipSide === 'right' ? '-left-1.5 border-b border-l' : '-right-1.5 border-t border-r'
             }`}
           />
-          <div className="flex items-center gap-3 rounded-t-lg border-b border-line bg-panel-raised px-3.5 py-3">
-            {icon}
-            <div className="flex min-w-0 flex-col gap-px">
-              <div className="text-base leading-5.5 font-bold text-heading">{title}</div>
-              <div className="text-xs leading-4.5 text-muted">{subtitle}</div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">{content}</div>
+          {game ? (
+            <>
+              <div className="flex items-center gap-3 rounded-t-md bg-game-head px-3 py-2.5">
+                {icon}
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <div className="text-lg leading-6 font-bold text-heading">{title}</div>
+                  {subtitle ? <div className="text-[15px] leading-5">{subtitle}</div> : null}
+                </div>
+              </div>
+              <div className="overflow-hidden rounded-b-md">{content}</div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 rounded-t-lg border-b border-line bg-panel-raised px-3.5 py-3">
+                {icon}
+                <div className="flex min-w-0 flex-col gap-px">
+                  <div className="text-base leading-5.5 font-bold text-heading">{title}</div>
+                  <div className="text-xs leading-4.5 text-muted">{subtitle}</div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">{content}</div>
+            </>
+          )}
         </div>
       ) : null}
     </div>

@@ -125,7 +125,12 @@ export function invalidatePlayerState(client: QueryClient, steamId: string) {
 }
 
 /** 写接口返回了最新数据时用：直接写进对应缓存，该玩家状态组的其余缓存过期 */
-export function applyPlayerWrite<T>(client: QueryClient, steamId: string, queryKey: QueryKey, data: T) {
+export function applyPlayerWrite<T>(
+  client: QueryClient,
+  steamId: string,
+  queryKey: QueryKey,
+  data: T,
+) {
   client.setQueryData(queryKey, data);
   // 刚写进去的就是最新值，跟着失效会多发一次同样的请求
   const written = hashKey(queryKey);

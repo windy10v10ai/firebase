@@ -5,11 +5,12 @@ import { OrderType } from '../afdian/enums/order-type.enum';
 import { AlipayOrder } from '../alipay/entities/alipay-order.entity';
 import { KofiOrder } from '../kofi/entities/kofi-order.entity';
 import { KofiType } from '../kofi/enums/kofi-type.enum';
+import { StripeOrder } from '../stripe/entities/stripe-order.entity';
 
 import { AnalyticsService } from './analytics.service';
 
 type CURRENCY = 'CNY' | 'USD';
-type AFFILIATION = 'afdian' | 'kofi' | 'alipay';
+type AFFILIATION = 'afdian' | 'kofi' | 'alipay' | 'stripe';
 
 export interface PurchaseEvent {
   name: string;
@@ -137,6 +138,32 @@ export class AnalyticsPurchaseService {
         currency: 'CNY',
         transaction_id: order.outTradeNo,
         value: totalAmount,
+      },
+    };
+
+    await this.analyticsService.sendEvent(order.steamId.toString(), event);
+  }
+
+  async stripePurchase(order: StripeOrder) {
+    const value = order.amountCent / 100;
+
+    const event: PurchaseEvent = {
+      name: 'purchase',
+      params: {
+        items: [
+          {
+            item_id: order.productCode,
+            item_name: `stripe-${order.productCode}`,
+            affiliation: 'stripe',
+            price: value / order.quantity,
+            currency: 'USD',
+            quantity: order.quantity,
+          },
+        ],
+        affiliation: 'stripe',
+        currency: 'USD',
+        transaction_id: order.id,
+        value,
       },
     };
 

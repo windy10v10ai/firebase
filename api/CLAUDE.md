@@ -33,11 +33,11 @@ NestJS 后端 API，同时是 Firebase Functions 的源代码。全仓库通用�
 
 手写文档的数据形状不经任何校验：字段名拼错、缺字段、类型不符都不会报错，测试通过也不能说明被测代码正确。走 API 时形状由生产代码产生，entity 变更后无需同步修改构造逻辑，并且顺带覆盖了上游链路。
 
-本地凭据在 `api/.env.local` 里，TEST 服务器的 key 是 `apikey`。造一个「已下单但没激活的会员」需要两步，都有现成接口：
+本地凭据在 `api/.env.local` 里，官方服务器的 key 是 `Invalid_NotOnDedicatedServer`。造一个「已下单但没激活的会员」需要两步，都有现成接口：
 
 ```bash
 # 建玩家（结算、激活等接口都要求玩家已存在）
-curl -H "x-api-key: apikey" "http://localhost:3001/api/game/start?steamIds=<id>&matchId=1&version=test"
+curl -H "x-api-key: Invalid_NotOnDedicatedServer" "http://localhost:3001/api/game/start?steamIds=<id>&matchId=1&version=test"
 # 造一张未激活订单：webhook 的 remark 不放 Dota2 ID，订单会存下来但激活失败
 curl -X POST "http://localhost:3001/api/afdian/webhook?token=afdian-webhook" -H "Content-Type: application/json" -d '{...}'
 ```
@@ -105,9 +105,11 @@ preset[dto.map] = undefined;
 
 ### 并发与一致性
 
+结算的所有入口必须共用账户冷却与每日额度。BigQuery 正常结算明细和审计保留客户端原始积分，GA4 与每日任务获得积分使用服务端实际发放结果；不要通过修改原始请求 DTO 来统一统计口径。架构见 [docs/api/README.md](../docs/api/README.md) 的「游戏结算与本地主机来源的限额」。
+
 玩法数据（战绩、积分累加、每日任务进度）**用读-改-写即可，不要上事务**。一个玩家同一时刻只在一局游戏里，结算、加分、任务进度天然顺序发生；并发覆盖要两条请求卡在同一个瞬间才会出现，真出现了丢一条记录也不影响玩家继续玩。为此多一次读、多一层重试不划算。
 
-涉及金钱的路径不适用这条：支付回调、订单激活、会员积分消耗要挡住重复投递与重放，做法见各自模块。
+涉及金钱的路径不适用这条：支付回调、订单激活、会员积分消耗要挡住重复投递与重放。支付回调按订单状态幂等：订单已成功直接回成功，否则验签、校验金额后发放，最后把订单改成成功；不为同一订单的并发回调加事务或锁，发放出错就让接口报错，交给第三方重试。
 
 理由见 [docs/api/README.md](../docs/api/README.md) 的「一致性」。
 
