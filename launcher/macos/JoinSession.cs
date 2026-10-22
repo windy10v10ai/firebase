@@ -21,12 +21,11 @@ namespace Windy10v10AI.Launcher
         readonly object runLock = new();
         CancellationTokenSource cancel;
         Task worker, entering = Task.CompletedTask;
-        JoinTunnel tunnel;
+        JoinRoomSession room;
+        JoinTunnel tunnel => room?.Tunnel;
         MacInstall install;
         bool autoEnter;
         RoomBrowser browser;
-        List<Candidate> browsingCandidates;
-        List<RelayLeg> browsingRelays;
         public string State { get; private set; } = "idle";
         public string Code { get; private set; }
         public bool Ready { get; private set; }
@@ -52,9 +51,8 @@ namespace Windy10v10AI.Launcher
         }
         public static string NormalizeCode(string code)
         {
-            code = (code ?? "").Trim().ToUpperInvariant();
-            if (code.Length != 6 || code.Any(c => !(c >= 'A' && c <= 'Z') && !(c >= '0' && c <= '9'))) throw new Exception(Strings.InvalidCode);
-            return code;
+            try { return JoinRoomSession.NormalizeCode(code); }
+            catch (RoomError e) { throw new Exception(JoinRoomSession.ErrorText(e.Code)); }
         }
         public void SetAutoEnter(bool enabled) { autoEnter = enabled; }
         public async Task Stop()
@@ -81,40 +79,42 @@ namespace Windy10v10AI.Launcher
         async Task Run(CancellationToken ct)
         {
             IDisposable mount = null;
-            CancellationTokenRegistration registration = default;
+            JoinRoomSession current = null;
             string failure = null;
             try
             {
                 Event("checking", Strings.Starting);
                 var accountId = CheckInstall(ct);
                 mount = options.Mount(install);
-                if (browser != null)
+                current = new JoinRoomSession(new JoinRoomSessionOptions
                 {
-                    browsingRelays = browser.OwnRelays;
-                    tunnel = browser.TakeTunnel(out browsingCandidates);
-                    browser.Dispose(); browser = null;
-                }
-                tunnel ??= options.CreateTunnel();
-                var current = tunnel;
-                // 取消必须同时关闭套接字，才能唤醒同步网络探测。
-                registration = ct.Register(() => current.Dispose());
-                ct.ThrowIfCancellationRequested();
-                var joined = await OpenRoom(current, accountId, ct);
-                PrepareConnection(current, joined, accountId, ct);
+                    CreateTunnel = () => options.CreateTunnel(),
+                    Gather = t => options.Gather(t),
+                    JoinRoom = (code, body) => options.JoinRoom(code, body)
+                });
+                lock (runLock) room = current;
+                var source = browser;
+                await RunNetwork(() => current.Prepare(source, ct), ct);
+                browser = null;
+                Event("joining", Strings.Connecting);
+                var code = Code;
+                await RunNetwork(() => current.Open(code, accountId, install.Manifest, ct), ct);
+                EmitRoster(current.Tunnel);
+                current.Connect(ct);
+                current.Forward(options.ForwardPort);
                 Event("waiting", Strings.StatusWaiting);
                 await Watch(current, ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { }
             catch (Exception) when (ct.IsCancellationRequested) { }
-            catch (RoomError e) { failure = JoinError(e.Code); }
+            catch (RoomError e) { failure = JoinRoomSession.ErrorText(e.Code); }
             catch (Exception e) { failure = e.Message; }
             finally
             {
                 Ready = false;
                 lock (runLock) cancel?.Cancel();
                 await entering;
-                registration.Dispose();
-                tunnel?.Dispose(); tunnel = null; browser?.Dispose(); browser = null; browsingCandidates = null; browsingRelays = null;
+                current?.Dispose(); room = null; browser?.Dispose(); browser = null;
                 try { mount?.Dispose(); } catch (Exception e) { failure ??= Strings.MapCleanupFailed + e.Message; }
                 Code = null;
                 emit(new { type = "roster", role = "join", players = Array.Empty<object>() });
@@ -129,51 +129,30 @@ namespace Windy10v10AI.Launcher
             ct.ThrowIfCancellationRequested();
             return accountId;
         }
-        async Task<Dictionary<string, object>> OpenRoom(JoinTunnel current, long accountId, CancellationToken ct)
+        static async Task RunNetwork(Action operation, CancellationToken ct)
         {
-            var candidates = browsingCandidates ?? await Task.Run(() => options.Gather(current)).WaitAsync(ct);
-            ct.ThrowIfCancellationRequested();
-            if (browsingCandidates == null) current.Start();
-            Event("joining", Strings.Connecting);
-            var body = HostSession.PeerBody(install, candidates, current.SymmetricNat); body["steamId"] = accountId;
-            if (browsingRelays != null) { var relays = RelayLeg.Encode(browsingRelays); if (relays.Count > 0) { body["relays"] = relays; body["relayRtt"] = relays[0]["rtt"]; body["relayLoss"] = relays[0]["loss"]; } }
-            var code = Code;
-            var joined = await Task.Run(() => options.JoinRoom(code, body)).WaitAsync(ct);
-            ct.ThrowIfCancellationRequested();
-            return joined;
+            var work = Task.Run(operation);
+            try { await work.WaitAsync(ct); }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                // HTTP 请求可能晚于离房结束，仍需观察它最终返回的异常。
+                _ = work.ContinueWith(t => { _ = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                throw;
+            }
         }
-        void PrepareConnection(JoinTunnel current, Dictionary<string, object> joined, long accountId, CancellationToken ct)
+        async Task Watch(JoinRoomSession current, CancellationToken ct)
         {
-            var host = joined.GetValueOrDefault("host") as Dictionary<string, object> ?? new();
-            var self = joined.GetValueOrDefault("self") as Dictionary<string, object> ?? new();
-            current.Placeholder = new List<RosterEntry> {
-                new(){Name=Field(host,"personaName")??Strings.TagHost,AvatarUrl=Field(host,"avatarUrl"),IsHost=true,Status=PlayerStatus.Connecting},
-                new(){SteamId=accountId,Name=Field(self,"personaName")??Strings.Player,AvatarUrl=Field(self,"avatarUrl"),Status=PlayerStatus.Connecting}
-            };
-            EmitRoster(current);
-            var peers = ((object[])joined["hostCandidates"]).Select(c => Candidate.Parse((string)c)).ToList();
-            var path = current.Connect((string)joined["joinToken"], peers, RelayTicket.Read(joined));
-            ct.ThrowIfCancellationRequested();
-            if (current.Kicked) throw new Exception(Strings.KickedByHost);
-            if (path == null) throw new Exception(Strings.ConnectFailed);
-            current.Thresholds = RouteThresholds.Read(joined); current.StartRouteCheck();
-            try { current.Forward(options.ForwardPort); }
-            catch (System.Net.Sockets.SocketException) { throw new Exception(Strings.PortInUse); }
-        }
-        async Task Watch(JoinTunnel current, CancellationToken ct)
-        {
-            var lifecycle = new JoinLifecycle(current.Game, false);
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                lifecycle.Observe(current);
+                var lifecycle = current.Observe();
                 if (lifecycle.State == JoinState.Kicked) throw new Exception(Strings.KickedByHost);
                 if (lifecycle.State == JoinState.Closed) return;
                 if (lifecycle.State == JoinState.HostLost) throw new Exception(Strings.HostLost);
                 ShowReadiness(lifecycle.State);
                 if (lifecycle.NewGameReady && autoEnter && (lifecycle.FirstGame || options.ClientRunning())) Enter();
-                EmitRoster(current);
-                EmitRoute(current);
+                EmitRoster(current.Tunnel);
+                EmitRoute(current.Tunnel);
                 await Task.Delay(options.MonitorIntervalMs, ct);
             }
         }
@@ -196,17 +175,5 @@ namespace Windy10v10AI.Launcher
             emit(new { type = "route", message, path, rtt = quality.Rtt, loss = quality.Loss, checking = current.Checking, silent = current.Silent });
         }
         void EmitRoster(JoinTunnel current) => emit(new { type = "roster", role = "join", players = current.Roster().Select(p => new { key = p.Key, steamId = p.SteamId, name = p.Name, avatarUrl = p.AvatarUrl, status = (int)p.Status, host = p.IsHost }).ToArray() });
-        static string Field(Dictionary<string, object> d, string key) => d.GetValueOrDefault(key) as string;
-        static string JoinError(string code) => code switch
-        {
-            "room_not_found" => Strings.RoomNotFound,
-            "room_full" => Strings.RoomFull,
-            "kicked" => Strings.KickedJoin,
-            "map_mismatch" or "map_version_mismatch" => Strings.MapMismatch,
-            "version_mismatch" or "protocol_mismatch" => Strings.VersionMismatch,
-            "network" => Strings.RoomNetwork,
-            "game_started" => Strings.GameStarted,
-            _ => Strings.LaunchFailed + code
-        };
     }
 }

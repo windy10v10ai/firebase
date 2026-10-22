@@ -65,10 +65,6 @@ namespace Windy10v10AI.Launcher
         const int ClosingGraceMs = 60000;
         // Steam hands a running Dota over within a second or two when it works at all
         const int SteamEnterMs = 5000;
-        // The host sends its roster every two seconds
-        const int JoinStateWaitMs = 5000;
-        // Dota gives the room's privileges to whoever loads in first, so joiners wait for the host, but not on a host that hangs
-        const int HostHeadStartMs = 30000;
         static readonly string ConnectCommand = "connect 127.0.0.1:" + LocalGate.Port;
         // Long enough for Steam to apply a pending update before signing in
         const int SteamSignInMs = 90000;
@@ -78,23 +74,11 @@ namespace Windy10v10AI.Launcher
         const int ErrorElevationRequired = 740;
         // The game turns off its auto start when the dedicated server carries this name
         const string RoomHostname = "windy10v10ai-room";
-        const string HeroSelection = "DOTA_GAMERULES_STATE_HERO_SELECTION";
         const string CorruptContent = "FATAL ERROR: Content file";
         const string LocalContentCorrupt = "Local content might be corrupt";
-        // Most friends join within minutes of the room opening, so polling is fast then and slower after
-        const int FastPollMs = 2000;
-        const int SlowPollMs = 5000;
-        const int GamePollMs = 60000;
-        // Keeps BigQuery rows few, at the cost of losing up to this much when the host crashes
-        const int QualityWindowMs = 300000;
-        // Matches the API's cap, so rows piling up while the API is unreachable are dropped oldest first
-        const int MaxPendingQuality = 50;
         const int RouteRefreshMs = 5000;
         // The same line the route check draws for the direct route, so a warning on the status line means the game will stutter
         const int RouteWarnLossPct = 5;
-        const int FastPollMinutes = 5;
-        // An idle room stops polling so it drops off the list; the host resumes it with one click if still there
-        const int PauseMinutes = 15;
         const int ListRefreshMs = 60000;
         const int BadgeRefreshMs = 60000;
         // A join page left open in the background stops asking the API for the list
@@ -153,28 +137,19 @@ namespace Windy10v10AI.Launcher
         bool playersShown;
         bool cardShown;
         long selfId;
-        HostRoster hostRoster;
+        HostRoomSession hostRoom;
+        JoinRoomSession joinedRoom;
+        CancellationTokenSource joinCancellation;
+        HostRoster hostRoster { get { var room = hostRoom; return room == null ? null : room.Roster; } }
         readonly FlatButton joinButton = new FlatButton();
         readonly FlatButton secondary = new FlatButton();
         Action secondaryAction;
-        HostTunnel hostTunnel;
-        RosterServer rosterServer;
-        JoinTunnel joinTunnel;
-        readonly List<Dictionary<string, object>> joinResults = new List<Dictionary<string, object>>();
-        // The room this launcher hosts; the poll thread reads them again when the host resumes a paused room
-        string roomCode;
-        string roomToken;
+        HostTunnel hostTunnel { get { var room = hostRoom; return room == null ? null : room.Tunnel; } }
+        JoinTunnel joinTunnel { get { var room = joinedRoom; return room == null ? null : room.Tunnel; } }
+        string roomCode { get { var room = hostRoom; return room == null ? null : room.Code; } }
         string roomMap;
-        Dictionary<string, object> roomBody;
-        // Replaced wholesale by the measuring thread, so readers never see a half-filled list
-        volatile List<RelayLeg> hostRelays = new List<RelayLeg>();
-        readonly HashSet<string> seenJoins = new HashSet<string>();
-        readonly List<long> kicked = new List<long>();
         bool paused;
         bool hostingReady;
-        // Read by the poll thread, so the list hides a finished game and shows how long the host's own has run
-        volatile bool roomEnded;
-        DateTime? roomStartedAt;
         readonly Dictionary<Control, bool> hiddenTabStops = new Dictionary<Control, bool>();
         readonly System.Windows.Forms.Timer badgeTimer = new System.Windows.Forms.Timer { Interval = BadgeRefreshMs };
         int badgeLoading;
@@ -189,7 +164,6 @@ namespace Windy10v10AI.Launcher
         bool pickingNext;
         // The mode the host picked for the next game, taken by the room's watch thread
         volatile int nextMode = -1;
-        volatile int roomGame = 1;
         bool joinEnded;
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
@@ -382,6 +356,7 @@ namespace Windy10v10AI.Launcher
             roomTypeBar.SelectedChanged += delegate
             {
                 Settings.PublicRoom = roomTypeBar.Selected == 0;
+                if (hostRoom != null) hostRoom.Configure(Settings.PublicRoom, Settings.MaxPlayers);
                 Settings.Save();
                 UpdateHostingHint();
                 ApplyRoomType();
@@ -398,6 +373,7 @@ namespace Windy10v10AI.Launcher
                 var item = new ToolStripMenuItem(string.Format(Strings.PlayersOption, n)) { ForeColor = Theme.Text, Tag = n };
                 item.Click += delegate
                 {
+                    if (hostRoom != null) hostRoom.Configure(Settings.PublicRoom, value);
                     Settings.MaxPlayers = value;
                     Settings.Save();
                     UpdateMaxButton();
@@ -791,7 +767,8 @@ namespace Windy10v10AI.Launcher
                 row.Avatars.Add(new RoomAvatar { Url = entry.AvatarUrl, Name = entry.Name });
             }
             row.Players = row.Avatars.Count;
-            var started = roomStartedAt;
+            var room = hostRoom;
+            var started = room == null ? null : room.StartedAt;
             if (started != null) row.Minutes = (int)(DateTime.UtcNow - started.Value).TotalMinutes;
             list.Add(row);
             return list;
@@ -958,16 +935,9 @@ namespace Windy10v10AI.Launcher
 
         void KickPlayer(string key)
         {
-            var roster = hostRoster;
-            var tunnel = hostTunnel;
-            if (roster == null || tunnel == null) return;
-            var entry = roster.Find(key);
-            if (entry != null && entry.SteamId != 0)
-            {
-                lock (kicked) kicked.Add(entry.SteamId);
-            }
-            tunnel.Kick(key);
-            roster.Remove(key);
+            var room = hostRoom;
+            if (room == null) return;
+            room.Kick(key);
             RefreshPlayers();
         }
 
@@ -982,6 +952,7 @@ namespace Windy10v10AI.Launcher
         void ResumeRoom()
         {
             if (!busy || !paused || hostTunnel == null) return;
+            hostRoom.Reopen();
             ShowPause(false);
             StartPolling();
         }
@@ -1003,11 +974,6 @@ namespace Windy10v10AI.Launcher
             Relayout();
         }
 
-        static string Field(Dictionary<string, object> data, string key)
-        {
-            object value;
-            return data.TryGetValue(key, out value) ? value as string : null;
-        }
 
         void SetFooter(Color dot, string text)
         {
@@ -1117,58 +1083,25 @@ namespace Windy10v10AI.Launcher
                 var workshopId = id;
                 id = PrepareAddon(install, id);
 
-                string code = null, token = null;
-                Dictionary<string, object> hostBody = null;
+                string code = null;
                 if (room)
                 {
                     selfId = SignedInAccount();
                     UI(() => status.Text = Strings.OpeningRoom);
-                    hostTunnel = new HostTunnel();
+                    var session = new HostRoomSession(new HostTunnel(), new HostRoster());
+                    hostRoom = session;
+                    session.Map = roomMap;
+                    session.Configure(Settings.PublicRoom, Settings.MaxPlayers);
                     bool publicIp;
-                    var candidates = hostTunnel.Gather(out publicIp);
-                    hostBody = PeerBody(candidates, hostTunnel.SymmetricNat, manifest);
-                    hostBody["publicIp"] = publicIp;
-                    lock (seenJoins) seenJoins.Clear();
-                    lock (kicked) kicked.Clear();
-                    roomEnded = false;
-                    roomStartedAt = null;
-                    hostRelays = new List<RelayLeg>();
+                    var candidates = session.Tunnel.Gather(out publicIp);
+                    if (stopping) throw new OperationCanceledException();
+                    var peer = PeerBody(candidates, session.Tunnel.SymmetricNat, manifest);
+                    peer["publicIp"] = publicIp;
                     Dictionary<string, object> opened;
-                    try
-                    {
-                        var openBody = new Dictionary<string, object>(hostBody);
-                        AddRoomState(openBody, 1);
-                        opened = RoomApi.Host(openBody);
-                        code = (string)opened["code"];
-                        token = (string)opened["token"];
-                    }
-                    catch (RoomError)
-                    {
-                        throw new LaunchError(Strings.OpenRoomFailed, false);
-                    }
-                    var roster = new HostRoster();
-                    roster.Add(new RosterEntry { SteamId = selfId, Key = "host", Name = Field(opened, "personaName"), AvatarUrl = Field(opened, "avatarUrl"), Status = Settings.AutoStartDota ? PlayerStatus.Loading : PlayerStatus.InRoom, IsHost = true });
-                    hostRoster = roster;
-                    hostTunnel.RosterSource = roster.Snapshot;
-                    hostTunnel.JoinFinished += OnJoinFinished;
-                    hostTunnel.JoinLeft += joinId => roster.SetStatus(joinId, PlayerStatus.Left);
-                    hostTunnel.GameTraffic += roster.SetEntering;
-                    hostTunnel.Start();
-                    var relays = RelayTicket.ReadAddresses(opened, "relayAddresses", "relayAddress");
-                    if (relays.Count > 0)
-                    {
-                        var measuring = hostTunnel;
-                        // Measured once per room; joiners add their own to each leg to estimate a relayed route
-                        new Thread(() =>
-                        {
-                            var legs = new List<RelayLeg>();
-                            foreach (var relay in relays) legs.Add(new RelayLeg(relay) { Quality = measuring.MeasureRelay(relay) });
-                            hostRelays = legs;
-                        })
-                        { IsBackground = true }.Start();
-                    }
-                    rosterServer = new RosterServer(roster.Snapshot, () => Settings.MaxPlayers);
-                    rosterServer.Start();
+                    try { opened = session.Open(peer, selfId, Settings.AutoStartDota); }
+                    catch (RoomError) { throw new LaunchError(Strings.OpenRoomFailed, false); }
+                    code = session.Code;
+                    session.StartNetwork(opened);
                     // The code is ready long before the server, so the host can share it while waiting
                     var shown = code;
                     UI(() =>
@@ -1183,15 +1116,11 @@ namespace Windy10v10AI.Launcher
                     });
                 }
 
-                roomGame = 1;
                 server = StartServer(install, id, map, room);
 
                 // The code is shown as soon as the room opens, so friends may join while the server is still loading
                 if (code != null)
                 {
-                    roomCode = code;
-                    roomToken = token;
-                    roomBody = hostBody;
                     StartPolling();
                 }
 
@@ -1357,10 +1286,13 @@ namespace Windy10v10AI.Launcher
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Connecting, Strings.ConnectingHint, Strings.Cancel, true);
             stage = "join";
-            new Thread(() => RunJoin(install, id, code, source)) { IsBackground = true }.Start();
+            var cancellation = new CancellationTokenSource();
+            joinCancellation = cancellation;
+            var cancellationToken = cancellation.Token;
+            new Thread(() => RunJoin(install, id, code, source, cancellationToken)) { IsBackground = true }.Start();
         }
 
-        void RunJoin(DotaInstall install, string id, string code, RoomBrowser source)
+        void RunJoin(DotaInstall install, string id, string code, RoomBrowser source, CancellationToken cancellation)
         {
             try
             {
@@ -1369,84 +1301,17 @@ namespace Windy10v10AI.Launcher
                     selfId = SignedInAccount();
                     UI(() => status.Text = Strings.Connecting);
                 }
-                JoinTunnel tunnel = null;
-                List<Candidate> candidates = null;
-                var ownRelays = new List<RelayLeg>();
-                if (source != null)
-                {
-                    ownRelays = source.OwnRelays;
-                    tunnel = source.TakeTunnel(out candidates);
-                    source.Dispose();
-                }
-                if (tunnel == null)
-                {
-                    tunnel = new JoinTunnel();
-                    joinTunnel = tunnel;
-                    bool publicIp;
-                    candidates = tunnel.Gather(out publicIp);
-                    tunnel.Start();
-                }
-                joinTunnel = tunnel;
-                if (stopping) throw new OperationCanceledException();
-                Dictionary<string, object> joined;
-                try
-                {
-                    var body = PeerBody(candidates, tunnel.SymmetricNat, install.InstalledManifest(id));
-                    // Reported with the join so every joiner's route to each relay is recorded without a request of its own
-                    var relays = RelayLeg.Encode(ownRelays);
-                    if (relays.Count > 0)
-                    {
-                        body["relays"] = relays;
-                        object rtt;
-                        if (relays[0].TryGetValue("rtt", out rtt)) body["relayRtt"] = rtt;
-                        body["relayLoss"] = relays[0]["loss"];
-                    }
-                    joined = RoomApi.Join(code, body);
-                }
-                catch (RoomError error)
-                {
-                    var failure = new LaunchError(JoinErrorText(error.Code, install, id), false);
-                    if (error.Code == "kicked" || error.Code == "room_full")
-                    {
-                        failure.Button = Strings.BackToList;
-                        failure.OnClick = BackToList;
-                    }
-                    throw failure;
-                }
-                var hostProfile = joined["host"] as Dictionary<string, object> ?? new Dictionary<string, object>();
-                var selfProfile = joined["self"] as Dictionary<string, object> ?? new Dictionary<string, object>();
-                tunnel.Placeholder = new List<RosterEntry>
-                {
-                    new RosterEntry { Name = Field(hostProfile, "personaName"), AvatarUrl = Field(hostProfile, "avatarUrl"), Status = PlayerStatus.Connecting, IsHost = true },
-                    new RosterEntry { SteamId = selfId, Name = Field(selfProfile, "personaName"), AvatarUrl = Field(selfProfile, "avatarUrl"), Status = PlayerStatus.Connecting },
-                };
+                cancellation.ThrowIfCancellationRequested();
+                var room = new JoinRoomSession();
+                joinedRoom = room;
+                room.Prepare(source, cancellation);
+                room.Open(code, selfId, install.InstalledManifest(id), cancellation);
                 UI(() => ShowPlayers(true));
-                var hostCandidates = new List<Candidate>();
-                foreach (var text in (object[])joined["hostCandidates"]) hostCandidates.Add(Candidate.Parse((string)text));
-                var path = tunnel.Connect((string)joined["joinToken"], hostCandidates, RelayTicket.Read(joined));
-                if (stopping) throw new OperationCanceledException();
-                if (tunnel.Kicked) throw new LaunchError(Strings.KickedByHost, false);
-                if (path == null) throw new LaunchError(Strings.ConnectFailed, false);
-                // Runs while Dota restarts, so the route is usually settled before the game connects
-                tunnel.Thresholds = RouteThresholds.Read(joined);
-                tunnel.StartRouteCheck();
-
+                room.Connect(cancellation);
                 PrepareAddon(install, id);
-                try
-                {
-                    tunnel.Forward();
-                }
-                catch (System.Net.Sockets.SocketException)
-                {
-                    throw new LaunchError(Strings.PortInUse, false);
-                }
+                room.Forward(LocalGate.Port);
                 var watch = new ClientWatch();
                 clientWatch = watch;
-                // The host's first roster round says which game the room is on and whether its server is up yet
-                for (var waited = 0; waited < JoinStateWaitMs && !tunnel.HasRoster && !stopping; waited += 200) Thread.Sleep(200);
-                var entered = tunnel.HasRoster && tunnel.GameReady && !tunnel.GameEnded;
-                if (entered) EnterGame(install, watch, -1);
-
                 UI(() =>
                 {
                     ShowProgress(string.Format(Strings.Joined, code), "", Strings.LeaveRoom, false);
@@ -1455,7 +1320,13 @@ namespace Windy10v10AI.Launcher
                     lastConnection = null;
                     RefreshRoute(true);
                 });
-                WatchJoin(tunnel, install, watch, code, entered);
+                WatchJoin(room, install, watch, code);
+            }
+            catch (RoomError error)
+            {
+                failureCause = error;
+                var back = error.Code == "kicked" || error.Code == "room_full";
+                Finish(JoinErrorText(error.Code, install, id), false, back ? Strings.BackToList : null, back ? (Action)BackToList : null);
             }
             catch (LaunchError error)
             {
@@ -1467,20 +1338,24 @@ namespace Windy10v10AI.Launcher
                 failureCause = error;
                 Finish(Strings.LaunchFailed + error.Message, false);
             }
+            finally
+            {
+                if (source != null) source.Dispose();
+            }
         }
 
         // The tunnel outlives Dota and each game, so a joiner who left can go back into the same match, and stays in
         // the room for the host's next game until leaving the room
-        void WatchJoin(JoinTunnel tunnel, DotaInstall install, ClientWatch client, string code, bool entered)
+        void WatchJoin(JoinRoomSession room, DotaInstall install, ClientWatch client, string code)
         {
             var title = string.Format(Strings.Joined, code);
             Presence? shown = null;
-            var lifecycle = new JoinLifecycle(tunnel.Game, entered);
             var waitingShown = false;
             while (!stopping)
             {
                 Thread.Sleep(1000);
-                lifecycle.Observe(tunnel);
+                if (stopping) break;
+                var lifecycle = room.Observe();
                 if (lifecycle.State == JoinState.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (lifecycle.State == JoinState.Closed) break;
                 if (lifecycle.State == JoinState.HostLost) throw new LaunchError(Strings.HostLost, false);
@@ -1539,168 +1414,19 @@ namespace Windy10v10AI.Launcher
             ShowSecondary(Strings.EnterGame, EnterAction(install, -1), true);
         }
 
-        // The API answers the same room again once the host polls with its token, even after the room lapsed while paused
         void PollRoom()
         {
-            var since = DateTime.UtcNow;
-            var started = false;
-            var qualitySince = DateTime.UtcNow;
-            var quality = new List<Dictionary<string, object>>();
-            var routeChecks = new List<Dictionary<string, object>>();
-            var own = hostTunnel;
-            var game = roomGame;
-            while (!stopping)
+            var room = hostRoom;
+            while (!stopping && room != null && room == hostRoom)
             {
-                if (roomGame != game)
+                room.Poll();
+                if (room.Paused)
                 {
-                    game = roomGame;
-                    started = false;
-                    since = DateTime.UtcNow;
-                    roomStartedAt = null;
-                }
-                var elapsed = DateTime.UtcNow - since;
-                if (!started && elapsed >= PauseAfter())
-                {
-                    HideFromList();
-                    UI(() => { if (busy && hostTunnel != null) ShowPause(true); });
+                    UI(() => { if (busy && room == hostRoom) ShowPause(true); });
                     return;
                 }
-                var wait = started ? GamePollMs : (elapsed.TotalMinutes < FastPollMinutes ? FastPollMs : SlowPollMs);
-                // The next game reopens the room to joiners, so its first poll goes out without waiting out a long interval
-                for (var waited = 0; waited < wait && roomGame == game && !stopping; waited += 500) Thread.Sleep(500);
-                var tunnel = hostTunnel;
-                var roster = hostRoster;
-                // A room reopened during the sleep has a poller of its own, and this one would mark it started
-                if (tunnel == null || tunnel != own || roster == null || stopping) return;
-                var startedNow = started || ReadShared(logFile).Contains(HeroSelection);
-                var body = new Dictionary<string, object>(roomBody);
-                body["code"] = roomCode;
-                body["token"] = roomToken;
-                body["started"] = startedNow;
-                body["game"] = game;
-                if (startedNow && roomStartedAt == null) roomStartedAt = DateTime.UtcNow;
-                if (roomEnded) body["ended"] = true;
-                AddRoomState(body, roster.ActiveCount());
-                body["players"] = GuestIds(roster);
-                List<Dictionary<string, object>> results;
-                lock (joinResults)
-                {
-                    results = new List<Dictionary<string, object>>(joinResults);
-                    joinResults.Clear();
-                }
-                body["results"] = results;
-                // Only the game itself is measured, so the first row starts when the game does
-                if (!startedNow)
-                {
-                    tunnel.TakeQuality();
-                    qualitySince = DateTime.UtcNow;
-                }
-                else if ((DateTime.UtcNow - qualitySince).TotalMilliseconds >= QualityWindowMs)
-                {
-                    quality.AddRange(tunnel.TakeQuality());
-                    qualitySince = DateTime.UtcNow;
-                    if (quality.Count > MaxPendingQuality) quality.RemoveRange(0, quality.Count - MaxPendingQuality);
-                }
-                if (quality.Count > 0) body["quality"] = quality.ToArray();
-                routeChecks.AddRange(tunnel.TakeRouteChecks());
-                if (routeChecks.Count > MaxPendingQuality) routeChecks.RemoveRange(0, routeChecks.Count - MaxPendingQuality);
-                if (routeChecks.Count > 0) body["routeChecks"] = routeChecks.ToArray();
-                try
-                {
-                    var answer = RoomApi.Host(body);
-                    quality.Clear();
-                    routeChecks.Clear();
-                    started = startedNow;
-                    foreach (Dictionary<string, object> join in (object[])answer["joins"])
-                    {
-                        var joinId = (string)join["joinId"];
-                        lock (seenJoins)
-                        {
-                            if (!seenJoins.Add(joinId)) continue;
-                        }
-                        var steamId = join.ContainsKey("steamId") && join["steamId"] != null ? Convert.ToInt64(join["steamId"]) : 0;
-                        object probeValue;
-                        // A probe only measures latency for someone browsing the list, so it never shows as a player
-                        var probe = join.TryGetValue("probe", out probeValue) && true.Equals(probeValue);
-                        if (!probe)
-                        {
-                            lock (kicked)
-                            {
-                                if (kicked.Contains(steamId)) continue;
-                            }
-                            roster.Add(new RosterEntry { SteamId = steamId, Key = joinId, Name = Field(join, "personaName"), AvatarUrl = Field(join, "avatarUrl"), Status = PlayerStatus.Connecting });
-                        }
-                        var candidates = new List<Candidate>();
-                        foreach (var text in (object[])join["candidates"]) candidates.Add(Candidate.Parse((string)text));
-                        tunnel.AddJoin(joinId, (string)join["joinToken"], candidates, probe, RelayTicket.Read(join));
-                    }
-                }
-                catch (Exception)
-                {
-                    // Polling resumes on the next tick; the start notice and results are sent again then
-                    lock (joinResults) joinResults.AddRange(results);
-                }
+                Thread.Sleep(250);
             }
-        }
-
-        // Without it a closed room stays listed until the API sees the polls stop, and browsers would find it unreachable
-        void HideFromList()
-        {
-            var roster = hostRoster;
-            // Without a code the request would open a new room instead
-            if (roster == null || roomCode == null || roomBody == null) return;
-            var body = new Dictionary<string, object>(roomBody);
-            body["code"] = roomCode;
-            body["token"] = roomToken;
-            AddRoomState(body, roster.ActiveCount());
-            body["public"] = false;
-            try
-            {
-                RoomApi.Host(body);
-            }
-            catch (Exception)
-            {
-                // The room still drops out once the API sees the polls stop
-            }
-        }
-
-        // Account IDs of everyone else still in the room, so the list can show their avatars
-        static long[] GuestIds(HostRoster roster)
-        {
-            var ids = new List<long>();
-            foreach (var entry in roster.Snapshot())
-            {
-                if (entry.IsHost || entry.SteamId == 0 || entry.Status == PlayerStatus.Failed || entry.Status == PlayerStatus.Left) continue;
-                ids.Add(entry.SteamId);
-            }
-            return ids.ToArray();
-        }
-
-        // Sent with the opening request and every poll, so changes the host makes while the room is open reach the list
-        void AddRoomState(Dictionary<string, object> body, int playerCount)
-        {
-            body["public"] = Settings.PublicRoom;
-            body["maxPlayers"] = Settings.MaxPlayers;
-            body["map"] = roomMap;
-            body["playerCount"] = playerCount;
-            var relays = RelayLeg.Encode(hostRelays);
-            if (relays.Count > 0)
-            {
-                body["relays"] = relays;
-                // Kept for an older API that only reads the first relay
-                object rtt;
-                if (relays[0].TryGetValue("rtt", out rtt)) body["relayRtt"] = rtt;
-                body["relayLoss"] = relays[0]["loss"];
-            }
-            lock (kicked) body["kickedSteamIds"] = kicked.ToArray();
-        }
-
-        // WINDY_ROOM_PAUSE_SECONDS shortens the pause so testers need not wait a quarter of an hour
-        static TimeSpan PauseAfter()
-        {
-            int seconds;
-            var text = Environment.GetEnvironmentVariable("WINDY_ROOM_PAUSE_SECONDS");
-            return int.TryParse(text, out seconds) && seconds > 0 ? TimeSpan.FromSeconds(seconds) : TimeSpan.FromMinutes(PauseMinutes);
         }
 
         void BackToList()
@@ -1709,47 +1435,19 @@ namespace Windy10v10AI.Launcher
             if (browser != null) browser.Refresh();
         }
 
-        void OnJoinFinished(string joinId, string path, string relayAddress, int elapsedMs)
-        {
-            var result = new Dictionary<string, object> { { "joinId", joinId }, { "elapsedMs", elapsedMs } };
-            if (path != null) result["path"] = path;
-            if (relayAddress != null) result["relayAddress"] = relayAddress;
-            lock (joinResults) joinResults.Add(result);
-            var roster = hostRoster;
-            if (roster != null) roster.SetStatus(joinId, path != null ? PlayerStatus.Loading : PlayerStatus.Failed);
-        }
-
         Dictionary<string, object> PeerBody(List<Candidate> candidates, bool? symmetricNat, string mapVersion)
         {
-            return new Dictionary<string, object>
-            {
-                { "mapVersion", mapVersion },
-                { "steamId", Platform.SteamAccountId() },
-                { "candidates", candidates.ConvertAll(c => c.ToString()) },
-                // A required API field; this launcher never maps a router port
-                { "upnp", false },
-                { "symmetricNat", symmetricNat },
-                { "protocolVersion", RoomApi.ProtocolVersion },
-                { "launcherVersion", Version },
-            };
+            return RoomPeer.Body(Platform.SteamAccountId(), mapVersion, candidates, symmetricNat);
         }
 
         static string JoinErrorText(string code, DotaInstall install, string id)
         {
-            switch (code)
+            if (code == "map_mismatch" || code == "map_version_mismatch")
             {
-                // A joiner with the latest map knows the host is the one behind
-                case "map_mismatch":
-                    DotaInstall checkedInstall;
-                    return DotaInstall.Check(id, out checkedInstall) == MapState.Ready ? Strings.MapHostOld : Strings.MapMismatch;
-                case "room_not_found": return Strings.RoomNotFound;
-                case "game_started": return Strings.GameStarted;
-                case "version_mismatch": return Strings.VersionMismatch;
-                case "kicked": return Strings.KickedJoin;
-                case "room_full": return Strings.RoomFull;
-                case "network": return Strings.RoomNetwork;
-                default: return Strings.LaunchFailed + code;
+                DotaInstall checkedInstall;
+                return DotaInstall.Check(id, out checkedInstall) == MapState.Ready ? Strings.MapHostOld : Strings.MapMismatch;
             }
+            return JoinRoomSession.ErrorText(code);
         }
 
         // Lets a developer test against the map built from the game repo rather than the Workshop copy
@@ -1847,15 +1545,13 @@ namespace Windy10v10AI.Launcher
 
         void CloseTunnels()
         {
-            var h = hostTunnel;
-            hostTunnel = null;
-            if (h != null) h.Dispose();
-            var r = rosterServer;
-            rosterServer = null;
-            if (r != null) r.Dispose();
-            var j = joinTunnel;
-            joinTunnel = null;
+            var h = Interlocked.Exchange(ref hostRoom, null);
+            if (h != null) h.Close();
+            var cancellation = Interlocked.Exchange(ref joinCancellation, null);
+            if (cancellation != null) cancellation.Cancel();
+            var j = Interlocked.Exchange(ref joinedRoom, null);
             if (j != null) j.Dispose();
+            if (cancellation != null) cancellation.Dispose();
             var g = gate;
             gate = null;
             if (g != null) g.Dispose();
@@ -2054,24 +1750,22 @@ namespace Windy10v10AI.Launcher
             var serverId = server.Id;
             long logOffset = 0;
             Presence? shown = null;
-            var end = new GameEnd();
-            var heldSince = DateTime.UtcNow;
+            var readyAt = DateTime.UtcNow;
             while (!stopping)
             {
                 Thread.Sleep(1000);
-                var roster = hostRoster;
-                var tunnel = hostTunnel;
-                if (roster == null || tunnel == null) break;
+                var room = hostRoom;
+                if (room == null) break;
+                var roster = room.Roster;
                 var mode = nextMode;
                 if (mode >= 0)
                 {
                     nextMode = -1;
-                    StartNextGame(install, workshopId, mode, client, tunnel, roster);
-                    heldSince = DateTime.UtcNow;
+                    StartNextGame(install, workshopId, mode, client, room);
+                    readyAt = DateTime.UtcNow;
                     serverId = server.Id;
                     logOffset = 0;
                     shown = null;
-                    end = new GameEnd();
                     continue;
                 }
                 var text = ReadFrom(logFile, ref logOffset);
@@ -2079,30 +1773,20 @@ namespace Windy10v10AI.Launcher
                 {
                     roster.SetInGame(long.Parse(match.Groups[1].Value));
                 }
-                if (!tunnel.GameReady && (roster.InGame("host") || (DateTime.UtcNow - heldSince).TotalMilliseconds >= HostHeadStartMs)) tunnel.GameReady = true;
-                var wasEnded = end.Ended;
-                if (end.Track(text))
-                {
-                    if (!wasEnded)
-                    {
-                        tunnel.GameEnded = true;
-                        roomEnded = true;
-                        UI(() => ShowRoomEnd(false));
-                    }
-                    if (end.Saved)
-                    {
-                        roster.SetAll(PlayerStatus.InRoom);
-                        UI(() => ShowRoomEnd(true));
-                    }
-                }
+                var wasEnded = room.Ended;
+                var wasSaved = room.Saved;
+                room.TrackServerLog(text);
+                if (!wasEnded && room.Ended) UI(() => ShowRoomEnd(false));
+                if (!wasSaved && room.Saved) UI(() => ShowRoomEnd(true));
+                room.UpdateReadiness(true, roster.InGame("host"), Settings.AutoStartDota, DotaClientRunning(serverId), readyAt);
                 // A server left running after its game fails within minutes, which is harmless once the game is over
                 if (server.HasExited)
                 {
-                    if (end.Ended) continue;
+                    if (room.Ended) continue;
                     throw new LaunchError(Strings.ServerExited, true);
                 }
                 NativeMethods.HideWindowsOf(serverId);
-                if (end.Ended) continue;
+                if (room.Ended) continue;
 
                 var presence = Judge(client, serverId);
                 if (presence == shown) continue;
@@ -2142,7 +1826,7 @@ namespace Windy10v10AI.Launcher
         }
 
         // Replaces the finished game's server in the same room; the tunnels stay up, so joiners only need their Dota moved over
-        void StartNextGame(DotaInstall install, string workshopId, int mode, ClientWatch client, HostTunnel tunnel, HostRoster roster)
+        void StartNextGame(DotaInstall install, string workshopId, int mode, ClientWatch client, HostRoomSession room)
         {
             var old = server;
             if (old != null)
@@ -2151,24 +1835,14 @@ namespace Windy10v10AI.Launcher
                 WaitQuietly(old);
             }
             var addon = PrepareAddon(install, workshopId);
-            // Starting the server clears the finished game's log, which the poll thread must not read as the new game's
-            server = StartServer(install, addon, MapKeys[mode], true);
-            roomEnded = false;
             roomMap = MapNames[mode];
-            // The poll thread copies this body, so it gets a new one rather than a change under its feet
-            var body = new Dictionary<string, object>(roomBody);
-            body["mapVersion"] = install.InstalledManifest(workshopId);
-            roomBody = body;
-            tunnel.GameEnded = false;
-            tunnel.GameReady = false;
-            roomGame = roomGame + 1;
-            tunnel.Game = roomGame;
-            roster.SetAll(PlayerStatus.Waiting);
-            if (!Settings.AutoStartDota && !DotaClientRunning(server.Id)) roster.SetStatus("host", PlayerStatus.InRoom);
+            room.NextGame(roomMap, install.InstalledManifest(workshopId));
+            server = StartServer(install, addon, MapKeys[mode], true);
+            if (!Settings.AutoStartDota && !DotaClientRunning(server.Id)) room.Roster.SetStatus("host", PlayerStatus.InRoom);
             WaitForMap(MapKeys[mode]);
             // A Dota that is open follows the room; a closed one only starts when the host asked for that
             if (Settings.AutoStartDota || DotaClientRunning(server.Id)) EnterGame(install, client, server.Id);
-            else tunnel.GameReady = true;
+            room.UpdateReadiness(true, room.Roster.InGame("host"), Settings.AutoStartDota, DotaClientRunning(server.Id), DateTime.UtcNow);
             UI(() =>
             {
                 if (!busy) return;
@@ -2260,9 +1934,8 @@ namespace Windy10v10AI.Launcher
             stopping = true;
             var s = server;
             if (s != null) KillQuietly(s);
-            // Ends a handshake that is still waiting for the host
-            var j = joinTunnel;
-            if (j != null) j.Dispose();
+            var cancellation = joinCancellation;
+            if (cancellation != null) cancellation.Cancel();
         }
 
         // Runs on the worker thread when a launch ends for any reason, and returns the window to its idle state
@@ -2281,12 +1954,10 @@ namespace Windy10v10AI.Launcher
             failureCause = null;
             // Stops the poll thread first so a late poll cannot list the room again
             stopping = true;
-            HideFromList();
             var s = server;
             if (s != null) KillQuietly(s);
             server = null;
             CloseTunnels();
-            hostRoster = null;
             UI(() =>
             {
                 busy = false;
@@ -2478,11 +2149,11 @@ namespace Windy10v10AI.Launcher
                 stopping = true;
                 KillQuietly(s);
             }
-            // Bounded so a slow network never holds the window open
-            var hide = new Thread(HideFromList) { IsBackground = true };
-            hide.Start();
-            hide.Join(3000);
-            CloseTunnels();
+            stopping = true;
+            // 网络请求不能阻止窗口退出，连接与游戏进程仍由关闭流程释放。
+            var close = new Thread(CloseTunnels) { IsBackground = true };
+            close.Start();
+            close.Join(3000);
             if (browser != null) browser.Dispose();
             base.OnFormClosing(e);
         }

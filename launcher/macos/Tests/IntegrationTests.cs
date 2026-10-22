@@ -15,7 +15,7 @@ namespace Windy10v10AI.Launcher
         {
             try
             {
-                MacMapTests.RunAll(); HostSessionTests.RunAll(); MacLaunchTests.RunAll(); Tests.MacServiceTests.RunAll(); SignonTests.RunAll(); LocalGateTests.RunAll(); RelayTests.RunAll(); TunnelPortTests.RunAll(); await JoinSessionTests.RunAll();
+                MacMapTests.RunAll(); HostSessionTests.RunAll(); MacLaunchTests.RunAll(); Tests.MacServiceTests.RunAll(); SignonTests.RunAll(); LocalGateTests.RunAll(); RelayTests.RunAll(); TunnelPortTests.RunAll(); SessionLifecycleTests.RunAll(); HostRoomSessionTests.RunAll(); await JoinSessionTests.RunAll();
                 // 动态端口使离线校验可与玩家房间同时运行。
                 using var fakeServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
                 using var host = new HostTunnel(((IPEndPoint)fakeServer.Client.LocalEndPoint).Port) { GameReady = false }; using var join = new JoinTunnel();
@@ -53,7 +53,7 @@ namespace Windy10v10AI.Launcher
             try
             {
                 var install = MacInstall.Find(); var candidates = host.Gather(out var publicIp);
-                baseBody = HostSession.PeerBody(install, candidates, host.SymmetricNat);
+                baseBody = RoomPeer.Body(MacInstall.AccountId(), install.Manifest, candidates, host.SymmetricNat);
                 baseBody["publicIp"] = publicIp; baseBody["public"] = false; baseBody["maxPlayers"] = 2; baseBody["playerCount"] = 1; baseBody["map"] = "easy";
                 var opened = RoomApi.Host(baseBody); code = (string)opened["code"]; token = (string)opened["token"];
                 host.RosterSource = () => new List<RosterEntry> { new() { SteamId = MacInstall.AccountId(), Name = "Mac transport test", IsHost = true, Status = PlayerStatus.InRoom } };
@@ -79,7 +79,7 @@ namespace Windy10v10AI.Launcher
                 foreach (bool relay in new[] { false, true })
                 {
                     using var join = new JoinTunnel(); var own = join.Gather(out _); join.Start();
-                    var answer = RoomApi.Join(code, HostSession.PeerBody(install, own, join.SymmetricNat));
+                    var answer = RoomApi.Join(code, RoomPeer.Body(MacInstall.AccountId(), install.Manifest, own, join.SymmetricNat));
                     JoinTunnel.RelayOnly = relay;
                     var path = join.Connect((string)answer["joinToken"], ((object[])answer["hostCandidates"]).Select(x => Candidate.Parse((string)x)).ToList(), RelayTicket.Read(answer));
                     Check(path != null && (!relay || path == "relay"), relay ? "real signed relay handshake" : "real room API and guest handshake (" + path + ")");
@@ -123,7 +123,7 @@ namespace Windy10v10AI.Launcher
             using (var probe = new JoinTunnel())
             {
                 var candidates = probe.Gather(out _); probe.Start();
-                var body = HostSession.PeerBody(install, candidates, probe.SymmetricNat); body["probe"] = true;
+                var body = RoomPeer.Body(MacInstall.AccountId(), install.Manifest, candidates, probe.SymmetricNat); body["probe"] = true;
                 var answer = RoomApi.Join(host.Code, body);
                 int rtt = probe.Measure((string)answer["joinToken"], ((object[])answer["hostCandidates"]).Select(x => Candidate.Parse((string)x)).ToList());
                 Check(rtt >= 0, "production room API and direct probe");
@@ -134,7 +134,7 @@ namespace Windy10v10AI.Launcher
             foreach (bool forceRelay in new[] { false, true })
             {
                 using var join = new JoinTunnel(); var candidates = join.Gather(out _); join.Start();
-                var answer = RoomApi.Join(host.Code, HostSession.PeerBody(install, candidates, join.SymmetricNat));
+                var answer = RoomApi.Join(host.Code, RoomPeer.Body(MacInstall.AccountId(), install.Manifest, candidates, join.SymmetricNat));
                 JoinTunnel.RelayOnly = forceRelay;
                 var path = join.Connect((string)answer["joinToken"], ((object[])answer["hostCandidates"]).Select(x => Candidate.Parse((string)x)).ToList(), RelayTicket.Read(answer));
                 Check(path != null && (!forceRelay || path == "relay"), forceRelay ? "production signed relay handshake" : "production guest handshake");

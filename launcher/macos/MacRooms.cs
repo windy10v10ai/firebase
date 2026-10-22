@@ -18,7 +18,7 @@ namespace Windy10v10AI.Launcher
             bool probing = !host.Active;
             if (browser != null && browser.Probing == probing) { Refresh(); return; }
             Dispose();
-            var created = new RoomBrowser(ListBody, (candidates, symmetric) => HostSession.PeerBody(new MacInstall { Manifest = MapVersion() }, candidates, symmetric), probing);
+            var created = new RoomBrowser(ListBody, (candidates, symmetric) => RoomPeer.Body(MacInstall.AccountId(), MapVersion(), candidates, symmetric), probing);
             browser = created;
             created.Changed += () => { if (browser == created) Publish(created); };
             Publish(created);

@@ -1,6 +1,6 @@
 # Mac 启动器
 
-Mac 与 Windows 是同一个启动器的两个平台，共用联机核心、版本定义、API 地址和中英俄文案。构建与离线测试见 [Mac README](../../launcher/macos/README.md)。软件开发与完整功能验收在当前实现 PR 完成。官方构建发布工作流验证由 [#1598](https://github.com/windy10v10ai/firebase/issues/1598) 跟踪，官网画面修改与正式发布由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。
+Mac 与 Windows 是同一个启动器的两个平台，共用联机核心、版本定义、API 地址和中英俄文案。构建与离线测试见 [Mac README](../../launcher/macos/README.md)。官方构建发布工作流验证由 [#1598](https://github.com/windy10v10ai/firebase/issues/1598) 跟踪，官网画面修改与正式发布由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。
 
 ## 平台边界
 

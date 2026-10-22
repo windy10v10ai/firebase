@@ -22,6 +22,7 @@ namespace Windy10v10AI.Launcher.Tests
                 LocalGateTests.RunAll();
                 TunnelPortTests.RunAll();
                 SessionLifecycleTests.RunAll();
+                HostRoomSessionTests.RunAll();
                 CorruptFilesTests.RunAll();
                 return 0;
             }

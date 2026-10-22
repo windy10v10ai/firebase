@@ -20,10 +20,13 @@ namespace Windy10v10AI.Launcher
             var events = new List<JsonElement>();
             var host = new HostSession(value => events.Add(JsonSerializer.SerializeToElement(value)));
             using var tunnel = new HostTunnel();
-            Set(host, "<Tunnel>k__BackingField", tunnel);
+            var room = new HostRoomSession(tunnel, host.Roster, _ => new Dictionary<string, object> { { "code", "AB12CD" }, { "token", "host" }, { "joins", Array.Empty<object>() } }, () => DateTime.UtcNow) { Map = "hard" };
+            room.Open(new Dictionary<string, object> { { "mapVersion", "offline" } }, 123, false);
+            Set(host, "room", room);
             Set(host, "worker", new TaskCompletionSource().Task);
-            Set(host, "body", new Dictionary<string, object> { { "mapVersion", "offline" } });
-            Set(host, "mode", "hard"); Set(host, "game", 2); Set(host, "started", true);
+            Set(host, "mode", "hard");
+            room.TrackServerLog("/api/game/end\n[Game] end game callback"); room.NextGame("hard", "offline");
+            room.TrackServerLog("DOTA_GAMERULES_STATE_HERO_SELECTION");
             host.Roster.Add(new RosterEntry { Key = "host", SteamId = 123, IsHost = true });
             host.Roster.Add(new RosterEntry { Key = "guest", SteamId = 456, Name = "guest", Status = PlayerStatus.InRoom });
             host.Roster.Add(new RosterEntry { Key = "left", SteamId = 789, Status = PlayerStatus.Left });
@@ -87,7 +90,7 @@ namespace Windy10v10AI.Launcher
             Check(!result.Value.GetProperty("loading").GetBoolean() && !result.Value.GetProperty("failed").GetBoolean(), "native list publishes shared loaded state");
         }
 
-        static Dictionary<string, object> Body(HostSession host) => (Dictionary<string, object>)Call(host, "HostBody");
+        static Dictionary<string, object> Body(HostSession host) => ((HostRoomSession)Get(host, "room")).Snapshot();
         static object Call(object target, string name, params object[] args) => target.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(target, args);
         static void Set(object target, string name, object value) => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(target, value);
         static object Get(object target, string name) => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
