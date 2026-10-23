@@ -14,8 +14,7 @@ mkdir -p "$APP_OUT/Contents/MacOS" "$APP_OUT/Contents/Resources/engine"
 for language in zh-CN en-US ru-RU; do
     "$APP_OUT/Contents/Resources/engine/WindyMacEngine" --strings "$language" > "$APP_OUT/Contents/Resources/strings-$language.json"
 done
-swiftc -swift-version 5 -target arm64-apple-macosx13.0 -O Native/Launcher.swift -o "$APP_OUT/Contents/MacOS/WindyMac" -framework Cocoa
-clang -arch x86_64 -mmacosx-version-min=13.0 -O2 Native/WorkshopUpdate.c -o "$APP_OUT/Contents/MacOS/WorkshopUpdate"
+bash build-native.sh "$APP_OUT/Contents/MacOS"
 cp Native/Info.plist "$APP_OUT/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP_OUT/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$APP_OUT/Contents/Info.plist"

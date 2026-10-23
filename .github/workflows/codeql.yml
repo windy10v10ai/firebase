@@ -1,0 +1,43 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  schedule:
+    - cron: '23 18 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  source:
+    name: Analyze source languages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: actions,csharp,javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@v4
+        with:
+          upload: false
+
+  native:
+    name: Analyze Mac native code
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp,swift
+          build-mode: manual
+      - name: Build Mac native code
+        run: bash launcher/macos/build-native.sh "$RUNNER_TEMP/windy-native"
+      - uses: github/codeql-action/analyze@v4
+        with:
+          upload: false
