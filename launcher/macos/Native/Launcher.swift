@@ -884,6 +884,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         let status = item["status"] as? Int ?? 0
         let key = status == 1 && item["host"] as? Bool == true ? "StatusHostLoading" : (states.indices.contains(status) ? states[status] : "StatusInRoom")
         let detail = label(text(key), size: 10); detail.lineBreakMode = .byTruncatingTail
+        detail.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let dot = label("●", size: 10); dot.widthAnchor.constraint(equalToConstant: 8).isActive = true
         let loading = Theme.color(0x6aa9e9); let faint = Theme.color(0x7f756d)
         var ring: NSColor?
