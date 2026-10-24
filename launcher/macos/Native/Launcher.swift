@@ -611,7 +611,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             let available = event["available"] as? Bool == true
             notice.stringValue = available ? text("UpdateAvailable", event["version"] as? String ?? "") : ""
             releaseAvailable = available; refreshControls()
-        case "update-ready": state = "idle"; NSApp.terminate(nil)
+        case "update-ready":
+            // 退出要等引擎进程结束的通知，该通知排在主队列里；在当前主队列任务内直接退出会互相等死，所以交给运行循环的定时器
+            state = "idle"; Timer.scheduledTimer(withTimeInterval: 0, repeats: false) { _ in NSApp.terminate(nil) }
         case "feedback":
             feedbackSend?.isEnabled = true
             if event["success"] as? Bool == true { feedbackWindow?.close(); showMessage(text("FeedbackThanks")) }
