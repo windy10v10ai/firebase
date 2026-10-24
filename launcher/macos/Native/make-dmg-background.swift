@@ -26,7 +26,7 @@ func render(scale: CGFloat) -> Data {
     head.move(to: NSPoint(x: 372, y: 232)); head.line(to: NSPoint(x: 402, y: 210)); head.line(to: NSPoint(x: 372, y: 188)); head.close(); head.fill()
     // Finder 图标名字的颜色随系统外观在黑白间切换，垫一块中灰底板让两种都看得清
     NSColor(hex: 0x857e77).setFill()
-    for x in [CGFloat(180), 480] { NSBezierPath(roundedRect: NSRect(x: x - 78, y: 103, width: 156, height: 26), xRadius: 6, yRadius: 6).fill() }
+    for x in [CGFloat(180), 480] { NSBezierPath(roundedRect: NSRect(x: x - 78, y: 112, width: 156, height: 26), xRadius: 6, yRadius: 6).fill() }
     for (index, line) in lines.enumerated() {
         let style = NSMutableParagraphStyle(); style.alignment = .center
         let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: index == 0 ? 15 : 12, weight: index == 0 ? .semibold : .regular), .foregroundColor: NSColor(hex: index == 0 ? 0xeee7e0 : 0xaca198), .paragraphStyle: style]
