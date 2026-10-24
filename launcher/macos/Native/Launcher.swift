@@ -825,7 +825,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             let item = roomRows[row]
             if let title = item["header"] as? String {
                 let heading = label(title, size: 10, weight: .semibold); heading.textColor = Theme.muted
-                let row = stack([heading], horizontal: true); row.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10); return row
+                let row = stack([heading], horizontal: true); row.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+                row.wantsLayer = true; row.layer?.backgroundColor = Theme.background.cgColor
+                return row
             }
             let kind = item["kind"] as? Int ?? 0
             if let empty = item["empty"] as? String {
