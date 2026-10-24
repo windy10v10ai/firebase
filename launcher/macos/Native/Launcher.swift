@@ -38,6 +38,20 @@ private enum Theme {
     static let muted = color(0xaca198)
 }
 
+private final class AvatarStrip: NSView {
+    init(_ avatars: [NSView]) {
+        super.init(frame: .zero)
+        for avatar in avatars { addSubview(avatar) }
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    override var intrinsicContentSize: NSSize { NSSize(width: min(150, 26 + CGFloat(max(0, subviews.count - 1)) * 19), height: 26) }
+    override func layout() {
+        super.layout()
+        let step = subviews.count > 1 ? min(19, (bounds.width - 26) / CGFloat(subviews.count - 1)) : 0
+        for (index, avatar) in subviews.enumerated() { avatar.frame = NSRect(x: CGFloat(index) * step, y: 0, width: 26, height: 26) }
+    }
+}
+
 final class LatencyView: NSView {
     let latency: Int
     let unreachable: Bool
@@ -236,8 +250,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var releaseAvailable = false
     var avatarCache = [String: NSImage]()
     var avatarRequests = Set<String>()
-    var roomRows = [[String: Any]]()
-    var roomEmptyMessage = text("RoomsLoading")
+    var roomRows: [[String: Any]] = [["header": text("SectionWaiting")], ["empty": text("RoomsLoading")]]
     var playerRows = [[String: Any]]()
     var feedbackWindow: NSWindow?
     var feedbackType: NSSegmentedControl?
@@ -573,14 +586,21 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             roomRows = rows.filter { $0["kind"] as? Int == 2 }
             for (kind, title) in [(0, "SectionWaiting"), (1, "SectionPlaying")] {
                 let section = rows.filter { ($0["kind"] as? Int ?? 0) == kind }
-                if !section.isEmpty { roomRows.append(["header": text(title)]); roomRows.append(contentsOf: section) }
+                if kind == 0 || !section.isEmpty {
+                    roomRows.append(["header": text(title)])
+                    if section.isEmpty { roomRows.append(["empty": text("NoRooms")]) }
+                    else { roomRows.append(contentsOf: section) }
+                }
             }
             setBadge(event["count"] as? Int ?? rows.filter { ($0["kind"] as? Int ?? 0) == 0 }.count)
             rooms.reloadData()
             if event["loading"] as? Bool == true { hint.stringValue = text("RoomsLoading") }
             else if event["failed"] as? Bool == true { hint.stringValue = text("RoomsFailed") }
             else if rows.isEmpty { hint.stringValue = text("NoRooms") } else { hint.stringValue = "" }
-            if rows.isEmpty { roomEmptyMessage = hint.stringValue; hint.stringValue = ""; rooms.reloadData() }
+            if rows.isEmpty {
+                roomRows = [["header": text("SectionWaiting")], ["empty": hint.stringValue]]
+                hint.stringValue = ""; rooms.reloadData()
+            }
             refreshControls()
         case "inspection":
             let details = event["details"] as? [String: Any] ?? event
@@ -716,7 +736,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     @objc func joinByCode() { join(roomCode.stringValue) }
     @objc func joinRoom() {
         let row = rooms.selectedRow
-        guard row >= 0, row < roomRows.count, roomRows[row]["header"] == nil else { return }
+        guard row >= 0, row < roomRows.count, roomRows[row]["header"] == nil, roomRows[row]["empty"] == nil else { return }
         joinRoomAt(row)
     }
     @objc func joinFromRow(_ sender: NSButton) { joinRoomAt(sender.tag) }
@@ -750,23 +770,30 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         if FileManager.default.fileExists(atPath: url.path) { NSWorkspace.shared.open(url) } else { append(text("LogsNotCreated")) }
     }
     @objc func about() { let alert = NSAlert(); alert.messageText = text("Title") + " " + launcherVersion; alert.informativeText = text("LauncherLicense"); alert.runModal() }
-    func numberOfRows(in tableView: NSTableView) -> Int { tableView === rooms ? max(1, roomRows.count) : (playerRows.count + 1) / 2 }
+    func numberOfRows(in tableView: NSTableView) -> Int { tableView === rooms ? roomRows.count : (playerRows.count + 1) / 2 }
     func tableViewSelectionDidChange(_ notification: Notification) { refreshControls() }
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        if tableView === rooms && roomRows.isEmpty { return 180 }
         if tableView === players { return 64 }
         return roomRows[row]["header"] != nil ? 24 : 52
     }
     func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
-        tableView !== rooms || (!roomRows.isEmpty && roomRows[row]["header"] == nil)
+        tableView !== rooms || (!roomRows.isEmpty && roomRows[row]["header"] == nil && roomRows[row]["empty"] == nil)
     }
-    func avatarView(_ address: String, name: String, size: CGFloat) -> NSImageView {
-        let image = NSImageView(); image.image = avatar(address); image.toolTip = name
+    func avatarView(_ address: String, name: String, size: CGFloat, anonymous: Bool = false) -> NSImageView {
+        let image = NSImageView(); image.image = anonymous ? nil : avatar(address); image.toolTip = anonymous ? nil : name
         image.imageScaling = .scaleAxesIndependently
         if image.image == nil {
             let tints: [UInt32] = [0x9ec7a8, 0xa9c4e6, 0xe8cf9a, 0xc9b6e0, 0xe6a6a6]
             let tint = tints[name.utf8.reduce(0) { ($0 + Int($1)) % tints.count }]
             image.image = NSImage(size: NSSize(width: size, height: size), flipped: false) { bounds in
+                if anonymous {
+                    Theme.color(0x4a3f37).setFill(); NSBezierPath(ovalIn: bounds).fill()
+                    Theme.muted.setStroke()
+                    let head = NSBezierPath(ovalIn: NSRect(x: bounds.midX - 3.5, y: bounds.midY - 0.5, width: 7, height: 7)); head.lineWidth = 1.6; head.stroke()
+                    let shoulders = NSBezierPath(); shoulders.lineWidth = 1.6
+                    shoulders.appendArc(withCenter: NSPoint(x: bounds.midX, y: bounds.midY - 6.5), radius: 6.5, startAngle: 20, endAngle: 160)
+                    shoulders.stroke(); return true
+                }
                 Theme.color(tint).setFill(); NSBezierPath(ovalIn: bounds).fill()
                 let initial = (name.isEmpty ? "?" : String(name.prefix(1)).uppercased()) as NSString
                 let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.boldSystemFont(ofSize: 11), .foregroundColor: Theme.background]
@@ -795,20 +822,28 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     }
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
         if tableView === rooms {
-            if roomRows.isEmpty { let message = label(roomEmptyMessage, size: 12); message.alignment = .center; message.textColor = Theme.muted; return stack([message], horizontal: true) }
             let item = roomRows[row]
             if let title = item["header"] as? String {
                 let heading = label(title, size: 10, weight: .semibold); heading.textColor = Theme.muted
                 let row = stack([heading], horizontal: true); row.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10); return row
             }
             let kind = item["kind"] as? Int ?? 0
-            let avatars = (item["avatars"] as? [[String: Any]] ?? []).prefix(3).map { avatarView($0["url"] as? String ?? "", name: $0["name"] as? String ?? "", size: 24) }
-            var nameViews: [NSView] = avatars
-            if nameViews.isEmpty { nameViews.append(avatarView("", name: item["name"] as? String ?? text("Player"), size: 24)) }
+            if let empty = item["empty"] as? String {
+                let message = label(empty, size: 11); message.textColor = Theme.muted; message.alignment = .center
+                return stack([message], horizontal: true)
+            }
+            let friends = item["friends"] as? Bool == true
+            let members = item["avatars"] as? [[String: Any]] ?? []
+            let avatarCount = friends ? max(1, item["playerCount"] as? Int ?? 0) : max(1, members.count)
+            let avatars = (0..<avatarCount).map { index -> NSView in
+                let member = members.indices.contains(index) ? members[index] : [:]
+                return avatarView(member["url"] as? String ?? "", name: member["name"] as? String ?? text("Player"), size: 26, anonymous: friends)
+            }
+            var nameViews: [NSView] = [AvatarStrip(avatars)]
             if kind != 1 { let name = label(kind == 2 ? text("YourRoom") : (item["name"] as? String ?? text("Player")), size: 12); name.lineBreakMode = .byTruncatingTail; name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal); nameViews.append(name) }
             nameViews.append(spacer())
             let name = stack(nameViews, horizontal: true, spacing: 4); name.setContentHuggingPriority(.defaultLow, for: .horizontal)
-            let map = label(text(["easy": "Easy", "hard": "Hard", "custom": "Custom"][item["map"] as? String ?? ""] ?? "Custom"), size: 11)
+            let map = label(text(friends ? "FriendGame" : (["easy": "Easy", "hard": "Hard", "custom": "Custom"][item["map"] as? String ?? ""] ?? "Custom")), size: 11)
             map.widthAnchor.constraint(equalToConstant: 50).isActive = true
             let count = label(kind == 1 ? text("RoomPlayers", String(item["playerCount"] as? Int ?? 0)) : "\(item["playerCount"] as? Int ?? 0)/\(item["maxPlayers"] as? Int ?? 10)", size: 11)
             count.widthAnchor.constraint(equalToConstant: 34).isActive = true
@@ -846,9 +881,33 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         playerName.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let nameLine = stack([playerName, label(item["host"] as? Bool == true ? text("TagHost") : "", size: 9), spacer()], horizontal: true, spacing: 4)
         let states = ["StatusConnecting", "StatusLoading", "StatusInGame", "StatusFailed", "StatusLeft", "StatusInRoom", "StatusWaiting"]
-        let status = item["status"] as? Int ?? 0; let detail = label("● " + text(states.indices.contains(status) ? states[status] : "StatusInRoom"), size: 10)
-        detail.textColor = Theme.muted; detail.lineBreakMode = .byTruncatingTail
-        let card = stack([avatarView(item["avatarUrl"] as? String ?? "", name: name, size: 32), stack([nameLine, detail], spacing: 3)], horizontal: true, spacing: 6)
+        let status = item["status"] as? Int ?? 0
+        let key = status == 1 && item["host"] as? Bool == true ? "StatusHostLoading" : (states.indices.contains(status) ? states[status] : "StatusInRoom")
+        let detail = label(text(key), size: 10); detail.lineBreakMode = .byTruncatingTail
+        let dot = label("●", size: 10); dot.widthAnchor.constraint(equalToConstant: 8).isActive = true
+        let loading = Theme.color(0x6aa9e9); let faint = Theme.color(0x7f756d)
+        var ring: NSColor?
+        switch status {
+        case 0: dot.textColor = Theme.color(0xe5a93a); detail.textColor = dot.textColor; ring = dot.textColor
+        case 1, 6: dot.textColor = loading; detail.textColor = Theme.color(0x9fc6ef); ring = loading
+        case 2: dot.textColor = Theme.color(0x3fb67a); detail.textColor = Theme.muted
+        case 3: dot.textColor = Theme.color(0xe5484d); detail.textColor = Theme.color(0xf0868a); playerName.textColor = Theme.muted
+        case 4: dot.textColor = faint; detail.textColor = faint; playerName.textColor = faint
+        default: dot.textColor = faint; detail.textColor = Theme.muted
+        }
+        let avatar = avatarView(item["avatarUrl"] as? String ?? "", name: name, size: 32)
+        avatar.alphaValue = status == 0 ? 190.0 / 255 : (status == 3 ? 100.0 / 255 : (status == 4 ? 90.0 / 255 : 1))
+        let portrait = NSView(); portrait.wantsLayer = true
+        portrait.widthAnchor.constraint(equalToConstant: 38).isActive = true; portrait.heightAnchor.constraint(equalToConstant: 38).isActive = true
+        avatar.translatesAutoresizingMaskIntoConstraints = false; portrait.addSubview(avatar)
+        avatar.centerXAnchor.constraint(equalTo: portrait.centerXAnchor).isActive = true; avatar.centerYAnchor.constraint(equalTo: portrait.centerYAnchor).isActive = true
+        if let ring = ring {
+            let outline = CAShapeLayer(); outline.path = CGPath(ellipseIn: CGRect(x: 1, y: 1, width: 36, height: 36), transform: nil)
+            outline.fillColor = nil; outline.strokeColor = ring.cgColor; outline.lineWidth = 2
+            if status == 0 { outline.lineDashPattern = [2, 3] }
+            portrait.layer?.addSublayer(outline)
+        }
+        let card = stack([portrait, stack([nameLine, stack([dot, detail, spacer()], horizontal: true, spacing: 4)], spacing: 3)], horizontal: true, spacing: 6)
         if sessionRole == "host" && item["host"] as? Bool != true {
             let kick = button("×", #selector(kickPlayer(_:))); kick.tag = index; kick.link = true
             kick.toolTip = text("Kick"); kick.setAccessibilityLabel(text("Kick")); kick.widthAnchor.constraint(equalToConstant: 18).isActive = true
@@ -975,7 +1034,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         case "host-starting":
             pages.selectedSegment = 1
             handle(["type": "state", "role": "host", "state": "loading", "code": "4ZZZMP", "message": text("Starting")])
-            handle(["type": "roster", "players": [["key": "host", "name": "Konosuba", "host": true, "status": 5]]])
+            handle(["type": "roster", "players": [["key": "host", "name": "Konosuba", "host": true, "status": 1]]])
         case "host", "join", "ended":
             let mode = option("--preview-state")!; let role = mode == "ended" ? "host" : mode; pages.selectedSegment = role == "host" ? 1 : 2
             handle(["type": "state", "role": role, "state": mode == "ended" ? "ended" : "ready", "code": "Z82QCT", "message": text(mode == "ended" ? "GameEnded" : "HostGuide")])
