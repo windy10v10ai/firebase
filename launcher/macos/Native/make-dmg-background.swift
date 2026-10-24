@@ -17,7 +17,7 @@ func render(scale: CGFloat) -> Data {
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     NSGradient(starting: NSColor(hex: 0x211d1a), ending: NSColor(hex: 0x161412))!.draw(in: NSRect(origin: .zero, size: size), angle: -90)
-    // 箭头在两个图标之间，图标中心 y 为 210（自底向上）
+    // 箭头落在两个图标之间的水平线上
     let accent = NSColor(hex: 0xe0552d)
     accent.setStroke(); accent.setFill()
     let shaft = NSBezierPath(); shaft.lineWidth = 6; shaft.lineCapStyle = .round
