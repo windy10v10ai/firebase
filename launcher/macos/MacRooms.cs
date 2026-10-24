@@ -6,6 +6,7 @@ namespace Windy10v10AI.Launcher
         readonly HostSession host;
         RoomBrowser browser;
         Timer refresh;
+        int badgeLoading;
 
         public MacRooms(Action<object> emit, HostSession host)
         {
@@ -30,6 +31,27 @@ namespace Windy10v10AI.Launcher
         public void Refresh()
         {
             browser?.Refresh();
+        }
+
+        public void RefreshBadge()
+        {
+            if (Interlocked.Exchange(ref badgeLoading, 1) == 1) return;
+            var own = host.Active ? host.Code : null;
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    var answer = RoomApi.List(ListBody());
+                    var count = 0;
+                    foreach (Dictionary<string, object> room in (object[])answer["rooms"])
+                    {
+                        if ((string)room["code"] != own) count++;
+                    }
+                    emit(new { type = "badge", count });
+                }
+                catch (Exception) { }
+                finally { Interlocked.Exchange(ref badgeLoading, 0); }
+            });
         }
 
         public RoomBrowser TakeForJoin()

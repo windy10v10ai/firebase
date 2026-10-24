@@ -49,6 +49,10 @@ namespace Windy10v10AI.Launcher
                 case "stop": await StopRoom(); break;
                 case "browse": Browse(command); break;
                 case "refresh": rooms.Refresh(); break;
+                case "badge":
+                    if (!host.Active && !join.Active && update.IsCompleted) ApplyMap(command);
+                    rooms.RefreshBadge();
+                    break;
                 case "kick": host.Kick(Convert.ToString(command.GetValueOrDefault("key", ""))); break;
                 case "reopen": host.Reopen(); break;
                 case "roomSettings": host.ConfigureRoom(true.Equals(command.GetValueOrDefault("public", false)), Convert.ToInt32(command.GetValueOrDefault("maxPlayers", host.MaxPlayers))); break;
