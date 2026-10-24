@@ -52,9 +52,10 @@ private final class AvatarStrip: NSView {
     }
 }
 
-final class LatencyView: NSView {
+final class LatencyView: NSView, NSViewToolTipOwner {
     let latency: Int
     let unreachable: Bool
+    var tip: String?
     init(latency: Int, unreachable: Bool) {
         self.latency = latency; self.unreachable = unreachable
         super.init(frame: .zero)
@@ -62,6 +63,13 @@ final class LatencyView: NSView {
         heightAnchor.constraint(equalToConstant: 24).isActive = true
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    // 视图尺寸由自动布局在之后才定下来，提示区域要跟着布局重设，否则悬停没有反应
+    override func layout() {
+        super.layout()
+        removeAllToolTips()
+        if tip != nil { addToolTip(bounds, owner: self, userData: nil) }
+    }
+    func view(_ view: NSView, stringForToolTip tag: NSView.ToolTipTag, point: NSPoint, userData data: UnsafeMutableRawPointer?) -> String { tip ?? "" }
     override func draw(_ dirtyRect: NSRect) {
         let lit = latency < 0 ? 0 : (latency < 60 ? 3 : (latency <= 120 ? 2 : 1))
         let color = Theme.color(latency < 60 ? 0x3fb67a : (latency <= 120 ? 0xe5a93a : 0xe5484d))
@@ -865,7 +873,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
                     spinner.startAnimation(nil); ping = stack([spinner], horizontal: true)
                     ping.widthAnchor.constraint(equalToConstant: 40).isActive = true
                 } else { ping = LatencyView(latency: latency, unreachable: probe == 3) }
-                ping.toolTip = probe == 2 ? text("ProbeLatency", String(rtt)) : (probe == 3 && relay >= 0 ? text("ProbeRelayLatency", String(relay)) : (probe == 1 ? text("ProbeTesting") : nil))
+                let tip = probe == 2 ? text("ProbeLatency", String(rtt)) : (probe == 3 && relay >= 0 ? text("ProbeRelayLatency", String(relay)) : (probe == 1 ? text("ProbeTesting") : nil))
+                if let view = ping as? LatencyView { view.tip = tip } else { ping.toolTip = tip }
                 let full = (item["playerCount"] as? Int ?? 0) >= (item["maxPlayers"] as? Int ?? 10)
                 let action = button(text(full ? "Full" : "Join"), #selector(joinFromRow(_:))); action.tag = row; action.primary = true
                 action.widthAnchor.constraint(equalToConstant: 62).isActive = true
