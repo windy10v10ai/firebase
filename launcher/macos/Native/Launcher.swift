@@ -372,7 +372,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         if offerMoveToApplications() { return }
         if let url = Bundle.main.url(forResource: "Launcher", withExtension: "icns") { NSApp.applicationIconImage = NSImage(contentsOf: url) }
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 480), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-        window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
+        window.isReleasedWhenClosed = false; window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
         let content = window.contentView!
         content.wantsLayer = true; content.layer?.backgroundColor = Theme.background.cgColor
         let banner = Banner(); banner.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(banner)
@@ -685,15 +685,20 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         try process.run(); process.waitUntilExit()
         if process.terminationStatus != 0 { throw CocoaError(.fileReadCorruptFile) }
     }
-    // 同一个应用已在运行，必须强制开新实例，否则系统只会把当前窗口提到前面
+    // 同一个应用已在运行，必须用 -n 强制开新实例，否则系统只会把当前窗口提到前面
     private func relaunch(_ target: URL) -> Bool {
-        let configuration = NSWorkspace.OpenConfiguration(); configuration.createsNewApplicationInstance = true
-        configuration.environment = ProcessInfo.processInfo.environment.filter { $0.key.hasPrefix("WINDY_") }
-        let done = DispatchSemaphore(value: 0); var opened = false
-        NSWorkspace.shared.openApplication(at: target, configuration: configuration) { _, error in opened = error == nil; done.signal() }
-        _ = done.wait(timeout: .now() + 10)
-        if opened { NSApp.terminate(nil) } else if presetAnswer(0) != nil { print("relaunch-failed") } else { showMessage(text("MoveAppFailed")) }
-        return opened
+        let process = Process(); process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        var arguments = ["-n"]
+        for (key, value) in ProcessInfo.processInfo.environment where key.hasPrefix("WINDY_") { arguments += ["--env", "\(key)=\(value)"] }
+        process.arguments = arguments + [target.path]
+        do { try process.run(); process.waitUntilExit() } catch { return failRelaunch() }
+        if process.terminationStatus != 0 { return failRelaunch() }
+        NSApp.terminate(nil)
+        return true
+    }
+    private func failRelaunch() -> Bool {
+        if presetAnswer(0) != nil { print("relaunch-failed") } else { showMessage(text("MoveAppFailed")) }
+        return false
     }
     func showMessage(_ value: String) { let alert = NSAlert(); alert.messageText = value; alert.runModal() }
     func confirm(_ title: String, _ body: String, _ action: String) -> Bool {

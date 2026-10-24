@@ -86,15 +86,24 @@ jobs:
           VERSION: ${{ needs.meta.outputs.version }}
         run: bash launcher/macos/verify-package.sh "launcher/macos/release/Windy10v10AI-$VERSION-macos-arm64.zip" "$VERSION" | tee verify.log
 
+      # 首次安装用 DMG 拖进「应用程序」，应用内更新用上面的 ZIP
+      - name: Make DMG
+        env:
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: bash launcher/macos/make-dmg.sh launcher/macos/dist/Windy10v10AI.app "launcher/macos/release/Windy10v10AI-$VERSION-macos-arm64.dmg" "$VERSION" | tee dmg.log
+
       - name: Write hash to summary
         env:
           VERSION: ${{ needs.meta.outputs.version }}
         run: |
-          sha=$(sed -n 's/^sha256: //p' verify.log)
-          printf '### macOS %s (arm64)\n\ncommit: `%s`\nsha256: `%s`\n' "$VERSION" "$GITHUB_SHA" "$sha" >> "$GITHUB_STEP_SUMMARY"
+          zip_sha=$(sed -n 's/^sha256: //p' verify.log)
+          dmg_sha=$(sed -n 's/^sha256: //p' dmg.log)
+          printf '### macOS %s (arm64)\n\ncommit: `%s`\nzip sha256: `%s`\ndmg sha256: `%s`\n' "$VERSION" "$GITHUB_SHA" "$zip_sha" "$dmg_sha" >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v7
         with:
           name: Windy10v10AI-${{ needs.meta.outputs.version }}-macos-arm64
-          path: launcher/macos/release/*.zip
+          path: |
+            launcher/macos/release/*.zip
+            launcher/macos/release/*.dmg
           if-no-files-found: error
