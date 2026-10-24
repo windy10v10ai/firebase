@@ -23,3 +23,7 @@ bash launcher/macos/build.sh
 - 当前 Windows 功能和三语界面的完整对齐。
 
 原作者的历史测试记录见 [#1572](https://github.com/windy10v10ai/firebase/pull/1572)，不代表当前版本通过实机验收。官网下载页面修改与正式发版由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。架构见 [Mac 平台说明](../../docs/launcher/macos.md)，贡献来源见 [UPSTREAM.md](UPSTREAM.md)。
+
+## 首次运行提示
+
+不在 `/Applications` 或 `~/Applications` 里运行时，启动先弹原生窗口问「移到应用程序」还是「直接运行」，可勾「不再提示」。移动时复制进 `~/Applications`，不要求管理员权限；复制后验证签名，同名应用确认后才替换，任何一步失败都保留原应用并继续从当前位置运行。移动成功后从新位置另开一个实例并退出当前进程。这个提示不替代 macOS 对下载应用的安全检查，不做安装向导。

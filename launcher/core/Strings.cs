@@ -129,6 +129,15 @@ namespace Windy10v10AI.Launcher
         public static string Update { get { return Pick("更新", "Update", "Обновить"); } }
         public static string Updating { get { return Pick("正在下载新版本…", "Downloading the new version...", "Загрузка новой версии…"); } }
         public static string UpdateFailed { get { return Pick("自动更新失败，请到官网下载新版本。", "Update failed. Download the new version from our website.", "Не удалось обновить. Скачайте новую версию на сайте."); } }
+        public static string MoveAppTitle { get { return Pick("把启动器移到「应用程序」？", "Move the launcher to Applications?", "Переместить лаунчер в «Программы»?"); } }
+        public static string MoveAppBody { get { return Pick("移过去后，下次可以从启动台找到它。", "After moving, you can find it in Launchpad.", "После перемещения лаунчер можно будет найти в Launchpad."); } }
+        public static string MoveApp { get { return Pick("移到应用程序", "Move to Applications", "Переместить"); } }
+        public static string RunHere { get { return Pick("直接运行", "Run from here", "Запустить отсюда"); } }
+        public static string DontAskAgain { get { return Pick("不再提示", "Don't ask again", "Больше не спрашивать"); } }
+        public static string ReplaceAppTitle { get { return Pick("「应用程序」里已有同名启动器，要替换吗？", "A launcher with the same name already exists. Replace it?", "Лаунчер с таким именем уже есть. Заменить?"); } }
+        public static string ReplaceAppBody { get { return Pick("已有的会被换成当前这一份。", "The existing one will be replaced by this copy.", "Существующий будет заменён этой копией."); } }
+        public static string ReplaceApp { get { return Pick("替换", "Replace", "Заменить"); } }
+        public static string MoveAppFailed { get { return Pick("没能移动启动器，继续从当前位置运行。", "Couldn't move the launcher. Continuing from here.", "Не удалось переместить лаунчер. Продолжаем отсюда."); } }
         public static string OpenDownloadPage { get { return Pick("打开官网", "Open website", "Открыть сайт"); } }
         public static string Changelog { get { return Pick("查看更新日志", "View changelog", "Список изменений"); } }
 

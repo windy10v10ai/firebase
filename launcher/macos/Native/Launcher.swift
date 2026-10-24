@@ -369,6 +369,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular); NSApp.appearance = NSAppearance(named: .darkAqua)
+        if offerMoveToApplications() { return }
         if let url = Bundle.main.url(forResource: "Launcher", withExtension: "icns") { NSApp.applicationIconImage = NSImage(contentsOf: url) }
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 480), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
         window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
@@ -627,6 +628,73 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         journal.scrollToEndOfDocument(nil)
     }
     func showError(_ value: String) { if pendingStart { state = "error"; pendingStart = false }; status.stringValue = value; status.textColor = .systemRed; append(value); refreshControls() }
+    // 提示的回答可由环境变量预设，供自动化验证；正式运行时为空，走真实弹窗
+    private func presetAnswer(_ index: Int) -> String? {
+        guard let value = ProcessInfo.processInfo.environment["WINDY_INSTALL_ANSWERS"] else { return nil }
+        let answers = value.split(separator: ",").map(String.init)
+        return index < answers.count ? answers[index] : ""
+    }
+    // 应用目录可由环境变量替换，供自动化验证
+    private var applicationFolders: [URL] {
+        if let value = ProcessInfo.processInfo.environment["WINDY_APPS_DIR"] { return [URL(fileURLWithPath: value, isDirectory: true)] }
+        return [URL(fileURLWithPath: "/Applications", isDirectory: true), FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)]
+    }
+    // 首次从应用目录之外运行时询问是否复制进去；返回 true 表示已从新位置重启，本进程应退出
+    func offerMoveToApplications() -> Bool {
+        let bundle = Bundle.main.bundleURL.resolvingSymlinksInPath()
+        let folders = applicationFolders.map { $0.resolvingSymlinksInPath().path + "/" }
+        if folders.contains(where: { bundle.path.hasPrefix($0) }) || defaults.bool(forKey: "skipMovePrompt") { return false }
+        var move: Bool, suppress: Bool
+        if let answer = presetAnswer(0) {
+            move = answer.hasPrefix("move"); suppress = answer.hasSuffix("+never")
+        } else {
+            let alert = NSAlert(); alert.messageText = text("MoveAppTitle"); alert.informativeText = text("MoveAppBody")
+            alert.addButton(withTitle: text("MoveApp")); alert.addButton(withTitle: text("RunHere"))
+            alert.showsSuppressionButton = true; alert.suppressionButton?.title = text("DontAskAgain")
+            move = alert.runModal() == .alertFirstButtonReturn; suppress = alert.suppressionButton?.state == .on
+        }
+        if suppress { defaults.set(true, forKey: "skipMovePrompt") }
+        guard move else { return false }
+        // 优先放进当前用户的应用目录，不需要管理员权限
+        let folder = applicationFolders.last!
+        let target = folder.appendingPathComponent(bundle.lastPathComponent)
+        let manager = FileManager.default
+        if manager.fileExists(atPath: target.path) {
+            var replace: Bool
+            if let answer = presetAnswer(1) { replace = answer == "replace" } else {
+                replace = confirm(text("ReplaceAppTitle"), text("ReplaceAppBody"), text("ReplaceApp"))
+            }
+            if !replace { return false }
+        }
+        let staged = folder.appendingPathComponent(".windy-copy-" + UUID().uuidString)
+        do {
+            try manager.createDirectory(at: folder, withIntermediateDirectories: true)
+            try manager.copyItem(at: bundle, to: staged)
+            try verifySignature(staged)
+            if manager.fileExists(atPath: target.path) { _ = try manager.replaceItemAt(target, withItemAt: staged) } else { try manager.moveItem(at: staged, to: target) }
+        } catch {
+            try? manager.removeItem(at: staged)
+            if presetAnswer(0) != nil { print("move-failed") } else { showMessage(text("MoveAppFailed")) }
+            return false
+        }
+        return relaunch(target)
+    }
+    private func verifySignature(_ url: URL) throws {
+        let process = Process(); process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        process.arguments = ["--verify", "--deep", "--strict", url.path]
+        try process.run(); process.waitUntilExit()
+        if process.terminationStatus != 0 { throw CocoaError(.fileReadCorruptFile) }
+    }
+    // 同一个应用已在运行，必须强制开新实例，否则系统只会把当前窗口提到前面
+    private func relaunch(_ target: URL) -> Bool {
+        let configuration = NSWorkspace.OpenConfiguration(); configuration.createsNewApplicationInstance = true
+        configuration.environment = ProcessInfo.processInfo.environment.filter { $0.key.hasPrefix("WINDY_") }
+        let done = DispatchSemaphore(value: 0); var opened = false
+        NSWorkspace.shared.openApplication(at: target, configuration: configuration) { _, error in opened = error == nil; done.signal() }
+        _ = done.wait(timeout: .now() + 10)
+        if opened { NSApp.terminate(nil) } else if presetAnswer(0) != nil { print("relaunch-failed") } else { showMessage(text("MoveAppFailed")) }
+        return opened
+    }
     func showMessage(_ value: String) { let alert = NSAlert(); alert.messageText = value; alert.runModal() }
     func confirm(_ title: String, _ body: String, _ action: String) -> Bool {
         let alert = NSAlert(); alert.messageText = title; alert.informativeText = body
