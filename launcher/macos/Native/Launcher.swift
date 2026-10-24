@@ -26,6 +26,54 @@ private func text(_ key: String, _ values: String...) -> String {
 }
 private var launcherVersion: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "" }
 
+private enum Theme {
+    static func color(_ hex: UInt32) -> NSColor {
+        NSColor(srgbRed: CGFloat((hex >> 16) & 255) / 255, green: CGFloat((hex >> 8) & 255) / 255, blue: CGFloat(hex & 255) / 255, alpha: 1)
+    }
+    static let background = color(0x161412)
+    static let panel = color(0x211d1a)
+    static let border = color(0x3b3029)
+    static let accent = color(0xe0552d)
+    static let text = color(0xeee7e0)
+    static let muted = color(0xaca198)
+}
+
+private final class ContentStack: NSStackView {
+    override var isFlipped: Bool { true }
+}
+
+private final class Banner: NSView {
+    let image = Bundle.main.url(forResource: "banner", withExtension: "jpg").flatMap { NSImage(contentsOf: $0) }
+    override func draw(_ dirtyRect: NSRect) {
+        NSBezierPath(rect: bounds).addClip()
+        NSColor.black.setFill(); bounds.fill()
+        guard let image = image else { return }
+        let width = bounds.width * 0.8
+        let height = width * image.size.height / image.size.width
+        image.draw(in: NSRect(x: (bounds.width - width) / 2, y: (bounds.height - height) / 2, width: width, height: height), from: .zero, operation: .sourceOver, fraction: 1)
+    }
+}
+
+private final class DifficultyButton: NSButton {
+    var subtitle = ""
+    override var isFlipped: Bool { true }
+    override var alignmentRectInsets: NSEdgeInsets { NSEdgeInsetsZero }
+    override func draw(_ dirtyRect: NSRect) {
+        let shape = NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: 8, yRadius: 8)
+        (isHighlighted ? Theme.border : Theme.panel).setFill(); shape.fill()
+        (window?.firstResponder === self ? Theme.accent : Theme.border).setStroke(); shape.stroke()
+        let opacity: CGFloat = isEnabled ? 1 : 0.4
+        let icon = NSRect(x: (bounds.width - 26) / 2, y: 10, width: 26, height: 26)
+        Theme.accent.withAlphaComponent(opacity).setFill(); NSBezierPath(ovalIn: icon).fill()
+        let arrow = NSBezierPath(); arrow.move(to: NSPoint(x: icon.midX - 3, y: icon.midY - 6))
+        arrow.line(to: NSPoint(x: icon.midX + 6, y: icon.midY)); arrow.line(to: NSPoint(x: icon.midX - 3, y: icon.midY + 6)); arrow.close()
+        NSColor.white.withAlphaComponent(opacity).setFill(); arrow.fill()
+        let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
+        (title as NSString).draw(in: NSRect(x: 6, y: 40, width: bounds.width - 12, height: 24), withAttributes: [.font: NSFont.systemFont(ofSize: 17, weight: .semibold), .foregroundColor: Theme.text.withAlphaComponent(opacity), .paragraphStyle: paragraph])
+        (subtitle as NSString).draw(in: NSRect(x: 6, y: 64, width: bounds.width - 12, height: 18), withAttributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: Theme.muted.withAlphaComponent(opacity), .paragraphStyle: paragraph])
+    }
+}
+
 final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate {
     var window: NSWindow!
     var engine: Process?
@@ -81,6 +129,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     let rooms = NSTableView()
     let players = NSTableView()
     let journal = NSTextView()
+    var statusLine: NSStackView!
     var roomSettings: NSStackView!
     var difficultyRow: NSStackView!
     var difficulties = [NSButton]()
@@ -102,6 +151,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     func label(_ value: String, size: CGFloat = 13, weight: NSFont.Weight = .regular) -> NSTextField {
         let view = NSTextField(labelWithString: value)
         view.font = .systemFont(ofSize: size, weight: weight)
+        view.textColor = Theme.text
         return view
     }
     func stack(_ views: [NSView], horizontal: Bool = false, spacing: CGFloat = 10) -> NSStackView {
@@ -118,11 +168,11 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         return view
     }
     func action(_ button: NSButton, _ selector: Selector) {
-        button.target = self; button.action = selector; button.bezelStyle = .rounded
+        button.target = self; button.action = selector; button.bezelStyle = .rounded; button.contentTintColor = Theme.text
     }
     func button(_ title: String, _ selector: Selector) -> NSButton {
         let view = NSButton(title: title, target: self, action: selector)
-        view.bezelStyle = .rounded
+        view.bezelStyle = .rounded; view.contentTintColor = Theme.text
         return view
     }
     func table(_ table: NSTableView, columns: [(String, String, CGFloat)], height: CGFloat) -> NSScrollView {
@@ -132,29 +182,47 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             table.addTableColumn(column)
         }
         table.delegate = self; table.dataSource = self; table.rowHeight = 34
-        table.usesAlternatingRowBackgroundColors = true
+        table.usesAlternatingRowBackgroundColors = false
+        table.backgroundColor = Theme.panel
+        table.gridColor = Theme.border
+        table.selectionHighlightStyle = .regular
         table.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
         let scroll = NSScrollView()
-        scroll.hasVerticalScroller = true; scroll.borderType = .bezelBorder; scroll.documentView = table
+        scroll.hasVerticalScroller = true; scroll.borderType = .noBorder; scroll.documentView = table
+        scroll.wantsLayer = true; scroll.layer?.cornerRadius = 8
         scroll.heightAnchor.constraint(equalToConstant: height).isActive = true
         return scroll
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 660, height: 810), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
-        window.title = text("Title"); window.minSize = NSSize(width: 660, height: 760); window.center()
-        let root = stack([], spacing: 12)
-        root.translatesAutoresizingMaskIntoConstraints = false
-        window.contentView!.addSubview(root)
+        NSApp.appearance = NSAppearance(named: .darkAqua)
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 690), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.title = text("Title"); window.minSize = NSSize(width: 680, height: 620); window.center()
+        window.backgroundColor = Theme.background
+        let content = window.contentView!
+        content.wantsLayer = true; content.layer?.backgroundColor = Theme.background.cgColor
+        let banner = Banner(); banner.translatesAutoresizingMaskIntoConstraints = false
+        let scroll = NSScrollView(); scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.hasVerticalScroller = true; scroll.drawsBackground = false
+        content.addSubview(banner); content.addSubview(scroll)
         NSLayoutConstraint.activate([
-            root.leadingAnchor.constraint(equalTo: window.contentView!.leadingAnchor, constant: 24),
-            root.trailingAnchor.constraint(equalTo: window.contentView!.trailingAnchor, constant: -24),
-            root.topAnchor.constraint(equalTo: window.contentView!.topAnchor, constant: 20),
-            root.bottomAnchor.constraint(equalTo: window.contentView!.bottomAnchor, constant: -20)
+            banner.leadingAnchor.constraint(equalTo: content.leadingAnchor), banner.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            banner.topAnchor.constraint(equalTo: content.topAnchor), banner.heightAnchor.constraint(equalToConstant: 112),
+            scroll.topAnchor.constraint(equalTo: banner.bottomAnchor), scroll.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: content.trailingAnchor), scroll.bottomAnchor.constraint(equalTo: content.bottomAnchor)
         ])
+        let root = ContentStack(); root.orientation = .vertical; root.alignment = .leading; root.spacing = 12
+        root.edgeInsets = NSEdgeInsets(top: 16, left: 24, bottom: 20, right: 24)
+        root.translatesAutoresizingMaskIntoConstraints = false
+        scroll.documentView = root
+        root.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor).isActive = true
+        root.heightAnchor.constraint(greaterThanOrEqualTo: scroll.contentView.heightAnchor).isActive = true
         let version = button("v" + launcherVersion + " ↗", #selector(openChangelog)); version.toolTip = text("Changelog")
-        root.addArrangedSubview(stack([label(text("Title"), size: 22, weight: .semibold), spacer(), version], horizontal: true))
-        let subtitle = label(text("Subtitle")); subtitle.textColor = .secondaryLabelColor; root.addArrangedSubview(subtitle)
+        let subtitle = NSTextField(wrappingLabelWithString: text("Subtitle")); subtitle.textColor = Theme.muted
+        subtitle.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        root.addArrangedSubview(stack([subtitle, spacer(), version], horizontal: true))
+        pages.segmentDistribution = .fillEqually; pages.controlSize = .large
+        pages.selectedSegmentBezelColor = Theme.accent
         pages.selectedSegment = preview ? 0 : min(2, max(0, defaults.integer(forKey: "mode")))
         pages.target = self; pages.action = #selector(changePage); root.addArrangedSubview(pages)
         roomType.selectedSegment = preview ? 0 : (defaults.bool(forKey: "privateRoom") ? 1 : 0)
@@ -170,12 +238,14 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         root.addArrangedSubview(mapCard)
         difficultyRow = stack([], horizontal: true)
         for (index, key) in ["Easy", "Hard", "Custom"].enumerated() {
-            let difficulty = button(text(key), #selector(startGame(_:)))
+            let difficulty = DifficultyButton(title: text(key), target: self, action: #selector(startGame(_:)))
+            difficulty.subtitle = ["N1 ~ N5", "N6 ~ N8", text("CustomSub")][index]
+            difficulty.setAccessibilityHelp(difficulty.subtitle)
             difficulty.tag = index; difficulty.font = .systemFont(ofSize: 17, weight: .semibold)
-            difficulty.heightAnchor.constraint(equalToConstant: 60).isActive = true
-            difficulty.widthAnchor.constraint(equalToConstant: 190).isActive = true
+            difficulty.heightAnchor.constraint(equalToConstant: 88).isActive = true
             difficultyRow.addArrangedSubview(difficulty); difficulties.append(difficulty)
         }
+        difficultyRow.distribution = .fillEqually
         root.addArrangedSubview(difficultyRow)
         autoStart.state = preview || defaults.object(forKey: "autoStartDota") == nil || defaults.bool(forKey: "autoStartDota") ? .on : .off
         autoEnter.state = preview || defaults.object(forKey: "autoEnter") == nil || defaults.bool(forKey: "autoEnter") ? .on : .off
@@ -206,13 +276,15 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         codeLine = stack([label(text("RoomCode")), roomLabel, spacer(), copyCode], horizontal: true); root.addArrangedSubview(codeLine)
         status.font = .systemFont(ofSize: 14, weight: .medium); status.maximumNumberOfLines = 3
         progress.style = .spinning; progress.controlSize = .small; progress.isDisplayedWhenStopped = false
-        root.addArrangedSubview(stack([progress, status], horizontal: true))
-        route.textColor = .secondaryLabelColor; root.addArrangedSubview(route)
-        hint.textColor = .secondaryLabelColor; hint.maximumNumberOfLines = 3; root.addArrangedSubview(hint)
+        statusLine = stack([progress, status], horizontal: true); root.addArrangedSubview(statusLine)
+        route.textColor = Theme.muted; root.addArrangedSubview(route)
+        hint.textColor = Theme.muted; hint.maximumNumberOfLines = 3; root.addArrangedSubview(hint)
         action(enter, #selector(enterGame)); action(stop, #selector(stopGame))
         gameActions = stack([enter, stop, button(text("CopyCommand"), #selector(copyConnect))], horizontal: true)
         root.addArrangedSubview(gameActions)
         action(reopen, #selector(reopenRoom)); root.addArrangedSubview(reopen); reopen.isHidden = true
+        let breathingRoom = NSView(); breathingRoom.heightAnchor.constraint(greaterThanOrEqualToConstant: 12).isActive = true
+        breathingRoom.setContentHuggingPriority(.defaultLow, for: .vertical); root.addArrangedSubview(breathingRoom)
         let divider = NSBox(); divider.boxType = .separator; root.addArrangedSubview(divider)
         mapLabel.maximumNumberOfLines = 2; root.addArrangedSubview(mapLabel)
         action(updateMap, #selector(updateWorkshop)); action(verify, #selector(verifyFiles)); action(subscribe, #selector(subscribeMap))
@@ -234,7 +306,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         journal.isVerticallyResizable = true; journal.textContainer?.widthTracksTextView = true
         logScroll.documentView = journal; logScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 70).isActive = true
         root.addArrangedSubview(logScroll); logScroll.isHidden = true
-        for view in root.arrangedSubviews { view.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true }
+        for view in root.arrangedSubviews { view.widthAnchor.constraint(equalTo: root.widthAnchor, constant: -48).isActive = true }
         buildMenu(); refreshControls()
         if option("--screenshot") == nil { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true) }
         if preview {
@@ -306,13 +378,13 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             paused = event["paused"] as? Bool ?? false
             if let value = event["publicRoom"] as? Bool { roomType.selectedSegment = value ? 0 : 1 }
             if let value = event["maxPlayers"] as? Int, (2...10).contains(value) { count.selectItem(at: value - 2) }
-            status.textColor = state == "error" ? .systemRed : .labelColor
+            status.textColor = state == "error" ? .systemRed : Theme.text
             append(status.stringValue); refreshControls()
             if !active && previous != state {
-                route.stringValue = ""
+                route.stringValue = ""; route.isHidden = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in self?.inspect(); self?.updateBrowsing() }
             }
-        case "route": route.stringValue = event["message"] as? String ?? ""
+        case "route": route.stringValue = event["message"] as? String ?? ""; route.isHidden = route.stringValue.isEmpty
         case "message":
             let value = event["message"] as? String ?? ""
             if event["level"] as? String == "error" { feedbackSend?.isEnabled = true; showError(value) } else { append(value) }
@@ -323,6 +395,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             if event["loading"] as? Bool == true { hint.stringValue = text("RoomsLoading") }
             else if event["failed"] as? Bool == true { hint.stringValue = text("RoomsFailed") }
             else if roomRows.isEmpty { hint.stringValue = text("NoRooms") } else { hint.stringValue = "" }
+            hint.isHidden = hint.stringValue.isEmpty
         case "inspection":
             let details = event["details"] as? [String: Any] ?? event
             mapState = details["mapState"] as? String ?? (details["installed"] as? Bool == true ? "unverified" : "unknown")
@@ -331,7 +404,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         case "release":
             let available = event["available"] as? Bool == true
             notice.stringValue = available ? text("UpdateAvailable", event["version"] as? String ?? "") : ""
-            releaseAvailable = available; download.isHidden = !available; installUpdate.isHidden = !available
+            releaseAvailable = available; notice.isHidden = !available; download.isHidden = !available; installUpdate.isHidden = !available
         case "update-ready": state = "idle"; NSApp.terminate(nil)
         case "feedback":
             feedbackSend?.isEnabled = true
@@ -355,7 +428,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         return alert.runModal() == .alertFirstButtonReturn
     }
     func refreshControls() {
-        hint.isHidden = active && !away && sessionRole == "host"
+        statusLine.isHidden = browsing
+        route.isHidden = route.stringValue.isEmpty
+        notice.isHidden = !releaseAvailable
         roomSettings.isHidden = page != "host"
         let blockedByMap = !active && ["outdated", "missing", "unknown"].contains(mapState)
         mapCard.isHidden = !blockedByMap
@@ -387,12 +462,13 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         if busy { progress.startAnimation(nil) } else { progress.stopAnimation(nil) }
         let mapKeys = ["ready": "MapReady", "outdated": "MapOutdated", "missing": "MapMissing", "unknown": "MapUnknown", "unverified": "MapUnverified", "checking": "MapChecking"]
         mapLabel.stringValue = mapMessage.isEmpty ? text(mapKeys[mapState] ?? "MapUnverified") : mapMessage
-        mapLabel.textColor = ["outdated", "missing", "unknown"].contains(mapState) ? .systemOrange : .secondaryLabelColor
+        mapLabel.textColor = ["outdated", "missing", "unknown"].contains(mapState) ? .systemOrange : Theme.muted
         if !active && !browsing {
             hint.stringValue = page == "host" ? text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint") : ""
         } else if active && !away && sessionRole == "host" {
             hint.stringValue = text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint")
         }
+        hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host")
     }
     @objc func saveSettings() {
         guard !preview else { return }
@@ -406,7 +482,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     @objc func changePage() {
         if active && sessionRole == "host" && pages.selectedSegment == 0 { pages.selectedSegment = 1 }
         saveSettings()
-        if !active { status.stringValue = text(page == "host" ? "HostIdle" : "Idle"); status.textColor = .labelColor }
+        if !active { status.stringValue = text(page == "host" ? "HostIdle" : "Idle"); status.textColor = Theme.text }
         refreshControls(); updateBrowsing()
     }
     func updateBrowsing() { send(["action": "browse", "active": browsing, "testMap": testMap.state == .on]) }
@@ -490,7 +566,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             } else { value = (item["host"] as? Bool == true ? text("TagHost") + " · " : "") + (item["name"] as? String ?? text("Player")) }
         }
         let field = label(value, size: 12); field.lineBreakMode = .byTruncatingTail; field.toolTip = value
-        guard identifier == "name" else { return field }
+        guard identifier == "name" else { return stack([field], horizontal: true) }
         var icons = [(String, String)]()
         if tableView === rooms {
             for avatar in roomRows[row]["avatars"] as? [[String: Any]] ?? [] {
@@ -524,6 +600,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     @objc func showFeedback() {
         if let window = feedbackWindow { window.makeKeyAndOrderFront(nil); return }
         let sheet = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 650), styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        sheet.backgroundColor = Theme.background
         sheet.title = text("FeedbackTitle"); sheet.isReleasedWhenClosed = false; sheet.center()
         let root = stack([], spacing: 12); root.translatesAutoresizingMaskIntoConstraints = false; sheet.contentView!.addSubview(root)
         NSLayoutConstraint.activate([root.leadingAnchor.constraint(equalTo: sheet.contentView!.leadingAnchor, constant: 24), root.trailingAnchor.constraint(equalTo: sheet.contentView!.trailingAnchor, constant: -24), root.topAnchor.constraint(equalTo: sheet.contentView!.topAnchor, constant: 24), root.bottomAnchor.constraint(equalTo: sheet.contentView!.bottomAnchor, constant: -24)])
@@ -571,7 +648,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         view.effectiveAppearance.performAsCurrentDrawingAppearance {
             NSGraphicsContext.saveGraphicsState()
             NSGraphicsContext.current = context
-            NSColor.windowBackgroundColor.setFill()
+            Theme.background.setFill()
             view.bounds.fill()
             view.displayIgnoringOpacity(view.bounds, in: context)
             NSGraphicsContext.restoreGraphicsState()
