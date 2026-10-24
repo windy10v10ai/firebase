@@ -4,6 +4,8 @@ import os
 app = defines["app"]
 background = defines["background"]
 
+# 挂载后的卷用应用自己的图标
+icon = os.path.join(app, "Contents/Resources/Launcher.icns")
 files = [app]
 symlinks = {"Applications": "/Applications"}
 icon_locations = {"Windy10v10AI.app": (180, 190), "Applications": (480, 190)}

@@ -18,6 +18,7 @@ hdiutil attach "$DMG" -readonly -nobrowse -mountpoint "$MOUNT" -quiet
 [ "$(readlink "$MOUNT/Applications")" = "/Applications" ] || fail "Applications shortcut missing"
 [ -f "$MOUNT/.background.tiff" ] || fail "background image missing"
 [ -f "$MOUNT/.DS_Store" ] || fail "window layout missing"
+[ -f "$MOUNT/.VolumeIcon.icns" ] || fail "volume icon missing"
 codesign --verify --deep --strict "$MOUNT/Windy10v10AI.app"
 actual=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$MOUNT/Windy10v10AI.app/Contents/Info.plist")
 [ "$actual" = "$VERSION" ] || fail "app version is $actual, expected $VERSION"
