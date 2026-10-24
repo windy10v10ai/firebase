@@ -2,6 +2,10 @@
 
 Mac 与 Windows 是同一个启动器的两个平台，共用联机核心、版本定义、API 地址和中英俄文案。构建与离线测试见 [Mac README](../../launcher/macos/README.md)。官方构建发布工作流验证由 [#1598](https://github.com/windy10v10ai/firebase/issues/1598) 跟踪，官网画面修改与正式发布由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。
 
+## 界面
+
+Mac 与 Windows 共用横幅、应用图标、深色配色和橙色强调色。单人、开房、加入、房间内和反馈窗口保持相同的功能入口与主要排版，减少切换系统时的学习成本。输入、菜单、键盘和系统窗口细节遵循 AppKit；维护与诊断工具放在菜单，主窗口底栏保留地图状态、反馈和开发选项。
+
 ## 平台边界
 
 AppKit 窗口通过 JSON 消息控制自带 ARM64 .NET 运行时的服务。房间、网络、隧道、名单和 HTTP 直接编译 `launcher/core`；账号识别和 socket 系统差异由 Mac 的 `Platform` 实现。界面、游戏启动、专用服进程和地图更新留在平台层。
