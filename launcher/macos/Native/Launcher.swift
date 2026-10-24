@@ -38,8 +38,83 @@ private enum Theme {
     static let muted = color(0xaca198)
 }
 
-private final class ContentStack: NSStackView {
-    override var isFlipped: Bool { true }
+final class LauncherButton: NSButton {
+    var primary = false
+    var link = false
+    var pill = false
+    override var alignmentRectInsets: NSEdgeInsets { NSEdgeInsetsZero }
+    override var intrinsicContentSize: NSSize {
+        NSSize(width: ceil((title as NSString).size(withAttributes: [.font: font ?? NSFont.systemFont(ofSize: 12)]).width) + (link ? 4 : 24), height: link ? 22 : 30)
+    }
+    override func draw(_ dirtyRect: NSRect) {
+        let selected = state == .on
+        let path = NSBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5), xRadius: pill ? 14 : 5, yRadius: pill ? 14 : 5)
+        if !link {
+            (primary ? Theme.accent : (isHighlighted || selected ? Theme.border : Theme.panel)).withAlphaComponent(isEnabled ? 1 : 0.45).setFill(); path.fill()
+            (selected || window?.firstResponder === self ? Theme.accent : Theme.border).setStroke(); path.stroke()
+        }
+        let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
+        let font = self.font ?? NSFont.systemFont(ofSize: 12)
+        let height = font.ascender - font.descender + 3
+        (title as NSString).draw(in: NSRect(x: 2, y: (bounds.height - height) / 2, width: bounds.width - 4, height: height), withAttributes: [.font: font, .foregroundColor: (link ? Theme.muted : Theme.text).withAlphaComponent(isEnabled ? 1 : 0.4), .paragraphStyle: paragraph])
+    }
+}
+
+private final class SegmentCell: NSSegmentedCell {
+    var badgeCount = 0
+    var hosting = false
+    override func draw(withFrame frame: NSRect, in view: NSView) {
+        Theme.panel.setFill(); NSBezierPath(roundedRect: frame, xRadius: 7, yRadius: 7).fill()
+        let width = frame.width / CGFloat(segmentCount)
+        for index in 0..<segmentCount {
+            let rect = NSRect(x: frame.minX + CGFloat(index) * width + 2, y: frame.minY + 2, width: width - 4, height: frame.height - 4)
+            if isSelected(forSegment: index) {
+                Theme.border.withAlphaComponent(0.35).setFill()
+                let path = NSBezierPath(roundedRect: rect, xRadius: 6, yRadius: 6); path.fill()
+                Theme.accent.setStroke(); path.stroke()
+            }
+            let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
+            let enabled = isEnabled && isEnabled(forSegment: index)
+            let font = NSFont.systemFont(ofSize: 12)
+            let title = index == 2 && badgeCount > 0 ? text("JoinRoom") : (label(forSegment: index) ?? "")
+            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: Theme.text.withAlphaComponent(enabled ? 1 : 0.4), .paragraphStyle: paragraph]
+            var titleRect = NSRect(x: rect.minX, y: rect.midY - 8, width: rect.width, height: 18)
+            if index == 2 && badgeCount > 0 {
+                let titleWidth = (title as NSString).size(withAttributes: [.font: font]).width
+                let badge = NSRect(x: rect.midX + (titleWidth - 22) / 2 + 8, y: rect.midY - 8, width: 22, height: 16)
+                titleRect = NSRect(x: rect.midX - (titleWidth + 30) / 2, y: titleRect.minY, width: titleWidth, height: 18)
+                let path = NSBezierPath(roundedRect: badge, xRadius: 8, yRadius: 8)
+                Theme.color(0x162634).setFill(); path.fill(); Theme.color(0x315372).setStroke(); path.stroke()
+                (String(badgeCount) as NSString).draw(in: badge, withAttributes: [.font: NSFont.systemFont(ofSize: 10), .foregroundColor: Theme.color(0x8dbce5), .paragraphStyle: paragraph])
+            }
+            (title as NSString).draw(in: titleRect, withAttributes: attributes)
+            if index == 1 && hosting {
+                let titleWidth = (title as NSString).size(withAttributes: [.font: font]).width
+                Theme.color(0x3fb67a).setFill(); NSBezierPath(ovalIn: NSRect(x: rect.midX - titleWidth / 2 - 10, y: rect.midY - 3, width: 6, height: 6)).fill()
+            }
+        }
+    }
+}
+
+private final class TabControl: NSSegmentedControl {
+    override var alignmentRectInsets: NSEdgeInsets { NSEdgeInsetsZero }
+}
+
+private func segments(_ labels: [String]) -> NSSegmentedControl {
+    let view = TabControl(); view.cell = SegmentCell()
+    view.segmentCount = labels.count; view.trackingMode = .selectOne; view.segmentDistribution = .fillEqually
+    for (index, label) in labels.enumerated() { view.setLabel(label, forSegment: index) }
+    return view
+}
+
+private final class DescriptionView: NSTextView {
+    var placeholder = "" { didSet { needsDisplay = true } }
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        if string.isEmpty {
+            (placeholder as NSString).draw(in: bounds.insetBy(dx: 6, dy: 6), withAttributes: [.font: font ?? NSFont.systemFont(ofSize: 12), .foregroundColor: Theme.muted])
+        }
+    }
 }
 
 private final class Banner: NSView {
@@ -74,7 +149,7 @@ private final class DifficultyButton: NSButton {
     }
 }
 
-final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate {
+final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate, NSTextFieldDelegate, NSMenuItemValidation {
     var window: NSWindow!
     var engine: Process?
     var input: Pipe?
@@ -92,6 +167,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var avatarCache = [String: NSImage]()
     var avatarRequests = Set<String>()
     var roomRows = [[String: Any]]()
+    var roomEmptyMessage = text("RoomsLoading")
     var playerRows = [[String: Any]]()
     var feedbackWindow: NSWindow?
     var feedbackType: NSSegmentedControl?
@@ -100,8 +176,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var feedbackTopics = [NSButton]()
     var feedbackSend: NSButton?
     let defaults = UserDefaults.standard
-    let pages = NSSegmentedControl(labels: [text("Solo"), text("HostRoom"), text("JoinRoom")], trackingMode: .selectOne, target: nil, action: nil)
-    let roomType = NSSegmentedControl(labels: [text("PublicRoom"), text("PrivateRoom")], trackingMode: .selectOne, target: nil, action: nil)
+    let pages = segments([text("Solo"), text("HostRoom"), text("JoinRoom")])
+    let roomType = segments([text("PublicRoom"), text("PrivateRoom")])
     let count = NSPopUpButton()
     let autoStart = NSButton(checkboxWithTitle: text("AutoStartDota"), target: nil, action: nil)
     let autoEnter = NSButton(checkboxWithTitle: text("AutoEnter"), target: nil, action: nil)
@@ -114,18 +190,15 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     let mapLabel = NSTextField(wrappingLabelWithString: text("MapChecking"))
     let notice = NSTextField(wrappingLabelWithString: "")
     let progress = NSProgressIndicator()
-    let enter = NSButton(title: text("EnterGame"), target: nil, action: nil)
-    let stop = NSButton(title: text("StopServer"), target: nil, action: nil)
-    let copyCode = NSButton(title: text("Copy"), target: nil, action: nil)
-    let removePlayer = NSButton(title: text("Kick"), target: nil, action: nil)
-    let reopen = NSButton(title: text("Reopen"), target: nil, action: nil)
-    let installUpdate = NSButton(title: text("Update"), target: nil, action: nil)
-    let refresh = NSButton(title: text("Refresh"), target: nil, action: nil)
-    let joinSelected = NSButton(title: text("JoinSelectedRoom"), target: nil, action: nil)
-    let updateMap = NSButton(title: text("UpdateMap"), target: nil, action: nil)
-    let verify = NSButton(title: text("VerifyFiles"), target: nil, action: nil)
-    let subscribe = NSButton(title: text("Subscribe"), target: nil, action: nil)
-    let download = NSButton(title: text("OpenDownloadPage"), target: nil, action: nil)
+    let enter = LauncherButton(title: text("EnterGame"), target: nil, action: nil)
+    let stop = LauncherButton(title: text("StopServer"), target: nil, action: nil)
+    let copyCode = LauncherButton(title: text("Copy"), target: nil, action: nil)
+    let reopen = LauncherButton(title: text("Reopen"), target: nil, action: nil)
+    let installUpdate = LauncherButton(title: text("Update"), target: nil, action: nil)
+    let refresh = LauncherButton(title: text("Refresh"), target: nil, action: nil)
+    let updateMap = LauncherButton(title: text("UpdateMap"), target: nil, action: nil)
+    let subscribe = LauncherButton(title: text("Subscribe"), target: nil, action: nil)
+    let download = LauncherButton(title: text("OpenDownloadPage"), target: nil, action: nil)
     let rooms = NSTableView()
     let players = NSTableView()
     let journal = NSTextView()
@@ -138,7 +211,15 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var joinLine: NSStackView!
     var gameActions: NSStackView!
     var codeLine: NSStackView!
-    var mapActions: NSStackView!
+    var body: NSStackView!
+    var footer: NSStackView!
+    var hostGuide: NSStackView!
+    var updateNotice: NSStackView!
+    var mapDot = NSTextField(labelWithString: "●")
+    var playerCount = NSTextField(labelWithString: "")
+    var codeJoin: NSButton!
+    var badgeTimer: Timer?
+    var lastBadge = Date.distantPast
     var mapCard: NSStackView!
     let mapWarning = NSTextField(wrappingLabelWithString: "")
 
@@ -148,7 +229,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var away: Bool { active && sessionRole == "host" && page == "join" }
     var browsing: Bool { page == "join" && (!active || away) }
 
-    func label(_ value: String, size: CGFloat = 13, weight: NSFont.Weight = .regular) -> NSTextField {
+    func label(_ value: String, size: CGFloat = 12, weight: NSFont.Weight = .regular) -> NSTextField {
         let view = NSTextField(labelWithString: value)
         view.font = .systemFont(ofSize: size, weight: weight)
         view.textColor = Theme.text
@@ -159,6 +240,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         view.orientation = horizontal ? .horizontal : .vertical
         view.alignment = horizontal ? .centerY : .leading
         view.spacing = spacing
+        if horizontal { view.distribution = .fill }
         if !horizontal { for child in views { child.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true } }
         return view
     }
@@ -168,11 +250,11 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         return view
     }
     func action(_ button: NSButton, _ selector: Selector) {
-        button.target = self; button.action = selector; button.bezelStyle = .rounded; button.contentTintColor = Theme.text
+        button.target = self; button.action = selector; button.font = .systemFont(ofSize: 12)
     }
-    func button(_ title: String, _ selector: Selector) -> NSButton {
-        let view = NSButton(title: title, target: self, action: selector)
-        view.bezelStyle = .rounded; view.contentTintColor = Theme.text
+    func button(_ title: String, _ selector: Selector) -> LauncherButton {
+        let view = LauncherButton(title: title, target: self, action: selector)
+        view.font = .systemFont(ofSize: 12)
         return view
     }
     func table(_ table: NSTableView, columns: [(String, String, CGFloat)], height: CGFloat) -> NSScrollView {
@@ -182,6 +264,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             table.addTableColumn(column)
         }
         table.delegate = self; table.dataSource = self; table.rowHeight = 34
+        table.style = .plain; table.intercellSpacing = .zero
         table.usesAlternatingRowBackgroundColors = false
         table.backgroundColor = Theme.panel
         table.gridColor = Theme.border
@@ -193,128 +276,138 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         scroll.heightAnchor.constraint(equalToConstant: height).isActive = true
         return scroll
     }
+    func panel(_ views: [NSView], color: NSColor = Theme.panel) -> NSStackView {
+        let view = stack(views, spacing: 8)
+        view.edgeInsets = NSEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        for constraint in view.constraints where constraint.firstAttribute == .width { constraint.constant = -24 }
+        view.wantsLayer = true; view.layer?.backgroundColor = color.cgColor
+        view.layer?.cornerRadius = 7; view.layer?.borderWidth = 1; view.layer?.borderColor = Theme.border.cgColor
+        return view
+    }
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
-        NSApp.appearance = NSAppearance(named: .darkAqua)
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 690), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
-        window.title = text("Title"); window.minSize = NSSize(width: 680, height: 620); window.center()
-        window.backgroundColor = Theme.background
+        NSApp.setActivationPolicy(.regular); NSApp.appearance = NSAppearance(named: .darkAqua)
+        if let url = Bundle.main.url(forResource: "Launcher", withExtension: "icns") { NSApp.applicationIconImage = NSImage(contentsOf: url) }
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 480), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+        window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
         let content = window.contentView!
         content.wantsLayer = true; content.layer?.backgroundColor = Theme.background.cgColor
-        let banner = Banner(); banner.translatesAutoresizingMaskIntoConstraints = false
-        let scroll = NSScrollView(); scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.hasVerticalScroller = true; scroll.drawsBackground = false
-        content.addSubview(banner); content.addSubview(scroll)
+        let banner = Banner(); banner.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(banner)
+        body = stack([], spacing: 12); body.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(body)
         NSLayoutConstraint.activate([
             banner.leadingAnchor.constraint(equalTo: content.leadingAnchor), banner.trailingAnchor.constraint(equalTo: content.trailingAnchor),
-            banner.topAnchor.constraint(equalTo: content.topAnchor), banner.heightAnchor.constraint(equalToConstant: 112),
-            scroll.topAnchor.constraint(equalTo: banner.bottomAnchor), scroll.leadingAnchor.constraint(equalTo: content.leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: content.trailingAnchor), scroll.bottomAnchor.constraint(equalTo: content.bottomAnchor)
+            banner.topAnchor.constraint(equalTo: content.topAnchor), banner.heightAnchor.constraint(equalToConstant: 80),
+            body.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20), body.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
+            body.topAnchor.constraint(equalTo: banner.bottomAnchor, constant: 12)
         ])
-        let root = ContentStack(); root.orientation = .vertical; root.alignment = .leading; root.spacing = 12
-        root.edgeInsets = NSEdgeInsets(top: 16, left: 24, bottom: 20, right: 24)
-        root.translatesAutoresizingMaskIntoConstraints = false
-        scroll.documentView = root
-        root.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor).isActive = true
-        root.heightAnchor.constraint(greaterThanOrEqualTo: scroll.contentView.heightAnchor).isActive = true
-        let version = button("v" + launcherVersion + " ↗", #selector(openChangelog)); version.toolTip = text("Changelog")
-        let subtitle = NSTextField(wrappingLabelWithString: text("Subtitle")); subtitle.textColor = Theme.muted
+        let version = button("v" + launcherVersion + " ↗", #selector(openChangelog)); version.link = true; version.toolTip = text("Changelog")
+        let subtitle = label(text("Subtitle"), size: 11); subtitle.textColor = Theme.muted
         subtitle.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        root.addArrangedSubview(stack([subtitle, spacer(), version], horizontal: true))
-        pages.segmentDistribution = .fillEqually; pages.controlSize = .large
-        pages.selectedSegmentBezelColor = Theme.accent
+        body.addArrangedSubview(stack([subtitle, spacer(), version], horizontal: true, spacing: 4))
+        pages.heightAnchor.constraint(equalToConstant: 36).isActive = true
         pages.selectedSegment = preview ? 0 : min(2, max(0, defaults.integer(forKey: "mode")))
-        pages.target = self; pages.action = #selector(changePage); root.addArrangedSubview(pages)
+        pages.target = self; pages.action = #selector(changePage); body.addArrangedSubview(pages)
+        roomType.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        roomType.widthAnchor.constraint(equalToConstant: languageCode == "ru-RU" ? 166 : 140).isActive = true
         roomType.selectedSegment = preview ? 0 : (defaults.bool(forKey: "privateRoom") ? 1 : 0)
         roomType.target = self; roomType.action = #selector(saveSettings)
-        count.addItems(withTitles: (2...10).map { text("PlayersOption", String($0)) })
+        count.addItems(withTitles: (2...10).map { text("PlayersOption", String($0)) }); count.font = .systemFont(ofSize: 11)
         let savedCount = defaults.integer(forKey: "maxPlayers")
         count.selectItem(at: preview || !(2...10).contains(savedCount) ? 8 : savedCount - 2)
         count.target = self; count.action = #selector(saveSettings)
-        roomSettings = stack([label(text("RoomType")), roomType, spacer(), label(text("MaxPlayers")), count], horizontal: true)
-        root.addArrangedSubview(roomSettings)
-        mapWarning.maximumNumberOfLines = 4
-        mapCard = stack([label(text("MapCardTitle"), weight: .semibold), mapWarning])
-        root.addArrangedSubview(mapCard)
-        difficultyRow = stack([], horizontal: true)
+        roomSettings = stack([label(text("RoomType"), size: 11), roomType, spacer(), label(text("MaxPlayers"), size: 11), count], horizontal: true, spacing: 6)
+        body.addArrangedSubview(roomSettings)
+        mapWarning.maximumNumberOfLines = 4; mapWarning.font = .systemFont(ofSize: 12)
+        action(updateMap, #selector(updateWorkshop)); action(subscribe, #selector(subscribeMap))
+        mapCard = panel([label(text("MapCardTitle"), weight: .semibold), mapWarning, stack([updateMap, subscribe, spacer()], horizontal: true)])
+        body.addArrangedSubview(mapCard)
+        action(refresh, #selector(refreshRooms))
+        rooms.target = self; rooms.doubleAction = #selector(joinRoom)
+        let roomTable = table(rooms, columns: [("room", "", 438)], height: 280); rooms.headerView = nil
+        let heading = roomColumns(NSView(), label(text("ColumnMap"), size: 10), label(text("ColumnPlayers"), size: 10), label(text("ColumnPing"), size: 10))
+        heading.heightAnchor.constraint(equalToConstant: 18).isActive = true
+        browser = stack([stack([label(text("PublicRooms"), weight: .semibold), spacer(), refresh], horizontal: true), heading, roomTable], spacing: 6)
+        body.addArrangedSubview(browser)
+        roomCode.placeholderString = text("CodeExample"); roomCode.font = .monospacedSystemFont(ofSize: 12, weight: .medium)
+        roomCode.target = self; roomCode.action = #selector(joinByCode); roomCode.delegate = self
+        roomCode.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        roomCode.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        codeJoin = button(text("Join"), #selector(joinByCode)); (codeJoin as? LauncherButton)?.primary = true
+        codeJoin.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        joinLine = stack([roomCode, codeJoin], horizontal: true, spacing: 8); body.addArrangedSubview(joinLine)
+        playerCount.font = .systemFont(ofSize: 11); playerCount.textColor = Theme.muted
+        let playerTable = table(players, columns: [("player", "", 412)], height: 130); players.headerView = nil
+        roster = panel([stack([label(text("PlayersInRoom"), size: 11), spacer(), playerCount], horizontal: true), playerTable])
+        body.addArrangedSubview(roster)
+        difficultyRow = stack([], horizontal: true, spacing: 10)
         for (index, key) in ["Easy", "Hard", "Custom"].enumerated() {
             let difficulty = DifficultyButton(title: text(key), target: self, action: #selector(startGame(_:)))
-            difficulty.subtitle = ["N1 ~ N5", "N6 ~ N8", text("CustomSub")][index]
-            difficulty.setAccessibilityHelp(difficulty.subtitle)
-            difficulty.tag = index; difficulty.font = .systemFont(ofSize: 17, weight: .semibold)
-            difficulty.heightAnchor.constraint(equalToConstant: 88).isActive = true
+            difficulty.subtitle = ["N1 ~ N5", "N6 ~ N8", text("CustomSub")][index]; difficulty.setAccessibilityHelp(difficulty.subtitle)
+            difficulty.tag = index; difficulty.heightAnchor.constraint(equalToConstant: 84).isActive = true
             difficultyRow.addArrangedSubview(difficulty); difficulties.append(difficulty)
         }
-        difficultyRow.distribution = .fillEqually
-        root.addArrangedSubview(difficultyRow)
+        difficultyRow.distribution = .fillEqually; body.addArrangedSubview(difficultyRow)
         autoStart.state = preview || defaults.object(forKey: "autoStartDota") == nil || defaults.bool(forKey: "autoStartDota") ? .on : .off
         autoEnter.state = preview || defaults.object(forKey: "autoEnter") == nil || defaults.bool(forKey: "autoEnter") ? .on : .off
-        autoStart.target = self; autoStart.action = #selector(saveSettings)
-        autoEnter.target = self; autoEnter.action = #selector(autoEnterChanged)
-        root.addArrangedSubview(autoStart); root.addArrangedSubview(autoEnter)
-        action(refresh, #selector(refreshRooms)); action(joinSelected, #selector(joinRoom))
-        rooms.target = self; rooms.doubleAction = #selector(joinRoom)
-        browser = stack([
-            stack([label(text("PublicRooms"), weight: .semibold), spacer(), refresh], horizontal: true),
-            table(rooms, columns: [("name", text("TagHost"), 200), ("map", text("ColumnMap"), 90), ("players", text("ColumnPlayers"), 80), ("ping", text("ColumnPing"), 180)], height: 160),
-            joinSelected
-        ])
-        root.addArrangedSubview(browser)
-        roomCode.placeholderString = text("CodeExample"); roomCode.font = .monospacedSystemFont(ofSize: 14, weight: .medium)
-        roomCode.target = self; roomCode.action = #selector(joinByCode)
-        roomCode.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        joinLine = stack([roomCode, button(text("Paste"), #selector(pasteCode)), button(text("Join"), #selector(joinByCode))], horizontal: true)
-        root.addArrangedSubview(joinLine)
-        action(removePlayer, #selector(kickPlayer))
-        roster = stack([
-            stack([label(text("PlayersInRoom"), weight: .semibold), spacer(), removePlayer], horizontal: true),
-            table(players, columns: [("name", text("Player"), 300), ("status", text("StatusColumn"), 260)], height: 140)
-        ])
-        root.addArrangedSubview(roster)
-        roomLabel.font = .monospacedSystemFont(ofSize: 25, weight: .semibold); roomLabel.isSelectable = true
-        action(copyCode, #selector(copyRoom))
-        codeLine = stack([label(text("RoomCode")), roomLabel, spacer(), copyCode], horizontal: true); root.addArrangedSubview(codeLine)
-        status.font = .systemFont(ofSize: 14, weight: .medium); status.maximumNumberOfLines = 3
+        autoStart.target = self; autoStart.action = #selector(saveSettings); autoStart.font = .systemFont(ofSize: 11)
+        autoEnter.target = self; autoEnter.action = #selector(autoEnterChanged); autoEnter.font = .systemFont(ofSize: 11)
+        body.addArrangedSubview(autoStart)
+        let guide = NSTextField(wrappingLabelWithString: ""); guide.font = .systemFont(ofSize: 12); guide.textColor = Theme.text
+        hostGuide = panel([guide], color: Theme.color(0x17251c)); hostGuide.layer?.borderColor = Theme.color(0x2d5a3e).cgColor
+        body.addArrangedSubview(hostGuide)
+        codeLine = stack([label(text("RoomCode"), size: 11)]); body.addArrangedSubview(codeLine)
+        roomLabel.font = .monospacedSystemFont(ofSize: 19, weight: .semibold); roomLabel.isSelectable = true; roomLabel.textColor = Theme.text
+        action(copyCode, #selector(copyRoom)); copyCode.title = "⧉"; copyCode.toolTip = text("Copy"); copyCode.setAccessibilityLabel(text("Copy"))
+        copyCode.widthAnchor.constraint(equalToConstant: 28).isActive = true
+        action(enter, #selector(enterGame)); action(stop, #selector(stopGame)); enter.primary = true
+        gameActions = stack([roomLabel, copyCode, enter, spacer(), stop], horizontal: true, spacing: 8); body.addArrangedSubview(gameActions)
+        status.font = .systemFont(ofSize: 12); status.textColor = Theme.muted; status.maximumNumberOfLines = 3
         progress.style = .spinning; progress.controlSize = .small; progress.isDisplayedWhenStopped = false
-        statusLine = stack([progress, status], horizontal: true); root.addArrangedSubview(statusLine)
-        route.textColor = Theme.muted; root.addArrangedSubview(route)
-        hint.textColor = Theme.muted; hint.maximumNumberOfLines = 3; root.addArrangedSubview(hint)
-        action(enter, #selector(enterGame)); action(stop, #selector(stopGame))
-        gameActions = stack([enter, stop, button(text("CopyCommand"), #selector(copyConnect))], horizontal: true)
-        root.addArrangedSubview(gameActions)
-        action(reopen, #selector(reopenRoom)); root.addArrangedSubview(reopen); reopen.isHidden = true
-        let breathingRoom = NSView(); breathingRoom.heightAnchor.constraint(greaterThanOrEqualToConstant: 12).isActive = true
-        breathingRoom.setContentHuggingPriority(.defaultLow, for: .vertical); root.addArrangedSubview(breathingRoom)
-        let divider = NSBox(); divider.boxType = .separator; root.addArrangedSubview(divider)
-        mapLabel.maximumNumberOfLines = 2; root.addArrangedSubview(mapLabel)
-        action(updateMap, #selector(updateWorkshop)); action(verify, #selector(verifyFiles)); action(subscribe, #selector(subscribeMap))
-        mapActions = stack([updateMap, verify, subscribe, spacer()], horizontal: true); root.addArrangedSubview(mapActions)
-        notice.maximumNumberOfLines = 3; root.addArrangedSubview(notice)
-        action(download, #selector(openDownload)); action(installUpdate, #selector(updateLauncher))
-        root.addArrangedSubview(stack([installUpdate, download, spacer()], horizontal: true)); download.isHidden = true; installUpdate.isHidden = true
-        let developer = button(text("Developer"), #selector(toggleDeveloper))
-        let feedback = button(text("Feedback"), #selector(showFeedback))
-        testMap.state = preview ? .off : (defaults.bool(forKey: "testMap") ? .on : .off)
-        testMap.isHidden = true; testMap.target = self; testMap.action = #selector(testMapChanged)
-        root.addArrangedSubview(stack([feedback, spacer(), developer], horizontal: true))
-        root.addArrangedSubview(testMap)
-        let logs = button(text("OpenLogs"), #selector(openLogs)); let logToggle = button(text("Logs"), #selector(toggleLogs))
-        root.addArrangedSubview(stack([logs, logToggle, spacer(), button(text("VersionCheck"), #selector(checkVersion))], horizontal: true))
+        statusLine = stack([progress, status], horizontal: true, spacing: 4); body.addArrangedSubview(statusLine)
+        route.font = .systemFont(ofSize: 11); route.textColor = Theme.muted; body.addArrangedSubview(route)
+        hint.font = .systemFont(ofSize: 12); hint.textColor = Theme.text; hint.maximumNumberOfLines = 3; body.addArrangedSubview(hint)
+        body.addArrangedSubview(autoEnter)
+        action(reopen, #selector(reopenRoom)); body.addArrangedSubview(reopen)
+        notice.font = .systemFont(ofSize: 12); notice.maximumNumberOfLines = 3
+        action(download, #selector(openDownload)); action(installUpdate, #selector(updateLauncher)); installUpdate.primary = true
+        updateNotice = panel([notice, stack([installUpdate, download, spacer()], horizontal: true)])
+        body.addArrangedSubview(updateNotice)
         let logScroll = NSScrollView(); logScroll.hasVerticalScroller = true; logScroll.borderType = .bezelBorder
         journal.isEditable = false; journal.isSelectable = true; journal.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
         journal.textContainerInset = NSSize(width: 8, height: 8); journal.autoresizingMask = [.width]
         journal.isVerticallyResizable = true; journal.textContainer?.widthTracksTextView = true
-        logScroll.documentView = journal; logScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 70).isActive = true
-        root.addArrangedSubview(logScroll); logScroll.isHidden = true
-        for view in root.arrangedSubviews { view.widthAnchor.constraint(equalTo: root.widthAnchor, constant: -48).isActive = true }
+        logScroll.documentView = journal; logScroll.heightAnchor.constraint(equalToConstant: 120).isActive = true
+        body.addArrangedSubview(logScroll); logScroll.isHidden = true
+        for view in body.arrangedSubviews { view.widthAnchor.constraint(equalTo: body.widthAnchor).isActive = true }
+        let divider = NSBox(); divider.boxType = .separator; divider.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(divider)
+        let developer = button(text("Developer"), #selector(toggleDeveloper)); developer.link = true; developer.font = .systemFont(ofSize: 10)
+        let feedback = button(text("Feedback"), #selector(showFeedback)); feedback.font = .systemFont(ofSize: 10)
+        testMap.state = preview ? .off : (defaults.bool(forKey: "testMap") ? .on : .off); testMap.font = .systemFont(ofSize: 10)
+        testMap.isHidden = true; testMap.target = self; testMap.action = #selector(testMapChanged)
+        mapLabel.font = .systemFont(ofSize: 10); mapLabel.lineBreakMode = .byTruncatingTail; mapLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        mapDot.font = .systemFont(ofSize: 9)
+        footer = stack([mapDot, mapLabel, spacer(), testMap, feedback, developer], horizontal: true, spacing: 6)
+        footer.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(footer)
+        NSLayoutConstraint.activate([
+            divider.leadingAnchor.constraint(equalTo: content.leadingAnchor), divider.trailingAnchor.constraint(equalTo: content.trailingAnchor), divider.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -40),
+            footer.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20), footer.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20), footer.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -8)
+        ])
         buildMenu(); refreshControls()
         if option("--screenshot") == nil { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true) }
         if preview {
             previewState()
-            if let path = option("--screenshot") {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self.savePreview(path) }
-            }
-        } else { launchEngine() }
+            if let path = option("--screenshot") { DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self.savePreview(path) } }
+        } else {
+            launchEngine(); refreshBadge()
+            badgeTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.refreshBadge() }
+        }
+    }
+    func resizeWindow() {
+        window.contentView?.layoutSubtreeIfNeeded()
+        let height = max(page == "join" && browsing ? 620.0 : 480.0, 80 + 12 + body.fittingSize.height + 60)
+        guard abs((window.contentView?.frame.height ?? 0) - height) > 1 else { return }
+        let top = window.frame.maxY
+        window.setContentSize(NSSize(width: 480, height: height))
+        window.setFrameOrigin(NSPoint(x: window.frame.minX, y: top - window.frame.height))
     }
     func buildMenu() {
         let menu = NSMenu(); let appItem = NSMenuItem(); menu.addItem(appItem)
@@ -327,7 +420,17 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         edit.addItem(withTitle: text("Copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c")
         edit.addItem(withTitle: text("Paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v")
         edit.addItem(withTitle: text("SelectAll"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        let maintenanceItem = NSMenuItem(); maintenanceItem.title = text("Developer"); menu.addItem(maintenanceItem)
+        let maintenance = NSMenu(title: text("Developer")); maintenanceItem.submenu = maintenance
+        for (title, action) in [(text("UpdateMap"), #selector(updateWorkshop)), (text("VerifyFiles"), #selector(verifyFiles)), (text("Subscribe"), #selector(subscribeMap)), (text("VersionCheck"), #selector(checkVersion)), (text("Logs"), #selector(toggleLogs)), (text("OpenLogs"), #selector(openLogs)), (text("CopyCommand"), #selector(copyConnect))] {
+            let item = maintenance.addItem(withTitle: title, action: action, keyEquivalent: ""); item.target = self
+        }
         NSApp.mainMenu = menu
+    }
+    func validateMenuItem(_ item: NSMenuItem) -> Bool {
+        guard let action = item.action else { return true }
+        if [#selector(updateWorkshop), #selector(verifyFiles), #selector(subscribeMap), #selector(checkVersion)].contains(action) { return backendAvailable && !active }
+        return true
     }
     func launchEngine() {
         let process = Process(); process.executableURL = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/engine/WindyMacEngine")
@@ -384,18 +487,27 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
                 route.stringValue = ""; route.isHidden = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in self?.inspect(); self?.updateBrowsing() }
             }
-        case "route": route.stringValue = event["message"] as? String ?? ""; route.isHidden = route.stringValue.isEmpty
+        case "route": route.stringValue = event["message"] as? String ?? ""; refreshControls()
         case "message":
             let value = event["message"] as? String ?? ""
             if event["level"] as? String == "error" { feedbackSend?.isEnabled = true; showError(value) } else { append(value) }
         case "roster":
             playerRows = event["players"] as? [[String: Any]] ?? []; players.reloadData(); refreshControls()
+        case "badge": setBadge(event["count"] as? Int ?? 0)
         case "rooms":
-            roomRows = event["rows"] as? [[String: Any]] ?? []; rooms.reloadData()
+            let rows = event["rows"] as? [[String: Any]] ?? []
+            roomRows = rows.filter { $0["kind"] as? Int == 2 }
+            for (kind, title) in [(0, "SectionWaiting"), (1, "SectionPlaying")] {
+                let section = rows.filter { ($0["kind"] as? Int ?? 0) == kind }
+                if !section.isEmpty { roomRows.append(["header": text(title)]); roomRows.append(contentsOf: section) }
+            }
+            setBadge(event["count"] as? Int ?? rows.filter { ($0["kind"] as? Int ?? 0) == 0 }.count)
+            rooms.reloadData()
             if event["loading"] as? Bool == true { hint.stringValue = text("RoomsLoading") }
             else if event["failed"] as? Bool == true { hint.stringValue = text("RoomsFailed") }
-            else if roomRows.isEmpty { hint.stringValue = text("NoRooms") } else { hint.stringValue = "" }
-            hint.isHidden = hint.stringValue.isEmpty
+            else if rows.isEmpty { hint.stringValue = text("NoRooms") } else { hint.stringValue = "" }
+            if rows.isEmpty { roomEmptyMessage = hint.stringValue; hint.stringValue = ""; rooms.reloadData() }
+            refreshControls()
         case "inspection":
             let details = event["details"] as? [String: Any] ?? event
             mapState = details["mapState"] as? String ?? (details["installed"] as? Bool == true ? "unverified" : "unknown")
@@ -404,7 +516,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         case "release":
             let available = event["available"] as? Bool == true
             notice.stringValue = available ? text("UpdateAvailable", event["version"] as? String ?? "") : ""
-            releaseAvailable = available; notice.isHidden = !available; download.isHidden = !available; installUpdate.isHidden = !available
+            releaseAvailable = available; refreshControls()
         case "update-ready": state = "idle"; NSApp.terminate(nil)
         case "feedback":
             feedbackSend?.isEnabled = true
@@ -428,50 +540,68 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         return alert.runModal() == .alertFirstButtonReturn
     }
     func refreshControls() {
-        statusLine.isHidden = browsing
-        route.isHidden = route.stringValue.isEmpty
-        notice.isHidden = !releaseAvailable
-        roomSettings.isHidden = page != "host"
-        let blockedByMap = !active && ["outdated", "missing", "unknown"].contains(mapState)
-        mapCard.isHidden = !blockedByMap
+        let blockedByMap = !active && (["missing", "unknown"].contains(mapState) || (mapState == "outdated" && page != "solo"))
+        roomSettings.isHidden = page != "host" || blockedByMap
+        mapCard.isHidden = !blockedByMap && !(mapState == "outdated" && !active)
         mapWarning.stringValue = mapState == "missing" ? text("NoMap") : (mapState == "unknown" ? text("NoDota") : text(page == "join" ? "MapCardJoin" : "MapCardHost"))
+        updateMap.isHidden = mapState != "outdated"; subscribe.isHidden = mapState != "missing"
         difficultyRow.isHidden = blockedByMap || page == "join" || (active && state != "ended")
         for difficulty in difficulties { difficulty.isEnabled = backendAvailable && (!active || state == "ended") }
-        autoStart.isHidden = page != "host" || active
-        autoEnter.isHidden = page != "join"
+        autoStart.isHidden = page != "host" || active || blockedByMap
+        autoEnter.isHidden = sessionRole != "join" || state != "ended"
         browser.isHidden = !browsing || blockedByMap; joinLine.isHidden = !browsing || away || blockedByMap
         roster.isHidden = !active || away || sessionRole == "solo" || state == "updating"
+        playerCount.stringValue = sessionRole == "host" ? "\(playerRows.count) / \(count.indexOfSelectedItem + 2)" : "\(playerRows.count)"
         codeLine.isHidden = code.isEmpty || away || sessionRole == "solo"
-        roomLabel.stringValue = code
-        gameActions.isHidden = !active || away || state == "updating"
+        roomLabel.stringValue = code; roomLabel.isHidden = codeLine.isHidden
+        gameActions.isHidden = !active || away || ["updating", "updating-launcher"].contains(state)
         enter.isEnabled = backendAvailable && ["ready", "playing"].contains(state)
+        enter.isHidden = !enter.isEnabled || (sessionRole == "host" && state == "playing")
+        copyCode.isHidden = codeLine.isHidden
         stop.isEnabled = backendAvailable && state != "stopping"
-        stop.title = sessionRole == "join" ? text("LeaveRoom") : (sessionRole == "solo" ? text("StopServer") : text("CloseRoom"))
-        removePlayer.isHidden = sessionRole != "host"
-        removePlayer.isEnabled = backendAvailable && players.selectedRow >= 0 && players.selectedRow < playerRows.count && playerRows[players.selectedRow]["host"] as? Bool != true
+        stop.title = sessionRole == "join" ? text("LeaveRoom") : (sessionRole == "solo" ? text("StopServer") : (busy ? text("Cancel") : text("CloseRoom")))
         pages.isEnabled = backendAvailable && (!active || sessionRole == "host")
+        pages.setEnabled(!active, forSegment: 0)
         roomType.isEnabled = backendAvailable && (!active || (sessionRole == "host" && !busy))
         count.isEnabled = roomType.isEnabled; testMap.isEnabled = !active
         reopen.isHidden = !paused || sessionRole != "host" || away
         installUpdate.isEnabled = backendAvailable && !active && releaseAvailable
         autoStart.isEnabled = !active; autoEnter.isEnabled = backendAvailable
         refresh.isEnabled = backendAvailable
-        let selected = rooms.selectedRow
-        joinSelected.isEnabled = backendAvailable && !away && selected >= 0 && selected < roomRows.count && roomRows[selected]["joinable"] as? Bool != false
-        updateMap.isEnabled = !active && backendAvailable; verify.isEnabled = !active && backendAvailable; subscribe.isEnabled = !active && backendAvailable
+        codeJoin.isEnabled = backendAvailable && !active && roomCode.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).range(of: "^[A-Za-z0-9]{6}$", options: .regularExpression) != nil
+        updateMap.isEnabled = !active && backendAvailable; subscribe.isEnabled = !active && backendAvailable
+        progress.isHidden = !busy
         if busy { progress.startAnimation(nil) } else { progress.stopAnimation(nil) }
         let mapKeys = ["ready": "MapReady", "outdated": "MapOutdated", "missing": "MapMissing", "unknown": "MapUnknown", "unverified": "MapUnverified", "checking": "MapChecking"]
-        mapLabel.stringValue = mapMessage.isEmpty ? text(mapKeys[mapState] ?? "MapUnverified") : mapMessage
-        mapLabel.textColor = ["outdated", "missing", "unknown"].contains(mapState) ? .systemOrange : Theme.muted
-        if !active && !browsing {
-            hint.stringValue = page == "host" ? text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint") : ""
-        } else if active && !away && sessionRole == "host" {
-            hint.stringValue = text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint")
-        }
+        mapLabel.stringValue = text(mapKeys[mapState] ?? "MapUnverified"); mapLabel.toolTip = mapMessage
+        mapDot.textColor = mapState == "ready" ? Theme.color(0x3fb67a) : (["outdated", "unverified"].contains(mapState) ? .systemOrange : Theme.muted)
+        hostGuide.isHidden = page != "host" || active || blockedByMap || releaseAvailable
+        (hostGuide.arrangedSubviews.first as? NSTextField)?.stringValue = "✓  " + text(autoStart.state == .on ? "HostGuide" : "HostGuideServerOnly")
+        if !active && !browsing { hint.stringValue = "" }
+        else if active && !away && sessionRole == "host" { hint.stringValue = text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint") }
         hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host")
+        statusLine.isHidden = browsing || !hostGuide.isHidden || blockedByMap || releaseAvailable
+        route.isHidden = route.stringValue.isEmpty || away
+        let showUpdate = releaseAvailable && !active && !blockedByMap
+        updateNotice.isHidden = !showUpdate
+        if active { statusLine.isHidden = away }
+        (pages.cell as? SegmentCell)?.hosting = active && sessionRole == "host"
+        pages.needsDisplay = true; roomType.needsDisplay = true
+        resizeWindow()
     }
+    func setBadge(_ count: Int) {
+        (pages.cell as? SegmentCell)?.badgeCount = count; pages.setLabel(text("JoinRoom") + (count > 0 ? "  \(count)" : ""), forSegment: 2); pages.needsDisplay = true
+    }
+    @objc func refreshBadge() {
+        guard !preview, window != nil, NSApp.isActive, !window.isMiniaturized, !browsing else { return }
+        lastBadge = Date(); send(["action": "badge", "testMap": testMap.state == .on])
+    }
+    func applicationDidBecomeActive(_ notification: Notification) {
+        if Date().timeIntervalSince(lastBadge) >= 10 { refreshBadge() }
+    }
+    func controlTextDidChange(_ notification: Notification) { refreshControls() }
     @objc func saveSettings() {
-        guard !preview else { return }
+        if preview { refreshControls(); return }
         defaults.set(pages.selectedSegment, forKey: "mode"); defaults.set(roomType.selectedSegment == 1, forKey: "privateRoom")
         defaults.set(count.indexOfSelectedItem + 2, forKey: "maxPlayers")
         defaults.set(autoStart.state == .on, forKey: "autoStartDota"); defaults.set(autoEnter.state == .on, forKey: "autoEnter")
@@ -487,9 +617,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     }
     func updateBrowsing() { send(["action": "browse", "active": browsing, "testMap": testMap.state == .on]) }
     @objc func autoEnterChanged() { saveSettings(); send(["action": "auto-enter", "enabled": autoEnter.state == .on]) }
-    @objc func toggleDeveloper() { testMap.isHidden.toggle() }
+    @objc func toggleDeveloper() { testMap.isHidden.toggle(); resizeWindow() }
     @objc func testMapChanged() { saveSettings(); inspect(); updateBrowsing() }
-    @objc func toggleLogs() { journal.enclosingScrollView?.isHidden.toggle() }
+    @objc func toggleLogs() { journal.enclosingScrollView?.isHidden.toggle(); resizeWindow() }
     @objc func inspect() { send(["action": "inspect", "testMap": testMap.state == .on]) }
     @objc func reopenRoom() { send(["action": "reopen"]) }
     @objc func updateLauncher() { send(["action": "update-launcher"]) }
@@ -510,19 +640,24 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         send(["action": "join", "code": normalized, "autoEnter": autoEnter.state == .on, "testMap": testMap.state == .on])
     }
     @objc func joinByCode() { join(roomCode.stringValue) }
-    @objc func pasteCode() { roomCode.stringValue = NSPasteboard.general.string(forType: .string) ?? "" }
     @objc func joinRoom() {
-        guard rooms.selectedRow >= 0, rooms.selectedRow < roomRows.count else { showError(text("ChooseRoom")); return }
-        guard roomRows[rooms.selectedRow]["joinable"] as? Bool != false else { return }
-        join(roomRows[rooms.selectedRow]["code"] as? String ?? "")
+        let row = rooms.selectedRow
+        guard row >= 0, row < roomRows.count, roomRows[row]["header"] == nil else { return }
+        joinRoomAt(row)
+    }
+    @objc func joinFromRow(_ sender: NSButton) { joinRoomAt(sender.tag) }
+    func joinRoomAt(_ row: Int) {
+        guard row >= 0, row < roomRows.count, !away, roomRows[row]["joinable"] as? Bool != false,
+              (roomRows[row]["kind"] as? Int ?? 0) == 0 else { return }
+        join(roomRows[row]["code"] as? String ?? "")
     }
     @objc func enterGame() { send(["action": "enter"]) }
     @objc func stopGame() {
         if state == "saving" && !confirm(text("SavingCloseTitle"), text("SavingCloseBody"), text("StopAnyway")) { return }
         state = "stopping"; refreshControls(); send(["action": "stop"])
     }
-    @objc func kickPlayer() {
-        let row = players.selectedRow
+    @objc func kickPlayer(_ sender: NSButton) {
+        let row = sender.tag
         guard sessionRole == "host", row >= 0, row < playerRows.count, playerRows[row]["host"] as? Bool != true else { return }
         let player = playerRows[row]
         if confirm(text("KickConfirm", player["name"] as? String ?? text("Player")), "", text("Kick")) { send(["action": "kick", "key": player["key"] as? String ?? ""]) }
@@ -541,48 +676,94 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         if FileManager.default.fileExists(atPath: url.path) { NSWorkspace.shared.open(url) } else { append(text("LogsNotCreated")) }
     }
     @objc func about() { let alert = NSAlert(); alert.messageText = text("Title") + " " + launcherVersion; alert.informativeText = text("LauncherLicense"); alert.runModal() }
-    func numberOfRows(in tableView: NSTableView) -> Int { tableView === rooms ? roomRows.count : playerRows.count }
+    func numberOfRows(in tableView: NSTableView) -> Int { tableView === rooms ? max(1, roomRows.count) : (playerRows.count + 1) / 2 }
     func tableViewSelectionDidChange(_ notification: Notification) { refreshControls() }
+    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
+        if tableView === rooms && roomRows.isEmpty { return 180 }
+        if tableView === players { return 64 }
+        return roomRows[row]["header"] != nil ? 24 : 52
+    }
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        tableView !== rooms || (!roomRows.isEmpty && roomRows[row]["header"] == nil)
+    }
+    func avatarView(_ address: String, name: String, size: CGFloat) -> NSImageView {
+        let image = NSImageView(); image.image = avatar(address); image.toolTip = name
+        image.widthAnchor.constraint(equalToConstant: size).isActive = true; image.heightAnchor.constraint(equalToConstant: size).isActive = true
+        image.wantsLayer = true; image.layer?.cornerRadius = size / 2; image.layer?.masksToBounds = true
+        return image
+    }
+    func roomColumns(_ name: NSView, _ map: NSView, _ count: NSView, _ tail: NSView) -> NSView {
+        let row = NSView()
+        for child in [name, map, count, tail] {
+            child.translatesAutoresizingMaskIntoConstraints = false; row.addSubview(child)
+            child.centerYAnchor.constraint(equalTo: row.centerYAnchor).isActive = true
+        }
+        NSLayoutConstraint.activate([
+            tail.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -10), tail.widthAnchor.constraint(equalToConstant: 110),
+            count.trailingAnchor.constraint(equalTo: tail.leadingAnchor, constant: -8), count.widthAnchor.constraint(equalToConstant: 34),
+            map.trailingAnchor.constraint(equalTo: count.leadingAnchor, constant: -8), map.widthAnchor.constraint(equalToConstant: 50),
+            name.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 10), name.trailingAnchor.constraint(equalTo: map.leadingAnchor, constant: -8)
+        ])
+        return row
+    }
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
-        let identifier = column?.identifier.rawValue ?? "name"
-        let value: String
         if tableView === rooms {
+            if roomRows.isEmpty { let message = label(roomEmptyMessage, size: 12); message.alignment = .center; message.textColor = Theme.muted; return stack([message], horizontal: true) }
             let item = roomRows[row]
-            switch identifier {
-            case "map": value = text(["easy": "Easy", "hard": "Hard", "custom": "Custom"][item["map"] as? String ?? ""] ?? "Custom")
-            case "players": value = "\(item["playerCount"] as? Int ?? 0)/\(item["maxPlayers"] as? Int ?? 10)"
-            case "ping":
-                let rtt = item["rtt"] as? Int ?? item["latency"] as? Int ?? -1; let relay = item["relayRtt"] as? Int ?? -1
-                value = rtt >= 0 ? text("ProbeLatency", String(rtt)) : (relay >= 0 ? text("ProbeRelayLatency", String(relay)) : text("ProbeTesting"))
-            default:
-                let name = item["name"] as? String ?? text("Player")
-                value = name + (item["started"] as? Bool == true ? " · " + text("PlayingFor", String(item["minutes"] as? Int ?? 0)) : "")
+            if let title = item["header"] as? String {
+                let heading = label(title, size: 10, weight: .semibold); heading.textColor = Theme.muted
+                let row = stack([heading], horizontal: true); row.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10); return row
             }
-        } else {
-            let item = playerRows[row]
-            if identifier == "status" {
-                let states = ["StatusConnecting", "StatusLoading", "StatusInGame", "StatusFailed", "StatusLeft", "StatusInRoom", "StatusWaiting"]
-                let index = item["status"] as? Int ?? 0; value = text(states.indices.contains(index) ? states[index] : "StatusInRoom")
-            } else { value = (item["host"] as? Bool == true ? text("TagHost") + " · " : "") + (item["name"] as? String ?? text("Player")) }
-        }
-        let field = label(value, size: 12); field.lineBreakMode = .byTruncatingTail; field.toolTip = value
-        guard identifier == "name" else { return stack([field], horizontal: true) }
-        var icons = [(String, String)]()
-        if tableView === rooms {
-            for avatar in roomRows[row]["avatars"] as? [[String: Any]] ?? [] {
-                icons.append((avatar["url"] as? String ?? "", avatar["name"] as? String ?? ""))
+            let kind = item["kind"] as? Int ?? 0
+            let avatars = (item["avatars"] as? [[String: Any]] ?? []).prefix(3).map { avatarView($0["url"] as? String ?? "", name: $0["name"] as? String ?? "", size: 24) }
+            var nameViews: [NSView] = avatars
+            if nameViews.isEmpty { nameViews.append(avatarView("", name: item["name"] as? String ?? text("Player"), size: 24)) }
+            if kind != 1 { let name = label(kind == 2 ? text("YourRoom") : (item["name"] as? String ?? text("Player")), size: 12); name.lineBreakMode = .byTruncatingTail; name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal); nameViews.append(name) }
+            nameViews.append(spacer())
+            let name = stack(nameViews, horizontal: true, spacing: 4); name.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            let map = label(text(["easy": "Easy", "hard": "Hard", "custom": "Custom"][item["map"] as? String ?? ""] ?? "Custom"), size: 11)
+            map.widthAnchor.constraint(equalToConstant: 50).isActive = true
+            let count = label(kind == 1 ? text("RoomPlayers", String(item["playerCount"] as? Int ?? 0)) : "\(item["playerCount"] as? Int ?? 0)/\(item["maxPlayers"] as? Int ?? 10)", size: 11)
+            count.widthAnchor.constraint(equalToConstant: 34).isActive = true
+            let tail: NSView
+            if kind == 1 {
+                let duration = label(text("PlayingFor", String(item["minutes"] as? Int ?? 0)), size: 10); duration.textColor = Theme.muted; tail = duration
+            } else if kind == 2 || away { tail = NSView() }
+            else {
+                let rtt = item["rtt"] as? Int ?? -1; let relay = item["relayRtt"] as? Int ?? -1
+                let ping = label(rtt >= 0 ? "\(rtt)" : (relay >= 0 ? "↪ \(relay)" : "—"), size: 10)
+                ping.toolTip = rtt >= 0 ? text("ProbeLatency", String(rtt)) : (relay >= 0 ? text("ProbeRelayLatency", String(relay)) : text("ProbeTesting"))
+                ping.widthAnchor.constraint(equalToConstant: 40).isActive = true
+                let full = (item["playerCount"] as? Int ?? 0) >= (item["maxPlayers"] as? Int ?? 10)
+                let action = button(text(full ? "Full" : "Join"), #selector(joinFromRow(_:))); action.tag = row; action.primary = true
+                action.widthAnchor.constraint(equalToConstant: 62).isActive = true
+                action.isEnabled = backendAvailable && !away && kind == 0 && !full && item["joinable"] as? Bool != false
+                tail = stack([ping, action], horizontal: true, spacing: 8)
             }
-        } else { icons.append((playerRows[row]["avatarUrl"] as? String ?? "", playerRows[row]["name"] as? String ?? "")) }
-        var views = [NSView]()
-        for (url, name) in icons.prefix(3) {
-            let image = NSImageView(); image.image = avatar(url); image.toolTip = name
-            image.widthAnchor.constraint(equalToConstant: 24).isActive = true
-            image.heightAnchor.constraint(equalToConstant: 24).isActive = true
-            views.append(image)
+            return roomColumns(name, map, count, tail)
         }
-        views.append(field)
-        if tableView === rooms, roomRows[row]["friends"] as? Bool == true { field.toolTip = value + " · " + text("FriendGame") }
-        return stack(views, horizontal: true, spacing: 5)
+        let left = playerCard(row * 2)
+        let right = row * 2 + 1 < playerRows.count ? playerCard(row * 2 + 1) : NSView()
+        let pair = stack([left, right], horizontal: true, spacing: 8); pair.distribution = .fillEqually
+        return pair
+    }
+    func playerCard(_ index: Int) -> NSView {
+        let item = playerRows[index]; let name = item["name"] as? String ?? text("Player")
+        let playerName = label(name, size: 12); playerName.lineBreakMode = .byTruncatingTail; playerName.toolTip = name
+        playerName.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let nameLine = stack([playerName, label(item["host"] as? Bool == true ? text("TagHost") : "", size: 9), spacer()], horizontal: true, spacing: 4)
+        let states = ["StatusConnecting", "StatusLoading", "StatusInGame", "StatusFailed", "StatusLeft", "StatusInRoom", "StatusWaiting"]
+        let status = item["status"] as? Int ?? 0; let detail = label("● " + text(states.indices.contains(status) ? states[status] : "StatusInRoom"), size: 10)
+        detail.textColor = Theme.muted; detail.lineBreakMode = .byTruncatingTail
+        let card = stack([avatarView(item["avatarUrl"] as? String ?? "", name: name, size: 32), stack([nameLine, detail], spacing: 3)], horizontal: true, spacing: 6)
+        if sessionRole == "host" && item["host"] as? Bool != true {
+            let kick = button("×", #selector(kickPlayer(_:))); kick.tag = index; kick.link = true
+            kick.toolTip = text("Kick"); kick.setAccessibilityLabel(text("Kick")); kick.widthAnchor.constraint(equalToConstant: 18).isActive = true
+            card.addArrangedSubview(kick)
+        }
+        card.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+        card.wantsLayer = true; card.layer?.backgroundColor = Theme.color(0x2a2420).cgColor; card.layer?.cornerRadius = 5
+        return card
     }
     func avatar(_ address: String) -> NSImage? {
         if let cached = avatarCache[address] { return cached }
@@ -599,31 +780,57 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     }
     @objc func showFeedback() {
         if let window = feedbackWindow { window.makeKeyAndOrderFront(nil); return }
-        let sheet = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 650), styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        sheet.backgroundColor = Theme.background
-        sheet.title = text("FeedbackTitle"); sheet.isReleasedWhenClosed = false; sheet.center()
-        let root = stack([], spacing: 12); root.translatesAutoresizingMaskIntoConstraints = false; sheet.contentView!.addSubview(root)
-        NSLayoutConstraint.activate([root.leadingAnchor.constraint(equalTo: sheet.contentView!.leadingAnchor, constant: 24), root.trailingAnchor.constraint(equalTo: sheet.contentView!.trailingAnchor, constant: -24), root.topAnchor.constraint(equalTo: sheet.contentView!.topAnchor, constant: 24), root.bottomAnchor.constraint(equalTo: sheet.contentView!.bottomAnchor, constant: -24)])
-        let kind = NSSegmentedControl(labels: [text("TypeProblem"), text("TypeSuggestion")], trackingMode: .selectOne, target: nil, action: nil); kind.selectedSegment = 0; kind.target = self; kind.action = #selector(feedbackKindChanged)
+        let sheet = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 450), styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        sheet.backgroundColor = Theme.background; sheet.title = text("FeedbackTitle"); sheet.isReleasedWhenClosed = false; sheet.center()
+        let root = stack([], spacing: 10); root.translatesAutoresizingMaskIntoConstraints = false; sheet.contentView!.addSubview(root)
+        NSLayoutConstraint.activate([root.leadingAnchor.constraint(equalTo: sheet.contentView!.leadingAnchor, constant: 20), root.trailingAnchor.constraint(equalTo: sheet.contentView!.trailingAnchor, constant: -20), root.topAnchor.constraint(equalTo: sheet.contentView!.topAnchor, constant: 20)])
+        let kind = segments([text("TypeProblem"), text("TypeSuggestion")]); kind.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        kind.selectedSegment = 0; kind.target = self; kind.action = #selector(feedbackKindChanged)
         feedbackType = kind; root.addArrangedSubview(kind)
-        root.addArrangedSubview(label(text("RelatedTo") + " · " + text("UpToTwo")))
-        let topicKeys = ["TopicHero", "TopicAbility", "TopicAwakening", "TopicItem", "TopicBot", "TopicBalance", "TopicUI", "TopicMembership", "TopicLag", "TopicLauncher", "TopicWebsite"]
-        feedbackTopics = topicKeys.enumerated().map { index, key in let view = NSButton(checkboxWithTitle: text(key), target: self, action: #selector(topicChanged(_:))); view.tag = index; return view }
-        for offset in stride(from: 0, to: feedbackTopics.count, by: 3) { root.addArrangedSubview(stack(Array(feedbackTopics[offset..<min(offset + 3, feedbackTopics.count)]), horizontal: true)) }
-        root.addArrangedSubview(label(text("Description")))
-        let description = NSTextView(); description.font = .systemFont(ofSize: 13); description.isRichText = false; description.delegate = self; feedbackDescription = description
+        root.addArrangedSubview(stack([label(text("RelatedTo"), size: 11, weight: .semibold), spacer(), label(text("UpToTwo"), size: 10)], horizontal: true))
+        let keys = ["TopicHero", "TopicAbility", "TopicAwakening", "TopicItem", "TopicBot", "TopicBalance", "TopicUI", "TopicMembership", "TopicLag", "TopicLauncher", "TopicWebsite"]
+        feedbackTopics = keys.enumerated().map { index, key in
+            let view = button(text(key), #selector(topicChanged(_:))); view.setButtonType(.pushOnPushOff); view.pill = true
+            view.font = .systemFont(ofSize: 11); view.tag = index; view.heightAnchor.constraint(equalToConstant: 26).isActive = true
+            return view
+        }
+        var row = stack([], horizontal: true, spacing: 6); var width: CGFloat = 0
+        for view in feedbackTopics {
+            let next = view.intrinsicContentSize.width
+            if width + next > 460 { row.addArrangedSubview(spacer()); root.addArrangedSubview(row); row = stack([], horizontal: true, spacing: 6); width = 0 }
+            row.addArrangedSubview(view); width += next + 6
+        }
+        row.addArrangedSubview(spacer()); root.addArrangedSubview(row)
+        root.addArrangedSubview(label(text("Description"), size: 11, weight: .semibold))
+        let description = DescriptionView(); description.font = .systemFont(ofSize: 12); description.isRichText = false; description.delegate = self
+        description.backgroundColor = Theme.panel; description.textColor = Theme.text; feedbackDescription = description
         let scroll = NSScrollView(); scroll.hasVerticalScroller = true; scroll.borderType = .bezelBorder; scroll.documentView = description
         description.isVerticallyResizable = true; description.autoresizingMask = [.width]; description.textContainer?.widthTracksTextView = true
-        scroll.heightAnchor.constraint(equalToConstant: 160).isActive = true; root.addArrangedSubview(scroll)
-        let attach = NSButton(checkboxWithTitle: text("AttachLog"), target: nil, action: nil); attach.state = .on; attach.toolTip = text("AttachLogHint"); feedbackLog = attach; root.addArrangedSubview(attach)
-        root.addArrangedSubview(stack([label(text("PrivacyNote")), button(text("PrivacyLink"), #selector(openPrivacy))], horizontal: true))
-        let send = button(text("Send"), #selector(submitFeedback)); feedbackSend = send; root.addArrangedSubview(send)
+        description.textContainerInset = NSSize(width: 6, height: 6)
+        scroll.heightAnchor.constraint(equalToConstant: 116).isActive = true; root.addArrangedSubview(scroll)
+        let attach = NSButton(checkboxWithTitle: text("AttachLog"), target: nil, action: nil); attach.state = .on; attach.font = .systemFont(ofSize: 11); attach.toolTip = text("AttachLogHint")
+        feedbackLog = attach
+        let attachHint = label(text("AttachLogHint"), size: 10); attachHint.textColor = Theme.muted; attachHint.lineBreakMode = .byTruncatingTail; attachHint.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        root.addArrangedSubview(stack([attach, attachHint, spacer()], horizontal: true, spacing: 8))
+        let note = label(text("PrivacyNote"), size: 9); note.textColor = Theme.muted
+        let privacy = button(text("PrivacyLink"), #selector(openPrivacy)); privacy.link = true; privacy.font = .systemFont(ofSize: 9)
+        let policy = stack([note, privacy], horizontal: languageCode != "ru-RU", spacing: 0)
+        let cancel = button(text("Cancel"), #selector(closeFeedback)); cancel.keyEquivalent = "\u{1b}"
+        let send = button(text("Send"), #selector(submitFeedback)); send.primary = true; feedbackSend = send
+        root.addArrangedSubview(stack([policy, spacer(), cancel, send], horizontal: true, spacing: 8))
         for view in root.arrangedSubviews { view.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true }
-        feedbackWindow = sheet; feedbackKindChanged(); if option("--screenshot") == nil { sheet.makeKeyAndOrderFront(nil) }
+        feedbackWindow = sheet; feedbackKindChanged(); sheet.contentView?.layoutSubtreeIfNeeded()
+        sheet.setContentSize(NSSize(width: 500, height: max(430, root.fittingSize.height + 40)))
+        if option("--screenshot") == nil { sheet.makeKeyAndOrderFront(nil) }
     }
-    @objc func feedbackKindChanged() { feedbackDescription?.toolTip = text(feedbackType?.selectedSegment == 1 ? "SuggestionCue" : "ProblemCue") }
+    @objc func closeFeedback() { feedbackWindow?.close() }
+    @objc func feedbackKindChanged() {
+        let cue = text(feedbackType?.selectedSegment == 1 ? "SuggestionCue" : "ProblemCue")
+        feedbackDescription?.toolTip = cue; (feedbackDescription as? DescriptionView)?.placeholder = cue
+    }
     func textDidChange(_ notification: Notification) {
         if let description = feedbackDescription, description.string.count > 1000 { description.string = String(description.string.prefix(1000)) }
+        feedbackDescription?.needsDisplay = true
     }
     @objc func topicChanged(_ sender: NSButton) { if feedbackTopics.filter({ $0.state == .on }).count > 2 { sender.state = .off } }
     @objc func openPrivacy() { if !preview { NSWorkspace.shared.open(URL(string: "https://windy10v10ai.com/launch/code-signing#privacy")!) } }
@@ -662,15 +869,23 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         state = "idle"; NSApp.terminate(nil)
     }
     func previewState() {
-        mapState = "ready"
+        mapState = "ready"; setBadge(1)
         switch option("--preview-state") ?? "idle" {
-        case "host", "join":
-            let role = option("--preview-state")!; pages.selectedSegment = role == "host" ? 1 : 2
-            handle(["type": "state", "role": role, "state": "ready", "code": "Z82QCT", "message": text("HostGuide")])
+        case "host-idle": pages.selectedSegment = 1
+        case "host-starting":
+            pages.selectedSegment = 1
+            handle(["type": "state", "role": "host", "state": "loading", "code": "4ZZZMP", "message": text("Starting")])
+            handle(["type": "roster", "players": [["key": "host", "name": "Konosuba", "host": true, "status": 5]]])
+        case "host", "join", "ended":
+            let mode = option("--preview-state")!; let role = mode == "ended" ? "host" : mode; pages.selectedSegment = role == "host" ? 1 : 2
+            handle(["type": "state", "role": role, "state": mode == "ended" ? "ended" : "ready", "code": "Z82QCT", "message": text(mode == "ended" ? "GameEnded" : "HostGuide")])
             handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
         case "rooms":
             pages.selectedSegment = 2
-            handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "relayRtt": 68]]])
+            handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32, "kind": 0, "avatars": [["name": "Windy"], ["name": "Player"]]], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "kind": 1, "minutes": 24, "avatars": [["name": "Player"], ["name": "Windy"]]]]])
+        case "missing": mapState = "missing"
+        case "outdated": pages.selectedSegment = 1; mapState = "outdated"
+        case "error": state = "error"; status.stringValue = text("BackendExited"); status.textColor = .systemRed
         case "feedback": showFeedback()
         case "update": handle(["type": "release", "available": true, "version": "1.0.0"])
         default: break
