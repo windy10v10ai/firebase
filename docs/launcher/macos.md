@@ -1,10 +1,12 @@
 # Mac 启动器
 
-Mac 与 Windows 是同一个启动器的两个平台，共用联机核心、版本定义、API 地址和中英俄文案。构建与离线测试见 [Mac README](../../launcher/macos/README.md)。软件开发与完整功能验收在当前实现 PR 完成。官方构建发布工作流验证由 [#1598](https://github.com/windy10v10ai/firebase/issues/1598) 跟踪，官网画面修改与正式发布由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。
+Mac 与 Windows 是同一个启动器的两个平台，共用联机核心、版本定义、API 地址和中英俄文案。构建与离线测试见 [Mac README](../../launcher/macos/README.md)。官方构建发布工作流验证由 [#1598](https://github.com/windy10v10ai/firebase/issues/1598) 跟踪，官网画面修改与正式发布由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。
 
 ## 平台边界
 
 AppKit 窗口通过 JSON 消息控制自带 ARM64 .NET 运行时的服务。房间、网络、隧道、名单和 HTTP 直接编译 `launcher/core`；账号识别和 socket 系统差异由 Mac 的 `Platform` 实现。界面、游戏启动、专用服进程和地图更新留在平台层。
+
+共通会话、平台执行与界面的三层职责见 [启动器 README](../../launcher/README.md#代码结构)。Mac 的消息桥适配 AppKit 操作和会话状态，平台执行层处理游戏进程与文件操作。
 
 房主运行专用服；加入者只建立到房主的隧道，不启动本机专用服。关闭或离开房间释放本应用的连接和地图挂载，保留游戏客户端。
 

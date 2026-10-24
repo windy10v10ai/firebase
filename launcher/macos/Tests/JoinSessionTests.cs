@@ -176,14 +176,17 @@ namespace Windy10v10AI.Launcher.Tests
             fixture.Options.JoinRoom = (code, body) => { requested.TrySetResult(); release.Task.GetAwaiter().GetResult(); return fixture.Answer(code, body); };
             fixture.Session.Start("AB12CD", true);
             await requested.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            int stoppedEventCount = 0;
             try
             {
                 await fixture.Session.Stop().WaitAsync(TimeSpan.FromSeconds(2));
                 Check(!fixture.Session.Active && fixture.Mount.Disposals == 1, "stop cancels waiting room request and restores mount");
+                stoppedEventCount = fixture.Events.Count;
             }
             finally { release.TrySetResult(); }
             await Task.Delay(100);
             Check(fixture.Entries == 0 && fixture.Session.State == "idle", "late API answer cannot restart stopped session");
+            Check(fixture.Events.Count == stoppedEventCount, "late API answer cannot publish roster or state after leaving");
         }
         static async Task BusinessErrors()
         {

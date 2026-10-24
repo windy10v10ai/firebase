@@ -23,6 +23,7 @@
 
 `core/` 是 Windows 与 Mac 共用的联机代码，理由见 [README.md](README.md) 的「代码结构」。
 
+- 会话、平台执行与界面按 [README](README.md#代码结构) 的三层边界组织；房间流程和规则在共通会话维护，JSON 消息留在 Mac 界面适配层。
 - `core/` 只用 C# 5 语法，不引用 Windows 专用 API（注册表、`DllImport`、WinForms、`System.Drawing`），也不引用 `src/` 里的类型
 - 核心要用到系统能力时，在 `Platform` 加方法，每个平台的实现都补上：Windows 是 `src/Platform.cs`，Mac 是 `macos/Platform.cs`，核心测试是 `core/tests/dotnet/TestPlatform.cs`
 - 与平台无关的测试放 `core/tests/`，并加进 `core/tests/dotnet/Program.cs` 与 `tests/SteamExecutableTests.cs` 两处入口
