@@ -1,11 +1,17 @@
-import { hashKey, queryOptions, type QueryClient, type QueryKey } from '@tanstack/react-query';
+import {
+  hashKey,
+  infiniteQueryOptions,
+  queryOptions,
+  type QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 
 import { fetchPlayerAwakening } from './awaken';
 import { fetchDailyTask } from './daily-task';
 import { fetchBattleRank, fetchLeaderboard } from './leaderboard';
 import { fetchPlayerInfo, fetchPlayerMember, fetchPlayerProperties } from './player-info';
 import { fetchStatsRadar } from './player-stats-radar';
-import { fetchRecentMatches } from './player-stats-recent';
+import { fetchMatchHistory, fetchRecentMatches } from './player-stats-recent';
 import { fetchSteamProfile } from './steam-profile';
 
 const MINUTE = 60_000;
@@ -84,6 +90,18 @@ export function recentMatchesQuery(steamId: string) {
     queryKey: [...playerKey(steamId), 'stats-recent'],
     queryFn: () => fetchRecentMatches(steamId),
     ...CACHE_TIERS.short,
+  });
+}
+
+/** 首屏之后的更早战绩，滚到底才取；不留缓存，免得与重新取到的首屏接缝处重复 */
+export function matchHistoryQuery(steamId: string) {
+  return infiniteQueryOptions({
+    queryKey: [...playerKey(steamId), 'stats-history'],
+    queryFn: ({ pageParam }) => fetchMatchHistory(steamId, pageParam),
+    initialPageParam: null as number | null,
+    getNextPageParam: (last) => last.nextPage ?? undefined,
+    enabled: false,
+    ...CACHE_TIERS.realtime,
   });
 }
 

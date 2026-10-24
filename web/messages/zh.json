@@ -566,7 +566,11 @@
     },
     "recent": {
       "title": "近期战绩",
-      "note": "只保留最近 {count} 场，更早的不再保留。",
+      "note": "先显示最近 {count} 场，往下滚动会继续加载更早的战绩。此前只保留了 50 场，更早的无法找回。",
+      "loadingMore": "加载中…",
+      "loadMoreFailed": "没能加载更早的战绩",
+      "retry": "重试",
+      "noMore": "没有更早的战绩了",
       "noteLabel": "近期战绩说明",
       "columns": {
         "difficulty": "难度",

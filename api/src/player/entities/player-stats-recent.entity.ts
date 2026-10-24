@@ -77,9 +77,22 @@ export class PlayerStatsRecentMatch {
 export class PlayerStatsRecent {
   @ApiProperty()
   id: string;
-  /** 新场次在前，超出上限的从尾部丢弃 */
+  /** 新场次在前，攒满后最老的一批整页搬进归档 */
   @ApiProperty({ type: [PlayerStatsRecentMatch] })
   matches: PlayerStatsRecentMatch[];
+  /** 已搬进归档的页数，缺省按 0；页号从 1 起，越大越新 */
+  @ApiProperty({ required: false })
+  archivedPages?: number;
   @ApiProperty()
   updatedAt: Date;
+}
+
+/** 一整页写满后不再改动，文档 id 为 `${steamId}_${page}` */
+@Collection()
+export class PlayerStatsRecentArchive {
+  @ApiProperty()
+  id: string;
+  /** 新场次在前 */
+  @ApiProperty({ type: [PlayerStatsRecentMatch] })
+  matches: PlayerStatsRecentMatch[];
 }
