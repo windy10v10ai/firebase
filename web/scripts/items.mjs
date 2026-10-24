@@ -3,7 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { resolveGameRepo } from './dota-ability.mjs';
+import {
+  resolveGameRepo,
+  resolveDotaVersion,
+  parseFlatKv,
+  syncGameSource,
+} from './dota-ability.mjs';
 
 /**
  * 取物品与抽选技能的图标和三语名字，产出清单 config/items.json、config/abilities.json。
@@ -304,6 +309,7 @@ async function buildSlotAssets(sharp) {
 /** 能留在物品栏里的物品：商店在售、中立掉落、合成产物、神器，加上玩家真买过的 */
 function collectItems(npc, scripts, kv, dotaNames, csvFile) {
   const names = new Set([
+    'item_divine_regalia_broken',
     ...readListed(path.join(scripts, 'shops.txt'), /"item"\s+"(item_[a-z0-9_]+)"/g),
     ...readListed(path.join(npc, 'neutral_items.txt'), /"(item_[a-z0-9_]+)"\s+"1"/g),
     ...[...readKvBlocks(path.join(npc, 'npc_items_artifact.txt')).keys()],
@@ -333,6 +339,7 @@ function collectItems(npc, scripts, kv, dotaNames, csvFile) {
 async function main() {
   const sharp = await loadSharp();
   const game = resolveGameRepo(REPO);
+  syncGameSource(game);
   const scripts = path.join(game, 'game/scripts');
   const npc = path.join(scripts, 'npc');
   const resource = path.join(game, 'game/resource');
@@ -345,9 +352,25 @@ async function main() {
 
   const itemKv = readKvDir(npc, ITEM_KV_FILES);
   const itemNames = await readDotaNames('item');
+  // 原版数据源漏收的退化物品仍有独立的本地化和图标。
+  for (const [locale, language] of Object.entries(LANGUAGES)) {
+    const labels = parseFlatKv(
+      path.join(game, `docs/reference/${resolveDotaVersion(game)}/abilities_${language}.txt`),
+    );
+    const label = [...labels].find(
+      ([key]) => key.toLowerCase() === 'dota_tooltip_ability_item_divine_regalia_broken:n',
+    )?.[1];
+    if (label) itemNames[locale].set('item_divine_regalia_broken', label);
+  }
   await buildManifest({
     kind: 'items',
-    names: collectItems(npc, scripts, itemKv, itemNames, process.argv[2]),
+    names: collectItems(
+      npc,
+      scripts,
+      itemKv,
+      itemNames,
+      process.argv.slice(2).find((arg) => !arg.startsWith('--')),
+    ),
     kv: itemKv,
     gameIconDir: path.join(resource, 'flash3/images/items'),
     cdnDir: 'items',

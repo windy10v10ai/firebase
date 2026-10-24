@@ -17,6 +17,7 @@ import type { WikiEntry } from '@/app/wiki/entries';
 import type { WikiDetail } from '@/config/wiki';
 
 export type WikiKind = 'abilities' | 'items';
+export type WikiDetailSource = WikiKind | 'match-items';
 
 // 描边与档位标签照游戏抽选界面的五档色；类名写全，Tailwind 才扫得到
 export const TIER_CLASS: Record<number, { border: string; badge: string; text: string }> = {
@@ -43,7 +44,7 @@ type DetailMap = Map<string, WikiDetail>;
  * 说明数据单独成包，不随页面下发；文件名带内容 hash，浏览器长期缓存。
  * 同一页里多处要用时共用一次加载。
  */
-const LOADERS: Record<WikiKind, () => Promise<Record<string, WikiDetail>>> = {
+const LOADERS: Record<WikiDetailSource, () => Promise<Record<string, WikiDetail>>> = {
   abilities: () =>
     import('@/config/wiki-ability-details.json').then(
       (data) => data.default as unknown as Record<string, WikiDetail>,
@@ -52,16 +53,20 @@ const LOADERS: Record<WikiKind, () => Promise<Record<string, WikiDetail>>> = {
     import('@/config/wiki-item-details.json').then(
       (data) => data.default as unknown as Record<string, WikiDetail>,
     ),
+  'match-items': () =>
+    import('@/config/match-item-details.json').then(
+      (data) => data.default as unknown as Record<string, WikiDetail>,
+    ),
 };
-const loading: Partial<Record<WikiKind, Promise<DetailMap>>> = {};
+const loading: Partial<Record<WikiDetailSource, Promise<DetailMap>>> = {};
 
-function loadDetails(kind: WikiKind): Promise<DetailMap> {
+function loadDetails(kind: WikiDetailSource): Promise<DetailMap> {
   loading[kind] ??= LOADERS[kind]().then((data) => new Map(Object.entries(data)));
   return loading[kind];
 }
 
 /** enabled 为 false 时不发起加载，返回 null；变成 true 后开始加载，到了再返回 */
-export function useWikiDetails(kind: WikiKind, enabled = true): DetailMap | null {
+export function useWikiDetails(kind: WikiDetailSource, enabled = true): DetailMap | null {
   const [details, setDetails] = useState<DetailMap | null>(null);
   useEffect(() => {
     if (!enabled) {
@@ -156,7 +161,9 @@ function Subtitle({ entry, large = false }: { entry: WikiEntry; large?: boolean 
       </span>
     );
   }
-  return <span className={`font-semibold ${TIER_CLASS[entry.tier].text}`}>{entry.tag}</span>;
+  return entry.tag ? (
+    <span className={`font-semibold ${TIER_CLASS[entry.tier].text}`}>{entry.tag}</span>
+  ) : null;
 }
 
 /** 电脑档的悬浮说明，挂在 children 上；说明没到时先放骨架 */
@@ -179,7 +186,9 @@ export function WikiHoverTip({
       title={entry.label}
       subtitle={
         kind === 'items' ? (
-          <Subtitle entry={entry} />
+          entry.price !== undefined || entry.tag ? (
+            <Subtitle entry={entry} />
+          ) : null
         ) : (
           <span className={`font-semibold ${TIER_CLASS[entry.tier].text}`}>{entry.tag}</span>
         )
@@ -225,9 +234,11 @@ export function WikiDialog({
             <div className="min-w-0">
               <h2 className="text-lg leading-snug font-bold text-heading">{entry.label}</h2>
               {kind === 'items' ? (
-                <div className="mt-0.5 text-base">
-                  <Subtitle entry={entry} large />
-                </div>
+                entry.price !== undefined || entry.tag ? (
+                  <div className="mt-0.5 text-base">
+                    <Subtitle entry={entry} large />
+                  </div>
+                ) : null
               ) : (
                 <div className={`mt-0.5 text-sm font-semibold ${TIER_CLASS[entry.tier].text}`}>
                   {entry.tag}

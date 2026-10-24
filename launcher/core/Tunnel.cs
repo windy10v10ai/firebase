@@ -347,6 +347,7 @@ namespace Windy10v10AI.Launcher
         const int QualityPingMs = 6000;
 
         readonly object sync = new object();
+        readonly int gamePort;
         readonly Dictionary<string, string> joinIds = new Dictionary<string, string>();
         readonly HashSet<string> probes = new HashSet<string>();
         readonly Dictionary<string, string> paths = new Dictionary<string, string>();
@@ -368,8 +369,13 @@ namespace Windy10v10AI.Launcher
         public volatile int Game = 1;
         public volatile bool GameReady = true;
 
-        public HostTunnel()
+        public HostTunnel() : this(GamePort)
         {
+        }
+
+        internal HostTunnel(int gamePort)
+        {
+            this.gamePort = gamePort;
             new Thread(() =>
             {
                 var lastPing = DateTime.MinValue;
@@ -385,7 +391,7 @@ namespace Windy10v10AI.Launcher
                         foreach (var peer in peers.Values)
                         {
                             // A joiner waits for the roster before entering, so the game it belongs to goes out first
-                            if (Game > 1) SendTo(peer, Packet.NextGame, EncodeGame(Game, GameReady));
+                            SendTo(peer, Packet.NextGame, EncodeGame(Game, GameReady));
                             // Roster packets go out every two seconds, so they also keep the route open
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (GameEnded) SendTo(peer, Packet.GameEnded, BitConverter.GetBytes(Game));
@@ -636,7 +642,7 @@ namespace Windy10v10AI.Launcher
             if (peers.TryGetValue(token, out peer)) return peer;
             peer = new Peer { Local = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)) };
             Platform.KeepPrivate(peer.Local.Client);
-            peer.Local.Connect(IPAddress.Loopback, GamePort);
+            peer.Local.Connect(IPAddress.Loopback, gamePort);
             peers[token] = peer;
             new Thread(() =>
             {
@@ -943,7 +949,12 @@ namespace Windy10v10AI.Launcher
         // Opens the local port Dota connects to and starts watching the link
         public void Forward()
         {
-            local = new UdpClient(new IPEndPoint(IPAddress.Loopback, LocalGate.Port));
+            Forward(LocalGate.Port);
+        }
+
+        internal void Forward(int listenPort)
+        {
+            local = new UdpClient(new IPEndPoint(IPAddress.Loopback, listenPort));
             Platform.KeepPrivate(local.Client);
             new Thread(() =>
             {

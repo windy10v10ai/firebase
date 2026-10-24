@@ -1,6 +1,6 @@
 import { apiFetch } from './api';
 
-/** 与 api 的 RECENT_MATCH_LIMIT 一致：后端只留这么多场 */
+/** 与 api 的 RECENT_MATCH_LIMIT 一致：首屏展示的场数 */
 export const RECENT_MATCH_LIMIT = 50;
 
 /** 一局里自己那一行 */
@@ -49,8 +49,22 @@ export interface RecentMatch {
 
 export interface RecentMatches {
   matches: RecentMatch[];
+  /** 首屏之后是否还有更早的战绩 */
+  hasMore: boolean;
+}
+
+export interface MatchHistoryPage {
+  matches: RecentMatch[];
+  /** 下一次请求带回去的归档页号，没有更早的战绩时为空 */
+  nextPage: number | null;
 }
 
 export function fetchRecentMatches(steamId: string) {
   return apiFetch<RecentMatches>(`/api/player/${steamId}/stats/recent`);
+}
+
+/** `page` 为空时取首屏之后紧接着的那一段 */
+export function fetchMatchHistory(steamId: string, page: number | null) {
+  const query = page === null ? '' : `?page=${page}`;
+  return apiFetch<MatchHistoryPage>(`/api/player/${steamId}/stats/history${query}`);
 }

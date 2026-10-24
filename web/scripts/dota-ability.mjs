@@ -463,3 +463,27 @@ export function gameHead(game) {
   }
   return { commit, onDevelop };
 }
+
+/** 固定提交可用于预同步尚未合并的 game 改动，工作区必须保持干净。 */
+export function syncGameSource(game) {
+  const head = gameHead(game);
+  const expected = process.argv.find((arg) => arg.startsWith('--game-commit='))?.split('=')[1];
+  if (expected) {
+    if (!/^[a-f0-9]{40}$/.test(expected) || expected !== head.commit) {
+      throw new Error('--game-commit 必须是当前 game HEAD 的完整提交号');
+    }
+  } else if (!head.onDevelop) {
+    throw new Error(
+      'game HEAD 不在 origin/develop 上；预同步时用 --game-commit=<完整提交号> 固定来源',
+    );
+  }
+  const changes = execFileSync(
+    'git',
+    ['-C', game, 'status', '--porcelain', '--untracked-files=no'],
+    {
+      encoding: 'utf8',
+    },
+  ).trim();
+  if (changes) throw new Error('game 有未提交改动，请使用独立的干净副本');
+  return head;
+}

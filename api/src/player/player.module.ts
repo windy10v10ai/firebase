@@ -10,7 +10,7 @@ import { PlayerConduct } from './entities/player-conduct.entity';
 import { PlayerRanking } from './entities/player-ranking.entity';
 import { PlayerSetting } from './entities/player-setting.entity';
 import { PlayerStatsLifetime } from './entities/player-stats-lifetime.entity';
-import { PlayerStatsRecent } from './entities/player-stats-recent.entity';
+import { PlayerStatsRecent, PlayerStatsRecentArchive } from './entities/player-stats-recent.entity';
 import { Player } from './entities/player.entity';
 import { PlayerConductService } from './player-conduct.service';
 import { PlayerGamePresetService } from './player-game-preset.service';
@@ -31,6 +31,7 @@ import { PlayerService } from './player.service';
       PlayerConduct,
       PlayerStatsLifetime,
       PlayerStatsRecent,
+      PlayerStatsRecentArchive,
     ]),
     AnalyticsModule,
     BigQueryModule,

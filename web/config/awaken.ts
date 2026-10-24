@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: '410fa1db41262cc3acf62baad1bb464624ef5fa2',
+  gameCommit: 'd46e5fc41771ef8b955bf640e9a4247c3af0ee26',
   dotaVersion: '7.41f',
 } as const;
 
@@ -98,9 +98,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Подавление маны: пробуждение</font>",
     },
     desc: {
-      zh: "施放闪烁后，附近<font color='#FFFFFF'><b>600</b></font>范围内的敌方英雄立刻损失<font color='#FFFFFF'><b>40%</b></font>当前魔法，<font color='#FFFFFF'><b>4</b></font>秒内无法回复魔法。<br>法力虚空对范围内每个敌方英雄按其自身损失的魔法造成伤害。",
-      en: "After casting Blink, enemy heroes within <font color='#FFFFFF'><b>600</b></font> instantly lose <font color='#FFFFFF'><b>40%</b></font> of their current mana and cannot regain mana for <font color='#FFFFFF'><b>4</b></font> seconds.<br>Mana Void deals damage to each enemy hero in the area based on that hero's own missing mana.",
-      ru: "После применения Blink вражеские герои в радиусе <font color='#FFFFFF'><b>600</b></font> мгновенно теряют <font color='#FFFFFF'><b>40%</b></font> текущей маны и не могут восстанавливать ману <font color='#FFFFFF'><b>4</b></font> сек.<br>Mana Void наносит урон каждому вражескому герою в области по его собственной недостающей мане.",
+      zh: "施放闪烁后，附近<font color='#FFFFFF'><b>600</b></font>范围内的敌方英雄立刻损失<font color='#FFFFFF'><b>50%</b></font>当前魔法，<font color='#FFFFFF'><b>4</b></font>秒内无法回复魔法。<br>法力虚空对范围内每个敌方英雄按其自身损失的魔法造成伤害。<br>施放闪烁后，自动施放法术反制。",
+      en: "After casting Blink, enemy heroes within <font color='#FFFFFF'><b>600</b></font> instantly lose <font color='#FFFFFF'><b>50%</b></font> of their current mana and cannot regain mana for <font color='#FFFFFF'><b>4</b></font> seconds.<br>Mana Void deals damage to each enemy hero in the area based on that hero's own missing mana.<br>After casting Blink, Counterspell is cast automatically.",
+      ru: "После применения Blink вражеские герои в радиусе <font color='#FFFFFF'><b>600</b></font> мгновенно теряют <font color='#FFFFFF'><b>50%</b></font> текущей маны и не могут восстанавливать ману <font color='#FFFFFF'><b>4</b></font> сек.<br>Mana Void наносит урон каждому вражескому герою в области по его собственной недостающей мане.<br>После применения Blink автоматически применяется Counterspell.",
     },
     ability: {
       behavior: 'passive',
@@ -291,7 +291,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_earthshaker',
     abilityName: 'special_bonus_unique_earthshaker_upgrade',
-    freeTrial: true,
+    freeTrial: false,
     art: 'earthshaker.60372c69.webp',
     icon: 'earthshaker_aftershock.5751a199.webp',
     name: { zh: '宇智波牛神', en: 'Earthshaker', ru: 'Earthshaker' },
@@ -354,7 +354,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_abyssal_underlord',
     abilityName: 'special_bonus_unique_underlord_demons_reach_awaken',
-    freeTrial: true,
+    freeTrial: false,
     art: 'abyssal_underlord.bb075df0.webp',
     icon: 'abyssal_underlord_atrophy_aura.e1d68787.webp',
     name: { zh: '孽主', en: 'Underlord', ru: 'Underlord' },
@@ -1084,7 +1084,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_kunkka',
     abilityName: 'kunkka_torrent_storm',
-    freeTrial: false,
+    freeTrial: true,
     art: 'kunkka.1b3d19dc.webp',
     icon: 'kunkka_torrent_storm.5ed5eae7.webp',
     name: { zh: '昆卡', en: 'Kunkka', ru: 'Kunkka' },
@@ -1288,7 +1288,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_drow_ranger',
     abilityName: 'special_bonus_unique_drow_ranger_upgrade',
-    freeTrial: false,
+    freeTrial: true,
     art: 'drow_ranger.45dc71cd.webp',
     icon: 'drow_ranger_multishot_arcana.be05e297.webp',
     name: { zh: '卓尔游侠', en: 'Drow Ranger', ru: 'Drow Ranger' },
@@ -1375,44 +1375,80 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_phantom_assassin',
     abilityName: 'special_bonus_unique_phantom_assassin_upgrade',
-    freeTrial: false,
+    freeTrial: true,
     art: 'phantom_assassin.46cbb659.webp',
-    icon: 'phantom_assassin_arcana_phantom_strike.4c8440a6.webp',
+    icon: 'phantom_assassin_stifling_dagger.184b8fd5.webp',
     name: { zh: '幻影刺客', en: 'Phantom Assassin', ru: 'Phantom Assassin' },
     title: {
-      zh: "<font color='#d000ff'>幻影突袭 觉醒</font>",
-      en: "<font color='#d000ff'>Phantom Strike Awakened</font>",
-      ru: "<font color='#d000ff'>Phantom Strike Awakened</font>",
+      zh: "<font color='#d000ff'>窒碍短匕 觉醒</font>",
+      en: "<font color='#d000ff'>Stifling Dagger Awakened</font>",
+      ru: "<font color='#d000ff'>Stifling Dagger: пробуждение</font>",
     },
     desc: {
-      zh: "幻影刺客闪烁到一个目标单位身旁，获得短暂的攻击速度加成和<font color='#FFCC66'>黑皇杖</font>效果，并自动发起攻击。<br><br>窒碍短匕弹道速度提升。施放窒碍短匕后获得短暂<font color='#FFCC66'>黑皇杖</font>效果。",
-      en: "Phantom Assassin blinks to a target unit, gaining bonus attack speed and the <font color='#FFCC66'>Black King Bar</font> effect briefly, then automatically attacks.<br><br>Stifling Dagger's projectile speed is increased. Casting Stifling Dagger briefly grants the <font color='#FFCC66'>Black King Bar</font> effect.",
-      ru: "Phantom Assassin blinks to a target unit, gaining bonus attack speed and the <font color='#FFCC66'>Black King Bar</font> effect briefly, then automatically attacks.<br><br>Stifling Dagger's projectile speed is increased. Casting Stifling Dagger briefly grants the <font color='#FFCC66'>Black King Bar</font> effect.",
+      zh: "对敌方单位掷出一把匕首，减缓其移动速度，并造成物理伤害，数值为65 70 75 80 85+幻影刺客攻击伤害的30 45 60 75 90%，同时继承物品和技能的攻击效果。匕首弹道速度提升。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内有敌方英雄时，随机对其中一名自动施放；会反弹指向性技能的目标不会被选中。<br><font color='#d000ff'>觉醒强化：</font>施放窒碍短匕或幻影突袭后，获得短暂的<font color='#FFCC66'>魔法免疫</font>。",
+      en: "Throws a dagger at an enemy unit, slowing its movement speed and dealing physical damage equal to 65 70 75 80 85 plus 30 45 60 75 90% of Phantom Assassin's attack damage, and applying attack effects from items and abilities. The dagger's projectile speed is increased.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, casts automatically at a random enemy hero within cast range. Targets that reflect targeted spells are skipped.<br><font color='#d000ff'>AWAKENED:</font> After casting Stifling Dagger or Phantom Strike, gain brief <font color='#FFCC66'>Spell Immunity</font>.",
+      ru: "Герой бросает в выбранного врага кинжал, который замедляет передвижение, наносит физический урон в размере 65 70 75 80 85 + 30 45 60 75 90% от атаки владельца, а также накладывает эффекты атаки от его предметов и способностей. Скорость полёта кинжала повышена.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении способность автоматически применяется к случайному вражескому герою в радиусе применения. Цели, отражающие целевые способности, пропускаются.<br><font color='#d000ff'>Бонус пробуждения:</font> После применения Stifling Dagger или Phantom Strike герой ненадолго получает <font color='#FFCC66'>невосприимчивость к магии</font>.",
     },
     ability: {
-      behavior: 'target',
-      targeting: 'enemyUnits',
-      damageType: null,
-      piercesImmunity: 'no',
-      dispellable: null,
+      behavior: 'autocast',
+      targeting: 'enemyHeroes',
+      damageType: 'physical',
+      piercesImmunity: null,
+      dispellable: 'soft',
       values: [
         {
-          label: { zh: '攻击速度加成：', en: 'Bonus Attack Speed:', ru: 'Bonus Attack Speed:' },
-          levels: ['80', '120', '160', '200', '240'],
+          label: { zh: '移动速度减缓：', en: 'Movement Slow:', ru: 'ЗАМЕДЛЕНИЕ ПЕРЕДВИЖЕНИЯ:' },
+          levels: ['-50'],
+          percent: true,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: { zh: '减速持续时间：', en: 'Slow Duration:', ru: 'ДЛИТЕЛЬНОСТЬ ЗАМЕДЛЕНИЯ:' },
+          levels: ['2.1', '2.4', '2.7', '3', '3.3'],
           percent: false,
           aoe: false,
           spellAmp: false,
         },
         {
-          label: { zh: '持续时间：', en: 'Duration:', ru: 'Duration:' },
+          label: { zh: '基础伤害：', en: 'Base Damage:', ru: 'БАЗОВЫЙ УРОН:' },
+          levels: ['65', '70', '75', '80', '85'],
+          percent: false,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: { zh: '攻击伤害：', en: 'Attack Damage:', ru: 'УРОН ОТ АТАКИ:' },
+          levels: ['30', '45', '60', '75', '90'],
+          percent: true,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: {
+            zh: '幻影突袭魔免持续时间：',
+            en: 'Phantom Strike Immunity Duration:',
+            ru: 'ДЛИТ. ИММУНИТЕТА (Phantom Strike):',
+          },
           levels: ['2.0'],
           percent: false,
           aoe: false,
           spellAmp: false,
         },
+        {
+          label: {
+            zh: '窒碍短匕魔免持续时间：',
+            en: 'Stifling Dagger Immunity Duration:',
+            ru: 'ДЛИТ. ИММУНИТЕТА (Stifling Dagger):',
+          },
+          levels: ['1.0'],
+          percent: false,
+          aoe: false,
+          spellAmp: false,
+        },
       ],
-      cooldown: ['14', '12', '10', '8', '6'],
-      manaCost: ['50'],
+      cooldown: ['6'],
+      manaCost: ['30'],
       lore: null,
     },
   },
