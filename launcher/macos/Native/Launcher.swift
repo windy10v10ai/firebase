@@ -38,13 +38,41 @@ private enum Theme {
     static let muted = color(0xaca198)
 }
 
+final class LatencyView: NSView {
+    let latency: Int
+    let unreachable: Bool
+    init(latency: Int, unreachable: Bool) {
+        self.latency = latency; self.unreachable = unreachable
+        super.init(frame: .zero)
+        widthAnchor.constraint(equalToConstant: 40).isActive = true
+        heightAnchor.constraint(equalToConstant: 24).isActive = true
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    override func draw(_ dirtyRect: NSRect) {
+        let lit = latency < 0 ? 0 : (latency < 60 ? 3 : (latency <= 120 ? 2 : 1))
+        let color = Theme.color(latency < 60 ? 0x3fb67a : (latency <= 120 ? 0xe5a93a : 0xe5484d))
+        for (index, height) in [CGFloat(4), 8, 12].enumerated() {
+            (index < lit ? color : Theme.border).setFill()
+            NSBezierPath(roundedRect: NSRect(x: bounds.midX - 8 + CGFloat(index) * 6, y: bounds.midY - 6, width: 3, height: height), xRadius: 1, yRadius: 1).fill()
+        }
+        if unreachable && latency < 0 {
+            Theme.color(0xe5484d).setStroke()
+            let slash = NSBezierPath(); slash.lineWidth = 2; slash.lineCapStyle = .round
+            slash.move(to: NSPoint(x: bounds.midX - 7, y: bounds.midY + 5.5))
+            slash.line(to: NSPoint(x: bounds.midX + 7, y: bounds.midY - 5.5)); slash.stroke()
+        }
+    }
+}
+
 final class LauncherButton: NSButton {
     var primary = false
     var link = false
     var pill = false
+    var compact = false
+    var underlined = false
     override var alignmentRectInsets: NSEdgeInsets { NSEdgeInsetsZero }
     override var intrinsicContentSize: NSSize {
-        NSSize(width: ceil((title as NSString).size(withAttributes: [.font: font ?? NSFont.systemFont(ofSize: 12)]).width) + (link ? 4 : 24), height: link ? 22 : 30)
+        NSSize(width: ceil((title as NSString).size(withAttributes: [.font: font ?? NSFont.systemFont(ofSize: 12)]).width) + (link ? 4 : 24) + (image == nil ? 0 : 17), height: link || compact ? 22 : 30)
     }
     override func draw(_ dirtyRect: NSRect) {
         let selected = state == .on
@@ -53,11 +81,28 @@ final class LauncherButton: NSButton {
             (primary ? Theme.accent : (isHighlighted || selected ? Theme.border : Theme.panel)).withAlphaComponent(isEnabled ? 1 : 0.45).setFill(); path.fill()
             (selected || window?.firstResponder === self ? Theme.accent : Theme.border).setStroke(); path.stroke()
         }
-        let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
         let font = self.font ?? NSFont.systemFont(ofSize: 12)
-        let height = font.ascender - font.descender + 3
-        (title as NSString).draw(in: NSRect(x: 2, y: (bounds.height - height) / 2, width: bounds.width - 4, height: height), withAttributes: [.font: font, .foregroundColor: (link ? Theme.muted : Theme.text).withAlphaComponent(isEnabled ? 1 : 0.4), .paragraphStyle: paragraph])
+        var attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: (link && !isHighlighted ? Theme.muted : Theme.text).withAlphaComponent(isEnabled ? 1 : 0.4)]
+        if underlined { attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue }
+        let size = (title as NSString).size(withAttributes: attributes)
+        let iconWidth: CGFloat = image == nil ? 0 : 17
+        let textWidth = min(size.width, max(0, bounds.width - iconWidth - 4))
+        let left = bounds.midX - (textWidth + iconWidth) / 2
+        if let image = image {
+            let symbol = image.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [Theme.text])) ?? image
+            symbol.draw(in: NSRect(x: left, y: bounds.midY - 6, width: 12, height: 12), from: .zero, operation: .sourceOver, fraction: isEnabled ? 1 : 0.4, respectFlipped: true, hints: nil)
+        }
+        (title as NSString).draw(in: NSRect(x: left + iconWidth, y: bounds.midY - size.height / 2, width: textWidth, height: size.height), withAttributes: attributes)
     }
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        if link { addCursorRect(bounds, cursor: .pointingHand) }
+    }
+}
+
+private func segmentFrame(_ bounds: NSRect, index: Int, count: Int) -> NSRect {
+    let width = bounds.width / CGFloat(count)
+    return NSRect(x: bounds.minX + CGFloat(index) * width, y: bounds.minY, width: width, height: bounds.height)
 }
 
 private final class SegmentCell: NSSegmentedCell {
@@ -65,9 +110,8 @@ private final class SegmentCell: NSSegmentedCell {
     var hosting = false
     override func draw(withFrame frame: NSRect, in view: NSView) {
         Theme.panel.setFill(); NSBezierPath(roundedRect: frame, xRadius: 7, yRadius: 7).fill()
-        let width = frame.width / CGFloat(segmentCount)
         for index in 0..<segmentCount {
-            let rect = NSRect(x: frame.minX + CGFloat(index) * width + 2, y: frame.minY + 2, width: width - 4, height: frame.height - 4)
+            let rect = segmentFrame(frame, index: index, count: segmentCount).insetBy(dx: 2, dy: 2)
             if isSelected(forSegment: index) {
                 Theme.border.withAlphaComponent(0.35).setFill()
                 let path = NSBezierPath(roundedRect: rect, xRadius: 6, yRadius: 6); path.fill()
@@ -78,14 +122,17 @@ private final class SegmentCell: NSSegmentedCell {
             let font = NSFont.systemFont(ofSize: 12)
             let title = index == 2 && badgeCount > 0 ? text("JoinRoom") : (label(forSegment: index) ?? "")
             let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: Theme.text.withAlphaComponent(enabled ? 1 : 0.4), .paragraphStyle: paragraph]
-            var titleRect = NSRect(x: rect.minX, y: rect.midY - 8, width: rect.width, height: 18)
+            let titleHeight = (title as NSString).size(withAttributes: attributes).height
+            var titleRect = NSRect(x: rect.minX, y: rect.midY - titleHeight / 2, width: rect.width, height: titleHeight)
             if index == 2 && badgeCount > 0 {
                 let titleWidth = (title as NSString).size(withAttributes: [.font: font]).width
                 let badge = NSRect(x: rect.midX + (titleWidth - 22) / 2 + 8, y: rect.midY - 8, width: 22, height: 16)
-                titleRect = NSRect(x: rect.midX - (titleWidth + 30) / 2, y: titleRect.minY, width: titleWidth, height: 18)
+                titleRect = NSRect(x: rect.midX - (titleWidth + 30) / 2, y: titleRect.minY, width: titleWidth, height: titleHeight)
                 let path = NSBezierPath(roundedRect: badge, xRadius: 8, yRadius: 8)
                 Theme.color(0x162634).setFill(); path.fill(); Theme.color(0x315372).setStroke(); path.stroke()
-                (String(badgeCount) as NSString).draw(in: badge, withAttributes: [.font: NSFont.systemFont(ofSize: 10), .foregroundColor: Theme.color(0x8dbce5), .paragraphStyle: paragraph])
+                let badgeAttributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 10), .foregroundColor: Theme.color(0x8dbce5), .paragraphStyle: paragraph]
+                let badgeHeight = (String(badgeCount) as NSString).size(withAttributes: badgeAttributes).height
+                (String(badgeCount) as NSString).draw(in: NSRect(x: badge.minX, y: badge.midY - badgeHeight / 2, width: badge.width, height: badgeHeight), withAttributes: badgeAttributes)
             }
             (title as NSString).draw(in: titleRect, withAttributes: attributes)
             if index == 1 && hosting {
@@ -98,6 +145,14 @@ private final class SegmentCell: NSSegmentedCell {
 
 private final class TabControl: NSSegmentedControl {
     override var alignmentRectInsets: NSEdgeInsets { NSEdgeInsetsZero }
+    override func mouseDown(with event: NSEvent) {
+        guard isEnabled else { return }
+        let point = convert(event.locationInWindow, from: nil)
+        guard let index = (0..<segmentCount).first(where: { segmentFrame(bounds, index: $0, count: segmentCount).contains(point) }),
+              isEnabled(forSegment: index), index != selectedSegment else { return }
+        selectedSegment = index; needsDisplay = true
+        sendAction(action, to: target)
+    }
 }
 
 private func segments(_ labels: [String]) -> NSSegmentedControl {
@@ -105,6 +160,21 @@ private func segments(_ labels: [String]) -> NSSegmentedControl {
     view.segmentCount = labels.count; view.trackingMode = .selectOne; view.segmentDistribution = .fillEqually
     for (index, label) in labels.enumerated() { view.setLabel(label, forSegment: index) }
     return view
+}
+
+private final class RoomCodeCell: NSTextFieldCell {
+    override func drawingRect(forBounds rect: NSRect) -> NSRect {
+        var frame = super.drawingRect(forBounds: rect)
+        let height = cellSize(forBounds: rect).height
+        frame.origin.y = rect.midY - height / 2; frame.size.height = height
+        return frame
+    }
+    override func edit(withFrame rect: NSRect, in view: NSView, editor: NSText, delegate: Any?, event: NSEvent?) {
+        super.edit(withFrame: drawingRect(forBounds: rect), in: view, editor: editor, delegate: delegate, event: event)
+    }
+    override func select(withFrame rect: NSRect, in view: NSView, editor: NSText, delegate: Any?, start: Int, length: Int) {
+        super.select(withFrame: drawingRect(forBounds: rect), in: view, editor: editor, delegate: delegate, start: start, length: length)
+    }
 }
 
 private final class DescriptionView: NSTextView {
@@ -327,6 +397,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         heading.heightAnchor.constraint(equalToConstant: 18).isActive = true
         browser = stack([stack([label(text("PublicRooms"), weight: .semibold), spacer(), refresh], horizontal: true), heading, roomTable], spacing: 6)
         body.addArrangedSubview(browser)
+        roomCode.cell = RoomCodeCell(textCell: "")
+        roomCode.isEditable = true; roomCode.isSelectable = true; roomCode.isBezeled = true; roomCode.drawsBackground = true
         roomCode.placeholderString = text("CodeExample"); roomCode.font = .monospacedSystemFont(ofSize: 12, weight: .medium)
         roomCode.target = self; roomCode.action = #selector(joinByCode); roomCode.delegate = self
         roomCode.heightAnchor.constraint(equalToConstant: 34).isActive = true
@@ -381,6 +453,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         let divider = NSBox(); divider.boxType = .separator; divider.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(divider)
         let developer = button(text("Developer"), #selector(toggleDeveloper)); developer.link = true; developer.font = .systemFont(ofSize: 10)
         let feedback = button(text("Feedback"), #selector(showFeedback)); feedback.font = .systemFont(ofSize: 10)
+        feedback.compact = true; feedback.pill = true
+        feedback.image = NSImage(systemSymbolName: "bubble.left", accessibilityDescription: text("Feedback"))
         testMap.state = preview ? .off : (defaults.bool(forKey: "testMap") ? .on : .off); testMap.font = .systemFont(ofSize: 10)
         testMap.isHidden = true; testMap.target = self; testMap.action = #selector(testMapChanged)
         mapLabel.font = .systemFont(ofSize: 10); mapLabel.lineBreakMode = .byTruncatingTail; mapLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -688,6 +762,19 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     }
     func avatarView(_ address: String, name: String, size: CGFloat) -> NSImageView {
         let image = NSImageView(); image.image = avatar(address); image.toolTip = name
+        image.imageScaling = .scaleAxesIndependently
+        if image.image == nil {
+            let tints: [UInt32] = [0x9ec7a8, 0xa9c4e6, 0xe8cf9a, 0xc9b6e0, 0xe6a6a6]
+            let tint = tints[name.utf8.reduce(0) { ($0 + Int($1)) % tints.count }]
+            image.image = NSImage(size: NSSize(width: size, height: size), flipped: false) { bounds in
+                Theme.color(tint).setFill(); NSBezierPath(ovalIn: bounds).fill()
+                let initial = (name.isEmpty ? "?" : String(name.prefix(1)).uppercased()) as NSString
+                let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.boldSystemFont(ofSize: 11), .foregroundColor: Theme.background]
+                let measured = initial.size(withAttributes: attributes)
+                initial.draw(at: NSPoint(x: bounds.midX - measured.width / 2, y: bounds.midY - measured.height / 2), withAttributes: attributes)
+                return true
+            }
+        }
         image.widthAnchor.constraint(equalToConstant: size).isActive = true; image.heightAnchor.constraint(equalToConstant: size).isActive = true
         image.wantsLayer = true; image.layer?.cornerRadius = size / 2; image.layer?.masksToBounds = true
         return image
@@ -731,9 +818,15 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             } else if kind == 2 || away { tail = NSView() }
             else {
                 let rtt = item["rtt"] as? Int ?? -1; let relay = item["relayRtt"] as? Int ?? -1
-                let ping = label(rtt >= 0 ? "\(rtt)" : (relay >= 0 ? "↪ \(relay)" : "—"), size: 10)
-                ping.toolTip = rtt >= 0 ? text("ProbeLatency", String(rtt)) : (relay >= 0 ? text("ProbeRelayLatency", String(relay)) : text("ProbeTesting"))
-                ping.widthAnchor.constraint(equalToConstant: 40).isActive = true
+                let probe = item["probe"] as? Int ?? 0
+                let latency = item["latency"] as? Int ?? -1
+                let ping: NSView
+                if probe == 1 {
+                    let spinner = NSProgressIndicator(); spinner.style = .spinning; spinner.controlSize = .small
+                    spinner.startAnimation(nil); ping = stack([spinner], horizontal: true)
+                    ping.widthAnchor.constraint(equalToConstant: 40).isActive = true
+                } else { ping = LatencyView(latency: latency, unreachable: probe == 3) }
+                ping.toolTip = probe == 2 ? text("ProbeLatency", String(rtt)) : (probe == 3 && relay >= 0 ? text("ProbeRelayLatency", String(relay)) : (probe == 1 ? text("ProbeTesting") : nil))
                 let full = (item["playerCount"] as? Int ?? 0) >= (item["maxPlayers"] as? Int ?? 10)
                 let action = button(text(full ? "Full" : "Join"), #selector(joinFromRow(_:))); action.tag = row; action.primary = true
                 action.widthAnchor.constraint(equalToConstant: 62).isActive = true
@@ -776,7 +869,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
                 }
             }.resume()
         }
-        return NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: text("Player"))
+        return nil
     }
     @objc func showFeedback() {
         if let window = feedbackWindow { window.makeKeyAndOrderFront(nil); return }
@@ -813,14 +906,21 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         let attachHint = label(text("AttachLogHint"), size: 10); attachHint.textColor = Theme.muted; attachHint.lineBreakMode = .byTruncatingTail; attachHint.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         root.addArrangedSubview(stack([attach, attachHint, spacer()], horizontal: true, spacing: 8))
         let note = label(text("PrivacyNote"), size: 9); note.textColor = Theme.muted
-        let privacy = button(text("PrivacyLink"), #selector(openPrivacy)); privacy.link = true; privacy.font = .systemFont(ofSize: 9)
+        let privacy = button(text("PrivacyLink"), #selector(openPrivacy)); privacy.link = true; privacy.underlined = true; privacy.font = .systemFont(ofSize: 9)
         let policy = stack([note, privacy], horizontal: languageCode != "ru-RU", spacing: 0)
         let cancel = button(text("Cancel"), #selector(closeFeedback)); cancel.keyEquivalent = "\u{1b}"
         let send = button(text("Send"), #selector(submitFeedback)); send.primary = true; feedbackSend = send
-        root.addArrangedSubview(stack([policy, spacer(), cancel, send], horizontal: true, spacing: 8))
+        let actions = stack([policy, spacer(), cancel, send], horizontal: true, spacing: 8)
+        actions.translatesAutoresizingMaskIntoConstraints = false; sheet.contentView!.addSubview(actions)
+        NSLayoutConstraint.activate([
+            actions.leadingAnchor.constraint(equalTo: sheet.contentView!.leadingAnchor, constant: 20),
+            actions.trailingAnchor.constraint(equalTo: sheet.contentView!.trailingAnchor, constant: -20),
+            actions.bottomAnchor.constraint(equalTo: sheet.contentView!.bottomAnchor, constant: -20),
+            root.bottomAnchor.constraint(lessThanOrEqualTo: actions.topAnchor, constant: -20)
+        ])
         for view in root.arrangedSubviews { view.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true }
         feedbackWindow = sheet; feedbackKindChanged(); sheet.contentView?.layoutSubtreeIfNeeded()
-        sheet.setContentSize(NSSize(width: 500, height: max(430, root.fittingSize.height + 40)))
+        sheet.setContentSize(NSSize(width: 500, height: max(430, root.fittingSize.height + actions.fittingSize.height + 60)))
         if option("--screenshot") == nil { sheet.makeKeyAndOrderFront(nil) }
     }
     @objc func closeFeedback() { feedbackWindow?.close() }
@@ -882,7 +982,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
         case "rooms":
             pages.selectedSegment = 2
-            handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32, "kind": 0, "avatars": [["name": "Windy"], ["name": "Player"]]], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "kind": 1, "minutes": 24, "avatars": [["name": "Player"], ["name": "Windy"]]]]])
+            handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32, "probe": 2, "latency": 32, "kind": 0, "avatars": [["name": "Windy"], ["name": "Player"]]], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "kind": 1, "minutes": 24, "avatars": [["name": "Player"], ["name": "Windy"]]]]])
         case "missing": mapState = "missing"
         case "outdated": pages.selectedSegment = 1; mapState = "outdated"
         case "error": state = "error"; status.stringValue = text("BackendExited"); status.textColor = .systemRed
