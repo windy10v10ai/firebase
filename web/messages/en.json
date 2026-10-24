@@ -572,7 +572,11 @@
     },
     "recent": {
       "title": "Recent Matches",
-      "note": "Only your last {count} matches are kept; older ones are dropped.",
+      "note": "The latest {count} matches show first; keep scrolling to load older ones. Before this, only 50 matches were kept, and anything older can't be recovered.",
+      "loadingMore": "Loading…",
+      "loadMoreFailed": "Couldn't load older matches",
+      "retry": "Retry",
+      "noMore": "No older matches",
       "noteLabel": "About Recent Matches",
       "columns": {
         "difficulty": "Diff.",

@@ -5,7 +5,11 @@ import { InjectRepository } from 'nestjs-fireorm';
 
 import { GameEndDto, GameEndPlayerDto, getDotaTimeMsec } from '../analytics/dto/game-end-dto';
 
-import { PlayerStatsRecent, PlayerStatsRecentMatch } from './entities/player-stats-recent.entity';
+import {
+  PlayerStatsRecent,
+  PlayerStatsRecentArchive,
+  PlayerStatsRecentMatch,
+} from './entities/player-stats-recent.entity';
 import {
   STATS_LIFETIME_FIELDS,
   StatsLifetimeField,
@@ -14,8 +18,17 @@ import {
   validateStatContribution,
 } from './player-stats-lifetime.constants';
 
-/** 一行约 1 KB，50 行距 Firestore 单文档 1 MB 上限有二十倍余量 */
+/** 页面、雷达图与每页历史的场次数 */
 export const RECENT_MATCH_LIMIT = 50;
+
+/** 主文档攒到这个数就把最老的一批整页搬进归档：搬运摊到每 50 场一次，归档页写完不再改。一行约 1 KB，100 行距单文档 1 MB 上限仍有十倍余量 */
+const ARCHIVE_TRIGGER_COUNT = RECENT_MATCH_LIMIT * 2;
+
+export interface PlayerStatsHistoryPage {
+  matches: PlayerStatsRecentMatch[];
+  /** 下一次请求带回来的归档页号，没有更早的战绩时为空 */
+  nextPage: number | null;
+}
 
 /** 有每局上限可校验的那几项，上限与生涯战绩共用 */
 type CappedStats = Record<StatsLifetimeField, number>;
@@ -25,9 +38,11 @@ export class PlayerStatsRecentService {
   constructor(
     @InjectRepository(PlayerStatsRecent)
     private readonly repository: BaseFirestoreRepository<PlayerStatsRecent>,
+    @InjectRepository(PlayerStatsRecentArchive)
+    private readonly archiveRepository: BaseFirestoreRepository<PlayerStatsRecentArchive>,
   ) {}
 
-  /** 把一名玩家这一局的明细插到他的近期战绩最前面，超出上限的从尾部丢弃 */
+  /** 把一名玩家这一局的明细插到他的近期战绩最前面，攒满后最老的一批搬进归档 */
   async record(player: GameEndPlayerDto, gameEnd: GameEndDto): Promise<void> {
     const steamId = player.steamId;
     if (steamId <= 0) {
@@ -44,9 +59,14 @@ export class PlayerStatsRecentService {
     const existing = await this.repository.findById(id);
 
     if (existing) {
-      existing.matches = [match, ...(existing.matches ?? [])].slice(0, RECENT_MATCH_LIMIT);
+      const matches = [match, ...(existing.matches ?? [])];
       existing.updatedAt = new Date();
-      await this.repository.update(existing);
+      if (matches.length >= ARCHIVE_TRIGGER_COUNT) {
+        await this.archiveOldest(existing, matches);
+      } else {
+        existing.matches = matches;
+        await this.repository.update(existing);
+      }
     } else {
       await this.repository.create({ id, matches: [match], updatedAt: new Date() });
     }
@@ -54,6 +74,42 @@ export class PlayerStatsRecentService {
 
   async findBySteamId(steamId: number): Promise<PlayerStatsRecent | null> {
     return await this.repository.findById(steamId.toString());
+  }
+
+  /**
+   * 取页面展示的前 50 场之后的更早战绩。不带 page 从主文档里 50 场以后的部分开始，带 page 取该归档页；
+   * 一次不足 50 场就顺势再补一页归档，避免主文档里只剩几场时前端拿到一小段。
+   */
+  async findHistory(steamId: number, page?: number): Promise<PlayerStatsHistoryPage> {
+    const stats = await this.findBySteamId(steamId);
+    const archivedPages = stats?.archivedPages ?? 0;
+    const matches = page === undefined ? (stats?.matches ?? []).slice(RECENT_MATCH_LIMIT) : [];
+    let cursor = page === undefined ? archivedPages : Math.min(page, archivedPages);
+
+    while (matches.length < RECENT_MATCH_LIMIT && cursor >= 1) {
+      const archive = await this.archiveRepository.findById(`${steamId}_${cursor}`);
+      matches.push(...(archive?.matches ?? []));
+      cursor -= 1;
+    }
+    return { matches, nextPage: cursor >= 1 ? cursor : null };
+  }
+
+  /** 先写归档页再改主文档：中途失败时主文档仍是满的，下一局重新搬同一批，同号页覆盖写入即可 */
+  private async archiveOldest(
+    existing: PlayerStatsRecent,
+    matches: PlayerStatsRecentMatch[],
+  ): Promise<void> {
+    const page = (existing.archivedPages ?? 0) + 1;
+    const archive = { id: `${existing.id}_${page}`, matches: matches.slice(RECENT_MATCH_LIMIT) };
+    if (await this.archiveRepository.findById(archive.id)) {
+      await this.archiveRepository.update(archive);
+    } else {
+      await this.archiveRepository.create(archive);
+    }
+
+    existing.matches = matches.slice(0, RECENT_MATCH_LIMIT);
+    existing.archivedPages = page;
+    await this.repository.update(existing);
   }
 
   private buildMatch(player: GameEndPlayerDto, gameEnd: GameEndDto): PlayerStatsRecentMatch {
