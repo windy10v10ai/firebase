@@ -20,5 +20,6 @@ describe('LauncherController 平台分发', () => {
     const chunks: Buffer[] = [];
     for await (const chunk of file.getStream()) chunks.push(Buffer.from(chunk));
     expect(Buffer.concat(chunks)).toEqual(payload);
+    expect(file.getHeaders().length).toBeUndefined();
   });
 });
