@@ -9,7 +9,7 @@ interface SmartScreenFigureProps {
 
 export const MARK = 'relative rounded-[4px] outline-2 outline-offset-2 outline-link';
 
-export function Step({ n }: { n: 1 | 2 }) {
+export function Step({ n }: { n: 1 | 2 | 3 | 4 | 5 }) {
   return (
     <span className="absolute -top-3.5 -left-3.5 flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
       {n}

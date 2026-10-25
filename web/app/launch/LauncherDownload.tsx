@@ -130,17 +130,29 @@ export default function LauncherDownload() {
         {isMac ? t('suspiciousMac') : t('suspicious')}
       </p>
 
-      {/* 宽屏按列排，两条标题同在第一行，示意图顶边才对齐 */}
-      <div className="grid gap-x-5 gap-y-3 md:grid-flow-col md:grid-cols-2 md:grid-rows-[auto_auto]">
-        <p className={headingClass}>
-          {t.rich(isMac ? 'installPrompt' : 'browserPrompt', { mark })}
-        </p>
-        {isMac ? <MacFigure kind="install" /> : <SmartScreenFigure kind="browser" />}
-        <p className={`mt-3 md:mt-0 ${headingClass}`}>
-          {t.rich(isMac ? 'macPrompt' : 'windowsPrompt', { mark })}
-        </p>
-        {isMac ? <MacFigure kind="blocked" /> : <SmartScreenFigure kind="windows" />}
-      </div>
+      {isMac ? (
+        <>
+          <div className="space-y-3">
+            <p className={headingClass}>{t.rich('macInstallPrompt', { mark })}</p>
+            <div className="grid gap-3 md:grid-cols-2 md:gap-5">
+              <MacFigure kind="install" />
+              <MacFigure kind="warning" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <p className={headingClass}>{t.rich('macAllowPrompt', { mark })}</p>
+            <MacFigure kind="settings" />
+          </div>
+        </>
+      ) : (
+        // 宽屏按列排，两条标题同在第一行，示意图顶边才对齐
+        <div className="grid gap-x-5 gap-y-3 md:grid-flow-col md:grid-cols-2 md:grid-rows-[auto_auto]">
+          <p className={headingClass}>{t.rich('browserPrompt', { mark })}</p>
+          <SmartScreenFigure kind="browser" />
+          <p className={`mt-3 md:mt-0 ${headingClass}`}>{t.rich('windowsPrompt', { mark })}</p>
+          <SmartScreenFigure kind="windows" />
+        </div>
+      )}
 
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line pt-4 text-[13px] text-muted">
         <span>{t.rich('openSource', { github })}</span>
