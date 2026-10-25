@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream';
-
 import {
   BadGatewayException,
   Controller,
@@ -9,7 +7,6 @@ import {
   Param,
   Query,
   Res,
-  StreamableFile,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -65,19 +62,26 @@ export class LauncherController {
   async download(
     @Param('version') version: string,
     @Query('platform') platform = 'windows',
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<StreamableFile> {
+    @Res() res: Response,
+  ): Promise<void> {
     const release = this.launcherReleaseService.getRelease(platform);
     if (!release || version !== release.version) {
       throw new NotFoundException();
+    }
+    // 只在成功时设永久缓存，失败响应不能被 CDN 按版本号地址长期缓存
+    const cacheControl = 'public, max-age=31536000, immutable';
+    // Cloud Run 单个响应超过 32 MiB 会被截断，Mac 的 ZIP 更大，改由官网发出；应用内更新会校验哈希
+    const downloadUrl = this.launcherReleaseService.getDownloadUrl(platform);
+    if (downloadUrl) {
+      res.setHeader('Cache-Control', cacheControl);
+      res.redirect(302, downloadUrl);
+      return;
     }
     const exe = await this.launcherReleaseService.getPackage(platform);
     if (!exe) {
       throw new BadGatewayException();
     }
-    // 只在成功时设永久缓存，失败响应不能被 CDN 按版本号地址长期缓存
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    // 带 Content-Length 的响应超过 32 MiB 会被 Cloud Run 拒掉，以流发出走分块传输就不受限
-    return new StreamableFile(Readable.from(exe), { type: 'application/octet-stream' });
+    res.setHeader('Cache-Control', cacheControl);
+    res.type('application/octet-stream').send(exe);
   }
 }
