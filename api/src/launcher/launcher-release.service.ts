@@ -34,6 +34,13 @@ export class LauncherReleaseService {
     return this.getPackage('windows');
   }
 
+  /** 安装包太大、不能由本服务转发的平台，返回官网上的下载地址。 */
+  getDownloadUrl(platform: string): string | undefined {
+    const release = this.getRelease(platform);
+    if (!release || platform !== 'macos') return undefined;
+    return `${DOWNLOAD_ORIGIN}/downloads/Windy10v10AI-${release.version}-macos-arm64.zip`;
+  }
+
   /** 读取已发布的平台安装包并校验哈希，失败时不缓存。 */
   async getPackage(platform: string): Promise<Buffer | undefined> {
     const cached = this.packages.get(platform);
