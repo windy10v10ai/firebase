@@ -23,3 +23,7 @@ bash launcher/macos/build.sh
 - 当前 Windows 功能和三语界面的完整对齐。
 
 原作者的历史测试记录见 [#1572](https://github.com/windy10v10ai/firebase/pull/1572)，不代表当前版本通过实机验收。官网下载页面修改与正式发版由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。架构见 [Mac 平台说明](../../docs/launcher/macos.md)，贡献来源见 [UPSTREAM.md](UPSTREAM.md)。
+
+## 安装方式
+
+首次安装用 DMG：窗口左边是应用，右边是「应用程序」，中间的箭头指向右边，背景用启动器的配色，玩家拖进去即可。窗口布局在 `dmg-settings.py`，背景图由 `Native/make-dmg-background.swift` 生成，改完用 `tiffutil -cathidpicheck` 合成 `Native/dmg-background.tiff`。应用不会从「下载」「文稿」这类受保护文件夹里运行。应用内不做「移到应用程序」提示：从受保护文件夹运行会触发系统的文件夹访问询问，提示弹窗解决不了。ZIP 只用于应用内更新，替换整个 `.app`。暂不做 Developer ID 签名与公证，玩家首次打开要在系统设置里放行。

@@ -2,3 +2,4 @@
 /obj/
 /dist/
 .DS_Store
+/release/

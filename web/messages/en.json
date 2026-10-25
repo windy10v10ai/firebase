@@ -131,13 +131,27 @@
     },
     "launcher": {
       "name": "Windy10v10AI Launcher",
-      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play, or open a room for friends.",
+      "lead": "Play solo or online, team up in public rooms, and enjoy a smoother game.",
       "download": "Download launcher",
-      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
-      "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
+      "desktopOnly": "The launcher runs on a computer. Open this page on your computer to download it.",
+      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake. Allow it in two steps:",
+      "suspiciousMac": "The launcher is new, so macOS may block it the first time you open it. Install and allow it in two steps:",
+      "appleSilicon": "For Apple silicon (M1 and later)",
+      "openSource": "Its code is <github>open source on GitHub</github>",
       "codeSigning": "Privacy and safety",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
-      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
+      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>",
+      "installPrompt": "Install: drag the icon into <mark>Applications</mark>",
+      "macPrompt": "macOS blocks it: click <mark>Open Anyway</mark>",
+      "macInstall": {
+        "applications": "Applications"
+      },
+      "macBlock": {
+        "settings": "System Settings",
+        "privacy": "Privacy & Security",
+        "blocked": "“Windy10v10AI” was blocked to protect your Mac.",
+        "open": "Open Anyway"
+      }
     },
     "console": {
       "summary": "Don't want to download software? Start from the console",
@@ -172,12 +186,12 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_7_0": [
+          "Added a launcher for Mac"
+        ],
         "v0_6_2": [
           "Added \"Update map\" button",
           "Bug fixes"
-        ],
-        "v0_6_1": [
-          "Better route choice for online play"
         ],
         "v0_6_0": [
           "Enter games while Dota 2 is running, no restart needed",
@@ -190,15 +204,9 @@
         "v0_5_2": [
           "See games in progress on the Join tab"
         ],
-        "v0_5_1": [
-          "Fixed some issues"
-        ],
         "v0_5_0": [
           "Improved online play, fixing connection failures for some players",
           "Rejoin from the launcher after a disconnect; fewer overflow errors"
-        ],
-        "v0_4_3": [
-          "Fix games failing to start when Steam or Dota 2 is set to run as administrator"
         ],
         "v0_4_2": [
           "Report problems and suggest ideas from the launcher"
@@ -213,7 +221,6 @@
         "v0_3_4": [
           "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game"
         ],
-        "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus"],
         "v0_3_0": ["One-click updates"],
         "v0_2_0": [
           "First release: one click runs a local server and joins it for a smoother late game"

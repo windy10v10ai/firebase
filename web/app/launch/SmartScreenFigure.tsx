@@ -7,11 +7,11 @@ interface SmartScreenFigureProps {
   kind: 'browser' | 'windows';
 }
 
-const MARK = 'relative rounded-[4px] outline-2 outline-offset-2 outline-warning';
+export const MARK = 'relative rounded-[4px] outline-2 outline-offset-2 outline-link';
 
-function Step({ n }: { n: 1 | 2 }) {
+export function Step({ n }: { n: 1 | 2 }) {
   return (
-    <span className="absolute -top-3.5 -left-3.5 flex size-5 items-center justify-center rounded-full bg-warning text-xs font-bold text-surface">
+    <span className="absolute -top-3.5 -left-3.5 flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
       {n}
     </span>
   );

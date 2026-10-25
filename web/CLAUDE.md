@@ -63,7 +63,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **生效时机只说「下一局生效」**，不分开局方式；离线局沿用地图更新时的数据，只在 `/launch` 对比表下说明。不写「立即生效」「回游戏点刷新」
 - **完整规则只写在 `/launch`**，别的页面不重写开局方式与生效时机
 - **不向玩家解释连不上的原因，也不列游戏内暂缺的功能**，只说游廊开局「偶尔可能连不上」
-- **启动器的版本号只改 `app/launch/launcher.ts` 一处**：发新版时把 exe 以 `Windy10v10AI-<version>.exe` 放进 `public/downloads/`，删掉旧版文件，下载链接与页面上的版本跟着变。玩家存下来的名字由 `next.config.ts` 的 `Content-Disposition` 固定为 `Windy10v10AI.exe`
+- **启动器的版本号只改 `app/launch/launcher.ts` 一处**：发新版时把 exe 以 `Windy10v10AI-<version>.exe`、Mac 的 DMG 与 ZIP 以 `Windy10v10AI-<version>-macos-arm64.dmg` / `.zip` 放进 `public/downloads/`，删掉旧版文件，下载链接与页面上的版本跟着变；`LAUNCHER_MAC_VERSION` 为 `null` 时页面不显示 Mac tab。玩家存下来的名字由 `next.config.ts` 的 `Content-Disposition` 按扩展名固定为 `Windy10v10AI.exe` / `Windy10v10AI.dmg`
 
 ## 加载态
 
