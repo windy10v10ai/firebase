@@ -18,13 +18,6 @@ on:
         type: choice
         default: all
         options: [all, zh-CN, en-US, ru-RU]
-  pull_request:
-    paths:
-      - .github/workflows/launcher-ui.yml
-      - launcher/test-ui.ps1
-      - launcher/tests/ui-preview.cs
-      - launcher/macos/test-ui.sh
-      - launcher/ui-preview-summary.py
 
 permissions:
   contents: read
@@ -35,7 +28,7 @@ env:
 
 jobs:
   windows-ui:
-    if: ${{ github.event_name == 'pull_request' || inputs.platform == 'both' || inputs.platform == 'windows' }}
+    if: ${{ inputs.platform == 'both' || inputs.platform == 'windows' }}
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -65,7 +58,7 @@ jobs:
         run: python launcher/ui-preview-summary.py "${{ runner.temp }}/launcher-ui-windows" --artifact-url "$env:UI_ARTIFACT_URL"
 
   macos-ui:
-    if: ${{ github.event_name == 'pull_request' || inputs.platform == 'both' || inputs.platform == 'macos' }}
+    if: ${{ inputs.platform == 'both' || inputs.platform == 'macos' }}
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
