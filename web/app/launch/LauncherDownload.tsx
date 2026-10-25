@@ -92,11 +92,7 @@ export default function LauncherDownload() {
         </p>
       )}
 
-      <p className="text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
-        {isMac ? t('suspiciousMac') : t('suspicious')}
-      </p>
-
-      <div className="flex flex-col gap-4 border-t border-line pt-5 md:flex-row md:items-center md:gap-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-5">
         <div className="flex min-w-0 flex-1 items-center gap-3 md:gap-5">
           {/* eslint-disable-next-line @next/next/no-img-element -- 固定尺寸的本地小图，不需要 next/image 的裁剪与响应式 */}
           <img
@@ -129,6 +125,10 @@ export default function LauncherDownload() {
           {isMac && <span className="text-center text-xs text-muted">{t('appleSilicon')}</span>}
         </div>
       </div>
+
+      <p className="border-t border-line pt-5 text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
+        {isMac ? t('suspiciousMac') : t('suspicious')}
+      </p>
 
       {/* 宽屏按列排，两条标题同在第一行，示意图顶边才对齐 */}
       <div className="grid gap-x-5 gap-y-3 md:grid-flow-col md:grid-cols-2 md:grid-rows-[auto_auto]">
