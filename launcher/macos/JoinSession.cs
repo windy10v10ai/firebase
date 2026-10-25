@@ -24,7 +24,7 @@ namespace Windy10v10AI.Launcher
         JoinRoomSession room;
         JoinTunnel tunnel => room?.Tunnel;
         MacInstall install;
-        bool autoEnter;
+        volatile bool autoEnter;
         RoomBrowser browser;
         public string State { get; private set; } = "idle";
         public string Code { get; private set; }
@@ -150,7 +150,7 @@ namespace Windy10v10AI.Launcher
                 if (lifecycle.State == JoinState.Closed) return;
                 if (lifecycle.State == JoinState.HostLost) throw new Exception(Strings.HostLost);
                 ShowReadiness(lifecycle.State);
-                if (lifecycle.NewGameReady && autoEnter && (lifecycle.FirstGame || options.ClientRunning())) Enter();
+                if (lifecycle.NewGameReady && (lifecycle.FirstGame || options.ClientRunning()) && autoEnter) Enter();
                 EmitRoster(current.Tunnel);
                 EmitRoute(current.Tunnel);
                 await Task.Delay(options.MonitorIntervalMs, ct);

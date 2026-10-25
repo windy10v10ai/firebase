@@ -15,7 +15,7 @@ namespace Windy10v10AI.Launcher
         public static bool PublicRoom = true;
         public static int MaxPlayers = PlayerLimit;
         public static bool AutoStartDota = true;
-        public static bool AutoEnter = true;
+        public static volatile bool AutoEnter = true;
 
         public static string Folder
         {
