@@ -194,9 +194,6 @@
           "Added \"Update map\" button",
           "Bug fixes"
         ],
-        "v0_6_1": [
-          "Better route choice for online play"
-        ],
         "v0_6_0": [
           "Enter games while Dota 2 is running, no restart needed",
           "Stay in the room after a game; the host can start the next one right away",
@@ -208,15 +205,9 @@
         "v0_5_2": [
           "See games in progress on the Join tab"
         ],
-        "v0_5_1": [
-          "Fixed some issues"
-        ],
         "v0_5_0": [
           "Improved online play, fixing connection failures for some players",
           "Rejoin from the launcher after a disconnect; fewer overflow errors"
-        ],
-        "v0_4_3": [
-          "Fix games failing to start when Steam or Dota 2 is set to run as administrator"
         ],
         "v0_4_2": [
           "Report problems and suggest ideas from the launcher"
@@ -231,7 +222,6 @@
         "v0_3_4": [
           "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game"
         ],
-        "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus"],
         "v0_3_0": ["One-click updates"],
         "v0_2_0": [
           "First release: one click runs a local server and joins it for a smoother late game"
