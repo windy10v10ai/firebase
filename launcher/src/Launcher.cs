@@ -435,6 +435,8 @@ namespace Windy10v10AI.Launcher
             };
             Shown += delegate
             {
+                // 控件的有效可见性依赖父窗口，首次显示后才能据此完成布局。
+                Relayout();
                 UpdateBrowsing();
                 RefreshBadge();
                 badgeTimer.Start();
