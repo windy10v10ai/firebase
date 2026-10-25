@@ -25,6 +25,8 @@ Firestore
 - **Firebase Auth** 只用来签发和续期 ID Token，网站不直接读写 Firestore。
 - **浏览器用相对路径调 API**，由 `web/next.config.ts` 的 rewrite 转发，页面只跟本站域名打交道。理由见 [api-entry/README.md](../design/api-entry/README.md)。
 
+启动器内嵌网站的已确认设计见 [内嵌浏览器与网页加速](../launcher/web-browser.md)（尚未实现）：继续使用本站域名、页面和鉴权，内嵌浏览器按需选择直连或代理。
+
 ## 2. 鉴权设计
 
 做法见 [auth.controller.ts](../../api/src/auth/auth.controller.ts) 与 [auth.guard.ts](../../api/src/util/auth/auth.guard.ts)。这里只留结论：
