@@ -26,6 +26,7 @@
 *.rar binary
 *.7z binary
 *.exe binary
+*.dmg binary
 
 # 确保脚本文件使用 LF 换行符
 *.sh text eol=lf

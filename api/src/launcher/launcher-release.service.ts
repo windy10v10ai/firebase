@@ -5,12 +5,15 @@ import { logger } from 'firebase-functions/v2';
 
 import { LauncherReleaseDto } from './dto/launcher-release.dto';
 
-// 发布新版启动器时与 web 的 LAUNCHER_VERSION 一起改，哈希取自 web/public/downloads 下的 exe
+// 发布新版启动器时与 web 的 LAUNCHER_VERSION、LAUNCHER_MAC_VERSION 一起改，哈希取自 web/public/downloads 下的 exe 与 ZIP
 export const LAUNCHER_RELEASE: LauncherReleaseDto = {
-  version: '0.6.2',
-  sha256: 'f61fbae494bade65dd56859d85337791350def72586e7f18c52352538ea37951',
+  version: '0.7.0',
+  sha256: 'c0eb9d289308a81c78ffb2b5ef1e7b141e4396914803d526f54c9fc59d9e019f',
 };
-export const LAUNCHER_MAC_RELEASE: LauncherReleaseDto | undefined = undefined;
+export const LAUNCHER_MAC_RELEASE: LauncherReleaseDto | undefined = {
+  version: '0.7.0',
+  sha256: '736a4963b2a0a4ad2d96eb47ca4d388436b66fb77476eab1dba61fddfc550f5a',
+};
 export const LAUNCHER_VERSION_CACHE_SECONDS = 3600;
 
 const DOWNLOAD_ORIGIN = 'https://windy10v10ai.com';
