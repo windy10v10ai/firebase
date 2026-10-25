@@ -78,6 +78,10 @@ launcher\build.cmd
 dotnet run --project launcher/core/tests/dotnet/CoreTests.csproj
 ```
 
+## 界面验证
+
+修改界面后，按需运行 **Launcher UI previews**，选择 Windows、Mac 或两边，以及场景和语言。对应系统会构建原生窗口、生成截图与日志，并自动上传带缩略总览的测试产物。在 Windows 开发也能查看 Mac 界面，反之亦然；完整联机仍需实机验证。入口、下载命令与场景维护见 [跨平台界面验证](../docs/launcher/ui-verification.md)。
+
 ## 发布
 
 exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分两个 PR：

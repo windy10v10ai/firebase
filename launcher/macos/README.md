@@ -15,6 +15,10 @@ bash launcher/macos/build.sh
 
 `test.sh` 单独启用测试构建，正常应用不编入测试源码和真实房间诊断命令。离线 self-test 使用动态端口，不启动 Steam、游戏或真实房间。`--live-test`、`--transport-test`、`--join-room-test` 会访问真实服务，`--enter-client` 会启动或连接游戏，不属于离线校验。
 
+## 按需界面截图
+
+通过 **Launcher UI previews** 选择 `platform=macos`，可从任意开发电脑触发远端 Mac 原生界面截图。常规 CI 执行构建和离线测试，截图只在需要时运行。使用入口、产物下载、验证范围和本机脚本命令见 [跨平台界面验证](../../docs/launcher/ui-verification.md)。
+
 ## 尚需实机验收
 
 - Steam 冷启动、客户端复用，以及游戏结束后不退出 Dota 再从游廊开局的 VAC 验证。

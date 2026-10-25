@@ -199,17 +199,6 @@ jobs:
       - name: Build and verify Mac application
         run: bash launcher/macos/build.sh
 
-      - name: Test Mac launcher UI previews
-        run: bash launcher/macos/test-ui.sh "$RUNNER_TEMP/launcher-mac-ui"
-
-      - name: Upload Mac launcher UI previews
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: launcher-mac-ui
-          path: ${{ runner.temp }}/launcher-mac-ui/
-          if-no-files-found: error
-
   agent-skills:
     needs: changes
     if: needs.changes.outputs.skills == 'true'
