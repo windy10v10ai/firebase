@@ -131,13 +131,27 @@
     },
     "launcher": {
       "name": "Windy10v10AI Launcher",
-      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play, or open a room for friends.",
+      "lead": "Play solo or online, team up in public rooms, and enjoy a smoother game.",
       "download": "Download launcher",
-      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
-      "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
+      "desktopOnly": "The launcher runs on a computer. Open this page on your computer to download it.",
+      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake. Allow it in two steps:",
+      "suspiciousMac": "The launcher is new, so macOS may block it the first time you open it. Install and allow it in two steps:",
+      "appleSilicon": "For Apple silicon (M1 and later)",
+      "openSource": "Its code is <github>open source on GitHub</github>",
       "codeSigning": "Privacy and safety",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
-      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
+      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>",
+      "installPrompt": "Install: drag the icon into <mark>Applications</mark>",
+      "macPrompt": "macOS blocks it: click <mark>Open Anyway</mark>",
+      "macInstall": {
+        "applications": "Applications"
+      },
+      "macBlock": {
+        "settings": "System Settings",
+        "privacy": "Privacy & Security",
+        "blocked": "“Windy10v10AI” was blocked to protect your Mac.",
+        "open": "Open Anyway"
+      }
     },
     "console": {
       "summary": "Don't want to download software? Start from the console",

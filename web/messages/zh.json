@@ -131,13 +131,27 @@
     },
     "launcher": {
       "name": "Windy10v10AI 启动器",
-      "lead": "在本机单独运行服务器，后期更流畅。点一下难度即可开始游戏，也可以开房和朋友一起玩。",
+      "lead": "可以单机、联机，公开房间组队，游戏更流畅。",
       "download": "下载启动器",
-      "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截。",
-      "openSource": "代码已在 <github>GitHub 开源</github>，请放心下载，按下面两步允许运行：",
+      "desktopOnly": "启动器在电脑上运行，请用电脑打开本页下载。",
+      "suspicious": "启动器是新发布的软件，浏览器和 Windows 可能误判为可疑文件并拦截，按下面两步允许运行。",
+      "suspiciousMac": "启动器是新发布的软件，macOS 第一次打开可能拦截，按下面两步安装并允许运行。",
+      "appleSilicon": "适用于 Apple 芯片（M1 及以上）",
+      "openSource": "代码已在 <github>GitHub 开源</github>",
       "codeSigning": "隐私与安全说明",
       "browserPrompt": "浏览器拦截：点开提示，选「<mark>下载可疑文件</mark>」",
-      "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」"
+      "windowsPrompt": "Windows 拦截：点「<mark>更多信息</mark>」，再点「<mark>仍要运行</mark>」",
+      "installPrompt": "安装：把图标拖进「<mark>应用程序</mark>」",
+      "macPrompt": "macOS 拦截：点「<mark>仍要打开</mark>」",
+      "macInstall": {
+        "applications": "应用程序"
+      },
+      "macBlock": {
+        "settings": "系统设置",
+        "privacy": "隐私与安全性",
+        "blocked": "为保护 Mac，已阻止使用「Windy10v10AI」。",
+        "open": "仍要打开"
+      }
     },
     "console": {
       "summary": "不想下载软件？用控制台命令开局",
