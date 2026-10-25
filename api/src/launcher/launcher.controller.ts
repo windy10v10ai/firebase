@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 import {
   BadGatewayException,
   Controller,
@@ -75,6 +77,7 @@ export class LauncherController {
     }
     // 只在成功时设永久缓存，失败响应不能被 CDN 按版本号地址长期缓存
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    return new StreamableFile(exe, { type: 'application/octet-stream' });
+    // 带 Content-Length 的响应超过 32 MiB 会被 Cloud Run 拒掉，以流发出走分块传输就不受限
+    return new StreamableFile(Readable.from(exe), { type: 'application/octet-stream' });
   }
 }
