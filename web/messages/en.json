@@ -187,8 +187,7 @@
       "latest": "Latest",
       "entries": {
         "v0_7_0": [
-          "Added a launcher for Mac",
-          "Shortened the wait for results after a game ends"
+          "Added a launcher for Mac"
         ],
         "v0_6_2": [
           "Added \"Update map\" button",
