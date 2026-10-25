@@ -1082,6 +1082,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         default: break
         }
         if option("--preview-auto-enter") == "off" { autoEnter.state = .off }
+        if option("--preview-auto-start") == "off" { autoStart.state = .off }
         refreshControls()
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
