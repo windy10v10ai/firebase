@@ -42,6 +42,7 @@
 | `--color-heading` / `--color-content` / `--color-muted` | `#fafafa` / `#d4d4d8` / `#8b8b93` | 标题 / 正文 / 次要 |
 | `--color-faint` | `#5d5d66` | 禁用文字、数值分隔符 |
 | `--color-season` / `-strong` | `#a874ea` / `#9b5de0` | 勇士文字 / 填充；`-soft`、`-border` 为 12%、40% 透明 |
+| `--color-season-light` | `#c4a3f3` | 紫色底块上的浅紫文字，如属性页的「已满级」 |
 | `--color-member` / `-strong` | `#e0caa5` / `#daa520` | 会员数值 / 标题与填充；`-soft`、`-border` 为 11%、40% 透明 |
 
 中性色是带一点灰的炭黑，不是纯黑：纯黑底上的卡片与底色分不开层次。

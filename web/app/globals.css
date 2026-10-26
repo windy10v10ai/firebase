@@ -32,6 +32,8 @@
   --color-season-strong: #9b5de0;
   --color-season-soft: rgba(155, 93, 224, 0.12);
   --color-season-border: rgba(155, 93, 224, 0.4);
+  /* 深色底上的浅紫文字，用于满级与暂存提示 */
+  --color-season-light: #c4a3f3;
 
   --color-member: #e0caa5;
   --color-member-strong: #daa520;
