@@ -17,7 +17,7 @@ bash launcher/macos/build.sh
 
 ## 按需界面截图
 
-通过 **Launcher UI previews** 选择 `platform=macos`，可从任意开发电脑触发远端 Mac 原生界面截图。常规 CI 执行构建和离线测试，截图只在需要时运行。使用入口、产物下载、验证范围和本机脚本命令见 [跨平台界面验证](../../docs/launcher/ui-verification.md)。
+通过 **Launcher Mac UI previews** 选择场景和语言，可从开发电脑触发远端 Mac 原生界面截图，再由 AI 下载审图。常规 CI 执行构建和离线测试。使用入口、产物下载、验证范围和本机命令见 [界面验证](../../docs/launcher/ui-verification.md)。
 
 ## 尚需实机验收
 

@@ -1,53 +1,45 @@
-# 启动器跨平台界面验证
+# 启动器界面验证
 
-Windows 与 Mac 的界面截图按需运行，开发时无需为了检查另一平台的布局切换电脑。常规 PR CI 持续执行构建、格式和离线测试；界面变化时运行独立的 **Launcher UI previews** 工作流。
+日常采用 **Windows 本机验证、Mac 按需截图、AI 审图**，减少切换电脑和维护截图框架的成本。常规 PR CI 持续执行两平台的构建、格式和离线测试。
 
-## 运行与取图
+## Windows 本机验证
 
-工作流文件是 [launcher-ui.yml](../../.github/workflows/launcher-ui.yml)。合入默认分支 `develop` 后，可在仓库 Actions 中选择工作流、点击 **Run workflow**，再选择待验证分支。
+AI 按本次改动操作真实窗口、截图并检查三语长文案、控件显隐、文字截断和按钮重叠。难以进入的状态，在会话临时目录补最小预览辅助；截图方法和不干扰游戏的要求见 [PR 截图规约](../../launcher/CLAUDE.md#pr-截图)。
 
-| 输入 | 用途 |
-|---|---|
-| `platform` | `windows`、`macos` 或 `both` |
-| `scope` | 房主 `host`、加入者 `join`、反馈 `feedback` 或全部 `all` |
-| `language` | `zh-CN`、`en-US`、`ru-RU` 或全部 `all` |
+房间选项相关改动保留以下必测项：
 
-也可以在任意开发电脑上通过 GitHub CLI 触发：
+- 保存「创建房间」页后重新启动，选项立即可见，位置与切换标签回来一致。
+- 分别取消房主自动启动、加入者自动跟随，重新启动后保持选择，两项互不影响。
+- 加入者在游戏中、等待和结束时均能修改跟随选项；取消后下一局仍可手动进入。
+- 重新勾选不会立即进入当前已准备好的游戏，离房后隐藏选项。
+
+这些是本机检查清单；已有行为测试继续验证对应规则，截图不替代保存或联机行为测试。
+
+## Mac 按需截图
+
+在仓库 Actions 选择 **Launcher Mac UI previews**，点击 **Run workflow**，选择待验证分支、场景 `scope`（`host`、`join`、`feedback`、`all`）和语言 `language`（`zh-CN`、`en-US`、`ru-RU`、`all`）。[工作流](../../.github/workflows/launcher-ui.yml)合入默认分支 `develop` 后才有手动运行入口。
+
+也可在 Windows 或 Mac 上使用 GitHub CLI：
 
 ```bash
-gh workflow run launcher-ui.yml --ref <待验证分支> -f platform=both -f scope=all -f language=all
+gh workflow run launcher-ui.yml --ref <待验证分支> -f scope=all -f language=all
 gh run list --workflow launcher-ui.yml
-gh run download <run-id> -n launcher-ui-windows -D <Windows图片目录>
-gh run download <run-id> -n launcher-ui-macos -D <Mac图片目录>
+gh run download <run-id> -n launcher-ui-macos -D <图片目录>
 ```
 
-Windows 与 Mac 分别在 GitHub 托管的对应系统中构建并运行原生界面。每个平台的产物包含 PNG 原图、日志、报告和 `index.html` 缩略总览。运行摘要提供下载链接；解压后打开 `index.html`，点击缩略图检查原图。产物会按工作流的保留策略过期，需要长期留在 PR 的精选图片按 [PR 截图规约](../../launcher/CLAUDE.md#pr-截图)处理。
+远端 Mac 构建并运行真实 AppKit 预览，注入模拟状态，不启动 Steam、Dota 或真实房间，也不修改玩家保存的选择。原图、日志、报告和 `index.html` 缩略总览自动保存为 Actions 产物；从运行摘要下载，解压后打开总览并检查原图。产物按工作流策略过期，需长期放在 PR 的精选图片按截图规约处理。工作流不自动公开发布图片或发布安装包。
 
-工作流只上传测试产物，不自动将图片发布到 `assets` 分支，也不生成安装包或发布版本。
-
-## 验证范围
-
-预览运行真实 WinForms/AppKit 界面，注入模拟的房间和玩家状态。检查文字、排版、控件显隐、按钮和勾选状态；Windows 入口还检查部分控件边界与首显布局。
-
-截图生成成功只代表程序成功渲染并输出图片，不代表界面审查通过。下载后检查目标状态、三语长文案、按钮重叠和文字截断。预览不启动 Steam、Dota 或真实房间，不修改玩家的已保存选择。
-
-保存偏好、真实点击链路和联机规则使用对应行为测试验证。Steam 登录、Dota 冷启动与复用、跨平台联机、真实高 DPI 和长时间运行仍需实机验收。
-
-## 维护
-
-- 现有场景的布局、文案和配色修改，重新运行工作流即可，图片从最新代码渲染。
-- 新页面、弹窗或状态，补对应平台的预览场景及范围清单；工作流通常不需要修改。
-- 输入参数、构建入口或产物方式改变时，才调整工作流。
-
-Windows 入口为 [test-ui.ps1](../../launcher/test-ui.ps1)及 [ui-preview.cs](../../launcher/tests/ui-preview.cs)，Mac 入口为 [test-ui.sh](../../launcher/macos/test-ui.sh)及 AppKit 的预览状态。缩略总览由共用的 [ui-preview-summary.py](../../launcher/ui-preview-summary.py)生成。
-
-本机也可在构建后运行相同脚本：
-
-```powershell
-./launcher/test-ui.ps1 -OutputDirectory <绝对输出目录> -Scope host -Language zh-CN
-```
+Mac 本机也可在构建后运行相同入口：
 
 ```bash
 bash launcher/macos/test-ui.sh <绝对输出目录> host zh-CN
 python3 launcher/ui-preview-summary.py <绝对输出目录>
 ```
+
+## 审查与维护
+
+AI 检查目标画面是否正确、三语文字是否完整，以及按钮和选项是否重叠。成功生成 PNG 只代表渲染成功，不代表审图通过。
+
+现有画面改布局、文案或配色，重新取图即可；Mac 新页面或状态补到 AppKit 预览和 [截图脚本](../../launcher/macos/test-ui.sh)，通常不用改工作流。输入、构建入口或产物方式变化时才修改工作流。缩略总览由 [ui-preview-summary.py](../../launcher/ui-preview-summary.py)生成。
+
+Steam 登录、Dota 冷启动与复用、跨平台真实联机、高 DPI 和长时间运行仍需实机验证。

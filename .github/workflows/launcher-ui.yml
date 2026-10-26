@@ -1,13 +1,8 @@
-name: Launcher UI previews
+name: Launcher Mac UI previews
 
 on:
   workflow_dispatch:
     inputs:
-      platform:
-        description: Platform
-        type: choice
-        default: both
-        options: [both, windows, macos]
       scope:
         description: Screens to capture
         type: choice
@@ -27,38 +22,7 @@ env:
   UI_LANGUAGE: ${{ inputs.language || 'all' }}
 
 jobs:
-  windows-ui:
-    if: ${{ inputs.platform == 'both' || inputs.platform == 'windows' }}
-    runs-on: windows-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build Windows launcher
-        run: launcher\build.cmd
-        shell: cmd
-      - name: Capture Windows UI
-        shell: pwsh
-        run: ./launcher/test-ui.ps1 -OutputDirectory "$env:RUNNER_TEMP/launcher-ui-windows" -Scope $env:UI_SCOPE -Language $env:UI_LANGUAGE
-      - name: Prepare screenshot overview
-        if: always()
-        run: python launcher/ui-preview-summary.py "${{ runner.temp }}/launcher-ui-windows"
-      - name: Upload Windows screenshots and logs
-        if: always()
-        id: screenshots
-        uses: actions/upload-artifact@v7
-        with:
-          name: launcher-ui-windows
-          path: ${{ runner.temp }}/launcher-ui-windows/
-          if-no-files-found: error
-          retention-days: 14
-      - name: Link screenshot download
-        if: always()
-        env:
-          UI_ARTIFACT_URL: ${{ steps.screenshots.outputs.artifact-url }}
-        run: python launcher/ui-preview-summary.py "${{ runner.temp }}/launcher-ui-windows" --artifact-url "$env:UI_ARTIFACT_URL"
-
   macos-ui:
-    if: ${{ inputs.platform == 'both' || inputs.platform == 'macos' }}
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
