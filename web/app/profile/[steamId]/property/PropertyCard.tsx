@@ -65,11 +65,11 @@ const ONE_SHOT_PENDING_GRADIENT = `linear-gradient(90deg, ${LEVEL_COLORS.map((co
 const CONTROLS_LAYOUT_CLASS =
   'grid w-full shrink-0 grid-cols-2 items-center gap-4 @xl:flex @xl:justify-end @xl:gap-2';
 const ACTION_CLASS =
-  'w-full max-w-40 justify-self-center px-1 whitespace-nowrap @xl:w-24 @xl:max-w-none @xl:shrink-0 lg:@xl:w-20';
+  'w-full max-w-40 justify-self-center px-1 whitespace-nowrap lg:min-h-11 @xl:w-24 @xl:max-w-none @xl:shrink-0 lg:@xl:min-h-10 lg:@xl:w-20';
 
-/** 加减号是两个各自带描边的小按钮，底色比卡片浅一档，一眼看得出能按 */
+/** 加减号是两个各自带描边的小按钮，底色比卡片浅一档，一眼看得出能按；只有在右侧定宽的控件区里才收窄，另起一行时保持方形 */
 const STEP_BUTTON_CLASS =
-  'flex size-11 shrink-0 items-center justify-center rounded-[7px] border border-line-strong bg-panel-raised text-heading shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition-[filter,background-color] enabled:hover:brightness-125 enabled:active:bg-panel-soft enabled:active:shadow-none enabled:active:brightness-100 disabled:border-line disabled:bg-transparent disabled:text-faint disabled:shadow-none lg:h-10 lg:w-[34px]';
+  'flex size-11 shrink-0 items-center justify-center rounded-[7px] border border-line-strong bg-panel-raised text-heading shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition-[filter,background-color] enabled:hover:brightness-125 enabled:active:bg-panel-soft enabled:active:shadow-none enabled:active:brightness-100 disabled:border-line disabled:bg-transparent disabled:text-faint disabled:shadow-none lg:@xl:h-10 lg:@xl:w-[34px]';
 
 /**
  * 横条够宽时控件放在右侧并定宽，各行进度条才一样长；按横条自身的宽度判断，不看屏幕：
