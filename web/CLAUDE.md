@@ -111,7 +111,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **靠鼠标才成立的写 `lg:`，不写 `md:`。** 较矮的按钮（`min-h-11 lg:min-h-10`）、常驻的次要按钮、完整的账号文字都是这类；平板和手机一样按触控处理
 - **成排的条目卡网格写 `md:grid-cols-2 lg:grid-cols-3`。** 只有两项的卡组（如会员平台卡）到 `md:grid-cols-2` 为止
-- **头部控件与菜单行 `lg` 以下 44px 高，`lg:` 起 36px / 40px**，头部里新加控件照这个尺寸
+- **头部控件 `lg` 以下 44px 高，`lg:` 起 36px；菜单行不低于 44px**，头部里新加控件照这个尺寸
 - **头部吸顶**：页面里新加 `top` 吸顶元素时，偏移写 `top-[calc(var(--header-height)+<余量>)]`，否则会钻到头部底下。锚点跳转与 `scrollIntoView` 已由 `html` 的 `scroll-padding-top` 让出头部高度，`scroll-mt-*` 只写自己的余量，不再加头部高度，两者会叠加
 - **容器查询（`@container` 配 `@sm:` 等）不受此限。** 它按所在卡片的宽度分栏，与屏幕档位无关
 

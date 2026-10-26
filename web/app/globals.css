@@ -361,7 +361,7 @@
   }
 
   .nav-menu-item {
-    @apply relative -mx-2 flex min-h-11 items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading lg:min-h-10;
+    @apply relative -mx-2 flex min-h-11 items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading;
   }
 
   .nav-menu-item[aria-current='page'] {
