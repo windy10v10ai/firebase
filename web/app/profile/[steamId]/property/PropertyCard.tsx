@@ -58,7 +58,7 @@ const LEVEL_COLORS = [
 const ONE_SHOT_GRADIENT = `linear-gradient(90deg, ${LEVEL_COLORS.join(', ')})`;
 const ONE_SHOT_PENDING_GRADIENT = `linear-gradient(90deg, ${LEVEL_COLORS.map((color) => `${color}5c`).join(', ')})`;
 
-/** 按钮宽度固定：升级、激活文字不随状态变，加减器也不跟着移动 */
+/** 按钮宽度固定：升级、激活文字不随状态变，加减器也不跟着移动；两者一起靠右，窄屏整行很宽时手指不用来回跑 */
 const ACTION_CLASS = 'w-24 shrink-0 px-1 whitespace-nowrap lg:w-20';
 
 /** 加减号是两个各自带描边的小按钮，底色比卡片浅一档，一眼看得出能按 */
@@ -330,19 +330,18 @@ export default function PropertyCard({
                 </span>
               )}
             </div>
-            {full && !readOnly ? (
-              <MaxedBadge label={t('card.maxed')} className="flex @xl:hidden" />
-            ) : null}
           </div>
         </div>
 
         {readOnly ? null : full ? (
-          // 满级不留按钮，但占着控件区的宽度，进度条才和别的行一样长
+          // 满级不留按钮，但占着控件区的宽度，进度条才和别的行一样长；窄排法下不显示，紫边已经表明满级，进度条不用让位
           <div className={`hidden shrink-0 justify-center @xl:flex ${CONTROLS_WIDTH_CLASS}`}>
             <MaxedBadge label={t('card.maxed')} className="flex" />
           </div>
         ) : (
-          <div className={`flex w-full shrink-0 items-center gap-2 ${CONTROLS_WIDTH_CLASS}`}>
+          <div
+            className={`flex w-full shrink-0 items-center justify-end gap-2 ${CONTROLS_WIDTH_CLASS}`}
+          >
             {oneShot ? (
               <>
                 <span className="min-w-0 flex-1 text-xs leading-snug text-muted">
@@ -389,7 +388,7 @@ export default function PropertyCard({
                   type="button"
                   disabled={locked || (!staged && !canStage)}
                   onClick={() => (staged ? onUpgrade(target) : onPendingChange(1))}
-                  className={`${staged ? 'btn-season' : 'btn-season-outline'} ml-auto ${ACTION_CLASS}`}
+                  className={`${staged ? 'btn-season' : 'btn-season-outline'} ${ACTION_CLASS}`}
                 >
                   {t('card.upgrade')}
                 </button>

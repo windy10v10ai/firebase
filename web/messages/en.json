@@ -692,8 +692,7 @@
       "skill": {
         "title": "Bonus skill points",
         "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels"
-      },
-      "maxedCount": "Maxed {maxed} / {total}"
+      }
     },
     "card": {
       "perCell": "{value} per level",

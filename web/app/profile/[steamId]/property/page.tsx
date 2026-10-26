@@ -10,17 +10,11 @@ import LoginPanel from '@/app/components/LoginPanel';
 import Notice from '@/app/components/Notice';
 import OwnerBackLink from '@/app/components/OwnerBackLink';
 import PrivateProfileNotice from '@/app/components/PrivateProfileNotice';
-import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { useIsSelf } from '@/app/lib/auth';
 import { resetProperties, upgradeProperty, type PlayerInfo } from '@/app/lib/player-info';
 import { applyPlayerWrite, playerPropertiesQuery } from '@/app/lib/queries';
-import {
-  PROPERTY_GROUPS,
-  PROPERTY_LIST,
-  PROPERTY_MAX_LEVEL,
-  type PropertyDef,
-} from '@/config/properties';
+import { PROPERTY_GROUPS, PROPERTY_LIST, type PropertyDef } from '@/config/properties';
 
 import PointsCard from './PointsCard';
 import PropertyCard from './PropertyCard';
@@ -176,17 +170,11 @@ export default function PropertyPage() {
 
       {PROPERTY_GROUPS.map((group) => {
         const defs = PROPERTY_LIST.filter((def) => def.group === group);
-        const maxedCount = defs.filter((def) => levelOf(def.name) === PROPERTY_MAX_LEVEL).length;
-        const maxedText = (count: number) =>
-          t('group.maxedCount', { maxed: count, total: defs.length });
         return (
           <section key={group} className="space-y-3">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="title-secondary">{t(`group.${group}.title`)}</h2>
               <span className="text-sm text-muted">{t(`group.${group}.hint`)}</span>
-              <span className="ml-auto text-sm text-muted tabular-nums">
-                {info ? maxedText(maxedCount) : <Skeleton>{maxedText(0)}</Skeleton>}
-              </span>
             </div>
             <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2">
               {defs.map((def) => (

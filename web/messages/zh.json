@@ -686,8 +686,7 @@
       "skill": {
         "title": "额外技能点",
         "hint": "解锁比别的属性慢一倍：英雄每 4 级才到手 1 点"
-      },
-      "maxedCount": "满级 {maxed} / {total}"
+      }
     },
     "card": {
       "perCell": "每级 {value}",
