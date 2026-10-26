@@ -9,8 +9,8 @@ export const STEAM_BUTTON_CLASS =
   'inline-flex items-center whitespace-nowrap rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover';
 
 export const STEAM_BUTTON_SIZE_CLASS = {
-  // 36px 高，与登录后的账号控件统一，见 phase-2g-header-layout.md
-  default: 'h-9 gap-1.5 px-2.5',
+  // 头部里与账号控件等高：触屏档 44px 点击区，电脑档 36px
+  default: 'h-11 gap-1.5 px-2.5 lg:h-9',
   large: 'min-h-14 gap-3 px-6 text-lg',
 };
 

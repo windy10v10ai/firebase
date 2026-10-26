@@ -19,6 +19,8 @@
   --color-control: #1f1f23;
   --color-control-hover: #27272b;
   --color-control-active: #19191c;
+  /* 菜单项图标底块里的中性项：不属于任何功能色 */
+  --color-icon-tile: rgba(255, 255, 255, 0.06);
 
   --color-heading: #fafafa;
   --color-content: #d4d4d8;
@@ -148,7 +150,22 @@
   }
 }
 
+/* 头部吸顶后，锚点跳转与吸顶元素都要给它让出位置；数值以实际渲染高度为准 */
+:root {
+  --header-height: 65px;
+}
+
+@media (width >= 64rem) {
+  :root {
+    --header-height: 69px;
+  }
+}
+
 @layer base {
+  html {
+    scroll-padding-top: var(--header-height);
+  }
+
   body {
     /* 积分与战绩的数字要等宽，否则数值一变列就跳 */
     font-variant-numeric: tabular-nums;
@@ -344,7 +361,7 @@
   }
 
   .nav-menu-item {
-    @apply relative -mx-2 flex items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading;
+    @apply relative -mx-2 flex min-h-11 items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading lg:min-h-10;
   }
 
   .nav-menu-item[aria-current='page'] {
