@@ -74,8 +74,8 @@ export default function PlayerSummary({ uid }: { uid: string }) {
                 />
               )}
             </p>
-            {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，写法同 profile 页身份卡 */}
-            <p className="min-h-5 min-w-0 truncate text-[13px] text-muted">
+            {/* 昵称没取到时标题本身就是 ID，这一行空着；高度按复制按钮留足，昵称晚到也不撑高 */}
+            <p className="min-h-[22px] min-w-0 truncate text-[13px] text-muted">
               {personaName ? (
                 <IdWithCopy
                   id={uid}
