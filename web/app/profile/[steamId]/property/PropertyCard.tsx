@@ -65,8 +65,11 @@ const ACTION_CLASS = 'w-24 shrink-0 px-1 whitespace-nowrap lg:w-20';
 const STEP_BUTTON_CLASS =
   'flex size-11 shrink-0 items-center justify-center rounded-[7px] border border-line-strong bg-panel-raised text-heading shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition-[filter,background-color] enabled:hover:brightness-125 enabled:active:bg-panel-soft enabled:active:shadow-none enabled:active:brightness-100 disabled:border-line disabled:bg-transparent disabled:text-faint disabled:shadow-none lg:h-10 lg:w-[34px]';
 
-/** 控件区在 md 以上定宽，进度条在各行才一样长 */
-const CONTROLS_WIDTH_CLASS = 'md:w-56 lg:w-[188px]';
+/**
+ * 横条够宽时控件放在右侧并定宽，各行进度条才一样长；按横条自身的宽度判断，不看屏幕：
+ * 电脑两列时每条比平板单列还窄，长语言的名称放不下
+ */
+const CONTROLS_WIDTH_CLASS = '@xl:w-56 lg:@xl:w-[188px]';
 
 function cellStyle(color: string, state: CellState, full: boolean): CSSProperties | undefined {
   if (state === 'filled') {
@@ -236,158 +239,165 @@ export default function PropertyCard({
   return (
     // 别人看时没加过的属性压暗，加在哪一眼就能看出来
     <div
-      className={`card-container card-pad-sm flex flex-wrap items-center gap-x-3 gap-y-2.5 transition-colors md:flex-nowrap md:gap-x-3.5 ${borderClass} ${readOnly && known && current === 0 ? 'opacity-55' : ''}`}
+      className={`card-container card-pad-sm @container transition-colors ${borderClass} ${readOnly && known && current === 0 ? 'opacity-55' : ''}`}
     >
-      <span
-        className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] ${tileClass}`}
-      >
-        <def.Icon className="size-[22px]" strokeWidth={1.75} />
-      </span>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 @xl:flex-nowrap @xl:gap-x-3.5">
+        <span
+          className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] ${tileClass}`}
+        >
+          <def.Icon className="size-[22px]" strokeWidth={1.75} />
+        </span>
 
-      <div className="flex min-w-0 grow basis-[calc(100%-52px)] flex-col gap-2 md:basis-0">
-        <div className="relative flex min-w-0 items-baseline gap-2">
-          <span title={name} className="min-w-0 shrink-[0.1] truncate font-semibold text-heading">
-            {name}
-          </span>
-          {def.group === 'scaling' ? <Hint Icon={TrendingUp} tip={t('card.scalingTip')} /> : null}
-          {def.group === 'skill' ? <Hint Icon={Hourglass} tip={t('card.skillTip')} /> : null}
-          <span className="min-w-0 truncate text-xs text-muted">
-            {known ? subText : <Skeleton>{subText}</Skeleton>}
-          </span>
-          <span className="ml-auto flex shrink-0 items-baseline gap-1.5 whitespace-nowrap tabular-nums">
-            {!known ? (
-              <span className="font-bold">
-                <Skeleton />
+        <div className="flex min-w-0 grow basis-[calc(100%-52px)] flex-col gap-2 @xl:basis-0">
+          {/* 名称与小字各占一行、允许折行：英文、俄文的名称很长，截断后认不出是哪条属性 */}
+          <div className="relative flex min-w-0 items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-1.5">
+                <span className="font-semibold text-heading">{name}</span>
+                {def.group === 'scaling' ? (
+                  <Hint Icon={TrendingUp} tip={t('card.scalingTip')} />
+                ) : null}
+                {def.group === 'skill' ? <Hint Icon={Hourglass} tip={t('card.skillTip')} /> : null}
+              </div>
+              <span className="block text-xs text-muted">
+                {known ? subText : <Skeleton>{subText}</Skeleton>}
               </span>
-            ) : oneShot ? (
-              staged ? (
-                <span className="font-bold text-season">{t('card.staged')}</span>
-              ) : (
-                <span className={`font-bold ${current > 0 ? 'text-heading' : 'text-muted'}`}>
-                  {t(current > 0 ? 'card.owned' : 'card.notOwned')}
+            </div>
+            <span className="flex shrink-0 items-baseline gap-1.5 whitespace-nowrap tabular-nums">
+              {!known ? (
+                <span className="font-bold">
+                  <Skeleton />
                 </span>
-              )
+              ) : oneShot ? (
+                staged ? (
+                  <span className="font-bold text-season">{t('card.staged')}</span>
+                ) : (
+                  <span className={`font-bold ${current > 0 ? 'text-heading' : 'text-muted'}`}>
+                    {t(current > 0 ? 'card.owned' : 'card.notOwned')}
+                  </span>
+                )
+              ) : (
+                <>
+                  <span className={`font-bold ${current > 0 ? 'text-heading' : 'text-muted'}`}>
+                    {valueText(def, current)}
+                  </span>
+                  {staged ? (
+                    <>
+                      <span className="text-xs text-muted">→</span>
+                      <span className="font-bold text-season">{valueText(def, target)}</span>
+                    </>
+                  ) : null}
+                </>
+              )}
+            </span>
+          </div>
+
+          {/* 进度条只是把等级画出来，数值和等级都已经有文字，读屏不用再念一遍；格子是点选的辅助入口，键盘用加减器 */}
+          <div className="flex items-center gap-3">
+            <div
+              aria-hidden="true"
+              className="relative min-w-0 flex-1"
+              onMouseLeave={() => setHoveredCell(null)}
+            >
+              {oneShot ? (
+                <BarSegment
+                  pickable={pickable}
+                  className="block w-full"
+                  style={oneShotStyle(full ? 'filled' : staged ? 'pending' : 'empty', full)}
+                  empty={!full && !staged}
+                  onEnter={() => setHoveredCell(PROPERTY_MAX_LEVEL)}
+                  onPick={() => pickCell(def.barCells)}
+                />
+              ) : (
+                <div className="flex gap-[3px]">
+                  {cells.map(({ cell, state, color }) => (
+                    <BarSegment
+                      key={cell}
+                      pickable={pickable && cell > filled}
+                      className="flex-1"
+                      style={cellStyle(color, state, full)}
+                      empty={state === 'empty'}
+                      onEnter={() => setHoveredCell(cell)}
+                      onPick={() => pickCell(cell)}
+                    />
+                  ))}
+                </div>
+              )}
+              {/* 浮层挂在整条进度条的中线上，挂在格子上的话两头会顶出卡片 */}
+              {tipText === null ? null : (
+                <span className={`${TOOLTIP_CLASS} left-1/2 -translate-x-1/2 whitespace-nowrap`}>
+                  {tipText}
+                </span>
+              )}
+            </div>
+            {full && !readOnly ? (
+              <MaxedBadge label={t('card.maxed')} className="flex @xl:hidden" />
+            ) : null}
+          </div>
+        </div>
+
+        {readOnly ? null : full ? (
+          // 满级不留按钮，但占着控件区的宽度，进度条才和别的行一样长
+          <div className={`hidden shrink-0 justify-center @xl:flex ${CONTROLS_WIDTH_CLASS}`}>
+            <MaxedBadge label={t('card.maxed')} className="flex" />
+          </div>
+        ) : (
+          <div className={`flex w-full shrink-0 items-center gap-2 ${CONTROLS_WIDTH_CLASS}`}>
+            {oneShot ? (
+              <>
+                <span className="min-w-0 flex-1 text-xs leading-snug text-muted">
+                  {t('card.oneShotCost', { cost: PROPERTY_MAX_LEVEL })}
+                </span>
+                <button
+                  type="button"
+                  disabled={locked || (!staged && !canStage)}
+                  onClick={() => (staged ? onUpgrade(PROPERTY_MAX_LEVEL) : onPendingChange(1))}
+                  className={`${staged ? 'btn-season' : 'btn-season-outline'} ${ACTION_CLASS}`}
+                >
+                  {t('card.activate')}
+                </button>
+              </>
             ) : (
               <>
-                <span className={`font-bold ${current > 0 ? 'text-heading' : 'text-muted'}`}>
-                  {valueText(def, current)}
-                </span>
-                {staged ? (
-                  <>
-                    <span className="text-xs text-muted">→</span>
-                    <span className="font-bold text-season">{valueText(def, target)}</span>
-                  </>
-                ) : null}
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    aria-label={t('card.decrease')}
+                    disabled={!staged || locked}
+                    onClick={() => onPendingChange(pendingCells - 1)}
+                    className={STEP_BUTTON_CLASS}
+                  >
+                    <Minus className="size-4" />
+                  </button>
+                  <span
+                    className={`w-6 text-center font-bold tabular-nums ${staged ? 'text-season' : 'text-muted'}`}
+                  >
+                    {staged ? `+${pendingCells}` : 0}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={t('card.increase')}
+                    disabled={!canStage || locked}
+                    onClick={() => onPendingChange(pendingCells + 1)}
+                    className={STEP_BUTTON_CLASS}
+                  >
+                    <Plus className="size-4" />
+                  </button>
+                </div>
+                {/* 还没选档数时点升级只是先选上一档，不扣点；选好后按钮变实心，再点才提交 */}
+                <button
+                  type="button"
+                  disabled={locked || (!staged && !canStage)}
+                  onClick={() => (staged ? onUpgrade(target) : onPendingChange(1))}
+                  className={`${staged ? 'btn-season' : 'btn-season-outline'} ml-auto ${ACTION_CLASS}`}
+                >
+                  {t('card.upgrade')}
+                </button>
               </>
             )}
-          </span>
-        </div>
-
-        {/* 进度条只是把等级画出来，数值和等级都已经有文字，读屏不用再念一遍；格子是点选的辅助入口，键盘用加减器 */}
-        <div className="flex items-center gap-3">
-          <div
-            aria-hidden="true"
-            className="relative min-w-0 flex-1"
-            onMouseLeave={() => setHoveredCell(null)}
-          >
-            {oneShot ? (
-              <BarSegment
-                pickable={pickable}
-                className="block w-full"
-                style={oneShotStyle(full ? 'filled' : staged ? 'pending' : 'empty', full)}
-                empty={!full && !staged}
-                onEnter={() => setHoveredCell(PROPERTY_MAX_LEVEL)}
-                onPick={() => pickCell(def.barCells)}
-              />
-            ) : (
-              <div className="flex gap-[3px]">
-                {cells.map(({ cell, state, color }) => (
-                  <BarSegment
-                    key={cell}
-                    pickable={pickable && cell > filled}
-                    className="flex-1"
-                    style={cellStyle(color, state, full)}
-                    empty={state === 'empty'}
-                    onEnter={() => setHoveredCell(cell)}
-                    onPick={() => pickCell(cell)}
-                  />
-                ))}
-              </div>
-            )}
-            {/* 浮层挂在整条进度条的中线上，挂在格子上的话两头会顶出卡片 */}
-            {tipText === null ? null : (
-              <span className={`${TOOLTIP_CLASS} left-1/2 -translate-x-1/2 whitespace-nowrap`}>
-                {tipText}
-              </span>
-            )}
           </div>
-          {full && !readOnly ? (
-            <MaxedBadge label={t('card.maxed')} className="flex md:hidden" />
-          ) : null}
-        </div>
+        )}
       </div>
-
-      {readOnly ? null : full ? (
-        // 满级不留按钮，但占着控件区的宽度，进度条才和别的行一样长
-        <div className={`hidden shrink-0 justify-center md:flex ${CONTROLS_WIDTH_CLASS}`}>
-          <MaxedBadge label={t('card.maxed')} className="flex" />
-        </div>
-      ) : (
-        <div className={`flex w-full shrink-0 items-center gap-2 ${CONTROLS_WIDTH_CLASS}`}>
-          {oneShot ? (
-            <>
-              <span className="min-w-0 flex-1 text-xs leading-snug text-muted">
-                {t('card.oneShotCost', { cost: PROPERTY_MAX_LEVEL })}
-              </span>
-              <button
-                type="button"
-                disabled={locked || (!staged && !canStage)}
-                onClick={() => (staged ? onUpgrade(PROPERTY_MAX_LEVEL) : onPendingChange(1))}
-                className={`${staged ? 'btn-season' : 'btn-season-outline'} ${ACTION_CLASS}`}
-              >
-                {t('card.activate')}
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="flex shrink-0 items-center gap-1">
-                <button
-                  type="button"
-                  aria-label={t('card.decrease')}
-                  disabled={!staged || locked}
-                  onClick={() => onPendingChange(pendingCells - 1)}
-                  className={STEP_BUTTON_CLASS}
-                >
-                  <Minus className="size-4" />
-                </button>
-                <span
-                  className={`w-6 text-center font-bold tabular-nums ${staged ? 'text-season' : 'text-muted'}`}
-                >
-                  {staged ? `+${pendingCells}` : 0}
-                </span>
-                <button
-                  type="button"
-                  aria-label={t('card.increase')}
-                  disabled={!canStage || locked}
-                  onClick={() => onPendingChange(pendingCells + 1)}
-                  className={STEP_BUTTON_CLASS}
-                >
-                  <Plus className="size-4" />
-                </button>
-              </div>
-              {/* 还没选档数时点升级只是先选上一档，不扣点；选好后按钮变实心，再点才提交 */}
-              <button
-                type="button"
-                disabled={locked || (!staged && !canStage)}
-                onClick={() => (staged ? onUpgrade(target) : onPendingChange(1))}
-                className={`${staged ? 'btn-season' : 'btn-season-outline'} ml-auto ${ACTION_CLASS}`}
-              >
-                {t('card.upgrade')}
-              </button>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

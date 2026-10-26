@@ -188,7 +188,7 @@ export default function PropertyPage() {
                 {info ? maxedText(maxedCount) : <Skeleton>{maxedText(0)}</Skeleton>}
               </span>
             </div>
-            <div className="grid gap-2.5 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2">
               {defs.map((def) => (
                 <PropertyCard
                   key={def.name}
