@@ -1,7 +1,7 @@
-export const LAUNCHER_VERSION = '0.7.0';
+export const LAUNCHER_VERSION = '0.7.1';
 
 // Mac 版的官方安装包随发版 PR 一起放进 downloads，为 null 时页面不显示 Mac 入口
-export const LAUNCHER_MAC_VERSION: string | null = '0.7.0';
+export const LAUNCHER_MAC_VERSION: string | null = '0.7.1';
 
 // 服务器上的文件名带版本号才能永久缓存；玩家存下来的名字固定，换版本不留一串旧文件
 export const LAUNCHER_FILE_NAME = 'Windy10v10AI.exe';

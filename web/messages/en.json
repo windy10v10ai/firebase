@@ -196,6 +196,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_7_1": [
+          "Improved multiplayer connections with less lag and fewer disconnects"
+        ],
         "v0_7_0": [
           "Added a launcher for Mac"
         ],
