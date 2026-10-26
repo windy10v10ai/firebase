@@ -665,52 +665,50 @@
       "description": "刷新一下再试，还不行就过一会儿再来。"
     },
     "title": "属性加点",
-    "intro": "用属性点增强英雄。加点永久保留，每一局都带着。",
+    "intro": "用属性点增强英雄，加点永久保留。勇士等级和会员等级每升 1 级，各给 1 点。",
     "points": {
       "title": "属性点",
-      "usable": "可用 / 总数",
-      "used": "已加 / 总数",
+      "usableLabel": "可用属性点",
+      "usedLabel": "已加属性点",
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
-      "formula": "总属性点 = 勇士等级 + 会员等级，两种等级每升 1 级各给 1 点，只升不降。",
-      "reset": "重置属性"
+      "staged": "已选 {count} 点，点「升级」才扣"
     },
     "group": {
       "instant": {
         "title": "英雄 1 级起生效",
-        "hint": "不看英雄等级，进游戏就是全部数值 · {count} 条"
+        "hint": "不看英雄等级，进游戏就是全部数值"
       },
       "scaling": {
         "title": "随英雄升级解锁",
-        "hint": "英雄每 2 级解锁 1 级，英雄 1 级时这些属性还没有数值 · {count} 条"
+        "hint": "英雄每 2 级解锁 1 级，英雄 1 级时这些属性还没有数值"
       },
       "skill": {
         "title": "额外技能点",
-        "hint": "解锁比别的属性慢一倍：英雄每 4 级才到手 1 点 · {count} 条"
+        "hint": "解锁比别的属性慢一倍：英雄每 4 级才到手 1 点"
       }
     },
     "card": {
-      "level": "{level}/{max} 级",
       "perCell": "每级 {value}",
-      "stepCost": "每次升级消耗 {cost} 属性点",
+      "skillCost": "每级 {cost} 属性点",
       "skillValue": "{value} 点",
-      "full": "满级",
-      "owned": "已获取",
-      "notOwned": "未获取",
-      "scalingBadge": "随英雄升级",
-      "skillBadge": "英雄每 4 级 1 点",
-      "effectNote": "加到 {level} 级，英雄 {heroLevel} 级时全部生效",
-      "effectEmpty": "加点之后这里会写出需要的英雄等级",
-      "cellTip": "第 {cell} 级 · 英雄 {heroLevel} 级起生效",
+      "oneShot": "一次激活",
+      "owned": "已激活",
+      "notOwned": "未激活",
+      "staged": "将激活",
+      "scalingTip": "随英雄升级：英雄每 2 级解锁 1 级，英雄 1 级时还没有数值",
+      "skillTip": "英雄每 4 级才到手 1 点",
+      "cellTip": "第 {cell} 级，英雄 {heroLevel} 级起生效",
+      "oneShotTip": "激活后进游戏就全部生效",
       "upgrade": "升级",
-      "upgradeTo": "升至 {level} 级",
+      "activate": "激活",
       "oneShotCost": "消耗 {cost} 属性点",
-      "notEnough": "属性点不足",
       "maxed": "已满级",
       "decrease": "少加一级",
       "increase": "多加一级"
     },
     "reset": {
+      "button": "重置属性",
       "title": "重置属性",
       "description": "清空全部加点，属性点全额退回，可以重新分配。扣的是可用积分，累计积分与等级都不变，属性点总数也一点不少。",
       "useBattle": "消耗 {cost} 可用勇士积分",

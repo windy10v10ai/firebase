@@ -671,52 +671,50 @@
       "description": "Refresh and try again, or come back in a little while."
     },
     "title": "Attributes",
-    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game.",
+    "intro": "Spend attribute points to strengthen your hero. Upgrades are permanent. Every Battle Level and Member Level you gain gives 1 point.",
     "points": {
       "title": "Attribute points",
-      "usable": "Usable / total",
-      "used": "Spent / total",
-      "battleLevel": "Battle level",
-      "memberLevel": "Member level",
-      "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down.",
-      "reset": "Reset"
+      "usableLabel": "Usable attribute points",
+      "usedLabel": "Attribute points spent",
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "staged": "{count, plural, one {# point} other {# points}} selected, tap Upgrade to spend"
     },
     "group": {
       "instant": {
         "title": "Active from hero level 1",
-        "hint": "No hero level needed — the full value applies as soon as the game starts · {count} attributes"
+        "hint": "No hero level needed: the full value applies as soon as the game starts"
       },
       "scaling": {
         "title": "Unlocks as your hero levels",
-        "hint": "One level unlocks every 2 hero levels, so these do nothing at hero level 1 · {count} attributes"
+        "hint": "One level unlocks every 2 hero levels, so these do nothing at hero level 1"
       },
       "skill": {
         "title": "Bonus skill points",
-        "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels · {count} attribute"
+        "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels"
       }
     },
     "card": {
-      "level": "Level {level}/{max}",
       "perCell": "{value} per level",
-      "stepCost": "{cost} attribute points per upgrade",
+      "skillCost": "{cost} attribute points per level",
       "skillValue": "{value}",
-      "full": "Maxed",
-      "owned": "Owned",
-      "notOwned": "Not owned",
-      "scalingBadge": "Scales with hero level",
-      "skillBadge": "1 per 4 hero levels",
-      "effectNote": "At level {level}, fully active once your hero reaches level {heroLevel}",
-      "effectEmpty": "Add a level and this will tell you the hero level it needs",
-      "cellTip": "Level {cell} · active from hero level {heroLevel}",
+      "oneShot": "One-time activation",
+      "owned": "Active",
+      "notOwned": "Inactive",
+      "staged": "Will activate",
+      "scalingTip": "Scales with hero level: one level unlocks every 2 hero levels, and there is no value at hero level 1",
+      "skillTip": "Only 1 point every 4 hero levels",
+      "cellTip": "Level {cell}, active from hero level {heroLevel}",
+      "oneShotTip": "Fully active in game right after activation",
       "upgrade": "Upgrade",
-      "upgradeTo": "Upgrade to {level}",
+      "activate": "Activate",
       "oneShotCost": "Costs {cost} attribute points",
-      "notEnough": "Not enough points",
-      "maxed": "Maxed out",
+      "maxed": "Maxed",
       "decrease": "One level fewer",
       "increase": "One level more"
     },
     "reset": {
+      "button": "Reset",
       "title": "Reset attributes",
       "description": "Clears every level you have added and refunds all attribute points so you can spend them again. Only usable points are charged — total points, lifetime points and your levels stay exactly as they are.",
       "useBattle": "Spend {cost} usable battle points",
