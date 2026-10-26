@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { RotateCcw } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
@@ -131,8 +132,24 @@ export default function PropertyPage() {
       )}
       <div className="space-y-1.5">
         {isSelf ? null : <OwnerBackLink steamId={steamId} />}
-        <h1 className="title-primary">{t('title')}</h1>
-        <p className="text-sm text-muted">{t('intro')}</p>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5">
+          <h1 className="title-primary md:col-start-1">{t('title')}</h1>
+          {isSelf ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (info) {
+                  setDialogOpen(true);
+                }
+              }}
+              className="col-start-2 row-start-1 flex min-h-11 items-center gap-2 rounded-[7px] border border-danger/50 bg-danger/8 px-4 text-sm text-danger transition-colors hover:bg-danger/15 md:row-span-2 md:self-start"
+            >
+              <RotateCcw className="size-4" />
+              {t('reset.button')}
+            </button>
+          ) : null}
+          <p className="col-span-2 text-sm text-muted md:col-span-1">{t('intro')}</p>
+        </div>
       </div>
 
       <PointsCard
@@ -142,11 +159,7 @@ export default function PropertyPage() {
         totalLevel={info?.totalLevel ?? null}
         seasonLevel={info?.seasonLevel ?? null}
         memberLevel={info?.memberLevel ?? null}
-        onReset={() => {
-          if (info) {
-            setDialogOpen(true);
-          }
-        }}
+        stagedPoints={stagedLevels}
       />
 
       {failedAction ? (
@@ -161,29 +174,24 @@ export default function PropertyPage() {
           <section key={group} className="space-y-3">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="title-secondary">{t(`group.${group}.title`)}</h2>
-              <span className="text-sm text-muted">
-                {t(`group.${group}.hint`, { count: defs.length })}
-              </span>
+              <span className="text-sm text-muted">{t(`group.${group}.hint`)}</span>
             </div>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {defs.map((def) => {
-                const pendingCells = pending[def.name] ?? 0;
-                return (
-                  <PropertyCard
-                    key={def.name}
-                    def={def}
-                    level={levelOf(def.name)}
-                    pendingCells={pendingCells}
-                    canAdd={usableLevel !== null && usableLevel >= def.levelPerStep}
-                    busy={busy !== null}
-                    readOnly={!isSelf}
-                    onPendingChange={(cells) =>
-                      setPending((current) => ({ ...current, [def.name]: cells }))
-                    }
-                    onUpgrade={(targetLevel) => handleUpgrade(def, targetLevel)}
-                  />
-                );
-              })}
+            <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2">
+              {defs.map((def) => (
+                <PropertyCard
+                  key={def.name}
+                  def={def}
+                  level={levelOf(def.name)}
+                  pendingCells={pending[def.name] ?? 0}
+                  usablePoints={usableLevel}
+                  busy={busy !== null}
+                  readOnly={!isSelf}
+                  onPendingChange={(cells) =>
+                    setPending((current) => ({ ...current, [def.name]: cells }))
+                  }
+                  onUpgrade={(targetLevel) => handleUpgrade(def, targetLevel)}
+                />
+              ))}
             </div>
           </section>
         );

@@ -68,7 +68,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             siteOrigin={siteOrigin}
           >
             <QueryProvider>
-              <div className="relative z-10 flex flex-col min-h-screen">
+              {/* 首页首屏的背景图按视口宽度铺满，100vw 含滚动条宽度，不裁掉会出横向滚动条；用 clip 而不是 hidden，才不破坏头部吸顶 */}
+              <div className="relative z-10 flex flex-col min-h-screen overflow-x-clip">
                 <Header />
                 <main className="mx-auto w-full max-w-7xl px-3 py-6 md:px-4 md:py-8 flex-1">
                   {children}
