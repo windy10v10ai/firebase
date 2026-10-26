@@ -157,6 +157,10 @@
 
 **排查线上偶发故障、本地跑不通、登录链路异常、接口变慢，以及 API 部署后检查有没有出错、变慢之前，先用 Skill 工具加载 [debug-evidence](skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
 
+### 界面设计
+
+**对网站或启动器的界面做设计点评、技术检查、打磨或改版时，先用 Skill 工具加载 [impeccable](skills/impeccable/SKILL.md) 技能。**它按页面性质分模式，带点评、检查、打磨各命令的做法；视觉规范仍以 [docs/web/design-system.md](../docs/web/design-system.md) 为准。
+
 ---
 
 ## 代码规范
