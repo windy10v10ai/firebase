@@ -92,7 +92,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
             >
               {member ? t(`member.${status}`) : null}
             </span>
-            <span className="min-h-5 truncate text-sm text-muted">
+            <span className="min-h-5 text-sm text-muted">
               {member ? t('member.expireDate', { date: member.expireDateString ?? '' }) : null}
             </span>
           </p>
