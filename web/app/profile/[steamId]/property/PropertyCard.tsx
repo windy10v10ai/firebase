@@ -58,8 +58,14 @@ const LEVEL_COLORS = [
 const ONE_SHOT_GRADIENT = `linear-gradient(90deg, ${LEVEL_COLORS.join(', ')})`;
 const ONE_SHOT_PENDING_GRADIENT = `linear-gradient(90deg, ${LEVEL_COLORS.map((color) => `${color}5c`).join(', ')})`;
 
-/** 按钮宽度固定：升级、激活文字不随状态变，加减器也不跟着移动；两者一起靠右，窄屏整行很宽时手指不用来回跑 */
-const ACTION_CLASS = 'w-24 shrink-0 px-1 whitespace-nowrap lg:w-20';
+/**
+ * 控件另起一行时分左右两半，加减器在左半、按钮在右半，各自居中，按钮放宽好点但设上限；
+ * 控件在右侧定宽时按钮宽度固定，升级、激活文字随状态变也不会推动加减器
+ */
+const CONTROLS_LAYOUT_CLASS =
+  'grid w-full shrink-0 grid-cols-2 items-center gap-4 @xl:flex @xl:justify-end @xl:gap-2';
+const ACTION_CLASS =
+  'w-full max-w-40 justify-self-center px-1 whitespace-nowrap @xl:w-24 @xl:max-w-none @xl:shrink-0 lg:@xl:w-20';
 
 /** 加减号是两个各自带描边的小按钮，底色比卡片浅一档，一眼看得出能按 */
 const STEP_BUTTON_CLASS =
@@ -339,12 +345,10 @@ export default function PropertyCard({
             <MaxedBadge label={t('card.maxed')} className="flex" />
           </div>
         ) : (
-          <div
-            className={`flex w-full shrink-0 items-center justify-end gap-2 ${CONTROLS_WIDTH_CLASS}`}
-          >
+          <div className={`${CONTROLS_LAYOUT_CLASS} ${CONTROLS_WIDTH_CLASS}`}>
             {oneShot ? (
               <>
-                <span className="min-w-0 flex-1 text-xs leading-snug text-muted">
+                <span className="min-w-0 justify-self-center text-center text-xs leading-snug text-muted @xl:flex-1 @xl:text-left">
                   {t('card.oneShotCost', { cost: PROPERTY_MAX_LEVEL })}
                 </span>
                 <button
@@ -358,7 +362,7 @@ export default function PropertyCard({
               </>
             ) : (
               <>
-                <div className="flex shrink-0 items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1 justify-self-center">
                   <button
                     type="button"
                     aria-label={t('card.decrease')}
