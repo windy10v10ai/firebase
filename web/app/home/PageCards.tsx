@@ -3,92 +3,78 @@
 import {
   BookOpen,
   CalendarCheck,
-  ChevronRight,
   ChartNoAxesColumn,
-  Crown,
   Sparkles,
   Trophy,
   UserRound,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import Section from '@/app/components/Section';
+import ActionCard from '@/app/components/ActionCard';
 import { useAuth } from '@/app/lib/auth';
 import { playerPagePath } from '@/app/lib/player-path';
 
 // 顺序与头部菜单的分组一致：先是玩家自己的，再是人人一样的；图标颜色与头部菜单、个人主页入口卡一致
 const PAGE_CARDS = [
-  { key: 'profile', Icon: UserRound, iconClass: 'text-content' },
-  { key: 'property', Icon: ChartNoAxesColumn, iconClass: 'text-feature-property' },
-  { key: 'awaken', Icon: Sparkles, iconClass: 'text-feature-awaken' },
-  { key: 'dailyTask', Icon: CalendarCheck, iconClass: 'text-feature-daily' },
-  { key: 'membership', Icon: Crown, iconClass: 'text-member-strong' },
-  { key: 'wiki', Icon: BookOpen, iconClass: 'text-feature-wiki' },
-  { key: 'leaderboard', Icon: Trophy, iconClass: 'text-season' },
+  { key: 'profile', Icon: UserRound, iconClass: 'text-content', tileClass: 'bg-icon-tile' },
+  {
+    key: 'property',
+    Icon: ChartNoAxesColumn,
+    iconClass: 'text-feature-property',
+    tileClass: 'bg-feature-property-soft',
+  },
+  {
+    key: 'awaken',
+    Icon: Sparkles,
+    iconClass: 'text-feature-awaken',
+    tileClass: 'bg-feature-awaken-soft',
+  },
+  {
+    key: 'dailyTask',
+    Icon: CalendarCheck,
+    iconClass: 'text-feature-daily',
+    tileClass: 'bg-feature-daily-soft',
+  },
+  {
+    key: 'wiki',
+    Icon: BookOpen,
+    iconClass: 'text-feature-wiki',
+    tileClass: 'bg-feature-wiki-soft',
+  },
+  { key: 'leaderboard', Icon: Trophy, iconClass: 'text-season', tileClass: 'bg-season-soft' },
 ] as const;
 
 export default function PageCards() {
   const t = useTranslations('home.pages');
   const auth = useAuth();
 
-  // 页面没实现的一律不给 href，卡片就停在「即将上线」的样子上
   const uid = auth.status === 'authenticated' ? auth.uid : null;
-  const hrefOf: Record<string, string | null> = {
+  const hrefOf: Record<(typeof PAGE_CARDS)[number]['key'], string> = {
     profile: playerPagePath(uid),
     property: playerPagePath(uid, 'property'),
     awaken: playerPagePath(uid, 'awaken'),
-    membership: '/membership',
     dailyTask: playerPagePath(uid, 'daily-task'),
     wiki: '/wiki/abilities',
     leaderboard: '/leaderboard',
   };
 
   return (
-    <Section title={t('title')} containerClassName="max-w-none">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {PAGE_CARDS.map(({ key, Icon, iconClass }) => {
-          const href = hrefOf[key] ?? null;
-          const title = t(`${key}.title`);
-          const description = t(`${key}.description`);
-          const icon = (
-            <Icon className={`size-5 shrink-0 ${iconClass}`} strokeWidth={1.7} aria-hidden="true" />
-          );
-
-          if (!href) {
-            return (
-              <div
-                key={key}
-                className="card-pad-sm flex flex-col gap-2 rounded-[10px] border border-dashed border-line bg-panel"
-              >
-                <div className="flex items-center gap-2">
-                  {icon}
-                  <span className="flex-1 text-lg font-bold text-muted">{title}</span>
-                </div>
-                <p className="text-sm text-muted">{description}</p>
-                <span className="self-start rounded-full border border-line bg-panel-soft px-2.5 py-0.5 text-xs text-muted">
-                  {t('soon')}
-                </span>
-              </div>
-            );
-          }
-
-          return (
-            <Link
-              key={key}
-              href={href}
-              className="card-container card-pad-sm card-hover flex flex-col gap-2"
-            >
-              <div className="flex items-center gap-2">
-                {icon}
-                <span className="flex-1 text-lg font-bold text-heading">{title}</span>
-                <ChevronRight className="size-4 shrink-0 text-muted" aria-hidden="true" />
-              </div>
-              <p className="text-sm text-muted">{description}</p>
-            </Link>
-          );
-        })}
+    <section className="flex flex-col gap-3 lg:gap-4">
+      <h2 className="title-secondary font-heading text-xl md:text-2xl">{t('title')}</h2>
+      <div className="grid gap-2.5 md:grid-cols-2 md:gap-3.5 lg:grid-cols-3">
+        {PAGE_CARDS.map(({ key, Icon, iconClass, tileClass }) => (
+          <ActionCard
+            key={key}
+            translucent
+            href={hrefOf[key]}
+            Icon={Icon}
+            iconClassName={iconClass}
+            tileClassName={tileClass}
+            title={t(`${key}.title`)}
+            description={t(`${key}.description`)}
+          />
+        ))}
       </div>
-    </Section>
+    </section>
   );
 }

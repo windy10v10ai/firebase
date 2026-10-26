@@ -21,7 +21,7 @@ export default function AuthStatus() {
   if (uid === null) {
     return (
       <div className="group relative">
-        <SteamLoginButton />
+        <SteamLoginButton className="header-control" />
         <AcceleratorHint variant="tooltip" />
       </div>
     );
@@ -29,7 +29,7 @@ export default function AuthStatus() {
 
   return (
     // ID 与退出合并进同一条背景；退出单独占一格，点 ID 时不会误点到它
-    <div className="flex h-11 items-stretch lg:h-9 overflow-hidden whitespace-nowrap rounded-md border border-line bg-control text-content">
+    <div className="flex h-11 items-stretch lg:h-9 overflow-hidden whitespace-nowrap rounded-md border border-line bg-control text-content header-control">
       <Link
         href={playerPagePath(uid)}
         title={t('profileTooltip')}
@@ -47,7 +47,7 @@ export default function AuthStatus() {
           {profile?.personaName ?? t('loggedInAs', { uid })}
         </span>
       </Link>
-      <span className="hidden w-px bg-line lg:block" aria-hidden="true" />
+      <span className="hidden w-px bg-line header-divider lg:block" aria-hidden="true" />
       <button
         type="button"
         onClick={() => auth.signOut()}

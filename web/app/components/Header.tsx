@@ -132,6 +132,7 @@ export default function Header() {
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
     <header
       ref={headerRef}
+      data-transparent={transparent || undefined}
       className={`sticky top-0 z-20 border-b font-heading transition-colors duration-150 ease-out ${
         transparent ? 'border-transparent bg-transparent' : 'border-line bg-panel'
       }`}
@@ -173,7 +174,7 @@ export default function Header() {
                   {t(item.shortLabelKey)}
                 </Link>
               ))}
-              <span className="h-4 w-px bg-line" aria-hidden="true" />
+              <span className="h-4 w-px bg-line header-divider" aria-hidden="true" />
               {githubLink ? (
                 <a
                   href={githubLink.href}
@@ -188,7 +189,7 @@ export default function Header() {
               ) : null}
             </div>
             <LanguageSwitcher />
-            <span className="hidden h-5 w-px bg-line lg:block" aria-hidden="true" />
+            <span className="hidden h-5 w-px bg-line header-divider lg:block" aria-hidden="true" />
             <AuthStatus />
             {/* 汉堡是「打开菜单」的开关而不是导航项，窄屏下又是唯一入口，所以不标当前页 */}
             <button
@@ -197,7 +198,7 @@ export default function Header() {
               aria-label={t('menu')}
               aria-expanded={menuOpen}
               aria-controls="header-menu"
-              className="flex size-11 items-center justify-center rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover lg:size-9"
+              className="flex size-11 items-center justify-center rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover header-control lg:size-9"
             >
               <svg
                 className="h-5 w-5"

@@ -111,7 +111,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **靠鼠标才成立的写 `lg:`，不写 `md:`。** 较矮的按钮（`min-h-11 lg:min-h-10`）、常驻的次要按钮、完整的账号文字都是这类；平板和手机一样按触控处理
 - **成排的条目卡网格写 `md:grid-cols-2 lg:grid-cols-3`。** 只有两项的卡组（如会员平台卡）到 `md:grid-cols-2` 为止
-- **头部控件 `lg` 以下 44px 高，`lg:` 起 36px；菜单行不低于 44px**，头部里新加控件照这个尺寸
+- **头部控件 `lg` 以下 44px 高，`lg:` 起 36px；菜单行不低于 44px**，头部里新加控件照这个尺寸；带底色的控件加 `header-control`、竖分隔线加 `header-divider`，首页顶部头部透明时它们才会换成半透明底
 - **头部吸顶**：页面里新加 `top` 吸顶元素时，偏移写 `top-[calc(var(--header-height)+<余量>)]`，否则会钻到头部底下。锚点跳转与 `scrollIntoView` 已由 `html` 的 `scroll-padding-top` 让出头部高度，`scroll-mt-*` 只写自己的余量，不再加头部高度，两者会叠加
 - **容器查询（`@container` 配 `@sm:` 等）不受此限。** 它按所在卡片的宽度分栏，与屏幕档位无关
 
@@ -136,7 +136,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **页头、页脚这类每页都有的站内 `Link` 写 `prefetch={false}`**，正文里的链接不用加。理由见 [docs/web/README.md](../docs/web/README.md)「渲染方式」
 - **能点的一律手型，靠 `globals.css` base 层的全局规则**，调用点不写 `cursor-pointer`。可点击的控件用 `<button>` 或 `<a>` / `Link`，不用 `<div onClick>`
-- **能点的卡片用统一模板**：图标底块、标题与说明、可选的操作胶囊、右侧 36px 圆形箭头，规格见 design-system.md「可点击卡片」。操作文字放进胶囊，不写成橙色字或粗体字
+- **能点的卡片用 `ActionCard`**（`app/components/ActionCard.tsx`）：图标底块、标题与说明、可选的操作胶囊、右侧 36px 圆形箭头，规格见 design-system.md「可点击卡片」。操作文字放进胶囊，不写成橙色字或粗体字；说明较长的宽卡传 `capsuleBelow`，首页暖色底上传 `translucent`
 - **列表里整行是链接时右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
 - **文字链接不用橙色**：正文里的链接用 `.link-inline`（标题色加下划线），导航类链接用 `.link-hover`（静止中性、悬停提亮）
 - **悬停描边随归属**：属于勇士的入口用 `hover:border-season-border`，属于会员的用 `hover:border-member-border`，其余用 `.card-hover`
@@ -168,6 +168,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 | 与主按钮并排的返回、跳过 | `.btn-ghost` |
 | 清空、重置这类撤不回的入口 | `.btn-danger` |
 | 登录类的第三方入口 | 次按钮外观加品牌图标，Steam 用 `STEAM_BUTTON_CLASS`；首页首屏的登录例外，用 `.btn-cta` 加 Steam 图标 |
+| 压在首页首屏图上的次要入口（「获得地图」「下载启动器」「个人主页」） | `.btn-glass` |
 
 - **每屏最多一个主按钮或强调按钮**：`.btn-cta` 不和 `.btn-primary` 同屏出现，拿不准时用 `.btn-primary`
 - **请求进行中用 `Button` 的 `loading`**：按钮内转圈并禁用，文案由调用方换成进行时。不盖整页遮罩

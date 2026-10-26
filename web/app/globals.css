@@ -55,6 +55,23 @@
   --color-cta-border: #ff9a55;
   --color-cta-glow: rgba(240, 122, 42, 0.45);
 
+  --color-cta-soft: rgba(240, 122, 42, 0.14);
+
+  /* 首页暖色首屏：底色、毛玻璃面板与半透明按钮，只用在首页首屏，取值见 docs/web/design-system.md「首页的暖色首屏」 */
+  --color-hero: #120c0a;
+  --color-hero-panel: rgba(34, 20, 15, 0.55);
+  --color-hero-panel-border: rgba(255, 214, 186, 0.14);
+  --color-hero-panel-highlight: rgba(255, 214, 186, 0.22);
+  --color-hero-sample-border: rgba(255, 214, 186, 0.32);
+  --color-hero-sample: rgba(0, 0, 0, 0.14);
+  --color-glass: rgba(255, 255, 255, 0.06);
+  --color-glass-hover: rgba(255, 255, 255, 0.12);
+  --color-glass-border: rgba(255, 255, 255, 0.14);
+  --color-glass-border-strong: rgba(255, 255, 255, 0.2);
+  --color-home-card: rgba(255, 255, 255, 0.035);
+  --color-home-card-border: rgba(255, 255, 255, 0.07);
+  --color-home-card-hover: rgba(255, 255, 255, 0.06);
+
   /* 主色的标记档：当前页标记、可点击卡片的悬停描边、焦点框、转圈、选中态共用；不用来写字，橙色字在深底上发脏 */
   --color-link: #e07a3c;
   --color-link-hover: #f0955a;
@@ -288,6 +305,11 @@
     @apply bg-transparent text-faint;
   }
 
+  /* 压在首页首屏图片上的半透明按钮，底色靠背后的图，所以不能用实心的 secondary */
+  .btn-glass {
+    @apply inline-flex h-[46px] items-center justify-center gap-2 rounded-lg border border-glass-border-strong bg-glass px-5 text-[15px] font-bold text-heading transition-colors hover:bg-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link lg:h-12;
+  }
+
   /* 游戏按钮：只给花勇士积分或会员积分的操作，取值照搬游戏内 buttons.less */
   .btn-member,
   .btn-season {
@@ -331,6 +353,61 @@
     text-shadow: none;
   }
 
+  /* 首屏背后的暖色底：实色撑到首屏底部，再往下渐变回页面底色，与其余页面接上 */
+  .home-hero-wash {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-hero) 0,
+      var(--color-hero) calc(100% - 28rem),
+      var(--color-surface) 100%
+    );
+  }
+
+  /* 图片上的暗角：窄屏只压图片带，上下两端往底色收；电脑宽度文案在左，所以左重右轻，并保住头部文字的对比度 */
+  .home-hero-shade {
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-hero) 60%, transparent) 0%,
+      color-mix(in srgb, var(--color-hero) 5%, transparent) 22%,
+      color-mix(in srgb, var(--color-hero) 10%, transparent) 52%,
+      color-mix(in srgb, var(--color-hero) 75%, transparent) 78%,
+      var(--color-hero) 100%
+    );
+  }
+
+  @media (width >= 64rem) {
+    .home-hero-shade {
+      background-image:
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--color-hero) 60%, transparent),
+          transparent
+        ),
+        linear-gradient(180deg, transparent, var(--color-hero)),
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-hero) 95%, transparent) 0%,
+          color-mix(in srgb, var(--color-hero) 72%, transparent) 38%,
+          color-mix(in srgb, var(--color-hero) 20%, transparent) 70%,
+          color-mix(in srgb, var(--color-hero) 35%, transparent) 100%
+        );
+      background-size:
+        100% 120px,
+        100% 220px,
+        100% 100%;
+      background-position: top, bottom, center;
+      background-repeat: no-repeat;
+    }
+  }
+
+  .hero-panel {
+    @apply flex flex-col gap-4 rounded-2xl border border-hero-panel-border bg-hero-panel lg:gap-4.5;
+    backdrop-filter: blur(18px) saturate(140%);
+    box-shadow:
+      inset 0 1px 0 var(--color-hero-panel-highlight),
+      0 30px 60px -30px rgba(0, 0, 0, 0.7);
+  }
+
   /* 横排导航项是 link-hover 的例外：悬停只提亮文字，颜色留给当前页的下条 */
   .nav-top {
     @apply relative whitespace-nowrap text-content transition-colors duration-150 ease-out hover:text-heading;
@@ -372,6 +449,23 @@
     content: '';
     @apply absolute inset-y-1 left-0 w-0.5 rounded-full bg-link;
   }
+}
+
+/*
+ * 首页顶部头部透明、压在首屏图上，控件换成半透明底才看得清。
+ * 写在 layer 之外：控件自己的 bg-control 等工具类在 utilities 层，按层顺序会盖过 components 层里的规则。
+ */
+header[data-transparent] .header-control {
+  background-color: var(--color-glass);
+  border-color: var(--color-glass-border);
+}
+
+header[data-transparent] .header-control:hover {
+  background-color: var(--color-glass-hover);
+}
+
+header[data-transparent] .header-divider {
+  background-color: var(--color-glass-border);
 }
 
 @media (prefers-reduced-motion: reduce) {
