@@ -9,6 +9,7 @@ namespace Windy10v10AI.Launcher.Tests
             try
             {
                 RelayTests.RunAll();
+                RouteSwitchTests.RunAll();
                 LocalGateTests.RunAll();
                 TunnelPortTests.RunAll();
                 SessionLifecycleTests.RunAll();

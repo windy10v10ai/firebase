@@ -172,6 +172,19 @@ export class ConnectionQualityDto {
   @IsInt()
   @Min(0)
   rttP95?: number;
+  @ApiPropertyOptional({ description: '房主发给加入者的游戏数据丢包百分比，按包序号统计，0.7.1 起的启动器报' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  dataLossDownPct?: number;
+
+  @ApiPropertyOptional({ description: '加入者发给房主的游戏数据丢包百分比，按包序号统计，0.7.1 起的启动器报' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  dataLossUpPct?: number;
 }
 
 export class RouteCheckResultDto {
@@ -351,8 +364,14 @@ export class LauncherProfileDto {
 export class RouteCheckDto {
   @ApiProperty({ description: '线路得分里每 1% 丢包折算的毫秒数，得分 = 延迟 + 丢包百分比 × 它' })
   lossCostMs: number;
-  @ApiProperty({ description: '中转得分比直连低这么多毫秒以上才改走中转' })
+  @ApiProperty({ description: '另一条线路得分比在用的低这么多毫秒以上才换过去' })
   switchMarginMs: number;
+  @ApiProperty({ description: '游戏中一秒内游戏数据丢包达到这个百分比算一个坏秒，0.7.1 起的启动器读' })
+  badLossPct: number;
+  @ApiProperty({ description: '最近窗口里坏秒达到这个数，才拿两条线路比得分决定换不换' })
+  badSeconds: number;
+  @ApiProperty({ description: '数坏秒的窗口秒数' })
+  windowSeconds: number;
 }
 
 export class RelayDto {

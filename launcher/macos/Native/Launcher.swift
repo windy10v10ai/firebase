@@ -1069,7 +1069,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             handle(["type": "state", "role": "join", "state": nextState, "code": ["idle", "error"].contains(nextState) ? "" : "Z82QCT", "message": text(message)])
             if active {
                 handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
-                handle(["type": "route", "message": text("RouteQuality", text("RouteRelay"), "30", "0")])
+                handle(["type": "route", "message": text("RouteQualitySplit", text("RouteRelay"), "30", "0", "0")])
             }
         case "rooms":
             pages.selectedSegment = 2

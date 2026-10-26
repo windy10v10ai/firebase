@@ -2051,7 +2051,8 @@ namespace Windy10v10AI.Launcher
             else
             {
                 var name = path == PathType.Lan ? Strings.RouteLan : path == PathType.Relay ? Strings.RouteRelay : Strings.RouteDirect;
-                text = quality.Samples == 0 ? name : string.Format(Strings.RouteQuality, name, quality.Rtt < 0 ? "—" : quality.Rtt.ToString(), quality.Loss);
+                var rtt = quality.Rtt < 0 ? "—" : quality.Rtt.ToString();
+                text = quality.Samples == 0 ? name : quality.Split ? string.Format(Strings.RouteQualitySplit, name, rtt, quality.LossDown, quality.LossUp) : string.Format(Strings.RouteQuality, name, rtt, quality.Loss);
                 if (quality.Samples > 0 && quality.Loss >= RouteWarnLossPct) color = dot = Theme.Warning;
             }
             if (text == routeLabel.Text && color == routeLabel.ForeColor && dot == routeDot.BackColor) return;
