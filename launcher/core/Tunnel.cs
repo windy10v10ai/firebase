@@ -49,6 +49,14 @@ namespace Windy10v10AI.Launcher
         public bool Split;
         public int LossDown;
         public int LossUp;
+
+        // The same line the route check draws for the direct route, so a warning on the status line means the game will stutter
+        const int WarnLossPct = 5;
+
+        public bool Lossy
+        {
+            get { return Samples > 0 && Loss >= WarnLossPct; }
+        }
     }
 
     // Packets between a launcher and the relay; they start at 0xF0 so the relay never forwards them as tunnel packets

@@ -36,6 +36,9 @@ private enum Theme {
     static let accent = color(0xe0552d)
     static let text = color(0xeee7e0)
     static let muted = color(0xaca198)
+    static let faint = color(0x7f756d)
+    static let ok = color(0x3fb67a)
+    static let warning = color(0xe5a93a)
 }
 
 private final class AvatarStrip: NSView {
@@ -276,7 +279,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     let roomCode = NSTextField()
     let roomLabel = NSTextField(labelWithString: "")
     let status = NSTextField(wrappingLabelWithString: text("Idle"))
-    let route = NSTextField(wrappingLabelWithString: "")
+    let route = NSTextField(labelWithString: "")
+    let routeDot = NSTextField(labelWithString: "●")
     let hint = NSTextField(wrappingLabelWithString: "")
     let mapLabel = NSTextField(wrappingLabelWithString: text("MapChecking"))
     let notice = NSTextField(wrappingLabelWithString: "")
@@ -455,8 +459,16 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         gameActions = stack([roomLabel, copyCode, enter, spacer(), stop], horizontal: true, spacing: 8); body.addArrangedSubview(gameActions)
         status.font = .systemFont(ofSize: 12); status.textColor = Theme.muted; status.maximumNumberOfLines = 3
         progress.style = .spinning; progress.controlSize = .small; progress.isDisplayedWhenStopped = false
-        statusLine = stack([progress, status], horizontal: true, spacing: 4); body.addArrangedSubview(statusLine)
-        route.font = .systemFont(ofSize: 11); route.textColor = Theme.muted; body.addArrangedSubview(route)
+        route.font = .systemFont(ofSize: 11); route.textColor = Theme.muted; routeDot.font = .systemFont(ofSize: 9)
+        // The route sits at the end of the status line as on Windows, and the status wraps before the route is cut
+        status.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        status.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        for view in [routeDot, route] {
+            view.setContentHuggingPriority(.required, for: .horizontal)
+            view.setContentCompressionResistancePriority(.required, for: .horizontal)
+        }
+        statusLine = stack([progress, status, routeDot, route], horizontal: true, spacing: 4); body.addArrangedSubview(statusLine)
+        statusLine.setCustomSpacing(8, after: status); statusLine.setCustomSpacing(2, after: routeDot)
         body.addArrangedSubview(autoEnter)
         hint.font = .systemFont(ofSize: 12); hint.textColor = Theme.text; hint.maximumNumberOfLines = 3; body.addArrangedSubview(hint)
         action(reopen, #selector(reopenRoom)); body.addArrangedSubview(reopen)
@@ -579,10 +591,15 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             status.textColor = state == "error" ? .systemRed : Theme.text
             append(status.stringValue); refreshControls()
             if !active && previous != state {
-                route.stringValue = ""; route.isHidden = true
+                route.stringValue = ""; route.isHidden = true; routeDot.isHidden = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in self?.inspect(); self?.updateBrowsing() }
             }
-        case "route": route.stringValue = event["message"] as? String ?? ""; refreshControls()
+        case "route":
+            route.stringValue = event["message"] as? String ?? ""
+            let level = event["level"] as? String ?? "ok"
+            route.textColor = level == "warn" ? Theme.warning : Theme.muted
+            routeDot.textColor = level == "warn" ? Theme.warning : (level == "checking" ? Theme.faint : Theme.ok)
+            refreshControls()
         case "message":
             let value = event["message"] as? String ?? ""
             if event["level"] as? String == "error" { feedbackSend?.isEnabled = true; showError(value) } else { append(value) }
@@ -694,6 +711,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host")
         statusLine.isHidden = browsing || !hostGuide.isHidden || blockedByMap || releaseAvailable
         route.isHidden = route.stringValue.isEmpty || away
+        routeDot.isHidden = route.isHidden
         let showUpdate = releaseAvailable && !active && !blockedByMap
         updateNotice.isHidden = !showUpdate
         if active { statusLine.isHidden = away }
@@ -1069,7 +1087,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             handle(["type": "state", "role": "join", "state": nextState, "code": ["idle", "error"].contains(nextState) ? "" : "Z82QCT", "message": text(message)])
             if active {
                 handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
-                handle(["type": "route", "message": text("RouteQualitySplit", text("RouteRelay"), "30", "0", "0")])
+                // A playing joiner shows the lossy route the warning colour is for
+                let lossy = nextState == "playing"
+                handle(["type": "route", "message": text("RouteQualitySplit", text(lossy ? "RouteDirect" : "RouteRelay"), lossy ? "32" : "30", lossy ? "38" : "0", "0"), "level": lossy ? "warn" : "ok"])
             }
         case "rooms":
             pages.selectedSegment = 2

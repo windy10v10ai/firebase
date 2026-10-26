@@ -77,8 +77,6 @@ namespace Windy10v10AI.Launcher
         const string CorruptContent = "FATAL ERROR: Content file";
         const string LocalContentCorrupt = "Local content might be corrupt";
         const int RouteRefreshMs = 5000;
-        // The same line the route check draws for the direct route, so a warning on the status line means the game will stutter
-        const int RouteWarnLossPct = 5;
         const int ListRefreshMs = 60000;
         const int BadgeRefreshMs = 60000;
         // A join page left open in the background stops asking the API for the list
@@ -2053,7 +2051,7 @@ namespace Windy10v10AI.Launcher
                 var name = path == PathType.Lan ? Strings.RouteLan : path == PathType.Relay ? Strings.RouteRelay : Strings.RouteDirect;
                 var rtt = quality.Rtt < 0 ? "—" : quality.Rtt.ToString();
                 text = quality.Samples == 0 ? name : quality.Split ? string.Format(Strings.RouteQualitySplit, name, rtt, quality.LossDown, quality.LossUp) : string.Format(Strings.RouteQuality, name, rtt, quality.Loss);
-                if (quality.Samples > 0 && quality.Loss >= RouteWarnLossPct) color = dot = Theme.Warning;
+                if (quality.Lossy) color = dot = Theme.Warning;
             }
             if (text == routeLabel.Text && color == routeLabel.ForeColor && dot == routeDot.BackColor) return;
             routeLabel.Text = text;
