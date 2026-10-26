@@ -28,13 +28,13 @@ export default function AuthStatus() {
   }
 
   return (
-    // ID 与退出合并进同一条 36px 背景，见 phase-2g-header-layout.md；退出单独占一格，点 ID 时不会误点到它
-    <div className="flex h-9 items-stretch overflow-hidden whitespace-nowrap rounded-md border border-line bg-control text-content">
+    // ID 与退出合并进同一条背景；退出单独占一格，点 ID 时不会误点到它
+    <div className="flex h-11 items-stretch lg:h-9 overflow-hidden whitespace-nowrap rounded-md border border-line bg-control text-content">
       <Link
         href={playerPagePath(uid)}
         title={t('profileTooltip')}
         aria-label={t('profileTooltip')}
-        className="flex items-center gap-1.5 px-2.5 link-hover"
+        className="flex min-w-11 items-center justify-center gap-1.5 px-2.5 link-hover lg:min-w-0 lg:justify-start"
       >
         <PlayerAvatar
           avatarUrl={profile?.avatarUrl}

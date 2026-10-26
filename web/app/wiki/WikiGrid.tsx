@@ -191,7 +191,7 @@ export default function WikiGrid({ kind, categories, locale }: WikiGridProps) {
         <section
           key={section.key}
           id={section.key}
-          className="flex scroll-mt-20 flex-col gap-3 md:gap-4"
+          className="flex scroll-mt-4 flex-col gap-3 md:gap-4"
         >
           {section.title ? (
             <h2 className="text-lg font-bold text-heading">{section.title}</h2>

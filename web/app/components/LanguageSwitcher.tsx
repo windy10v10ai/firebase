@@ -63,8 +63,8 @@ export default function LanguageSwitcher() {
         title={t('switchLanguage')}
         aria-expanded={open}
         aria-controls="language-menu"
-        // 28px 高，量出的上限见 phase-2g-header-layout.md 的宽度约束
-        className="flex h-7 items-center gap-1 rounded border border-line bg-control px-1 text-sm text-content transition-colors hover:bg-control-hover"
+        // 宽度不能超过 44px，再宽 375 的头部这一行会被顶出视口
+        className="flex h-11 min-w-11 items-center justify-center gap-1 rounded-md border border-line bg-control px-1 text-sm text-content transition-colors hover:bg-control-hover lg:h-9 lg:min-w-0"
       >
         <Globe className="size-[15px] shrink-0" strokeWidth={1.7} aria-hidden="true" />
         <span className="text-heading">{currentMark}</span>
