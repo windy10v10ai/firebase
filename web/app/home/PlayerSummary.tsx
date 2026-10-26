@@ -93,7 +93,8 @@ export default function PlayerSummary({ uid }: { uid: string }) {
               >
                 {member ? t(`member.${status}`) : null}
               </span>
-              <span className="min-h-5 text-sm text-muted">
+              {/* 只占一行：长语言在窄面板里折行会让面板在数据到达后变高 */}
+              <span className="min-h-5 truncate text-[13px] text-muted">
                 {member ? t('member.expireDate', { date: member.expireDateString ?? '' }) : null}
               </span>
             </p>
