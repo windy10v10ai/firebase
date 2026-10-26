@@ -30,11 +30,18 @@ const RELAY_LOSS_LIMIT_PCT = 10;
 const LOSS_COST_MS = 10;
 // 得分好出这么多才放弃优先的那台中转或直连，差不多时不为一点差距多占中转
 const SWITCH_MARGIN_MS = 30;
+// 游戏中一秒内游戏数据丢包到这个比例算一个坏秒，窗口里坏秒够数才拿两条线路比得分；偶发几秒的抖动不值得换线
+const BAD_LOSS_PCT = 10;
+const BAD_SECONDS = 6;
+const WINDOW_SECONDS = 10;
 
 // 0.6.0 只认丢包阈值、不看延迟，远距离时会换到绕路的中转，所以只发得分参数，它读不到就不做加入后选线
 export const ROUTE_CHECK: RouteCheckDto = {
   lossCostMs: LOSS_COST_MS,
   switchMarginMs: SWITCH_MARGIN_MS,
+  badLossPct: BAD_LOSS_PCT,
+  badSeconds: BAD_SECONDS,
+  windowSeconds: WINDOW_SECONDS,
 };
 
 export type RelayRole = 'h' | 'j';

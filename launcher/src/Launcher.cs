@@ -77,8 +77,6 @@ namespace Windy10v10AI.Launcher
         const string CorruptContent = "FATAL ERROR: Content file";
         const string LocalContentCorrupt = "Local content might be corrupt";
         const int RouteRefreshMs = 5000;
-        // The same line the route check draws for the direct route, so a warning on the status line means the game will stutter
-        const int RouteWarnLossPct = 5;
         const int ListRefreshMs = 60000;
         const int BadgeRefreshMs = 60000;
         // A join page left open in the background stops asking the API for the list
@@ -164,7 +162,6 @@ namespace Windy10v10AI.Launcher
         bool pickingNext;
         // The mode the host picked for the next game, taken by the room's watch thread
         volatile int nextMode = -1;
-        bool joinEnded;
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
         string endNotice;
@@ -436,6 +433,8 @@ namespace Windy10v10AI.Launcher
             };
             Shown += delegate
             {
+                // 控件的有效可见性依赖父窗口，首次显示后才能据此完成布局。
+                Relayout();
                 UpdateBrowsing();
                 RefreshBadge();
                 badgeTimer.Start();
@@ -550,6 +549,7 @@ namespace Windy10v10AI.Launcher
             }
             var actionWidth = Math.Max(P(80), TextRenderer.MeasureText(action.Text, action.Font).Width + P(28));
             var secondaryWidth = Math.Max(P(80), TextRenderer.MeasureText(secondary.Text, secondary.Font).Width + P(28));
+            autoEnterBox.Visible = busy && joining && showPlayers && !Hosting;
             if (hostCode.Visible)
             {
                 // A notice about the finished game is taller than the status line it replaces
@@ -569,16 +569,21 @@ namespace Windy10v10AI.Launcher
                 hint.SetBounds(P(20), P(row + 36), P(440), P(20));
                 // Going back into the game is the one secondary action players want, so it comes first
                 var actionLeft = secondary.Visible ? P(20) + secondaryWidth + P(8) : P(20);
-                secondary.SetBounds(P(20), P(row + 62), secondaryWidth, P(30));
-                action.SetBounds(actionLeft, P(row + 62), actionWidth, P(30));
-                autoEnterBox.Visible = joinEnded && busy && modeBar.Selected == 2;
-                if (autoEnterBox.Visible) autoEnterBox.SetBounds(action.Right + P(16), P(row + 66), autoEnterBox.PreferredWidth + P(2), P(22));
+                var actionRow = row + 62;
+                if (autoEnterBox.Visible)
+                {
+                    autoEnterBox.SetBounds(P(20), P(actionRow), autoEnterBox.PreferredWidth + P(2), P(22));
+                    actionRow += 32;
+                }
+                secondary.SetBounds(P(20), P(actionRow), secondaryWidth, P(30));
+                action.SetBounds(actionLeft, P(actionRow), actionWidth, P(30));
             }
             // A host looking at the public list leaves its own room controls on the host tab
             var away = Hosting && joining;
             SetHostAreaShown(!away);
             // An idle join page only ever shows a notice in this area, so it needs less room than a launch in progress
             y += away ? 0 : (browsing && !busy ? 60 : 124);
+            if (autoEnterBox.Visible) y += 32;
             // Keeps the solo tab as tall as the host tab's room settings row, so switching between them does not resize the window
             if (modeBar.Selected == 0 && !cardShown) y += 42 + (busy ? 0 : 26);
             divider.SetBounds(0, P(y), P(480), Math.Max(1, P(1)));
@@ -1375,7 +1380,7 @@ namespace Windy10v10AI.Launcher
                 if (lifecycle.NewGameReady)
                 {
                     endNotice = null;
-                    if (lifecycle.FirstGame || (Settings.AutoEnter && DotaClientRunning(-1))) EnterGame(install, client, -1);
+                    if (lifecycle.FirstGame || (DotaClientRunning(-1) && Settings.AutoEnter)) EnterGame(install, client, -1);
                     else
                     {
                         shown = Presence.Out;
@@ -1392,7 +1397,6 @@ namespace Windy10v10AI.Launcher
                 UI(() =>
                 {
                     if (!busy) return;
-                    joinEnded = false;
                     ShowPresence(presence, title, Strings.LeaveRoom, install, -1);
                 });
             }
@@ -1401,7 +1405,6 @@ namespace Windy10v10AI.Launcher
 
         void ShowJoinEnded(string title)
         {
-            joinEnded = true;
             ShowProgress(title, Strings.GameEnded, Strings.LeaveRoom, false);
             secondary.Visible = false;
             Relayout();
@@ -1409,7 +1412,6 @@ namespace Windy10v10AI.Launcher
 
         void ShowJoinNewGame(string title, DotaInstall install)
         {
-            joinEnded = false;
             ShowProgress(title, Strings.NewGameStarted, Strings.LeaveRoom, false);
             ShowSecondary(Strings.EnterGame, EnterAction(install, -1), true);
         }
@@ -1977,7 +1979,6 @@ namespace Windy10v10AI.Launcher
                 saving = false;
                 pickingNext = false;
                 nextMode = -1;
-                joinEnded = false;
                 action.MakePlain();
                 var ended = endNotice;
                 endNotice = null;
@@ -2048,8 +2049,9 @@ namespace Windy10v10AI.Launcher
             else
             {
                 var name = path == PathType.Lan ? Strings.RouteLan : path == PathType.Relay ? Strings.RouteRelay : Strings.RouteDirect;
-                text = quality.Samples == 0 ? name : string.Format(Strings.RouteQuality, name, quality.Rtt < 0 ? "—" : quality.Rtt.ToString(), quality.Loss);
-                if (quality.Samples > 0 && quality.Loss >= RouteWarnLossPct) color = dot = Theme.Warning;
+                var rtt = quality.Rtt < 0 ? "—" : quality.Rtt.ToString();
+                text = quality.Samples == 0 ? name : quality.Split ? string.Format(Strings.RouteQualitySplit, name, rtt, quality.LossDown, quality.LossUp) : string.Format(Strings.RouteQuality, name, rtt, quality.Loss);
+                if (quality.Lossy) color = dot = Theme.Warning;
             }
             if (text == routeLabel.Text && color == routeLabel.ForeColor && dot == routeDot.BackColor) return;
             routeLabel.Text = text;
