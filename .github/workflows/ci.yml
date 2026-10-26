@@ -18,7 +18,6 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
       launcher: ${{ steps.filter.outputs.launcher }}
-      skills: ${{ steps.filter.outputs.skills }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -67,6 +66,10 @@ jobs:
           echo "web=$web" >> "$GITHUB_OUTPUT"
           echo "launcher=$launcher" >> "$GITHUB_OUTPUT"
           echo "skills=$skills" >> "$GITHUB_OUTPUT"
+
+      - name: Validate skill frontmatter
+        if: steps.filter.outputs.skills == 'true'
+        run: npm run skills:check
 
   api-quality:
     needs: changes
@@ -199,31 +202,14 @@ jobs:
       - name: Build and verify Mac application
         run: bash launcher/macos/build.sh
 
-  agent-skills:
-    needs: changes
-    if: needs.changes.outputs.skills == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Validate skill frontmatter
-        run: npm run skills:check
-
   ci:
     if: ${{ !cancelled() }}
-    needs:
-      [changes, api-quality, api-e2e, web-quality, launcher-build, launcher-core-mac, agent-skills]
+    needs: [changes, api-quality, api-e2e, web-quality, launcher-build, launcher-core-mac]
     runs-on: ubuntu-latest
     steps:
       - name: Verify required jobs
         env:
           CHANGES_RESULT: ${{ needs.changes.result }}
-          SKILLS_CHANGED: ${{ needs.changes.outputs.skills }}
-          AGENT_SKILLS_RESULT: ${{ needs.agent-skills.result }}
           API_CHANGED: ${{ needs.changes.outputs.api }}
           WEB_CHANGED: ${{ needs.changes.outputs.web }}
           API_QUALITY_RESULT: ${{ needs.api-quality.result }}
@@ -251,4 +237,3 @@ jobs:
           check_result "$WEB_CHANGED" "$WEB_QUALITY_RESULT"
           check_result "$LAUNCHER_CHANGED" "$LAUNCHER_BUILD_RESULT"
           check_result "$LAUNCHER_CHANGED" "$LAUNCHER_CORE_MAC_RESULT"
-          check_result "$SKILLS_CHANGED" "$AGENT_SKILLS_RESULT"
