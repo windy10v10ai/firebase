@@ -172,14 +172,18 @@ export class ConnectionQualityDto {
   @IsInt()
   @Min(0)
   rttP95?: number;
-  @ApiPropertyOptional({ description: '房主发给加入者的游戏数据丢包百分比，按包序号统计，0.7.1 起的启动器报' })
+  @ApiPropertyOptional({
+    description: '房主发给加入者的游戏数据丢包百分比，按包序号统计，0.7.1 起的启动器报',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(100)
   dataLossDownPct?: number;
 
-  @ApiPropertyOptional({ description: '加入者发给房主的游戏数据丢包百分比，按包序号统计，0.7.1 起的启动器报' })
+  @ApiPropertyOptional({
+    description: '加入者发给房主的游戏数据丢包百分比，按包序号统计，0.7.1 起的启动器报',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -366,7 +370,9 @@ export class RouteCheckDto {
   lossCostMs: number;
   @ApiProperty({ description: '另一条线路得分比在用的低这么多毫秒以上才换过去' })
   switchMarginMs: number;
-  @ApiProperty({ description: '游戏中一秒内游戏数据丢包达到这个百分比算一个坏秒，0.7.1 起的启动器读' })
+  @ApiProperty({
+    description: '游戏中一秒内游戏数据丢包达到这个百分比算一个坏秒，0.7.1 起的启动器读',
+  })
   badLossPct: number;
   @ApiProperty({ description: '最近窗口里坏秒达到这个数，才拿两条线路比得分决定换不换' })
   badSeconds: number;
