@@ -171,8 +171,10 @@ namespace Windy10v10AI.Launcher
         {
             var quality = current.Status(out var path);
             var route = path == PathType.Relay ? Strings.RouteRelay : path == PathType.Lan ? Strings.RouteLan : Strings.RouteDirect;
-            var message = current.Silent ? Strings.HostSilent : current.Checking || quality.Rtt < 0 ? Strings.RouteChecking : string.Format(Strings.RouteQuality, route, quality.Rtt, quality.Loss);
-            emit(new { type = "route", message, path, rtt = quality.Rtt, loss = quality.Loss, checking = current.Checking, silent = current.Silent });
+            var message = current.Silent ? Strings.HostSilent : current.Checking || quality.Rtt < 0 ? Strings.RouteChecking
+                : quality.Split ? string.Format(Strings.RouteQualitySplit, route, quality.Rtt, quality.LossDown, quality.LossUp) : string.Format(Strings.RouteQuality, route, quality.Rtt, quality.Loss);
+            var level = current.Silent || quality.Lossy ? "warn" : current.Checking || quality.Rtt < 0 ? "checking" : "ok";
+            emit(new { type = "route", message, level, path, rtt = quality.Rtt, loss = quality.Loss, checking = current.Checking, silent = current.Silent });
         }
         void EmitRoster(JoinTunnel current) => emit(new { type = "roster", role = "join", players = current.Roster().Select(p => new { key = p.Key, steamId = p.SteamId, name = p.Name, avatarUrl = p.AvatarUrl, status = (int)p.Status, host = p.IsHost }).ToArray() });
     }

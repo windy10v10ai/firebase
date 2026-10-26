@@ -54,7 +54,7 @@ Steam 这边必须守住的规矩：
 - **请求体校验失败记一行 warn 日志**（`request validation failed`，带不合格的字段路径、`version` 与报文里的 steamId）：游戏端只知道请求失败、看不到原因，HTTP 日志里也没有请求体
 - **`GET /api/launcher/workshop/:id` 是公开端点**：启动器是发给玩家的 exe，放进去的 key 等于公开。它只接受正式图与测试图两个工坊 ID，其余 404，免得被当成通用的 Steam 代理。启动器先直连 Steam，失败才来这里
 - **`GET /api/launcher/version` 与 `GET /api/launcher/download/:version` 是启动器自我更新用的公开端点**：各平台版本与安装包哈希在代码中定义；默认返回 Windows，Mac 显式传 `platform=macos`。未发布的平台返回 404，避免 Mac 下载 Windows 安装包。下载只接受对应平台的当前版本，由函数从官网取包、核对哈希后返回。两者都靠 CDN 缓存挡住重复请求，下载地址带版本号可以永久缓存，所以哈希不符时宁可失败也不返回。放在 API 下而不是只放官网，是因为国内代理只转发 `/api/`
-- **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API；加入的响应还带加入后实测选线的得分参数，加入者的测量结果由房主随轮询转报。房间与加入请求存 Firestore，带 IP，按 TTL 字段 `expireAt` 清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
+- **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API；加入的响应还带加入后实测选线与游戏中换路的参数，加入者的测量结果由房主随轮询转报。房间与加入请求存 Firestore，带 IP，按 TTL 字段 `expireAt` 清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
 - **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。列出心跳未过期的可加入房间，以及已开局未结束的游戏；好友房只给人数与已进行时间。玩家资料由 API 获取，不用房主上报的资料。等待房间与游戏分别缓存，游戏状态允许更长的展示延迟，以减少重复读取；跨局重叠时优先展示等待状态，避免列表与人数重复统计。握手仅处理有效窗口内的加入与测速请求，历史记录不参与轮询。新增查询索引须在 API 上线前就绪。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源；网站已登录时改走 `POST /api/feedback/web`（`@AllowWeb()`），Steam ID 取登录态，报告的 `steamIdVerified` 只有这条路是 true，其余来源请求体里的 ID 都能伪造。游戏来源不带日志，改带游戏现场 `gameState`，字段名与结算一致。报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都定期删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：个人按 Steam ID 限频，没有 ID 时按 IP（国内代理转发的请求共用代理 IP）；另有全站每日上限，Steam ID 能伪造，这是存储费用的封顶。分类与仓库标签的对应见 [feedback-review](../../.claude/skills/feedback-review/SKILL.md) 技能，取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
 - 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由见「对外入口」；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
@@ -139,6 +139,7 @@ Steam 这边必须守住的规矩：
 - **`*_upnp` 已停用、恒为 false**；`host_public_ip` 表示房主网卡地址就是公网地址；`*_symmetric_nat` 为真时打洞基本必败，只拿到一个 STUN 结果时为空
 - **`steam_id` 是上报者**，开房是房主、加入是加入者，启动器从注册表读、可伪造，只用于排查；`host_steam_id` 由 API 从房间文档取
 - **丢包率按 `SUM(ping_lost) / SUM(ping_sent)` 汇总**，不要平均百分比。测的是两个启动器之间一来一回，游廊开局没有这一段
+- **`data_loss_down_pct` / `data_loss_up_pct` 是游戏数据本身的丢包**：按包序号统计，down 是房主发给加入者、up 是加入者发给房主，只有双方都是新版启动器才有。小 ping 测不出只丢大包、密集包的线路，判断游戏卡不卡以它为准
 - **不记 IP**：按地区分析时查 Firestore 加入记录里的候选地址，它们按 TTL 清理
 
 ### 预先汇总
