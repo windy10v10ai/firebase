@@ -53,6 +53,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 - **只告诉玩家怎么做，不解释为什么这样设计**：平台限制、技术原因、方案取舍不进界面文案。写「付款时请在留言里填写你的 Dota2 好友 ID」，不写「Ko-fi 带不了 ID，所以请……」；理由留在设计文档与 PR
 - **说明启动器做了什么时（签名政策、隐私说明），用玩家能懂、让人安心的短句**：一件事一句话，说它对玩家有什么用；不写文件路径、文件夹名这类技术细节，也不展开卸载、清理步骤。路径和细节读起来像在藏东西，反而让人害怕
 - **几段信息分开呈现，不用「·」拼成一行**：拆成各自的标签、分行或表格列。「·」拼接是 AI 生成界面的典型痕迹，玩家也分不清哪段是主信息
+- **中文标题、副标题要分行时按意思断**：断在停顿处（逗号后、短语之间），不把一个词拆到两行，如「DOTA2 10v10 AI / 自定义地图」。手动断行用 `<br>` 或分成两个块，只在会折行的宽度生效；英文、俄文照常自动折行
 
 ## 文案里的开局方式
 
@@ -133,7 +134,9 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **页头、页脚这类每页都有的站内 `Link` 写 `prefetch={false}`**，正文里的链接不用加。理由见 [docs/web/README.md](../docs/web/README.md)「渲染方式」
 - **能点的一律手型，靠 `globals.css` base 层的全局规则**，调用点不写 `cursor-pointer`。可点击的控件用 `<button>` 或 `<a>` / `Link`，不用 `<div onClick>`
-- **整张卡或整行是链接时，右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
+- **能点的卡片用统一模板**：图标底块、标题与说明、可选的操作胶囊、右侧 36px 圆形箭头，规格见 design-system.md「可点击卡片」。操作文字放进胶囊，不写成橙色字或粗体字
+- **列表里整行是链接时右侧放 `ChevronRight`（`text-muted`），悬停要有看得见的变化**；不能点的不放箭头
+- **文字链接不用橙色**：正文里的链接用 `.link-inline`（标题色加下划线），导航类链接用 `.link-hover`（静止中性、悬停提亮）
 - **悬停描边随归属**：属于勇士的入口用 `hover:border-season-border`，属于会员的用 `hover:border-member-border`，其余用 `.card-hover`
 - **整行链接里子元素各自写了文字颜色时，外层的 `link-hover` 看不出变化**。这种链接改用 `group`，在子元素上写 `group-hover:`
 - **需要解释的地方用 `InfoPopover`，不散写原生 `title`**：它在有鼠标时悬停展开、触屏点击展开。触发元素可以换成被解释的东西自己（表头图标、缩写列名），命中区撑满整格；短提示传 `compact`。`title` 只留给被 `truncate` 截断的文字与装饰图片的替代文本，理由见 [docs/web/design-system.md](../docs/web/design-system.md)「提示与说明」
@@ -144,8 +147,8 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 - **调用点不写色值**，一律用 `globals.css` `@theme` 里的 token；要新颜色先加 token
 - **紫（`season`）与金（`member`）只表示勇士与会员两套货币**，不用于交互反馈或通用按钮
-- **交互反馈用主色标记档 `link` 系列**：链接、当前页标记、焦点框、转圈、`.card-hover` 都是它
-- **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
+- **交互反馈用主色标记档 `link` 系列**：当前页标记、焦点框、转圈、`.card-hover` 都是它。**`text-link` 不上文字**，只给图标与转圈；链接文字见「可点击元素」
+- **功能色只上图标与图标底块**：`text-feature-*` 与 `bg-feature-*-soft`。首页卡片、头部菜单、个人主页入口卡三处用同一个颜色、同一个图标。新功能上线按 design-system.md「功能色」的扩展顺序取色，先加 token
 - **品牌色只上平台自己的标识**（平台名、图标、平台自己的页面标题，如激活页），不上按钮、描边、悬停；会员页购买区的平台标签、说明条与档位顶条是唯一例外，见 design-system.md「品牌色」。新增品牌加 token，并在 design-system.md「品牌色」登记它和站内哪个颜色同色系
 - **折扣标签用 `discount`，不用 `danger`**，形状与限免标签一致，见 design-system.md「状态色」
 
@@ -157,13 +160,14 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 |---|---|
 | 花勇士积分，或与游戏里是同一个操作（加点、觉醒） | `.btn-season`，暂存一步用 `.btn-season-outline` |
 | 花会员积分 | `.btn-member` |
+| 一屏里最想让人点的那一个（首页首屏的登录与签到、`/launch` 的下载） | `.btn-cta` |
 | 提交、重试、跳转、去外部平台订阅或付款 | `.btn-primary`，即 `Button` 的默认 `variant` |
 | 取消、次要操作 | `.btn-secondary` |
 | 与主按钮并排的返回、跳过 | `.btn-ghost` |
 | 清空、重置这类撤不回的入口 | `.btn-danger` |
-| 登录类的第三方入口 | 次按钮外观加品牌图标，Steam 用 `STEAM_BUTTON_CLASS` |
+| 登录类的第三方入口 | 次按钮外观加品牌图标，Steam 用 `STEAM_BUTTON_CLASS`；首页首屏的登录例外，用 `.btn-cta` 加 Steam 图标 |
 
-- **每屏最多一个主按钮**
+- **每屏最多一个主按钮或强调按钮**：`.btn-cta` 不和 `.btn-primary` 同屏出现，拿不准时用 `.btn-primary`
 - **请求进行中用 `Button` 的 `loading`**：按钮内转圈并禁用，文案由调用方换成进行时。不盖整页遮罩
 - **游戏按钮（`.btn-season`、`.btn-member`）的取值照搬游戏仓库的 `buttons.less`，不改**，属性、觉醒页要与游戏内同名操作长得一样
 - **标题字体只收了顶栏与页面大标题的字**（`font-heading`，`.title-primary` 已带上）。改了 `navigation.*`、键名为 `title` 或以 `Title` 结尾的文案，或语言名，跑 `npm run font:heading` 并提交 `app/fonts/` 下的产物，CI 的 `font:heading:check` 会拦下漏跑的情况。文案带接口数据（玩家昵称、英雄名等）的位置不用 `font-heading`，收不全的字会退回系统字体，一行里混两种字形。理由见 [docs/web/README.md](../docs/web/README.md) 的字体一行
