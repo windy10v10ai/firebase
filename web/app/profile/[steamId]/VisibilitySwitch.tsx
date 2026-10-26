@@ -49,7 +49,7 @@ export default function VisibilitySwitch({
         {t('label')}
         <span
           aria-hidden="true"
-          className={`relative h-4.5 w-7.5 shrink-0 rounded-full transition-colors ${isPublic ? 'bg-primary' : 'bg-line-strong'}`}
+          className={`relative h-4.5 w-7.5 shrink-0 rounded-full transition-colors ${isPublic ? 'bg-link' : 'bg-line-strong'}`}
         >
           <span
             className={`absolute top-0.5 size-3.5 rounded-full transition-all ${

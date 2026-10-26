@@ -43,7 +43,9 @@ export default function LauncherDownload() {
   const touch = device === 'touch';
   const platform = chosen ?? (device === 'mac' ? 'mac' : 'windows');
 
-  const mark = (chunks: React.ReactNode) => <span className="text-link">{chunks}</span>;
+  const mark = (chunks: React.ReactNode) => (
+    <span className="font-bold text-heading">{chunks}</span>
+  );
   // 不换行：窄屏时图标和文字被拆到两行，读起来像两样东西
   const github = (chunks: React.ReactNode) => (
     <a
@@ -76,7 +78,7 @@ export default function LauncherDownload() {
               onClick={() => setChosen(tab)}
               className={`min-h-11 rounded-[7px] px-5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link lg:min-h-9 ${
                 platform === tab
-                  ? 'bg-panel text-heading ring-1 ring-primary-border ring-inset'
+                  ? 'bg-panel text-heading ring-1 ring-link-border ring-inset'
                   : 'text-muted hover:text-heading'
               }`}
             >
@@ -113,7 +115,7 @@ export default function LauncherDownload() {
           <a
             href={isMac ? LAUNCHER_MAC_URL : LAUNCHER_URL}
             download={isMac ? LAUNCHER_MAC_FILE_NAME : LAUNCHER_FILE_NAME}
-            className="btn-primary"
+            className="btn-cta"
           >
             <Download className="size-[18px]" aria-hidden="true" />
             {t('download')}

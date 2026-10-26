@@ -186,7 +186,7 @@ export default function LaunchPage() {
               </h3>
               <span className="text-sm text-muted tabular-nums">{date}</span>
               {index === 0 && (
-                <span className="rounded-full border border-link-border bg-link/10 px-2.5 text-xs leading-5 font-medium text-link">
+                <span className="rounded-full border border-link-border bg-link/10 px-2.5 text-xs leading-5 font-medium text-heading">
                   {t('changelog.latest')}
                 </span>
               )}

@@ -140,7 +140,7 @@ export default function PlayerCard({
         {isSelf ? (
           <Link
             href="/membership"
-            className="inline-flex items-center gap-1 text-sm whitespace-nowrap text-link transition-colors hover:text-link-hover"
+            className="inline-flex items-center gap-1 text-sm whitespace-nowrap text-content link-hover"
           >
             {tMember('link')}
             <ChevronRight className="size-4" aria-hidden="true" />

@@ -18,7 +18,7 @@ export default function OwnerBackLink({ steamId }: { steamId: string }) {
   return (
     <Link
       href={playerPagePath(steamId)}
-      className="inline-flex max-w-full items-center gap-2 text-sm text-link transition-colors hover:text-link-hover"
+      className="inline-flex max-w-full items-center gap-2 text-sm text-content link-hover"
     >
       <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
       <PlayerAvatar
