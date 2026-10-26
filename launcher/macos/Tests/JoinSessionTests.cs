@@ -14,7 +14,7 @@ namespace Windy10v10AI.Launcher.Tests
         {
             checks = 0;
             InvalidCodesDoNotStart();
-            await Task.WhenAll(AutoEntryAcrossGames(), InitialEntryInLaterHostGame(), ManualEntryAndStop(), BrowserSocketIsReused(), HostDeparture(false), HostDeparture(true), StopDuringRoomRequest(), BusinessErrors());
+            await Task.WhenAll(AutoEntryAcrossGames(), AutoEntryPreferenceChanges(), InitialEntryInLaterHostGame(), ManualEntryAndStop(), BrowserSocketIsReused(), HostDeparture(false), HostDeparture(true), StopDuringRoomRequest(), BusinessErrors());
             Console.WriteLine($"PASS JoinSession tests ({checks} assertions)");
         }
         static void Check(bool condition, string message)
@@ -80,6 +80,34 @@ namespace Windy10v10AI.Launcher.Tests
             Check(fixture.Entries == 2, "automatic next game entry happens once");
             await NextGameWithClosedClient(fixture);
             await GracefulHostClose(fixture);
+        }
+        static async Task AutoEntryPreferenceChanges()
+        {
+            await using var fixture = new Fixture();
+            fixture.Host.GameReady = true;
+            fixture.Session.Start("AB12CD", true);
+            await Wait(() => fixture.Session.Ready && fixture.Entries == 1, "preference first entry");
+            fixture.Session.SetAutoEnter(false);
+            fixture.Host.Game = 2;
+            await Wait(() => fixture.Tunnel.Game == 2 && fixture.Session.Ready, "unchecked next game ready");
+            await Task.Delay(100);
+            Check(fixture.Entries == 1, "cancelling during a game prevents following the host");
+            fixture.Session.SetAutoEnter(true);
+            await Task.Delay(100);
+            Check(fixture.Entries == 1, "enabling auto entry does not enter the ready game immediately");
+            fixture.Host.Game = 3;
+            await Wait(() => fixture.Tunnel.Game == 3 && fixture.Entries == 2, "enabled following game entry");
+            int clientChecks = 0;
+            fixture.Options.ClientRunning = () =>
+            {
+                fixture.Session.SetAutoEnter(false);
+                Interlocked.Increment(ref clientChecks);
+                return true;
+            };
+            fixture.Host.Game = 4;
+            await Wait(() => Volatile.Read(ref clientChecks) > 0, "client check before automatic entry");
+            await Task.Delay(100);
+            Check(fixture.Entries == 2, "automatic entry checks the latest choice after checking the client");
         }
         static async Task NextGameWithClosedClient(Fixture fixture)
         {
