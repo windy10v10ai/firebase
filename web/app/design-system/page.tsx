@@ -1,6 +1,7 @@
-import { BookOpen, CalendarCheck, ChartNoAxesColumn, ChevronRight, Sparkles } from 'lucide-react';
+import { BookOpen, CalendarCheck, ChartNoAxesColumn, Sparkles } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
+import ActionCard from '../components/ActionCard';
 import SteamIcon from '../components/SteamIcon';
 import Button, { STEAM_BUTTON_CLASS, STEAM_BUTTON_SIZE_CLASS } from '../components/ui/button';
 
@@ -211,24 +212,15 @@ export default function DesignSystemPage() {
       </Block>
 
       <Block title="可点击卡片">
-        <a
+        <ActionCard
           href="#"
-          className="card-container card-hover card-pad-sm flex items-center gap-3 md:gap-4"
-        >
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-feature-property-soft">
-            <ChartNoAxesColumn className="size-6 text-feature-property" aria-hidden="true" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-base font-bold text-heading">属性加点</span>
-            <span className="block text-sm text-muted">用勇士积分提升英雄属性</span>
-          </span>
-          <span className="hidden h-8 items-center rounded-full border border-capsule-border px-3 text-[13px] text-capsule-text md:inline-flex">
-            去加点
-          </span>
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-arrow-border">
-            <ChevronRight className="size-4 text-muted" aria-hidden="true" />
-          </span>
-        </a>
+          Icon={ChartNoAxesColumn}
+          iconClassName="text-feature-property"
+          tileClassName="bg-feature-property-soft"
+          title="属性加点"
+          description="用勇士积分提升英雄属性"
+          capsule="去加点"
+        />
       </Block>
 
       <Block title="文字链接">

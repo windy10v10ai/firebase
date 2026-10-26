@@ -11,10 +11,17 @@ interface CheckInRowProps {
   info: PlayerInfo | null;
   steamId: string;
   onClaimed: (player: PlayerInfo) => void;
+  /** 首页首屏里签到是主操作，用强调按钮 */
+  buttonVariant?: 'primary' | 'cta';
 }
 
 /** 首页与个人主页共用的签到入口，数据没到或不是有效会员时整行不渲染 */
-export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps) {
+export default function CheckInRow({
+  info,
+  steamId,
+  onClaimed,
+  buttonVariant = 'primary',
+}: CheckInRowProps) {
   const t = useTranslations('checkIn');
   const [pending, setPending] = useState(false);
   const [claimed, setClaimed] = useState<CheckInPoints | null>(null);
@@ -63,7 +70,12 @@ export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps
             {t('done')}
           </span>
         ) : (
-          <Button onClick={onClick} loading={pending} className="w-full shrink-0 @sm:w-auto">
+          <Button
+            variant={buttonVariant}
+            onClick={onClick}
+            loading={pending}
+            className="w-full shrink-0 @sm:w-auto"
+          >
             {pending ? t('pending') : t('action')}
           </Button>
         )}

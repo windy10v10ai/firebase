@@ -31,10 +31,9 @@
     }
   },
   "home": {
-    "title": "DOTA2 10v10 AI 自定义地图",
+    "title": "DOTA2 10v10 AI<br></br>自定义地图",
     "workshop": {
-      "title": "Steam 创意工坊",
-      "description": "在 Steam 创意工坊订阅我们的地图，您的支持是我们持续更新的动力",
+      "description": "在 Steam 创意工坊订阅我们的地图，<br></br>您的支持是我们持续更新的动力",
       "subscribe": "获得地图"
     },
     "feedback": {
@@ -46,10 +45,9 @@
       "description": "查看项目源代码和更新日志，并参与贡献"
     },
     "intro": {
-      "title": "登录后，随时查看自己的数据",
+      "title": "登录查看自己的数据",
       "description": "用 Steam 登录，就能在网站上看战绩、勇士与会员积分，并给英雄属性加点、洗点、解锁觉醒。",
-      "privacy": "密码输在 Steam 官网，本站只拿到你的 Steam ID",
-      "upcoming": ["更多数据统计"]
+      "privacy": "密码输在 Steam 官网，本站只拿到你的 Steam ID"
     },
     "summary": {
       "profileLink": "个人主页",
@@ -60,29 +58,22 @@
       },
       "battleLevel": "勇士等级",
       "memberLevel": "会员等级",
-      "battlePoint": "可用勇士积分",
-      "memberPoint": "可用会员积分",
+      "usablePoints": "可用积分",
       "member": {
         "premium": "高级会员",
         "normal": "普通会员",
         "expireDate": "有效期至：{date}",
         "expired": "会员已过期"
-      }
+      },
+      "remainingToLevel": "距 {level} 级还差 {amount}"
     },
     "sample": {
-      "games": "游戏场次",
-      "winRate": "胜率",
-      "conduct": "行为分",
-      "signIn": "每日签到",
-      "vision": "额外视野",
-      "cooldown": "冷却时间",
-      "moveSpeed": "移动速度",
-      "awakened": "已觉醒英雄",
-      "level": "{n} 级"
+      "tag": "示例",
+      "name": "玩家昵称",
+      "note": "以上是示例，登录后显示你自己的等级和积分"
     },
     "pages": {
       "title": "主要页面",
-      "soon": "即将上线",
       "profile": {
         "title": "个人主页",
         "description": "战绩、勇士与会员等级、可用积分"
@@ -94,10 +85,6 @@
       "awaken": {
         "title": "英雄觉醒",
         "description": "已觉醒英雄、解锁与随机"
-      },
-      "membership": {
-        "title": "会员订阅",
-        "description": "会员福利、爱发电与 Ko-fi 订阅入口"
       },
       "dailyTask": {
         "title": "每日任务",
@@ -111,6 +98,13 @@
         "title": "排行榜",
         "description": "勇士积分前 500 名与我的排名"
       }
+    },
+    "hero": {
+      "downloadLauncher": "下载启动器"
+    },
+    "memberCard": {
+      "description": "每月领会员积分，开局抽选技能升级为 8 选 1，还有会员专属 BUFF",
+      "capsule": "查看会员福利"
     }
   },
   "launch": {
@@ -239,8 +233,9 @@
       }
     },
     "homeCard": {
-      "title": "开局方式",
-      "body": "从游廊开局即可。想要后期更流畅、连接更稳，可以下载启动器，同样支持多人联机。"
+      "title": "启动方式",
+      "body": "用启动器开局，游戏更流畅、不卡顿，支持多人联机。",
+      "capsule": "游廊和启动器，怎么选？"
     }
   },
   "membership": {

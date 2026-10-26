@@ -121,8 +121,10 @@ export default function LauncherDownload() {
             {t('download')}
           </a>
           <span className="text-center text-xs text-muted">
-            {isMac ? LAUNCHER_MAC_FILE_NAME : LAUNCHER_FILE_NAME} · v
-            {isMac ? LAUNCHER_MAC_VERSION : LAUNCHER_VERSION}
+            {isMac ? LAUNCHER_MAC_FILE_NAME : LAUNCHER_FILE_NAME}
+          </span>
+          <span className="text-center text-xs text-muted">
+            v{isMac ? LAUNCHER_MAC_VERSION : LAUNCHER_VERSION}
           </span>
           {isMac && <span className="text-center text-xs text-muted">{t('appleSilicon')}</span>}
         </div>
