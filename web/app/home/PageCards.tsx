@@ -4,7 +4,7 @@ import {
   BookOpen,
   CalendarCheck,
   ChevronRight,
-  CirclePlus,
+  ChartNoAxesColumn,
   Crown,
   Sparkles,
   Trophy,
@@ -20,7 +20,7 @@ import { playerPagePath } from '@/app/lib/player-path';
 // 顺序与头部菜单的分组一致：先是玩家自己的，再是人人一样的；图标颜色与头部菜单、个人主页入口卡一致
 const PAGE_CARDS = [
   { key: 'profile', Icon: UserRound, iconClass: 'text-content' },
-  { key: 'property', Icon: CirclePlus, iconClass: 'text-feature-property' },
+  { key: 'property', Icon: ChartNoAxesColumn, iconClass: 'text-feature-property' },
   { key: 'awaken', Icon: Sparkles, iconClass: 'text-feature-awaken' },
   { key: 'dailyTask', Icon: CalendarCheck, iconClass: 'text-feature-daily' },
   { key: 'membership', Icon: Crown, iconClass: 'text-member-strong' },

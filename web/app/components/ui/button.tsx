@@ -2,7 +2,7 @@ import { LoaderCircle } from 'lucide-react';
 
 import type { ComponentPropsWithoutRef } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'season' | 'member';
+type ButtonVariant = 'primary' | 'cta' | 'secondary' | 'ghost' | 'danger' | 'season' | 'member';
 
 /** 跳去 Steam 的入口：次按钮外观加 Steam 图标，登录与创意工坊订阅共用 */
 export const STEAM_BUTTON_CLASS =
@@ -14,9 +14,10 @@ export const STEAM_BUTTON_SIZE_CLASS = {
   large: 'min-h-14 gap-3 px-6 text-lg',
 };
 
-// 纯色是网站自己的操作，渐变只给花勇士积分或会员积分的操作，选型见 web/CLAUDE.md「按钮」
+// 选型见 web/CLAUDE.md「按钮」
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
   primary: 'btn-primary',
+  cta: 'btn-cta',
   secondary: 'btn-secondary',
   ghost: 'btn-ghost',
   danger: 'btn-danger',

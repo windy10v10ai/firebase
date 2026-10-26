@@ -109,7 +109,7 @@ export default function PlayerSummary({ uid }: { uid: string }) {
         </div>
         <Link
           href={playerPagePath(uid)}
-          className="inline-flex shrink-0 items-center gap-1 text-sm whitespace-nowrap text-link transition-colors hover:text-link-hover"
+          className="inline-flex shrink-0 items-center gap-1 text-sm whitespace-nowrap text-content link-hover"
         >
           <span className="hidden md:inline">{t('profileLink')}</span>
           <ChevronRight className="size-4" aria-hidden="true" />

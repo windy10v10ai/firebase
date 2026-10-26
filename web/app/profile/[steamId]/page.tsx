@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck, Check, CirclePlus, Sparkles, Trophy } from 'lucide-react';
+import { CalendarCheck, Check, ChartNoAxesColumn, Sparkles, Trophy } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -106,7 +106,7 @@ export default function ProfilePage() {
         <div className="grid min-w-0 gap-2 md:grid-cols-2 md:gap-4">
           <FeatureEntryCard
             tone="property"
-            Icon={CirclePlus}
+            Icon={ChartNoAxesColumn}
             title={t('entries.property.title')}
             badge={
               info && !isSelf ? (
