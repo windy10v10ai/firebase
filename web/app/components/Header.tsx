@@ -75,7 +75,8 @@ export default function Header() {
   const headerRef = useRef<HTMLElement>(null);
   // 服务端渲染与首帧按「在顶部」画：首页打开时就在顶部
   const [atTop, setAtTop] = useState(true);
-  const transparent = pathname === '/' && atTop;
+  // 菜单是实心的，打开时头部跟着变实心，两块连成一体
+  const transparent = pathname === '/' && atTop && !menuOpen;
 
   useEffect(() => {
     const update = () => setAtTop(window.scrollY <= AT_TOP_THRESHOLD);
@@ -218,85 +219,89 @@ export default function Header() {
             </button>
           </div>
         </div>
-        {menuOpen ? (
-          // 浮层下方是正文，底色必须不透明，否则两层文字叠在一起。
-          // 手机铺满整行好点按；平板起改成挂在汉堡按钮下的面板，宽屏上菜单项不会远离按钮
-          <div
-            id="header-menu"
-            className="absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 md:left-auto md:right-4 md:w-72 md:rounded-[10px] md:border md:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)]"
-          >
-            {NAV_MENU_GROUPS.map((group, index) => (
-              <div key={group} role="group" aria-labelledby={`header-menu-${group}`}>
-                {index > 0 ? <div className="my-1 h-px bg-line" aria-hidden="true" /> : null}
-                <p id={`header-menu-${group}`} className="pt-2 pb-0.5 text-xs text-muted">
-                  {t(`menuGroups.${group}`)}
-                </p>
-                {SITE_NAV_ITEMS.filter((item) => item.group === group).map((item) => {
-                  const { Icon, className, tile } = SITE_NAV_ICONS[item.key]!;
-                  return (
-                    <Link
-                      key={item.key}
-                      href={item.href}
-                      prefetch={false}
-                      onClick={() => setMenuOpen(false)}
-                      aria-current={
-                        isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
-                      }
-                      className="nav-menu-item"
-                    >
-                      <span className={`${NAV_ICON_TILE_CLASS} ${tile}`}>
-                        <Icon
-                          className={`size-[17px] ${className}`}
-                          strokeWidth={1.7}
-                          aria-hidden="true"
-                        />
-                      </span>
-                      <span className="flex-1">{t(item.fullLabelKey)}</span>
-                    </Link>
-                  );
-                })}
-                {group === 'community'
-                  ? EXTERNAL_LINKS.map((link) => {
-                      const Icon = EXTERNAL_LINK_ICONS[link.labelKey]!;
-                      return (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => setMenuOpen(false)}
-                          className="nav-menu-item"
-                        >
-                          <span className={`${NAV_ICON_TILE_CLASS} bg-icon-tile`}>
-                            <Icon className="size-[17px]" />
-                          </span>
-                          <span className="flex-1">{t(link.labelKey)}</span>
-                          <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
-                        </a>
-                      );
-                    })
-                  : null}
-              </div>
-            ))}
-            {auth.status === 'authenticated' ? (
-              <>
-                {/* 电脑宽度头部账号控件里也有退出，菜单照样保留，所有宽度都能在同一处找到 */}
-                <div className="my-1 h-px bg-line" aria-hidden="true" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    auth.signOut();
-                  }}
-                  className="nav-menu-item w-full justify-between"
-                >
-                  <span>{tAuth('signOut')}</span>
-                  <LogOut className="size-4 shrink-0" aria-hidden="true" />
-                </button>
-              </>
-            ) : null}
-          </div>
-        ) : null}
+        {/*
+          浮层下方是正文，底色必须不透明，否则两层文字叠在一起。
+          手机铺满整行好点按；平板起改成挂在汉堡按钮下的面板，宽屏上菜单项不会远离按钮。
+          关上时仍挂在页面里，收起动画才放得完；visibility 随过渡最后才切换，收起后读屏和 Tab 都碰不到
+        */}
+        <div
+          id="header-menu"
+          inert={!menuOpen}
+          className={`absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 transition-[opacity,transform,visibility] duration-150 ease-out md:left-auto md:right-4 md:w-72 md:rounded-[10px] md:border md:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)] ${
+            menuOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'
+          }`}
+        >
+          {NAV_MENU_GROUPS.map((group, index) => (
+            <div key={group} role="group" aria-labelledby={`header-menu-${group}`}>
+              {index > 0 ? <div className="my-1 h-px bg-line" aria-hidden="true" /> : null}
+              <p id={`header-menu-${group}`} className="pt-2 pb-0.5 text-xs text-muted">
+                {t(`menuGroups.${group}`)}
+              </p>
+              {SITE_NAV_ITEMS.filter((item) => item.group === group).map((item) => {
+                const { Icon, className, tile } = SITE_NAV_ICONS[item.key]!;
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    prefetch={false}
+                    onClick={() => setMenuOpen(false)}
+                    aria-current={
+                      isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                    }
+                    className="nav-menu-item"
+                  >
+                    <span className={`${NAV_ICON_TILE_CLASS} ${tile}`}>
+                      <Icon
+                        className={`size-[17px] ${className}`}
+                        strokeWidth={1.7}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <span className="flex-1">{t(item.fullLabelKey)}</span>
+                  </Link>
+                );
+              })}
+              {group === 'community'
+                ? EXTERNAL_LINKS.map((link) => {
+                    const Icon = EXTERNAL_LINK_ICONS[link.labelKey]!;
+                    return (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMenuOpen(false)}
+                        className="nav-menu-item"
+                      >
+                        <span className={`${NAV_ICON_TILE_CLASS} bg-icon-tile`}>
+                          <Icon className="size-[17px]" />
+                        </span>
+                        <span className="flex-1">{t(link.labelKey)}</span>
+                        <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
+                      </a>
+                    );
+                  })
+                : null}
+            </div>
+          ))}
+          {auth.status === 'authenticated' ? (
+            <>
+              {/* 电脑宽度头部账号控件里也有退出，菜单照样保留，所有宽度都能在同一处找到 */}
+              <div className="my-1 h-px bg-line" aria-hidden="true" />
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  auth.signOut();
+                }}
+                className="nav-menu-item w-full justify-between"
+              >
+                <span>{tAuth('signOut')}</span>
+                <LogOut className="size-4 shrink-0" aria-hidden="true" />
+              </button>
+            </>
+          ) : null}
+        </div>
       </nav>
     </header>
   );

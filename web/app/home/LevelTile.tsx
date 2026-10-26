@@ -58,8 +58,8 @@ export default function LevelTile({ tone, label, values, failed = false }: Level
             })
           : (placeholder ?? <Skeleton>000000000</Skeleton>)}
       </span>
-      {/* 示例卡里的块最窄，装不下「标签 + 数值」时数值换到下一行 */}
-      <div className="mt-2.5 flex flex-wrap items-baseline justify-between gap-x-2">
+      {/* 「标签 + 数值」能否并排要看数值长短，骨架与真实数值会折成不同行数，固定分两行面板才不会在数据到达后变高 */}
+      <div className="mt-2.5 flex flex-col">
         <span className="text-xs whitespace-nowrap text-muted">{t('usablePoints')}</span>
         <span className={`text-sm font-bold tabular-nums ${style.text}`}>
           {values
