@@ -40,6 +40,15 @@ interface PlayerCheck {
   today: Date;
 }
 
+// 本地 key 能伪造别人逃跑，每天只扣一次，把冒用造成的损失封顶
+function isConductPenaltyAllowed(check: PlayerCheck, gameEnd: GameEndDto): boolean {
+  return (
+    check.player.isDisconnected &&
+    gameEnd.playerCount >= 2 &&
+    check.current?.conductPenaltyDate?.getTime() !== check.today.getTime()
+  );
+}
+
 function getUtcMidnight(date: Date): Date {
   const truncated = new Date(date);
   truncated.setUTCHours(0, 0, 0, 0);
@@ -203,6 +212,7 @@ export class LocalHostService {
       }
       if (check.reason) reasons.push(check.reason);
       if (!accepted && check.ok) reasons.push('match_rejected');
+      if (accepted && isConductPenaltyAllowed(check, gameEnd)) reasons.push('conduct_penalty');
       if (reasons.length === 0) return [];
       return [
         {
@@ -400,7 +410,9 @@ export class LocalHostService {
   ): Promise<number> {
     const counters = { ...check.counters };
     counters.gameEndSeasonPoint += check.battlePoints;
+    const conductPenalty = isConductPenaltyAllowed(check, gameEnd);
     await this.saveDailyCounters(check.steamId, check.current, check.today, counters, {
+      ...(conductPenalty ? { conductPenaltyDate: check.today } : {}),
       lastRequestAt: new Date(),
       lastRequestMatchId: gameEnd.matchId,
       ipActivity: mergeIpActivity(check.current?.ipActivity, origin, {
@@ -414,9 +426,7 @@ export class LocalHostService {
       check.player.teamId === gameEnd.winnerTeamId,
       check.battlePoints,
       check.player.isDisconnected,
-      context.route === 'official' &&
-        context.serverType !== SERVER_TYPE.LOCAL &&
-        gameEnd.playerCount >= 2,
+      gameEnd.playerCount >= 2 && (!check.player.isDisconnected || conductPenalty),
       gameId,
     );
     logger.info('game/end: recorded', {
