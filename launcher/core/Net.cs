@@ -105,13 +105,16 @@ namespace Windy10v10AI.Launcher
         }
     }
 
-    // Limits the API sends with a join for leaving the direct route; kept in the API so they change without a launcher release
+    // Limits the API sends with a join for choosing between the direct route and the relay; kept in the API so they change without a launcher release
     class RouteThresholds
     {
         public int DirectLossPct = -1;
         public int RelayLossPct = -1;
         public int LossCostMs = -1;
         public int SwitchMarginMs = -1;
+        public int BadLossPct = -1;
+        public int BadSeconds = -1;
+        public int WindowSeconds = -1;
 
         // Null when the API sent none, which leaves the route the handshake picked
         public static RouteThresholds Read(Dictionary<string, object> answer)
@@ -125,6 +128,9 @@ namespace Windy10v10AI.Launcher
                 RelayLossPct = Field(check, "relayLossPct"),
                 LossCostMs = Field(check, "lossCostMs"),
                 SwitchMarginMs = Field(check, "switchMarginMs"),
+                BadLossPct = Field(check, "badLossPct"),
+                BadSeconds = Field(check, "badSeconds"),
+                WindowSeconds = Field(check, "windowSeconds"),
             };
             var scored = limits.LossCostMs >= 0 && limits.SwitchMarginMs >= 0;
             var legacy = limits.DirectLossPct >= 0 && limits.RelayLossPct >= 0;
@@ -140,13 +146,29 @@ namespace Windy10v10AI.Launcher
         // Scores each route as latency plus weighted loss, the same rule the API ranks relays by, and falls back to loss limits for an older API
         public bool PrefersRelay(RouteQuality direct, RouteQuality relay)
         {
-            if (direct.Samples == 0 || relay.Samples == 0 || relay.Rtt < 0) return false;
-            if (LossCostMs < 0 || SwitchMarginMs < 0) return direct.Loss >= DirectLossPct && relay.Loss <= RelayLossPct;
-            return Score(direct) - Score(relay) > SwitchMarginMs;
+            if (LossCostMs < 0 || SwitchMarginMs < 0)
+            {
+                if (direct.Samples == 0 || relay.Samples == 0 || relay.Rtt < 0) return false;
+                return direct.Loss >= DirectLossPct && relay.Loss <= RelayLossPct;
+            }
+            return Prefers(direct, relay);
         }
 
-        // A direct route that never answered has no latency to add, and its full loss already outweighs any usable relay
-        int Score(RouteQuality quality)
+        // Switching during a game needs the bad-second limits as well as the score; without them only reconnects change the route
+        public bool InGame
+        {
+            get { return LossCostMs >= 0 && SwitchMarginMs >= 0 && BadLossPct >= 0 && BadSeconds > 0 && WindowSeconds >= BadSeconds; }
+        }
+
+        // Whether the other route scores clearly better than the one in use, in either direction between the direct route and the relay
+        public bool Prefers(RouteQuality current, RouteQuality other)
+        {
+            if (current.Samples == 0 || other.Samples == 0 || other.Rtt < 0) return false;
+            return Score(current) - Score(other) > SwitchMarginMs;
+        }
+
+        // A route that never answered has no latency to add, and its full loss already outweighs any usable alternative
+        public int Score(RouteQuality quality)
         {
             return Math.Max(quality.Rtt, 0) + quality.Loss * LossCostMs;
         }

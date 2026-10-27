@@ -45,12 +45,17 @@ Windows 与 Mac 采用三层职责划分，使同一条房间规则只维护一�
 - **API 只牵线**：开房、轮询、交换地址走 API，直连时游戏数据不经过我们的服务器。
 - **不依赖公网 IP**：局域网、打洞、中转同时试，不用 UPnP。中转只转发、不看内容，服务器在 server 仓库。
 - **中转的列表与排序在 API**：启动器上报到各台的延迟与丢包，API 排出顺序发给双方，增减中转、调优先级只需部署 API。
-- **加入后实测一次再定路**：直连与中转比一次，中转明显更好才换，之后整局不换。
+- **加入后实测一次定路，游戏中按游戏数据的真实丢包换路**：小 ping 能过的线路可能专丢又大又密的游戏数据，所以游戏数据按序号统计两个方向的丢包。在用的线路持续丢包、另一条按得分明显更好才换，直连与中转对称。
+- **换路后用游戏数据复核，更差就换回并在本房间锁定**：另一条线路平时只靠稀疏的 ping 打分，可能看走眼；两次换路之间留间隔，免得来回跳。
+- **只在直连与这次加入分到的那台中转之间换**：房主只在一台中转上认领，换到别的中转要改房主端。
+- **走直连时也一直留着中转**：每秒经中转 ping 一次房主，中转会话不被回收、随时能换；同时占用的中转会话约等于同时在玩的加入者数。
+- **没有回包时赶在 Dota 断开前重连**：重新握手比 Dota 掉线更早开始；原来走中转的优先回中转，那时直连已被判定更差。
 - **对玩家只分「直连」与「中转」**：单写「服务器」会和「服务器主机」混淆。
 - **房间跨局保留，下一局由房主手动启动**：什么时候开、开什么难度是房主的事。
 - **下一局先放房主进，再放加入者**：游戏内房主归第一个加载完的玩家，大家同时加载时电脑快的加入者会抢走；房主迟迟进不来就不再等。
 - **房间按局记「已开始」**：下一局开始时房间重新开放加入。
 - **两个勾选框，默认都勾上并记住**：房主「开房后自动启动 Dota 2」，加入者「房主启动下一局时自动进入」。加入者的 Dota 没开时不替玩家启动，以免把正在玩别的游戏的人拽出来。
+- **加入后的自动进入选项常驻房间操作区，独占一行**：玩家可以在游戏中或等待房主时取消，无需抢在两局之间操作；勾选变化只影响后续游戏的自动进入，不退出当前游戏，也不立即进入已经准备好的游戏。
 - **房主不等人就开始，靠提示解决，不改默认**：多数房主本来一个人玩，默认不启动 Dota 会让他们每局多一步。
 - **房主是唯一的状态来源**：玩家名单、游戏结束与结算完成都由房主读专用服日志得出，经隧道发给加入者，两边看到的一致。
 - **联机要求地图最新**：双方地图版本不同进游戏可能出错。
@@ -77,17 +82,23 @@ launcher\build.cmd
 dotnet run --project launcher/core/tests/dotnet/CoreTests.csproj
 ```
 
+## 界面验证
+
+Windows 界面由 AI 在本机操作、截图并审查。需要确认 Mac 界面时，按需运行 **Launcher Mac UI previews**，选择场景和语言，下载原图、日志与缩略总览后审图。完整联机仍需实机验证。入口、下载命令与维护方法见 [界面验证](../docs/launcher/ui-verification.md)。
+
 ## 发布
 
 exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分两个 PR：
 
 1. 代码 PR：按 [CLAUDE.md](CLAUDE.md) 的「版本号」升版本，合进 `develop`。可以攒几个 PR 共用一个未发布的版本号。
 2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。发布的 exe 必须来自这里，不用本机编译的。
-3. 没有代码签名，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可继续；报具体病毒家族、或大量引擎一起报时先停下排查。
+   工作流同时产出 Windows 的 exe 与 Mac 的 `Windy10v10AI-<version>-macos-arm64.zip`，同一个版本号；Mac 另有拖拽安装的 DMG，ZIP 留给应用内更新。Mac 包在工作流里已验证结构、版本、架构与 ad hoc 签名（`macos/verify-package.sh`），运行摘要里有两个包的 sha256 与对应提交。
+3. 没有代码签名，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可继续；报具体病毒家族、或大量引擎一起报时先停下排查。**大版本（升第二位及以上）不论扫描结果都提交一次误报申报**：云端判定与本机扫描不是一回事，扫描干净的版本也有玩家反馈被 Windows 报毒，提前申报比等玩家撞上再处理省事。
 4. 发版 PR：
    - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
-   - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION`。
-   - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有）。抄错时 api 单测会失败。
+   - 把 Mac 的 `Windy10v10AI-<version>-macos-arm64.zip` 与 `.dmg` 也复制进 `web/public/downloads/`，删掉旧版。
+   - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION` 与 `LAUNCHER_MAC_VERSION`（首次发 Mac 版时从 `null` 改成版本号，页面才显示 Mac tab）。
+   - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有），Mac 取 ZIP 的 sha256（`LAUNCHER_MAC_RELEASE`）。抄错时 api 单测会失败。
    - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只列对玩家影响大的变化，小修小改合成一句；未发布的版本并进本版。
 5. 发版 PR 合进 `develop` 后，从 dev 站（`https://dev--windy10v10ai.asia-east1.hosted.app/launch`）实际下载一次，Defender 不拦截才请用户审批 Release PR。下载时的云端判定与 VirusTotal 上的 Microsoft 一栏不是同一条，前面两项都干净也可能被拦；被拦就到误报申报页提交，等微软放行、重新下载不报再上线。
 

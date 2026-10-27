@@ -22,7 +22,16 @@ describe('buildConnectionQualityRow', () => {
       room,
       {
         join,
-        quality: { joinId: 'j', path: 'relay', sent: 30, lost: 3, rttP50: 45, rttP95: 120 },
+        quality: {
+          joinId: 'j',
+          path: 'relay',
+          sent: 30,
+          lost: 3,
+          rttP50: 45,
+          rttP95: 120,
+          dataLossDownPct: 38,
+          dataLossUpPct: 0,
+        },
         relayAddress: '1.2.3.4:27200',
       },
       new Date('2026-10-06T00:00:00Z'),
@@ -37,6 +46,8 @@ describe('buildConnectionQualityRow', () => {
       ping_lost: 3,
       rtt_p50_ms: 45,
       rtt_p95_ms: 120,
+      data_loss_down_pct: 38,
+      data_loss_up_pct: 0,
       steam_id: 2002,
       host_steam_id: 1001,
       country: 'CN',
@@ -54,7 +65,13 @@ describe('buildConnectionQualityRow', () => {
       new Date(),
     );
 
-    expect(row).toMatchObject({ rtt_p50_ms: null, rtt_p95_ms: null, relay_address: null });
+    expect(row).toMatchObject({
+      rtt_p50_ms: null,
+      rtt_p95_ms: null,
+      relay_address: null,
+      data_loss_down_pct: null,
+      data_loss_up_pct: null,
+    });
   });
 });
 

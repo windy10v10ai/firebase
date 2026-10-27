@@ -11,17 +11,35 @@ interface CheckInRowProps {
   info: PlayerInfo | null;
   steamId: string;
   onClaimed: (player: PlayerInfo) => void;
+  /** 首页首屏里签到是主操作，用强调按钮 */
+  buttonVariant?: 'primary' | 'cta';
+  /** 只占位不显示：按文案最长的情况排版，外层负责隐藏 */
+  placeholder?: boolean;
+}
+
+// 补签天数取上限，占位按最长的那句文案排
+const PLACEHOLDER_STATUS: CheckInPoints = { dailyPoint: 100, catchUpDays: 7, catchUpPoint: 700 };
+
+/** 签到行会不会出现：数据到了且是有效会员 */
+export function hasCheckIn(info: PlayerInfo | null): boolean {
+  return Boolean(info?.member?.enable && info.checkIn?.memberPoint);
 }
 
 /** 首页与个人主页共用的签到入口，数据没到或不是有效会员时整行不渲染 */
-export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps) {
+export default function CheckInRow({
+  info,
+  steamId,
+  onClaimed,
+  buttonVariant = 'primary',
+  placeholder = false,
+}: CheckInRowProps) {
   const t = useTranslations('checkIn');
   const [pending, setPending] = useState(false);
   const [claimed, setClaimed] = useState<CheckInPoints | null>(null);
   const [failed, setFailed] = useState(false);
 
-  const status = info?.checkIn?.memberPoint;
-  if (!info?.member?.enable || !status) {
+  const status = placeholder ? PLACEHOLDER_STATUS : info?.checkIn?.memberPoint;
+  if (!status || (!placeholder && !hasCheckIn(info))) {
     return null;
   }
 
@@ -63,7 +81,12 @@ export default function CheckInRow({ info, steamId, onClaimed }: CheckInRowProps
             {t('done')}
           </span>
         ) : (
-          <Button onClick={onClick} loading={pending} className="w-full shrink-0 @sm:w-auto">
+          <Button
+            variant={buttonVariant}
+            onClick={onClick}
+            loading={pending}
+            className="w-full shrink-0 @sm:w-auto"
+          >
             {pending ? t('pending') : t('action')}
           </Button>
         )}

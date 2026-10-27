@@ -1,0 +1,53 @@
+name: Launcher Mac UI previews
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Screens to capture
+        type: choice
+        default: all
+        options: [all, host, join, feedback]
+      language:
+        description: Language
+        type: choice
+        default: all
+        options: [all, zh-CN, en-US, ru-RU]
+
+permissions:
+  contents: read
+
+env:
+  UI_SCOPE: ${{ inputs.scope || 'all' }}
+  UI_LANGUAGE: ${{ inputs.language || 'all' }}
+
+jobs:
+  macos-ui:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Build Mac launcher
+        run: bash launcher/macos/build.sh
+      - name: Capture Mac UI
+        run: bash launcher/macos/test-ui.sh "$RUNNER_TEMP/launcher-ui-macos" "$UI_SCOPE" "$UI_LANGUAGE"
+      - name: Prepare screenshot overview
+        if: always()
+        run: python3 launcher/ui-preview-summary.py "$RUNNER_TEMP/launcher-ui-macos"
+      - name: Upload Mac screenshots and logs
+        if: always()
+        id: screenshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: launcher-ui-macos
+          path: ${{ runner.temp }}/launcher-ui-macos/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Link screenshot download
+        if: always()
+        env:
+          UI_ARTIFACT_URL: ${{ steps.screenshots.outputs.artifact-url }}
+        run: python3 launcher/ui-preview-summary.py "$RUNNER_TEMP/launcher-ui-macos" --artifact-url "$UI_ARTIFACT_URL"

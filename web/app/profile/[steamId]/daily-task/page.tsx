@@ -90,7 +90,7 @@ export default function DailyTaskPage() {
 
       {/* 电脑宽度左栏今天、右栏历史；更窄时按 DOM 顺序单列 */}
       <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
-        <div className="grid gap-6 lg:sticky lg:top-6">
+        <div className="grid gap-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)]">
           <TodayCard
             snapshot={snapshot}
             refreshing={refreshing}

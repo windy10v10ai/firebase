@@ -2,7 +2,7 @@ import { logger } from 'firebase-functions';
 
 import { GameEndDto, GameEndGameOptionsDto, GameEndPlayerDto } from '../analytics/dto/game-end-dto';
 
-import { PlayerStatsRecent } from './entities/player-stats-recent.entity';
+import { PlayerStatsRecent, PlayerStatsRecentArchive } from './entities/player-stats-recent.entity';
 import { PlayerStatsRecentService, RECENT_MATCH_LIMIT } from './player-stats-recent.service';
 
 describe('PlayerStatsRecentService', () => {
@@ -10,6 +10,16 @@ describe('PlayerStatsRecentService', () => {
   const update = jest.fn();
   const create = jest.fn();
   const repository = { findById, update, create };
+  const archiveFindById = jest.fn();
+  const archiveUpdate = jest.fn();
+  const archiveCreate = jest.fn();
+  const archiveRepository = {
+    findById: archiveFindById,
+    update: archiveUpdate,
+    create: archiveCreate,
+  };
+  const newService = () =>
+    new PlayerStatsRecentService(repository as never, archiveRepository as never);
   const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
 
   const defaultGameOptions: GameEndGameOptionsDto = {
@@ -57,6 +67,9 @@ describe('PlayerStatsRecentService', () => {
     findById.mockReset();
     update.mockReset();
     create.mockReset();
+    archiveFindById.mockReset();
+    archiveUpdate.mockReset();
+    archiveCreate.mockReset();
     warnSpy.mockClear();
   });
 
@@ -65,7 +78,7 @@ describe('PlayerStatsRecentService', () => {
   });
 
   it('should create the document with the match on first record', async () => {
-    const service = new PlayerStatsRecentService(repository as never);
+    const service = newService();
     findById.mockResolvedValueOnce(null);
 
     await service.record(
@@ -96,7 +109,7 @@ describe('PlayerStatsRecentService', () => {
   });
 
   it('should mark a loss when the team differs from the winner', async () => {
-    const service = new PlayerStatsRecentService(repository as never);
+    const service = newService();
     findById.mockResolvedValueOnce(null);
 
     await service.record(basePlayer({ teamId: 3 }), baseGameEnd());
@@ -105,27 +118,142 @@ describe('PlayerStatsRecentService', () => {
     expect(created.matches[0].win).toBe(false);
   });
 
-  it('should prepend the new match and drop the oldest beyond the limit', async () => {
-    const service = new PlayerStatsRecentService(repository as never);
+  const matchesOf = (prefix: string, count: number) =>
+    Array.from({ length: count }, (_, index) => ({ matchId: `${prefix}-${index}` }));
+
+  it('should prepend the new match and keep growing below the archive trigger', async () => {
+    const service = newService();
     findById.mockResolvedValueOnce({
       id: '123',
-      matches: Array.from({ length: RECENT_MATCH_LIMIT }, (_, index) => ({
-        matchId: `old-${index}`,
-      })),
+      matches: matchesOf('old', RECENT_MATCH_LIMIT),
       updatedAt: new Date(),
     } as PlayerStatsRecent);
 
     await service.record(basePlayer(), baseGameEnd({ matchId: 'newest' }));
 
     const updated = update.mock.calls[0][0] as PlayerStatsRecent;
-    expect(updated.matches).toHaveLength(RECENT_MATCH_LIMIT);
+    expect(updated.matches).toHaveLength(RECENT_MATCH_LIMIT + 1);
     expect(updated.matches[0].matchId).toBe('newest');
     expect(updated.matches[1].matchId).toBe('old-0');
-    expect(updated.matches[RECENT_MATCH_LIMIT - 1].matchId).toBe(`old-${RECENT_MATCH_LIMIT - 2}`);
+    expect(archiveCreate).not.toHaveBeenCalled();
+  });
+
+  it('should move the oldest batch into a new archive page once the document is full', async () => {
+    const service = newService();
+    findById.mockResolvedValueOnce({
+      id: '123',
+      matches: matchesOf('old', RECENT_MATCH_LIMIT * 2 - 1),
+      archivedPages: 2,
+      updatedAt: new Date(),
+    } as PlayerStatsRecent);
+    archiveFindById.mockResolvedValueOnce(null);
+
+    await service.record(basePlayer(), baseGameEnd({ matchId: 'newest' }));
+
+    const archive = archiveCreate.mock.calls[0][0] as PlayerStatsRecentArchive;
+    expect(archive.id).toBe('123_3');
+    expect(archive.matches).toHaveLength(RECENT_MATCH_LIMIT);
+    expect(archive.matches[0].matchId).toBe(`old-${RECENT_MATCH_LIMIT - 1}`);
+    expect(archive.matches[RECENT_MATCH_LIMIT - 1].matchId).toBe(
+      `old-${RECENT_MATCH_LIMIT * 2 - 2}`,
+    );
+    const updated = update.mock.calls[0][0] as PlayerStatsRecent;
+    expect(updated.matches).toHaveLength(RECENT_MATCH_LIMIT);
+    expect(updated.matches[0].matchId).toBe('newest');
+    expect(updated.archivedPages).toBe(3);
+  });
+
+  it('should overwrite an archive page left behind by an interrupted move', async () => {
+    const service = newService();
+    findById.mockResolvedValueOnce({
+      id: '123',
+      matches: matchesOf('old', RECENT_MATCH_LIMIT * 2 - 1),
+      updatedAt: new Date(),
+    } as PlayerStatsRecent);
+    archiveFindById.mockResolvedValueOnce({ id: '123_1', matches: [] });
+
+    await service.record(basePlayer(), baseGameEnd());
+
+    expect(archiveCreate).not.toHaveBeenCalled();
+    expect(archiveUpdate).toHaveBeenCalledTimes(1);
+    expect((update.mock.calls[0][0] as PlayerStatsRecent).archivedPages).toBe(1);
+  });
+
+  describe('findHistory', () => {
+    it('should return the overflow of the document and the newest archive page together', async () => {
+      const service = newService();
+      findById.mockResolvedValueOnce({
+        id: '123',
+        matches: matchesOf('main', RECENT_MATCH_LIMIT + 2),
+        archivedPages: 3,
+      });
+      archiveFindById.mockResolvedValueOnce({
+        id: '123_3',
+        matches: matchesOf('p3', RECENT_MATCH_LIMIT),
+      });
+
+      const result = await service.findHistory(123);
+
+      expect(archiveFindById).toHaveBeenCalledWith('123_3');
+      expect(result.matches).toHaveLength(RECENT_MATCH_LIMIT + 2);
+      expect(result.matches[0].matchId).toBe(`main-${RECENT_MATCH_LIMIT}`);
+      expect(result.matches[2].matchId).toBe('p3-0');
+      expect(result.nextPage).toBe(2);
+    });
+
+    it('should return only the overflow when nothing has been archived yet', async () => {
+      const service = newService();
+      findById.mockResolvedValueOnce({
+        id: '123',
+        matches: matchesOf('main', RECENT_MATCH_LIMIT + 5),
+      });
+
+      const result = await service.findHistory(123);
+
+      expect(archiveFindById).not.toHaveBeenCalled();
+      expect(result.matches).toHaveLength(5);
+      expect(result.nextPage).toBeNull();
+    });
+
+    it('should read one archive page at a time when a page is given', async () => {
+      const service = newService();
+      findById.mockResolvedValueOnce({ id: '123', matches: [], archivedPages: 3 });
+      archiveFindById.mockResolvedValueOnce({
+        id: '123_2',
+        matches: matchesOf('p2', RECENT_MATCH_LIMIT),
+      });
+
+      const result = await service.findHistory(123, 2);
+
+      expect(archiveFindById).toHaveBeenCalledTimes(1);
+      expect(result.matches).toHaveLength(RECENT_MATCH_LIMIT);
+      expect(result.nextPage).toBe(1);
+    });
+
+    it('should stop at the first page and clamp a page past the end', async () => {
+      const service = newService();
+      findById.mockResolvedValueOnce({ id: '123', matches: [], archivedPages: 1 });
+      archiveFindById.mockResolvedValueOnce({
+        id: '123_1',
+        matches: matchesOf('p1', RECENT_MATCH_LIMIT),
+      });
+
+      const result = await service.findHistory(123, 9);
+
+      expect(archiveFindById).toHaveBeenCalledWith('123_1');
+      expect(result.nextPage).toBeNull();
+    });
+
+    it('should return nothing for a player without records', async () => {
+      const service = newService();
+      findById.mockResolvedValueOnce(null);
+
+      expect(await service.findHistory(123)).toEqual({ matches: [], nextPage: null });
+    });
   });
 
   it('should reset an over-limit field to 0 and still record the match', async () => {
-    const service = new PlayerStatsRecentService(repository as never);
+    const service = newService();
     findById.mockResolvedValueOnce(null);
 
     await service.record(basePlayer({ totalGoldEarned: 999_999_999 }), baseGameEnd());
@@ -137,7 +265,7 @@ describe('PlayerStatsRecentService', () => {
   });
 
   it('should no-op for bot steamId', async () => {
-    const service = new PlayerStatsRecentService(repository as never);
+    const service = newService();
 
     await service.record(basePlayer({ steamId: 0 }), baseGameEnd());
 
@@ -147,7 +275,7 @@ describe('PlayerStatsRecentService', () => {
   });
 
   it('should skip the match for point-farming game options', async () => {
-    const service = new PlayerStatsRecentService(repository as never);
+    const service = newService();
 
     await service.record(
       basePlayer(),

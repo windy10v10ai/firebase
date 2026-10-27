@@ -15,6 +15,10 @@ bash launcher/macos/build.sh
 
 `test.sh` 单独启用测试构建，正常应用不编入测试源码和真实房间诊断命令。离线 self-test 使用动态端口，不启动 Steam、游戏或真实房间。`--live-test`、`--transport-test`、`--join-room-test` 会访问真实服务，`--enter-client` 会启动或连接游戏，不属于离线校验。
 
+## 按需界面截图
+
+通过 **Launcher Mac UI previews** 选择场景和语言，可从开发电脑触发远端 Mac 原生界面截图，再由 AI 下载审图。常规 CI 执行构建和离线测试。使用入口、产物下载、验证范围和本机命令见 [界面验证](../../docs/launcher/ui-verification.md)。
+
 ## 尚需实机验收
 
 - Steam 冷启动、客户端复用，以及游戏结束后不退出 Dota 再从游廊开局的 VAC 验证。
@@ -23,3 +27,7 @@ bash launcher/macos/build.sh
 - 当前 Windows 功能和三语界面的完整对齐。
 
 原作者的历史测试记录见 [#1572](https://github.com/windy10v10ai/firebase/pull/1572)，不代表当前版本通过实机验收。官网下载页面修改与正式发版由 [#1599](https://github.com/windy10v10ai/firebase/issues/1599) 跟踪。架构见 [Mac 平台说明](../../docs/launcher/macos.md)，贡献来源见 [UPSTREAM.md](UPSTREAM.md)。
+
+## 安装方式
+
+首次安装用 DMG：窗口左边是应用，右边是「应用程序」，中间的箭头指向右边，背景用启动器的配色，玩家拖进去即可。窗口布局在 `dmg-settings.py`，背景图由 `Native/make-dmg-background.swift` 生成，改完用 `tiffutil -cathidpicheck` 合成 `Native/dmg-background.tiff`。应用不会从「下载」「文稿」这类受保护文件夹里运行。应用内不做「移到应用程序」提示：从受保护文件夹运行会触发系统的文件夹访问询问，提示弹窗解决不了。ZIP 只用于应用内更新，替换整个 `.app`。暂不做 Developer ID 签名与公证，玩家首次打开要在系统设置里放行。

@@ -3,6 +3,6 @@ namespace Windy10v10AI.Launcher
     // Shared by every platform build so a release carries one version number everywhere
     static class LauncherVersion
     {
-        public const string Current = "0.6.3";
+        public const string Current = "0.7.2";
     }
 }

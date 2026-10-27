@@ -1,4 +1,4 @@
-# windy10v10ai-cloud
+# windy10v10ai-firebase
 
 [English](../README.md) | 简体中文
 

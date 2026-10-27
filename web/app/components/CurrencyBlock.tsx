@@ -1,4 +1,5 @@
 import Skeleton from '@/app/components/ui/skeleton';
+import { levelProgress } from '@/app/lib/level-progress';
 
 import type { useTranslations } from 'next-intl';
 
@@ -44,13 +45,7 @@ export default function CurrencyBlock({
   values,
   detailed = true,
 }: CurrencyBlockProps) {
-  // 满级或数据异常时不强行显示负数进度
-  const progress = !values
-    ? 0
-    : values.nextLevelPoint > 0
-      ? Math.min(100, Math.max(0, (values.currentLevelPoint / values.nextLevelPoint) * 100))
-      : 100;
-  const remaining = values ? Math.max(0, values.nextLevelPoint - values.currentLevelPoint) : 0;
+  const { progress, remaining } = levelProgress(values);
   const cumulativeText = t('cumulative', { total: (values?.pointTotal ?? 0).toLocaleString() });
   const remainingText = t('remainingToLevel', {
     level: (values?.level ?? 0) + 1,

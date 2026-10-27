@@ -195,6 +195,8 @@ namespace Windy10v10AI.Launcher
         public static string RouteDirect { get { return Pick("直连", "Direct", "Напрямую"); } }
         public static string RouteRelay { get { return Pick("中转", "Relay", "Через сервер"); } }
         public static string RouteQuality { get { return Pick("{0} · {1} ms · 丢包 {2}%", "{0} · {1} ms · {2}% loss", "{0} · {1} мс · потери {2}%"); } }
+        // Down is what reaches this player, matching the incoming loss Dota shows; up is what this player sends
+        public static string RouteQualitySplit { get { return Pick("{0} · {1} ms · 丢包 ↓{2}% ↑{3}%", "{0} · {1} ms · loss ↓{2}% ↑{3}%", "{0} · {1} мс · потери ↓{2}% ↑{3}%"); } }
         public static string LeaveRoom { get { return Pick("离开房间", "Leave room", "Покинуть комнату"); } }
         public static string HostGuide { get { return Pick("等待玩家加入后，从 Dota 2 里点「锁定并开始」", "Once players join, start the game in Dota 2.", "Когда игроки зайдут, начните игру в Dota 2."); } }
         public static string SavingResults { get { return Pick("游戏已结束，正在保存结果", "Game over. Saving the results...", "Игра окончена. Сохраняем результаты…"); } }

@@ -20,7 +20,10 @@ import { Public } from '../util/auth/public.decorator';
 import { ConductPlayerDto } from './dto/conduct-player.dto';
 import { PlayerRankDto, PlayerRankingDto } from './dto/player-ranking.dto';
 import { PlayerStatsRadarResponse } from './dto/player-stats-radar.response';
-import { PlayerStatsRecentResponse } from './dto/player-stats-recent.response';
+import {
+  PlayerStatsHistoryResponse,
+  PlayerStatsRecentResponse,
+} from './dto/player-stats-recent.response';
 import { UpdatePlayerGamePresetDto } from './dto/update-player-game-preset.dto';
 import { UpdatePlayerSettingDto } from './dto/update-player-setting.dto';
 import { UpdateProfileVisibilityDto } from './dto/update-profile-visibility.dto';
@@ -76,7 +79,22 @@ export class PlayerController {
     const stats = await this.playerStatsRecentService.findBySteamId(steamId);
     // Firestore 只能整份取，limit 省的是这一跳到浏览器的字节
     const take = Math.min(Math.max(limit, 1), RECENT_MATCH_LIMIT);
-    return { matches: (stats?.matches ?? []).slice(0, take) };
+    const matches = stats?.matches ?? [];
+    return {
+      matches: matches.slice(0, take),
+      hasMore: matches.length > RECENT_MATCH_LIMIT || (stats?.archivedPages ?? 0) > 0,
+    };
+  }
+
+  @AllowWeb()
+  @AllowViewOthers()
+  @Get(':steamId/stats/history')
+  @ApiOperation({ summary: 'Get matches older than the recent ones, one page at a time' })
+  async getStatsHistory(
+    @Param('steamId', ParseIntPipe) steamId: number,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+  ): Promise<PlayerStatsHistoryResponse> {
+    return await this.playerStatsRecentService.findHistory(steamId, page);
   }
 
   // 游戏服务端读取，启动器开的本地主机局也要能取到

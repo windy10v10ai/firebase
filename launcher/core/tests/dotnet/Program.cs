@@ -9,10 +9,12 @@ namespace Windy10v10AI.Launcher.Tests
             try
             {
                 RelayTests.RunAll();
+                RouteSwitchTests.RunAll();
                 LocalGateTests.RunAll();
                 TunnelPortTests.RunAll();
                 SessionLifecycleTests.RunAll();
                 HostRoomSessionTests.RunAll();
+                FeedbackLogTests.RunAll();
                 return 0;
             }
             catch (Exception error)
