@@ -110,7 +110,7 @@ Steam 这边必须守住的规矩：
 | 表 | 一行是什么 | 分区 / 聚类 |
 |---|---|---|
 | `game_end_players` | 一次结算里的一个玩家，电脑也写（`steam_id` 为 0） | `ended_at` 按天 / `steam_id`、`difficulty`、`hero_name` |
-| `game_end_players_audit` | 一个玩家的一次异常或拒绝结算判断 | `evaluated_at` 按天 / `steam_id`、`server_type` |
+| `game_end_players_audit` | 一个玩家的一次异常、拒绝或扣行为分的结算判断 | `evaluated_at` 按天 / `steam_id`、`server_type` |
 | `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
 | `member_history` | 一次开通或续费会员，写入前后的等级与到期日都留下 | `created_at` 按天 / `steam_id` |
 | `launcher_room_events` | 启动器联机的一次开房或一次加入的连接结果，用来看打洞失败率 | `event_time` 按天 / `event` |
