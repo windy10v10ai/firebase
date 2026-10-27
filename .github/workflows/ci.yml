@@ -32,6 +32,7 @@ jobs:
           api=false
           web=false
           launcher=false
+          skills=false
 
           while IFS= read -r file; do
             case "$file" in
@@ -48,10 +49,15 @@ jobs:
                 api=true
                 web=true
                 launcher=true
+                skills=true
+                ;;
+              .claude/skills/*|scripts/*agent-skills*)
+                skills=true
                 ;;
               .nvmrc|.prettierrc|firebase.json|package.json|package-lock.json)
                 api=true
                 web=true
+                skills=true
                 ;;
             esac
           done < <(git diff --name-only --no-renames "$BASE_SHA...$HEAD_SHA")
@@ -59,6 +65,11 @@ jobs:
           echo "api=$api" >> "$GITHUB_OUTPUT"
           echo "web=$web" >> "$GITHUB_OUTPUT"
           echo "launcher=$launcher" >> "$GITHUB_OUTPUT"
+          echo "skills=$skills" >> "$GITHUB_OUTPUT"
+
+      - name: Validate skill frontmatter
+        if: steps.filter.outputs.skills == 'true'
+        run: npm run skills:check
 
   api-quality:
     needs: changes

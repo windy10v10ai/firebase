@@ -111,6 +111,8 @@ export function buildConnectionQualityRow(
     ping_lost: quality.lost,
     rtt_p50_ms: quality.rttP50 ?? null,
     rtt_p95_ms: quality.rttP95 ?? null,
+    data_loss_down_pct: quality.dataLossDownPct ?? null,
+    data_loss_up_pct: quality.dataLossUpPct ?? null,
     launcher_version: join.launcherVersion,
     country: join.country ?? null,
     steam_id: join.steamId,

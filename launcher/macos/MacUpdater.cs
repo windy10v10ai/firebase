@@ -19,9 +19,23 @@ namespace Windy10v10AI.Launcher
         [DllImport("libSystem.B.dylib")]
         static extern int getppid();
 
+        // 本地联调时指向本机的 API，只走这一条线路
+        static string LocalApi()
+        {
+            var local = Environment.GetEnvironmentVariable("WINDY_API");
+            return string.IsNullOrEmpty(local) ? null : local.TrimEnd('/') + "/api/launcher/";
+        }
+
+        internal static string[] Routes(string first)
+        {
+            var local = LocalApi();
+            if (local != null) return new[] { local };
+            return new[] { first, first == LauncherApi.Direct ? LauncherApi.Relay : LauncherApi.Direct };
+        }
+
         public static MacRelease FindNewer()
         {
-            foreach (var api in new[] { LauncherApi.Direct, LauncherApi.Relay })
+            foreach (var api in Routes(LauncherApi.Direct))
             {
                 try
                 {
@@ -61,7 +75,7 @@ namespace Windy10v10AI.Launcher
             {
                 var zip = Path.Combine(stage, "update.zip");
                 byte[] bytes = null;
-                foreach (var api in new[] { release.Api, release.Api == LauncherApi.Direct ? LauncherApi.Relay : LauncherApi.Direct })
+                foreach (var api in Routes(release.Api))
                 {
                     try
                     {

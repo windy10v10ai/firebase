@@ -1,6 +1,6 @@
 # 启动器联机 阶段 6：加入后实测选线与显示线路质量
 
-> 状态：已完成，随启动器 0.5.4 发布，对应 #1425。长期说明见 [启动器联机](../../../launcher/README.md#联机)，`route_checked` 事件见 [docs/api/README.md](../../api/README.md) 的 `launcher_room_events` 字段。
+> 状态：已完成，随启动器 0.5.4 发布，对应 #1425。游戏中换路见[阶段 8](phase-8-in-game-route-switch.md)。长期说明见 [启动器联机](../../../launcher/README.md#联机)，`route_checked` 事件见 [docs/api/README.md](../../api/README.md) 的 `launcher_room_events` 字段。
 
 加入时按「局域网 > 打洞 > 中转」取第一条连通的路，打洞能通就一直走打洞，哪怕整局都在丢包；玩家也看不到自己走哪条路。线上数据显示：直连丢包集中在约 14% 的加入，这些加入开局就差、整局都差，集中在晚高峰，换成中转多数能解决。
 

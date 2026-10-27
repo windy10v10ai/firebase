@@ -341,3 +341,20 @@ export function heroLevelForCell(def: PropertyDef, cell: number): number {
   const per = HERO_LEVEL_PER_STEP[def.group];
   return per === 0 ? 1 : cell * per;
 }
+
+/**
+ * 点进度条第 cell 格时应暂存几档，再点一次已选中的那一格取消选择。
+ * freePoints 是扣掉全部暂存档数之后剩下的属性点，结果不会超过它能负担的档数。
+ */
+export function stepsForCell(
+  def: PropertyDef,
+  level: number,
+  stagedSteps: number,
+  cell: number,
+  freePoints: number,
+): number {
+  const wanted = Math.ceil((cell * levelsPerCell(def) - level) / def.levelPerStep);
+  const steps = wanted === stagedSteps ? 0 : wanted;
+  const affordable = Math.floor((freePoints + stagedSteps * def.levelPerStep) / def.levelPerStep);
+  return Math.max(0, Math.min(steps, affordable));
+}

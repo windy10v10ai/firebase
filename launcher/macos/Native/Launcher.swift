@@ -36,6 +36,9 @@ private enum Theme {
     static let accent = color(0xe0552d)
     static let text = color(0xeee7e0)
     static let muted = color(0xaca198)
+    static let faint = color(0x7f756d)
+    static let ok = color(0x3fb67a)
+    static let warning = color(0xe5a93a)
 }
 
 private final class AvatarStrip: NSView {
@@ -52,9 +55,10 @@ private final class AvatarStrip: NSView {
     }
 }
 
-final class LatencyView: NSView {
+final class LatencyView: NSView, NSViewToolTipOwner {
     let latency: Int
     let unreachable: Bool
+    var tip: String?
     init(latency: Int, unreachable: Bool) {
         self.latency = latency; self.unreachable = unreachable
         super.init(frame: .zero)
@@ -62,6 +66,13 @@ final class LatencyView: NSView {
         heightAnchor.constraint(equalToConstant: 24).isActive = true
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    // 视图尺寸由自动布局在之后才定下来，提示区域要跟着布局重设，否则悬停没有反应
+    override func layout() {
+        super.layout()
+        removeAllToolTips()
+        if tip != nil { addToolTip(bounds, owner: self, userData: nil) }
+    }
+    func view(_ view: NSView, stringForToolTip tag: NSView.ToolTipTag, point: NSPoint, userData data: UnsafeMutableRawPointer?) -> String { tip ?? "" }
     override func draw(_ dirtyRect: NSRect) {
         let lit = latency < 0 ? 0 : (latency < 60 ? 3 : (latency <= 120 ? 2 : 1))
         let color = Theme.color(latency < 60 ? 0x3fb67a : (latency <= 120 ? 0xe5a93a : 0xe5484d))
@@ -268,7 +279,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     let roomCode = NSTextField()
     let roomLabel = NSTextField(labelWithString: "")
     let status = NSTextField(wrappingLabelWithString: text("Idle"))
-    let route = NSTextField(wrappingLabelWithString: "")
+    let route = NSTextField(labelWithString: "")
+    let routeDot = NSTextField(labelWithString: "●")
     let hint = NSTextField(wrappingLabelWithString: "")
     let mapLabel = NSTextField(wrappingLabelWithString: text("MapChecking"))
     let notice = NSTextField(wrappingLabelWithString: "")
@@ -371,7 +383,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         NSApp.setActivationPolicy(.regular); NSApp.appearance = NSAppearance(named: .darkAqua)
         if let url = Bundle.main.url(forResource: "Launcher", withExtension: "icns") { NSApp.applicationIconImage = NSImage(contentsOf: url) }
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 480), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-        window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
+        window.isReleasedWhenClosed = false; window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
         let content = window.contentView!
         content.wantsLayer = true; content.layer?.backgroundColor = Theme.background.cgColor
         let banner = Banner(); banner.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(banner)
@@ -447,10 +459,18 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         gameActions = stack([roomLabel, copyCode, enter, spacer(), stop], horizontal: true, spacing: 8); body.addArrangedSubview(gameActions)
         status.font = .systemFont(ofSize: 12); status.textColor = Theme.muted; status.maximumNumberOfLines = 3
         progress.style = .spinning; progress.controlSize = .small; progress.isDisplayedWhenStopped = false
-        statusLine = stack([progress, status], horizontal: true, spacing: 4); body.addArrangedSubview(statusLine)
-        route.font = .systemFont(ofSize: 11); route.textColor = Theme.muted; body.addArrangedSubview(route)
-        hint.font = .systemFont(ofSize: 12); hint.textColor = Theme.text; hint.maximumNumberOfLines = 3; body.addArrangedSubview(hint)
+        route.font = .systemFont(ofSize: 11); route.textColor = Theme.muted; routeDot.font = .systemFont(ofSize: 9)
+        // The route sits at the end of the status line as on Windows, and the status wraps before the route is cut
+        status.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        status.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        for view in [routeDot, route] {
+            view.setContentHuggingPriority(.required, for: .horizontal)
+            view.setContentCompressionResistancePriority(.required, for: .horizontal)
+        }
+        statusLine = stack([progress, status, routeDot, route], horizontal: true, spacing: 4); body.addArrangedSubview(statusLine)
+        statusLine.setCustomSpacing(8, after: status); statusLine.setCustomSpacing(2, after: routeDot)
         body.addArrangedSubview(autoEnter)
+        hint.font = .systemFont(ofSize: 12); hint.textColor = Theme.text; hint.maximumNumberOfLines = 3; body.addArrangedSubview(hint)
         action(reopen, #selector(reopenRoom)); body.addArrangedSubview(reopen)
         notice.font = .systemFont(ofSize: 12); notice.maximumNumberOfLines = 3
         action(download, #selector(openDownload)); action(installUpdate, #selector(updateLauncher)); installUpdate.primary = true
@@ -571,10 +591,15 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             status.textColor = state == "error" ? .systemRed : Theme.text
             append(status.stringValue); refreshControls()
             if !active && previous != state {
-                route.stringValue = ""; route.isHidden = true
+                route.stringValue = ""; route.isHidden = true; routeDot.isHidden = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in self?.inspect(); self?.updateBrowsing() }
             }
-        case "route": route.stringValue = event["message"] as? String ?? ""; refreshControls()
+        case "route":
+            route.stringValue = event["message"] as? String ?? ""
+            let level = event["level"] as? String ?? "ok"
+            route.textColor = level == "warn" ? Theme.warning : Theme.muted
+            routeDot.textColor = level == "warn" ? Theme.warning : (level == "checking" ? Theme.faint : Theme.ok)
+            refreshControls()
         case "message":
             let value = event["message"] as? String ?? ""
             if event["level"] as? String == "error" { feedbackSend?.isEnabled = true; showError(value) } else { append(value) }
@@ -611,7 +636,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             let available = event["available"] as? Bool == true
             notice.stringValue = available ? text("UpdateAvailable", event["version"] as? String ?? "") : ""
             releaseAvailable = available; refreshControls()
-        case "update-ready": state = "idle"; NSApp.terminate(nil)
+        case "update-ready":
+            // 退出要等引擎进程结束的通知，该通知排在主队列里；在当前主队列任务内直接退出会互相等死，所以交给运行循环的定时器
+            state = "idle"; Timer.scheduledTimer(withTimeInterval: 0, repeats: false) { _ in NSApp.terminate(nil) }
         case "feedback":
             feedbackSend?.isEnabled = true
             if event["success"] as? Bool == true { feedbackWindow?.close(); showMessage(text("FeedbackThanks")) }
@@ -634,6 +661,13 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         return alert.runModal() == .alertFirstButtonReturn
     }
     func refreshControls() {
+        let joinedRoom = active && sessionRole == "join" && !code.isEmpty
+        let actionAnchor: NSView = joinedRoom ? autoEnter : codeLine
+        if let actionIndex = body.arrangedSubviews.firstIndex(of: gameActions),
+           let anchorIndex = body.arrangedSubviews.firstIndex(of: actionAnchor), actionIndex != anchorIndex + 1 {
+            body.removeArrangedSubview(gameActions)
+            if let index = body.arrangedSubviews.firstIndex(of: actionAnchor) { body.insertArrangedSubview(gameActions, at: index + 1) }
+        }
         let blockedByMap = !active && (["missing", "unknown"].contains(mapState) || (mapState == "outdated" && page != "solo"))
         roomSettings.isHidden = page != "host" || blockedByMap
         mapCard.isHidden = !blockedByMap && !(mapState == "outdated" && !active)
@@ -642,16 +676,17 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         difficultyRow.isHidden = blockedByMap || page == "join" || (active && state != "ended")
         for difficulty in difficulties { difficulty.isEnabled = backendAvailable && (!active || state == "ended") }
         autoStart.isHidden = page != "host" || active || blockedByMap
-        autoEnter.isHidden = sessionRole != "join" || state != "ended"
+        autoEnter.isHidden = !joinedRoom
         browser.isHidden = !browsing || blockedByMap; joinLine.isHidden = !browsing || away || blockedByMap
         roster.isHidden = !active || away || sessionRole == "solo" || state == "updating"
         playerCount.stringValue = sessionRole == "host" ? "\(playerRows.count) / \(count.indexOfSelectedItem + 2)" : "\(playerRows.count)"
-        codeLine.isHidden = code.isEmpty || away || sessionRole == "solo"
-        roomLabel.stringValue = code; roomLabel.isHidden = codeLine.isHidden
+        let showRoomCode = !code.isEmpty && !away && sessionRole != "solo"
+        codeLine.isHidden = !showRoomCode || joinedRoom
+        roomLabel.stringValue = code; roomLabel.isHidden = !showRoomCode
         gameActions.isHidden = !active || away || ["updating", "updating-launcher"].contains(state)
         enter.isEnabled = backendAvailable && ["ready", "playing"].contains(state)
         enter.isHidden = !enter.isEnabled || (sessionRole == "host" && state == "playing")
-        copyCode.isHidden = codeLine.isHidden
+        copyCode.isHidden = !showRoomCode
         stop.isEnabled = backendAvailable && state != "stopping"
         stop.title = sessionRole == "join" ? text("LeaveRoom") : (sessionRole == "solo" ? text("StopServer") : (busy ? text("Cancel") : text("CloseRoom")))
         pages.isEnabled = backendAvailable && (!active || sessionRole == "host")
@@ -676,6 +711,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host")
         statusLine.isHidden = browsing || !hostGuide.isHidden || blockedByMap || releaseAvailable
         route.isHidden = route.stringValue.isEmpty || away
+        routeDot.isHidden = route.isHidden
         let showUpdate = releaseAvailable && !active && !blockedByMap
         updateNotice.isHidden = !showUpdate
         if active { statusLine.isHidden = away }
@@ -863,7 +899,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
                     spinner.startAnimation(nil); ping = stack([spinner], horizontal: true)
                     ping.widthAnchor.constraint(equalToConstant: 40).isActive = true
                 } else { ping = LatencyView(latency: latency, unreachable: probe == 3) }
-                ping.toolTip = probe == 2 ? text("ProbeLatency", String(rtt)) : (probe == 3 && relay >= 0 ? text("ProbeRelayLatency", String(relay)) : (probe == 1 ? text("ProbeTesting") : nil))
+                let tip = probe == 2 ? text("ProbeLatency", String(rtt)) : (probe == 3 && relay >= 0 ? text("ProbeRelayLatency", String(relay)) : (probe == 1 ? text("ProbeTesting") : nil))
+                if let view = ping as? LatencyView { view.tip = tip } else { ping.toolTip = tip }
                 let full = (item["playerCount"] as? Int ?? 0) >= (item["maxPlayers"] as? Int ?? 10)
                 let action = button(text(full ? "Full" : "Join"), #selector(joinFromRow(_:))); action.tag = row; action.primary = true
                 action.widthAnchor.constraint(equalToConstant: 62).isActive = true
@@ -1042,6 +1079,18 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             let mode = option("--preview-state")!; let role = mode == "ended" ? "host" : mode; pages.selectedSegment = role == "host" ? 1 : 2
             handle(["type": "state", "role": role, "state": mode == "ended" ? "ended" : "ready", "code": "Z82QCT", "message": text(mode == "ended" ? "GameEnded" : "HostGuide")])
             handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
+        case "join-checking", "join-waiting", "join-ready", "join-playing", "join-ended", "join-error", "join-left":
+            pages.selectedSegment = 2
+            let state = String(option("--preview-state")!.dropFirst(5))
+            let nextState = state == "left" ? "idle" : state
+            let message = ["checking": "Starting", "waiting": "StatusWaiting", "ready": "EnterGame", "playing": "EnterGame", "ended": "GameEnded", "error": "BackendExited", "idle": "JoinGuide"][nextState] ?? "JoinGuide"
+            handle(["type": "state", "role": "join", "state": nextState, "code": ["idle", "error"].contains(nextState) ? "" : "Z82QCT", "message": text(message)])
+            if active {
+                handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
+                // A playing joiner shows the lossy route the warning colour is for
+                let lossy = nextState == "playing"
+                handle(["type": "route", "message": text("RouteQualitySplit", text(lossy ? "RouteDirect" : "RouteRelay"), lossy ? "32" : "30", lossy ? "38" : "0", "0"), "level": lossy ? "warn" : "ok"])
+            }
         case "rooms":
             pages.selectedSegment = 2
             handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32, "probe": 2, "latency": 32, "kind": 0, "avatars": [["name": "Windy"], ["name": "Player"]]], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "kind": 1, "minutes": 24, "avatars": [["name": "Player"], ["name": "Windy"]]]]])
@@ -1052,6 +1101,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         case "update": handle(["type": "release", "available": true, "version": "1.0.0"])
         default: break
         }
+        if option("--preview-auto-enter") == "off" { autoEnter.state = .off }
+        if option("--preview-auto-start") == "off" { autoStart.state = .off }
         refreshControls()
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }

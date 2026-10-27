@@ -1,4 +1,4 @@
-# windy10v10ai-cloud
+# windy10v10ai-firebase
 
 English | [简体中文](docs/README_ZH.md)
 
@@ -24,6 +24,7 @@ distribution exception and notes on prior MIT releases in
 - [Built With](#built-with)
 - [Get Start](#get-start)
   - [Installation](#installation)
+  - [Agent skills](#agent-skills)
   - [Running the app](#running-the-app)
   - [Local end points](#local-end-points)
 - [Maintenance](#maintenance)
@@ -75,6 +76,10 @@ firebase use windy10v10ai
 # setup package
 npm install
 ```
+
+### Agent skills
+
+Task instructions for AI agents live in [`.claude/skills`](.claude/skills). Claude Code reads them directly; Codex and DSH read project skills from `.agents/skills`, so run `npm run skills:link` once per checkout to create that link (a junction on Windows, a symlink elsewhere — it is not committed). `npm run skills:check` validates skill frontmatter.
 
 ### Set GCP
 

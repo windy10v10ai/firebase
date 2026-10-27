@@ -5,12 +5,15 @@ import { logger } from 'firebase-functions/v2';
 
 import { LauncherReleaseDto } from './dto/launcher-release.dto';
 
-// 发布新版启动器时与 web 的 LAUNCHER_VERSION 一起改，哈希取自 web/public/downloads 下的 exe
+// 发布新版启动器时与 web 的 LAUNCHER_VERSION、LAUNCHER_MAC_VERSION 一起改，哈希取自 web/public/downloads 下的 exe 与 ZIP
 export const LAUNCHER_RELEASE: LauncherReleaseDto = {
-  version: '0.6.2',
-  sha256: 'f61fbae494bade65dd56859d85337791350def72586e7f18c52352538ea37951',
+  version: '0.7.1',
+  sha256: 'f41bacab3052f0867fb6e98203b3bba12e839fc5cbb806308feb343ee1571c46',
 };
-export const LAUNCHER_MAC_RELEASE: LauncherReleaseDto | undefined = undefined;
+export const LAUNCHER_MAC_RELEASE: LauncherReleaseDto | undefined = {
+  version: '0.7.1',
+  sha256: '258baf4dc5f2cb13457d120fc69a81da97026ec1d3c973cb55b0d176e18645cd',
+};
 export const LAUNCHER_VERSION_CACHE_SECONDS = 3600;
 
 const DOWNLOAD_ORIGIN = 'https://windy10v10ai.com';
@@ -29,6 +32,13 @@ export class LauncherReleaseService {
   /** 取最新版启动器的 exe，取不到或内容与发布哈希不符时返回 undefined */
   async getExe(): Promise<Buffer | undefined> {
     return this.getPackage('windows');
+  }
+
+  /** 安装包太大、不能由本服务转发的平台，返回官网上的下载地址。 */
+  getDownloadUrl(platform: string): string | undefined {
+    const release = this.getRelease(platform);
+    if (!release || platform !== 'macos') return undefined;
+    return `${DOWNLOAD_ORIGIN}/downloads/Windy10v10AI-${release.version}-macos-arm64.zip`;
   }
 
   /** 读取已发布的平台安装包并校验哈希，失败时不缓存。 */

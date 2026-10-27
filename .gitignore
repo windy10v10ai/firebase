@@ -139,3 +139,6 @@ docs/superpowers/
 
 # 本地联调用的第三方测试密钥（api/.secret.local）
 .secret.local
+
+# Agent skill link created by `npm run skills:link`
+/.agents/
