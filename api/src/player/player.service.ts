@@ -82,7 +82,7 @@ export class PlayerService {
     if (isDisconnect) {
       player.disconnectCount++;
     }
-    // 行为分被冒用会害到别人，只有可信来源才计算
+    // 是否计算由调用方按单人局、每日扣分上限判定
     if (calculateConductPoint) {
       player.conductPoint = this.playerConductService.calculateGameEndConductPoint(
         player.conductPoint ?? 100,

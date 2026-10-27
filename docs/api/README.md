@@ -61,7 +61,7 @@ Steam 这边必须守住的规矩：
 
 ### 游戏结算与本地主机来源的限额
 
-打包进地图的本地 key 一解包就泄露，后端不能相信它带来的 steamId。结算的单局上限、冷却和每日额度按账户跨所有游戏服务器与入口共用，避免切换来源绕过限制。会员积分消耗仍仅对 `LOCAL` 来源限额，订单次数沿用网站与本地共用的规则。计数存在 `LocalRateLimit`（文档 id 就是 steamId），判定与取值都在 `LocalHostService`。
+本地主机来源的请求不可信，后端不能直接相信它带来的 steamId。结算的单局上限、冷却和每日额度按账户跨所有游戏服务器与入口共用，避免切换来源绕过限制。会员积分消耗仍仅对 `LOCAL` 来源限额，订单次数沿用网站与本地共用的规则。计数存在 `LocalRateLimit`（文档 id 就是 steamId），判定与取值都在 `LocalHostService`。
 
 | 限额 | 超出时 |
 |---|---|
@@ -75,6 +75,7 @@ Steam 这边必须守住的规矩：
 - **三个当日计数共用一个 `dailyDate`**，日期对不上时必须一起归零，写回统一走 `LocalHostService` 里唯一那个写入口：只更新自己那一个再把日期推到今天，会把另外两个昨天的数字算成今天的
 - **检查与记账是分开的两次读写，不上事务**：并发下同一个 steamId 最多多放一笔，代价以单笔上限封顶
 - **只按 steamId 限，不按 IP**：Cloud Functions 侧拿不到可信的客户端 IP。代价是泄露的 key 可以拿别人的 steamId 把对方当天的额度刷满
+- **逃跑扣行为分每人每天只扣一次**：限制单日扣分幅度；扣分记进结算审计（`conduct_penalty`），便于事后核查与回滚。单人局不计算行为分
 - **本地来源的积分消耗与限额拒绝各记一行日志**：只读接口与个人设置不记，记了也查不出冒用
 
 ### 代理路由 `/api/proxy/*`
@@ -109,7 +110,7 @@ Steam 这边必须守住的规矩：
 | 表 | 一行是什么 | 分区 / 聚类 |
 |---|---|---|
 | `game_end_players` | 一次结算里的一个玩家，电脑也写（`steam_id` 为 0） | `ended_at` 按天 / `steam_id`、`difficulty`、`hero_name` |
-| `game_end_players_audit` | 一个玩家的一次异常或拒绝结算判断 | `evaluated_at` 按天 / `steam_id`、`server_type` |
+| `game_end_players_audit` | 一个玩家的一次异常、拒绝或扣行为分的结算判断 | `evaluated_at` 按天 / `steam_id`、`server_type` |
 | `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
 | `member_history` | 一次开通或续费会员，写入前后的等级与到期日都留下 | `created_at` 按天 / `steam_id` |
 | `launcher_room_events` | 启动器联机的一次开房或一次加入的连接结果，用来看打洞失败率 | `event_time` 按天 / `event` |
