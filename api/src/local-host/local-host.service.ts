@@ -40,7 +40,7 @@ interface PlayerCheck {
   today: Date;
 }
 
-// 本地 key 能伪造别人逃跑，每天只扣一次，把冒用造成的损失封顶
+// 每人每天只扣一次，限制单日扣分幅度
 function isConductPenaltyAllowed(check: PlayerCheck, gameEnd: GameEndDto): boolean {
   return (
     check.player.isDisconnected &&
