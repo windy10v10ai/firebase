@@ -25,6 +25,7 @@ namespace Windy10v10AI.Launcher.Tests
                 SessionLifecycleTests.RunAll();
                 HostRoomSessionTests.RunAll();
                 CorruptFilesTests.RunAll();
+                FeedbackLogTests.RunAll();
                 return 0;
             }
             catch (Exception error)
