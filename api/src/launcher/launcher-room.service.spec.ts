@@ -337,7 +337,13 @@ describe('LauncherRoomService', () => {
     });
 
     expect(withoutRelay.routeCheck).toBeUndefined();
-    expect(joined.routeCheck).toEqual({ lossCostMs: 10, switchMarginMs: 30 });
+    expect(joined.routeCheck).toEqual({
+      lossCostMs: 10,
+      switchMarginMs: 30,
+      badLossPct: 10,
+      badSeconds: 6,
+      windowSeconds: 10,
+    });
     expect(bigQuery.recordRouteChecks).toHaveBeenCalledWith(
       expect.objectContaining({ id: room.code }),
       [

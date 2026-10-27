@@ -5,71 +5,64 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import CheckInRow from '@/app/components/CheckInRow';
+import CheckInRow, { hasCheckIn } from '@/app/components/CheckInRow';
 import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
-import Skeleton from '@/app/components/ui/skeleton';
-import { memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
+import { memberStatusKey } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 import { applyPlayerWrite, playerInfoQuery } from '@/app/lib/queries';
 import { useSteamProfile } from '@/app/lib/use-steam-profile';
 
-function StatRow({
-  label,
-  value,
-  className,
-}: {
-  label: string;
-  value: string | null;
-  className: string;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-line py-2">
-      <dt className="text-sm text-muted">{label}</dt>
-      <dd className={`font-medium ${className}`}>{value ?? <Skeleton />}</dd>
-    </div>
-  );
-}
+import LevelTile from './LevelTile';
 
+/** 首屏右侧面板（已登录）：身份、两套等级与积分、签到 */
 export default function PlayerSummary({ uid }: { uid: string }) {
   const t = useTranslations('home.summary');
   const queryClient = useQueryClient();
   const infoQuery = useQuery(playerInfoQuery(uid));
   const info = infoQuery.data ?? null;
-  // 网格始终占位，失败时数值显示为横线，卡片高度不随请求结果变化
+  // 面板结构始终不变，失败时数值显示为横线，高度不随请求结果变化
   const failed = !info && infoQuery.isError;
   const profile = useSteamProfile(uid);
 
   const member = info?.member;
   const status = memberStatusKey(member);
-  const pending = !info && !failed;
-  const valueOf = (read: (loaded: PlayerInfo) => number) =>
-    info ? read(info).toLocaleString() : failed ? '—' : null;
   const idText = t('heading', { id: uid });
   const personaName = profile?.personaName ?? null;
+  const profilePath = playerPagePath(uid);
+
+  const seasonValues = info
+    ? {
+        level: info.seasonLevel,
+        currentLevelPoint: info.seasonCurrrentLevelPoint,
+        nextLevelPoint: info.seasonNextLevelPoint,
+        usablePoint: info.useableSeasonPoint ?? 0,
+      }
+    : null;
+  const memberValues = info
+    ? {
+        level: info.memberLevel,
+        currentLevelPoint: info.memberCurrentLevelPoint,
+        nextLevelPoint: info.memberNextLevelPoint,
+        usablePoint: info.useableMemberPoint ?? 0,
+      }
+    : null;
 
   return (
-    <section className="card-container card-pad space-y-5">
-      {/* 窄屏把链接文字收成箭头，ID 才放得进一行 */}
-      <div className="flex items-center gap-2">
-        {/* 铺一层透明链接负责整块跳转，复制按钮不能嵌进 <a>，靠 IdWithCopy 的 relative 盖在链接上面接住点击 */}
-        <div className="relative flex min-w-0 flex-1 items-center gap-4">
-          <Link
-            href={playerPagePath(uid)}
-            className="absolute inset-0 rounded-[10px]"
-            aria-hidden="true"
-            tabIndex={-1}
-          />
-          <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-panel-soft">
+    <div className="flex flex-col">
+      <section className="hero-panel card-pad">
+        <div className="flex items-center gap-3.5">
+          <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-hero-panel-border bg-glass md:size-14">
             <PlayerAvatar
               avatarUrl={profile?.avatarUrl}
-              imageClassName="size-14 object-cover"
-              iconClassName="size-7 text-muted"
+              imageClassName="size-12 object-cover md:size-14"
+              iconClassName="size-6 text-muted md:size-7"
               iconStrokeWidth={1.7}
             />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="flex min-w-0 items-center text-2xl font-bold text-heading md:text-[26px]">
+            {/* 昵称来自接口数据，不用标题字体 */}
+            <p className="flex min-w-0 items-center text-xl font-bold text-heading md:text-2xl">
               {personaName ? (
                 <span className="min-w-0 truncate">{personaName}</span>
               ) : (
@@ -81,8 +74,8 @@ export default function PlayerSummary({ uid }: { uid: string }) {
                 />
               )}
             </p>
-            {/* 昵称没取到时标题本身就是 ID，这一行空着；高度照留，写法同 profile 页身份卡 */}
-            <p className="min-h-5 min-w-0 truncate text-sm text-muted">
+            {/* 昵称没取到时标题本身就是 ID，这一行空着；高度按复制按钮留足，昵称晚到也不撑高 */}
+            <p className="min-h-[22px] min-w-0 truncate text-[13px] text-muted">
               {personaName ? (
                 <IdWithCopy
                   id={uid}
@@ -92,60 +85,63 @@ export default function PlayerSummary({ uid }: { uid: string }) {
                 />
               ) : null}
             </p>
-            {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页，同屏不放第三个；没开通过留空，「未开通会员」既没信息也没去处 */}
-            {/* 两行始终占位且不折行，会员信息晚到也不撑高身份行；加载中同样只留白，非会员本来就空着，放骨架会预告不存在的内容 */}
-            <p className="flex flex-col md:flex-row md:items-center md:gap-x-2">
+            {/* 会员状态只做陈述，订阅入口在下面的会员卡和会员页；状态与有效期各占一行、始终占位，会员信息晚到也不撑高身份行，非会员本来就空着，放骨架会预告不存在的内容 */}
+            <p className="flex flex-col">
               {/* 金色代表会员有效，过期了照样上金会让人以为还在生效 */}
               <span
                 className={`min-h-6 truncate ${member?.enable ? 'font-medium text-member-strong' : 'text-muted'}`}
               >
                 {member ? t(`member.${status}`) : null}
               </span>
-              <span className="min-h-5 truncate text-sm text-muted">
+              {/* 只占一行：长语言在窄面板里折行会让面板在数据到达后变高 */}
+              <span className="min-h-5 truncate text-[13px] text-muted">
                 {member ? t('member.expireDate', { date: member.expireDateString ?? '' }) : null}
               </span>
             </p>
           </div>
+          <Link
+            href={profilePath}
+            className="btn-glass hidden h-10 gap-1 px-3.5 text-sm md:inline-flex"
+          >
+            {t('profileLink')}
+            <ChevronRight className="size-4" aria-hidden="true" />
+          </Link>
         </div>
-        <Link
-          href={playerPagePath(uid)}
-          className="inline-flex shrink-0 items-center gap-1 text-sm whitespace-nowrap text-link transition-colors hover:text-link-hover"
-        >
-          <span className="hidden md:inline">{t('profileLink')}</span>
+
+        <div className="grid grid-cols-2 gap-2.5" aria-busy={!info && !failed}>
+          <LevelTile tone="season" label={t('battleLevel')} values={seasonValues} failed={failed} />
+          <LevelTile tone="member" label={t('memberLevel')} values={memberValues} failed={failed} />
+        </div>
+
+        <CheckInRow
+          info={info}
+          steamId={uid}
+          buttonVariant="cta"
+          onClaimed={(player) => {
+            void applyPlayerWrite(queryClient, uid, playerInfoQuery(uid).queryKey, player);
+          }}
+        />
+
+        <Link href={profilePath} className="btn-glass h-11 gap-1 text-sm md:hidden">
+          {t('profileLink')}
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>
-      </div>
-
-      <dl className="grid gap-x-8 md:grid-cols-2" aria-busy={pending}>
-        <StatRow
-          label={t('battleLevel')}
-          value={valueOf((loaded) => loaded.seasonLevel)}
-          className="text-season"
-        />
-        <StatRow
-          label={t('memberLevel')}
-          value={valueOf((loaded) => loaded.memberLevel)}
-          className="text-member"
-        />
-        <StatRow
-          label={t('battlePoint')}
-          value={valueOf((loaded) => loaded.useableSeasonPoint ?? 0)}
-          className="text-season"
-        />
-        <StatRow
-          label={t('memberPoint')}
-          value={valueOf((loaded) => loaded.useableMemberPoint ?? 0)}
-          className="text-member"
-        />
-      </dl>
-
-      <CheckInRow
-        info={info}
-        steamId={uid}
-        onClaimed={(player) => {
-          void applyPlayerWrite(queryClient, uid, playerInfoQuery(uid).queryKey, player);
-        }}
-      />
-    </section>
+      </section>
+      {/* 签到行要等数据、且只有有效会员才有：没有它时在面板下面留出同样高的空白，下方的主要页面就不会随加载结果跳动。边框与内边距照面板写，占位行与真实的签到行同宽、折行一致 */}
+      {hasCheckIn(info) ? null : (
+        <div
+          aria-hidden="true"
+          className="invisible border-x border-transparent px-4 pt-4 md:px-6 lg:px-8 lg:pt-4.5"
+        >
+          <CheckInRow
+            info={null}
+            steamId={uid}
+            onClaimed={() => {}}
+            buttonVariant="cta"
+            placeholder
+          />
+        </div>
+      )}
+    </div>
   );
 }

@@ -12,6 +12,14 @@ namespace Windy10v10AI.Launcher.Tests
             if (MacUpdater.ReadRelease(data, "https://example.invalid/", "9.0.0") != null) throw new Exception("same version offered");
             data["sha256"] = "invalid";
             if (MacUpdater.ReadRelease(data, "https://example.invalid/", "0.6.3") != null) throw new Exception("invalid hash accepted");
+            if (MacUpdater.Routes(LauncherApi.Direct).Length != 2) throw new Exception("Fallback route missing");
+            Environment.SetEnvironmentVariable("WINDY_API", "http://127.0.0.1:3999/");
+            try
+            {
+                var local = MacUpdater.Routes(LauncherApi.Direct);
+                if (local.Length != 1 || local[0] != "http://127.0.0.1:3999/api/launcher/") throw new Exception("Local API override ignored");
+            }
+            finally { Environment.SetEnvironmentVariable("WINDY_API", null); }
             var folder = Path.Combine(Path.GetTempPath(), "windy-service-tests-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(folder);
             try

@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS `${PROJECT_ID}.${DATASET}.launcher_room_events` (
   direct_loss_pct INT64,
   direct_rtt_ms INT64,
   relay_loss_pct INT64,
-  relay_rtt_ms INT64
+  relay_rtt_ms INT64,
+  data_loss_down_pct INT64,
+  data_loss_up_pct INT64
 )
 PARTITION BY DATE(event_time)
 CLUSTER BY event;
@@ -46,4 +48,6 @@ ALTER TABLE `${PROJECT_ID}.${DATASET}.launcher_room_events`
   ADD COLUMN IF NOT EXISTS direct_loss_pct INT64,
   ADD COLUMN IF NOT EXISTS direct_rtt_ms INT64,
   ADD COLUMN IF NOT EXISTS relay_loss_pct INT64,
-  ADD COLUMN IF NOT EXISTS relay_rtt_ms INT64;
+  ADD COLUMN IF NOT EXISTS relay_rtt_ms INT64,
+  ADD COLUMN IF NOT EXISTS data_loss_down_pct INT64,
+  ADD COLUMN IF NOT EXISTS data_loss_up_pct INT64;

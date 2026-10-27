@@ -200,8 +200,8 @@ describe('GameService', () => {
       jest.clearAllMocks();
     });
 
-    it('windy主机 活动期间内 未领取 应发放中秋活动积分', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-09-25T00:00:00.000Z'));
+    it('windy主机 活动期间内 未领取 应发放补偿积分', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-24T12:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
@@ -209,7 +209,7 @@ describe('GameService', () => {
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
         steamId,
         {
-          seasonPointTotal: 5000,
+          seasonPointTotal: 1000,
         },
         { reason: 'event_reward' },
       );
@@ -218,16 +218,16 @@ describe('GameService', () => {
         {
           steamId,
           title: {
-            cn: '中秋国庆快乐',
-            en: 'Mid-Autumn Festival Bonus!',
+            cn: '服务器波动补偿',
+            en: 'Server Fluctuation Compensation',
           },
-          seasonPoint: 5000,
+          seasonPoint: 1000,
         },
       ]);
     });
 
-    it('test主机 活动期间内 未领取 应发放中秋活动积分', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-09-25T00:00:00.000Z'));
+    it('test主机 活动期间内 未领取 应发放补偿积分', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-24T12:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
@@ -235,7 +235,7 @@ describe('GameService', () => {
       expect(playerService.upsertAddPoint).toHaveBeenCalledWith(
         steamId,
         {
-          seasonPointTotal: 5000,
+          seasonPointTotal: 1000,
         },
         { reason: 'event_reward' },
       );
@@ -243,16 +243,16 @@ describe('GameService', () => {
         {
           steamId,
           title: {
-            cn: '中秋国庆快乐',
-            en: 'Mid-Autumn Festival Bonus!',
+            cn: '服务器波动补偿',
+            en: 'Server Fluctuation Compensation',
           },
-          seasonPoint: 5000,
+          seasonPoint: 1000,
         },
       ]);
     });
 
     it('未知来源主机 活动期间内 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-09-25T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-24T12:00:00.000Z'));
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.UNKNOWN);
 
@@ -262,7 +262,7 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间外 不应发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-10-10T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-26T00:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([{ steamId, result: undefined }]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);
@@ -272,9 +272,9 @@ describe('GameService', () => {
     });
 
     it('windy主机 活动期间内 已领取 不应重复发放', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-09-25T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-24T12:00:00.000Z'));
       eventRewardsService.getRewardResults.mockResolvedValue([
-        { steamId, result: { id: steamId.toString(), steamId, midAutumn2026: true } },
+        { steamId, result: { id: steamId.toString(), steamId, compensation20261024: true } },
       ]);
 
       const result = await service.giveEventReward([steamId], SERVER_TYPE.WINDY);

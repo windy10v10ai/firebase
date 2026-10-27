@@ -1,6 +1,6 @@
 name: Launcher release build
 
-# 官网发布的 exe 取自这里的产物，保证它能追溯到仓库里的某次提交
+# 官网发布的安装包取自这里的产物，保证它能追溯到仓库里的某次提交
 on:
   workflow_dispatch:
 
@@ -8,10 +8,12 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: windows-latest
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
     steps:
-      # 功能分支是 squash 合并的，从它编译的 exe 对应的提交不在 develop 历史里，无法追溯
+      # 功能分支是 squash 合并的，从它编译的安装包对应的提交不在 develop 历史里，无法追溯
       - name: Require develop
         if: github.ref != 'refs/heads/develop'
         run: |
@@ -20,18 +22,25 @@ jobs:
 
       - uses: actions/checkout@v7
 
-      # 自我更新只认版本号，同号换 exe 时已更新的玩家收不到，所以不比线上新就不编译
+      # 自我更新只认版本号，同号换安装包时已更新的玩家收不到，所以不比线上新就不编译；
+      # Windows 与 Mac 同次发布同一个版本号，以 Windows 的线上版本为基准
       - name: Require a version newer than live
         id: meta
-        shell: pwsh
         run: |
-          $version = [regex]::Match((Get-Content launcher/core/LauncherVersion.cs -Raw), 'const string Current = "([^"]+)"').Groups[1].Value
-          $live = (Invoke-RestMethod https://api.windy10v10ai.com/api/launcher/version).version
-          if ([version]$version -le [version]$live) {
-            "::error::Launcher version $version is not newer than live $live. Bump Current in launcher/core/LauncherVersion.cs first."
+          version=$(grep -oP 'const string Current = "\K[^"]+' launcher/core/LauncherVersion.cs)
+          live=$(curl -fsS https://api.windy10v10ai.com/api/launcher/version | jq -r .version)
+          newest=$(printf '%s\n%s\n' "$version" "$live" | sort -V | tail -n 1)
+          if [ "$version" = "$live" ] || [ "$newest" != "$version" ]; then
+            echo "::error::Launcher version $version is not newer than live $live. Bump Current in launcher/core/LauncherVersion.cs first."
             exit 1
-          }
-          "version=$version" >> $env:GITHUB_OUTPUT
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: meta
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
 
       - name: Build
         run: launcher\build.cmd
@@ -41,10 +50,63 @@ jobs:
         shell: pwsh
         run: |
           $sha = (Get-FileHash launcher/dist/Windy10v10AI.exe -Algorithm SHA256).Hash.ToLower()
-          "### Windy10v10AI ${{ steps.meta.outputs.version }}`n`nsha256: ``$sha``" >> $env:GITHUB_STEP_SUMMARY
+          "### Windows ${{ needs.meta.outputs.version }}`n`ncommit: ``${{ github.sha }}```nsha256: ``$sha``" >> $env:GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Windy10v10AI-${{ steps.meta.outputs.version }}
+          name: Windy10v10AI-${{ needs.meta.outputs.version }}
           path: launcher/dist/Windy10v10AI.exe
+          if-no-files-found: error
+
+  macos:
+    needs: meta
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        run: bash launcher/macos/build.sh
+
+      # 文件名与 API 下载接口约定的一致，应用内更新按它取包
+      - name: Package
+        env:
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: |
+          mkdir -p launcher/macos/release
+          ditto -c -k --keepParent launcher/macos/dist/Windy10v10AI.app "launcher/macos/release/Windy10v10AI-$VERSION-macos-arm64.zip"
+
+      - name: Verify package
+        id: verify
+        env:
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: bash launcher/macos/verify-package.sh "launcher/macos/release/Windy10v10AI-$VERSION-macos-arm64.zip" "$VERSION" | tee verify.log
+
+      # 首次安装用 DMG 拖进「应用程序」，应用内更新用上面的 ZIP；窗口布局由 dmgbuild 直接写入，不依赖 Finder
+      - name: Install dmgbuild
+        run: pip3 install --break-system-packages dmgbuild==1.6.5
+
+      - name: Make DMG
+        env:
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: bash launcher/macos/make-dmg.sh launcher/macos/dist/Windy10v10AI.app "launcher/macos/release/Windy10v10AI-$VERSION-macos-arm64.dmg" "$VERSION" | tee dmg.log
+
+      - name: Write hash to summary
+        env:
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: |
+          zip_sha=$(sed -n 's/^sha256: //p' verify.log)
+          dmg_sha=$(sed -n 's/^sha256: //p' dmg.log)
+          printf '### macOS %s (arm64)\n\ncommit: `%s`\nzip sha256: `%s`\ndmg sha256: `%s`\n' "$VERSION" "$GITHUB_SHA" "$zip_sha" "$dmg_sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Windy10v10AI-${{ needs.meta.outputs.version }}-macos-arm64
+          path: |
+            launcher/macos/release/*.zip
+            launcher/macos/release/*.dmg
           if-no-files-found: error

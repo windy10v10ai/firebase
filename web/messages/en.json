@@ -33,7 +33,6 @@
   "home": {
     "title": "DOTA2 10v10 AI Custom Map",
     "workshop": {
-      "title": "Steam Workshop",
       "description": "Subscribe to our map on Steam Workshop. Your support drives our continuous updates.",
       "subscribe": "Get the map"
     },
@@ -46,10 +45,9 @@
       "description": "View project source code, changelog, and contribute to the project"
     },
     "intro": {
-      "title": "Sign in to check your own data anytime",
+      "title": "Sign in to see your own data",
       "description": "Sign in with Steam to see your match record, Battle Points and Member Points, and to spend attribute points, reset them and awaken heroes.",
-      "privacy": "You type your password on Steam's own site; we only receive your Steam ID.",
-      "upcoming": ["More statistics"]
+      "privacy": "You type your password on Steam's own site; we only receive your Steam ID."
     },
     "summary": {
       "profileLink": "Profile",
@@ -60,29 +58,22 @@
       },
       "battleLevel": "Battle Level",
       "memberLevel": "Member Level",
-      "battlePoint": "Usable Battle Points",
-      "memberPoint": "Usable Member Points",
+      "usablePoints": "Usable Points",
       "member": {
         "premium": "Premium member",
         "normal": "Member",
         "expireDate": "Valid until {date}",
         "expired": "Membership expired"
-      }
+      },
+      "remainingToLevel": "{amount} to level {level}"
     },
     "sample": {
-      "games": "Games",
-      "winRate": "Win Rate",
-      "conduct": "Conduct Score",
-      "signIn": "Daily check-in",
-      "vision": "Bonus vision",
-      "cooldown": "Cooldown",
-      "moveSpeed": "Movement speed",
-      "awakened": "Awakened heroes",
-      "level": "Lv {n}"
+      "tag": "Sample",
+      "name": "Player name",
+      "note": "This is a sample. Sign in to see your own levels and points."
     },
     "pages": {
       "title": "Main pages",
-      "soon": "Coming soon",
       "profile": {
         "title": "Profile",
         "description": "Match record, Battle and Member levels, usable points"
@@ -94,10 +85,6 @@
       "awaken": {
         "title": "Hero Awakening",
         "description": "Awakened heroes, unlock and randomise"
-      },
-      "membership": {
-        "title": "Membership",
-        "description": "Member benefits, Afdian and Ko-fi subscriptions"
       },
       "dailyTask": {
         "title": "Daily Tasks",
@@ -111,6 +98,13 @@
         "title": "Leaderboard",
         "description": "Top 500 by Battle Points, and your rank"
       }
+    },
+    "hero": {
+      "downloadLauncher": "Download launcher"
+    },
+    "memberCard": {
+      "description": "Earn Member Points every month, upgrade your starting skill draft to pick 1 of 8, and get exclusive member BUFFs",
+      "capsule": "See member benefits"
     }
   },
   "launch": {
@@ -131,13 +125,37 @@
     },
     "launcher": {
       "name": "Windy10v10AI Launcher",
-      "lead": "Runs a separate server on your PC, so the late game stays smooth. Pick a difficulty and play, or open a room for friends.",
+      "lead": "Play solo or online, team up in public rooms, and enjoy a smoother game.",
       "download": "Download launcher",
-      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake.",
-      "openSource": "Its code is <github>open source on GitHub</github>, so it's safe to download. Allow it in two steps:",
+      "desktopOnly": "The launcher runs on a computer. Open this page on your computer to download it.",
+      "suspicious": "The launcher is new, so your browser and Windows may flag it as suspicious by mistake. Allow it in two steps:",
+      "suspiciousMac": "The launcher is new, so macOS may block it the first time you open it. Install and allow it with the steps below:",
+      "appleSilicon": "For Apple silicon (M1 and later)",
+      "openSource": "Its code is <github>open source on GitHub</github>",
       "codeSigning": "Privacy and safety",
       "browserPrompt": "Browser blocks it: open the warning, choose <mark>Download suspicious file</mark>",
-      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>"
+      "windowsPrompt": "Windows blocks it: click <mark>More info</mark>, then <mark>Run anyway</mark>",
+      "macInstallPrompt": "Install and open: drag the icon into <mark>Applications</mark>, double-click it, and click <mark>Done</mark> in the warning",
+      "macAllowPrompt": "Allow it: in System Settings search “<mark>security</mark>”, open <mark>Privacy & Security</mark>, scroll to the bottom, and click <mark>Open Anyway</mark>",
+      "macInstall": {
+        "applications": "Applications"
+      },
+      "macWarning": {
+        "title": "“Windy10v10AI” Not Opened",
+        "body": "Apple could not verify “Windy10v10AI” is free of malware that may harm your Mac or compromise your privacy.",
+        "done": "Done",
+        "trash": "Move to Trash"
+      },
+      "macSettings": {
+        "search": "security",
+        "privacy": "Privacy & Security",
+        "security": "Security",
+        "securityItem": "Security Settings",
+        "allow": "Allow applications from",
+        "source": "App Store & Known Developers",
+        "blocked": "“Windy10v10AI” was blocked to protect your Mac.",
+        "open": "Open Anyway"
+      }
     },
     "console": {
       "summary": "Don't want to download software? Start from the console",
@@ -172,12 +190,15 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_7_1": [
+          "Improved multiplayer connections with less lag and fewer disconnects"
+        ],
+        "v0_7_0": [
+          "Added a launcher for Mac"
+        ],
         "v0_6_2": [
           "Added \"Update map\" button",
           "Bug fixes"
-        ],
-        "v0_6_1": [
-          "Better route choice for online play"
         ],
         "v0_6_0": [
           "Enter games while Dota 2 is running, no restart needed",
@@ -190,15 +211,9 @@
         "v0_5_2": [
           "See games in progress on the Join tab"
         ],
-        "v0_5_1": [
-          "Fixed some issues"
-        ],
         "v0_5_0": [
           "Improved online play, fixing connection failures for some players",
           "Rejoin from the launcher after a disconnect; fewer overflow errors"
-        ],
-        "v0_4_3": [
-          "Fix games failing to start when Steam or Dota 2 is set to run as administrator"
         ],
         "v0_4_2": [
           "Report problems and suggest ideas from the launcher"
@@ -213,7 +228,6 @@
         "v0_3_4": [
           "Fixed a VAC warning when starting an Arcade game without closing Dota 2 after a launcher game"
         ],
-        "v0_3_2": ["Fixed Windows Defender flagging the launcher as a virus"],
         "v0_3_0": ["One-click updates"],
         "v0_2_0": [
           "First release: one click runs a local server and joins it for a smoother late game"
@@ -221,8 +235,9 @@
       }
     },
     "homeCard": {
-      "title": "How to start the game",
-      "body": "Just launch from the Arcade. Want a smoother late game and a steadier connection? Download the launcher, which supports multiplayer too."
+      "title": "How to launch",
+      "body": "Start with the launcher for smoother, lag-free games, with multiplayer support.",
+      "capsule": "Arcade or launcher?"
     }
   },
   "membership": {
@@ -572,7 +587,11 @@
     },
     "recent": {
       "title": "Recent Matches",
-      "note": "Only your last {count} matches are kept; older ones are dropped.",
+      "note": "The latest {count} matches show first; keep scrolling to load older ones. Before this, only 50 matches were kept, and anything older can't be recovered.",
+      "loadingMore": "Loading…",
+      "loadMoreFailed": "Couldn't load older matches",
+      "retry": "Retry",
+      "noMore": "No older matches",
       "noteLabel": "About Recent Matches",
       "columns": {
         "difficulty": "Diff.",
@@ -652,52 +671,50 @@
       "description": "Refresh and try again, or come back in a little while."
     },
     "title": "Attributes",
-    "intro": "Spend attribute points to upgrade your hero. Upgrades are permanent and carry into every game.",
+    "intro": "Spend attribute points to strengthen your hero. Upgrades are permanent. Every Battle Level and Member Level you gain gives 1 point.",
     "points": {
       "title": "Attribute points",
-      "usable": "Usable / total",
-      "used": "Spent / total",
-      "battleLevel": "Battle level",
-      "memberLevel": "Member level",
-      "formula": "Total points = battle level + member level. Each level of either grants 1 point, and neither level ever goes down.",
-      "reset": "Reset"
+      "usableLabel": "Usable attribute points",
+      "usedLabel": "Attribute points spent",
+      "battleLevel": "Battle Level",
+      "memberLevel": "Member Level",
+      "staged": "{count, plural, one {# point} other {# points}} selected, tap Upgrade to spend"
     },
     "group": {
       "instant": {
         "title": "Active from hero level 1",
-        "hint": "No hero level needed — the full value applies as soon as the game starts · {count} attributes"
+        "hint": "No hero level needed: the full value applies as soon as the game starts"
       },
       "scaling": {
         "title": "Unlocks as your hero levels",
-        "hint": "One level unlocks every 2 hero levels, so these do nothing at hero level 1 · {count} attributes"
+        "hint": "One level unlocks every 2 hero levels, so these do nothing at hero level 1"
       },
       "skill": {
         "title": "Bonus skill points",
-        "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels · {count} attribute"
+        "hint": "Unlocks half as fast as everything else: 1 point every 4 hero levels"
       }
     },
     "card": {
-      "level": "Level {level}/{max}",
       "perCell": "{value} per level",
-      "stepCost": "{cost} attribute points per upgrade",
+      "skillCost": "{cost} attribute points per level",
       "skillValue": "{value}",
-      "full": "Maxed",
-      "owned": "Owned",
-      "notOwned": "Not owned",
-      "scalingBadge": "Scales with hero level",
-      "skillBadge": "1 per 4 hero levels",
-      "effectNote": "At level {level}, fully active once your hero reaches level {heroLevel}",
-      "effectEmpty": "Add a level and this will tell you the hero level it needs",
-      "cellTip": "Level {cell} · active from hero level {heroLevel}",
+      "oneShot": "One-time activation",
+      "owned": "Active",
+      "notOwned": "Inactive",
+      "staged": "Will activate",
+      "scalingTip": "Scales with hero level: one level unlocks every 2 hero levels, and there is no value at hero level 1",
+      "skillTip": "Only 1 point every 4 hero levels",
+      "cellTip": "Level {cell}, active from hero level {heroLevel}",
+      "oneShotTip": "Fully active in game right after activation",
       "upgrade": "Upgrade",
-      "upgradeTo": "Upgrade to {level}",
+      "activate": "Activate",
       "oneShotCost": "Costs {cost} attribute points",
-      "notEnough": "Not enough points",
-      "maxed": "Maxed out",
+      "maxed": "Maxed",
       "decrease": "One level fewer",
       "increase": "One level more"
     },
     "reset": {
+      "button": "Reset",
       "title": "Reset attributes",
       "description": "Clears every level you have added and refunds all attribute points so you can spend them again. Only usable points are charged — total points, lifetime points and your levels stay exactly as they are.",
       "useBattle": "Spend {cost} usable battle points",

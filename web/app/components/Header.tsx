@@ -3,7 +3,7 @@
 import {
   BookOpen,
   CalendarCheck,
-  CirclePlus,
+  ChartNoAxesColumn,
   Crown,
   ExternalLink,
   LogOut,
@@ -34,18 +34,34 @@ const EXTERNAL_LINK_ICONS: Record<string, typeof GithubIcon> = {
 };
 
 // 每个功能一个颜色，与首页、个人主页的入口卡一致，见 docs/web/design-system.md「功能色」
-const SITE_NAV_ICONS: Record<string, { Icon: typeof CirclePlus; className: string }> = {
-  profile: { Icon: UserRound, className: 'text-content' },
-  property: { Icon: CirclePlus, className: 'text-feature-property' },
-  awaken: { Icon: Sparkles, className: 'text-feature-awaken' },
-  dailyTask: { Icon: CalendarCheck, className: 'text-feature-daily' },
-  membership: { Icon: Crown, className: 'text-member-strong' },
-  leaderboard: { Icon: Trophy, className: 'text-season' },
-  wiki: { Icon: BookOpen, className: 'text-feature-wiki' },
+const SITE_NAV_ICONS: Record<
+  string,
+  { Icon: typeof ChartNoAxesColumn; className: string; tile: string }
+> = {
+  profile: { Icon: UserRound, className: 'text-content', tile: 'bg-icon-tile' },
+  property: {
+    Icon: ChartNoAxesColumn,
+    className: 'text-feature-property',
+    tile: 'bg-feature-property-soft',
+  },
+  awaken: { Icon: Sparkles, className: 'text-feature-awaken', tile: 'bg-feature-awaken-soft' },
+  dailyTask: {
+    Icon: CalendarCheck,
+    className: 'text-feature-daily',
+    tile: 'bg-feature-daily-soft',
+  },
+  membership: { Icon: Crown, className: 'text-member-strong', tile: 'bg-member-soft' },
+  leaderboard: { Icon: Trophy, className: 'text-season', tile: 'bg-season-soft' },
+  wiki: { Icon: BookOpen, className: 'text-feature-wiki', tile: 'bg-feature-wiki-soft' },
   // 启动游戏与反馈不属于任何一块玩家数据，用中性色
-  launch: { Icon: Play, className: 'text-content' },
-  feedback: { Icon: MessageSquareText, className: 'text-content' },
+  launch: { Icon: Play, className: 'text-content', tile: 'bg-icon-tile' },
+  feedback: { Icon: MessageSquareText, className: 'text-content', tile: 'bg-icon-tile' },
 };
+
+const NAV_ICON_TILE_CLASS = 'grid size-7 shrink-0 place-items-center rounded-[7px]';
+
+// 滚动距离不超过这个值仍算在页面顶部，免得触控板的微小抖动让头部来回变色
+const AT_TOP_THRESHOLD = 8;
 
 export default function Header() {
   const t = useTranslations('navigation');
@@ -57,6 +73,17 @@ export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  // 服务端渲染与首帧按「在顶部」画：首页打开时就在顶部
+  const [atTop, setAtTop] = useState(true);
+  // 菜单是实心的，打开时头部跟着变实心，两块连成一体
+  const transparent = pathname === '/' && atTop && !menuOpen;
+
+  useEffect(() => {
+    const update = () => setAtTop(window.scrollY <= AT_TOP_THRESHOLD);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
 
   // 菜单浮在内容上方，点到页面别处或按 Esc 都应该关掉，而不是只能再点一次汉堡
   useEffect(() => {
@@ -104,11 +131,17 @@ export default function Header() {
 
   return (
     // 显式提层，否则页面里在 header 之后出现的定位元素会盖住展开的菜单
-    <header ref={headerRef} className="relative z-20 border-b border-line bg-surface font-heading">
+    <header
+      ref={headerRef}
+      data-transparent={transparent || undefined}
+      className={`sticky top-0 z-20 border-b font-heading transition-colors duration-150 ease-out ${
+        transparent ? 'border-transparent bg-transparent' : 'border-line bg-panel'
+      }`}
+    >
       {/* 菜单浮层以它定位：平板起贴着外框右缘弹出，屏幕再宽也对着汉堡按钮 */}
-      <nav className="relative mx-auto max-w-7xl px-4 py-4">
-        {/* 行高由账号位的 36px 控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
-        <div className="flex min-h-9 justify-between items-center gap-3">
+      <nav className="relative mx-auto max-w-7xl px-3 py-2.5 md:px-4 lg:py-4">
+        {/* 行高由账号位控件撑起，兜底防止它缺席时整行变矮、正文跟着跳 */}
+        <div className="flex min-h-11 items-center justify-between gap-3 lg:min-h-9">
           {/* 每页都常驻的链接不预取：页面全是动态渲染，每次预取都是一次函数调用，按页面浏览量成倍放大 */}
           <Link
             href="/"
@@ -127,7 +160,7 @@ export default function Header() {
             <span className="lg:hidden">{t('homeShort')}</span>
             <span className="hidden lg:inline">{t('home')}</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3">
             <div className="hidden md:flex items-center gap-4">
               {topRowNavItems.map((item) => (
                 <Link
@@ -142,7 +175,7 @@ export default function Header() {
                   {t(item.shortLabelKey)}
                 </Link>
               ))}
-              <span className="h-4 w-px bg-line" aria-hidden="true" />
+              <span className="h-4 w-px bg-line header-divider" aria-hidden="true" />
               {githubLink ? (
                 <a
                   href={githubLink.href}
@@ -157,7 +190,7 @@ export default function Header() {
               ) : null}
             </div>
             <LanguageSwitcher />
-            <span className="h-5 w-px bg-line" aria-hidden="true" />
+            <span className="hidden h-5 w-px bg-line header-divider lg:block" aria-hidden="true" />
             <AuthStatus />
             {/* 汉堡是「打开菜单」的开关而不是导航项，窄屏下又是唯一入口，所以不标当前页 */}
             <button
@@ -166,7 +199,7 @@ export default function Header() {
               aria-label={t('menu')}
               aria-expanded={menuOpen}
               aria-controls="header-menu"
-              className="rounded border border-line bg-control p-1 text-content transition-colors hover:bg-control-hover"
+              className="flex size-11 items-center justify-center rounded-md border border-line bg-control text-content transition-colors hover:bg-control-hover header-control lg:size-9"
             >
               <svg
                 className="h-5 w-5"
@@ -186,81 +219,89 @@ export default function Header() {
             </button>
           </div>
         </div>
-        {menuOpen ? (
-          // 浮层下方是正文，底色必须不透明，否则两层文字叠在一起。
-          // 手机铺满整行好点按；平板起改成挂在汉堡按钮下的面板，宽屏上菜单项不会远离按钮
-          <div
-            id="header-menu"
-            className="absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 md:left-auto md:right-4 md:w-72 md:rounded-[10px] md:border md:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)]"
-          >
-            {NAV_MENU_GROUPS.map((group, index) => (
-              <div key={group} role="group" aria-labelledby={`header-menu-${group}`}>
-                {index > 0 ? <div className="my-1 h-px bg-line" aria-hidden="true" /> : null}
-                <p id={`header-menu-${group}`} className="pt-2 pb-0.5 text-xs text-muted">
-                  {t(`menuGroups.${group}`)}
-                </p>
-                {SITE_NAV_ITEMS.filter((item) => item.group === group).map((item) => {
-                  const { Icon, className } = SITE_NAV_ICONS[item.key]!;
-                  return (
-                    <Link
-                      key={item.key}
-                      href={item.href}
-                      prefetch={false}
-                      onClick={() => setMenuOpen(false)}
-                      aria-current={
-                        isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
-                      }
-                      className="nav-menu-item"
-                    >
+        {/*
+          浮层下方是正文，底色必须不透明，否则两层文字叠在一起。
+          手机铺满整行好点按；平板起改成挂在汉堡按钮下的面板，宽屏上菜单项不会远离按钮。
+          关上时仍挂在页面里，收起动画才放得完；visibility 随过渡最后才切换，收起后读屏和 Tab 都碰不到
+        */}
+        <div
+          id="header-menu"
+          inert={!menuOpen}
+          className={`absolute inset-x-0 top-full z-20 border-b border-line bg-panel px-4 py-2 transition-[opacity,transform,visibility] duration-150 ease-out md:left-auto md:right-4 md:w-72 md:rounded-[10px] md:border md:shadow-[0_18px_40px_-10px_rgba(0,0,0,0.85)] ${
+            menuOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'
+          }`}
+        >
+          {NAV_MENU_GROUPS.map((group, index) => (
+            <div key={group} role="group" aria-labelledby={`header-menu-${group}`}>
+              {index > 0 ? <div className="my-1 h-px bg-line" aria-hidden="true" /> : null}
+              <p id={`header-menu-${group}`} className="pt-2 pb-0.5 text-xs text-muted">
+                {t(`menuGroups.${group}`)}
+              </p>
+              {SITE_NAV_ITEMS.filter((item) => item.group === group).map((item) => {
+                const { Icon, className, tile } = SITE_NAV_ICONS[item.key]!;
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    prefetch={false}
+                    onClick={() => setMenuOpen(false)}
+                    aria-current={
+                      isCurrent('section' in item ? item.section : item.href) ? 'page' : undefined
+                    }
+                    className="nav-menu-item"
+                  >
+                    <span className={`${NAV_ICON_TILE_CLASS} ${tile}`}>
                       <Icon
-                        className={`size-[19px] shrink-0 ${className}`}
+                        className={`size-[17px] ${className}`}
                         strokeWidth={1.7}
                         aria-hidden="true"
                       />
-                      <span className="flex-1">{t(item.fullLabelKey)}</span>
-                    </Link>
-                  );
-                })}
-                {group === 'community'
-                  ? EXTERNAL_LINKS.map((link) => {
-                      const Icon = EXTERNAL_LINK_ICONS[link.labelKey]!;
-                      return (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => setMenuOpen(false)}
-                          className="nav-menu-item"
-                        >
-                          <Icon className="size-[19px] shrink-0" />
-                          <span className="flex-1">{t(link.labelKey)}</span>
-                          <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
-                        </a>
-                      );
-                    })
-                  : null}
-              </div>
-            ))}
-            {auth.status === 'authenticated' ? (
-              <>
-                {/* 电脑宽度头部账号控件里也有退出，菜单照样保留，所有宽度都能在同一处找到 */}
-                <div className="my-1 h-px bg-line" aria-hidden="true" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    auth.signOut();
-                  }}
-                  className="nav-menu-item w-full justify-between"
-                >
-                  <span>{tAuth('signOut')}</span>
-                  <LogOut className="size-4 shrink-0" aria-hidden="true" />
-                </button>
-              </>
-            ) : null}
-          </div>
-        ) : null}
+                    </span>
+                    <span className="flex-1">{t(item.fullLabelKey)}</span>
+                  </Link>
+                );
+              })}
+              {group === 'community'
+                ? EXTERNAL_LINKS.map((link) => {
+                    const Icon = EXTERNAL_LINK_ICONS[link.labelKey]!;
+                    return (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMenuOpen(false)}
+                        className="nav-menu-item"
+                      >
+                        <span className={`${NAV_ICON_TILE_CLASS} bg-icon-tile`}>
+                          <Icon className="size-[17px]" />
+                        </span>
+                        <span className="flex-1">{t(link.labelKey)}</span>
+                        <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
+                      </a>
+                    );
+                  })
+                : null}
+            </div>
+          ))}
+          {auth.status === 'authenticated' ? (
+            <>
+              {/* 电脑宽度头部账号控件里也有退出，菜单照样保留，所有宽度都能在同一处找到 */}
+              <div className="my-1 h-px bg-line" aria-hidden="true" />
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  auth.signOut();
+                }}
+                className="nav-menu-item w-full justify-between"
+              >
+                <span>{tAuth('signOut')}</span>
+                <LogOut className="size-4 shrink-0" aria-hidden="true" />
+              </button>
+            </>
+          ) : null}
+        </div>
       </nav>
     </header>
   );

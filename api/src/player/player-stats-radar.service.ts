@@ -22,7 +22,7 @@ import {
   STATS_BASELINE_QUANTILE_STEPS,
   STATS_BASELINE_WINDOW_DAYS,
 } from './player-stats-radar.constants';
-import { PlayerStatsRecentService } from './player-stats-recent.service';
+import { PlayerStatsRecentService, RECENT_MATCH_LIMIT } from './player-stats-recent.service';
 
 @Injectable()
 export class PlayerStatsRadarService {
@@ -81,7 +81,11 @@ export class PlayerStatsRadarService {
     if (!baseline) {
       logger.warn('[StatsRadar] baseline missing');
     }
-    return buildRadar(recent?.matches ?? [], baseline?.difficulties ?? {});
+    // 主文档在攒满归档前会超过 50 场，评分只看最近这 50 场
+    return buildRadar(
+      (recent?.matches ?? []).slice(0, RECENT_MATCH_LIMIT),
+      baseline?.difficulties ?? {},
+    );
   }
 }
 

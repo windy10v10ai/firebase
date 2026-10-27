@@ -1,11 +1,12 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { ChevronDown, Skull, TowerControl, Zap, type LucideIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import InfoPopover from '@/app/components/InfoPopover';
+import Button from '@/app/components/ui/button';
 import Skeleton from '@/app/components/ui/skeleton';
 import {
   useWikiDetails,
@@ -17,7 +18,7 @@ import {
 import { abilityLocale } from '@/app/lib/ability-text';
 import { matchItemEntries } from '@/app/lib/match-items';
 import { RECENT_MATCH_LIMIT, type RecentMatch } from '@/app/lib/player-stats-recent';
-import { recentMatchesQuery } from '@/app/lib/queries';
+import { matchHistoryQuery, recentMatchesQuery } from '@/app/lib/queries';
 import {
   abilityEntries,
   lotteryItemEntries,
@@ -308,6 +309,8 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
   const tStats = useTranslations('profile.stats');
   const locale = useLocale();
   const query = useQuery(recentMatchesQuery(steamId));
+  const history = useInfiniteQuery(matchHistoryQuery(steamId));
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const [openRow, setOpenRow] = useState<number | null>(null);
   const tWiki = useTranslations('wiki');
   const [wanted, setWanted] = useState<Record<WikiDetailSource, boolean>>({
@@ -354,8 +357,36 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
     },
   };
 
+  // 首屏是否有更早的战绩由首屏接口告知；一页都没取过时 hasNextPage 为假，要单独放行第一次
+  const canLoadMore =
+    query.data?.hasMore === true && (history.data === undefined || history.hasNextPage);
+  const { fetchNextPage, isFetching: historyFetching, isError: historyFailed } = history;
+  // 哨兵每次请求结束后重新挂一次：此时若仍在视口附近，会立刻触发下一段，短的一段不会让加载停住
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !canLoadMore || historyFetching || historyFailed) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '400px' },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [canLoadMore, historyFetching, historyFailed, fetchNextPage]);
+
   const loaded: LoadResult | null = query.data
-    ? { status: 'ready', matches: query.data.matches }
+    ? {
+        status: 'ready',
+        matches: [
+          ...query.data.matches,
+          ...(history.data?.pages.flatMap((page) => page.matches) ?? []),
+        ],
+      }
     : query.isError
       ? { status: 'failed' }
       : null;
@@ -665,6 +696,25 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
           })}
         </ul>
       )}
+      {/* 底部提示：加载中、失败可重试、已到头；哨兵在加载中和失败时都不挂，失败后不会自己反复请求 */}
+      {query.data?.hasMore ? (
+        <div className="px-3 pt-3 pb-2 text-center text-sm text-muted md:px-4" aria-live="polite">
+          {historyFailed ? (
+            <div className="flex items-center justify-center gap-3">
+              <span>{t('loadMoreFailed')}</span>
+              <Button variant="secondary" onClick={() => void fetchNextPage()}>
+                {t('retry')}
+              </Button>
+            </div>
+          ) : canLoadMore ? (
+            <div ref={sentinelRef} className="min-h-6">
+              {historyFetching ? t('loadingMore') : null}
+            </div>
+          ) : history.data ? (
+            t('noMore')
+          ) : null}
+        </div>
+      ) : null}
       <WikiDialog
         kind="items"
         entry={opened?.kind === 'item' ? opened.entry : null}

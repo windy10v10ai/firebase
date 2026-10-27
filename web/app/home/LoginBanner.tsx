@@ -1,53 +1,56 @@
 'use client';
 
+import { UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import AcceleratorHint from '@/app/components/AcceleratorHint';
 import SteamLoginButton from '@/app/components/SteamLoginButton';
 
-import SampleDataPanel from './SampleDataPanel';
+import LevelTile from './LevelTile';
 
-// 盖住示意面板的遮罩，压到底的那一端要接近不透明，否则数字会透过文字
-const NARROW_STOPS = 'rgba(15,15,17,0.35) 0%, rgba(15,15,17,0.92) 26%, rgba(15,15,17,1) 38%';
-const WIDE_STOPS =
-  'rgba(15,15,17,1) 0%, rgba(15,15,17,1) 50%, rgba(15,15,17,0.72) 72%, rgba(15,15,17,0.45) 100%';
+// 示意数据写死，只演示「登录后能看到什么」，不请求接口
+const SAMPLE_SEASON = {
+  level: 23,
+  currentLevelPoint: 1110,
+  nextLevelPoint: 1790,
+  usablePoint: 4820,
+};
+const SAMPLE_MEMBER = { level: 5, currentLevelPoint: 760, nextLevelPoint: 2000, usablePoint: 1260 };
 
+/** 首屏右侧面板（未登录）：示意一份玩家数据，再给登录入口 */
 export default function LoginBanner() {
   const t = useTranslations('home.intro');
+  const tSample = useTranslations('home.sample');
+  const tSummary = useTranslations('home.summary');
 
   return (
-    <section className="card-container relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <SampleDataPanel />
+    <section className="hero-panel card-pad">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="font-heading text-xl font-bold text-heading md:text-[22px]">{t('title')}</h2>
+        <p className="text-sm text-content">{t('description')}</p>
       </div>
-      {/* 文案落在哪半边，遮罩就压哪半边：窄屏文案在下，宽屏在左 */}
-      <div
-        className="pointer-events-none absolute inset-0 md:hidden"
-        style={{ backgroundImage: `linear-gradient(180deg, ${NARROW_STOPS})` }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 hidden md:block"
-        style={{ backgroundImage: `linear-gradient(90deg, ${WIDE_STOPS})` }}
-      />
-      {/* 窄屏顶部要给背景图让位，所以只借 card-pad 的左右与底，上边距单独给 */}
-      <div className="card-pad relative flex flex-col gap-4 pt-36 md:max-w-[460px] md:pt-6 lg:pt-8">
-        <h2 className="title-secondary">{t('title')}</h2>
-        <p className="text-content">{t('description')}</p>
-        <div className="flex flex-col items-start gap-2">
-          <SteamLoginButton size="large" />
-          <AcceleratorHint />
-          <p className="text-sm text-muted">{t('privacy')}</p>
+
+      <div className="box-pad flex flex-col gap-3 rounded-xl border border-dashed border-hero-sample-border bg-hero-sample">
+        <div className="flex items-center gap-2.5">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-glass">
+            <UserRound className="size-[18px] text-muted" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1 truncate font-bold text-content">{tSample('name')}</span>
+          <span className="rounded-full bg-warning px-2.5 py-px text-xs font-extrabold text-primary-text">
+            {tSample('tag')}
+          </span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {t.raw('upcoming').map((item: string) => (
-            <span
-              key={item}
-              className="rounded-full border border-line bg-panel-soft px-2.5 py-0.5 text-xs text-muted"
-            >
-              {item}
-            </span>
-          ))}
+        <div className="grid grid-cols-2 gap-2.5 opacity-85">
+          <LevelTile tone="season" label={tSummary('battleLevel')} values={SAMPLE_SEASON} />
+          <LevelTile tone="member" label={tSummary('memberLevel')} values={SAMPLE_MEMBER} />
         </div>
+        <p className="text-xs text-muted">{tSample('note')}</p>
+      </div>
+
+      <SteamLoginButton variant="cta" />
+      <div className="flex flex-col items-start gap-2">
+        <AcceleratorHint />
+        <p className="text-sm text-muted">{t('privacy')}</p>
       </div>
     </section>
   );

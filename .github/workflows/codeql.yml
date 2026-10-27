@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [develop, main]
+    branches: [develop]
   pull_request:
-    branches: [develop, main]
+    branches: [develop]
   schedule:
     - cron: '23 18 * * 1'
   workflow_dispatch:
@@ -26,8 +26,42 @@ jobs:
           build-mode: none
       - uses: github/codeql-action/analyze@v4
 
+  changes:
+    name: Detect Mac native changes
+    runs-on: ubuntu-latest
+    outputs:
+      native: ${{ steps.filter.outputs.native }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # 只有拉取请求按改动范围跳过；推送、定时和手动触发始终分析
+      - name: Detect changed native code
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          native=true
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            native=false
+            while IFS= read -r file; do
+              case "$file" in
+                launcher/*|.github/workflows/codeql.yml)
+                  native=true
+                  ;;
+              esac
+            done < <(git diff --name-only --no-renames "$BASE_SHA...$HEAD_SHA")
+          fi
+          echo "native=$native" >> "$GITHUB_OUTPUT"
+
   native:
     name: Analyze Mac native code
+    needs: changes
+    # 作业级跳过在必需检查里算通过，工作流级 paths 过滤会让检查一直挂起
+    if: needs.changes.outputs.native == 'true'
     runs-on: macos-latest
     timeout-minutes: 20
     steps:

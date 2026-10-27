@@ -181,3 +181,18 @@ describe('PlayerStatsRadarService.refreshBaseline', () => {
     expect(dailyStatsService.save).not.toHaveBeenCalled();
   });
 });
+
+describe('PlayerStatsRadarService.getRadar', () => {
+  it('主文档攒到 50 场以上时只取最近 50 场', async () => {
+    const recent = { matches: repeat(medianMatch(), 100) };
+    const service = new PlayerStatsRadarService(
+      { get: jest.fn().mockResolvedValue({ difficulties: { '5': baseline } }) } as never,
+      {} as never,
+      { findBySteamId: jest.fn().mockResolvedValue(recent) } as never,
+    );
+
+    const result = await service.getRadar(123);
+
+    expect(result.matchCount).toBe(50);
+  });
+});

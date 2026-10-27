@@ -16,9 +16,9 @@ VirusTotal 用 Claude in Chrome 上传，不用 API（要填密钥）。应用�
 - 上传框在 `vt-ui-main-upload-form` 的 shadow DOM 里，`find` 拿不到：先用 `javascript_tool` 往 `document.body` 插一个带 `aria-label` 的 `<input type="file">`，`file_upload` 传给它，再用 `DataTransfer` 赋给 shadow DOM 里的第二个 file input 并派发 `change`，最后在 shadow DOM 里找到「Confirm upload」调 `click()`
 - 完成后跳到 `/gui/file/<sha256>`。单次 `javascript_tool` 超过 45 秒会超时，分几次轮询；结果用 `javascript_tool` 递归拼 `shadowRoot` 文本来读
 
-Microsoft 一栏报 `!ml` 时，按 `references/false-positive.md` 申报误报。
+Microsoft 一栏报 `!ml` 时，按 `references/false-positive.md` 申报误报。大版本（升第二位及以上）不论扫描结果干净与否都申报一次，理由见 README 第 3 步。
 
-完成条件：Defender 输出 `found no threats`，VirusTotal 的检出数与 Microsoft 一栏已写进发版 PR 的测试清单。
+完成条件：Defender 输出 `found no threats`，VirusTotal 的检出数与 Microsoft 一栏已写进发版 PR 的测试清单；大版本另已提交误报申报。
 
 ## 第 4 步：更新日志
 

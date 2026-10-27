@@ -10,14 +10,17 @@
     'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   --font-heading: var(--font-heading-face), var(--font-sans);
 
-  --color-surface: #09090b;
-  --color-panel: #0f0f11;
-  --color-panel-soft: #17171a;
-  --color-panel-raised: #1f1f23;
-  --color-line: #27272a;
-  --color-line-strong: #3f3f46;
-  --color-control: #17171a;
-  --color-control-hover: #1f1f23;
+  --color-surface: #101012;
+  --color-panel: #18181b;
+  --color-panel-soft: #1f1f23;
+  --color-panel-raised: #27272b;
+  --color-line: #2e2e33;
+  --color-line-strong: #46464e;
+  --color-control: #1f1f23;
+  --color-control-hover: #27272b;
+  --color-control-active: #19191c;
+  /* 菜单项图标底块里的中性项：不属于任何功能色 */
+  --color-icon-tile: rgba(255, 255, 255, 0.06);
 
   --color-heading: #fafafa;
   --color-content: #d4d4d8;
@@ -29,24 +32,57 @@
   --color-season-strong: #9b5de0;
   --color-season-soft: rgba(155, 93, 224, 0.12);
   --color-season-border: rgba(155, 93, 224, 0.4);
+  /* 深色底上的浅紫文字，用于满级与暂存提示 */
+  --color-season-light: #c4a3f3;
 
   --color-member: #e0caa5;
   --color-member-strong: #daa520;
   --color-member-soft: rgba(218, 165, 32, 0.11);
   --color-member-border: rgba(218, 165, 32, 0.4);
 
-  /* 网站主色：实色档给主按钮；悬停往深走，变亮后白字对比度掉到 AA 以下 */
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-active: #1e40af;
-  --color-primary-border: #5b8cf5;
-  --color-primary-border-hover: #6b95f7;
-  --color-primary-glow: rgba(37, 99, 235, 0.75);
+  /* 网站主色（余烬橙）：主按钮是杏色竖向渐变配黑字，比实底亮橙安静，按钮多的页面也不刺眼 */
+  --color-primary-from: #cf8048;
+  --color-primary-to: #b8662f;
+  --color-primary-hover-from: #d98e58;
+  --color-primary-hover-to: #c4733d;
+  --color-primary-active: #b8662f;
+  --color-primary-border: #dc9060;
+  --color-primary-border-bottom: #8a4420;
+  --color-primary-text: #1a0c05;
 
-  /* 主色的标记档：链接、当前页标记、可点击卡片的悬停描边、焦点框、转圈共用，页面上只有一种蓝 */
-  --color-link: #60a5fa;
-  --color-link-hover: #93c5fd;
-  --color-link-border: rgba(96, 165, 250, 0.5);
+  /* 强调按钮：一屏只给最想让人点的那一个，亮橙实底比主按钮更抢眼 */
+  --color-cta: #f07a2a;
+  --color-cta-hover: #f58a42;
+  --color-cta-active: #e06d20;
+  --color-cta-border: #ff9a55;
+  --color-cta-glow: rgba(240, 122, 42, 0.45);
+
+  --color-cta-soft: rgba(240, 122, 42, 0.14);
+
+  /* 首页暖色首屏：底色、毛玻璃面板与半透明按钮，只用在首页首屏，取值见 docs/web/design-system.md「首页的暖色首屏」 */
+  --color-hero: #120c0a;
+  --color-hero-panel: rgba(34, 20, 15, 0.55);
+  --color-hero-panel-border: rgba(255, 214, 186, 0.14);
+  --color-hero-panel-highlight: rgba(255, 214, 186, 0.22);
+  --color-hero-sample-border: rgba(255, 214, 186, 0.32);
+  --color-hero-sample: rgba(0, 0, 0, 0.14);
+  --color-glass: rgba(255, 255, 255, 0.06);
+  --color-glass-hover: rgba(255, 255, 255, 0.12);
+  --color-glass-border: rgba(255, 255, 255, 0.14);
+  --color-glass-border-strong: rgba(255, 255, 255, 0.2);
+  --color-home-card: rgba(255, 255, 255, 0.035);
+  --color-home-card-border: rgba(255, 255, 255, 0.07);
+  --color-home-card-hover: rgba(255, 255, 255, 0.06);
+
+  /* 主色的标记档：当前页标记、可点击卡片的悬停描边、焦点框、转圈、选中态共用；不用来写字，橙色字在深底上发脏 */
+  --color-link: #e07a3c;
+  --color-link-hover: #f0955a;
+  --color-link-border: rgba(224, 122, 60, 0.5);
+
+  /* 可点击卡片上的操作胶囊与圆形箭头：半透明描边在任何卡片底上都只比底亮一点，文字比正文色暖一档 */
+  --color-capsule-border: rgba(255, 255, 255, 0.18);
+  --color-capsule-text: #d6d2cf;
+  --color-arrow-border: rgba(255, 255, 255, 0.16);
 
   /* 功能色只上各功能的图标与图标底块，数值、按钮、标题都不跟 */
   --color-feature-property: var(--color-season);
@@ -55,10 +91,10 @@
   --color-feature-awaken-soft: rgba(221, 83, 231, 0.12);
   --color-feature-daily: #04bbc3;
   --color-feature-daily-soft: rgba(4, 187, 195, 0.12);
-  --color-feature-wiki: #e28d4f;
-  --color-feature-wiki-soft: rgba(226, 141, 79, 0.12);
+  --color-feature-wiki: #7ca2f6;
+  --color-feature-wiki-soft: rgba(124, 162, 246, 0.12);
 
-  /* 品牌色只上各平台自己的标识（平台名、图标），不上按钮、描边、悬停：它们与站内的紫、蓝、绿同色系。
+  /* 品牌色只上各平台自己的标识（平台名、图标），不上按钮、描边、悬停：它们与站内的紫、蓝、青、绿同色系。
      会员页购买区是唯一例外，整块只属于选中的平台，见 docs/web/design-system.md「品牌色」 */
   --color-afdian: #946ce6;
   --color-kofi: #29abe0;
@@ -133,7 +169,22 @@
   }
 }
 
+/* 头部吸顶后，锚点跳转与吸顶元素都要给它让出位置；数值以实际渲染高度为准 */
+:root {
+  --header-height: 65px;
+}
+
+@media (width >= 64rem) {
+  :root {
+    --header-height: 69px;
+  }
+}
+
 @layer base {
+  html {
+    scroll-padding-top: var(--header-height);
+  }
+
   body {
     /* 积分与战绩的数字要等宽，否则数值一变列就跳 */
     font-variant-numeric: tabular-nums;
@@ -192,35 +243,53 @@
     @apply transition-colors hover:border-link-border;
   }
 
-  /* 导航类链接：静止中性，悬停变链接蓝 */
+  /* 导航类链接：静止中性，悬停提亮 */
   .link-hover {
-    @apply transition-colors hover:text-link;
+    @apply transition-colors hover:text-heading;
   }
 
-  /* 正文里的内联链接：静止就上色，否则在整段文字里认不出来 */
+  /* 正文里的内联链接靠下划线认出来，不靠颜色：橙色只做标记，不写字 */
   .link-inline {
-    @apply text-link transition-colors hover:text-link-hover;
+    @apply text-heading underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-heading;
   }
 
-  /* 网站自己的按钮是纯色面，渐变只留给游戏按钮；选型见 web/CLAUDE.md「按钮」 */
+  /* 选型见 web/CLAUDE.md「按钮」 */
   .btn-primary,
+  .btn-cta,
   .btn-secondary,
   .btn-ghost,
   .btn-danger {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-[7px] border px-5 text-sm font-bold transition-[background-color,border-color,color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link lg:min-h-10;
   }
 
-  /* 光晕放在按钮下方而不是做成渐变面，免得和游戏按钮混在一起 */
+  /* 网站整体是扁平的，层次只靠一道顶边高光和深一档的底边，不做厚边 */
   .btn-primary {
-    @apply border-primary-border bg-primary text-white shadow-[0_6px_18px_-8px_var(--color-primary-glow)] hover:border-primary-border-hover hover:bg-primary-hover active:bg-primary-active active:shadow-none;
+    @apply border-primary-border border-b-primary-border-bottom text-primary-text shadow-[inset_0_1px_0_rgba(255,255,255,0.2)];
+    background-image: linear-gradient(180deg, var(--color-primary-from), var(--color-primary-to));
+  }
+
+  .btn-primary:not(:disabled):hover {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-primary-hover-from),
+      var(--color-primary-hover-to)
+    );
+  }
+
+  .btn-primary:not(:disabled):active {
+    @apply bg-primary-active bg-none shadow-none;
+  }
+
+  .btn-cta {
+    @apply border-cta-border bg-cta font-extrabold text-primary-text shadow-[0_6px_18px_-10px_var(--color-cta-glow)] hover:bg-cta-hover active:bg-cta-active active:shadow-none;
   }
 
   .btn-secondary {
-    @apply border-line bg-control text-content hover:border-[#3f3f46] hover:bg-control-hover hover:text-heading active:bg-[#141416];
+    @apply border-line bg-control text-content hover:border-line-strong hover:bg-control-hover hover:text-heading active:bg-control-active;
   }
 
   .btn-ghost {
-    @apply border-transparent px-4 text-content hover:bg-panel-soft hover:text-heading active:bg-[#141416];
+    @apply border-transparent px-4 text-content hover:bg-panel-soft hover:text-heading active:bg-control-active;
   }
 
   .btn-danger {
@@ -228,16 +297,22 @@
   }
 
   .btn-primary:disabled,
+  .btn-cta:disabled,
   .btn-secondary:disabled,
   .btn-danger:disabled {
-    @apply border-line bg-panel-soft text-[#5d5d66] shadow-none;
+    @apply border-line bg-panel-soft bg-none text-faint shadow-none;
   }
 
   .btn-ghost:disabled {
-    @apply bg-transparent text-[#5d5d66];
+    @apply bg-transparent text-faint;
   }
 
-  /* 游戏按钮：只给花勇士积分或会员积分的操作，渐变照搬游戏内 buttons.less 的取值 */
+  /* 压在首页首屏图片上的半透明按钮，底色靠背后的图，所以不能用实心的 secondary */
+  .btn-glass {
+    @apply inline-flex h-[46px] items-center justify-center gap-2 rounded-lg border border-glass-border-strong bg-glass px-5 text-[15px] font-bold text-heading transition-colors hover:bg-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link lg:h-12;
+  }
+
+  /* 游戏按钮：只给花勇士积分或会员积分的操作，取值照搬游戏内 buttons.less */
   .btn-member,
   .btn-season {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-[7px] border px-5 text-sm font-extrabold text-white transition-[filter] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link lg:min-h-10;
@@ -280,6 +355,61 @@
     text-shadow: none;
   }
 
+  /* 首屏背后的暖色底：实色撑到首屏底部，再往下渐变回页面底色，与其余页面接上 */
+  .home-hero-wash {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-hero) 0,
+      var(--color-hero) calc(100% - 28rem),
+      var(--color-surface) 100%
+    );
+  }
+
+  /* 图片上的暗角：窄屏只压图片带，上下两端往底色收；电脑宽度文案在左，所以左重右轻，并保住头部文字的对比度 */
+  .home-hero-shade {
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-hero) 60%, transparent) 0%,
+      color-mix(in srgb, var(--color-hero) 5%, transparent) 22%,
+      color-mix(in srgb, var(--color-hero) 10%, transparent) 52%,
+      color-mix(in srgb, var(--color-hero) 75%, transparent) 78%,
+      var(--color-hero) 100%
+    );
+  }
+
+  @media (width >= 64rem) {
+    .home-hero-shade {
+      background-image:
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--color-hero) 60%, transparent),
+          transparent
+        ),
+        linear-gradient(180deg, transparent, var(--color-hero)),
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-hero) 95%, transparent) 0%,
+          color-mix(in srgb, var(--color-hero) 72%, transparent) 38%,
+          color-mix(in srgb, var(--color-hero) 20%, transparent) 70%,
+          color-mix(in srgb, var(--color-hero) 35%, transparent) 100%
+        );
+      background-size:
+        100% 120px,
+        100% 220px,
+        100% 100%;
+      background-position: top, bottom, center;
+      background-repeat: no-repeat;
+    }
+  }
+
+  .hero-panel {
+    @apply flex flex-col gap-4 rounded-2xl border border-hero-panel-border bg-hero-panel lg:gap-4.5;
+    backdrop-filter: blur(18px) saturate(140%);
+    box-shadow:
+      inset 0 1px 0 var(--color-hero-panel-highlight),
+      0 30px 60px -30px rgba(0, 0, 0, 0.7);
+  }
+
   /* 横排导航项是 link-hover 的例外：悬停只提亮文字，颜色留给当前页的下条 */
   .nav-top {
     @apply relative whitespace-nowrap text-content transition-colors duration-150 ease-out hover:text-heading;
@@ -310,7 +440,7 @@
   }
 
   .nav-menu-item {
-    @apply relative -mx-2 flex items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading;
+    @apply relative -mx-2 flex min-h-11 items-center gap-2 rounded px-2 py-2 text-content transition-colors duration-150 ease-out hover:bg-panel-soft hover:text-heading;
   }
 
   .nav-menu-item[aria-current='page'] {
@@ -321,6 +451,23 @@
     content: '';
     @apply absolute inset-y-1 left-0 w-0.5 rounded-full bg-link;
   }
+}
+
+/*
+ * 首页顶部头部透明、压在首屏图上，控件换成半透明底才看得清。
+ * 写在 layer 之外：控件自己的 bg-control 等工具类在 utilities 层，按层顺序会盖过 components 层里的规则。
+ */
+header[data-transparent] .header-control {
+  background-color: var(--color-glass);
+  border-color: var(--color-glass-border);
+}
+
+header[data-transparent] .header-control:hover {
+  background-color: var(--color-glass-hover);
+}
+
+header[data-transparent] .header-divider {
+  background-color: var(--color-glass-border);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 {
   "name": "cloud",
   "version": "0.0.1",
-  "description": "windy10v10ai-cloud",
+  "description": "Windy 10v10 AI Cloud Functions API",
   "author": "windy",
   "private": true,
   "license": "MIT",
