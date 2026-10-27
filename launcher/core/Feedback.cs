@@ -44,8 +44,8 @@ namespace Windy10v10AI.Launcher
         const int DirectTimeout = 10000;
         const int RelayTimeout = 20000;
         const int MaxLogBytes = 1024 * 1024;
-        const long TailBytes = 20L * 1024 * 1024;
-        const long SmallTailBytes = 5L * 1024 * 1024;
+        // 压缩上限只有 1MB：重复行压缩比极高，普通日志低得多，所以先尝试较长的头尾，超限再缩短。
+        static readonly long[] SegmentBytes = { 20L * 1024 * 1024, 5L * 1024 * 1024, 1024L * 1024 };
         static readonly string[] Modes = { "solo", "host", "join" };
 
         static FeedbackApi()
@@ -128,9 +128,9 @@ namespace Windy10v10AI.Launcher
             try
             {
                 if (!File.Exists(path)) return null;
-                foreach (var tail in new[] { TailBytes, SmallTailBytes })
+                foreach (var segment in SegmentBytes)
                 {
-                    var packed = Compress(Anonymize(ReadTail(path, tail)));
+                    var packed = Compress(Anonymize(ReadHeadAndTail(path, segment)));
                     if (packed.Length <= MaxLogBytes) return Convert.ToBase64String(packed);
                 }
             }
@@ -140,23 +140,37 @@ namespace Windy10v10AI.Launcher
             return null;
         }
 
-        static string ReadTail(string path, long bytes)
+        // 失败行刷屏时尾部全是刷屏内容，触发前的现场只在日志开头，所以长日志同时保留头和尾。
+        public static string ReadHeadAndTail(string path, long segment)
         {
             // 游戏运行期间仍会写日志，读取不能锁住文件。
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
             {
-                var start = Math.Max(0, stream.Length - bytes);
-                stream.Seek(start, SeekOrigin.Begin);
-                var buffer = new byte[stream.Length - start];
-                var read = 0;
-                while (read < buffer.Length)
-                {
-                    var n = stream.Read(buffer, read, buffer.Length - read);
-                    if (n <= 0) break;
-                    read += n;
-                }
-                return Encoding.UTF8.GetString(buffer, 0, read);
+                var length = stream.Length;
+                if (length <= segment * 2) return ReadRange(stream, 0, length);
+                var head = ReadRange(stream, 0, segment);
+                var tail = ReadRange(stream, length - segment, segment);
+                // 切口落在行中间时丢掉不完整的半行。
+                var headEnd = head.LastIndexOf('\n');
+                if (headEnd >= 0) head = head.Substring(0, headEnd + 1);
+                var tailStart = tail.IndexOf('\n');
+                if (tailStart >= 0) tail = tail.Substring(tailStart + 1);
+                return head + "[launcher] log middle omitted, kept first and last " + (segment / 1024 / 1024) + "MB of " + (length / 1024 / 1024) + "MB\n" + tail;
             }
+        }
+
+        static string ReadRange(FileStream stream, long start, long count)
+        {
+            stream.Seek(start, SeekOrigin.Begin);
+            var buffer = new byte[count];
+            var read = 0;
+            while (read < buffer.Length)
+            {
+                var n = stream.Read(buffer, read, buffer.Length - read);
+                if (n <= 0) break;
+                read += n;
+            }
+            return Encoding.UTF8.GetString(buffer, 0, read);
         }
 
         // 反馈不需要本机用户名，发送前隐藏日志路径中的用户名。
