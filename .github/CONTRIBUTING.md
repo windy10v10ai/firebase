@@ -4,11 +4,19 @@ English | [简体中文](CONTRIBUTING_ZH.md)
 
 Thanks for taking the time to contribute!
 
-## What we welcome
+## Players: use the feedback page
 
-- **Bug reports and suggestions**: open an [issue](https://github.com/windy10v10ai/firebase/issues/new/choose).
+If you are a player or a user of the website and want to report a problem or suggest an idea, please use the feedback page: <https://windy10v10ai.com/feedback>. Choose "Report a problem" or "Suggest an idea", pick what it relates to, and describe it in your own words. Reporting from the launcher can attach game logs, which helps us find the cause faster.
+
+You don't need to know anything about the code, and you don't need a GitHub account.
+
+## Contributors: use GitHub when you plan to implement it
+
+GitHub issues and pull requests are for code changes, made by the person who will write the code:
+
 - **Small fixes**: typos, documentation, translations and obvious small bug fixes can go straight to a pull request.
-- **New features and behavior changes**: please open an issue and discuss it first. By default the maintainer implements features, so a feature pull request without prior agreement may be closed. This saves you from building something that doesn't fit the project.
+- **Bug fixes and features you plan to implement yourself**: open an [issue](https://github.com/windy10v10ai/firebase/issues/new/choose) first. Explain the problem and how you would change the code, then wait for the maintainer to agree before you start. By default the maintainer implements features, so a feature pull request without prior agreement may be closed. This saves you from building something that doesn't fit the project.
+- **Only an idea, or you are not going to write it**: use the [feedback page](https://windy10v10ai.com/feedback) instead. The maintainer reads it and decides.
 
 ## Always open an issue first for these
 
@@ -22,7 +30,7 @@ Even a small change in these areas needs an issue and the maintainer's agreement
 ## Before you open a pull request
 
 1. Search the [existing issues](https://github.com/windy10v10ai/firebase/issues) first.
-2. For a feature or behavior change, open an issue that explains the problem and your idea, then wait for the maintainer to agree before you start.
+2. For a bug fix or feature you will implement, open an issue and wait for the maintainer to agree.
 3. Small fixes don't need an issue. Say what you changed and why in the pull request.
 
 ## Communication

@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Discord
+  - name: '玩家反馈：报告问题或提出建议 / Players: report a problem or suggest an idea'
+    url: https://windy10v10ai.com/feedback
+    about: '玩家理解级别的问题和建议请到这里提交，不需要懂代码也不需要 GitHub 账号 / For players, no code knowledge or GitHub account needed'
+  - name: 'Discord'
     url: https://discord.com/invite/MfawtDpxks
-    about: 实时交流，还不确定是不是 BUG 时先在这里问 / Chat with the community, ask here if you are not sure it is a bug
+    about: '实时交流 / Chat with the community'
