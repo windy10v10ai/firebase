@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discord
+    url: https://discord.com/invite/MfawtDpxks
+    about: 实时交流，还不确定是不是 BUG 时先在这里问 / Chat with the community, ask here if you are not sure it is a bug

@@ -1,0 +1,63 @@
+name: BUG 报告 / Bug report
+description: 网站、API 或启动器出了问题 / Something in the website, API or launcher is not working
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！请先搜索[已有的 Issue](https://github.com/windy10v10ai/firebase/issues)，避免重复。标题写清现象，例如「会员页面刷新后积分显示为 0」。
+        **请不要在这里贴 Token、密钥、Cookie、Steam 账号信息或其他个人信息。** 截图和日志里出现的请先打码。
+  - type: dropdown
+    id: component
+    attributes:
+      label: 出问题的部分 / Which part
+      options:
+        - 网站 / Website
+        - API / 服务端
+        - 启动器 / Launcher
+        - 不确定 / Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么 / What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望的表现 / What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 从干净状态到出问题的最短步骤；必现还是偶发 / The shortest steps; always or sometimes
+      placeholder: |
+        1. 打开……
+        2. 点击……
+        3. ……
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 环境 / Environment
+      description: 浏览器和系统，或启动器版本 / Browser and OS, or launcher version
+      placeholder: Chrome 130 / Windows 11，或 启动器 1.2.3
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 截图、录屏或日志 / Screenshots, recordings or logs
+      description: 浏览器控制台报错也很有用 / Browser console errors help too
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认 / Before you submit
+      options:
+        - label: 我搜索过已有的 Issue，没有重复 / I searched existing issues and found no duplicate
+          required: true
+        - label: 我没有贴入密钥、Token 或个人信息 / I did not paste secrets, tokens or personal data
+          required: true
