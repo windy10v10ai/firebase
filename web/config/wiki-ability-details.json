@@ -105,7 +105,7 @@
           "label": {
             "zh": "额外生命值：",
             "en": "ADDITIONAL HEALTH:",
-            "ru": "ADDITIONAL HEALTH:"
+            "ru": "ДОП. ЗДОРОВЬЕ:"
           },
           "levels": [
             "1000",
@@ -137,7 +137,7 @@
           "label": {
             "zh": "额外魔法恢复：",
             "en": "ADDITIONAL MANA REGEN:",
-            "ru": "ADDITIONAL MANA REGEN:"
+            "ru": "ДОП. ВОССТАНОВЛЕНИЕ МАНЫ:"
           },
           "levels": [
             "10"
@@ -775,8 +775,8 @@
   "faceless_void_time_zone": {
     "desc": {
       "zh": "在时空中创造一个遮罩，改变其中所有单位的移动、攻击、施法、弹道和转身速度。友军的速度提升，冷却加快。敌人的速度降低，技能和物品的冷却全部冻结。时间膨胀的负面状态持续时间在逆转时空内不会变少。",
-      "en": "Creates a blister in spacetime, altering the movement, cast, projectile, cooldown, and turn rate speed of all units inside. Allies have increased speed and cooldown acceleration. Enemies have decreased speed, and have frozen ability and item cooldowns. Does not affect Ultimate abilities. Time Dilation does not tick down while inside.",
-      "ru": "Creates a blister in spacetime, altering the movement, cast, projectile, cooldown, and turn rate speed of all units inside. Allies have increased speed and cooldown acceleration. Enemies have decreased speed, and have frozen ability and item cooldowns. Does not affect Ultimate abilities. Time Dilation does not tick down while inside."
+      "en": "In a flash of spacetime, a zone is created that alters the movement, attack, cast, projectile, and turn speeds of all units within. Allies gain movement speed and faster cooldowns. Enemies are slowed and their ability and item cooldowns are frozen. The debuff duration of Time Dilation does not decrease inside the Time Zone.",
+      "ru": "Создаёт в пространстве-времени зону, меняющую скорость передвижения, атаки, применения способностей, снарядов и поворота всех юнитов внутри. Союзники ускоряются, а их способности и предметы перезаряжаются быстрее. Враги замедляются, а перезарядка их способностей и предметов полностью замораживается. Длительность негативного эффекта замедления времени внутри временной зоны не уменьшается."
     },
     "ability": {
       "behavior": "point",
@@ -925,7 +925,7 @@
     "desc": {
       "zh": "对敌人施加末日诅咒，对其进行驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>驱散类型：弱驱散<br><br>持有<font color='#92acf5'>阿哈利姆神杖</font>时，末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
       "en": "Inflicts a curse that dispels an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>DISPEL TYPE: Basic Dispel<br><br>With <font color='#92acf5'>Aghanim's Scepter</font>, Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.",
-      "ru": "Накладывает проклятие, которое развеивает врага и не позволяет ему использовать способности или лечиться, при этом враг постепенно получает урон.<br><br>ТИП РАЗВЕИВАНИЯ: Простое развеивание<br><br>С <font color='#92acf5'>Aghanim's Scepter</font> Doom также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Doom на врагов в радиусе 350, сам не получая Doom.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Devour</font>, автоматически повышаются до максимального уровня."
+      "ru": "Накладывает на врага проклятие Рок, развеивает его и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>ТИП РАЗВЕИВАНИЯ: Простое развеивание<br><br>С <font color='#92acf5'>Скипетр Аганима</font> Рок также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Рок на врагов в радиусе 350, сам не получая Рок.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня."
     },
     "ability": {
       "behavior": "target",
@@ -1088,9 +1088,9 @@
   },
   "windrunner_whirlwind_custom": {
     "desc": {
-      "zh": "集中火力不再需要施法目标，而是对风行者攻击距离 + 150范围内的随机敌人发动攻击。每秒发动固定次数的攻击，以英雄优先。<br><br>学会本技能后，施放风行时进入<font color='#d7ccc7'>隐身</font>状态，持续时间与风行相同。攻击敌人后会短暂显形，随后重新隐身。移动不会破坏隐身状态。",
-      "en": "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing Heroes.<br><br>Learning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility.",
-      "ru": "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing Heroes.<br><br>Learning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility."
+      "zh": "集中火力不再需要施法目标，而是对风行者攻击距离 + 150范围内的随机敌人发动攻击。每秒发动固定次数的攻击，优先攻击英雄或Boss。<br><br>学会本技能后，施放风行时进入<font color='#d7ccc7'>隐身</font>状态，持续时间与风行相同。攻击敌人后会短暂显形，随后重新隐身。移动不会破坏隐身状态。",
+      "en": "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing heroes and bosses.<br><br>Learning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility.",
+      "ru": "«Сосредоточенный огонь» больше не требует цели, а атакует случайных врагов в радиусе атаки Ветреницы + 150. Совершает фиксированное число атак в секунду, предпочитая героев и боссов.<br><br>Изучив эту способность, применяя «Порыв ветра», герой получает <font color='#d7ccc7'>невидимость</font> на то же время. После атаки он ненадолго становится видимым и снова невидимым. Движение не развеивает невидимость."
     },
     "ability": {
       "behavior": "noTarget",
@@ -1103,7 +1103,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "Длительность:"
           },
           "levels": [
             "8",
@@ -1119,7 +1119,7 @@
           "label": {
             "zh": "每秒攻击次数：",
             "en": "ATTACKS PER SECOND:",
-            "ru": "ATTACKS PER SECOND:"
+            "ru": "Атак в секунду:"
           },
           "levels": [
             "4",
@@ -1135,7 +1135,7 @@
           "label": {
             "zh": "攻击伤害降低：",
             "en": "ATTACK DAMAGE REDUCTION:",
-            "ru": "ATTACK DAMAGE REDUCTION:"
+            "ru": "Снижение урона от атаки:"
           },
           "levels": [
             "-25"
@@ -1160,7 +1160,7 @@
       "lore": {
         "zh": "狂风所至，箭雨无处不在。",
         "en": "Where the gale blows, arrows rain without end.",
-        "ru": "Where the gale blows, arrows rain without end."
+        "ru": "Куда долетает ураган, там льётся дождь стрел."
       }
     }
   },
@@ -1406,7 +1406,7 @@
     "desc": {
       "zh": "召集其他维度的混沌骑士来到这个世界，与此处的混沌骑士一同作战。每当混沌骑士攻击时，其他的混沌骑士也会对目标开展额外攻击，其他的混沌骑士的攻击有短暂的冷却。",
       "en": "Summons other Chaos Knights from other dimensions to Chaos Knight's side and fight with alongside him as a part of his being. Whenever Chaos Knight attacks, the other Chaos Knights will also deliver their own attacks on the target. The additional Chaos Knights' attacks have a short cooldown before they can strike again.",
-      "ru": "Summons other Chaos Knights from other dimensions to Chaos Knight's side and fight with alongside him as a part of his being. Whenever Chaos Knight attacks, the other Chaos Knights will also deliver their own attacks on the target. The additional Chaos Knights' attacks have a short cooldown before they can strike again."
+      "ru": "Призывает к Хаос-рыцарю других Хаос-рыцарей из иных измерений, которые сражаются вместе с ним. Когда Хаос-рыцарь атакует, остальные Хаос-рыцари наносят по цели собственную атаку, у которой есть короткий откат."
     },
     "ability": {
       "behavior": "noTarget",
@@ -1419,7 +1419,7 @@
           "label": {
             "zh": "混沌之军持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "Длительность:"
           },
           "levels": [
             "20",
@@ -1435,7 +1435,7 @@
           "label": {
             "zh": "额外攻击次数：",
             "en": "EXTRA ATTACKS:",
-            "ru": "EXTRA ATTACKS:"
+            "ru": "Дополнительные атаки:"
           },
           "levels": [
             "1",
@@ -1451,7 +1451,7 @@
           "label": {
             "zh": "攻击冷却时间：",
             "en": "EXTRA ATTACKS COOLDOWN:",
-            "ru": "EXTRA ATTACKS COOLDOWN:"
+            "ru": "Откат дополнительных атак:"
           },
           "levels": [
             "2",
@@ -1476,15 +1476,15 @@
       "lore": {
         "zh": "凭借混沌骑士在各个世界丰富的战斗经验，他的幻象足以压制所有敢于反抗他的人。",
         "en": "With the Chaos Knight's rich combat experience in various worlds, his very being brings enough strength to suppress anyone who dares to oppose him. And any copies of him wherever they may be.",
-        "ru": "With the Chaos Knight's rich combat experience in various worlds, his very being brings enough strength to suppress anyone who dares to oppose him. And any copies of him wherever they may be."
+        "ru": "Богатый боевой опыт Хаос-рыцаря в разных мирах даёт ему силу подавить любого, кто осмелится ему противостоять, а также все его копии."
       }
     }
   },
   "bloodseeker_blood_mist2": {
     "desc": {
       "zh": "血魔将自己的鲜血撒向一片区域，伤害自身的同时对敌人造成伤害",
-      "en": "Bloodseeker sprays his blood continuously in the area around him, losing health to damage and slow his enemies.",
-      "ru": "Пока способность активна, герой разбрызгивает вокруг свою кровь, теряя здоровье, но нанося задетым врагам урон и замедляя их"
+      "en": "Bloodseeker sprays his blood in the area around him, losing health while damaging his enemies.",
+      "ru": "Кровопускатель разбрызгивает свою кровь вокруг себя, теряя здоровье и нанося урон врагам."
     },
     "ability": {
       "behavior": "toggle",
@@ -1510,7 +1510,7 @@
           "label": {
             "zh": "每秒生命消耗/伤害：",
             "en": "HP PER SECOND COST/DAMAGE:",
-            "ru": "Урон / потеря здоровья в секунду:"
+            "ru": "Потеря здоровья / урон в секунду:"
           },
           "levels": [
             "4",
@@ -1533,7 +1533,7 @@
     "desc": {
       "zh": "<h1><font color='#A74ABD'>主动：狂潮</font></h1>以前所未有的速度对指定地点范围内的敌人疯狂倾泻法术，包括所有可用的技能和物品。效果期间所有冷却时间缩短为1/5，移除施法前摇，持续状态不会被打断，直至蓝尽人亡，但人无法移动。<br><br>持续时间：3 4 5 6 7 秒",
       "en": "<h1><font color='#A74ABD'>Active: Frenzy</font></h1>Unleash a barrage of spells at unprecedented speed on enemies within range at the target location, including all available abilities and items. During the effect, all cooldowns are reduced to 1/5, cast points are removed, channeling states cannot be interrupted, until mana is exhausted, but you cannot move.<br><br>Duration: 3 4 5 6 7 seconds",
-      "ru": "<h1><font color='#A74ABD'>Active: Frenzy</font></h1>Unleash a barrage of spells at unprecedented speed on enemies within range at the target location, including all available abilities and items. During the effect, all cooldowns are reduced to 1/5, cast points are removed, channeling states cannot be interrupted, until mana is exhausted, but you cannot move.<br><br>Duration: 3 4 5 6 7 seconds"
+      "ru": "<h1><font color='#A74ABD'>Активно: Безумие</font></h1>С невиданной скоростью обрушивает на врагов в указанной области все доступные способности и предметы. Во время действия все откаты сокращены в 1/5, убраны задержки применения, поддерживаемые состояния нельзя прервать, пока не кончится мана, но герой не может двигаться.<br><br>Длительность: 3 4 5 6 7 сек."
     },
     "ability": {
       "behavior": "point",
@@ -1546,7 +1546,7 @@
           "label": {
             "zh": "施法间隔：",
             "en": "Cast Interval:",
-            "ru": "Cast Interval:"
+            "ru": "Интервал применения:"
           },
           "levels": [
             "0.4",
@@ -1563,7 +1563,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "Duration:",
-            "ru": "Duration:"
+            "ru": "Длительность:"
           },
           "levels": [
             "3",
@@ -1580,7 +1580,7 @@
           "label": {
             "zh": "冷却缩减：",
             "en": "Cooldown Reduction:",
-            "ru": "Cooldown Reduction:"
+            "ru": "Сокращение откатов:"
           },
           "levels": [
             "60",
@@ -1597,7 +1597,7 @@
           "label": {
             "zh": "施法前摇减免：",
             "en": "Cast Point Reduction:",
-            "ru": "Cast Point Reduction:"
+            "ru": "Снижение задержки применения:"
           },
           "levels": [
             "100"
@@ -1610,7 +1610,7 @@
           "label": {
             "zh": "搜索范围：",
             "en": "Search Radius:",
-            "ru": "Search Radius:"
+            "ru": "Радиус поиска:"
           },
           "levels": [
             "300",
@@ -1627,7 +1627,7 @@
           "label": {
             "zh": "期间额外施法距离：",
             "en": "Bonus Cast Range:",
-            "ru": "Bonus Cast Range:"
+            "ru": "Дополнительная дальность применения:"
           },
           "levels": [
             "1200"
@@ -1648,7 +1648,7 @@
       "lore": {
         "zh": "欸我说，这位病人下次悠着点，技能都搓冒烟了，蓝是一滴也不剩啊",
         "en": "Hey, I'm telling you, this patient should take it easy next time. Mashed the buttons till they smoked, not a drop of mana left.",
-        "ru": "Hey, I'm telling you, this patient should take it easy next time. Mashed the buttons till they smoked, not a drop of mana left."
+        "ru": "Эй, говорю же, этому пациенту в следующий раз стоит полегче: кнопки дымятся, а маны ни капли не осталось."
       }
     }
   },
@@ -1656,7 +1656,7 @@
     "desc": {
       "zh": "被动：有概率闪避攻击并造成暴击。<br><br>主动：进入醉拳状态，英雄开始左右摇晃醉步，获得30%移动速度加成，闪避与暴击概率提升至3倍，持续5秒。",
       "en": "Passive: Chance to dodge attacks and deal critical damage.<br><br>Active: Enter Drunken state, staggering left and right uncontrollably. Gain 30% movement speed and 3x dodge and crit chance for 5 seconds.",
-      "ru": "Пассивно даёт шанс уклониться от атаки и нанести критический урон.<br><br>При активации герой начинает шататься, получает 30% к скорости передвижения, а шансы уклонения и критической атаки увеличиваются в 3 раза на 5 сек."
+      "ru": "Пассивно: шанс уклониться от атаки и нанести критический удар.<br><br>Активно: герой входит в состояние опьянения и шатается из стороны в сторону. Получает 30% к скорости передвижения, а шансы уклонения и крита возрастают в 3 раза на 5 сек."
     },
     "ability": {
       "behavior": "autocast",
@@ -1669,7 +1669,7 @@
           "label": {
             "zh": "闪避/暴击概率：",
             "en": "DODGE/CRIT CHANCE:",
-            "ru": "DODGE/CRIT CHANCE:"
+            "ru": "Шанс уклонения/крита:"
           },
           "levels": [
             "15",
@@ -1703,7 +1703,7 @@
           "label": {
             "zh": "激活持续时间：",
             "en": "ACTIVE DURATION:",
-            "ru": "Длительность："
+            "ru": "Длительность действия:"
           },
           "levels": [
             "5"
@@ -1730,7 +1730,7 @@
     "desc": {
       "zh": "剑圣化身旋转风暴，每秒对周围敌人造成基础伤害加目标最大生命百分比的魔法伤害。期间获得<font color='#FFCC66'>减益免疫</font>和80%魔法抗性，可以正常攻击但攻击力降低50%。旋转结束时对自身施加强效驱散。",
       "en": "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80% magic resistance, and can attack normally but with attack power reduced by 50%. Performs a strong dispel on himself when the spin ends.",
-      "ru": "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80% magic resistance, and can attack normally but with attack power reduced by 50%. Performs a strong dispel on himself when the spin ends."
+      "ru": "Джаггернаут превращается в вихрь клинков и ежесекундно наносит окружающим врагам магический урон, складывающийся из базового урона и процента от максимального здоровья цели. На время действия он получает <font color='#FFCC66'>невосприимчивость к дебаффам</font> и 80% сопротивления магии, может атаковать, но его урон от атак снижен на 50%. По окончании вихря на себя накладывается сильное развеивание."
     },
     "ability": {
       "behavior": "channeled",
@@ -1743,7 +1743,7 @@
           "label": {
             "zh": "作用范围：",
             "en": "RADIUS:",
-            "ru": "RADIUS:"
+            "ru": "РАДИУС:"
           },
           "levels": [
             "350"
@@ -1756,7 +1756,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "ДЛИТЕЛЬНОСТЬ:"
           },
           "levels": [
             "5"
@@ -1769,7 +1769,7 @@
           "label": {
             "zh": "基础伤害：",
             "en": "BASE DAMAGE:",
-            "ru": "BASE DAMAGE:"
+            "ru": "БАЗОВЫЙ УРОН:"
           },
           "levels": [
             "80",
@@ -1786,7 +1786,7 @@
           "label": {
             "zh": "每秒最大生命伤害：",
             "en": "MAX HEALTH DAMAGE PER SECOND:",
-            "ru": "MAX HEALTH DAMAGE PER SECOND:"
+            "ru": "УРОН ОТ МАКС. ЗДОРОВЬЯ В СЕКУНДУ:"
           },
           "levels": [
             "2"
@@ -1817,7 +1817,7 @@
     "desc": {
       "zh": "英雄与命运博弈，每一次攻击都是赌注。累计 4 次有效普通攻击后，下一次有效普通攻击将对目标等概率触发以下命运之一：<font color='#FFD76A'>暴击</font>、<font color='#8FD7FF'>眩晕</font>目标 0.6 0.7 0.8 0.9 秒、持续驱散、破坏、缠绕、锁闭，持续 2 2.25 2.5 2.75 秒。持续驱散会立即并每 0.2 秒进行一次弱驱散，仅移除目标的正面状态。每次轮盘触发都会对英雄自身施加一次弱驱散。<br>主动释放后进入“命定之刻”，持续期间每次有效普通攻击都必定触发轮盘，且不会增加、重置或消耗原有攻击计数。",
       "en": "The hero wagers against fate with every attack. After completing 4 valid attacks, the next valid attack triggers one of the following fates against the target: <font color='#FFD76A'>Critical Strike</font>, <font color='#8FD7FF'>Stun</font> for 0.6 0.7 0.8 0.9 seconds, Continuous Dispel, Break, Root, or Mute for 2 2.25 2.5 2.75 seconds. Continuous Dispel immediately applies a basic dispel and repeats every 0.2 seconds, removing only positive buffs from the target. Every roulette trigger also applies a basic dispel to the hero.<br>Casting the ability grants Destined Moment, causing every valid attack to trigger roulette without gaining, resetting, or consuming the stored attack count.",
-      "ru": "The hero wagers against fate with every attack. After completing 4 valid attacks, the next valid attack triggers one of the following fates against the target: <font color='#FFD76A'>Critical Strike</font>, <font color='#8FD7FF'>Stun</font> for 0.6 0.7 0.8 0.9 seconds, Continuous Dispel, Break, Root, or Mute for 2 2.25 2.5 2.75 seconds. Continuous Dispel immediately applies a basic dispel and repeats every 0.2 seconds, removing only positive buffs from the target. Every roulette trigger also applies a basic dispel to the hero.<br>Casting the ability grants Destined Moment, causing every valid attack to trigger roulette without gaining, resetting, or consuming the stored attack count."
+      "ru": "Каждая атака — ставка в игре с судьбой. После 4 зачтённых атак следующая с равной вероятностью применит к цели один из эффектов: <font color='#FFD76A'>критический удар</font>, <font color='#8FD7FF'>оглушение</font> на 0.6 0.7 0.8 0.9 сек., непрерывное развеивание, истощение, оцепенение или запрет предметов на 2 2.25 2.5 2.75 сек. Непрерывное развеивание сразу и каждые 0.2 сек. применяет к цели простое развеивание, снимающее только положительные эффекты. При каждом срабатывании рулетки герой также получает простое развеивание.<br>При применении способности наступает «Предначертанный момент»: каждая зачтённая атака запускает рулетку, не увеличивая, не сбрасывая и не расходуя накопленный счётчик."
     },
     "ability": {
       "behavior": "noTarget",
@@ -1830,7 +1830,7 @@
           "label": {
             "zh": "暴击伤害：",
             "en": "CRITICAL DAMAGE:",
-            "ru": "CRITICAL DAMAGE:"
+            "ru": "Критический урон:"
           },
           "levels": [
             "200",
@@ -1844,41 +1844,9 @@
         },
         {
           "label": {
-            "zh": "眩晕时间：",
-            "en": "Stun Duration:",
-            "ru": "Stun Duration:"
-          },
-          "levels": [
-            "0.6",
-            "0.7",
-            "0.8",
-            "0.9"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "命运效果持续时间：",
-            "en": "Fate Effect Duration:",
-            "ru": "Fate Effect Duration:"
-          },
-          "levels": [
-            "2",
-            "2.25",
-            "2.5",
-            "2.75"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
             "zh": "命定之刻持续时间：",
             "en": "Destined Moment Duration:",
-            "ru": "Destined Moment Duration:"
+            "ru": "Длительность «Предначертанного момента»:"
           },
           "levels": [
             "4",
@@ -1903,7 +1871,7 @@
       "lore": {
         "zh": "命运从不掷骰子——除非，你就是赌注。",
         "en": "Fate never rolls the dice—unless you are the wager.",
-        "ru": "Fate never rolls the dice—unless you are the wager."
+        "ru": "Судьба не бросает кости — если только ставкой не стали вы."
       }
     }
   },
@@ -2245,7 +2213,7 @@
     "desc": {
       "zh": "酒仙这下NB了，获得四种拳法的效果。",
       "en": "Gain the bonunses of four different fighting styles.",
-      "ru": "Gain the bonunses of four different fighting styles."
+      "ru": "Теперь Пивовар крут: получает эффекты всех четырёх стилей боя."
     },
     "ability": {
       "behavior": "noTarget",
@@ -2258,7 +2226,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "ДЛИТЕЛЬНОСТЬ:"
           },
           "levels": [
             "16",
@@ -2273,7 +2241,7 @@
           "label": {
             "zh": "移动速度加成：",
             "en": "<font color=\"#87ceeb\">%MOVEMENT SPEED</font>:",
-            "ru": "<font color=\"#87ceeb\">%MOVEMENT SPEED</font>:"
+            "ru": "БОНУС СКОРОСТИ ПЕРЕДВИЖЕНИЯ:"
           },
           "levels": [
             "5",
@@ -2288,7 +2256,7 @@
           "label": {
             "zh": "状态抗性加成：",
             "en": "<font color=\"#662375\">%STATUS RESISTANCE</font>:",
-            "ru": "<font color=\"#662375\">%STATUS RESISTANCE</font>:"
+            "ru": "БОНУС СОПРОТИВЛЕНИЯ ЭФФЕКТАМ:"
           },
           "levels": [
             "10",
@@ -2303,7 +2271,7 @@
           "label": {
             "zh": "魔法抗性：",
             "en": "<font color=\"#9acd32\">%MAGIC RESISTANCE</font>:",
-            "ru": "<font color=\"#9acd32\">%MAGIC RESISTANCE</font>:"
+            "ru": "СОПРОТИВЛЕНИЕ МАГИИ:"
           },
           "levels": [
             "10",
@@ -2318,7 +2286,7 @@
           "label": {
             "zh": "<font color=\"#87ceeb\">护甲</font>：",
             "en": "<font color=\"#9acd32\">ARMOR</font>:",
-            "ru": "<font color=\"#9acd32\">ARMOR</font>:"
+            "ru": "<font color=\"#87ceeb\">БРОНЯ</font>:"
           },
           "levels": [
             "4",
@@ -2333,7 +2301,7 @@
           "label": {
             "zh": "<font color=\"#87ceeb\">闪避</font>：",
             "en": "<font color=\"#87ceeb\">EVASION</font>:",
-            "ru": "<font color=\"#87ceeb\">EVASION</font>:"
+            "ru": "<font color=\"#87ceeb\">УКЛОНЕНИЕ</font>:"
           },
           "levels": [
             "15",
@@ -2348,7 +2316,7 @@
           "label": {
             "zh": "<font color=\"#FF0000\">致命一击几率</font>：",
             "en": "<font color=\"#FF0000\">CRITICAL CHANCE</font>:",
-            "ru": "<font color=\"#FF0000\">CRITICAL CHANCE</font>:"
+            "ru": "<font color=\"#FF0000\">ШАНС КРИТ. УДАРА</font>:"
           },
           "levels": [
             "25"
@@ -2361,7 +2329,7 @@
           "label": {
             "zh": "<font color=\"#FF0000\">致命一击伤害</font>：",
             "en": "<font color=\"#FF0000\">CRITICAL DAMAGE</font>:",
-            "ru": "<font color=\"#FF0000\">CRITICAL DAMAGE</font>:"
+            "ru": "<font color=\"#FF0000\">УРОН КРИТ. УДАРА</font>:"
           },
           "levels": [
             "150",
@@ -2376,7 +2344,7 @@
           "label": {
             "zh": "<font color=\"#FF0000\">攻击速度</font>：",
             "en": "<font color=\"#FF0000\">ATTACK SPEED</font>:",
-            "ru": "<font color=\"#FF0000\">ATTACK SPEED</font>:"
+            "ru": "<font color=\"#FF0000\">СКОРОСТЬ АТАКИ</font>:"
           },
           "levels": [
             "20",
@@ -2391,7 +2359,7 @@
           "label": {
             "zh": "<font color=\"#662375\">攻击降低移动速度</font>：",
             "en": "<font color=\"#662375\">ATTACK/MOVEMENT SLOW</font>:",
-            "ru": "<font color=\"#662375\">ATTACK/MOVEMENT SLOW</font>:"
+            "ru": "<font color=\"#662375\">СНИЖЕНИЕ СКОРОСТИ ПЕРЕДВИЖЕНИЯ ОТ АТАК</font>:"
           },
           "levels": [
             "10",
@@ -2406,7 +2374,7 @@
           "label": {
             "zh": "<font color=\"#662375\">减速持续时间</font>：",
             "en": "<font color=\"#662375\">SLOW DURATION</font>:",
-            "ru": "<font color=\"#662375\">SLOW DURATION</font>:"
+            "ru": "<font color=\"#662375\">ДЛИТЕЛЬНОСТЬ ЗАМЕДЛЕНИЯ</font>:"
           },
           "levels": [
             "2"
@@ -2429,7 +2397,7 @@
       "lore": {
         "zh": "没有人清楚曼吉克斯是否注意到自己和自然之间强大的连结，因为这总是发生在他醉得不省人事之时。",
         "en": "It isn't clear whether Mangix is consciously aware of his potent bond with nature, as it often occurs in the midst of a drunken stupor.",
-        "ru": "It isn't clear whether Mangix is consciously aware of his potent bond with nature, as it often occurs in the midst of a drunken stupor."
+        "ru": "Никто не знает, замечает ли Мангкс свою сильную связь с природой — это всегда происходит, когда он напивается до беспамятства."
       }
     }
   },
@@ -3976,7 +3944,7 @@
     "desc": {
       "zh": "持续施法 - 克林克兹持续朝目标方向射出多支灼热的箭矢，击中所有敌人，造成克林克兹攻击伤害的一定百分比并施加攻击特效，同时敌人会受到焦油炸弹的减速效果。",
       "en": "CHANNELED - Shoot multiple piercing arrows in the target direction that hit all enemy units dealing a percentage of attack damage and applying any attack modifiers.",
-      "ru": "ПРЕРЫВАЕМАЯ — герой выпускает залп стрел в выбранном направлении. Они пролетают сквозь всех врагов на пути, нанося им долю от обычного урона, а также накладывая эффекты атаки и замедление от способности Tar Bomb."
+      "ru": "Поддерживаемое - Клинкз непрерывно выпускает в выбранном направлении раскалённые стрелы, поражающие всех врагов. Стрелы наносят часть урона от атаки и применяют модификаторы атаки, а враги попадают под замедление от смоляной бомбы."
     },
     "ability": {
       "behavior": "channeled",
@@ -3989,7 +3957,7 @@
           "label": {
             "zh": "距离：",
             "en": "RANGE:",
-            "ru": "ДАЛЬНОСТЬ:"
+            "ru": "Дальность:"
           },
           "levels": [
             "800",
@@ -4006,7 +3974,7 @@
           "label": {
             "zh": "每支箭矢伤害：",
             "en": "DAMAGE PER ARROW:",
-            "ru": "УРОН ОТ АТАКИ:"
+            "ru": "Урон за стрелу:"
           },
           "levels": [
             "75",
@@ -4023,7 +3991,7 @@
           "label": {
             "zh": "发射箭矢数量：",
             "en": "ARROWS FIRED:",
-            "ru": "ЧИСЛО СТРЕЛ:"
+            "ru": "Выпущено стрел:"
           },
           "levels": [
             "6"
@@ -4042,7 +4010,7 @@
       "lore": {
         "zh": "其他人很难分辨骷髅弓箭手身边缭绕的劲风到底是来自他心中的火焰还是他出箭的速度。",
         "en": "It's hard to say whether the blur around the Bone Fletcher is from his flaming heart or his speed with the quiver.",
-        "ru": "Трудно сказать, вызвано ли дрожание воздуха вокруг костяного лучника жаром его раскалённого сердца или скоростью, с которой он достаёт стрелы из колчана."
+        "ru": "Трудно сказать, что окутывает Скелета-лучника — пламя его сердца или скорость его стрел."
       }
     }
   },
@@ -4050,7 +4018,7 @@
     "desc": {
       "zh": "减少敌方单位的治疗和生命回复。<br/><br/>主动施法：对周围敌方单位造成伤害和减速，距离自己越近伤害和减速越大",
       "en": "Reduces the healing and health restoration of enemy units.<br/><br/>Active: Deal damage and slow nearby enemy units. Slow and damage are stronger the closer enemy units are.",
-      "ru": "Снижает восстановление здоровья, вампиризм и лечение врага.<br/><br/>Активно: Наносит урон и замедляет окружающих врагов. Чем ближе они к герою, тем больше урон и замедление."
+      "ru": "Снижает лечение и восстановление здоровья вражеских существ.<br/><br/>Активно: наносит урон и замедляет врагов рядом, чем ближе враг, тем сильнее эффект."
     },
     "ability": {
       "behavior": "noTarget",
@@ -4063,7 +4031,7 @@
           "label": {
             "zh": "减疗百分比：",
             "en": "HEAL AMPLFICIATION REDUCTION:",
-            "ru": "Снижение лечения："
+            "ru": "Снижение лечения:"
           },
           "levels": [
             "20",
@@ -4080,7 +4048,7 @@
           "label": {
             "zh": "生命恢复减少：",
             "en": "HEALTH RESTORATION REDUCTION:",
-            "ru": "Снижение восстановления здоровья："
+            "ru": "Снижение восстановления здоровья:"
           },
           "levels": [
             "10",
@@ -4097,7 +4065,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "ACTIVE DURATION:",
-            "ru": "Длительность："
+            "ru": "Длительность действия:"
           },
           "levels": [
             "5"
@@ -4110,7 +4078,7 @@
           "label": {
             "zh": "最大伤害：",
             "en": "MAX BASE DAMAGE:",
-            "ru": "Макс. урон："
+            "ru": "Максимальный урон:"
           },
           "levels": [
             "40",
@@ -4127,7 +4095,7 @@
           "label": {
             "zh": "攻击力伤害加成倍率：",
             "en": "MAX BONUS DAMAGE PER ATTACK DAMAGE:",
-            "ru": "ad rate："
+            "ru": "Максимальный бонусный урон за единицу урона от атаки:"
           },
           "levels": [
             "0.15"
@@ -4154,7 +4122,7 @@
     "desc": {
       "zh": "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><font color='#FFFFFF'>神杖升级：命中的敌方英雄附加眩晕效果。</font>",
       "en": "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>",
-      "ru": "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>"
+      "ru": "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.<br><br><font color='#FFFFFF'>Аганимовский скипетр: поражённые герои также оглушаются.</font>"
     },
     "ability": {
       "behavior": "point",
@@ -4167,7 +4135,7 @@
           "label": {
             "zh": "暗杀范围:",
             "en": "RADIUS:",
-            "ru": "RADIUS:"
+            "ru": "Радиус:"
           },
           "levels": [
             "350"
@@ -4180,7 +4148,7 @@
           "label": {
             "zh": "致命一击伤害:",
             "en": "CRITICAL DAMAGE:",
-            "ru": "CRITICAL DAMAGE:"
+            "ru": "Урон критического удара:"
           },
           "levels": [
             "220",
@@ -4196,7 +4164,7 @@
           "label": {
             "zh": "额外物理伤害:",
             "en": "BONUS PHYSICAL DAMAGE:",
-            "ru": "BONUS PHYSICAL DAMAGE:"
+            "ru": "Дополнительный физический урон:"
           },
           "levels": [
             "300",
@@ -4221,7 +4189,7 @@
       "lore": {
         "zh": "扣下扳机的那一刻，整片战场都为之屏息。",
         "en": "For the space of a heartbeat, the whole battlefield holds its breath.",
-        "ru": "For the space of a heartbeat, the whole battlefield holds its breath."
+        "ru": "В этот миг всё поле боя затаило дыхание."
       }
     }
   },
@@ -4920,7 +4888,7 @@
     "desc": {
       "zh": "持续施法 - 重置修补匠的大多数物品和技能的冷却时间。<br>按住Alt查看不能刷新的物品和技能。",
       "en": "CHANNELED - Resets the cooldown on most of Tinker's items and abilities.<br>Hold ALT to see a list of items and abilities that cannot be refreshed by Rearm.",
-      "ru": "CHANNELED - Resets the cooldown on most of Tinker's items and abilities.<br>Hold ALT to see a list of items and abilities that cannot be refreshed by Rearm."
+      "ru": "Поддерживаемое - сбрасывает откат большинства предметов и способностей Тинкера.<br>Удерживайте ALT, чтобы увидеть предметы и способности, которые «Перезарядка» не сбрасывает."
     },
     "ability": {
       "behavior": "channeled",
@@ -4933,7 +4901,7 @@
           "label": {
             "zh": "再装填施法时间：",
             "en": "TIME TO REARM:",
-            "ru": "TIME TO REARM:"
+            "ru": "Время перезарядки:"
           },
           "levels": [
             "3.5",
@@ -4956,7 +4924,7 @@
       "lore": {
         "zh": "这儿换块新电池，那儿塞几枚火箭弹，鲍什不断改进现有的技术。",
         "en": "A new battery here, another set of rockets there, Boush continually improves on existing technology.",
-        "ru": "A new battery here, another set of rockets there, Boush continually improves on existing technology."
+        "ru": "Где-то новая батарейка, где-то ещё ракеты — Бауш постоянно улучшает существующую технику."
       }
     }
   },
@@ -5137,7 +5105,7 @@
     "desc": {
       "zh": "减少其他所有技能的剩余冷却时间。施放邪能会暂时增加生命消耗。",
       "en": "Decreases the remaining cooldown of all other abilities. Casting Bad Juju temporarily increases its health cost.",
-      "ru": "Decreases the remaining cooldown of all other abilities. Casting Bad Juju temporarily increases its health cost."
+      "ru": "Сокращает оставшееся время восстановления всех других способностей. Применение дурных чар временно повышает расход здоровья."
     },
     "ability": {
       "behavior": "noTarget",
@@ -5150,7 +5118,7 @@
           "label": {
             "zh": "技能冷却时间减少：",
             "en": "COOLDOWN REDUCTION:",
-            "ru": "COOLDOWN REDUCTION:"
+            "ru": "СОКРАЩЕНИЕ ПЕРЕЗАРЯДКИ СПОСОБНОСТЕЙ:"
           },
           "levels": [
             "3",
@@ -5166,7 +5134,7 @@
           "label": {
             "zh": "每次施法增加生命消耗：",
             "en": "HEALTH COST INCREASE PER CAST:",
-            "ru": "HEALTH COST INCREASE PER CAST:"
+            "ru": "ПОВЫШЕНИЕ РАСХОДА ЗДОРОВЬЯ ЗА ПРИМЕНЕНИЕ:"
           },
           "levels": [
             "40"
@@ -5179,7 +5147,7 @@
           "label": {
             "zh": "生命消耗增加持续时间：",
             "en": "HEALTH COST INCREASE DURATION:",
-            "ru": "HEALTH COST INCREASE DURATION:"
+            "ru": "ДЛИТЕЛЬНОСТЬ ПОВЫШЕННОГО РАСХОДА ЗДОРОВЬЯ:"
           },
           "levels": [
             "20"
@@ -5196,7 +5164,7 @@
       "lore": {
         "zh": "虚无之境的每一次咒术都使其能进一步渗透尘世的周遭。",
         "en": "Each invocation of the Nothl realm helps it further permeate the surroundings of our own.",
-        "ru": "Each invocation of the Nothl realm helps it further permeate the surroundings of our own."
+        "ru": "Каждое заклинание из Иного мира позволяет ему всё глубже проникать в окружающий мир."
       }
     }
   },
@@ -5401,7 +5369,7 @@
     "desc": {
       "zh": "创造出一个神圣屏障环绕友军，提升目标的状态抗性，力量和生命恢复。<br><br>驱散类型：强驱散",
       "en": "Creates a holy barrier around an ally, increasing the target's status resistance, strength, and health regeneration.<br><br>Dispel Type: Strong Dispel",
-      "ru": "Creates a holy barrier around an ally, increasing the target's status resistance, strength, and health regeneration.<br><br>Dispel Type: Strong Dispel"
+      "ru": "Создаёт вокруг союзника священный барьер, повышающий сопротивление эффектам, силу и восстановление здоровья цели.<br><br>Тип развеивания: сильное развеивание"
     },
     "ability": {
       "behavior": "target",
@@ -5414,7 +5382,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "ДЛИТЕЛЬНОСТЬ:"
           },
           "levels": [
             "10"
@@ -5427,7 +5395,7 @@
           "label": {
             "zh": "状态抗性：",
             "en": "STATUS RESISTANCE:",
-            "ru": "STATUS RESISTANCE:"
+            "ru": "СОПРОТИВЛЕНИЕ ЭФФЕКТАМ:"
           },
           "levels": [
             "50"
@@ -5440,7 +5408,7 @@
           "label": {
             "zh": "力量加成：",
             "en": "STRENGTH:",
-            "ru": "STRENGTH:"
+            "ru": "СИЛА:"
           },
           "levels": [
             "8",
@@ -5456,7 +5424,7 @@
           "label": {
             "zh": "生命恢复：",
             "en": "HEALTH REGEN:",
-            "ru": "HEALTH REGEN:"
+            "ru": "ВОССТАНОВЛЕНИЕ ЗДОРОВЬЯ:"
           },
           "levels": [
             "8",
@@ -5484,7 +5452,7 @@
       "lore": {
         "zh": "当面对着牺牲之渊时，普利斯特对魔法的适应力得到了测试和证实。",
         "en": "When facing the Abyss of Sacrifice, Purist's resistance to magic was tested and proven.",
-        "ru": "When facing the Abyss of Sacrifice, Purist's resistance to magic was tested and proven."
+        "ru": "Перед лицом Бездны жертвоприношений стойкость Пуриста к магии была проверена и доказана."
       }
     }
   },
@@ -7409,7 +7377,7 @@
     "desc": {
       "zh": "使莉娜获得顺畅的移动状态，并且提升技能伤害和魔法抗性。开启时获得炽魂的最高叠加层数。",
       "en": "Grants unobstructed movement, increased spell damage, and magic resistance.",
-      "ru": "Дарует герою беспрепятственное передвижение. Увеличивает его урон от заклинаний и сопротивление магии. Применение даёт владельцу максимум эффектов способности Fiery Soul."
+      "ru": "Дарует беспрепятственное передвижение, повышает урон от способностей и сопротивление магии. При активации даёт максимальное число эффектов Fiery Soul."
     },
     "ability": {
       "behavior": "noTarget",
@@ -7422,7 +7390,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "ДЛИТЕЛЬНОСТЬ:"
+            "ru": "Длительность:"
           },
           "levels": [
             "8"
@@ -7435,7 +7403,7 @@
           "label": {
             "zh": "魔法抗性：",
             "en": "MAGIC RESISTANCE:",
-            "ru": "СОПРОТИВЛЕНИЕ МАГИИ:"
+            "ru": "Сопротивление магии:"
           },
           "levels": [
             "15",
@@ -7452,7 +7420,7 @@
           "label": {
             "zh": "技能增强：",
             "en": "SPELL AMP:",
-            "ru": "ДОП. УРОН ОТ ЗАКЛИНАНИЙ:"
+            "ru": "Усиление способностей:"
           },
           "levels": [
             "10",
@@ -7479,15 +7447,15 @@
       "lore": {
         "zh": "一道天然的屏障，不论是拦住讨厌的姐妹还是可怕的野兽都能轻松做到。",
         "en": "A natural defense equally suited to keeping anything from unwanted sisters to snarling hellbeasts at bay.",
-        "ru": "Врождённая защита от настырных сестёр и зубастых тварей."
+        "ru": "Естественная защита, одинаково надёжная и от назойливых сестёр, и от рычащих адских тварей."
       }
     }
   },
   "dazzle_rain_of_vermin": {
     "desc": {
-      "zh": "对一片区域造成持续伤害，并有12%概率将其变为小鸡",
+      "zh": "对一片区域内的敌人造成持续伤害，并有概率将其变为小鸡。",
       "en": "Creates rain over an area that deals continuous damage to enemies over its duration. Enemies within the contaminated area also have a chance to transform into harmless creatures for a short time.",
-      "ru": "Наносит постоянный урон области, с вероятностью 12% превращая ее в цыплят."
+      "ru": "Создаёт дождь на области, наносящий врагам постоянный урон. У врагов в заражённой области также есть шанс превратиться на короткое время в безобидное существо."
     },
     "ability": {
       "behavior": "point",
@@ -7500,7 +7468,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "RAIN DURATION:",
-            "ru": "Длительность："
+            "ru": "Длительность дождя:"
           },
           "levels": [
             "5"
@@ -7513,7 +7481,7 @@
           "label": {
             "zh": "范围：",
             "en": "RAIN RADIUS:",
-            "ru": "Радиус："
+            "ru": "Радиус дождя:"
           },
           "levels": [
             "500"
@@ -7526,7 +7494,7 @@
           "label": {
             "zh": "概率：",
             "en": "HEX CHANCE:",
-            "ru": "Шанс："
+            "ru": "Шанс превращения:"
           },
           "levels": [
             "20",
@@ -7543,7 +7511,7 @@
           "label": {
             "zh": "变形持续时间：",
             "en": "HEX DURATION:",
-            "ru": "Длительность трансформации："
+            "ru": "Длительность превращения:"
           },
           "levels": [
             "1.2",
@@ -7560,7 +7528,7 @@
           "label": {
             "zh": "伤害：",
             "en": "RAIN DAMAGE:",
-            "ru": "повреждать："
+            "ru": "Урон дождя:"
           },
           "levels": [
             "50",
@@ -7595,7 +7563,7 @@
     "desc": {
       "zh": "炼金术士向友军目标扔出一瓶药剂，施加弱驱散效果，并提供攻击速度，移动速度和生命恢复。<br><br>驱散类型：弱驱散",
       "en": "Throws a potion at an ally or yourself, applying a basic dispel and granting attack speed, movement speed and HP regen.<br><br>DISPEL TYPE: Basic Dispel",
-      "ru": "Throws a potion at an ally or yourself, applying a basic dispel and granting attack speed, movement speed and HP regen.<br><br>DISPEL TYPE: Basic Dispel"
+      "ru": "Бросает зелье в союзника или в себя, применяя простое развеивание и давая скорость атаки, скорость передвижения и восстановление здоровья.<br><br>Тип развеивания: простое"
     },
     "ability": {
       "behavior": "target",
@@ -7608,7 +7576,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "Длительность:"
           },
           "levels": [
             "10"
@@ -7621,7 +7589,7 @@
           "label": {
             "zh": "攻击速度：",
             "en": "BONUS ATTACK SPEED:",
-            "ru": "BONUS ATTACK SPEED:"
+            "ru": "Бонус к скорости атаки:"
           },
           "levels": [
             "150"
@@ -7634,7 +7602,7 @@
           "label": {
             "zh": "生命恢复：",
             "en": "BONUS HP REGEN:",
-            "ru": "BONUS HP REGEN:"
+            "ru": "Бонус к восстановлению здоровья:"
           },
           "levels": [
             "120"
@@ -7647,7 +7615,7 @@
           "label": {
             "zh": "移动速度：",
             "en": "BONUS MOVEMENT SPEED:",
-            "ru": "BONUS MOVEMENT SPEED:"
+            "ru": "Бонус к скорости передвижения:"
           },
           "levels": [
             "90"
@@ -7670,7 +7638,7 @@
     "desc": {
       "zh": "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。",
       "en": "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.",
-      "ru": "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed."
+      "ru": "Запускает мясной крюк, который притягивает к себе первую задетую цель.<br><br><font color='#00CED1'>Автоприменение:</font> при включении крюк притягивает только врагов, при выключении может притягивать и союзников.<br><br>Значительно увеличены дальность применения и скорость крюка."
     },
     "ability": {
       "behavior": "autocast",
@@ -7683,7 +7651,7 @@
           "label": {
             "zh": "伤害：",
             "en": "DAMAGE:",
-            "ru": "DAMAGE:"
+            "ru": "УРОН:"
           },
           "levels": [
             "150",
@@ -7700,7 +7668,7 @@
           "label": {
             "zh": "钩子速度：",
             "en": "HOOK SPEED:",
-            "ru": "HOOK SPEED:"
+            "ru": "СКОРОСТЬ КРЮКА:"
           },
           "levels": [
             "2100",
@@ -7717,7 +7685,7 @@
           "label": {
             "zh": "基础施法距离：",
             "en": "BASE CAST RANGE:",
-            "ru": "BASE CAST RANGE:"
+            "ru": "БАЗОВАЯ ДАЛЬНОСТЬ ПРИМЕНЕНИЯ:"
           },
           "levels": [
             "1800",
@@ -7741,7 +7709,11 @@
       "manaCost": [
         "120"
       ],
-      "lore": null
+      "lore": {
+        "zh": "这下总不用吵架了吧",
+        "en": "No need to argue about it anymore.",
+        "ru": "Теперь можно и не ссориться."
+      }
     }
   },
   "centaur_stampede": {
@@ -9393,7 +9365,7 @@
     "desc": {
       "zh": "发射火箭，攻击1800范围内可见的最近敌方英雄。",
       "en": "Launches rockets at the nearest visible heroes within 1800 range.",
-      "ru": "Launches rockets at the nearest visible heroes within 1800 range."
+      "ru": "Выпускает ракеты по ближайшим видимым вражеским героям в радиусе 1800."
     },
     "ability": {
       "behavior": "noTarget",
@@ -9406,7 +9378,7 @@
           "label": {
             "zh": "伤害：",
             "en": "DAMAGE:",
-            "ru": "DAMAGE:"
+            "ru": "УРОН:"
           },
           "levels": [
             "120",
@@ -9423,7 +9395,7 @@
           "label": {
             "zh": "目标数：",
             "en": "TARGETS:",
-            "ru": "TARGETS:"
+            "ru": "КОЛ-ВО ЦЕЛЕЙ:"
           },
           "levels": [
             "2",
@@ -9440,7 +9412,7 @@
           "label": {
             "zh": "飞弹速度：",
             "en": "MISSILE SPEED:",
-            "ru": "MISSILE SPEED:"
+            "ru": "СКОРОСТЬ РАКЕТЫ:"
           },
           "levels": [
             "900"
@@ -9463,7 +9435,7 @@
       "lore": {
         "zh": "鲍什最后救下来的玩意儿，是一个改造过的制导式火箭筒。",
         "en": "The last contraption Boush was able to save was a retrofitted rocket launcher with a homing mechanism.",
-        "ru": "The last contraption Boush was able to save was a retrofitted rocket launcher with a homing mechanism."
+        "ru": "Последнее, что спас Бауш, — модифицированная самонаводящаяся ракетная установка."
       }
     }
   },
@@ -9635,7 +9607,7 @@
     "desc": {
       "zh": "为一个友方单位或建筑物制造一层寒冰护甲，增加护甲值并减速对其发动攻击的敌方单位。持续60.0秒。",
       "en": "Creates a shield around the target friendly unit or building, which adds armor and slows attacking units. Lasts 60.0 seconds.",
-      "ru": "Creates a shield around the target friendly unit or building, which adds armor and slows attacking units. Lasts 60.0 seconds."
+      "ru": "Создаёт ледяную броню на союзном юните или строении, повышая броню и замедляя вражеских юнитов, атакующих его. Длится 60.0 сек."
     },
     "ability": {
       "behavior": "autocast",
@@ -9648,7 +9620,7 @@
           "label": {
             "zh": "友军护甲提升：",
             "en": "ALLY ARMOR BONUS:",
-            "ru": "ALLY ARMOR BONUS:"
+            "ru": "БРОНЯ СОЮЗНИКУ:"
           },
           "levels": [
             "8",
@@ -9665,7 +9637,7 @@
           "label": {
             "zh": "减速持续时间：",
             "en": "SLOW DURATION:",
-            "ru": "SLOW DURATION:"
+            "ru": "ДЛИТЕЛЬНОСТЬ ЗАМЕДЛЕНИЯ:"
           },
           "levels": [
             "2.0"
@@ -9678,7 +9650,7 @@
           "label": {
             "zh": "敌军移动速度减缓：",
             "en": "ENEMY MOVE SLOW:",
-            "ru": "ENEMY MOVE SLOW:"
+            "ru": "ЗАМЕДЛЕНИЕ ПЕРЕДВИЖЕНИЯ ВРАГАМ:"
           },
           "levels": [
             "-8",
@@ -9695,7 +9667,7 @@
           "label": {
             "zh": "敌军攻击速度降低：",
             "en": "ENEMY ATTACK SLOW:",
-            "ru": "ENEMY ATTACK SLOW:"
+            "ru": "СНИЖЕНИЕ СКОРОСТИ АТАКИ ВРАГАМ:"
           },
           "levels": [
             "-16",
@@ -9724,7 +9696,7 @@
       "lore": {
         "zh": "原本是为了在中埋伏自卫时打造的，现在巫妖也能为他人施加这个强力的冰霜护体魔咒。",
         "en": "Originally crafted during his ambush for self-defense, the Lich is capable of enchanting others with a formidable defense of frost magic.",
-        "ru": "Originally crafted during his ambush for self-defense, the Lich is capable of enchanting others with a formidable defense of frost magic."
+        "ru": "Это мощное ледяное заклинание изначально было создано для защиты от засад, а теперь Лич может накладывать его и на других."
       }
     }
   },
@@ -10135,7 +10107,7 @@
     "desc": {
       "zh": "创建一个随机神符，神符创建后20秒后会消失",
       "en": "Creates a random rune in front of you. Runes created this way will despawn in 20 seconds if not activated.",
-      "ru": "Создает случайную руну"
+      "ru": "Создаёт перед вами случайную руну. Созданные так руны исчезают через 20 секунд, если их не активировать."
     },
     "ability": {
       "behavior": "noTarget",
@@ -10356,7 +10328,7 @@
     "desc": {
       "zh": "蝙蝠骑士的攻击会施加一个负面效果，每1秒造成16 20 24 28 32%攻击伤害，持续2秒。",
       "en": "Attacks apply a debuff that deals 16 20 24 28 32% of the initial attack damage every 1s for 2s.",
-      "ru": "Атаки героя накладывают эффект, который раз в 1 сек. наносит 16 20 24 28 32% урона от его атаки. Длительность: 2 сек."
+      "ru": "Атаки Бэтрайдера накладывают негативный эффект, наносящий 16 20 24 28 32% урона от атаки каждые 1 сек. в течение 2 сек."
     },
     "ability": {
       "behavior": "passive",
@@ -10374,7 +10346,7 @@
     "desc": {
       "zh": "杰奇洛攻击时两个头都会发动攻击，不过每个头造成的伤害减少。",
       "en": "Jakiro's attacks launch an attack from each head, but deal less damage each.",
-      "ru": "Атаки Джакиро запускают удар с каждой головы, но каждый наносит меньше урона."
+      "ru": "Атаки Джакиро совершаются обеими головами, но каждая голова наносит меньше урона."
     },
     "ability": {
       "behavior": "passive",
@@ -10387,7 +10359,7 @@
           "label": {
             "zh": "攻击力降低：",
             "en": "ATTACK DAMAGE REDUCTION:",
-            "ru": "ATTACK DAMAGE REDUCTION:"
+            "ru": "Снижение урона от атаки:"
           },
           "levels": [
             "50",
@@ -10480,7 +10452,7 @@
     "desc": {
       "zh": "戴泽每次施放技能后，其他所有冷却中的技能都会减少冷却时间。",
       "en": "Whenever Dazzle Casts a Spell, all other abilities currently on cooldown have their cooldowns reduced.",
-      "ru": "Whenever Dazzle Casts a Spell, all other abilities currently on cooldown have their cooldowns reduced."
+      "ru": "После каждого применения способности Даззла время восстановления всех других перезаряжающихся способностей сокращается."
     },
     "ability": {
       "behavior": "passive",
@@ -10493,7 +10465,7 @@
           "label": {
             "zh": "每次施法减少冷却时间：",
             "en": "COOLDOWN REDUCTION PER CAST:",
-            "ru": "COOLDOWN REDUCTION PER CAST:"
+            "ru": "СОКРАЩЕНИЕ ПЕРЕЗАРЯДКИ ЗА ПРИМЕНЕНИЕ:"
           },
           "levels": [
             "1",
@@ -10511,7 +10483,7 @@
       "lore": {
         "zh": "虚无之境的每一次咒术都使其能进一步渗透尘世的周遭。",
         "en": "Each invocation of the Nothl realm helps it further permeate the surroundings of our own.",
-        "ru": "Each invocation of the Nothl realm helps it further permeate the surroundings of our own."
+        "ru": "Каждое заклинание из Иного мира позволяет ему всё глубже проникать в окружающий мир."
       }
     }
   },
@@ -10797,7 +10769,7 @@
     "desc": {
       "zh": "克林克兹和他的骷髅弓手会施加一个可叠加的负面效果，使他们的攻击可以穿透最高目标20 30 40 50 60%总物理护甲（不会降低他们的护甲）。克林克兹每次攻击施加3%，骷髅弓手施加1%。<br><br>持续5秒。",
       "en": "Clinkz and his skeletons apply a stacking debuff that causes their attacks to pierce up to 20 30 40 50 60% of the target's total physical armor (does not reduce their armor).  Clinkz applies 3% per attack, and skeletons apply 1%. <br><br>Lasts 5 seconds.",
-      "ru": "Clinkz and his skeletons apply a stacking debuff that causes their attacks to pierce up to 20 30 40 50 60% of the target's total physical armor (does not reduce their armor).  Clinkz applies 3% per attack, and skeletons apply 1%. <br><br>Lasts 5 seconds."
+      "ru": "Клинкз и его скелеты накладывают складывающийся негативный эффект: их атаки пробивают до 20 30 40 50 60% всей физической брони цели (но не снижают её). Клинкз накладывает 3% за атаку, скелеты — 1%.<br><br>Длится 5 сек."
     },
     "ability": {
       "behavior": "passive",
@@ -10900,7 +10872,7 @@
     "desc": {
       "zh": "减免一定比例的伤害。基于减免前的伤害，累积1秒后反射给范围内的所有敌人，反射伤害类型与接收伤害类型一致。",
       "en": "Reduces a percentage of incoming damage. Based on pre-mitigation damage, accumulates for 1 second then reflects to all enemies in range. Reflection damage type matches the received damage type.",
-      "ru": "Reduces a percentage of incoming damage. Based on pre-mitigation damage, accumulates for 1 second then reflects to all enemies in range. Reflection damage type matches the received damage type."
+      "ru": "Снижает часть получаемого урона. Урон до снижения накапливается за 1 сек. и отражается всем врагам в радиусе, а тип отражённого урона совпадает с полученным."
     },
     "ability": {
       "behavior": "passive",
@@ -10913,7 +10885,7 @@
           "label": {
             "zh": "折射比例：",
             "en": "DAMAGE REFLECTED:",
-            "ru": "DAMAGE REFLECTED:"
+            "ru": "Доля отражения:"
           },
           "levels": [
             "10",
@@ -10930,7 +10902,7 @@
           "label": {
             "zh": "折射伤害阈值：",
             "en": "REFLECTION DAMAGE THRESHOLD:",
-            "ru": "REFLECTION DAMAGE THRESHOLD:"
+            "ru": "Порог отражённого урона:"
           },
           "levels": [
             "10",
@@ -10947,7 +10919,7 @@
           "label": {
             "zh": "折射范围：",
             "en": "REFLECTION RADIUS:",
-            "ru": "REFLECTION RADIUS:"
+            "ru": "Радиус отражения:"
           },
           "levels": [
             "700"
@@ -10966,7 +10938,7 @@
     "desc": {
       "zh": "被动技能。使黑暗贤者下次攻击可以打出目标的复制体,造成伤害和眩晕。",
       "en": "Passively causes your next attack to damage and stun the target, while knocking an illusion out of them.",
-      "ru": "Следующая атака героя наносит цели урон, оглушает её и создаёт её иллюзию."
+      "ru": "Пассивно: следующая атака наносит урон и оглушает цель, а также выбивает из неё иллюзию."
     },
     "ability": {
       "behavior": "passive",
@@ -10979,7 +10951,7 @@
           "label": {
             "zh": "幻象持续时间：",
             "en": "ILLUSION DURATION:",
-            "ru": "ВРЕМЯ ЖИЗНИ КОПИИ:"
+            "ru": "Длительность иллюзии:"
           },
           "levels": [
             "3"
@@ -10992,7 +10964,7 @@
           "label": {
             "zh": "眩晕时间：",
             "en": "STUN DURATION:",
-            "ru": "МАКС. ДЛИТЕЛЬНОСТЬ ОГЛУШЕНИЯ:"
+            "ru": "Длительность оглушения:"
           },
           "levels": [
             "1.0"
@@ -11005,7 +10977,7 @@
           "label": {
             "zh": "基础伤害：",
             "en": "BASE DAMAGE:",
-            "ru": "МАКСИМАЛЬНЫЙ УРОН:"
+            "ru": "Базовый урон:"
           },
           "levels": [
             "100",
@@ -11020,7 +10992,7 @@
           "label": {
             "zh": "攻击力伤害加成倍率：",
             "en": "BONUS DAMAGE PER ATTACK DAMAGE:",
-            "ru": "ad ставка："
+            "ru": "Множитель урона от атаки:"
           },
           "levels": [
             "1",
@@ -11043,7 +11015,7 @@
     "desc": {
       "zh": "使英雄在单次施法中有概率多次施放同一技能和物品，多重施法间隔为0.6秒。<br>食人魔魔法师觉醒时额外获得此技能，与大招多重施法叠加形成双重多重施法，并移除先天技能傻福。",
       "en": "Allows you cast abilities and items multiple times with each use. Each multicast has a 0.6 second interval.<br>When Ogre Magi is Awakened, this skill is granted in addition to the ultimate Multicast, stacking into a double multicast, and the innate Dumb Luck ability is removed.",
-      "ru": "Allows you cast abilities and items multiple times with each use. Each multicast has a 0.6 second interval.<br>When Ogre Magi is Awakened, this skill is granted in addition to the ultimate Multicast, stacking into a double multicast, and the innate Dumb Luck ability is removed."
+      "ru": "Позволяет применять способности и предметы несколько раз за одно использование. Интервал между применениями — 0.6 сек.<br>При пробуждении Огр-маг дополнительно получает эту способность, она складывается с ультимейтом «Многократное применение», образуя двойное применение, а врождённая способность «Дурная удача» удаляется."
     },
     "ability": {
       "behavior": "passive",
@@ -11056,7 +11028,7 @@
           "label": {
             "zh": "2X施放概率：",
             "en": "2X CAST CHANCE:",
-            "ru": "2X CAST CHANCE:"
+            "ru": "Шанс 2X применения:"
           },
           "levels": [
             "75"
@@ -11069,7 +11041,7 @@
           "label": {
             "zh": "3X施放概率：",
             "en": "3X CAST CHANCE:",
-            "ru": "3X CAST CHANCE:"
+            "ru": "Шанс 3X применения:"
           },
           "levels": [
             "15",
@@ -11085,7 +11057,7 @@
           "label": {
             "zh": "4X施放概率：",
             "en": "4X CAST CHANCE:",
-            "ru": "4X CAST CHANCE:"
+            "ru": "Шанс 4X применения:"
           },
           "levels": [
             "0",
@@ -11103,7 +11075,7 @@
       "lore": {
         "zh": "可以触发绝大多数的技能和物品，持续施法不会触发多重施法。",
         "en": "Can trigger most abilities and items, channel ability won't trigger multiple casting.",
-        "ru": "Can trigger most abilities and items, channel ability won't trigger multiple casting."
+        "ru": "Срабатывает для большинства способностей и предметов, поддерживаемые способности не вызывают многократного применения."
       }
     }
   },
@@ -11111,7 +11083,7 @@
     "desc": {
       "zh": "每点智力都会提供作用范围加成，影响技能和物品。",
       "en": "Gain AoE per intelligence. Affects both abilities and items.",
-      "ru": "Gain AoE per intelligence. Affects both abilities and items."
+      "ru": "Даёт бонус к радиусу действия за каждую единицу интеллекта. Влияет на способности и предметы."
     },
     "ability": {
       "behavior": "passive",
@@ -11124,7 +11096,7 @@
           "label": {
             "zh": "每点智力作用范围加成：",
             "en": "AOE PER INTELLIGENCE:",
-            "ru": "AOE PER INTELLIGENCE:"
+            "ru": "Бонус к радиусу за интеллект:"
           },
           "levels": [
             "0.4"
@@ -11143,7 +11115,7 @@
     "desc": {
       "zh": "修补匠的每3点智力提供1%物品冷却时间减少，最多为60%。",
       "en": "Gain 1% item cooldown reduction per 3 Intelligence, up to a maximum of 60%.",
-      "ru": "Gain 1% item cooldown reduction per 3 Intelligence, up to a maximum of 60%."
+      "ru": "Каждые 3 интеллекта дают 1% снижения отката предметов, максимум 60%."
     },
     "ability": {
       "behavior": "passive",
@@ -11161,7 +11133,7 @@
     "desc": {
       "zh": "拉比克现在每级获得1层奇心的叠加效果，每层奇心提供1点基础攻击力，0.3%增益/减益增强，和1作用范围加成。<br><br>如果拉比克看到1200范围内有敌方英雄施放技能，他就会获得2层奇心，持续20秒。如果当前提供临时奇心的敌人在受到来自拉比克的伤害后3秒内阵亡，他就会永久获得1层奇心.",
       "en": "Rubick gains 1 stack of Curiosity per level that grants him 1 base damage, 0.3% Buff/Debuff Duration, and 1 AOE Bonus. <br><br>If Rubick sees an enemy Hero cast an ability within 1200 distance of him, he gains 2 Curiosity for 20 seconds.  If an enemy Hero dies while Rubick has Curiosity from them and he damaged them in the last 3 seconds, he gains 1 Curiosity permanently.",
-      "ru": "Rubick gains 1 stack of Curiosity per level that grants him 1 base damage, 0.3% Buff/Debuff Duration, and 1 AOE Bonus. <br><br>If Rubick sees an enemy Hero cast an ability within 1200 distance of him, he gains 2 Curiosity for 20 seconds.  If an enemy Hero dies while Rubick has Curiosity from them and he damaged them in the last 3 seconds, he gains 1 Curiosity permanently."
+      "ru": "Рабик получает 1 стак любопытства за уровень; каждый стак даёт 1 к базовому урону, 0.3% к силе баффов и дебаффов и 1 к радиусу действия.<br><br>Если Рабик видит, как вражеский герой применяет способность в радиусе 1200 от него, он получает 2 стаков любопытства на 20 сек. Если вражеский герой, давший временное любопытство, погибает в течение 3 сек. после полученного от Рабика урона, Рабик навсегда получает 1 стаков."
     },
     "ability": {
       "behavior": "passive",
@@ -11179,7 +11151,7 @@
     "desc": {
       "zh": "<h1><font color='#0096FF'>被动：武痴</font></h1>普攻有概率触发一个学习过的主动技能，普通技能和终极技能独立伪随机触发。如果技能不在冷却，触发后会短暂进入冷却后返还（剑圣无敌斩单独4s返还，其他技能0.1s返还）。如果技能在冷却，触发后会重新冷却。",
       "en": "<h1><font color='#0096FF'>Passive: Chain Reaction</font></h1>When your attacks land, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. If the ability is not on cooldown, it will enter a brief cooldown after triggering and then restore (Juggernaut's Omnislash restores after 4s separately, other abilities restore after 0.1s). If the ability is on cooldown, it will reset the cooldown.",
-      "ru": "<h1><font color='#0096FF'>Passive: Chain Reaction</font></h1>When your attacks land, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. If the ability is not on cooldown, it will enter a brief cooldown after triggering and then restore (Juggernaut's Omnislash restores after 4s separately, other abilities restore after 0.1s). If the ability is on cooldown, it will reset the cooldown."
+      "ru": "<h1><font color='#0096FF'>Пассивно: Цепная реакция</font></h1>При попадании атакой есть шанс применить случайную изученную активную способность. Обычные и ультимативные способности срабатывают независимо по псевдослучайному распределению. Если способность не в откате, после срабатывания она ненадолго уходит в откат, а затем восстанавливается (у «Кругового удара» Джаггернаута отдельное восстановление через 4 с, у остальных — через 0,1 с). Если способность в откате, откат начинается заново."
     },
     "ability": {
       "behavior": "passive",
@@ -11192,7 +11164,7 @@
           "label": {
             "zh": "触发其中一个普通技能的概率：",
             "en": "Probability of triggering one of the basic skills:",
-            "ru": "Probability of triggering one of the basic skills:"
+            "ru": "Шанс срабатывания одной из обычных способностей:"
           },
           "levels": [
             "6",
@@ -11209,7 +11181,7 @@
           "label": {
             "zh": "触发其中一个终极技能的概率：",
             "en": "Probability of triggering one of the ultimate skills:",
-            "ru": "Probability of triggering one of the ultimate skills:"
+            "ru": "Шанс срабатывания одной из ультимативных способностей:"
           },
           "levels": [
             "2",
@@ -11232,7 +11204,7 @@
     "desc": {
       "zh": "<h1><font color='#FF0000'>被动：入魔</font></h1>施放技能有概率触发一个学习过的主动技能，普通技能和终极技能独立伪随机触发。与多重施法互斥。孙悟空模型无法触发。<br><br>普通技能触发概率：35 45 55 65 75%<br>终极技能触发概率：15 20 25 30 35%",
       "en": "<h1><font color='#FF0000'>Passive: Spell Echo</font></h1>When you cast an ability, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. Mutually exclusive with multiple cast. Monkey King model cannot trigger.<br><br>Basic Ability Trigger Chance: 35 45 55 65 75%<br>Ultimate Ability Trigger Chance: 15 20 25 30 35%",
-      "ru": "<h1><font color='#FF0000'>Passive: Spell Echo</font></h1>When you cast an ability, there is a chance to trigger a random learned active ability. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution. Mutually exclusive with multiple cast. Monkey King model cannot trigger.<br><br>Basic Ability Trigger Chance: 35 45 55 65 75%<br>Ultimate Ability Trigger Chance: 15 20 25 30 35%"
+      "ru": "<h1><font color='#FF0000'>Пассивно: Одержимость</font></h1>При применении способности есть шанс применить случайную изученную активную способность. Обычные и ультимативные способности срабатывают независимо по псевдослучайному распределению. Несовместимо с многократным применением. Модель Обезьяньего короля не срабатывает.<br><br>Шанс срабатывания обычной способности: 35 45 55 65 75%<br>Шанс срабатывания ультимативной способности: 15 20 25 30 35%"
     },
     "ability": {
       "behavior": "passive",
@@ -11246,7 +11218,7 @@
       "lore": {
         "zh": "炫迈是吧，小彩旗是吧，停不下来是吧",
         "en": "Chewing gum, right? Little colorful flag, right? Can't stop, right?",
-        "ru": "Chewing gum, right? Little colorful flag, right? Can't stop, right?"
+        "ru": "Жвачка, да? Флажок, да? Не остановиться, да?"
       }
     }
   },
@@ -11254,7 +11226,7 @@
     "desc": {
       "zh": "<h1><font color='#FFFF00'>被动：金身</font></h1>被攻击时有概率触发已学习的技能。普通技能和终极技能独立伪随机触发。",
       "en": "<h1><font color='#FFFF00'>Passive: Golden Body</font></h1>When attacked, has a chance to trigger learned abilities. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution.",
-      "ru": "<h1><font color='#FFFF00'>Passive: Golden Body</font></h1>When attacked, has a chance to trigger learned abilities. Basic abilities and ultimate abilities trigger independently with pseudo-random distribution."
+      "ru": "<h1><font color='#FFFF00'>Пассивно: Золотое тело</font></h1>При получении атаки есть шанс применить изученные способности. Обычные и ультимативные способности срабатывают независимо по псевдослучайному распределению."
     },
     "ability": {
       "behavior": "passive",
@@ -11267,7 +11239,7 @@
           "label": {
             "zh": "普通技能触发概率：",
             "en": "Basic Ability Trigger Chance:",
-            "ru": "Basic Ability Trigger Chance:"
+            "ru": "Шанс срабатывания обычной способности:"
           },
           "levels": [
             "3",
@@ -11284,7 +11256,7 @@
           "label": {
             "zh": "终极技能触发概率：",
             "en": "Ultimate Ability Trigger Chance:",
-            "ru": "Ultimate Ability Trigger Chance:"
+            "ru": "Шанс срабатывания ультимативной способности:"
           },
           "levels": [
             "1",
@@ -11301,7 +11273,7 @@
           "label": {
             "zh": "内置冷却时间：",
             "en": "Internal Cooldown:",
-            "ru": "Internal Cooldown:"
+            "ru": "Внутренний откат:"
           },
           "levels": [
             "0.3",
@@ -11320,7 +11292,7 @@
       "lore": {
         "zh": "你小子指定是皮痒了，越挨揍越来劲",
         "en": "You're definitely itching for a beating, the harder they hit, the more fired up you get.",
-        "ru": "You're definitely itching for a beating, the harder they hit, the more fired up you get."
+        "ru": "Ты явно чешешься от желания получить тумаков — чем сильнее бьют, тем больше заводишься."
       }
     }
   },
@@ -11821,7 +11793,7 @@
     "desc": {
       "zh": "幽鬼的攻击对敌人造成额外的纯粹伤害。",
       "en": "Deals bonus pure damage whenever Spectre attacks an enemy.",
-      "ru": "Каждая атака героя и его иллюзий наносит дополнительный чистый урон, если в радиусе 0 от жертвы нет её союзников."
+      "ru": "Атаки Спектры наносят врагам дополнительный чистый урон."
     },
     "ability": {
       "behavior": "passive",
@@ -12407,7 +12379,7 @@
     "desc": {
       "zh": "神龙的生命之血提升了龙骑士的生命恢复和护甲。",
       "en": "The life blood of the Dragon improves Dragon Knight's health regeneration and armor.",
-      "ru": "The life blood of the Dragon improves Dragon Knight's health regeneration and armor."
+      "ru": "Живая кровь дракона усиливает восстановление здоровья и броню Рыцаря-дракона."
     },
     "ability": {
       "behavior": "passive",
@@ -12420,7 +12392,7 @@
           "label": {
             "zh": "额外生命恢复：",
             "en": "BONUS HP REGEN:",
-            "ru": "BONUS HP REGEN:"
+            "ru": "Бонус к восстановлению здоровья:"
           },
           "levels": [
             "5",
@@ -12437,7 +12409,7 @@
           "label": {
             "zh": "护甲提升：",
             "en": "BONUS ARMOR:",
-            "ru": "BONUS ARMOR:"
+            "ru": "Бонус к броне:"
           },
           "levels": [
             "5",
@@ -12460,7 +12432,7 @@
     "desc": {
       "zh": "獸拥有10%基础减速抗性，每拥有250点生命上限就获得+0.5%作用范围加成和+1%减速抗性。",
       "en": "Primal Beast has 10% base Slow Resistance and gains 0.5% bonus Area of Effect and 1% Slow Resistance for every 250 Max Health.",
-      "ru": "Primal Beast has 10% base Slow Resistance and gains 0.5% bonus Area of Effect and 1% Slow Resistance for every 250 Max Health."
+      "ru": "Исполин имеет 10% базового сопротивления замедлению и за каждые 250 максимального здоровья получает +0.5% к радиусу действия и +1% к сопротивлению замедлению."
     },
     "ability": {
       "behavior": "passive",
@@ -12474,11 +12446,82 @@
       "lore": null
     }
   },
+  "morphling_ebb_and_flow2": {
+    "desc": {
+      "zh": "变体精灵根据当前力量值获得额外施法距离和<font color='#9ec8e3'>减速抗性</font>，根据当前敏捷值获得攻击距离和移动速度。这些效果在他变形为其他英雄时仍然有效。",
+      "en": "Morphling receives bonus cast range and slow resistance based on his current Strength, and attack range and movement speed based on his current Agility. These bonuses persist if he is morphed into another hero.",
+      "ru": "Герой получает бонусы к дальности применения заклинаний и сопротивлению замедлениям, зависящие от текущей силы, и бонусы к дальности атаки и скорости передвижения, зависящие от текущей ловкости. Эти бонусы сохраняются, даже если превратиться в другого героя."
+    },
+    "ability": {
+      "behavior": "passive",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "敏捷转为攻击距离：",
+            "en": "AGILITY TO ATTACK RANGE:",
+            "ru": "ДАЛЬНОСТЬ АТАКИ ОТ ЛОВКОСТИ:"
+          },
+          "levels": [
+            "25"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "敏捷转为移动速度：",
+            "en": "AGILITY TO MOVEMENT SPEED:",
+            "ru": "СКОРОСТЬ ПЕРЕДВИЖЕНИЯ ОТ ЛОВКОСТИ:"
+          },
+          "levels": [
+            "15"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "力量转为施法距离：",
+            "en": "STRENGTH TO CAST RANGE:",
+            "ru": "ДАЛЬНОСТЬ ПРИМЕНЕНИЯ ЗАКЛИНАНИЙ ОТ СИЛЫ:"
+          },
+          "levels": [
+            "25"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "力量转为<font color='#9ec8e3'>减速抗性</font>：",
+            "en": "STRENGTH TO SLOW RESISTANCE:",
+            "ru": "СОПРОТИВЛЕНИЕ ЗАМЕДЛЕНИЯМ ОТ СИЛЫ:"
+          },
+          "levels": [
+            "25"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": null,
+      "manaCost": null,
+      "lore": null
+    }
+  },
   "silencer_brain_drain2": {
     "desc": {
       "zh": "沉默术士对被沉默的目标造成更多伤害，受到来自他们的伤害减少。<br><br>沉默术士无需完成击杀就能永久窃取1点智力，只要敌方英雄在沉默术士附近1200范围内阵亡或者死亡时带有沉默术士的负面效果即可。如果阵亡时被沉默，将额外窃取1点智力。",
       "en": "Silencer takes less damage from and deals more damage to silenced targets.<br><br>If an enemy Hero dies within 1200 range of Silencer or was debuffed by Silencer at the time of death, Silencer permanently steals 1 Intelligence from them.  If the victim was silenced, steal an extra 1 Intelligence.",
-      "ru": "Silencer takes less damage from and deals more damage to silenced targets.<br><br>If an enemy Hero dies within 1200 range of Silencer or was debuffed by Silencer at the time of death, Silencer permanently steals 1 Intelligence from them.  If the victim was silenced, steal an extra 1 Intelligence."
+      "ru": "Молчаливый наносит больше урона и получает меньше урона от молчащих целей.<br><br>Если вражеский герой умирает в радиусе 1200 от Молчаливого или на нём висел его негативный эффект, Молчаливый навсегда крадёт у него 1 интеллекта. Если жертва была под молчанием, он крадёт дополнительно 1 интеллекта."
     },
     "ability": {
       "behavior": "passive",
@@ -12491,7 +12534,7 @@
           "label": {
             "zh": "沉默单位伤害：",
             "en": "SILENCED TARGET DAMAGE:",
-            "ru": "SILENCED TARGET DAMAGE:"
+            "ru": "Урон по молчащим:"
           },
           "levels": [
             "20"
@@ -12510,7 +12553,7 @@
     "desc": {
       "zh": "斯温从力量中获得额外攻击力，但是基础攻击力降低。",
       "en": "Gain additional attack damage from Strength, at the cost of decreased base damage.",
-      "ru": "Sven получает дополнительный урон от силы, но его базовый урон уменьшается."
+      "ru": "Свен получает дополнительный урон от силы, но его базовый урон снижен."
     },
     "ability": {
       "behavior": "passive",
@@ -12546,7 +12589,7 @@
     "desc": {
       "zh": "增加自身状态抗性和力量",
       "en": "Grants Strength and Status Resistance",
-      "ru": "Увеличивает сопротивление эффектам и силу. "
+      "ru": "Даёт силу и сопротивление эффектам"
     },
     "ability": {
       "behavior": "passive",
@@ -12599,7 +12642,7 @@
     "desc": {
       "zh": "每4次攻击发射一枚冰霜法球，造成范围伤害，并短暂减速主要目标",
       "en": "Every 4th attack launches an orb of chilling frost, dealing extra AoE damage and greatly slowing the primary target's movement speed briefly.",
-      "ru": "Каждая 4-я атака выпускает ледяную сферу, которая наносит урон по области и ненадолго замедляет основную цель."
+      "ru": "Каждая 4-я атака выпускает ледяную сферу, наносящую урон по области и ненадолго сильно замедляющую основную цель."
     },
     "ability": {
       "behavior": "passive",
@@ -12612,7 +12655,7 @@
           "label": {
             "zh": "范围：",
             "en": "RADIUS:",
-            "ru": "Радиус："
+            "ru": "Радиус:"
           },
           "levels": [
             "300"
@@ -12625,7 +12668,7 @@
           "label": {
             "zh": "伤害：",
             "en": "BASE DAMAGE:",
-            "ru": "Урон："
+            "ru": "Базовый урон:"
           },
           "levels": [
             "50",
@@ -12642,10 +12685,27 @@
           "label": {
             "zh": "攻击力伤害加成倍率：",
             "en": "BONUS DAMAGE PER ATTACK DAMAGE:",
-            "ru": "Коэф. от урона героя："
+            "ru": "Бонусный урон за единицу урона от атаки:"
           },
           "levels": [
             "0.4"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "减速持续时间：",
+            "en": "SLOW DURATION:",
+            "ru": "Длительность замедления:"
+          },
+          "levels": [
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9"
           ],
           "percent": false,
           "aoe": false,
@@ -12661,7 +12721,7 @@
     "desc": {
       "zh": "增加额外攻击速度，攻击有35%概率召唤一个冰爆打击随机区域，造成伤害和1秒减速",
       "en": "Each attack has a 35% chance to summon an icy blast to strike a random area around you, dealing damage and slowing enemies for 1 second. Passively grants attack speed.",
-      "ru": "Пассивно увеличивает скорость атаки. Каждая атака с вероятностью 35% вызывает ледяной взрыв в случайной области, наносящий урон и замедляющий врагов на 1 секунду."
+      "ru": "Каждая атака с шансом 35% вызывает ледяной взрыв в случайной области, нанося урон и замедляя врагов на 1 сек. Пассивно повышает скорость атаки."
     },
     "ability": {
       "behavior": "passive",
@@ -12674,7 +12734,7 @@
           "label": {
             "zh": "额外攻击速度：",
             "en": "BONUS ATTACK SPEED:",
-            "ru": "BONUS ATTACK SPEED:"
+            "ru": "Бонус к скорости атаки:"
           },
           "levels": [
             "30",
@@ -12691,7 +12751,7 @@
           "label": {
             "zh": "伤害：",
             "en": "BASE DAMAGE:",
-            "ru": "повреждать："
+            "ru": "Урон:"
           },
           "levels": [
             "40",
@@ -12708,7 +12768,7 @@
           "label": {
             "zh": "攻击力伤害加成倍率：",
             "en": "BONUS DAMAGE PER ATTACK DAMAGE:",
-            "ru": "ad ставка："
+            "ru": "Множитель урона от атаки:"
           },
           "levels": [
             "1"
@@ -12721,7 +12781,7 @@
           "label": {
             "zh": "冰爆发射范围：",
             "en": "ICE BLAST SPAWN RADIUS:",
-            "ru": "Случайный диапазон："
+            "ru": "Радиус появления взрыва:"
           },
           "levels": [
             "400"
@@ -12734,7 +12794,7 @@
           "label": {
             "zh": "冰爆伤害范围：",
             "en": "ICE BLAST EXPLOSION RADIUS:",
-            "ru": "Диапазон повреждений от ледяного взрыва："
+            "ru": "Радиус взрыва:"
           },
           "levels": [
             "200"
@@ -12753,7 +12813,7 @@
     "desc": {
       "zh": "<h1><font color='#FFCC66'>被动：绝影</font></h1>根据过去一定时间内的位移距离概率触发已学习的技能。腿儿倒腾的越快，触发概率越高。",
       "en": "<h1><font color='#FFCC66'>Passive: Shadow Step</font></h1>Triggers learned abilities based on the distance moved within a certain time period. The faster you move, the higher the trigger chance.",
-      "ru": "<h1><font color='#FFCC66'>Passive: Shadow Step</font></h1>Triggers learned abilities based on the distance moved within a certain time period. The faster you move, the higher the trigger chance."
+      "ru": "<h1><font color='#FFCC66'>Пассивно: Тень</font></h1>Срабатывает изученные способности с шансом, зависящим от пройденного за определённое время расстояния. Чем быстрее бежишь, тем выше шанс."
     },
     "ability": {
       "behavior": "passive",
@@ -12766,7 +12826,7 @@
           "label": {
             "zh": "基础普通技能触发概率（对应移速500）：",
             "en": "Base Basic Ability Trigger Chance (at speed 500):",
-            "ru": "Base Basic Ability Trigger Chance (at speed 500):"
+            "ru": "Базовый шанс срабатывания обычной способности (при скорости 500):"
           },
           "levels": [
             "8",
@@ -12783,7 +12843,7 @@
           "label": {
             "zh": "基础终极技能触发概率（对应移速500）：",
             "en": "Base Ultimate Ability Trigger Chance (at speed 500):",
-            "ru": "Base Ultimate Ability Trigger Chance (at speed 500):"
+            "ru": "Базовый шанс срабатывания ультимативной способности (при скорости 500):"
           },
           "levels": [
             "0.4",
@@ -12800,7 +12860,7 @@
           "label": {
             "zh": "触发时间间隔：",
             "en": "Trigger Interval:",
-            "ru": "Trigger Interval:"
+            "ru": "Интервал срабатывания:"
           },
           "levels": [
             "0.2"
@@ -12815,7 +12875,7 @@
       "lore": {
         "zh": "我只是出来跑个步，你们怎么就打起来了",
         "en": "I was just out for a run, why did you all start fighting?",
-        "ru": "I was just out for a run, why did you all start fighting?"
+        "ru": "Я просто вышел пробежаться, а вы уже подрались."
       }
     }
   },
@@ -12823,7 +12883,7 @@
     "desc": {
       "zh": "<h1><font color='#90EE90'>被动：幽莲</font></h1>受到指向性技能伤害时有概率反弹伤害，成功反弹时有概率触发已学习的技能。",
       "en": "<h1><font color='#90EE90'>Passive: Lotus</font></h1>When taking damage from targeted spells, has a chance to reflect the damage. Upon successful reflection, has a chance to trigger learned abilities.",
-      "ru": "<h1><font color='#90EE90'>Passive: Lotus</font></h1>When taking damage from targeted spells, has a chance to reflect the damage. Upon successful reflection, has a chance to trigger learned abilities."
+      "ru": "<h1><font color='#90EE90'>Пассивно: Лотос</font></h1>При получении урона от направленных способностей есть шанс отразить урон, а при успешном отражении — шанс применить изученные способности."
     },
     "ability": {
       "behavior": "passive",
@@ -12836,7 +12896,7 @@
           "label": {
             "zh": "反弹伤害百分比：",
             "en": "Reflected Damage Percentage:",
-            "ru": "Reflected Damage Percentage:"
+            "ru": "Доля отражённого урона:"
           },
           "levels": [
             "100"
@@ -12849,7 +12909,7 @@
           "label": {
             "zh": "反弹概率：",
             "en": "Reflection Chance:",
-            "ru": "Reflection Chance:"
+            "ru": "Шанс отражения:"
           },
           "levels": [
             "30",
@@ -12866,7 +12926,7 @@
           "label": {
             "zh": "反弹触发后，普通技能触发概率：",
             "en": "Basic Ability Trigger Chance after reflection:",
-            "ru": "Basic Ability Trigger Chance after reflection:"
+            "ru": "Шанс срабатывания обычной способности после отражения:"
           },
           "levels": [
             "80"
@@ -12879,7 +12939,7 @@
           "label": {
             "zh": "反弹触发后，终级技能触发概率：",
             "en": "Ultimate Ability Trigger Chance after reflection:",
-            "ru": "Ultimate Ability Trigger Chance after reflection:"
+            "ru": "Шанс срабатывания ультимативной способности после отражения:"
           },
           "levels": [
             "20"
@@ -12892,7 +12952,7 @@
           "label": {
             "zh": "内置冷却时间：",
             "en": "Internal Cooldown:",
-            "ru": "Internal Cooldown:"
+            "ru": "Внутренний откат:"
           },
           "levels": [
             "0.5",
@@ -12911,7 +12971,7 @@
       "lore": {
         "zh": "瞅你一眼都不行，这就要动手啊",
         "en": "Can't even look at you without wanting to fight?",
-        "ru": "Can't even look at you without wanting to fight?"
+        "ru": "Даже взглянуть нельзя, сразу в драку."
       }
     }
   },
@@ -12919,7 +12979,7 @@
     "desc": {
       "zh": "<h1><font color='#87CEEB'>被动：凝心</font></h1>凝心静气，在技能冷却好而不释放的时候积蓄能量，增幅下次释放造成的第一次伤害。<br><br>大招在充能15 12 9 7 5秒后开始计数，小技能在充能7 6 5 4 3秒后开始计数。<br>充能达到阈值后，额外获得2倍基础增幅。<br>伤害增幅效果持续3.0秒。<br>最大增幅倍率：3 4 5 6 7倍。",
       "en": "<h1><font color='#87CEEB'>Passive: Focus</font></h1>Focus and calm, accumulating energy when abilities are off cooldown but not cast, amplifying the first damage dealt by the next cast.<br><br>Ultimate abilities start counting after 15 12 9 7 5 seconds of charging, normal abilities after 7 6 5 4 3 seconds of charging.<br>Upon reaching the threshold, gain an additional 2x base amplification.<br>Damage amplification effect lasts 3.0 seconds.<br>Maximum amplification multiplier: 3 4 5 6 7x.",
-      "ru": "<h1><font color='#87CEEB'>Passive: Focus</font></h1>Focus and calm, accumulating energy when abilities are off cooldown but not cast, amplifying the first damage dealt by the next cast.<br><br>Ultimate abilities start counting after 15 12 9 7 5 seconds of charging, normal abilities after 7 6 5 4 3 seconds of charging.<br>Upon reaching the threshold, gain an additional 2x base amplification.<br>Damage amplification effect lasts 3.0 seconds.<br>Maximum amplification multiplier: 3 4 5 6 7x."
+      "ru": "<h1><font color='#87CEEB'>Пассивно: Сосредоточенность</font></h1>Сосредоточившись, герой копит энергию, пока способности готовы, но не применены, усиливая первый урон от следующего применения.<br><br>Ультимативные способности начинают копить через 15 12 9 7 5 сек., обычные — через 7 6 5 4 3 сек.<br>Достигнув порога, герой получает дополнительно 2x базового усиления.<br>Усиление урона длится 3.0 сек.<br>Максимальный множитель усиления: 3 4 5 6 7x."
     },
     "ability": {
       "behavior": "passive",
@@ -12933,7 +12993,7 @@
       "lore": {
         "zh": "你小子，憋这一……个技能，是憋了多久啊",
         "en": "You, holding back this... one ability for how long?",
-        "ru": "You, holding back this... one ability for how long?"
+        "ru": "Ты сдерживал одну... способность, и как долго?"
       }
     }
   },
@@ -14576,7 +14636,7 @@
     "desc": {
       "zh": "炼金术士将敌人的尸体和赏金神符转化成额外的金币。炼金术士每杀死一个单位，就能获得基础额外金钱和附加额外金钱。如果炼金术士在接下来40秒内又杀死了一个单位，获得了黄金，那么他所获得的附加额外金钱将有一定幅度的增加。另外，赏金神符将提供成倍金钱。",
       "en": "Alchemist synthesizes additional gold from his enemies and bounty runes. With each kill, Alchemist earns base bonus gold and extra bonus gold. If Alchemist kills another unit which yields gold within the next 40 seconds, an additional instance of Extra Bonus Gold is added to the total. Additionally, causes bounty runes to yield more gold.",
-      "ru": "Позволяет синтезировать больше золота из врагов и рун. Дополнительное золото за убийство существ состоит из начального бонуса и нарастающего, который увеличивается с каждым существом, убитым в течение 40 сек. после предыдущего. Также способность умножает золото от рун богатства."
+      "ru": "Алхимик получает дополнительное золото за убийства врагов и руны богатства. За каждое убийство он получает базовое и дополнительное бонусное золото. Если Алхимик убьёт единицу, дающую золото, в течение следующих 40 сек., к сумме добавляется ещё одна порция дополнительного золота. Кроме того, руны богатства дают больше золота."
     },
     "ability": {
       "behavior": "passive",
@@ -14589,7 +14649,7 @@
           "label": {
             "zh": "连杀限时：",
             "en": "RECENT KILL WINDOW:",
-            "ru": "МАКС. ИНТЕРВАЛ УБИЙСТВ:"
+            "ru": "Окно серии убийств:"
           },
           "levels": [
             "40"
@@ -14602,7 +14662,7 @@
           "label": {
             "zh": "基础金钱奖励：",
             "en": "BASE BONUS GOLD:",
-            "ru": "НАЧАЛЬНЫЙ БОНУС:"
+            "ru": "Базовое бонусное золото:"
           },
           "levels": [
             "4",
@@ -14619,7 +14679,7 @@
           "label": {
             "zh": "额外金钱奖励：",
             "en": "EXTRA BONUS GOLD:",
-            "ru": "НАРАСТАЮЩИЙ БОНУС:"
+            "ru": "Дополнительное бонусное золото:"
           },
           "levels": [
             "2",
@@ -14636,7 +14696,7 @@
           "label": {
             "zh": "赏金神符奖励倍数：",
             "en": "BOUNTY RUNE MULTIPLIER:",
-            "ru": "МНОЖИТЕЛЬ РУН БОГАТСТВА:"
+            "ru": "Множитель рун богатства:"
           },
           "levels": [
             "4"
@@ -14649,7 +14709,7 @@
           "label": {
             "zh": "最高额外金钱：",
             "en": "MAX BONUS GOLD PER KILL:",
-            "ru": "МАКСИМУМ ДОП. ЗОЛОТА:"
+            "ru": "Максимум дополнительного золота:"
           },
           "levels": [
             "32",
@@ -14668,7 +14728,7 @@
       "lore": {
         "zh": "尽管对付不了一座山，但拉泽尔还是掌握着技术，能转化一些较小的化合物来填满他的荷包。",
         "en": "While it is not a mountain, Razzil has mastered the conversion of smaller compounds to line his pockets.",
-        "ru": "Пускай эксперимент с горой и не удался, зато структуры поменьше Раззил легко обращает в звонкую монету."
+        "ru": "Хоть это и не гора, Раззил освоил превращение веществ поменьше в звонкую монету."
       }
     }
   },
@@ -15144,7 +15204,7 @@
     "desc": {
       "zh": "狙击手和目标相距每100距离，他的攻击都会造成额外伤害。",
       "en": "Sniper's attacks deal bonus damage for every 100 units of distance Sniper is from the target.",
-      "ru": "Sniper's attacks deal bonus damage for every 100 units of distance Sniper is from the target."
+      "ru": "Атаки Снайпера наносят дополнительный урон за каждые 100 единиц расстояния до цели."
     },
     "ability": {
       "behavior": "passive",
@@ -15157,7 +15217,7 @@
           "label": {
             "zh": "额外伤害：",
             "en": "BONUS DAMAGE:",
-            "ru": "BONUS DAMAGE:"
+            "ru": "Бонусный урон:"
           },
           "levels": [
             "1.0",
@@ -15180,7 +15240,7 @@
     "desc": {
       "zh": "熊战士获得攻击力加成，数值为当前生命值的一定百分比。",
       "en": "Gain bonus damage equal to a percentage of current health.",
-      "ru": "Ursa получает бонусный урон, равный проценту от его текущего здоровья"
+      "ru": "Медвежатник получает бонус к урону, равный проценту от текущего здоровья."
     },
     "ability": {
       "behavior": "passive",
@@ -15193,7 +15253,7 @@
           "label": {
             "zh": "生命值转为攻击力：",
             "en": "HEALTH AS DAMAGE:",
-            "ru": "Здоровье в урон:"
+            "ru": "Здоровья в урон:"
           },
           "levels": [
             "1",
@@ -15216,7 +15276,7 @@
     "desc": {
       "zh": "获得护甲一定百分比的力量",
       "en": "Gain Strength based on armor.",
-      "ru": "Когда рядом с героем нет союзников, его сила увеличивается на долю от показателя брони."
+      "ru": "Даёт силу в зависимости от брони."
     },
     "ability": {
       "behavior": "passive",
@@ -15229,7 +15289,7 @@
           "label": {
             "zh": "护甲力量加成：",
             "en": "ARMOR TO STRENGTH:",
-            "ru": "Бонус прочности брони:"
+            "ru": "Брони в силу:"
           },
           "levels": [
             "60",
@@ -15252,7 +15312,7 @@
     "desc": {
       "zh": "黑暗贤者从每点智力获得0.6 0.8 1.0 1.2 1.4攻击速度。",
       "en": "Dark Seer gains 0.6 0.8 1.0 1.2 1.4 Attack Speed from each point of Intelligence.",
-      "ru": "За каждую единицу Интеллекта Dark Seer получает 0.6 0.8 1.0 1.2 1.4 скорости атаки."
+      "ru": "Тёмный мудрец получает 0.6 0.8 1.0 1.2 1.4 к скорости атаки за каждую единицу интеллекта."
     },
     "ability": {
       "behavior": "passive",
@@ -15270,7 +15330,7 @@
     "desc": {
       "zh": "拉比克施放法术时获得可叠加的作用范围加成。",
       "en": "Rubick gains stacking bonus area of effect when he casts a spell.",
-      "ru": "Rubick gains stacking bonus area of effect when he casts a spell."
+      "ru": "Рабик получает складывающийся бонус к радиусу действия при применении способностей."
     },
     "ability": {
       "behavior": "passive",
@@ -15283,7 +15343,7 @@
           "label": {
             "zh": "作用范围加成：",
             "en": "AOE BONUS:",
-            "ru": "AOE BONUS:"
+            "ru": "Бонус к радиусу действия:"
           },
           "levels": [
             "10"
@@ -15296,7 +15356,7 @@
           "label": {
             "zh": "魔法抗性加成：",
             "en": "MAGIC RESIST BONUS:",
-            "ru": "MAGIC RESIST BONUS:"
+            "ru": "Бонус к сопротивлению магии:"
           },
           "levels": [
             "10"
@@ -15309,7 +15369,7 @@
           "label": {
             "zh": "额外持续时间：",
             "en": "BONUS DURATION:",
-            "ru": "BONUS DURATION:"
+            "ru": "Дополнительная длительность:"
           },
           "levels": [
             "10"
@@ -15321,14 +15381,18 @@
       ],
       "cooldown": null,
       "manaCost": null,
-      "lore": null
+      "lore": {
+        "zh": "如果魔法不能打动你，贫僧也略通一些拳脚",
+        "en": "If magic cannot move you, this humble monk also knows a few punches.",
+        "ru": "Если магия тебя не проймёт, этот скромный монах и кулаками объяснит."
+      }
     }
   },
   "ancient_apparition_bone_chill2": {
     "desc": {
       "zh": "每当远古冰魄通过他的技能对敌人造成魔法伤害，敌人就会减速一段时间。如果目标是英雄，力量还会降低。多个本效果会叠加，并且持续时间相互独立。",
       "en": "When Ancient Apparition deals Magic damage to an enemy with his abilities, it is slowed for a short duration. If the target is a Hero, its Strength is also reduced. Multiple instances of this effect stack and have independent durations.",
-      "ru": "When Ancient Apparition deals Magic damage to an enemy with his abilities, it is slowed for a short duration. If the target is a Hero, its Strength is also reduced. Multiple instances of this effect stack and have independent durations."
+      "ru": "Когда Древнее привидение наносит магический урон способностями, цель замедляется на короткое время. Если цель — герой, её сила также снижается. Несколько эффектов складываются и действуют независимо."
     },
     "ability": {
       "behavior": "passive",
@@ -15341,7 +15405,7 @@
           "label": {
             "zh": "力量降低：",
             "en": "STRENGTH REDUCTION:",
-            "ru": "STRENGTH REDUCTION:"
+            "ru": "Снижение силы:"
           },
           "levels": [
             "1",
@@ -15358,7 +15422,7 @@
           "label": {
             "zh": "持续时间：",
             "en": "DURATION:",
-            "ru": "DURATION:"
+            "ru": "Длительность:"
           },
           "levels": [
             "4.0"
@@ -15369,9 +15433,9 @@
         },
         {
           "label": {
-            "zh": "移动速度减缓：:",
+            "zh": "移动速度减缓：",
             "en": "MOVEMENT SLOW:",
-            "ru": "MOVEMENT SLOW:"
+            "ru": "Замедление передвижения:"
           },
           "levels": [
             "2"
@@ -16243,7 +16307,7 @@
     "desc": {
       "zh": "拉比克对奥术的精通能够影响周围敌人的感知，降低他们的魔法抗性。可以在防御和进攻之间切换，选择降低敌人的魔法抗性或提升队友的魔法抗性。",
       "en": "Rubick's mastery of the arcane creates an aura that nullifies the enemies' senses, or increases his own by altering the magical resistance of nearby units.<br><br>Null Field can be toggled to increase nearby allies' bonus magic resistance or to decrease nearby enemies' magic resistance.",
-      "ru": "Rubick's mastery of the arcane creates an aura that nullifies the enemies' senses, or increases his own by altering the magical resistance of nearby units.<br><br>Null Field can be toggled to increase nearby allies' bonus magic resistance or to decrease nearby enemies' magic resistance."
+      "ru": "Мастерство Рубика в тайных искусствах влияет на восприятие окружающих врагов, снижая их сопротивление магии. Можно переключать между защитой и атакой: снижать сопротивление магии врагов или повышать его союзникам."
     },
     "ability": {
       "behavior": "noTarget",
@@ -16256,7 +16320,7 @@
           "label": {
             "zh": "魔法抗性加成：",
             "en": "MAGIC RESISTANCE:",
-            "ru": "MAGIC RESISTANCE:"
+            "ru": "БОНУС СОПРОТИВЛЕНИЯ МАГИИ:"
           },
           "levels": [
             "10",
@@ -16273,7 +16337,7 @@
           "label": {
             "zh": "作用范围：",
             "en": "RADIUS:",
-            "ru": "RADIUS:"
+            "ru": "РАДИУС:"
           },
           "levels": [
             "1200"
@@ -16290,7 +16354,7 @@
       "lore": {
         "zh": "不是每一个魔导师都能成为大魔导师……",
         "en": "Not every magus can become a Grand Magus...",
-        "ru": "Not every magus can become a Grand Magus..."
+        "ru": "Не каждый магистр может стать великим магистром…"
       }
     }
   },
@@ -16385,7 +16449,7 @@
     "desc": {
       "zh": "16 20 24 28 32%概率躲避伤害",
       "en": "Gain a 16 20 24 28 32% chance to completely dodge an instance of incoming damage.",
-      "ru": "Даёт 16 20 24 28 32% шанс полностью избежать любого получаемого урона."
+      "ru": "Даёт 16 20 24 28 32% шанс полностью избежать получаемого урона."
     },
     "ability": {
       "behavior": "passive",
@@ -17017,7 +17081,7 @@
     "desc": {
       "zh": "每攻击4次，召唤火雨对目标周围的敌方单位造成伤害",
       "en": "Every 4th attack, summon a single instance of a Direstorm to deal damage to enemy units around the attacked target.",
-      "ru": "Every 4th attack, summon a single instance of a Direstorm to deal damage to enemy units around the attacked target."
+      "ru": "Каждая 4-я атака призывает огненный шторм, наносящий урон врагам вокруг атакованной цели."
     },
     "ability": {
       "behavior": "passive",
@@ -17030,7 +17094,7 @@
           "label": {
             "zh": "范围：",
             "en": "FIRESTORM RADIUS:",
-            "ru": "FIRESTORM RADIUS:"
+            "ru": "Радиус:"
           },
           "levels": [
             "400"
@@ -17043,7 +17107,7 @@
           "label": {
             "zh": "基础伤害：",
             "en": "BASE DAMAGE:",
-            "ru": "BASE DAMAGE:"
+            "ru": "Базовый урон:"
           },
           "levels": [
             "30",
@@ -17060,7 +17124,7 @@
           "label": {
             "zh": "最大生命值伤害：",
             "en": "MAX HP DAMAGE:",
-            "ru": "MAX HP DAMAGE:"
+            "ru": "Урон от максимального здоровья:"
           },
           "levels": [
             "2",
@@ -17083,7 +17147,7 @@
     "desc": {
       "zh": "赏金猎人以敌方英雄为目标施放技能和物品时会偷取4 6 8 10 12金钱。",
       "en": "Bounty Hunter steals 4 6 8 10 12 gold when targeting enemy heroes with his abilities or items.",
-      "ru": "Применяя способность или предмет на вражеского героя, Bounty Hunter крадёт у него 4 6 8 10 12 золота."
+      "ru": "Охотник за головами крадёт 4 6 8 10 12 золота, используя способности или предметы на вражеских героях."
     },
     "ability": {
       "behavior": "passive",
@@ -17096,7 +17160,7 @@
           "label": {
             "zh": "金钱偷取：",
             "en": "GOLD STEAL:",
-            "ru": "ПОХИЩЕНИЕ ЗОЛОТА:"
+            "ru": "Кража золота:"
           },
           "levels": [
             "4",
@@ -17119,7 +17183,7 @@
     "desc": {
       "zh": "在自身光环范围内停留一定时间的敌人会被缠绕，并造成伤害",
       "en": "Enemies that stay within the aura for a certain period of time will receive damage and become rooted briefly.",
-      "ru": "Enemies that stay within the aura for a certain period of time will receive damage and become rooted briefly."
+      "ru": "Враги, пробывшие в ауре определённое время, получают урон и ненадолго обездвиживаются."
     },
     "ability": {
       "behavior": "passive",
@@ -17132,7 +17196,7 @@
           "label": {
             "zh": "范围：",
             "en": "AURA RADIUS:",
-            "ru": "AURA RADIUS:"
+            "ru": "Радиус ауры:"
           },
           "levels": [
             "600"
@@ -17145,7 +17209,7 @@
           "label": {
             "zh": "触发间隔：",
             "en": "TRIGGER INTERVAL:",
-            "ru": "TRIGGER INTERVAL:"
+            "ru": "Интервал срабатывания:"
           },
           "levels": [
             "4"
@@ -17158,7 +17222,7 @@
           "label": {
             "zh": "缠绕时间：",
             "en": "ROOT DURATION:",
-            "ru": "ROOT DURATION:"
+            "ru": "Длительность обездвиживания:"
           },
           "levels": [
             "0.8",
@@ -17175,7 +17239,7 @@
           "label": {
             "zh": "伤害：",
             "en": "DAMAGE:",
-            "ru": "DAMAGE:"
+            "ru": "Урон:"
           },
           "levels": [
             "60",
@@ -17198,7 +17262,7 @@
     "desc": {
       "zh": "水晶室女消耗在她技能上的一部分魔法会转化为物理护盾。",
       "en": "A portion of the mana Crystal Maiden spends on her abilities is converted into a physical barrier.",
-      "ru": "A portion of the mana Crystal Maiden spends on her abilities is converted into a physical barrier."
+      "ru": "Часть маны, потраченной Кристальной девой на способности, превращается в физический барьер."
     },
     "ability": {
       "behavior": "passive",
@@ -17211,7 +17275,7 @@
           "label": {
             "zh": "魔法转为护盾：",
             "en": "MANA SPENT TO BARRIER:",
-            "ru": "MANA SPENT TO BARRIER:"
+            "ru": "Маны в барьер:"
           },
           "levels": [
             "100",
@@ -17228,7 +17292,7 @@
           "label": {
             "zh": "护盾持续时间：",
             "en": "BARRIER DURATION:",
-            "ru": "BARRIER DURATION:"
+            "ru": "Длительность барьера:"
           },
           "levels": [
             "12"
