@@ -5,7 +5,7 @@ description: 和用户一起给某个 issue 定 spec，写成执行说明交给 
 
 # issue-spec
 
-用户在场时，和用户把一个 issue 的做法谈定，写成 issue 正文里的 `## 执行说明` 并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码。标签与执行说明格式见 `.claude/references/agent-autorun.md`，开始前先读。
+用户在场时，和用户把一个 issue 的做法谈定，写成 issue 正文里的 `## 执行说明` 并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码。标签与执行说明格式见 `.claude/references/agent-issue.md`，开始前先读。
 
 ## 1. 补齐 issue 字段
 
@@ -15,7 +15,7 @@ description: 和用户一起给某个 issue 定 spec，写成执行说明交给 
 
 读正文、评论、关联的 issue / PR，再读相关代码，读到能说清「现在是什么样、要改成什么样」为止。
 
-判断是否适合交给 agent（标准见 `agent-autorun.md`「适合交给 agent 的 issue」）。不适合时告诉用户原因，打 `L4-investigate`，用户在场时做。
+判断是否适合交给 agent（标准见 `agent-issue.md`「适合交给 agent 的 issue」）。不适合时告诉用户原因，打 `L4-investigate`，用户在场时做。
 
 ## 3. 和用户谈定
 
@@ -32,7 +32,7 @@ description: 和用户一起给某个 issue 定 spec，写成执行说明交给 
 
 ## 4. 写入 issue
 
-按 `agent-autorun.md` 的格式写出执行说明。给用户确认时不贴全文，只列三组重点：用户拍板的、按默认做的（附「不同意就说」）、运行验证要读什么；全文写进 issue 后给链接。
+按 `agent-issue.md` 的格式写出执行说明。给用户确认时不贴全文，只列三组重点：用户拍板的、按默认做的（附「不同意就说」）、运行验证要读什么；全文写进 issue 后给链接。
 
 用户确认后写进 issue 正文末尾（已有 `## 执行说明` 时整段替换），再打标签：
 

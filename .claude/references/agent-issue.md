@@ -2,7 +2,7 @@
 
 `issue-spec`（用户在场时拍板）、`issue-impl`（做一条）与 `issue-autorun`（用户不在时批量做）之间的约定。`issue-impl` 与 `issue-autorun` 只认这里定义的标签和执行说明，不读对话。
 
-game 仓库（`../windy10v10ai/.claude/references/agent-autorun.md`）有一份完整版。标签含义、执行说明格式、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
+game 仓库（`../windy10v10ai/.claude/references/agent-issue.md`）有一份完整版。标签含义、执行说明格式、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
 
 ## 标签
 

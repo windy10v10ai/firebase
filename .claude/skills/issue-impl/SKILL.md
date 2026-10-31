@@ -5,7 +5,7 @@ description: 按 issue 末尾的「执行说明」实现一条 issue：实现、
 
 # issue-impl
 
-把一条已有「执行说明」的 issue 做到 PR。标签与执行说明格式见 `.claude/references/agent-autorun.md`，开始前先读。没有 `## 执行说明` 的 issue 不做：用户在场先用 `issue-spec` 补，批量模式记为 `agent-block`。
+把一条已有「执行说明」的 issue 做到 PR。标签与执行说明格式见 `.claude/references/agent-issue.md`，开始前先读。没有 `## 执行说明` 的 issue 不做：用户在场先用 `issue-spec` 补，批量模式记为 `agent-block`。
 
 ## 硬规则
 

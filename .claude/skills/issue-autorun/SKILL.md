@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # issue-autorun
 
-用户不在场时，把 firebase 仓库里所有带 `agent-todo` 的 issue 做完。能做的都做完，做不了的跳过并记下来，最后统一留给用户。标签与执行说明约定见 `.claude/references/agent-autorun.md`，开始前先读。
+用户不在场时，把 firebase 仓库里所有带 `agent-todo` 的 issue 做完。能做的都做完，做不了的跳过并记下来，最后统一留给用户。标签与执行说明约定见 `.claude/references/agent-issue.md`，开始前先读。
 
 一次只做一个 issue，全部在主 checkout 里做，顺序跑，省掉 worktree 和 emulator 端口冲突。每批在新对话里跑。
 
