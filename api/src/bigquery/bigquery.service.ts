@@ -58,7 +58,7 @@ export class BigQueryService {
     ]);
   }
 
-  /** 只写异常与拒绝判断。 */
+  /** 只写异常、拒绝与扣行为分的判断。 */
   async recordGameEndAudit(
     gameEnd: GameEndDto,
     context: GameEndRecordContext,

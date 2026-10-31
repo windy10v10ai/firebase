@@ -149,7 +149,7 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect((await getPlayerStatsLifetime(app, steamId))?.kills).toBe(10);
   }, 60000);
 
-  it('合法本地结算：累加积分与战绩，不动行为分', async () => {
+  it('合法本地单人结算：累加积分与战绩，不动行为分', async () => {
     const steamId = 105620001;
     mockDate('2026-08-16T01:00:00.000Z');
     await createPlayer(app, { steamId, matchCount: 20, conductPoint: 95 });

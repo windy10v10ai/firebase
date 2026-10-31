@@ -312,6 +312,30 @@ describe('LocalHostService', () => {
     });
   });
 
+  it('本地多人局逃跑扣行为分，每人每天只扣一次并写审计', async () => {
+    const { service, store, playerService, bigQueryService } = createService();
+    store.set('2', { id: '2', conductPenaltyDate: getUtcMidnightForTest() });
+    const gameEnd = createGameEndDto({
+      playerCount: 3,
+      players: [
+        createPlayerDto({ steamId: 1, isDisconnected: true }),
+        createPlayerDto({ steamId: 2, isDisconnected: true }),
+        createPlayerDto({ steamId: 3 }),
+      ],
+    });
+
+    await service.recordGameEnd(gameEnd, GAME_ID);
+
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(1, true, 200, true, true, GAME_ID);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(2, true, 200, true, false, GAME_ID);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledWith(3, true, 200, false, true, GAME_ID);
+    expect(store.get('1')?.conductPenaltyDate).toEqual(getUtcMidnightForTest());
+    const decisions = bigQueryService.recordGameEndAudit.mock.calls[0][2];
+    expect(decisions).toEqual([
+      expect.objectContaining({ player: gameEnd.players[0], reasons: ['conduct_penalty'] }),
+    ]);
+  });
+
   describe('会员积分限额', () => {
     it('单笔超过 50 拒绝', async () => {
       const { service } = createService();
