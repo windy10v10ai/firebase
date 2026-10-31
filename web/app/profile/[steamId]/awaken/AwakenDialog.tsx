@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import AbilityDetails from '@/app/components/AbilityDetails';
 import AbilityDialog from '@/app/components/AbilityDialog';
 import GameText from '@/app/components/GameText';
+import SteamLoginButton from '@/app/components/SteamLoginButton';
 import { abilityLocale } from '@/app/lib/ability-text';
 import {
   AWAKEN_MEMBER_POINT_COST,
@@ -29,6 +30,8 @@ interface AwakenDialogProps {
   useableMemberPoint: number;
   onClose: () => void;
   onConfirm: (useMemberPoint: boolean) => void;
+  /** 未登录的预览：底部换成登录入口 */
+  preview?: boolean;
 }
 
 /**
@@ -44,6 +47,7 @@ export default function AwakenDialog({
   useableMemberPoint,
   onClose,
   onConfirm,
+  preview = false,
 }: AwakenDialogProps) {
   const t = useTranslations('awaken.dialog');
   const locale = abilityLocale(useLocale());
@@ -102,7 +106,12 @@ export default function AwakenDialog({
       footer={
         hero ? (
           <>
-            {unlocked ? (
+            {preview ? (
+              <div className="flex flex-col gap-2.5">
+                <p className="text-sm">{t('loginToAwaken')}</p>
+                <SteamLoginButton size="wide" className="w-full" />
+              </div>
+            ) : unlocked ? (
               <p className="flex min-h-11 items-center justify-center gap-2 rounded-[7px] bg-member-soft text-sm font-bold text-member-strong lg:min-h-10">
                 <Check className="size-4" aria-hidden="true" />
                 {t('alreadyUnlocked')}

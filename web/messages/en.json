@@ -661,6 +661,9 @@
     }
   },
   "property": {
+    "preview": {
+      "hint": "Sign in to spend points"
+    },
     "loading": "Loading attributes",
     "noRecord": {
       "title": "No record for this player",
@@ -695,6 +698,7 @@
       }
     },
     "card": {
+      "maxValue": "Max <b>{value}</b>",
       "perCell": "{value} per level",
       "skillCost": "{cost} attribute points per level",
       "skillValue": "{value}",
@@ -757,6 +761,11 @@
     }
   },
   "awaken": {
+    "preview": {
+      "heroCount": "Heroes to awaken",
+      "hint": "Sign in to see your awakened heroes and usable points",
+      "viewSkill": "View ability"
+    },
     "title": "Hero Awakening",
     "loading": "Loading awakenings",
     "unlock": "Awaken",
@@ -779,6 +788,7 @@
       "memberPoint": "Usable Member Points"
     },
     "dialog": {
+      "loginToAwaken": "Sign in to awaken this hero",
       "question": "Choose the points to spend to awaken this hero",
       "alreadyUnlocked": "Awakened",
       "useBattle": "{cost} usable Battle Points",
@@ -1007,6 +1017,12 @@
     "iconMissing": "No icon"
   },
   "auth": {
+    "guest": {
+      "leaderboard": {
+        "title": "Leaderboard",
+        "description": "Browse other players' profiles"
+      }
+    },
     "login": "Sign in with Steam",
     "loginShort": "Sign in",
     "loginTooltip": "Redirects to Steam's official login page. We only get your Steam ID.",
