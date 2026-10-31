@@ -2,7 +2,7 @@
 
 `issue-spec`（用户在场时拍板）、`issue-impl`（做一条）与 `issue-autorun`（用户不在时批量做）之间的约定。`issue-impl` 与 `issue-autorun` 只认这里定义的标签和执行说明，不读对话。
 
-game 仓库（`../windy10v10ai/.claude/references/agent-issue.md`）有一份完整版。标签含义、执行说明格式、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
+game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/agent-issue.md) 有一份完整版。标签含义、执行说明格式、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
 
 ## 标签
 
@@ -40,7 +40,7 @@ game 仓库（`../windy10v10ai/.claude/references/agent-issue.md`）有一份完
 - **不做**：明确排除的相关改动
 - **验收**：必须通过的命令（见下文「默认验收命令」），以及要补的测试用例，每个用例写明输入与预期
 - **运行验证**：需要 / 不需要；需要时逐项标层级（见下文「运行验证分三层」）并写操作步骤和预期值
-- **上线顺序**：只改一个仓库写「无」；跨仓库（与 `../windy10v10ai`）写清各开什么 PR、谁先部署
+- **上线顺序**：只改一个仓库写「无」；跨仓库（与 game 仓库）写清各开什么 PR、谁先部署
 ```
 
 - 目标拆成几条互不依赖的小项，agent 卡在其中一条时才能跳过它继续做别的

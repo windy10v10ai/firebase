@@ -9,7 +9,7 @@ description: 和用户一起给某个 issue 定 spec，写成执行说明交给 
 
 ## 1. 补齐 issue 字段
 
-只看当前这条 issue，缺哪项补哪项：Type、Priority、Effort、仓库标签、组织项目「开发计划」（`gh project` 编号 3）里的 Status。查询与设置命令、字段 ID 沿用 game 仓库 `issue-triage` skill 的「配置」表与第 4 步（`../windy10v10ai/.claude/skills/issue-triage/SKILL.md`），项目和 Type、Priority、Effort 字段是组织级的，两个仓库共用。缺项按 issue 内容给建议值，第 3 步一并让用户确认后再设。
+只看当前这条 issue，缺哪项补哪项：Type、Priority、Effort、仓库标签、组织项目「开发计划」（`gh project` 编号 3）里的 Status。查询与设置命令、字段 ID 沿用 game 仓库 [issue-triage](https://github.com/windy10v10ai/game/blob/develop/.claude/skills/issue-triage/SKILL.md) skill 的「配置」表与第 4 步，项目和 Type、Priority、Effort 字段是组织级的，两个仓库共用。缺项按 issue 内容给建议值，第 3 步一并让用户确认后再设。
 
 ## 2. 读懂 issue
 
@@ -25,7 +25,7 @@ description: 和用户一起给某个 issue 定 spec，写成执行说明交给 
 - 改动范围：列得出具体文件或目录
 - 不做什么
 - 要补哪些测试，输入与预期值
-- 要不要跨仓库改（`../windy10v10ai`），各开什么 PR、谁先部署
+- 要不要跨仓库改（game 仓库），各开什么 PR、谁先部署
 - 目标能否拆成几条互不依赖的小项
 
 能从代码或项目规则直接得出的不问，直接写进草稿。
