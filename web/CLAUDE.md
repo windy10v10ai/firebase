@@ -162,13 +162,13 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 |---|---|
 | 花勇士积分，或与游戏里是同一个操作（加点、觉醒） | `.btn-season`，暂存一步用 `.btn-season-outline` |
 | 花会员积分 | `.btn-member` |
-| 一屏里最想让人点的那一个（首页首屏的登录与签到、`/launch` 的下载） | `.btn-cta` |
+| 一屏里最想让人点的那一个（首页首屏的签到、`/launch` 的下载） | `.btn-cta` |
 | 提交、重试、跳转、去外部平台订阅或付款 | `.btn-primary`，即 `Button` 的默认 `variant` |
 | 取消、次要操作 | `.btn-secondary` |
 | 与主按钮并排的返回、跳过 | `.btn-ghost` |
 | 清空、重置这类撤不回的入口 | `.btn-danger` |
-| 登录类的第三方入口 | 次按钮外观加品牌图标，Steam 用 `STEAM_BUTTON_CLASS`；首页首屏的登录例外，用 `.btn-cta` 加 Steam 图标 |
-| 压在首页首屏图上的次要入口（「获得地图」「下载启动器」「个人主页」） | `.btn-glass` |
+| 登录类的第三方入口 | 次按钮外观加品牌图标，Steam 用 `SteamLoginButton`；首页首屏的登录用它的 `glass` 外观，不用 `.btn-cta` |
+| 压在首页首屏图上的入口（「获得地图」「下载启动器」「个人主页」、登录） | `.btn-glass` |
 
 - **每屏最多一个主按钮或强调按钮**：`.btn-cta` 不和 `.btn-primary` 同屏出现，拿不准时用 `.btn-primary`
 - **请求进行中用 `Button` 的 `loading`**：按钮内转圈并禁用，文案由调用方换成进行时。不盖整页遮罩

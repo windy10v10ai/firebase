@@ -29,6 +29,8 @@ interface AwakenCardProps {
   busy: boolean;
   /** 不传就只展示、不能点开觉醒，给别人看的页面用 */
   onOpen?: (hero: AwakenHero) => void;
+  /** 未登录的预览：点开只看技能，按钮换成中性色 */
+  preview?: boolean;
 }
 
 /**
@@ -38,7 +40,14 @@ interface AwakenCardProps {
  * 整张卡是点击热区，里面那个按钮只是视觉提示：游戏内的按钮只有 22px 高，
  * 触屏按不准，用整张卡当热区就不必为了凑触控尺寸把卡片撑大。
  */
-export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: AwakenCardProps) {
+export default function AwakenCard({
+  hero,
+  unlocked,
+  tooPoor,
+  busy,
+  onOpen,
+  preview = false,
+}: AwakenCardProps) {
   const t = useTranslations('awaken');
   const locale = abilityLocale(useLocale());
   // 立绘、英雄名、技能图标都是本地常量，数据没到照样画；这时按钮按未觉醒的样子置灰锁住
@@ -154,12 +163,14 @@ export default function AwakenCard({ hero, unlocked, tooPoor, busy, onOpen }: Aw
             className={`flex h-7.5 w-full items-center justify-center rounded-[7px] border text-[13px] font-bold ${
               unlocked
                 ? 'border-transparent bg-member-soft text-member-strong'
-                : dimmed || !known
-                  ? 'border-line bg-panel-soft/90 text-faint'
-                  : 'border-[#7a6fd0] bg-linear-to-r from-[#4f48b2] to-[#0f033a] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.53)]'
+                : preview
+                  ? 'border-line bg-panel-soft/90 text-content'
+                  : dimmed || !known
+                    ? 'border-line bg-panel-soft/90 text-faint'
+                    : 'border-[#7a6fd0] bg-linear-to-r from-[#4f48b2] to-[#0f033a] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.53)]'
             }`}
           >
-            {unlocked ? t('unlocked') : t('unlock')}
+            {unlocked ? t('unlocked') : preview ? t('preview.viewSkill') : t('unlock')}
           </span>
         </div>
       </Frame>

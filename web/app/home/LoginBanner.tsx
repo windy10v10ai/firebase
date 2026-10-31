@@ -47,7 +47,7 @@ export default function LoginBanner() {
         <p className="text-xs text-muted">{tSample('note')}</p>
       </div>
 
-      <SteamLoginButton variant="cta" />
+      <SteamLoginButton variant="glass" />
       <div className="flex flex-col items-start gap-2">
         <AcceleratorHint />
         <p className="text-sm text-muted">{t('privacy')}</p>

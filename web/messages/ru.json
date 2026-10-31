@@ -661,6 +661,9 @@
     }
   },
   "property": {
+    "preview": {
+      "hint": "Войдите, чтобы распределить очки"
+    },
     "loading": "Загрузка атрибутов",
     "noRecord": {
       "title": "Нет данных об этом игроке",
@@ -695,6 +698,7 @@
       }
     },
     "card": {
+      "maxValue": "Макс. <b>{value}</b>",
       "perCell": "{value} за уровень",
       "skillCost": "{cost, plural, one {# очко} few {# очка} many {# очков} other {# очка}} атрибутов за уровень",
       "skillValue": "{value}",
@@ -757,6 +761,11 @@
     }
   },
   "awaken": {
+    "preview": {
+      "heroCount": "Героев для пробуждения",
+      "hint": "Войдите, чтобы увидеть пробуждённых героев и доступные очки",
+      "viewSkill": "Способность"
+    },
     "title": "Пробуждение героев",
     "loading": "Загрузка пробуждений",
     "unlock": "Пробудить",
@@ -779,6 +788,7 @@
       "memberPoint": "Доступно Member Points"
     },
     "dialog": {
+      "loginToAwaken": "Войдите, чтобы пробудить этого героя",
       "question": "Выберите очки для траты, чтобы пробудить этого героя",
       "alreadyUnlocked": "Пробуждён",
       "useBattle": "{cost} доступных Battle Points",
@@ -1007,6 +1017,12 @@
     "iconMissing": "Нет иконки"
   },
   "auth": {
+    "guest": {
+      "leaderboard": {
+        "title": "Таблица лидеров",
+        "description": "Посмотрите профили других игроков"
+      }
+    },
     "login": "Войти через Steam",
     "loginShort": "Войти",
     "loginTooltip": "Откроется официальная страница входа Steam. Мы получаем только ваш Steam ID.",

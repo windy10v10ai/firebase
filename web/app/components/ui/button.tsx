@@ -12,6 +12,8 @@ export const STEAM_BUTTON_SIZE_CLASS = {
   // 头部里与账号控件等高：触屏档 44px 点击区，电脑档 36px
   default: 'h-11 gap-1.5 px-2.5 lg:h-9',
   large: 'min-h-14 gap-3 px-6 text-lg',
+  // 横条里的登录入口：横条很宽时按钮跟着放大，窄屏由调用方撑满整行
+  wide: 'h-12 justify-center gap-2 px-7 text-base font-semibold md:min-w-64',
 };
 
 // 选型见 web/CLAUDE.md「按钮」
