@@ -655,6 +655,9 @@
     }
   },
   "property": {
+    "preview": {
+      "hint": "登录后加点"
+    },
     "loading": "正在读取属性",
     "noRecord": {
       "title": "没有这个玩家的记录",
@@ -689,6 +692,7 @@
       }
     },
     "card": {
+      "maxValue": "满级 <b>{value}</b>",
       "perCell": "每级 {value}",
       "skillCost": "每级 {cost} 属性点",
       "skillValue": "{value} 点",
@@ -751,6 +755,11 @@
     }
   },
   "awaken": {
+    "preview": {
+      "heroCount": "可觉醒英雄",
+      "hint": "登录后显示已觉醒的英雄和可用积分",
+      "viewSkill": "看技能"
+    },
     "title": "英雄觉醒",
     "loading": "正在读取觉醒记录",
     "unlock": "觉醒",
@@ -773,6 +782,7 @@
       "memberPoint": "可用会员积分"
     },
     "dialog": {
+      "loginToAwaken": "登录后觉醒这个英雄",
       "question": "选择消耗的积分，觉醒该英雄",
       "alreadyUnlocked": "已觉醒",
       "useBattle": "{cost} 可用勇士积分",
@@ -1001,6 +1011,12 @@
     "iconMissing": "无图"
   },
   "auth": {
+    "guest": {
+      "leaderboard": {
+        "title": "排行榜",
+        "description": "看看其他玩家的主页"
+      }
+    },
     "login": "通过 Steam 登录",
     "loginShort": "登录",
     "loginTooltip": "跳转到 Steam 官方页面登录，网站只获取你的 Steam ID",

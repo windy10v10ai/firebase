@@ -28,6 +28,8 @@ interface PropertyCardProps {
   busy: boolean;
   /** 别人看时只画等级，不放任何操作 */
   readOnly: boolean;
+  /** 未登录的预览：没有等级可画，右侧换成满级数值 */
+  preview?: boolean;
   onPendingChange: (cells: number) => void;
   onUpgrade: (targetLevel: number) => void;
 }
@@ -189,6 +191,7 @@ export default function PropertyCard({
   usablePoints,
   busy,
   readOnly,
+  preview = false,
   onPendingChange,
   onUpgrade,
 }: PropertyCardProps) {
@@ -245,7 +248,7 @@ export default function PropertyCard({
   return (
     // 别人看时没加过的属性压暗，加在哪一眼就能看出来
     <div
-      className={`card-container card-pad-sm @container transition-colors ${borderClass} ${readOnly && known && current === 0 ? 'opacity-55' : ''}`}
+      className={`card-container card-pad-sm @container transition-colors ${borderClass} ${readOnly && !preview && known && current === 0 ? 'opacity-55' : ''}`}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 @xl:flex-nowrap @xl:gap-x-3.5">
         <span
@@ -270,7 +273,16 @@ export default function PropertyCard({
               </span>
             </div>
             <span className="flex shrink-0 items-baseline gap-1.5 whitespace-nowrap tabular-nums">
-              {!known ? (
+              {preview ? (
+                <span className="text-sm text-muted">
+                  {oneShot
+                    ? t('card.oneShotCost', { cost: PROPERTY_MAX_LEVEL })
+                    : t.rich('card.maxValue', {
+                        value: valueText(def, PROPERTY_MAX_LEVEL),
+                        b: (chunks) => <b className="font-bold text-content">{chunks}</b>,
+                      })}
+                </span>
+              ) : !known ? (
                 <span className="font-bold">
                   <Skeleton />
                 </span>
