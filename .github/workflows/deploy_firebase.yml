@@ -38,7 +38,7 @@ jobs:
         run: npm ci --prefix api
 
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@35d0fd9b92b2c66dcd13f1b72dacc588e89e7567 # v15.32.1
+        uses: w9jds/firebase-action@a3f8db378f69597e99644eb9c8dfefe0bcce6e1d # v15.34.1
         with:
           args: deploy --only functions,hosting,firestore
         env:
