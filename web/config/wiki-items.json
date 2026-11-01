@@ -1,6 +1,6 @@
 {
   "source": {
-    "gameCommit": "43138187047dfd315e9f626a9faa5a94ab32c893",
+    "gameCommit": "f5e80fea1f51cf682b6faff4e3e9418ee4373e18",
     "dotaVersion": "7.41f"
   },
   "priceTiers": [
@@ -188,6 +188,10 @@
     },
     {
       "name": "item_consecrated_wraps",
+      "tier": 2
+    },
+    {
+      "name": "item_veil_of_discord",
       "tier": 2
     },
     {
@@ -664,6 +668,12 @@
       "name": "item_blue_fantasy",
       "section": "equipment",
       "price": 16700,
+      "tier": 4
+    },
+    {
+      "name": "item_aeon_amulet",
+      "section": "equipment",
+      "price": 18000,
       "tier": 4
     },
     {

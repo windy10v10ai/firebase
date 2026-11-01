@@ -9,25 +9,31 @@
     "icon": "abyssal_blade_v2.cf51be81.webp",
     "zh": "一闪",
     "en": "Flash",
-    "ru": null
+    "ru": "Вспышка"
   },
   "item_adi_king": {
     "icon": "adi_king.c8f92bb8.webp",
     "zh": "阿迪王",
     "en": "Advanced Phase Boots",
-    "ru": null
+    "ru": "Адидас Кинг"
   },
   "item_adi_king_plus": {
     "icon": "adi_king_plus.67de2211.webp",
     "zh": "阿迪王plus",
     "en": "Advanced Phase Boots Plus",
-    "ru": null
+    "ru": "Адидас Кинг Plus"
   },
   "item_aegis": {
     "icon": "aegis.9444690c.webp",
     "zh": "不朽之守护",
     "en": "Aegis of the Immortal",
     "ru": "Aegis of the Immortal"
+  },
+  "item_aeon_amulet": {
+    "icon": "aeon_amulet.e3a10171.webp",
+    "zh": "永恒护符",
+    "en": "Aeon Amulet",
+    "ru": "Амулет вечности"
   },
   "item_aeon_disk": {
     "icon": "aeon_disk.4ea87449.webp",
@@ -39,7 +45,7 @@
     "icon": "aeon_pendant.04fcb4a3.webp",
     "zh": "咸鱼之王",
     "en": "Aeon Pendant",
-    "ru": null
+    "ru": "Кулон Эона"
   },
   "item_aether_lens": {
     "icon": "aether_lens.ce4f3156.webp",
@@ -51,7 +57,7 @@
     "icon": "aether_lens_2.68131223.webp",
     "zh": "以太透镜2",
     "en": "Upgraded Aether Lens",
-    "ru": null
+    "ru": "Aether Lens 2"
   },
   "item_aghanims_shard": {
     "icon": "aghanims_shard.f010efaa.webp",
@@ -75,13 +81,13 @@
     "icon": "arcane_blink.2153bf2d.webp",
     "zh": "爱因斯坦闪光",
     "en": "Blink of Einstein",
-    "ru": "Arcane Blink"
+    "ru": "Вспышка Эйнштейна"
   },
   "item_arcane_blink_2": {
     "icon": "arcane_blink_2.60986ad8.webp",
     "zh": "秘奥闪光",
     "en": "Arcane Blink",
-    "ru": null
+    "ru": "Тайная вспышка"
   },
   "item_arcane_boots": {
     "icon": "arcane_boots.ab8970c4.webp",
@@ -93,7 +99,7 @@
     "icon": "arcane_octarine_core.18b2f94c.webp",
     "zh": "奥术之心",
     "en": "Arcane Core",
-    "ru": null
+    "ru": "Магическое ядро"
   },
   "item_arcane_ring": {
     "icon": "arcane_ring.f2983820.webp",
@@ -111,31 +117,31 @@
     "icon": "armlet_artifact.7a29be6f.webp",
     "zh": "神器·光暗臂章",
     "en": "Artifact Armlet of Mordiggian",
-    "ru": null
+    "ru": "Артефакт: Armlet света и тьмы"
   },
   "item_armlet_dark": {
     "icon": "armlet_dark.0a2af53d.webp",
     "zh": "暗影·臂章",
     "en": "Dark Armlet of Mordiggian",
-    "ru": null
+    "ru": "Тёмный Armlet of Mordiggian"
   },
   "item_armlet_light": {
     "icon": "armlet_light.ea04bb8b.webp",
     "zh": "圣光·臂章",
     "en": "Light Armlet of Mordiggian",
-    "ru": null
+    "ru": "Светлый Armlet of Mordiggian"
   },
   "item_armlet_plus": {
     "icon": "armlet_plus.b6c8a664.webp",
     "zh": "小鸡臂章Plus",
     "en": "Armlet of Mordiggian Plus",
-    "ru": null
+    "ru": "Куриный Armlet Plus"
   },
   "item_armlet_pro_max": {
     "icon": "armlet_pro_max.e62d9a35.webp",
     "zh": "小鸡臂章Pro Max",
     "en": "Armlet of Mordiggian Plus Pro Max",
-    "ru": null
+    "ru": "Куриный Armlet Pro Max"
   },
   "item_ash_legion_shield": {
     "icon": "ash_legion_shield.94a0a33e.webp",
@@ -153,7 +159,7 @@
     "icon": "awaken_stone.304eba8c.webp",
     "zh": "觉醒石",
     "en": "Awakening Stone",
-    "ru": null
+    "ru": "Камень пробуждения"
   },
   "item_ballista": {
     "icon": "ballista.2d84049f.webp",
@@ -171,13 +177,13 @@
     "icon": "beast_armor.99661e13.webp",
     "zh": "兽化甲",
     "en": "Beast Armor",
-    "ru": null
+    "ru": "Броня зверя"
   },
   "item_beast_shield": {
     "icon": "beast_shield.94455679.webp",
     "zh": "兽化盾",
     "en": "Beast Shield",
-    "ru": null
+    "ru": "Щит зверя"
   },
   "item_belt_of_strength": {
     "icon": "belt_of_strength.95af2868.webp",
@@ -195,7 +201,7 @@
     "icon": "bfury_ultra.d6aa291f.webp",
     "zh": "救世狂战",
     "en": "Worldcleaver",
-    "ru": null
+    "ru": "Worldcleaver"
   },
   "item_black_king_bar": {
     "icon": "black_king_bar.2b6d0be6.webp",
@@ -207,7 +213,7 @@
     "icon": "black_king_bar_2.7e4de4e8.webp",
     "zh": "天神杖",
     "en": "Upgraded Black King Bar",
-    "ru": null
+    "ru": "Жезл богов"
   },
   "item_blade_mail": {
     "icon": "blade_mail.12780fea.webp",
@@ -219,7 +225,7 @@
     "icon": "blade_mail_2.d76273d3.webp",
     "zh": "刃甲2",
     "en": "Upgraded Blade Mail",
-    "ru": null
+    "ru": "Blade Mail 2"
   },
   "item_blade_of_alacrity": {
     "icon": "blade_of_alacrity.833c39c2.webp",
@@ -291,13 +297,13 @@
     "icon": "bloodstone.21274268.webp",
     "zh": "血精神石",
     "en": "Godly Bloodstone",
-    "ru": "Bloodstone"
+    "ru": "Божественный Bloodstone"
   },
   "item_bloodstone_v2": {
     "icon": "bloodstone_v2.a53b7b55.webp",
     "zh": "迷你血精石",
     "en": "Mini Bloodstone",
-    "ru": null
+    "ru": "Мини-Bloodstone"
   },
   "item_bloodthorn": {
     "icon": "bloodthorn.eae886ba.webp",
@@ -309,13 +315,13 @@
     "icon": "bloodthorn_ultra.83afbc7f.webp",
     "zh": "变态辣",
     "en": "Ultra Bloodthorn",
-    "ru": null
+    "ru": "Ультра Bloodthorn"
   },
   "item_blue_fantasy": {
     "icon": "blue_fantasy.706baee6.webp",
     "zh": "苍蓝幻想",
     "en": "Blue Fantasy",
-    "ru": null
+    "ru": "Лазурная фантазия"
   },
   "item_boots": {
     "icon": "boots.6d3627dd.webp",
@@ -333,7 +339,7 @@
     "icon": "boots_of_bearing_2.f470b0c7.webp",
     "zh": "神器·蹦迪之鞋",
     "en": "Artifact: Boots of Bearing",
-    "ru": null
+    "ru": "Артефакт: Сапоги дискотеки"
   },
   "item_boots_of_elves": {
     "icon": "boots_of_elves.d90e7258.webp",
@@ -387,7 +393,7 @@
     "icon": "candy_candy.504f8ac4.webp",
     "zh": "嘉心糖",
     "en": "Diana Candy",
-    "ru": null
+    "ru": "Конфета Дианы"
   },
   "item_ceremonial_robe": {
     "icon": "ceremonial_robe.02529890.webp",
@@ -453,7 +459,7 @@
     "icon": "collector.f5055f00.webp",
     "zh": "收纳符",
     "en": "Item Collector",
-    "ru": null
+    "ru": "Талисман коллекционера"
   },
   "item_conjurers_catalyst": {
     "icon": "conjurers_catalyst.4db30ead.webp",
@@ -477,7 +483,7 @@
     "icon": "consumable_gem.d679387e.webp",
     "zh": "幻影宝石",
     "en": "Phantom Gem",
-    "ru": null
+    "ru": "Призрачный самоцвет"
   },
   "item_crellas_crozier": {
     "icon": "crellas_crozier.fc582491.webp",
@@ -489,7 +495,7 @@
     "icon": "crellas_crozier_2.b5884f90.webp",
     "zh": "神器·克莱拉的神化牧杖",
     "en": "Artifact: Crella's Divine Crozier",
-    "ru": null
+    "ru": "Артефакт: Божественный посох Креллы"
   },
   "item_crimson_guard": {
     "icon": "crimson_guard.64500b53.webp",
@@ -567,7 +573,7 @@
     "icon": "dark_part.07e44878.webp",
     "zh": "暗影组件",
     "en": "Dark Part",
-    "ru": null
+    "ru": "Частица тьмы"
   },
   "item_defiant_shell": {
     "icon": "defiant_shell.8dcb3288.webp",
@@ -609,7 +615,7 @@
     "icon": "devastator_2.f6bbf5b9.webp",
     "zh": "神圣斧",
     "en": "Sacred Parasma",
-    "ru": null
+    "ru": "Священная Parasma"
   },
   "item_dezun_bloodrite": {
     "icon": "dezun_bloodrite.5fe686fb.webp",
@@ -657,7 +663,7 @@
     "icon": "dodo_desolator.9166d33e.webp",
     "zh": "黯灭头",
     "en": "Dodo Desolator",
-    "ru": null
+    "ru": "Desolator-дудо"
   },
   "item_dormant_curio": {
     "icon": "dormant_curio.7616e11d.webp",
@@ -669,7 +675,7 @@
     "icon": "dracula_mask.6aa6f420.webp",
     "zh": "生命之盔",
     "en": "Dracula's Mask",
-    "ru": null
+    "ru": "Маска Дракулы"
   },
   "item_dragon_ball_1": {
     "icon": "dragon_ball_1.e3407721.webp",
@@ -747,7 +753,7 @@
     "icon": "echo_sabre_2.5ee08121.webp",
     "zh": "音速战刃",
     "en": "Upgraded Echo Sabre",
-    "ru": null
+    "ru": "Echo Sabre 2"
   },
   "item_eldwurms_edda": {
     "icon": "eldwurms_edda.71cfe40a.webp",
@@ -939,7 +945,7 @@
     "icon": "essence_distiller_2.0962adcf.webp",
     "zh": "神器·精灵圣宝",
     "en": "Artifact: Sacred Spirit Distiller",
-    "ru": null
+    "ru": "Артефакт: Священный Essence Distiller"
   },
   "item_essence_ring": {
     "icon": "essence_ring.6020081c.webp",
@@ -963,7 +969,7 @@
     "icon": "excalibur.06cee5c8.webp",
     "zh": "EX咖喱棒",
     "en": "Excalibur",
-    "ru": null
+    "ru": "Excalibur"
   },
   "item_exchange": {
     "icon": "exchange.116ca62d.webp",
@@ -1047,19 +1053,19 @@
     "icon": "forbidden_blade.6f5f4a5b.webp",
     "zh": "禁忌战刃",
     "en": "Forbidden Blade",
-    "ru": null
+    "ru": "Запретный клинок"
   },
   "item_forbidden_staff": {
     "icon": "forbidden_staff.add3be26.webp",
     "zh": "禁忌法锤",
     "en": "Forbidden Staff",
-    "ru": null
+    "ru": "Запретный молот"
   },
   "item_force_field_ultra": {
     "icon": "force_field_ultra.34e98e80.webp",
     "zh": "神器·天地同寿甲",
     "en": "Artifact: Arcanist's Armor",
-    "ru": null
+    "ru": "Артефакт: Броня общей гибели"
   },
   "item_force_staff": {
     "icon": "force_staff.038e962b.webp",
@@ -1071,61 +1077,61 @@
     "icon": "force_staff_2.ed51588f.webp",
     "zh": "风力法杖",
     "en": "Wind Force Staff",
-    "ru": null
+    "ru": "Force Staff 2"
   },
   "item_force_staff_3": {
     "icon": "force_staff_3.da9b3685.webp",
     "zh": "黄金法杖",
     "en": "Golden Force Staff",
-    "ru": null
+    "ru": "Золотой Force Staff"
   },
   "item_fusion_agile": {
     "icon": "fusion_agile.ac238b61.webp",
     "zh": "灵动符文",
     "en": "Agile Rune",
-    "ru": null
+    "ru": "Руна ловкости"
   },
   "item_fusion_beast": {
     "icon": "fusion_beast.7296df81.webp",
     "zh": "兽化符文",
     "en": "Beast Rune",
-    "ru": null
+    "ru": "Руна зверя"
   },
   "item_fusion_brutal": {
     "icon": "fusion_brutal.4f5bea88.webp",
     "zh": "暴虐符文",
     "en": "Brutal Rune",
-    "ru": null
+    "ru": "Руна жестокости"
   },
   "item_fusion_forbidden": {
     "icon": "fusion_forbidden.c6abc067.webp",
     "zh": "禁忌符文",
     "en": "Forbidden Rune",
-    "ru": null
+    "ru": "Запретная руна"
   },
   "item_fusion_hawkeye": {
     "icon": "fusion_hawkeye.41634c82.webp",
     "zh": "鹰眼符文",
     "en": "Hawkeye Rune",
-    "ru": null
+    "ru": "Руна ястребиного глаза"
   },
   "item_fusion_life": {
     "icon": "fusion_life.492e6586.webp",
     "zh": "生命符文",
     "en": "Life Rune",
-    "ru": null
+    "ru": "Руна жизни"
   },
   "item_fusion_magic": {
     "icon": "fusion_magic.2f4af320.webp",
     "zh": "魔化符文",
     "en": "Magic Rune",
-    "ru": null
+    "ru": "Руна магии"
   },
   "item_fusion_shadow": {
     "icon": "fusion_shadow.af281cce.webp",
     "zh": "暗影符文",
     "en": "Shadow Rune",
-    "ru": null
+    "ru": "Руна тени"
   },
   "item_gale_guard": {
     "icon": "gale_guard.4674cdc9.webp",
@@ -1203,7 +1209,7 @@
     "icon": "guardian_greaves_artifact.3f5a7dd2.webp",
     "zh": "神器·卫士胫甲",
     "en": "Artifact Guardian Greaves",
-    "ru": null
+    "ru": "Артефакт: Guardian Greaves"
   },
   "item_gungir": {
     "icon": "gungir.1be0538b.webp",
@@ -1215,7 +1221,7 @@
     "icon": "gungir_2.3790f704.webp",
     "zh": "风暴之锤",
     "en": "Advanced Gleipnir",
-    "ru": null
+    "ru": "Громовой молот"
   },
   "item_gunpowder_gauntlets": {
     "icon": "gunpowder_gauntlets.32102e5a.webp",
@@ -1233,7 +1239,7 @@
     "icon": "hand_of_group.dda5686a.webp",
     "zh": "团队之手",
     "en": "Hand of Team",
-    "ru": null
+    "ru": "Рука команды"
   },
   "item_hand_of_midas": {
     "icon": "hand_of_midas.49bb16a5.webp",
@@ -1263,13 +1269,13 @@
     "icon": "hawkeye_fighter.2f45552c.webp",
     "zh": "鹰眼战机",
     "en": "Hawkeye Fighter",
-    "ru": null
+    "ru": "Истребитель «Ястребиный глаз»"
   },
   "item_hawkeye_turret": {
     "icon": "hawkeye_turret.66956090.webp",
     "zh": "鹰眼炮台",
     "en": "Hawkeye Turret",
-    "ru": null
+    "ru": "Турель «Ястребиный глаз»"
   },
   "item_headdress": {
     "icon": "headdress.f1094329.webp",
@@ -1293,7 +1299,7 @@
     "icon": "heavens_halberd_v2.48101093.webp",
     "zh": "无锋战戟",
     "en": "Heaven's Lament",
-    "ru": null
+    "ru": "Плач небес"
   },
   "item_heavy_blade": {
     "icon": "heavy_blade.a67ac6fe.webp",
@@ -1323,7 +1329,7 @@
     "icon": "hurricane_pike_2.041028f1.webp",
     "zh": "黄金魔龙枪 Ultimate",
     "en": "Golden Hurricane Pike",
-    "ru": null
+    "ru": "Золотая Hurricane Pike"
   },
   "item_hydras_breath": {
     "icon": "hydras_breath.5f039f0f.webp",
@@ -1335,7 +1341,7 @@
     "icon": "hydras_breath_2.434012f8.webp",
     "zh": "神器·千年毒蛟之息",
     "en": "Artifact: Millennial Hydra's Breath",
-    "ru": null
+    "ru": "Артефакт: Дыхание тысячелетней гидры"
   },
   "item_hyperstone": {
     "icon": "hyperstone.dada05df.webp",
@@ -1353,13 +1359,13 @@
     "icon": "imp_claw.1bd1e916.webp",
     "zh": "力量法则碎片",
     "en": "Power Law Fragment",
-    "ru": "Imp Claw"
+    "ru": "Осколок закона силы"
   },
   "item_infernal_desolator": {
     "icon": "infernal_desolator.4958f805.webp",
     "zh": "绝对破防之刃",
     "en": "Infernal Desolator",
-    "ru": null
+    "ru": "Абсолютный Desolator"
   },
   "item_infused_raindrop": {
     "icon": "infused_raindrop.c95bafac.webp",
@@ -1371,13 +1377,13 @@
     "icon": "insight_armor.096b08f7.webp",
     "zh": "洞察盔甲",
     "en": "Armor of Insight",
-    "ru": null
+    "ru": "Броня прозрения"
   },
   "item_inventory_slot_unlock": {
     "icon": "inventory_slot_unlock.15931ec6.webp",
     "zh": "扩容之书",
     "en": "Tome of Expansion",
-    "ru": null
+    "ru": "Том расширения"
   },
   "item_invis_sword": {
     "icon": "invis_sword.edcbf196.webp",
@@ -1419,7 +1425,7 @@
     "icon": "kaya_and_sange_1.db1a65b4.webp",
     "zh": "神器·散慧对剑",
     "en": "Ultra Kaya and Sange",
-    "ru": null
+    "ru": "Артефакт: Kaya and Sange"
   },
   "item_kobold_cup": {
     "icon": "kobold_cup.04413fc9.webp",
@@ -1443,7 +1449,7 @@
     "icon": "light_part.c0ba682b.webp",
     "zh": "圣光组件",
     "en": "Light Part",
-    "ru": null
+    "ru": "Частица света"
   },
   "item_lotus_orb": {
     "icon": "lotus_orb.41e8497a.webp",
@@ -1485,7 +1491,7 @@
     "icon": "magic_sword.de9e286e.webp",
     "zh": "魔渊剑",
     "en": "Demonic Sword",
-    "ru": null
+    "ru": "Демонический клинок"
   },
   "item_magic_wand": {
     "icon": "magic_wand.23f786ff.webp",
@@ -1515,13 +1521,13 @@
     "icon": "manta_1.ffd0c3f2.webp",
     "zh": "幻身斧",
     "en": "Upgraded Manta Style",
-    "ru": null
+    "ru": "Улучшенный Manta Style"
   },
   "item_manta_2": {
     "icon": "manta_2.5f4d1f43.webp",
     "zh": "相位斧",
     "en": "Phase Axe",
-    "ru": null
+    "ru": "Фазовый топор"
   },
   "item_mantle": {
     "icon": "mantle.ec968166.webp",
@@ -1563,7 +1569,7 @@
     "icon": "meteor_hammer_2.df52f725.webp",
     "zh": "星落",
     "en": "Asteroid Hammer",
-    "ru": null
+    "ru": "Падение звезды"
   },
   "item_minotaur_horn": {
     "icon": "minotaur_horn.3c3c8d38.webp",
@@ -1599,7 +1605,7 @@
     "icon": "mjollnir_2.090c5b3b.webp",
     "zh": "神器·神雷锤",
     "en": "Artifact: Divine Thunder Hammer",
-    "ru": null
+    "ru": "Артефакт: Божественный громовой молот"
   },
   "item_monkey_king_bar": {
     "icon": "monkey_king_bar.c2ca38d1.webp",
@@ -1611,7 +1617,7 @@
     "icon": "monkey_king_bar_2.cb1bab49.webp",
     "zh": "定海神针",
     "en": "Ultra Monkey King Bar",
-    "ru": null
+    "ru": "Ультра Monkey King Bar"
   },
   "item_moon_shard": {
     "icon": "moon_shard.e13de1fc.webp",
@@ -1623,7 +1629,7 @@
     "icon": "moon_shard_datadriven.e13de1fc.webp",
     "zh": "真·银月之晶",
     "en": "Moon Shard",
-    "ru": null
+    "ru": "Истинный Moon Shard"
   },
   "item_mysterious_hat": {
     "icon": "mysterious_hat.8a852376.webp",
@@ -1641,7 +1647,7 @@
     "icon": "necronomicon_staff.091ca49c.webp",
     "zh": "死灵法杖",
     "en": "Necronomicon Staff",
-    "ru": null
+    "ru": "Жезл Некрономикона"
   },
   "item_nemesis_curse": {
     "icon": "nemesis_curse.444e3d24.webp",
@@ -1701,7 +1707,7 @@
     "icon": "orb_of_the_brine.d8ec5b84.webp",
     "zh": "苍洋魔珠",
     "en": "Orb of the Brine",
-    "ru": null
+    "ru": "Сфера пучины"
   },
   "item_orb_of_venom": {
     "icon": "orb_of_venom.0c8a7b0f.webp",
@@ -1725,7 +1731,7 @@
     "icon": "overwhelming_blink_2.e9a649c9.webp",
     "zh": "泰森闪光",
     "en": "Tyson's Flash",
-    "ru": null
+    "ru": "Вспышка Тайсона"
   },
   "item_paladin_sword": {
     "icon": "paladin_sword.cab8658d.webp",
@@ -1749,7 +1755,7 @@
     "icon": "passive_skill_tome.214e4c55.webp",
     "zh": "被动技能书",
     "en": "Passive Skill Tome",
-    "ru": null
+    "ru": "Том пассивного навыка"
   },
   "item_pavise": {
     "icon": "pavise.f3224fae.webp",
@@ -1845,7 +1851,7 @@
     "icon": "quelling_blade_2_datadriven.ad0985f7.webp",
     "zh": "毒瘤之刃",
     "en": "Toxic Blade",
-    "ru": null
+    "ru": "Ядовитый клинок"
   },
   "item_radiance": {
     "icon": "radiance.0b07f1af.webp",
@@ -1857,7 +1863,7 @@
     "icon": "radiance_2.0076e803.webp",
     "zh": "圣焰之光",
     "en": "Fiery Radiance",
-    "ru": null
+    "ru": "Святое пламя"
   },
   "item_rapier": {
     "icon": "rapier.5ac4b9db.webp",
@@ -1869,13 +1875,13 @@
     "icon": "rapier_ultra.cc4987cf.webp",
     "zh": "诅咒圣剑",
     "en": "Cursed Rapier",
-    "ru": null
+    "ru": "Проклятая Divine Rapier"
   },
   "item_rapier_ultra_bot": {
     "icon": "rapier_ultra_bot.cc4987cf.webp",
     "zh": "解放的诅咒圣剑",
     "en": "Liberated Rapier",
-    "ru": null
+    "ru": "Освобождённая Divine Rapier"
   },
   "item_rattlecage": {
     "icon": "rattlecage.5ded3294.webp",
@@ -1893,7 +1899,7 @@
     "icon": "refresh_core.ee2c4899.webp",
     "zh": "熔火核心",
     "en": "Refresher Core",
-    "ru": null
+    "ru": "Ядро обновления"
   },
   "item_refresher": {
     "icon": "refresher.6693322c.webp",
@@ -1929,7 +1935,7 @@
     "icon": "revenants_brooch_ultra.a704e5c3.webp",
     "zh": "神器·魔武双修",
     "en": "Artifact: Revenant's Brooch",
-    "ru": null
+    "ru": "Артефакт: Двойное мастерство"
   },
   "item_riftshadow_prism": {
     "icon": "riftshadow_prism.765fbd02.webp",
@@ -2001,13 +2007,13 @@
     "icon": "rune_transmuter_advanced.704e2d44.webp",
     "zh": "转化石",
     "en": "Advanced Rune Transmuter",
-    "ru": null
+    "ru": "Продвинутый преобразователь рун"
   },
   "item_rune_transmuter_random": {
     "icon": "rune_transmuter_random.93447780.webp",
     "zh": "洗炼石",
     "en": "Rune Signer",
-    "ru": null
+    "ru": "Камень перековки рун"
   },
   "item_sacred_six_vein": {
     "icon": "sacred_six_vein.74effef5.webp",
@@ -2031,7 +2037,7 @@
     "icon": "saint_orb.c8ba71c5.webp",
     "zh": "圣女白莲",
     "en": "Saint White Lotus",
-    "ru": null
+    "ru": "Белый лотос святой"
   },
   "item_sange": {
     "icon": "sange.068af7eb.webp",
@@ -2049,7 +2055,7 @@
     "icon": "sange_and_yasha_1.61235111.webp",
     "zh": "神器·散夜对剑",
     "en": "Ultra Sange and Yasha",
-    "ru": null
+    "ru": "Артефакт: Sange and Yasha"
   },
   "item_satanic": {
     "icon": "satanic.93fe85de.webp",
@@ -2061,7 +2067,7 @@
     "icon": "satanic_2.8b018fa6.webp",
     "zh": "真红·撒旦之邪力",
     "en": "Upgraded Satanic",
-    "ru": null
+    "ru": "Багровый Satanic"
   },
   "item_searing_signet": {
     "icon": "searing_signet.1fd4b7d5.webp",
@@ -2097,13 +2103,13 @@
     "icon": "shadow_impact.7ef7ae7e.webp",
     "zh": "暗影法杖",
     "en": "Shadow Staff",
-    "ru": null
+    "ru": "Теневой посох"
   },
   "item_shadow_judgment": {
     "icon": "shadow_judgment.d81b4d26.webp",
     "zh": "暗影裁决",
     "en": "Shadow Judgment",
-    "ru": null
+    "ru": "Теневой приговор"
   },
   "item_shawl": {
     "icon": "shawl.d8f2cfb3.webp",
@@ -2127,19 +2133,19 @@
     "icon": "shivas_guard_2.60f2ed91.webp",
     "zh": "雅典娜的守护",
     "en": "Athena's Guard",
-    "ru": null
+    "ru": "Щит Афины"
   },
   "item_shotgun": {
     "icon": "shotgun.c3ae9037.webp",
     "zh": "双管霰弹枪",
     "en": "Double-Barrel",
-    "ru": null
+    "ru": "Двуствольное ружьё"
   },
   "item_shotgun_v2": {
     "icon": "shotgun_v2.8ff069c2.webp",
     "zh": "三管霰弹枪",
     "en": "Bullet-Filled Shotgun",
-    "ru": null
+    "ru": "Трёхствольное ружьё"
   },
   "item_silver_edge": {
     "icon": "silver_edge.6ffdfd58.webp",
@@ -2151,13 +2157,13 @@
     "icon": "silver_edge_2.116bbc1c.webp",
     "zh": "无敌之刃",
     "en": "Edge of Lothar",
-    "ru": null
+    "ru": "Клинок неуязвимости"
   },
   "item_six_paths_reincarnation_gun": {
     "icon": "six_paths_reincarnation_gun.738fd653.webp",
     "zh": "六道轮回枪",
     "en": "Six Paths Reincarnation Gun",
-    "ru": null
+    "ru": "Оружие шести путей"
   },
   "item_skadi": {
     "icon": "skadi.d7598cc9.webp",
@@ -2169,13 +2175,13 @@
     "icon": "skadi_2.a3cd19cf.webp",
     "zh": "粘妈之眼",
     "en": "Upgraded Eye of Skadi",
-    "ru": null
+    "ru": "Eye of Skadi 2"
   },
   "item_skill_reset": {
     "icon": "skill_reset.e8a94791.webp",
     "zh": "技能洗点书",
     "en": "Respec Tome",
-    "ru": null
+    "ru": "Том сброса навыков"
   },
   "item_slippers": {
     "icon": "slippers.a05d8c2e.webp",
@@ -2241,7 +2247,7 @@
     "icon": "sphere_2.e59d6fdf.webp",
     "zh": "真·林肯法球",
     "en": "Upgraded Linken's Sphere",
-    "ru": null
+    "ru": "Истинная Linken's Sphere"
   },
   "item_spider_legs": {
     "icon": "spider_legs.01b400e1.webp",
@@ -2289,19 +2295,19 @@
     "icon": "swift_blink_2.a36c9a06.webp",
     "zh": "博尔特闪光",
     "en": "Blink of Bolt",
-    "ru": null
+    "ru": "Вспышка Болта"
   },
   "item_swift_glove": {
     "icon": "swift_glove.a2cb67e0.webp",
     "zh": "无限手套",
     "en": "Swift Glove",
-    "ru": null
+    "ru": "Перчатка бесконечности"
   },
   "item_switchable_crit_blade": {
     "icon": "switchable_crit_blade.8c4482c6.webp",
     "zh": "归海一刀",
     "en": "Guihai Blade",
-    "ru": null
+    "ru": "Клинок Гуйхая"
   },
   "item_talisman_of_evasion": {
     "icon": "talisman_of_evasion.526400d2.webp",
@@ -2325,25 +2331,25 @@
     "icon": "time_gem.8ba2a80a.webp",
     "zh": "时间宝石",
     "en": "Time Gem",
-    "ru": null
+    "ru": "Камень времени"
   },
   "item_tome_of_ability_reset": {
     "icon": "tome_of_ability_reset.51e25d7b.webp",
     "zh": "能力重置书",
     "en": "Ability Reset Tome",
-    "ru": null
+    "ru": "Том сброса способности"
   },
   "item_tome_of_agility": {
     "icon": "tome_of_agility.12e77fd5.webp",
     "zh": "敏捷之书",
     "en": "Tome of Agility",
-    "ru": null
+    "ru": "Том ловкости"
   },
   "item_tome_of_intelligence": {
     "icon": "tome_of_intelligence.712723e3.webp",
     "zh": "智力之书",
     "en": "Tome of Intelligence",
-    "ru": null
+    "ru": "Том интеллекта"
   },
   "item_tome_of_knowledge": {
     "icon": "tome_of_knowledge.ac60cf27.webp",
@@ -2355,13 +2361,13 @@
     "icon": "tome_of_luoshu.59f41b74.webp",
     "zh": "洛书",
     "en": "Tome of Luoshu",
-    "ru": null
+    "ru": "Том Лошу"
   },
   "item_tome_of_strength": {
     "icon": "tome_of_strength.a3a7575e.webp",
     "zh": "力量之书",
     "en": "Tome of Strength",
-    "ru": null
+    "ru": "Том силы"
   },
   "item_tpscroll": {
     "icon": "tpscroll.29e590b0.webp",
@@ -2403,13 +2409,13 @@
     "icon": "ultimate_scepter_2.33b9b81e.webp",
     "zh": "真·阿哈利姆神杖",
     "en": "Aghanim's Regalia",
-    "ru": "Aghanim's Blessing"
+    "ru": "Истинный Aghanim's Scepter"
   },
   "item_undying_heart": {
     "icon": "undying_heart.05b08f99.webp",
     "zh": "不朽之心",
     "en": "Undying Heart",
-    "ru": null
+    "ru": "Сердце бессмертия"
   },
   "item_unrelenting_eye": {
     "icon": "unrelenting_eye.287ba612.webp",
@@ -2439,7 +2445,7 @@
     "icon": "veil_of_discord_2.9242e6c1.webp",
     "zh": "赫拉的神秘面纱",
     "en": "Upgraded Veil of Discord",
-    "ru": null
+    "ru": "Мистическая вуаль Геры"
   },
   "item_vitality_booster": {
     "icon": "vitality_booster.2f12b739.webp",
@@ -2457,7 +2463,7 @@
     "icon": "vladmir_2.b5c5299a.webp",
     "zh": "强袭祭品",
     "en": "Vladmir's Assault Cuirass",
-    "ru": null
+    "ru": "Штурмовое Vladmir's Offering"
   },
   "item_void_stone": {
     "icon": "void_stone.811d4cfc.webp",
@@ -2487,19 +2493,19 @@
     "icon": "wasp_callous.798ace77.webp",
     "zh": "大核荣耀冷酷",
     "en": "Callous Wasp",
-    "ru": null
+    "ru": "Бесчувственный Wasp"
   },
   "item_wasp_despotic": {
     "icon": "wasp_despotic.758ae4ef.webp",
     "zh": "大核荣耀暴虐",
     "en": "Despotic Wasp",
-    "ru": null
+    "ru": "Деспотичный Wasp"
   },
   "item_wasp_golden": {
     "icon": "wasp_golden.dcdc5aaa.webp",
     "zh": "黄金大核荣耀",
     "en": "Golden Wasp",
-    "ru": null
+    "ru": "Золотой Wasp"
   },
   "item_weighted_dice": {
     "icon": "weighted_dice.d20ebb9a.webp",
@@ -2523,7 +2529,7 @@
     "icon": "wings_of_haste.771304d4.webp",
     "zh": "急速之翼",
     "en": "Wings of Haste",
-    "ru": null
+    "ru": "Крылья спешки"
   },
   "item_wish_1": {
     "icon": "wish_1.97948e0b.webp",
@@ -2559,7 +2565,7 @@
     "icon": "withered_spring.606a340e.webp",
     "zh": "生命之心",
     "en": "Withered Spring",
-    "ru": null
+    "ru": "Источник жизни"
   },
   "item_wizard_hat": {
     "icon": "wizard_hat.67278055.webp",
@@ -2589,6 +2595,6 @@
     "icon": "yasha_and_kaya_1.8bdcd278.webp",
     "zh": "神器·慧夜对剑",
     "en": "Ultra Yasha and Kaya",
-    "ru": null
+    "ru": "Артефакт: Yasha and Kaya"
   }
 }
