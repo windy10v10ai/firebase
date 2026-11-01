@@ -155,7 +155,9 @@
 
 ### 排查 bug
 
-**排查线上偶发故障、本地跑不通、登录链路异常、接口变慢，以及 API 部署后检查有没有出错、变慢之前，先用 Skill 工具加载 [debug-evidence](skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
+**排查线上偶发故障、本地跑不通、登录链路异常、接口变慢之前，先用 Skill 工具加载 [debug-evidence](skills/debug-evidence/SKILL.md) 技能。**它写明生产日志怎么查、日志字段长什么样、哪些位置本来就没有日志，不要凭猜测下结论。
+
+**API 部署后盯线上有没有引入新问题时，先加载 [deploy-monitor](skills/deploy-monitor/SKILL.md) 技能。**它分 15 分钟内查严重故障、一小时后与部署前对比两段，只报这次部署新引入的问题。
 
 ### 界面设计
 
