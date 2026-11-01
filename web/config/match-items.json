@@ -1,6 +1,6 @@
 {
   "source": {
-    "gameCommit": "7e39fcfccf22c7344253a1b6fa0f249892972da7",
+    "gameCommit": "f5e80fea1f51cf682b6faff4e3e9418ee4373e18",
     "dotaVersion": "7.41f"
   },
   "items": [
@@ -750,10 +750,6 @@
     },
     {
       "name": "item_vanguard",
-      "price": 1700
-    },
-    {
-      "name": "item_veil_of_discord",
       "price": 1700
     },
     {

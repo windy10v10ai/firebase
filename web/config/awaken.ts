@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: 'd46e5fc41771ef8b955bf640e9a4247c3af0ee26',
+  gameCommit: '80497b3211fb2bf0a9d89dcb1e2c2eea2bba5bd5',
   dotaVersion: '7.41f',
 } as const;
 
@@ -86,6 +86,35 @@ export interface AwakenHero {
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
 export const AWAKEN_HEROES: AwakenHero[] = [
   {
+    heroName: 'npc_dota_hero_storm_spirit',
+    abilityName: 'special_bonus_unique_storm_spirit_upgrade',
+    freeTrial: true,
+    art: 'storm_spirit.d1a722c4.webp',
+    icon: 'storm_spirit_ball_lightning.e60832b8.webp',
+    name: { zh: '风暴之灵', en: 'Storm Spirit', ru: 'Storm Spirit' },
+    title: {
+      zh: "<font color='#d000ff'>球状涡流 觉醒</font>",
+      en: "<font color='#d000ff'>Ball Lightning Vortex Awakened</font>",
+      ru: "<font color='#d000ff'>Вихрь шаровой молнии: пробуждение</font>",
+    },
+    desc: {
+      zh: "球状闪电伤害敌方英雄后，将其拉向蓝猫并使其无法行动，持续时间为电子涡流的<font color='#FFFFFF'><b>50%</b></font>。<br>需已学习电子涡流。同一英雄在3秒内最多触发一次，小兵、幻象和<font color='#FFCC66'>魔法免疫</font>的单位不会触发。",
+      en: "After Ball Lightning damages an enemy hero, that hero is pulled toward Storm Spirit and cannot act for <font color='#FFFFFF'><b>50%</b></font> of Electric Vortex's duration.<br>Requires Electric Vortex to be learned. Each hero can be triggered at most once every 3 seconds. Creeps, illusions and <font color='#FFCC66'>spell immune</font> units are not affected.",
+      ru: "После того как Шаровая молния наносит урон вражескому герою, он притягивается к Storm Spirit и не может действовать в течение <font color='#FFFFFF'><b>50%</b></font> длительности Электрического вихря.<br>Требуется изученный Электрический вихрь. Каждый герой может быть затронут не чаще одного раза за 3 сек. Крипы, иллюзии и цели с <font color='#FFCC66'>невосприимчивостью к магии</font> не затрагиваются.",
+    },
+    ability: {
+      behavior: 'passive',
+      targeting: null,
+      damageType: null,
+      piercesImmunity: null,
+      dispellable: null,
+      values: [],
+      cooldown: null,
+      manaCost: null,
+      lore: null,
+    },
+  },
+  {
     heroName: 'npc_dota_hero_antimage',
     abilityName: 'special_bonus_unique_antimage_mana_suppression_awaken',
     freeTrial: true,
@@ -100,7 +129,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     desc: {
       zh: "施放闪烁后，附近<font color='#FFFFFF'><b>600</b></font>范围内的敌方英雄立刻损失<font color='#FFFFFF'><b>50%</b></font>当前魔法，<font color='#FFFFFF'><b>4</b></font>秒内无法回复魔法。<br>法力虚空对范围内每个敌方英雄按其自身损失的魔法造成伤害。<br>施放闪烁后，自动施放法术反制。",
       en: "After casting Blink, enemy heroes within <font color='#FFFFFF'><b>600</b></font> instantly lose <font color='#FFFFFF'><b>50%</b></font> of their current mana and cannot regain mana for <font color='#FFFFFF'><b>4</b></font> seconds.<br>Mana Void deals damage to each enemy hero in the area based on that hero's own missing mana.<br>After casting Blink, Counterspell is cast automatically.",
-      ru: "После применения Blink вражеские герои в радиусе <font color='#FFFFFF'><b>600</b></font> мгновенно теряют <font color='#FFFFFF'><b>50%</b></font> текущей маны и не могут восстанавливать ману <font color='#FFFFFF'><b>4</b></font> сек.<br>Mana Void наносит урон каждому вражескому герою в области по его собственной недостающей мане.<br>После применения Blink автоматически применяется Counterspell.",
+      ru: "После применения Скачка вражеские герои в радиусе <font color='#FFFFFF'><b>600</b></font> мгновенно теряют <font color='#FFFFFF'><b>50%</b></font> текущей маны и не могут восстанавливать ману <font color='#FFFFFF'><b>4</b></font> сек.<br>Пустота маны наносит урон каждому вражескому герою в области по его собственной недостающей мане.<br>После применения Скачка автоматически применяется Контрзаклинание.",
     },
     ability: {
       behavior: 'passive',
@@ -124,12 +153,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>魂断 觉醒</font>",
       en: "<font color='#d000ff'>Sunder Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждённый Sunder</font>",
+      ru: "<font color='#d000ff'>Разрыв: пробуждение</font>",
     },
     desc: {
       zh: "隔断恐怖利刃以及目标英雄的灵魂并将双方的当前血量百分比进行互换。交换后双方英雄的生命值必定在一定百分比以上。<br><br><font color='#00CED1'>自动施放：</font>生命值低于<font color='#FFFFFF'><b>30%</b></font>时，自动对施法距离内生命值百分比最高的敌方英雄施放魂断。<br><font color='#d000ff'>觉醒强化：</font>被眩晕、沉默、妖术等控制时也会自动施放。魂断需冷却完毕且魔法足够，敌方英雄生命值百分比都低于自己时不触发。",
       en: "Severs the life from both Terrorblade and a target hero, exchanging a percentage of both units' current health. Some health points must remain.<br><br><font color='#00CED1'>Autocast:</font> Below <font color='#FFFFFF'><b>30%</b></font> health, automatically casts Sunder on the enemy hero with the highest health percentage within cast range.<br><font color='#d000ff'>AWAKENED:</font> Still triggers while stunned, silenced, hexed, or otherwise disabled. Requires Sunder to be off cooldown with enough mana, and does not trigger if no enemy hero's health percentage is higher than your own.",
-      ru: "Разрывает жизнь Terrorblade и целевого героя, меняя местами проценты текущего здоровья обоих. Часть здоровья обязательно остаётся.<br><br><font color='#00CED1'>Автоприменение:</font> При здоровье ниже <font color='#FFFFFF'><b>30%</b></font> автоматически применяет Sunder по вражескому герою с наибольшим процентом здоровья в радиусе действия.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> Срабатывает даже под оглушением, безмолвием, превращением в барана и другим контролем. Требует, чтобы Sunder был готов к использованию и хватало маны, и не срабатывает, если ни у одного вражеского героя процент здоровья не выше вашего.",
+      ru: "Разрывает жизнь Террорблейда и целевого героя, меняя местами проценты текущего здоровья обоих. Часть здоровья обязательно остаётся.<br><br><font color='#00CED1'>Автоприменение:</font> При здоровье ниже <font color='#FFFFFF'><b>30%</b></font> автоматически применяет Разрыв по вражескому герою с наибольшим процентом здоровья в радиусе действия.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> Срабатывает даже под оглушением, безмолвием, превращением в барана и другим контролем. Требует, чтобы Разрыв был готов к использованию и хватало маны, и не срабатывает, если ни у одного вражеского героя процент здоровья не выше вашего.",
     },
     ability: {
       behavior: 'passive',
@@ -153,12 +182,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>追踪术 觉醒</font>",
       en: "<font color='#d000ff'>Track Awakened</font>",
-      ru: "<font color='#d000ff'>Track: пробуждение</font>",
+      ru: "<font color='#d000ff'>Слежение: пробуждение</font>",
     },
     desc: {
       zh: "追踪一个敌方英雄，获得目标的真实视域，使目标受到的伤害增加，同时掌握目标当前携带的金钱数额。如果目标在被追踪期间死亡，赏金猎人和附近友方英雄都将获得若干金钱奖励。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内有敌方英雄时自动施放，优先追踪尚未被追踪的英雄。<br><font color='#d000ff'>觉醒强化：</font>追踪术施放后，对目标额外投出一枚当前等级的投掷飞镖。该飞镖无视施法距离、不触发冷却，消耗投掷飞镖的魔法值；未学习投掷飞镖或魔法不足时不投出。",
       en: "Tracks an enemy hero, granting True Sight of the target, increasing the damage they take and providing information on how much gold it is carrying. If the target dies, Bounty Hunter and nearby heroes collect a bonus bounty of gold.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, casts automatically whenever an enemy hero is within cast range, prioritizing heroes that are not yet tracked.<br><font color='#d000ff'>AWAKENED:</font> After Track is cast, Bounty Hunter also throws a Shuriken Toss of its current level at the target. This Shuriken ignores cast range and does not trigger its cooldown, but costs Shuriken Toss's mana. It is not thrown if Shuriken Toss is unlearned or mana is insufficient.",
-      ru: "Помечает вражеского героя, раскрывая его невидимость, увеличивая получаемый им урон и показывая его запас золота. За смерть этого врага владелец способности и союзные герои неподалёку получат дополнительное золото.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении способность применяется автоматически, если в радиусе применения есть вражеский герой; в первую очередь по ещё не помеченным героям.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> После применения Track герой также бросает в цель Shuriken Toss текущего уровня. Этот сюрикен игнорирует дальность применения и не уходит на перезарядку, но тратит ману Shuriken Toss. Он не бросается, если Shuriken Toss не изучен или не хватает маны.",
+      ru: "Помечает вражеского героя, получая истинное зрение на цель, увеличивая получаемый им урон и показывая его запас золота. За смерть этого врага владелец способности и союзные герои неподалёку получат дополнительное золото.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении способность применяется автоматически, если в радиусе применения есть вражеский герой; в первую очередь по ещё не помеченным героям.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> После применения Слежения герой также бросает в цель сюрикен способностью «Бросок сюрикена» текущего уровня. Этот сюрикен игнорирует дальность применения и не уходит на перезарядку, но тратит ману способности «Бросок сюрикена». Он не бросается, если способность «Бросок сюрикена» не изучена или не хватает маны.",
     },
     ability: {
       behavior: 'autocast',
@@ -211,12 +240,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>钻地 觉醒</font>",
       en: "<font color='#d000ff'>Burrow Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждённое Закапывание</font>",
+      ru: "<font color='#d000ff'>Закапывание: пробуждение</font>",
     },
     desc: {
       zh: '钻地状态下可以保持正常移动速度并自由移动，同时保留钻地的其他效果。',
       en: 'Nyx Assassin can move freely at his normal movement speed while Burrowed, while retaining all other Burrow effects.',
-      ru: 'Nyx Assassin может свободно передвигаться с обычной скоростью в состоянии Burrow, сохраняя все остальные эффекты способности.',
+      ru: 'Никс-убийца может свободно передвигаться с обычной скоростью в состоянии закапывания, сохраняя все остальные эффекты способности.',
     },
     ability: {
       behavior: 'passive',
@@ -240,12 +269,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>野性之斧 觉醒</font>",
       en: "<font color='#d000ff'>Wild Axes Awakened</font>",
-      ru: "<font color='#d000ff'>Wild Axes: пробуждение</font>",
+      ru: "<font color='#d000ff'>Дикие топоры: пробуждение</font>",
     },
     desc: {
       zh: "兽王投出他的斧头然后召回它们，切开飞过的敌人和树木。每把飞斧对同一个敌人只能击中一次，并且使受到来自兽王和其单位的伤害增加。减益持续时间受状态抗性影响。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方单位时自动朝最远的敌方英雄投斧。<br><font color='#d000ff'>觉醒强化：</font>伤害加深持续时间延长，飞斧以极快速度飞出并返回，斯洛姆战鼓的伤害，治疗和原始咆哮提供的敲鼓层数一并提高。",
       en: "Beastmaster sends his axes flying and calls them home again, slicing through enemy units and trees along their path. Each axe can hit an enemy once, and amplifies subsequent damage from Beastmaster and his units. Debuff duration is affected by Status Resistance.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, throws the axes toward the farthest enemy hero whenever an enemy unit is within cast range.<br><font color='#d000ff'>AWAKENED:</font> Damage amplification lasts longer, the axes travel out and back at extreme speed, and Drums of Slom gains increased damage, healing, and drum stacks from Primal Roar.",
-      ru: "Герой швыряет топоры, которые прорубают деревья и противников на своём пути и возвращаются обратно. Каждый топор задевает одного врага лишь единожды и увеличивает урон, получаемый от героя и его существ. Длительность эффекта зависит от сопротивления эффектам.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении топоры автоматически летят в самого дальнего вражеского героя, если в радиусе применения есть вражеские единицы.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> Длительность усиления получаемого урона повышена, топоры почти мгновенно вылетают и возвращаются, а Drums of Slom получает увеличенные урон, лечение и число ударов барабана от Primal Roar.",
+      ru: "Герой швыряет топоры, которые прорубают деревья и противников на своём пути и возвращаются обратно. Каждый топор задевает одного врага лишь единожды и увеличивает урон, получаемый от героя и его существ. Длительность эффекта зависит от сопротивления эффектам.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении топоры автоматически летят в самого дальнего вражеского героя, если в радиусе применения есть вражеские единицы.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> Длительность усиления получаемого урона повышена, топоры почти мгновенно вылетают и возвращаются, а Барабаны Слома получают увеличенные урон, лечение и число ударов барабана от Первобытного рёва.",
     },
     ability: {
       behavior: 'autocast',
@@ -294,7 +323,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     freeTrial: false,
     art: 'earthshaker.60372c69.webp',
     icon: 'earthshaker_aftershock.5751a199.webp',
-    name: { zh: '宇智波牛神', en: 'Earthshaker', ru: 'Earthshaker' },
+    name: { zh: '宇智波牛神', en: 'Earthshaker', ru: 'Бык Учиха' },
     title: {
       zh: "<font color='#d000ff'>余震 觉醒</font>",
       en: "<font color='#d000ff'>Aftershock Awakened</font>",
@@ -361,12 +390,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>恶魔之势 觉醒</font>",
       en: "<font color='#d000ff'>Demon's Reach Awakened</font>",
-      ru: "<font color='#d000ff'>Демонический размах · Пробуждение</font>",
+      ru: "<font color='#d000ff'>Демонический размах: пробуждение</font>",
     },
     desc: {
       zh: '孽主在拥有衰退光环的攻击力加成时，攻击具有分裂效果。分裂距离随当前加成攻击力提高。',
       en: "Underlord's attacks cleave while he has bonus damage from Atrophy Aura. Cleave distance increases with each point of bonus damage.",
-      ru: 'Атаки Underlord наносят прорубающий урон, пока он получает дополнительный урон от Atrophy Aura. Дальность прорубания увеличивается с каждой единицей дополнительного урона.',
+      ru: 'Атаки Владыки бездны наносят прорубающий урон, пока он получает дополнительный урон от Ауры атрофии. Дальность прорубания увеличивается с каждой единицей дополнительного урона.',
     },
     ability: {
       behavior: 'passive',
@@ -420,12 +449,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>精华侵蚀 觉醒</font>",
       en: "<font color='#d000ff'>Essence Erosion Awakened</font>",
-      ru: "<font color='#d000ff'>Разъедание сущности · Пробуждение</font>",
+      ru: "<font color='#d000ff'>Разъедание сущности: пробуждение</font>",
     },
     desc: {
       zh: "斯拉克击杀敌人时，将能量转移偷取属性总量的10%永久偷走该英雄的全属性。<br>敌方英雄的基础属性最低保留<font color='#FFFFFF'><b>1</b></font>点。",
       en: "When Slark kills an enemy hero, he permanently steals 10% of the total attributes his Essence Shift has taken from that hero.<br>An enemy hero's base attributes never fall below <font color='#FFFFFF'><b>1</b></font>.",
-      ru: "Когда Slark убивает вражеского героя, он навсегда забирает 10% от общего количества атрибутов, похищенных у этого героя его Essence Shift.<br>Базовые атрибуты вражеского героя не опускаются ниже <font color='#FFFFFF'><b>1</b></font>.",
+      ru: "Когда Сларк убивает вражеского героя, он навсегда забирает 10% от общего количества атрибутов, похищенных у этого героя его способностью «Перенос сущности».<br>Базовые атрибуты вражеского героя не опускаются ниже <font color='#FFFFFF'><b>1</b></font>.",
     },
     ability: {
       behavior: 'passive',
@@ -449,12 +478,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>畅快淋漓 觉醒</font>",
       en: "<font color='#d000ff'>The Quickening Awakened</font>",
-      ru: "<font color='#d000ff'>Ускорение · Пробуждение</font>",
+      ru: "<font color='#d000ff'>Ускорение: пробуждение</font>",
     },
     desc: {
       zh: '亚巴顿附近900范围内有单位阵亡时，他的所有冷却时间都会减少。非英雄单位阵亡减少0.2秒，英雄阵亡减少3秒。',
       en: 'Whenever a unit dies within 900 range of Abaddon, all his cooldowns are reduced. Non-hero deaths reduce them by 0.2s; hero deaths reduce them by 3s.',
-      ru: 'Когда юнит умирает в радиусе 900 от Abaddon, всё его время перезарядки сокращается. Смерть не-героя сокращает его на 0.2 сек., а смерть героя — на 3 сек.',
+      ru: 'Когда юнит умирает в радиусе 900 от Абаддона, оставшееся время перезарядки всех его способностей и предметов сокращается. Смерть не-героя сокращает его на 0.2 сек., а смерть героя — на 3 сек.',
     },
     ability: {
       behavior: 'passive',
@@ -478,12 +507,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>天裔之杖 觉醒</font>",
       en: "<font color='#d000ff'>Staff of the Scion Awakened</font>",
-      ru: "<font color='#d000ff'>Посох отпрыска · Пробуждение</font>",
+      ru: "<font color='#d000ff'>Посох отпрыска: пробуждение</font>",
     },
     desc: {
-      zh: "<font color='#d000ff'>觉醒强化：</font>天怒法师获得天裔之杖，其技能对敌方英雄造成<font color='#05CAFF'>魔法伤害</font>时，他所有技能的冷却时间都会减少0.1秒。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方英雄时，天怒法师自动施放上古封印、震荡光弹、神秘之耀与奥法鹰隼，其中奥法鹰隼在只有小兵时也会施放。",
-      en: "<font color='#d000ff'>Awakening Bonus:</font> Skywrath Mage gains Staff of the Scion. Every time his abilities deal <font color='#05CAFF'>magical damage</font> to an enemy hero, the cooldown of all his abilities is reduced by 0.1s.<br><br><font color='#00CED1'>Autocast:</font> While enabled, Skywrath Mage automatically casts Ancient Seal, Concussive Shot, Mystic Flare and Arcane Bolt whenever an enemy hero is within cast range. Arcane Bolt also fires at creeps when no hero is available.",
-      ru: "<font color='#d000ff'>Бонус пробуждения:</font> Skywrath Mage получает Staff of the Scion. Каждый раз, когда его способности наносят <font color='#05CAFF'>магический урон</font> вражескому герою, время восстановления всех его способностей сокращается на 0.1 сек.<br><br><font color='#00CED1'>Автоприменение:</font> Если включено, Skywrath Mage автоматически применяет Ancient Seal, Concussive Shot, Mystic Flare и Arcane Bolt, когда вражеский герой находится в радиусе применения. Arcane Bolt также применяется по крипам, если героев поблизости нет.",
+      zh: "<font color='#d000ff'>觉醒强化：</font>天怒法师获得天裔之杖，其技能对敌方英雄造成<font color='#05CAFF'>魔法伤害</font>时，他所有技能的冷却时间都会减少0.1秒。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方英雄时，天怒法师自动施放上古封印、震荡光弹、神秘之耀与奥法鹰隼，其中奥法鹰隼在拥有<font color='#92ACF5'>魔晶</font>且只有小兵时也会施放。",
+      en: "<font color='#d000ff'>Awakening Bonus:</font> Skywrath Mage gains Staff of the Scion. Every time his abilities deal <font color='#05CAFF'>magical damage</font> to an enemy hero, the cooldown of all his abilities is reduced by 0.1s.<br><br><font color='#00CED1'>Autocast:</font> While enabled, Skywrath Mage automatically casts Ancient Seal, Concussive Shot, Mystic Flare and Arcane Bolt whenever an enemy hero is within cast range. With <font color='#92ACF5'>Aghanim's Shard</font>, Arcane Bolt also fires at creeps when no hero is available.",
+      ru: "<font color='#d000ff'>Бонус пробуждения:</font> Небесный маг получает Посох отпрыска. Каждый раз, когда его способности наносят <font color='#05CAFF'>магический урон</font> вражескому герою, время восстановления всех его способностей сокращается на 0.1 сек.<br><br><font color='#00CED1'>Автоприменение:</font> Если включено, Небесный маг автоматически применяет Древнюю печать, Сотрясающий выстрел, Мистическую вспышку и Чародейский снаряд, когда вражеский герой находится в радиусе применения. При наличии <font color='#92ACF5'>Осколка Аганима</font> Чародейский снаряд также применяется по крипам, если героев поблизости нет.",
     },
     ability: {
       behavior: 'autocast',
@@ -507,12 +536,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>薄葬 觉醒</font>",
       en: "<font color='#d000ff'>Shallow Grave Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждение Shallow Grave</font>",
+      ru: "<font color='#d000ff'>Неглубокая могила: пробуждение</font>",
     },
     desc: {
       zh: "对自己或队友施放薄葬后，目标在薄葬持续期间获得<font color='#FFCC66'>黑皇杖</font>效果。",
       en: "After casting Shallow Grave on yourself or an ally, the target gains the <font color='#FFCC66'>Black King Bar</font> effect for the duration of Shallow Grave.",
-      ru: "После применения Shallow Grave на себя или союзника цель получает эффект <font color='#FFCC66'>Black King Bar</font> на время действия Shallow Grave.",
+      ru: "После применения Неглубокой могилы на себя или союзника цель получает эффект <font color='#FFCC66'>Чёрного короля</font> на время действия Неглубокой могилы.",
     },
     ability: {
       behavior: 'passive',
@@ -541,7 +570,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     desc: {
       zh: "上古巨神放出他的灵体游魂，灵魂对任何经过的单位都会造成伤害。当它与巨神合体时，它每伤害过一个单位都会给予若干攻击力和移动速度加成。<br><br>灵体游魂拥有回音重踏，回归和自然秩序三个技能。<br><br><font color='#d000ff'>觉醒强化：</font>冷却时间缩短。<br><font color='#00CED1'>自动施法：</font>技能冷却完毕且附近存在敌方英雄时，自动朝距离最远的敌方英雄放出游魂，游魂可召回时立即自动收回，无需手动操作；开启期间手动放出的游魂同样会被自动收回。",
       en: "Elder Titan sends forth his Astral Spirit, damaging any units it passes through.  When the spirit rejoins the Titan, it grants bonus damage and movement speed for each unit it passed through.<br><br>The Astral Spirit possesses the Echo Stomp, Return Spirit, and Natural Order abilities.<br><br><font color='#d000ff'>Awakening Bonus:</font> Reduced cooldown.<br><font color='#00CED1'>Autocast:</font> Whenever the ability is off cooldown and an enemy hero is nearby, automatically sends the spirit toward the farthest enemy hero, then recalls it automatically as soon as the recall is available, with no manual input required. While active, manually cast spirits are also recalled automatically.",
-      ru: "Elder Titan призывает своего астрального духа, который наносит урон любым юнитам на своём пути. Когда дух воссоединяется с Titan, он даёт бонус к урону и скорости передвижения за каждый задетый юнит.<br><br>Астральный дух обладает способностями Echo Stomp, Return Spirit и Natural Order.<br><br><font color='#d000ff'>Бонус пробуждения:</font> Сокращённое время восстановления.<br><font color='#00CED1'>Автоприменение:</font> Как только способность готова к использованию и поблизости есть вражеский герой, автоматически посылает духа к самому дальнему вражескому герою, а затем автоматически возвращает его, как только возврат становится доступен, без ручного управления. Пока способность активна, вручную призванный дух также возвращается автоматически.",
+      ru: "Древний титан призывает своего астрального духа, который наносит урон любым юнитам на своём пути. Когда дух воссоединяется с титаном, он даёт бонус к урону и скорости передвижения за каждый задетый юнит.<br><br>Астральный дух обладает способностями Эхо-топот, Возврат духа и Естественный порядок.<br><br><font color='#d000ff'>Бонус пробуждения:</font> Сокращённое время восстановления.<br><font color='#00CED1'>Автоприменение:</font> Как только способность готова к использованию и поблизости есть вражеский герой, автоматически посылает духа к самому дальнему вражескому герою, а затем автоматически возвращает его, как только возврат становится доступен, без ручного управления. Пока способность активна, вручную призванный дух также возвращается автоматически.",
     },
     ability: {
       behavior: 'autocast',
@@ -634,11 +663,11 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     freeTrial: false,
     art: 'techies.23f5b27a.webp',
     icon: 'techies_stasis_trap.8b3220b4.webp',
-    name: { zh: '茶神', en: 'hechahecha', ru: 'Techies' },
+    name: { zh: '茶神', en: 'hechahecha', ru: 'Чайный бог' },
     title: {
       zh: "<font color='#d000ff'>斯奎的瞄准镜 觉醒</font>",
       en: "<font color='#d000ff'>Squee's Scope Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждение: Squee's Scope</font>",
+      ru: "<font color='#d000ff'>Прицел Скви: пробуждение</font>",
     },
     desc: {
       zh: '每点攻击速度都会让工程师获得1攻击距离和攻击弹道速度。',
@@ -672,7 +701,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     desc: {
       zh: '血肉傀儡期间，尸王的普通攻击命中敌人时，会以该敌人为中心施放一次腐朽，最多每0.6秒触发一次。此次施放不消耗魔法，且不影响腐朽的冷却时间。<br>幻象和破坏状态下无法触发。<br>无攻击间隔的衍生攻击无法触发。',
       en: "While Flesh Golem is active, each of Undying's normal attacks casts Decay centered on the enemy hit, triggering at most once every 0.6 seconds. This cast costs no mana and does not affect Decay's cooldown.<br>Cannot be triggered by illusions or while Broken.<br>Derived attacks with no attack cooldown cannot trigger this effect.",
-      ru: 'Пока действует Голем из плоти, каждая обычная атака Undying при попадании применяет Гниение с центром на поражённом враге, но не чаще одного раза в 0.6 сек. Это применение не расходует ману и не влияет на перезарядку Гниения.<br>Иллюзии и отключение пассивных способностей не активируют эффект.<br>Производные атаки без задержки между атаками не активируют эффект.',
+      ru: 'Пока действует Голем из плоти, каждая обычная атака Бессмертного при попадании применяет Гниение с центром на поражённом враге, но не чаще одного раза в 0.6 сек. Это применение не расходует ману и не влияет на перезарядку Гниения.<br>Иллюзии не могут активировать эффект, как и герой под действием истощения.<br>Производные атаки без задержки между атаками не активируют эффект.',
     },
     ability: {
       behavior: 'passive',
@@ -701,7 +730,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     desc: {
       zh: "提升连环霜冻的弹道速度与跳跃范围，并延长减速和霜缚的持续时间。<br><br>命中英雄或肉山时额外造成相当于智力0.75倍的魔法伤害，并叠加1层寒灾印记，持续8秒，叠满3层后自动引爆；也可对已叠加印记的敌人施放寒霜爆发提前引爆。引爆会在350范围内造成相当于智力0.75倍乘以当前印记层数的魔法伤害，并<font color='#2DD5E4'>眩晕</font>敌人0.6秒。<br><br>若已学会寒冰尖柱，连环霜冻命中附近唯一的敌方英雄时会自动在其位置施放寒冰尖柱。",
       en: "Increases Chain Frost's projectile speed and bounce range, and extends the duration of its slow and Frostbound.<br><br>Hits on a hero or Roshan deal bonus magical damage equal to 0.75x Intelligence and apply a stack of Frost Calamity lasting 8 seconds, detonating automatically at 3 stacks; casting Frost Blast on a marked enemy also detonates it early. Detonation deals magical damage in a 350 radius equal to 0.75x Intelligence per stack consumed and <font color='#2DD5E4'>Stuns</font> enemies for 0.6 seconds.<br><br>If Ice Spire is already learned, hitting the only enemy hero nearby with Chain Frost casts Ice Spire at that hero automatically.",
-      ru: "Увеличивает скорость снаряда и радиус отскока Chain Frost, а также продлевает длительность замедления и Frostbound.<br><br>Попадания по герою или Roshan наносят дополнительный магический урон в размере 0.75x интеллекта и накладывают 1 заряд Frost Calamity длительностью 8 сек, который взрывается самостоятельно при 3 зарядах; применение Frost Blast на отмеченного врага также взрывает его досрочно. Взрыв наносит урон в радиусе 350 в размере 0.75x интеллекта за каждый израсходованный заряд и <font color='#2DD5E4'>оглушает</font> врагов на 0.6 сек.<br><br>Если Ice Spire уже изучена, попадание Chain Frost по единственному вражескому герою поблизости автоматически применяет Ice Spire в позиции этого героя.",
+      ru: "Увеличивает скорость снаряда и радиус отскока Цепного мороза, а также продлевает длительность замедления и Ледяных оков.<br><br>Попадания по герою или Рошану наносят дополнительный магический урон в размере 0.75x интеллекта и накладывают 1 заряд Ледяного бедствия длительностью 8 сек, который взрывается самостоятельно при 3 зарядах; применение Морозного взрыва на отмеченного врага также взрывает его досрочно. Взрыв наносит магический урон в радиусе 350 в размере 0.75x интеллекта за каждый израсходованный заряд и <font color='#2DD5E4'>оглушает</font> врагов на 0.6 сек.<br><br>Если Ледяной шпиль уже изучен, попадание Цепного мороза по единственному вражескому герою поблизости автоматически применяет Ледяной шпиль в позиции этого героя.",
     },
     ability: {
       behavior: 'passive',
@@ -725,12 +754,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>末日 觉醒</font>",
       en: "<font color='#d000ff'>Doom Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждённый Doom</font>",
+      ru: "<font color='#d000ff'>Рок: пробуждение</font>",
     },
     desc: {
       zh: "对敌人施加末日诅咒，对其进行驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>驱散类型：弱驱散<br><br>持有<font color='#92acf5'>阿哈利姆神杖</font>时，末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
       en: "Inflicts a curse that dispels an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>DISPEL TYPE: Basic Dispel<br><br>With <font color='#92acf5'>Aghanim's Scepter</font>, Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.",
-      ru: "Накладывает проклятие, которое развеивает врага и не позволяет ему использовать способности или лечиться, при этом враг постепенно получает урон.<br><br>ТИП РАЗВЕИВАНИЯ: Простое развеивание<br><br>С <font color='#92acf5'>Aghanim's Scepter</font> Doom также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Doom на врагов в радиусе 350, сам не получая Doom.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Devour</font>, автоматически повышаются до максимального уровня.",
+      ru: "Накладывает на врага проклятие Рок, развеивает его и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>ТИП РАЗВЕИВАНИЯ: Простое развеивание<br><br>С <font color='#92acf5'>Скипетр Аганима</font> Рок также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Рок на врагов в радиусе 350, сам не получая Рок.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня.",
     },
     ability: {
       behavior: 'target',
@@ -769,12 +798,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>冲击波 觉醒</font>",
       en: "<font color='#d000ff'>Illuminate Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждение Illuminate</font>",
+      ru: "<font color='#d000ff'>Световая волна: пробуждение</font>",
     },
     desc: {
       zh: "冲击波基础伤害提高100点，最大蓄力时间缩短至<font color='#FFFFFF'><b>1.5</b></font>秒，距离提高至<font color='#FFFFFF'><b>2300</b></font>，宽度提高至<font color='#FFFFFF'><b>600</b></font>，速度提高至<font color='#FFFFFF'><b>1350</b></font>。<br>冲击波每命中一名敌方英雄获得1层聚光，每层使冲击波伤害提高20%。",
       en: "Increases Illuminate's base damage by 100, shortens max channel time to <font color='#FFFFFF'><b>1.5</b></font> seconds, extends distance to <font color='#FFFFFF'><b>2300</b></font>, width to <font color='#FFFFFF'><b>600</b></font> and speed to <font color='#FFFFFF'><b>1350</b></font>.<br>Each enemy Hero hit by Illuminate grants 1 Focus stack, and each stack increases Illuminate damage by 20%.",
-      ru: "Увеличивает базовый урон Illuminate на 100, сокращает максимальное время накопления до <font color='#FFFFFF'><b>1.5</b></font> сек., увеличивает дальность до <font color='#FFFFFF'><b>2300</b></font>, ширину до <font color='#FFFFFF'><b>600</b></font> и скорость до <font color='#FFFFFF'><b>1350</b></font>.<br>За каждого задетого Illuminate вражеского героя даётся 1 заряд Фокуса, каждый заряд увеличивает урон Illuminate на 20%.",
+      ru: "Увеличивает базовый урон Световой волны на 100, сокращает максимальное время накопления до <font color='#FFFFFF'><b>1.5</b></font> сек., увеличивает дальность до <font color='#FFFFFF'><b>2300</b></font>, ширину до <font color='#FFFFFF'><b>600</b></font> и скорость до <font color='#FFFFFF'><b>1350</b></font>.<br>За каждого задетого Световой волной вражеского героя даётся 1 заряд Фокуса, каждый заряд увеличивает урон Световой волны на 20%.",
     },
     ability: {
       behavior: 'passive',
@@ -813,12 +842,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>极寒领域 觉醒</font>",
       en: "<font color='#d000ff'>Freezing Field Awakened</font>",
-      ru: "<font color='#d000ff'>Freezing Field Awakened</font>",
+      ru: "<font color='#d000ff'>Ледяное поле: пробуждение</font>",
     },
     desc: {
       zh: "施放极寒领域获得<font color='#FFCC66'>黑皇杖</font>效果。<br><br>同时获得<font color='#FFFFFF'>法术抵抗</font>，持续<font color='#FFFFFF'><b>10</b></font>秒，抵挡一次敌方指向性法术后消失。",
       en: "Casting Freezing Field grants the <font color='#FFCC66'>Black King Bar</font> effect.<br><br>Also grants <font color='#FFFFFF'>Spellblock</font> for <font color='#FFFFFF'><b>10</b></font> seconds, consumed after blocking one enemy targeted spell.",
-      ru: "Casting Freezing Field grants the <font color='#FFCC66'>Black King Bar</font> effect.<br><br>Also grants <font color='#FFFFFF'>Spellblock</font> for <font color='#FFFFFF'><b>10</b></font> seconds, consumed after blocking one enemy targeted spell.",
+      ru: "Применение Ледяного поля даёт эффект <font color='#FFCC66'>Чёрного короля</font>.<br><br>Также даётся <font color='#FFFFFF'>блокировка заклинания</font> на <font color='#FFFFFF'><b>10</b></font> сек., которая исчезает после блокирования одного вражеского направленного заклинания.",
     },
     ability: {
       behavior: 'passive',
@@ -842,12 +871,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>小小 觉醒</font>",
       en: "<font color='#d000ff'>Tiny Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждение Tiny</font>",
+      ru: "<font color='#d000ff'>Крошка: пробуждение</font>",
     },
     desc: {
       zh: '抓起的树木不再因攻击次数耗尽而损毁。<br>长大不再降低攻击速度。',
       en: 'The grabbed tree is no longer destroyed when its attack count runs out.<br>Grow no longer reduces attack speed.',
-      ru: 'Захваченное дерево больше не разрушается, когда заканчиваются его атаки.<br>Grow больше не снижает скорость атаки.',
+      ru: 'Захваченное дерево больше не разрушается, когда заканчиваются его атаки.<br>Рост больше не снижает скорость атаки.',
     },
     ability: {
       behavior: 'passive',
@@ -871,12 +900,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>自动决斗·觉醒</font>",
       en: "<font color='#d000ff'>Auto Duel · Awakened</font>",
-      ru: "<font color='#d000ff'>Автоматическая дуэль · Пробуждение</font>",
+      ru: "<font color='#d000ff'>Автоматическая дуэль: пробуждение</font>",
     },
     desc: {
-      zh: "<font color='#00CED1'>自动施法：</font>开启后，若决斗可以施放，则自动对决斗施法距离外额外200范围内最近的可见敌方英雄施放决斗。不会选择幻象，只有大概率能击杀目标、且不会让自身陷入残血时才会触发。<br><br>自动决斗会无视并消耗目标的被动法术格挡与反弹效果。<br><br>决斗期间，军团指挥官获得<font color='#FFCC66'>黑皇杖</font>效果，目标无法被选中。",
-      en: "<font color='#00CED1'>Autocast:</font> While enabled and Duel is ready, automatically casts Duel on the nearest visible enemy hero within Duel's cast range plus 200. Illusions are ignored, and it only triggers when there's a high chance of killing the target without leaving Legion Commander critically low on health.<br><br>Auto Duel ignores and consumes the target's passive spell block and reflection effects.<br><br>During Duel, Legion Commander gains the <font color='#FFCC66'>Black King Bar</font> effect, and the target cannot be selected.",
-      ru: "<font color='#00CED1'>Автоприменение:</font> Если включено и Duel готова, способность автоматически применяется к ближайшему видимому вражескому герою в радиусе применения Duel плюс 200. Иллюзии игнорируются.<br><br>Автоматическая дуэль игнорирует и расходует пассивные эффекты блока и отражения заклинаний цели.<br><br>Длительность Duel фиксирована и не зависит от сопротивления эффектам.<br><br>Во время Duel Legion Commander получает эффект <font color='#FFCC66'>Black King Bar</font>, а цель нельзя выбрать.",
+      zh: "<font color='#00CED1'>自动施法：</font>开启后，若决斗可以施放，则自动对决斗施法距离外额外200范围内最近的可见敌方英雄施放决斗。不会选择幻象，只有大概率能击杀目标、且不会让自身陷入残血时才会触发。<br><br>自动决斗会无视并消耗目标的被动法术格挡与反弹效果。<br><br>决斗期间，军团指挥官获得<font color='#FFCC66'>黑皇杖</font>效果。",
+      en: "<font color='#00CED1'>Autocast:</font> While enabled and Duel is ready, automatically casts Duel on the nearest visible enemy hero within Duel's cast range plus 200. Illusions are ignored, and it only triggers when there's a high chance of killing the target without leaving Legion Commander critically low on health.<br><br>Auto Duel ignores and consumes the target's passive spell block and reflection effects.<br><br>During Duel, Legion Commander gains the <font color='#FFCC66'>Black King Bar</font> effect.",
+      ru: "<font color='#00CED1'>Автоприменение:</font> Если включено и Дуэль готова, способность автоматически применяется к ближайшему видимому вражескому герою в радиусе применения Дуэли плюс 200. Иллюзии не выбираются; применяется, только если цель с большой вероятностью будет убита и Командир легиона не окажется на грани смерти.<br><br>Автоматическая дуэль игнорирует и расходует пассивные эффекты блока и отражения заклинаний цели.<br><br>Во время Дуэли Командир легиона получает эффект <font color='#FFCC66'>Чёрного короля</font>.",
     },
     ability: {
       behavior: 'autocast',
@@ -916,12 +945,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>烈日炙烤 觉醒</font>",
       en: "<font color='#d000ff'>Sun Ray Awakened</font>",
-      ru: "<font color='#d000ff'>Пробуждение: Солнечный луч</font>",
+      ru: "<font color='#d000ff'>Солнечный луч: пробуждение</font>",
     },
     desc: {
       zh: '烈日炙烤的光束末端对目标造成的伤害与治疗更高。光束强度从 50% 长度处开始增强，在 1200 距离处达到基础伤害/治疗的 180%。若光束长度进一步增加，末端的伤害和治疗量会继续提高。',
       en: "Sun Ray does more damage and healing to targets near the end of the beam. Beam intensity starts increasing at 50% of its length, reaching 180% of base damage and healing at 1200 range. Extending the beam further makes the endpoint's damage and healing keep increasing.",
-      ru: 'Луч Sun Ray наносит больше урона и лечения целям у своего конца. Интенсивность луча начинает расти с 50% его длины и достигает 180% базового урона и лечения на дальности 1200. Дальнейшее увеличение длины луча продолжает усиливать эффект на его конце.',
+      ru: 'Луч Солнечный луч наносит больше урона и лечения целям у своего конца. Интенсивность луча начинает расти с 50% его длины и достигает 180% базового урона и лечения на дальности 1200. Дальнейшее увеличение длины луча продолжает усиливать эффект на его конце.',
     },
     ability: {
       behavior: 'passive',
@@ -974,12 +1003,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>斯温 觉醒</font>",
       en: "<font color='#d000ff'>Sven Awakened</font>",
-      ru: "<font color='#d000ff'>Sven Awakened</font>",
+      ru: "<font color='#d000ff'>Свен: пробуждение</font>",
     },
     desc: {
       zh: "施放风暴之拳后获得<font color='#FFCC66'>黑皇杖</font>效果，持续2秒，期间力量提升20 40 60 80 100点，攻击速度提升20 40 60 80 100点。",
       en: "Casting Storm Hammer grants the <font color='#FFCC66'>Black King Bar</font> effect for 2 seconds, increasing Strength by 20 40 60 80 100 and Attack Speed by 20 40 60 80 100 during that time.",
-      ru: "Casting Storm Hammer grants the <font color='#FFCC66'>Black King Bar</font> effect for 2 seconds, increasing Strength by 20 40 60 80 100 and Attack Speed by 20 40 60 80 100 during that time.",
+      ru: "После применения Молота бури даётся эффект <font color='#FFCC66'>Чёрного короля</font> на 2 сек., сила повышается на 20 40 60 80 100, скорость атаки — на 20 40 60 80 100.",
     },
     ability: {
       behavior: 'passive',
@@ -1003,12 +1032,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>发条 觉醒</font>",
       en: "<font color='#d000ff'>Power Cogs Awakened</font>",
-      ru: "<font color='#d000ff'>Power Cogs Awakened</font>",
+      ru: "<font color='#d000ff'>Часовщик: пробуждение</font>",
     },
     desc: {
       zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%</b></font>。",
       en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time.",
-      ru: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time.",
+      ru: "После применения Силовых шестерён даётся эффект <font color='#FFCC66'>Чёрного короля</font> на <font color='#FFFFFF'><b>3</b></font> сек., а получаемый урон снижается на <font color='#FFFFFF'><b>60%</b></font>.",
     },
     ability: {
       behavior: 'passive',
@@ -1032,12 +1061,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>旋风 觉醒</font>",
       en: "<font color='#d000ff'>Whirlwind Awakened</font>",
-      ru: "<font color='#d000ff'>Whirlwind Awakened</font>",
+      ru: "<font color='#d000ff'>Вихрь (пробужд.)</font>",
     },
     desc: {
-      zh: "集中火力不再需要施法目标，而是对风行者攻击距离 + 150范围内的随机敌人发动攻击。每秒发动固定次数的攻击，以英雄优先。<br><br>学会本技能后，施放风行时进入<font color='#d7ccc7'>隐身</font>状态，持续时间与风行相同。攻击敌人后会短暂显形，随后重新隐身。移动不会破坏隐身状态。",
-      en: "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing Heroes.<br><br>Learning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility.",
-      ru: "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing Heroes.<br><br>Learning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility.",
+      zh: "集中火力不再需要施法目标，而是对风行者攻击距离 + 150范围内的随机敌人发动攻击。每秒发动固定次数的攻击，优先攻击英雄或Boss。<br><br>学会本技能后，施放风行时进入<font color='#d7ccc7'>隐身</font>状态，持续时间与风行相同。攻击敌人后会短暂显形，随后重新隐身。移动不会破坏隐身状态。",
+      en: "Focus Fire no longer requires a target, instead firing at random enemies within Windranger's attack range + 150. Fires a fixed number of attacks per second, prioritizing heroes and bosses.<br><br>Learning this ability causes casting Windrun to grant <font color='#d7ccc7'>invisibility</font> for the same duration. Attacking briefly reveals you before you turn invisible again. Moving does not break invisibility.",
+      ru: "«Сосредоточенный огонь» больше не требует цели, а атакует случайных врагов в радиусе атаки Ветреницы + 150. Совершает фиксированное число атак в секунду, предпочитая героев и боссов.<br><br>Изучив эту способность, применяя «Порыв ветра», герой получает <font color='#d7ccc7'>невидимость</font> на то же время. После атаки он ненадолго становится видимым и снова невидимым. Движение не развеивает невидимость.",
     },
     ability: {
       behavior: 'noTarget',
@@ -1047,14 +1076,14 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       dispellable: 'no',
       values: [
         {
-          label: { zh: '持续时间：', en: 'DURATION:', ru: 'DURATION:' },
+          label: { zh: '持续时间：', en: 'DURATION:', ru: 'Длительность:' },
           levels: ['8', '9', '10', '11'],
           percent: false,
           aoe: false,
           spellAmp: false,
         },
         {
-          label: { zh: '每秒攻击次数：', en: 'ATTACKS PER SECOND:', ru: 'ATTACKS PER SECOND:' },
+          label: { zh: '每秒攻击次数：', en: 'ATTACKS PER SECOND:', ru: 'Атак в секунду:' },
           levels: ['4', '5', '6', '7'],
           percent: false,
           aoe: false,
@@ -1064,7 +1093,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
           label: {
             zh: '攻击伤害降低：',
             en: 'ATTACK DAMAGE REDUCTION:',
-            ru: 'ATTACK DAMAGE REDUCTION:',
+            ru: 'Снижение урона от атаки:',
           },
           levels: ['-25'],
           percent: true,
@@ -1077,7 +1106,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       lore: {
         zh: '狂风所至，箭雨无处不在。',
         en: 'Where the gale blows, arrows rain without end.',
-        ru: 'Where the gale blows, arrows rain without end.',
+        ru: 'Куда долетает ураган, там льётся дождь стрел.',
       },
     },
   },
@@ -1091,12 +1120,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>洪流浪潮 觉醒</font>",
       en: "<font color='#d000ff'>Torrent Storm Awakened</font>",
-      ru: "<font color='#d000ff'>Torrent Storm Awakened</font>",
+      ru: "<font color='#d000ff'>Буря потоков: пробуждение</font>",
     },
     desc: {
       zh: '在目标地点1100范围内，每0.2秒在一个随机区域释放一道洪流，持续4.0秒。',
       en: 'Releases a Torrent in a random area within 1100 range of the target position once every 0.2 for 4.0 seconds.',
-      ru: 'Releases a Torrent in a random area within 1100 range of the target position once every 0.2 for 4.0 seconds.',
+      ru: 'В радиусе 1100 от указанной точки каждые 0.2 сек. в случайной области создаётся Поток, действующий 4.0 сек.',
     },
     ability: {
       behavior: 'point',
@@ -1110,7 +1139,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       lore: {
         zh: '一百个陆地的联盟也牵制不了这些滔天海浪。',
         en: "A hundred leagues of dry land couldn't keep these seas at bay.",
-        ru: "A hundred leagues of dry land couldn't keep these seas at bay.",
+        ru: 'Сто союзов суши не сдержат эти волны.',
       },
     },
   },
@@ -1124,12 +1153,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>多重施法（觉醒）</font>",
       en: "<font color='#d000ff'>Multicast (Awakened)</font>",
-      ru: "<font color='#d000ff'>Multicast (Awakened)</font>",
+      ru: "<font color='#d000ff'>Многократное применение (пробужд.)</font>",
     },
     desc: {
       zh: '使英雄在单次施法中有概率多次施放同一技能和物品，多重施法间隔为0.6秒。<br>食人魔魔法师觉醒时额外获得此技能，与大招多重施法叠加形成双重多重施法，并移除先天技能傻福。',
       en: 'Allows you cast abilities and items multiple times with each use. Each multicast has a 0.6 second interval.<br>When Ogre Magi is Awakened, this skill is granted in addition to the ultimate Multicast, stacking into a double multicast, and the innate Dumb Luck ability is removed.',
-      ru: 'Allows you cast abilities and items multiple times with each use. Each multicast has a 0.6 second interval.<br>When Ogre Magi is Awakened, this skill is granted in addition to the ultimate Multicast, stacking into a double multicast, and the innate Dumb Luck ability is removed.',
+      ru: 'Позволяет применять способности и предметы несколько раз за одно использование. Интервал между применениями — 0.6 сек.<br>При пробуждении Огр-маг дополнительно получает эту способность, она складывается с ультимейтом «Многократное применение», образуя двойное применение, а врождённая способность «Дурная удача» удаляется.',
     },
     ability: {
       behavior: 'passive',
@@ -1139,21 +1168,21 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       dispellable: null,
       values: [
         {
-          label: { zh: '2X施放概率：', en: '2X CAST CHANCE:', ru: '2X CAST CHANCE:' },
+          label: { zh: '2X施放概率：', en: '2X CAST CHANCE:', ru: 'Шанс 2X применения:' },
           levels: ['75'],
           percent: true,
           aoe: false,
           spellAmp: false,
         },
         {
-          label: { zh: '3X施放概率：', en: '3X CAST CHANCE:', ru: '3X CAST CHANCE:' },
+          label: { zh: '3X施放概率：', en: '3X CAST CHANCE:', ru: 'Шанс 3X применения:' },
           levels: ['15', '20', '25', '30'],
           percent: true,
           aoe: false,
           spellAmp: false,
         },
         {
-          label: { zh: '4X施放概率：', en: '4X CAST CHANCE:', ru: '4X CAST CHANCE:' },
+          label: { zh: '4X施放概率：', en: '4X CAST CHANCE:', ru: 'Шанс 4X применения:' },
           levels: ['0', '5', '10', '15'],
           percent: true,
           aoe: false,
@@ -1165,7 +1194,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       lore: {
         zh: '可以触发绝大多数的技能和物品，持续施法不会触发多重施法。',
         en: "Can trigger most abilities and items, channel ability won't trigger multiple casting.",
-        ru: "Can trigger most abilities and items, channel ability won't trigger multiple casting.",
+        ru: 'Срабатывает для большинства способностей и предметов, поддерживаемые способности не вызывают многократного применения.',
       },
     },
   },
@@ -1179,12 +1208,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>寒冬诅咒 觉醒</font>",
       en: "<font color='#d000ff'>Winter's Curse Awakened</font>",
-      ru: "<font color='#d000ff'>Winter's Curse Awakened</font>",
+      ru: "<font color='#d000ff'>Зимнее проклятие: пробуждение</font>",
     },
     desc: {
       zh: "寒冬诅咒的主目标死亡时，诅咒转移给范围内血量最低的敌方单位，持续时间为原时长的<font color='#FFFFFF'><b>50%</b></font>。",
       en: "When the primary target of Winter's Curse dies, the curse transfers to the enemy unit with the lowest health in the radius, lasting <font color='#FFFFFF'><b>50%</b></font> of the original duration.",
-      ru: "When the primary target of Winter's Curse dies, the curse transfers to the enemy unit with the lowest health in the radius, lasting <font color='#FFFFFF'><b>50%</b></font> of the original duration.",
+      ru: "Когда основная цель Зимнего проклятия умирает, проклятие переходит к вражескому юниту с наименьшим здоровьем в радиусе, а длительность составляет <font color='#FFFFFF'><b>50%</b></font> от исходной.",
     },
     ability: {
       behavior: 'passive',
@@ -1208,12 +1237,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>齐天大圣 觉醒</font>",
       en: "<font color='#d000ff'>Monkey King Awakened</font>",
-      ru: "<font color='#d000ff'>Monkey King Awakened</font>",
+      ru: "<font color='#d000ff'>Сунь Укун: пробуждение</font>",
     },
     desc: {
       zh: "棒击大地额外伤害提升<font color='#FFFFFF'><b>200</b></font>，施法距离提升<font color='#FFFFFF'><b>700</b></font>。<br>可以在被控制状态下施放斗战胜佛。<br>施放斗战胜佛时获得<font color='#FFCC66'>黑皇杖</font>效果，持续到大招结束。",
       en: "Boundless Strike gains <font color='#FFFFFF'><b>200</b></font> bonus damage and <font color='#FFFFFF'><b>700</b></font> cast range.<br>Can cast Defy while disabled.<br>When casting Defy, gains the <font color='#FFCC66'>Black King Bar</font> effect until the ability ends.",
-      ru: "Boundless Strike gains <font color='#FFFFFF'><b>200</b></font> bonus damage and <font color='#FFFFFF'><b>700</b></font> cast range.<br>Can cast Defy while disabled.<br>When casting Defy, gains the <font color='#FFCC66'>Black King Bar</font> effect until the ability ends.",
+      ru: "Дополнительный урон Беспредельного удара повышен на <font color='#FFFFFF'><b>200</b></font>, дальность применения — на <font color='#FFFFFF'><b>700</b></font>.<br>Воинство Вуконга можно применять под контролем.<br>При применении Воинства Вуконга даётся эффект <font color='#FFCC66'>Чёрного короля</font> до конца действия ультимейта.",
     },
     ability: {
       behavior: 'passive',
@@ -1237,12 +1266,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>神灭斩 觉醒</font>",
       en: "<font color='#d000ff'>Laguna Blade Awakened</font>",
-      ru: "<font color='#d000ff'>Laguna Blade Awakened</font>",
+      ru: "<font color='#d000ff'>Клинок Лагуны: пробуждение</font>",
     },
     desc: {
       zh: "每次释放神灭斩，对目标额外造成等同本次神灭斩伤害的<font color='#FFE56E'>纯粹伤害</font>，该伤害受技能增强影响。",
       en: "Each time Lina casts Laguna Blade, the target takes additional <font color='#FFE56E'>pure damage</font> equal to that Laguna Blade's damage, affected by Spell Amplification.",
-      ru: "Each time Lina casts Laguna Blade, the target takes additional <font color='#FFE56E'>pure damage</font> equal to that Laguna Blade's damage, affected by Spell Amplification.",
+      ru: "Каждое применение Клинка Лагуны дополнительно наносит цели <font color='#FFE56E'>чистый урон</font>, равный урону этого Клинка Лагуны; этот урон усиливается усилением способностей.",
     },
     ability: {
       behavior: 'passive',
@@ -1266,12 +1295,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>自动喷刺 觉醒</font>",
       en: "<font color='#d000ff'>Auto Quill Awakened</font>",
-      ru: "<font color='#d000ff'>Auto Quill Awakened</font>",
+      ru: "<font color='#d000ff'>Автоматический выброс игл: пробуждение</font>",
     },
     desc: {
       zh: "<font color='#00CED1'>自动施法：</font>开启后，当范围内有敌方英雄时，钢背兽自动施放刺针扫射，并对最近的敌方英雄施放粘稠鼻液。<br><br><font color='#d000ff'>觉醒强化：</font>粘稠鼻液：基础降甲提升至<font color='#FFFFFF'><b>10</b></font>点，每层降甲提升至<font color='#FFFFFF'><b>6</b></font>点，叠加上限提升至<font color='#FFFFFF'><b>10</b></font>层<br>刺针扫射：伤害上限提升至<font color='#FFFFFF'><b>1000</b></font><br>战意：叠加上限提升至<font color='#FFFFFF'><b>20</b></font>层",
       en: "<font color='#00CED1'>Autocast:</font> With autocast enabled, whenever enemy heroes are in range, Bristleback automatically fires Quill Spray and casts Viscous Nasal Goo on the nearest enemy hero.<br><br><font color='#d000ff'>Awakening Bonuses:</font> Viscous Nasal Goo: base armor reduction raised to <font color='#FFFFFF'><b>10</b></font>, per-stack to <font color='#FFFFFF'><b>6</b></font>, stack limit raised to <font color='#FFFFFF'><b>10</b></font><br>Quill Spray: damage cap raised to <font color='#FFFFFF'><b>1000</b></font><br>Warpath: max stacks raised to <font color='#FFFFFF'><b>20</b></font>",
-      ru: "<font color='#00CED1'>Autocast:</font> With autocast enabled, whenever enemy heroes are in range, Bristleback automatically fires Quill Spray and casts Viscous Nasal Goo on the nearest enemy hero.<br><br><font color='#d000ff'>Awakening Bonuses:</font> Viscous Nasal Goo: base armor reduction raised to <font color='#FFFFFF'><b>10</b></font>, per-stack to <font color='#FFFFFF'><b>6</b></font>, stack limit raised to <font color='#FFFFFF'><b>10</b></font><br>Quill Spray: damage cap raised to <font color='#FFFFFF'><b>1000</b></font><br>Warpath: max stacks raised to <font color='#FFFFFF'><b>20</b></font>",
+      ru: "<font color='#00CED1'>Автоприменение:</font> после включения, когда в радиусе есть вражеский герой, Колючий спиногрыз автоматически применяет Выброс игл и накладывает Вязкую слизь на ближайшего вражеского героя.<br><br><font color='#d000ff'>Бонус пробуждения:</font> Вязкая слизь: базовое снижение брони повышено до <font color='#FFFFFF'><b>10</b></font>, снижение брони за заряд — до <font color='#FFFFFF'><b>6</b></font>, максимум зарядов — до <font color='#FFFFFF'><b>10</b></font><br>Выброс игл: максимальный урон повышен до <font color='#FFFFFF'><b>1000</b></font><br>Тропа войны: максимум зарядов повышен до <font color='#FFFFFF'><b>20</b></font>",
     },
     ability: {
       behavior: 'autocast',
@@ -1295,12 +1324,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>裂影箭 觉醒</font>",
       en: "<font color='#d000ff'>Splinter Shot Awakened</font>",
-      ru: "<font color='#d000ff'>Splinter Shot Awakened</font>",
+      ru: "<font color='#d000ff'>Расколотая стрела: пробуждение</font>",
     },
     desc: {
       zh: "普攻有40%概率分裂出箭矢，射向主目标周围最多2名敌人，每支造成本次攻击伤害50%的物理伤害，并附带霜冻之箭的减速效果。<br>分裂箭矢将穿透敌人的防御，无视他们的<font color='#FFFFFF'><b>基础护甲</b></font>。",
       en: "Attacks have a 40% chance to splinter into arrows that fly at up to 2 enemies around the primary target, each dealing 50% of the attack's damage as physical damage and applying Frost Arrows' slow.<br>Splinter arrows pierce through defenses, ignoring their <font color='#FFFFFF'><b>base armor</b></font>.",
-      ru: "Attacks have a 40% chance to splinter into arrows that fly at up to 2 enemies around the primary target, each dealing 50% of the attack's damage as physical damage and applying Frost Arrows' slow.<br>Splinter arrows pierce through defenses, ignoring their <font color='#FFFFFF'><b>base armor</b></font>.",
+      ru: "Обычные атаки с вероятностью 40% выпускают стрелы, летящие к не более чем 2 врагам вокруг основной цели; каждая наносит 50% физического урона от этой атаки и накладывает замедление Морозные стрелы.<br>Расколотые стрелы пробивают защиту врагов, игнорируя их <font color='#FFFFFF'><b>базовую броню</b></font>.",
     },
     ability: {
       behavior: 'passive',
@@ -1324,12 +1353,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>魂之挽歌护体 觉醒</font>",
       en: "<font color='#d000ff'>Requiem of Souls Guard Awakened</font>",
-      ru: "<font color='#d000ff'>Requiem of Souls Guard Awakened</font>",
+      ru: "<font color='#d000ff'>Покров Реквием душ: пробуждение</font>",
     },
     desc: {
       zh: "释放魂之挽歌的施法前摇期间，影魔获得<font color='#FFCC66'>黑皇杖</font>效果，避免被控制打断。<br><br>支配死灵击杀英雄获得<font color='#FFFFFF'><b>10</b></font>个灵魂，击杀小兵获得<font color='#FFFFFF'><b>3</b></font>个灵魂。<br><br>提升施法速度<font color='#FFFFFF'><b>50%</b></font>，降低暗影压制与魂之挽歌的施法抬手时间。",
       en: "During Requiem of Souls' cast animation, Shadow Fiend gains the <font color='#FFCC66'>Black King Bar</font> effect, preventing his cast from being interrupted by disables.<br><br>Necromastery grants <font color='#FFFFFF'><b>10</b></font> souls per hero kill and <font color='#FFFFFF'><b>3</b></font> souls per unit kill.<br><br>Increases cast speed by <font color='#FFFFFF'><b>50%</b></font>, reducing the cast point of Shadowraze and Requiem of Souls.",
-      ru: "During Requiem of Souls' cast animation, Shadow Fiend gains the <font color='#FFCC66'>Black King Bar</font> effect, preventing his cast from being interrupted by disables.<br><br>Necromastery grants <font color='#FFFFFF'><b>10</b></font> souls per hero kill and <font color='#FFFFFF'><b>3</b></font> souls per unit kill.<br><br>Increases cast speed by <font color='#FFFFFF'><b>50%</b></font>, reducing the cast point of Shadowraze and Requiem of Souls.",
+      ru: "Во время подготовки Реквиема душ Теневой дух получает эффект <font color='#FFCC66'>Чёрного короля</font>, защищающий от прерывания контролем.<br><br>Власть над душами даёт <font color='#FFFFFF'><b>10</b></font> душ за убийство героя и <font color='#FFFFFF'><b>3</b></font> души за убийство крипа.<br><br>Скорость применения повышена на <font color='#FFFFFF'><b>50%</b></font>, время замаха Теневой волны и Реквиема душ сокращено.",
     },
     ability: {
       behavior: 'passive',
@@ -1353,12 +1382,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>神语 觉醒</font>",
       en: "<font color='#d000ff'>Divine Words Awakened</font>",
-      ru: "<font color='#d000ff'>Divine Words Awakened</font>",
+      ru: "<font color='#d000ff'>Божественное слово: пробуждение</font>",
     },
     desc: {
       zh: '巫医沟通神明，死亡守卫与变身术守卫被召唤时，攻击力按巫医当前技能增强的50%等比提升。',
       en: "By communing with the gods, Witch Doctor's Death Wards and Voodoo Switcheroo wards gain attack damage scaled by 50% of his current Spell Amplification when summoned.",
-      ru: "By communing with the gods, Witch Doctor's Death Wards and Voodoo Switcheroo wards gain attack damage scaled by 50% of his current Spell Amplification when summoned.",
+      ru: 'Знахарь взывает к богам: при призыве Смертоносного тотема и тотема превращения их урон от атак повышается пропорционально текущему усилению способностей Знахаря на 50%.',
     },
     ability: {
       behavior: 'passive',
@@ -1382,12 +1411,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>窒碍短匕 觉醒</font>",
       en: "<font color='#d000ff'>Stifling Dagger Awakened</font>",
-      ru: "<font color='#d000ff'>Stifling Dagger: пробуждение</font>",
+      ru: "<font color='#d000ff'>Удушающий кинжал: пробуждение</font>",
     },
     desc: {
       zh: "对敌方单位掷出一把匕首，减缓其移动速度，并造成物理伤害，数值为65 70 75 80 85+幻影刺客攻击伤害的30 45 60 75 90%，同时继承物品和技能的攻击效果。匕首弹道速度提升。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内有敌方英雄时，随机对其中一名自动施放；会反弹指向性技能的目标不会被选中。<br><font color='#d000ff'>觉醒强化：</font>施放窒碍短匕或幻影突袭后，获得短暂的<font color='#FFCC66'>魔法免疫</font>。",
       en: "Throws a dagger at an enemy unit, slowing its movement speed and dealing physical damage equal to 65 70 75 80 85 plus 30 45 60 75 90% of Phantom Assassin's attack damage, and applying attack effects from items and abilities. The dagger's projectile speed is increased.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, casts automatically at a random enemy hero within cast range. Targets that reflect targeted spells are skipped.<br><font color='#d000ff'>AWAKENED:</font> After casting Stifling Dagger or Phantom Strike, gain brief <font color='#FFCC66'>Spell Immunity</font>.",
-      ru: "Герой бросает в выбранного врага кинжал, который замедляет передвижение, наносит физический урон в размере 65 70 75 80 85 + 30 45 60 75 90% от атаки владельца, а также накладывает эффекты атаки от его предметов и способностей. Скорость полёта кинжала повышена.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении способность автоматически применяется к случайному вражескому герою в радиусе применения. Цели, отражающие целевые способности, пропускаются.<br><font color='#d000ff'>Бонус пробуждения:</font> После применения Stifling Dagger или Phantom Strike герой ненадолго получает <font color='#FFCC66'>невосприимчивость к магии</font>.",
+      ru: "Герой бросает в выбранного врага кинжал, который замедляет передвижение, наносит физический урон в размере 65 70 75 80 85 + 30 45 60 75 90% от атаки владельца, а также накладывает эффекты атаки от его предметов и способностей. Скорость полёта кинжала повышена.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении способность автоматически применяется к случайному вражескому герою в радиусе применения. Цели, отражающие целевые способности, пропускаются.<br><font color='#d000ff'>Бонус пробуждения:</font> После применения Удушающего кинжала или Призрачного удара герой ненадолго получает <font color='#FFCC66'>невосприимчивость к магии</font>.",
     },
     ability: {
       behavior: 'autocast',
@@ -1428,7 +1457,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
           label: {
             zh: '幻影突袭魔免持续时间：',
             en: 'Phantom Strike Immunity Duration:',
-            ru: 'ДЛИТ. ИММУНИТЕТА (Phantom Strike):',
+            ru: 'ДЛИТ. ИММУНИТЕТА (Призрачный удар):',
           },
           levels: ['2.0'],
           percent: false,
@@ -1439,7 +1468,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
           label: {
             zh: '窒碍短匕魔免持续时间：',
             en: 'Stifling Dagger Immunity Duration:',
-            ru: 'ДЛИТ. ИММУНИТЕТА (Stifling Dagger):',
+            ru: 'ДЛИТ. ИММУНИТЕТА (Удушающий кинжал):',
           },
           levels: ['1.0'],
           percent: false,
@@ -1462,12 +1491,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>神王 觉醒</font>",
       en: "<font color='#d000ff'>God King Awakened</font>",
-      ru: "<font color='#d000ff'>God King Awakened</font>",
+      ru: "<font color='#d000ff'>Царь богов: пробуждение</font>",
     },
     desc: {
-      zh: '开启自动施法后，宙斯自动对施法距离内的敌人施放弧形闪电与雷击。<br><br>优先对英雄施法，范围内只有小兵时仅施放弧形闪电。',
-      en: 'When autocast is enabled, Zeus automatically casts Arc Lightning and Lightning Bolt on enemies within cast range.<br><br>Prioritizes heroes. Casts only Arc Lightning when only creeps are in range.',
-      ru: 'When autocast is enabled, Zeus automatically casts Arc Lightning and Lightning Bolt on enemies within cast range.<br><br>Prioritizes heroes. Casts only Arc Lightning when only creeps are in range.',
+      zh: "<font color='#00CED1'>自动施法：</font>开启后，宙斯自动对施法距离内的敌人施放弧形闪电与雷击。<br><br>优先对英雄施法。<br>弧形闪电：达到<font color='#FFFFFF'><b>3</b></font>级后，范围内没有英雄时也会对小兵施放。<br>雷击：学会范围型雷击天赋后，范围内没有英雄时也会对小兵施放。",
+      en: "<font color='#00CED1'>Autocast:</font> While enabled, Zeus automatically casts Arc Lightning and Lightning Bolt on enemies within cast range.<br><br>Prioritizes heroes.<br>Arc Lightning: once it reaches level <font color='#FFFFFF'><b>3</b></font>, it is also cast on creeps when no hero is in range.<br>Lightning Bolt: with the AoE Lightning Bolt talent, it is also cast on creeps when no hero is in range.",
+      ru: "<font color='#00CED1'>Автоприменение:</font> после включения Зевс автоматически применяет Дуговую молнию и Удар молнии по врагам в радиусе применения.<br><br>В первую очередь применяет по героям.<br>Дуговая молния: начиная с <font color='#FFFFFF'><b>3</b></font> уровня также применяется по крипам, если героев поблизости нет.<br>Удар молнии: с талантом на Удар молнии по области также применяется по крипам, если героев поблизости нет.",
     },
     ability: {
       behavior: 'autocast',
@@ -1491,12 +1520,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>竭心光环 觉醒</font>",
       en: "<font color='#d000ff'>Heartstopper Aura Awakened</font>",
-      ru: "<font color='#d000ff'>Heartstopper Aura Awakened</font>",
+      ru: "<font color='#d000ff'>Останавливающая сердца аура: пробуждение</font>",
     },
     desc: {
       zh: "死灵法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><font color='#d000ff'>造成的伤害可以被技能增强。</font>",
       en: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font>",
-      ru: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font>",
+      ru: "Некрофос заставляет сердца врагов остановиться: окружающие вражеские юниты непрерывно теряют здоровье в размере процента от максимального запаса.<br><br><font color='#d000ff'>Наносимый урон усиливается усилением способностей.</font>",
     },
     ability: {
       behavior: 'aura',
@@ -1506,7 +1535,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       dispellable: 'no',
       values: [
         {
-          label: { zh: '作用范围：', en: 'Radius:', ru: 'Radius:' },
+          label: { zh: '作用范围：', en: 'Radius:', ru: 'РАДИУС:' },
           levels: ['700'],
           percent: false,
           aoe: true,
@@ -1516,7 +1545,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
           label: {
             zh: '每秒最大生命值伤害：',
             en: 'Max Health Damage per Second:',
-            ru: 'Max Health Damage per Second:',
+            ru: 'УРОН ОТ МАКС. ЗДОРОВЬЯ В СЕКУНДУ:',
           },
           levels: ['0.6', '0.9', '1.2', '1.5', '1.8'],
           percent: true,
@@ -1526,7 +1555,11 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ],
       cooldown: null,
       manaCost: null,
-      lore: null,
+      lore: {
+        zh: '竭心感染有救了',
+        en: 'Heartstopper infection is finally curable.',
+        ru: 'Теперь заражение сердца излечимо.',
+      },
     },
   },
   {
@@ -1539,12 +1572,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>无情铁手 觉醒</font>",
       en: "<font color='#d000ff'>Ruthless Hand Awakened</font>",
-      ru: "<font color='#d000ff'>Ruthless Hand Awakened</font>",
+      ru: "<font color='#d000ff'>Автоматический Отсекающий клинок: пробуждение</font>",
     },
     desc: {
       zh: "<font color='#00CED1'>自动施放：自动斩杀</font><br><br>开启自动施法后，只要淘汰之刃冷却就绪，斧王便自动检测施法范围内血量低于斩杀线的敌方英雄并立即施放淘汰之刃。",
       en: "<font color='#00CED1'>Autocast: Auto Cull</font><br><br>With autocast enabled, whenever Culling Blade is off cooldown, Axe automatically detects enemy heroes within cast range whose health is below the cull threshold and casts Culling Blade immediately.",
-      ru: "<font color='#00CED1'>Autocast: Auto Cull</font><br><br>With autocast enabled, whenever Culling Blade is off cooldown, Axe automatically detects enemy heroes within cast range whose health is below the cull threshold and casts Culling Blade immediately.",
+      ru: "<font color='#00CED1'>Автоприменение: автоматическое добивание</font><br><br>После включения автоприменения Акс, как только Отсекающий клинок будет готов, автоматически находит в радиусе применения вражеских героев со здоровьем ниже порога добивания и сразу применяет по ним Отсекающий клинок.",
     },
     ability: {
       behavior: 'autocast',
@@ -1558,7 +1591,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       lore: {
         zh: '利刃所向，皆为收割。',
         en: 'Where the blade falls, the harvest follows.',
-        ru: 'Where the blade falls, the harvest follows.',
+        ru: 'Всё, что попадает под лезвие, будет сжато.',
       },
     },
   },
@@ -1572,12 +1605,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>暗杀 觉醒</font>",
       en: "<font color='#d000ff'>Assassinate Awakened</font>",
-      ru: "<font color='#d000ff'>Assassinate Awakened</font>",
+      ru: "<font color='#d000ff'>Убийственный выстрел (пробужд.)</font>",
     },
     desc: {
       zh: "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><font color='#FFFFFF'>神杖升级：命中的敌方英雄附加眩晕效果。</font>",
       en: "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>",
-      ru: "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>",
+      ru: "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.<br><br><font color='#FFFFFF'>Аганимовский скипетр: поражённые герои также оглушаются.</font>",
     },
     ability: {
       behavior: 'point',
@@ -1587,14 +1620,14 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       dispellable: null,
       values: [
         {
-          label: { zh: '暗杀范围:', en: 'RADIUS:', ru: 'RADIUS:' },
+          label: { zh: '暗杀范围:', en: 'RADIUS:', ru: 'Радиус:' },
           levels: ['350'],
           percent: false,
           aoe: true,
           spellAmp: false,
         },
         {
-          label: { zh: '致命一击伤害:', en: 'CRITICAL DAMAGE:', ru: 'CRITICAL DAMAGE:' },
+          label: { zh: '致命一击伤害:', en: 'CRITICAL DAMAGE:', ru: 'Урон критического удара:' },
           levels: ['220', '240', '260', '280'],
           percent: true,
           aoe: false,
@@ -1604,7 +1637,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
           label: {
             zh: '额外物理伤害:',
             en: 'BONUS PHYSICAL DAMAGE:',
-            ru: 'BONUS PHYSICAL DAMAGE:',
+            ru: 'Дополнительный физический урон:',
           },
           levels: ['300', '400', '500', '600'],
           percent: false,
@@ -1617,7 +1650,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       lore: {
         zh: '扣下扳机的那一刻，整片战场都为之屏息。',
         en: 'For the space of a heartbeat, the whole battlefield holds its breath.',
-        ru: 'For the space of a heartbeat, the whole battlefield holds its breath.',
+        ru: 'В этот миг всё поле боя затаило дыхание.',
       },
     },
   },
@@ -1631,12 +1664,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>剑刃风暴 觉醒</font>",
       en: "<font color='#d000ff'>Blade Fury Awakened</font>",
-      ru: "<font color='#d000ff'>Blade Fury Awakened</font>",
+      ru: "<font color='#d000ff'>Танец клинков: пробуждение</font>",
     },
     desc: {
       zh: "剑圣化身旋转风暴，每秒对周围敌人造成基础伤害加目标最大生命百分比的魔法伤害。期间获得<font color='#FFCC66'>减益免疫</font>和80%魔法抗性，可以正常攻击但攻击力降低50%。旋转结束时对自身施加强效驱散。",
       en: "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80% magic resistance, and can attack normally but with attack power reduced by 50%. Performs a strong dispel on himself when the spin ends.",
-      ru: "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80% magic resistance, and can attack normally but with attack power reduced by 50%. Performs a strong dispel on himself when the spin ends.",
+      ru: "Джаггернаут превращается в вихрь клинков и ежесекундно наносит окружающим врагам магический урон, складывающийся из базового урона и процента от максимального здоровья цели. На время действия он получает <font color='#FFCC66'>невосприимчивость к дебаффам</font> и 80% сопротивления магии, может атаковать, но его урон от атак снижен на 50%. По окончании вихря на себя накладывается сильное развеивание.",
     },
     ability: {
       behavior: 'channeled',
@@ -1646,21 +1679,21 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       dispellable: 'no',
       values: [
         {
-          label: { zh: '作用范围：', en: 'RADIUS:', ru: 'RADIUS:' },
+          label: { zh: '作用范围：', en: 'RADIUS:', ru: 'РАДИУС:' },
           levels: ['350'],
           percent: false,
           aoe: true,
           spellAmp: false,
         },
         {
-          label: { zh: '持续时间：', en: 'DURATION:', ru: 'DURATION:' },
+          label: { zh: '持续时间：', en: 'DURATION:', ru: 'ДЛИТЕЛЬНОСТЬ:' },
           levels: ['5'],
           percent: false,
           aoe: false,
           spellAmp: false,
         },
         {
-          label: { zh: '基础伤害：', en: 'BASE DAMAGE:', ru: 'BASE DAMAGE:' },
+          label: { zh: '基础伤害：', en: 'BASE DAMAGE:', ru: 'БАЗОВЫЙ УРОН:' },
           levels: ['80', '160', '240', '320', '400'],
           percent: false,
           aoe: false,
@@ -1670,7 +1703,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
           label: {
             zh: '每秒最大生命伤害：',
             en: 'MAX HEALTH DAMAGE PER SECOND:',
-            ru: 'MAX HEALTH DAMAGE PER SECOND:',
+            ru: 'УРОН ОТ МАКС. ЗДОРОВЬЯ В СЕКУНДУ:',
           },
           levels: ['2'],
           percent: true,
@@ -1693,12 +1726,12 @@ export const AWAKEN_HEROES: AwakenHero[] = [
     title: {
       zh: "<font color='#d000ff'>肉钩 觉醒</font>",
       en: "<font color='#d000ff'>Meat Hook Awakened</font>",
-      ru: "<font color='#d000ff'>Meat Hook Awakened</font>",
+      ru: "<font color='#d000ff'>Мясной крюк: пробуждение</font>",
     },
     desc: {
       zh: "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。",
       en: "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.",
-      ru: "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.",
+      ru: "Запускает мясной крюк, который притягивает к себе первую задетую цель.<br><br><font color='#00CED1'>Автоприменение:</font> при включении крюк притягивает только врагов, при выключении может притягивать и союзников.<br><br>Значительно увеличены дальность применения и скорость крюка.",
     },
     ability: {
       behavior: 'autocast',
@@ -1708,21 +1741,25 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       dispellable: null,
       values: [
         {
-          label: { zh: '伤害：', en: 'DAMAGE:', ru: 'DAMAGE:' },
+          label: { zh: '伤害：', en: 'DAMAGE:', ru: 'УРОН:' },
           levels: ['150', '220', '290', '360', '430'],
           percent: false,
           aoe: false,
           spellAmp: true,
         },
         {
-          label: { zh: '钩子速度：', en: 'HOOK SPEED:', ru: 'HOOK SPEED:' },
+          label: { zh: '钩子速度：', en: 'HOOK SPEED:', ru: 'СКОРОСТЬ КРЮКА:' },
           levels: ['2100', '2400', '2700', '3000', '3300'],
           percent: false,
           aoe: false,
           spellAmp: false,
         },
         {
-          label: { zh: '基础施法距离：', en: 'BASE CAST RANGE:', ru: 'BASE CAST RANGE:' },
+          label: {
+            zh: '基础施法距离：',
+            en: 'BASE CAST RANGE:',
+            ru: 'БАЗОВАЯ ДАЛЬНОСТЬ ПРИМЕНЕНИЯ:',
+          },
           levels: ['1800', '2100', '2400', '2700', '3000'],
           percent: false,
           aoe: false,
@@ -1731,7 +1768,11 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ],
       cooldown: ['14', '13', '12', '11', '10'],
       manaCost: ['120'],
-      lore: null,
+      lore: {
+        zh: '这下总不用吵架了吧',
+        en: 'No need to argue about it anymore.',
+        ru: 'Теперь можно и не ссориться.',
+      },
     },
   },
 ];

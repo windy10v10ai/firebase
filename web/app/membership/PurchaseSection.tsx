@@ -46,13 +46,13 @@ interface PurchaseSectionProps {
 const DISCOUNT_CLASS =
   'rounded border border-discount bg-black/60 px-1.5 text-[11px] font-bold text-discount';
 
-// 顶条只回答「现在用哪家付」，描边、底色、悬停仍是中性色
+// 整块购买区只属于选中的平台，顶条与悬停描边都用平台色回答「现在用哪家付」；底色仍是中性色
 const PLATFORM_STYLE: Record<
   PaymentPlatform,
-  { topBar: string; tabOn: string; desc: string; note: string; link: string; currency: string }
+  { tier: string; tabOn: string; desc: string; note: string; link: string; currency: string }
 > = {
   alipay: {
-    topBar: 'border-t-alipay',
+    tier: 'border-t-alipay hover:border-x-alipay/50 hover:border-b-alipay/50',
     tabOn: 'border-alipay bg-alipay/10',
     desc: 'text-alipay',
     note: 'border-alipay/35 bg-alipay/8',
@@ -60,7 +60,7 @@ const PLATFORM_STYLE: Record<
     currency: '¥',
   },
   afdian: {
-    topBar: 'border-t-afdian',
+    tier: 'border-t-afdian hover:border-x-afdian/50 hover:border-b-afdian/50',
     tabOn: 'border-afdian bg-afdian/10',
     desc: 'text-afdian',
     note: 'border-afdian/35 bg-afdian/8',
@@ -68,7 +68,7 @@ const PLATFORM_STYLE: Record<
     currency: '¥',
   },
   stripe: {
-    topBar: 'border-t-stripe',
+    tier: 'border-t-stripe hover:border-x-stripe/50 hover:border-b-stripe/50',
     tabOn: 'border-stripe bg-stripe/10',
     desc: 'text-stripe-text',
     note: 'border-stripe/35 bg-stripe/8',
@@ -76,7 +76,7 @@ const PLATFORM_STYLE: Record<
     currency: 'US$',
   },
   kofi: {
-    topBar: 'border-t-kofi',
+    tier: 'border-t-kofi hover:border-x-kofi/50 hover:border-b-kofi/50',
     tabOn: 'border-kofi bg-kofi/10',
     desc: 'text-kofi',
     note: 'border-kofi/35 bg-kofi/8',
@@ -90,10 +90,10 @@ const RECOMMEND_CLASS =
   'absolute -end-1 -top-3 overflow-hidden rounded-full border border-success/40 bg-panel lg:static';
 
 const TIER_CLASS =
-  'flex w-full min-w-0 rounded-xl border border-line border-t-[3px] bg-panel-soft text-start text-heading transition-colors hover:border-x-link-border hover:border-b-link-border hover:bg-control-hover';
+  'flex w-full min-w-0 rounded-xl border border-line border-t-[3px] bg-panel-soft text-start text-heading transition-colors hover:bg-control-hover';
 
 interface TierProps {
-  topBar: string;
+  tier: string;
   className: string;
   /** 支付宝开弹窗、Stripe 下单后跳收银台，其他平台新窗口跳转 */
   action: { onClick: () => void } | { href: string };
@@ -102,8 +102,8 @@ interface TierProps {
 }
 
 /** 档位本身就是付款入口 */
-function Tier({ topBar, className, action, disabled, children }: TierProps) {
-  const classes = `${TIER_CLASS} ${topBar} ${className}`;
+function Tier({ tier, className, action, disabled, children }: TierProps) {
+  const classes = `${TIER_CLASS} ${tier} ${className}`;
   if ('href' in action) {
     return (
       <a href={action.href} target="_blank" rel="noopener noreferrer" className={classes}>
@@ -247,7 +247,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
     return (
       <Tier
         key={tier.months}
-        topBar={style.topBar}
+        tier={style.tier}
         className="h-[72px] items-center px-4 lg:h-[104px]"
         disabled={stripePending !== null}
         action={{ onClick: () => void startStripe('MEMBER_PREMIUM', tier.months) }}
@@ -299,7 +299,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
   const alipayMemberTier = (tier: MemberTier) => (
     <Tier
       key={tier.months}
-      topBar={style.topBar}
+      tier={style.tier}
       className="h-[72px] items-center px-4 lg:h-[104px]"
       action={{
         onClick: () =>
@@ -336,7 +336,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
 
   const externalMemberTier = (href: string, price: string, label: string) => (
     <Tier
-      topBar={style.topBar}
+      tier={style.tier}
       className="h-[72px] items-center gap-4 px-4 lg:h-[104px]"
       action={{ href }}
     >
@@ -377,7 +377,7 @@ export default function PurchaseSection({ steamId, onAlipay }: PurchaseSectionPr
       />
     );
     const shared = {
-      topBar: style.topBar,
+      tier: style.tier,
       className: 'h-20 items-center gap-2.5 ps-1.5 pe-4 lg:h-24',
     };
 

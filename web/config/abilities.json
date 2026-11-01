@@ -15,49 +15,49 @@
     "icon": "ability_charge_damage.c522ed06.webp",
     "zh": "蝴蝶效应 · 青凝",
     "en": "Butterfly Effect: Cyan",
-    "ru": null
+    "ru": "Эффект бабочки · Бирюза"
   },
   "ability_fate_roulette": {
     "icon": "ability_fate_roulette.d0fd5920.webp",
     "zh": "命运轮盘",
     "en": "Fate Roulette",
-    "ru": null
+    "ru": "Рулетка судьбы"
   },
   "ability_trigger_learned_skills": {
     "icon": "ability_trigger_learned_skills.6d6de129.webp",
     "zh": "蝴蝶效应 · 蓝武",
     "en": "Butterfly Effect: Blue",
-    "ru": null
+    "ru": "Эффект бабочки · Лазурь"
   },
   "ability_trigger_on_active": {
     "icon": "ability_trigger_on_active.c22032fb.webp",
     "zh": "蝴蝶效应 · 紫啸",
     "en": "Butterfly Effect: Purple",
-    "ru": null
+    "ru": "Эффект бабочки · Пурпур"
   },
   "ability_trigger_on_attacked": {
     "icon": "ability_trigger_on_attacked.4c68fe23.webp",
     "zh": "蝴蝶效应 · 金身",
     "en": "Butterfly Effect: Gold",
-    "ru": null
+    "ru": "Эффект бабочки · Золото"
   },
   "ability_trigger_on_cast": {
     "icon": "ability_trigger_on_cast.a737420c.webp",
     "zh": "蝴蝶效应 · 红魔",
     "en": "Butterfly Effect: Red",
-    "ru": null
+    "ru": "Эффект бабочки · Багрянец"
   },
   "ability_trigger_on_move": {
     "icon": "ability_trigger_on_move.d2e088dd.webp",
     "zh": "蝴蝶效应 · 橙影",
     "en": "Butterfly Effect: Orange",
-    "ru": null
+    "ru": "Эффект бабочки · Янтарь"
   },
   "ability_trigger_on_spell_reflect": {
     "icon": "ability_trigger_on_spell_reflect.10166470.webp",
     "zh": "蝴蝶效应 · 绿莲",
     "en": "Butterfly Effect: Green",
-    "ru": null
+    "ru": "Эффект бабочки · Лотос"
   },
   "abyssal_underlord_atrophy_aura": {
     "icon": "abyssal_underlord_atrophy_aura.49c297e1.webp",
@@ -75,13 +75,13 @@
     "icon": "abyssal_underlord_firestorm2.09c74eaa.webp",
     "zh": "火雨降临",
     "en": "Firestorm Advent",
-    "ru": null
+    "ru": "Пришествие огненного шторма"
   },
   "abyssal_underlord_malice_aura": {
     "icon": "abyssal_underlord_malice_aura.838ff1cc.webp",
     "zh": "怨念光环",
     "en": "Aura of Malice",
-    "ru": null
+    "ru": "Аура злобы"
   },
   "alchemist_acid_spray": {
     "icon": "alchemist_acid_spray.81a33831.webp",
@@ -93,7 +93,7 @@
     "icon": "alchemist_berserk_potion2.b04ce3c7.webp",
     "zh": "狂暴药剂",
     "en": "Berserk Potion",
-    "ru": null
+    "ru": "Яростное зелье"
   },
   "alchemist_chemical_rage": {
     "icon": "alchemist_chemical_rage.e13316e7.webp",
@@ -105,13 +105,13 @@
     "icon": "alchemist_goblins_greed2.974c7d00.webp",
     "zh": "贪魔的贪婪",
     "en": "Greevil's Greed",
-    "ru": "Greevil's Greed"
+    "ru": "Жадность гоблина"
   },
   "ancient_apparition_bone_chill2": {
     "icon": "ancient_apparition_bone_chill2.8fd1cfa7.webp",
     "zh": "刺骨严寒",
     "en": "Bone Chill",
-    "ru": null
+    "ru": "Костяной холод"
   },
   "ancient_apparition_chilling_touch": {
     "icon": "ancient_apparition_chilling_touch.5d0c0063.webp",
@@ -123,13 +123,13 @@
     "icon": "ancient_apparition_freezing_aura.98528df8.webp",
     "zh": "极寒光环",
     "en": "Bonechill Aura",
-    "ru": "Freezing aura"
+    "ru": "Аура стужи"
   },
   "ancient_apparition_frost_orb": {
     "icon": "ancient_apparition_frost_orb.f42526a1.webp",
     "zh": "冰霜法球",
     "en": "Frost Orb",
-    "ru": "Frost orb"
+    "ru": "Ледяная сфера"
   },
   "ancient_apparition_ice_vortex": {
     "icon": "ancient_apparition_ice_vortex.63ca68d2.webp",
@@ -159,7 +159,7 @@
     "icon": "arc_warden_scepter2.8a396f6a.webp",
     "zh": "人工神符",
     "en": "Rune Forge",
-    "ru": "Artificial Rune"
+    "ru": "Кузня рун"
   },
   "axe_berserkers_call": {
     "icon": "axe_berserkers_call.45de436c.webp",
@@ -183,7 +183,7 @@
     "icon": "axe_one_man_army2.cfec862f.webp",
     "zh": "一人之军",
     "en": "One Man Army",
-    "ru": "One Man Army"
+    "ru": "Армия из одного"
   },
   "batrider_firefly": {
     "icon": "batrider_firefly.0f8f6e8c.webp",
@@ -201,7 +201,7 @@
     "icon": "batrider_smoldering_resin2.f25ce5fa.webp",
     "zh": "闷烧树脂",
     "en": "Smoldering Resin",
-    "ru": "Smoldering Resin"
+    "ru": "Тлеющая смола"
   },
   "black_drake_magic_amplification_aura": {
     "icon": "black_drake_magic_amplification_aura.ed44d0fc.webp",
@@ -213,7 +213,7 @@
     "icon": "bloodseeker_blood_mist2.ffdd1423.webp",
     "zh": "血雾",
     "en": "Blood Mist",
-    "ru": "blood mist"
+    "ru": "Кровавый туман"
   },
   "bloodseeker_bloodrage": {
     "icon": "bloodseeker_bloodrage.be40b0bf.webp",
@@ -243,7 +243,7 @@
     "icon": "bounty_hunter_cutpurse2.92e824c8.webp",
     "zh": "妙手空空",
     "en": "Cutpurse",
-    "ru": "Cutpurse"
+    "ru": "Карманник"
   },
   "bounty_hunter_jinada": {
     "icon": "bounty_hunter_jinada.9542d8f4.webp",
@@ -267,7 +267,7 @@
     "icon": "brewmaster_drunken_boxing.0f674247.webp",
     "zh": "醉拳",
     "en": "Drunken Boxing",
-    "ru": "Drunken Boxing"
+    "ru": "Пьяный бой"
   },
   "brewmaster_fire_phase": {
     "icon": "brewmaster_fire_phase.fa218ed1.webp",
@@ -279,7 +279,7 @@
     "icon": "brewmaster_primal_split_lua.92b594ea.webp",
     "zh": "元素分离·改",
     "en": "Primal Split MK2",
-    "ru": null
+    "ru": "Разделение стихий (изменено)"
   },
   "centaur_double_edge": {
     "icon": "centaur_double_edge.42c8902d.webp",
@@ -303,7 +303,7 @@
     "icon": "centaur_sturdy.42c8902d.webp",
     "zh": "不屈",
     "en": "Sturdy",
-    "ru": "sturdy"
+    "ru": "Стойкость"
   },
   "chaos_knight_chaos_strike": {
     "icon": "chaos_knight_chaos_strike.09aea406.webp",
@@ -321,13 +321,13 @@
     "icon": "clinkz_burning_barrage2.5861f7e0.webp",
     "zh": "炽烈火雨",
     "en": "Burning Barrage",
-    "ru": "Burning Barrage"
+    "ru": "Пылающий залп"
   },
   "clinkz_infernal_shred2": {
     "icon": "clinkz_infernal_shred2.16e8d834.webp",
     "zh": "地狱之裂",
     "en": "Infernal Shred",
-    "ru": null
+    "ru": "Адское расщепление"
   },
   "crystal_maiden_brilliance_aura": {
     "icon": "crystal_maiden_brilliance_aura.110c4a50.webp",
@@ -357,25 +357,25 @@
     "icon": "crystal_maiden_glacial_guard2.ef7b7ea6.webp",
     "zh": "冰川护体",
     "en": "Glacial Guard",
-    "ru": null
+    "ru": "Ледяная защита"
   },
   "crystal_maiden_ice_explosion": {
     "icon": "crystal_maiden_ice_explosion.70580eff.webp",
     "zh": "冰爆",
     "en": "Ice Explosion",
-    "ru": "ice_explosion"
+    "ru": "Ледяной взрыв"
   },
   "dark_seer_normal_punch2": {
     "icon": "dark_seer_normal_punch2.e3e144f1.webp",
     "zh": "普通一拳",
     "en": "Normal Punch",
-    "ru": "Normal Punch"
+    "ru": "Обычный удар"
   },
   "dark_seer_quick_wit2": {
     "icon": "dark_seer_quick_wit2.f81f1da6.webp",
     "zh": "才思敏捷",
     "en": "Quick Wit",
-    "ru": "Quick Wit"
+    "ru": "Быстрый ум"
   },
   "dark_seer_vacuum": {
     "icon": "dark_seer_vacuum.8f18b787.webp",
@@ -405,19 +405,19 @@
     "icon": "dazzle_bad_juju.48836ecd.webp",
     "zh": "邪能",
     "en": "Bad Juju",
-    "ru": null
+    "ru": "Дурные чары"
   },
   "dazzle_good_juju": {
     "icon": "dazzle_good_juju.ef1f7e18.webp",
     "zh": "善咒",
     "en": "Good Juju",
-    "ru": null
+    "ru": "Добрые чары"
   },
   "dazzle_rain_of_vermin": {
     "icon": "dazzle_rain_of_vermin.9b24aea4.webp",
     "zh": "诅咒之雨",
     "en": "Rain of Vermin",
-    "ru": "dazzle_rain_of_vermin"
+    "ru": "Дождь вредителей"
   },
   "dazzle_shadow_wave": {
     "icon": "dazzle_shadow_wave.63f422d4.webp",
@@ -435,7 +435,7 @@
     "icon": "doom_bringer_doom_awakened.74515bca.webp",
     "zh": "末日 觉醒",
     "en": "Doom Awakened",
-    "ru": "Пробуждённый Doom"
+    "ru": "Рок: пробуждение"
   },
   "doom_bringer_infernal_blade": {
     "icon": "doom_bringer_infernal_blade.ec1c318c.webp",
@@ -447,7 +447,7 @@
     "icon": "dragon_knight_dragon_blood2.41e20317.webp",
     "zh": "龙族血统",
     "en": "Dragon Blood",
-    "ru": null
+    "ru": "Драконья кровь"
   },
   "drow_ranger_frost_arrows": {
     "icon": "drow_ranger_frost_arrows.69ecd79d.webp",
@@ -531,7 +531,7 @@
     "icon": "faceless_void_backtrack2.5e8155df.webp",
     "zh": "回到过去",
     "en": "Backtrack",
-    "ru": "backtrack"
+    "ru": "Возврат в прошлое"
   },
   "faceless_void_chronosphere": {
     "icon": "faceless_void_chronosphere.bd15b35f.webp",
@@ -591,13 +591,13 @@
     "icon": "imba_chaos_knight_phantasm.8836db2f.webp",
     "zh": "混沌之军",
     "en": "Army of Chaos",
-    "ru": null
+    "ru": "Армия хаоса"
   },
   "jakiro_double_trouble2": {
     "icon": "jakiro_double_trouble2.ad2f355c.webp",
     "zh": "天生一对",
     "en": "Double Trouble",
-    "ru": "Double Trouble"
+    "ru": "Двойные неприятности"
   },
   "jakiro_dual_breath": {
     "icon": "jakiro_dual_breath.ad2f355c.webp",
@@ -627,7 +627,7 @@
     "icon": "juggernaut_blade_fury_custom.8502de55.webp",
     "zh": "剑刃风暴 觉醒",
     "en": "Blade Fury Awakened",
-    "ru": null
+    "ru": "Танец клинков: пробуждение"
   },
   "juggernaut_omni_slash": {
     "icon": "juggernaut_omni_slash.76725f28.webp",
@@ -681,7 +681,7 @@
     "icon": "leshrac_defilement2.089bbba2.webp",
     "zh": "大肆污染",
     "en": "Defilement",
-    "ru": null
+    "ru": "Осквернение"
   },
   "leshrac_split_earth": {
     "icon": "leshrac_split_earth.31359094.webp",
@@ -705,7 +705,7 @@
     "icon": "lich_frost_armor.26e73769.webp",
     "zh": "霜冻护甲",
     "en": "Ice Armor",
-    "ru": null
+    "ru": "Морозная броня"
   },
   "life_stealer_rage": {
     "icon": "life_stealer_rage.0c595388.webp",
@@ -723,7 +723,7 @@
     "icon": "lina_flame_cloak2.d2b9d83a.webp",
     "zh": "腾焰斗篷",
     "en": "Flame Cloak",
-    "ru": "Flame Cloak"
+    "ru": "Пламенный плащ"
   },
   "lina_light_strike_array": {
     "icon": "lina_light_strike_array.06fc1793.webp",
@@ -857,6 +857,12 @@
     "en": "Jingu Mastery",
     "ru": "Jingu Mastery"
   },
+  "morphling_ebb_and_flow2": {
+    "icon": "morphling_ebb_and_flow2.4cd93f78.webp",
+    "zh": "潮涨潮落",
+    "en": "Ebb and Flow",
+    "ru": "Ebb and Flow"
+  },
   "muerta_gunslinger": {
     "icon": "muerta_gunslinger.5cb12729.webp",
     "zh": "神枪在手",
@@ -915,7 +921,7 @@
     "icon": "ogre_magi_multicast_lua.f43a0558.webp",
     "zh": "多重施法（觉醒）",
     "en": "Multicast (Awakened)",
-    "ru": null
+    "ru": "Многократное применение (пробужд.)"
   },
   "omniknight_degen_aura": {
     "icon": "omniknight_degen_aura.b3e22c46.webp",
@@ -939,7 +945,7 @@
     "icon": "omniknight_repel.c155b49b.webp",
     "zh": "咸鱼恩赐",
     "en": "Heavenly Grace",
-    "ru": null
+    "ru": "Благодать солёной рыбы"
   },
   "pangolier_fortune_favors_the_bold": {
     "icon": "pangolier_fortune_favors_the_bold.bde54b1f.webp",
@@ -981,7 +987,7 @@
     "icon": "primal_beast_colossal2.bf4ca1c4.webp",
     "zh": "庞",
     "en": "Colossal",
-    "ru": null
+    "ru": "Исполин"
   },
   "primal_beast_trample": {
     "icon": "primal_beast_trample.ae8f0794.webp",
@@ -1005,7 +1011,7 @@
     "icon": "pudge_meat_hook_lua.590255c3.webp",
     "zh": "肉钩 觉醒",
     "en": "Meat Hook Awakened",
-    "ru": null
+    "ru": "Мясной крюк: пробуждение"
   },
   "pugna_nether_blast": {
     "icon": "pugna_nether_blast.42753db7.webp",
@@ -1065,19 +1071,19 @@
     "icon": "rubick_curiosity2.ec5c0609.webp",
     "zh": "奇心",
     "en": "Curiosity",
-    "ru": null
+    "ru": "Любопытство"
   },
   "rubick_might_and_magus2": {
     "icon": "rubick_might_and_magus2.18add27c.webp",
     "zh": "力量与魔法",
     "en": "Might and Magus",
-    "ru": null
+    "ru": "Сила и магия"
   },
   "rubick_null_field": {
     "icon": "rubick_null_field.5656499a.webp",
     "zh": "失效力场",
     "en": "Null Field",
-    "ru": null
+    "ru": "Поле подавления"
   },
   "shadow_demon_menace": {
     "icon": "shadow_demon_menace.8a88dd2e.webp",
@@ -1113,7 +1119,7 @@
     "icon": "silencer_brain_drain2.a2dc5e45.webp",
     "zh": "默默受苦",
     "en": "Suffer In Silence",
-    "ru": null
+    "ru": "Страдание в тишине"
   },
   "silencer_glaives_of_wisdom": {
     "icon": "silencer_glaives_of_wisdom.e8ff0fc6.webp",
@@ -1179,13 +1185,13 @@
     "icon": "sniper_keen_scope2.041a9873.webp",
     "zh": "基恩瞄准镜",
     "en": "Keen Scope",
-    "ru": null
+    "ru": "Острый прицел"
   },
   "special_bonus_unique_sniper_assassinate_upgrade": {
     "icon": "special_bonus_unique_sniper_assassinate_upgrade.3e56c791.webp",
     "zh": "暗杀 觉醒",
     "en": "Assassinate Awakened",
-    "ru": null
+    "ru": "Убийственный выстрел (пробужд.)"
   },
   "spectre_desolate": {
     "icon": "spectre_desolate.9281f6d8.webp",
@@ -1197,7 +1203,7 @@
     "icon": "spectre_dispersion2.3936658f.webp",
     "zh": "折射（改）",
     "en": "Dispersion (MK2)",
-    "ru": null
+    "ru": "Дисперсия (изм.)"
   },
   "spirit_breaker_greater_bash": {
     "icon": "spirit_breaker_greater_bash.acebc15f.webp",
@@ -1233,7 +1239,7 @@
     "icon": "sven_wrath_of_god2.b25e4c4a.webp",
     "zh": "神之愤怒",
     "en": "Wrath of God",
-    "ru": "Wrath of God"
+    "ru": "Гнев бога"
   },
   "templar_assassin_meld": {
     "icon": "templar_assassin_meld.316a04b0.webp",
@@ -1275,19 +1281,19 @@
     "icon": "tinker_eureka2.38b3478b.webp",
     "zh": "尤里卡！",
     "en": "Eureka!",
-    "ru": null
+    "ru": "Эврика!"
   },
   "tinker_heat_seeking_missile": {
     "icon": "tinker_heat_seeking_missile.0931b5fb.webp",
     "zh": "热导飞弹",
     "en": "Heat-Seeking Missile",
-    "ru": null
+    "ru": "Самонаводящаяся ракета"
   },
   "tinker_rearm_lua": {
     "icon": "tinker_rearm_lua.dde6823a.webp",
     "zh": "再装填",
     "en": "Rearm",
-    "ru": null
+    "ru": "Перезарядка"
   },
   "tiny_grow": {
     "icon": "tiny_grow.5c6609e1.webp",
@@ -1359,7 +1365,7 @@
     "icon": "ursa_maul2.53fef14c.webp",
     "zh": "暴烈之爪",
     "en": "Maul",
-    "ru": "Maul"
+    "ru": "Сокрушение"
   },
   "vengefulspirit_command_aura": {
     "icon": "vengefulspirit_command_aura.5bf3d6ba.webp",
@@ -1401,7 +1407,7 @@
     "icon": "windrunner_whirlwind_custom.02d88bf5.webp",
     "zh": "旋风 觉醒",
     "en": "Whirlwind Awakened",
-    "ru": null
+    "ru": "Вихрь (пробужд.)"
   },
   "winter_wyvern_arctic_burn": {
     "icon": "winter_wyvern_arctic_burn.14f0830e.webp",

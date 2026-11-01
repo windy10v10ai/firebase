@@ -24,6 +24,8 @@ export class LocalRateLimit {
   dailyGameEndSeasonPoint?: number;
   dailyUsedMemberPoint?: number;
   dailyCreatedOrderCount?: number;
+  // 最近一次扣逃跑行为分的 UTC 日期，每天只扣一次
+  conductPenaltyDate?: Date;
   // 按来源累计且不归零，用于事后分辨消耗来自玩家本人还是盗用者
   ipActivity?: IpActivityEntry[];
 }

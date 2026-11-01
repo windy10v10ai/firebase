@@ -9,9 +9,9 @@ import SteamIcon from './SteamIcon';
 import { STEAM_BUTTON_CLASS, STEAM_BUTTON_SIZE_CLASS } from './ui/button';
 
 interface SteamLoginButtonProps {
-  size?: 'default' | 'large';
-  /** cta：首页首屏唯一的主操作，通栏强调按钮；其余场景用次按钮外观 */
-  variant?: 'steam' | 'cta';
+  size?: 'default' | 'large' | 'wide';
+  /** glass：首页首屏压在背景图上的通栏按钮；其余场景用次按钮外观 */
+  variant?: 'steam' | 'glass';
   className?: string;
 }
 
@@ -25,13 +25,13 @@ export default function SteamLoginButton({
   const { loginUrl } = useAuth();
   const href = loginUrl(pathname);
 
-  if (variant === 'cta') {
+  if (variant === 'glass') {
     return (
       <a
         href={href}
         title={t('loginTooltip')}
         aria-label={t('login')}
-        className="btn-cta h-13 w-full text-base"
+        className="btn-glass w-full text-base lg:h-13"
       >
         <SteamIcon className="size-5 shrink-0" />
         <span>{t('login')}</span>
@@ -47,7 +47,7 @@ export default function SteamLoginButton({
       className={`${STEAM_BUTTON_CLASS} ${STEAM_BUTTON_SIZE_CLASS[size]} ${className}`}
     >
       <SteamIcon className={size === 'large' ? 'size-6 shrink-0' : 'size-5 shrink-0'} />
-      <span>{size === 'large' ? t('login') : t('loginShort')}</span>
+      <span>{size === 'default' ? t('loginShort') : t('login')}</span>
     </a>
   );
 }

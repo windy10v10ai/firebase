@@ -1,5 +1,6 @@
 {
   "art": {
+    "npc_dota_hero_storm_spirit": "storm_spirit.d1a722c4.webp",
     "npc_dota_hero_antimage": "antimage.4b96c7dc.webp",
     "npc_dota_hero_terrorblade": "terrorblade.38c7a323.webp",
     "npc_dota_hero_bounty_hunter": "bounty_hunter.a8cac8de.webp",
@@ -43,6 +44,7 @@
     "npc_dota_hero_pudge": "pudge.f0968078.webp"
   },
   "icons": {
+    "storm_spirit_ball_lightning": "storm_spirit_ball_lightning.e60832b8.webp",
     "antimage_blink": "antimage_blink.1e48365e.webp",
     "terrorblade_sunder": "terrorblade_sunder.81abec5d.webp",
     "bounty_hunter_track": "bounty_hunter_track.ee84d8d3.webp",

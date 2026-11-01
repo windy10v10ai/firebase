@@ -4,7 +4,7 @@ Before making changes in this repository, read and follow [CLAUDE.md](.claude/CL
 
 ## Skills
 
-Reusable task instructions live in `.claude/skills/<name>/SKILL.md`. Read the matching file before starting a task its description covers — player data migration, game data sync, launcher release, cheat handling, feedback review, debugging, docs.
+Reusable task instructions live in `.claude/skills/<name>/SKILL.md`. Read the matching file before starting a task its description covers — player data migration, game data sync, launcher release, cheat handling, feedback review, debugging, docs, handing issues to agents (`issue-spec`, `issue-impl`, `issue-autorun`).
 
 - Claude Code reads `.claude/skills` directly.
 - Codex and DSH discover project skills at `.agents/skills`. Run `npm run skills:link` once per checkout to create that link; it stays out of git.
