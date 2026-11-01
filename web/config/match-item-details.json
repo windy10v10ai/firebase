@@ -5120,7 +5120,7 @@
     "desc": {
       "zh": "<h1>被动：归海一刀(仿)</h1>使下一次攻击必定暴击，造成<b>1760%</b>伤害。",
       "en": "<h1>Passive: Return to the Sea</h1>The next attack will critically strike for <b>1760%</b> damage.",
-      "ru": "<h1>Пассивное: Critical Strike</h1> Делает следующую атаку владельца критической. Она нанесёт <b>1760%</b> урона."
+      "ru": "<h1>Пассивное: Удар Гуйхая (имитация)</h1>Следующая атака гарантированно наносит критический удар с уроном <b>1760%</b>."
     },
     "ability": {
       "behavior": "passive",
@@ -5136,7 +5136,7 @@
       "lore": {
         "zh": "游龙当归海，海不迎我自来也。",
         "en": "The dragon's scales are as vast as the sea.",
-        "ru": "Охота на демонов — дело довольно неблагодарное, зато на останках этих тварей можно нажиться в Плачущей розе."
+        "ru": "Дракон уходит в море, а море его не встречает — так приду сам."
       }
     }
   },
@@ -8722,75 +8722,6 @@
         "zh": "能够让持有者躲过最致命攻击的强力盾牌。",
         "en": "A powerful shield that defends its wielder from even the most vicious of attacks.",
         "ru": "Мощный щит, защищающий своего хозяина даже от самых яростных атак."
-      }
-    }
-  },
-  "item_veil_of_discord": {
-    "desc": {
-      "zh": "<h1>主动：法术虚弱</h1>发出一波弱化冲击，使<b>900</b>范围内敌方英雄受到的技能伤害增加<b>10%</b>。<br><br>可以在持续施法期间施放。<br><br>持续时间：<b>16.0</b>秒。",
-      "en": "<h1>Active: Spell Weakness</h1> Cast a <b>900</b> radius blast that causes enemy heroes to take <b>10%</b> increased damage from spells.<br><br>Can be cast while channeling.<br><br>Duration: <b>16.0</b> seconds.",
-      "ru": "<h1>Активное: Spell Weakness</h1> Ослабляет вражеских героев в радиусе <b>900</b> вокруг владельца, отчего они получают на <b>10%</b> больше урона от заклинаний.<br><br>Можно использовать во время применения прерываемых заклинаний.<br><br>Длительность: <b>16.0</b> сек."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": "soft",
-      "values": [
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "175"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "智力",
-            "en": "Intelligence",
-            "ru": "к интеллекту"
-          },
-          "sign": "+",
-          "levels": [
-            "10"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能吸血",
-            "en": "Spell Lifesteal",
-            "ru": "к вампиризму заклинаниями"
-          },
-          "sign": "+",
-          "levels": [
-            "18"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "16"
-      ],
-      "manaCost": [
-        "25"
-      ],
-      "lore": {
-        "zh": "一个堕落法师的头饰。",
-        "en": "The headwear of corrupt magi.",
-        "ru": "Головной убор испорченных магов."
       }
     }
   },
