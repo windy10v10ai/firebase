@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # issue-autorun
 
-用户不在场时，把 firebase 仓库里所有带 `agent-todo` 的 issue 做完。能做的都做完，做不了的跳过并记下来，最后统一留给用户。标签与执行说明约定见 `.claude/references/agent-issue.md`，开始前先读。
+用户不在场时，把 firebase 仓库里所有带 `agent-todo` 的 issue 做完。能做的都做完，做不了的跳过并记下来，最后统一留给用户。标签与正文结构约定见 `.claude/references/agent-issue.md`，开始前先读。
 
 一次只做一个 issue，全部在主 checkout 里做，顺序跑，省掉 worktree 和 emulator 端口冲突。每批在新对话里跑。
 
@@ -25,7 +25,7 @@ disable-model-invocation: true
 gh issue list -R windy10v10ai/firebase -l agent-todo --state open --limit 100 --json number,title,body
 ```
 
-对每个 issue 查「开发计划」项目里的 Status 与 Priority（查询见 game 仓库 `issue-triage` 第 1 步），按下面的顺序排，前一项相同再比后一项：
+对每个 issue 查「开发计划」项目里的 Status 与 Priority（查询见 game 仓库 [issue-fields.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/issue-fields.md)「查询」），按下面的顺序排，前一项相同再比后一项：
 
 1. Status：In progress → Todo → Plan → Backlog → 未入项目
 2. Priority：Urgent → High → Medium → Low → 未填
@@ -44,7 +44,7 @@ gh issue list -R windy10v10ai/firebase -l agent-todo --state open --limit 100 --
 
 ```markdown
 你在仓库主 checkout（当前目录）里做 issue windy10v10ai/firebase#<id>，用户不在场，从实现一直做到运行验证，中途不交回、不提问。
-先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做，分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 末尾的「执行说明」。
+先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做，分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 正文（背景、目标、要求、验收、执行说明）。
 卡住时按 `issue-impl`「卡住时怎么办」处理。最终回复按 `issue-impl` 第 8 步写。
 ```
 

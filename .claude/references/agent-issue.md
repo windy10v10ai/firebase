@@ -1,8 +1,8 @@
 # 交给 agent 自动做的 issue
 
-`issue-spec`（用户在场时拍板）、`issue-impl`（做一条）与 `issue-autorun`（用户不在时批量做）之间的约定。`issue-impl` 与 `issue-autorun` 只认这里定义的标签和执行说明，不读对话。
+`issue-spec`（用户在场时拍板）、`issue-impl`（做一条）与 `issue-autorun`（用户不在时批量做）之间的约定。`issue-impl` 与 `issue-autorun` 只认这里定义的标签和 issue 正文结构，不读对话。
 
-game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/agent-issue.md) 有一份完整版。标签含义、执行说明格式、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
+game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/agent-issue.md) 有一份完整版。标签含义、正文结构、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
 
 ## 标签
 
@@ -12,7 +12,7 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 | `agent-done` | `issue-autorun` | 已开 PR（审查通过为正式，没做完的保持草稿），等用户审；PR 里的「等你处理」只列用户本人要看或拍板的事 |
 | `agent-block` | `issue-autorun` | 整条 issue 一点都做不了，原因写在 issue 留言里 |
 
-一个 issue 同时只带其中一个。用户处理完 `agent-block` 的留言、补好执行说明后换回 `agent-todo`。
+一个 issue 同时只带其中一个。用户处理完 `agent-block` 的留言、补好正文后换回 `agent-todo`。
 
 ### 级别标签
 
@@ -27,18 +27,40 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 
 「用户判定」项不影响级别，统一进「等你处理」。
 
-## 执行说明
+## issue 正文结构
 
-写在 issue 正文末尾，标题固定为 `## 执行说明`，agent 只按这一段干活。每一项都要写到不用再问的程度：
+用户先看的几块放前面、写得最短，写给执行 AI 的细节放最后，用户不用细看：
+
+```markdown
+## 背景
+一两句：现状是什么、为什么要做
+
+## 目标
+做完后玩家或开发者能观察到的结果，可拆成几条，各条尽量互不依赖
+
+## 要求
+用户亲口拍板的指示，一条一行；用户没说过的不写在这里
+
+## 验收
+用白话写怎么判对错：页面或接口会是什么样、哪个字段是什么值；命令、用例、脚本步骤放进执行说明
+
+## 执行说明
+（写给执行的 AI）
+```
+
+firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库有，见其 `agent-issue.md`）。`issue-impl` 与 `issue-autorun` 按整份正文干活。几块之间有冲突时，「要求」最大，其次「验收」，再其次执行说明。执行 AI 不读对话，所以「要求」里别写只有对话里才懂的话。
+
+### 执行说明
+
+标题固定为 `## 执行说明`，写在正文最后，面向执行者而不是用户。每一项都要写到不用再问的程度：
 
 ```markdown
 ## 执行说明
 
-- **目标**：做完后玩家或开发者能观察到的结果，可拆成几条，各条尽量互不依赖
-- **做法**：先写用哪个 skill（没有对得上的写「无」），再写已拍板的实现方案，含选型
+- **做法**：先写用哪个 skill（没有对得上的写「无」），再写已拍板的实现方案，含选型。AI 自己推断、用户没拍板的取舍标「建议」
 - **改动范围**：允许改的文件或目录，逐条列出
 - **不做**：明确排除的相关改动
-- **验收**：必须通过的命令（见下文「默认验收命令」），以及要补的测试用例，每个用例写明输入与预期
+- **验收命令**：必须通过的命令（见下文「默认验收命令」），以及要补的测试用例，每个用例写明输入与预期
 - **运行验证**：需要 / 不需要；需要时逐项标层级（见下文「运行验证分三层」）并写操作步骤和预期值
 - **上线顺序**：只改一个仓库写「无」；跨仓库（与 game 仓库）写清各开什么 PR、谁先部署
 ```
