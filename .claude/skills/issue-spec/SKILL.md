@@ -7,6 +7,8 @@ description: 和用户一起给某个 issue 定 spec，写成 issue 正文（背
 
 用户在场时，和用户把一个 issue 的做法谈定，整理成 `agent-issue.md`「issue 正文结构」那几块，执行说明写成 Markdown artifact 挂到 issue，并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。
 
+用户给的不是 issue 而是一句想法时，先查重再新建：先 `gh issue list -R windy10v10ai/firebase --state all --search "<关键词>"` 搜已有 issue（含已关闭的），有相近的就接着谈那一条；没有才 `gh issue create` 新建，标题写想要的结果，Status 放 Plan（命令见 game 仓库 [issue-fields.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/issue-fields.md)），再从下一步补字段。用户没指定 issue 也没给想法时，从项目 Plan 栏最上面那条开始。
+
 ## 1. 补齐 issue 字段
 
 只看当前这条 issue，缺哪项补哪项：Type、Priority、Effort、仓库标签、组织项目「开发计划」（`gh project` 编号 3）里的 Status。查询与设置命令、字段 ID 见 game 仓库的 [issue-fields.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/issue-fields.md)，项目和 Type、Priority、Effort 字段是组织级的，两个仓库共用。缺项按 issue 内容给建议值，第 3 步一并让用户确认后再设。
