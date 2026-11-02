@@ -28,7 +28,7 @@ description: 按 issue 正文（背景、目标、要求、验收）和「执行
 
 ## 步骤
 
-1. **开工前**：`git status --porcelain` 必须为空，`git switch develop && git pull --ff-only`，再切 `feature/<issue-id>-<3–6 个英文小写单词>`（Bug 用 `fix/`）。开工把 issue 在「开发计划」项目里的 Status 置为 In progress
+1. **开工前**：`git status --porcelain` 必须为空，`git switch develop && git pull --ff-only`，再看这条 issue 有没有关联的未合并 PR（`gh issue view <issue-id> -R windy10v10ai/firebase --json closedByPullRequestsReferences`，草稿也算）：有就接着做，`git fetch origin && git switch -C <该 PR 的分支> origin/<该 PR 的分支>`，不另切分支、不另开 PR；没有才切 `feature/<issue-id>-<3–6 个英文小写单词>`（Bug 用 `fix/`）。开工把 issue 在「开发计划」项目里的 Status 置为 In progress
 2. **先读**：根 `.claude/CLAUDE.md`、改动目录的 `CLAUDE.md`、执行说明「做法」指定的 skill
 3. **实现**：按「做法」做，范围外的不碰
 4. **验收**：跑执行说明「验收命令」里的命令并补测试，并逐条核对「验收」一节；`git diff --name-only origin/develop...HEAD` 只含改动范围内的文件；改了注释的，按根 `CLAUDE.md`「注释规约」自查

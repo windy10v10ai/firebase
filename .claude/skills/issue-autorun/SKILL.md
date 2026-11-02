@@ -44,7 +44,7 @@ gh issue list -R windy10v10ai/firebase -l agent-todo --state open --limit 100 --
 
 ```markdown
 你在仓库主 checkout（当前目录）里做 issue windy10v10ai/firebase#<id>，用户不在场，从实现一直做到运行验证，中途不交回、不提问。
-先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做，分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 正文（背景、目标、要求、验收）和「执行说明」artifact。
+先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做（这条 issue 已有未合并的 PR 就接着做），新切分支时分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 正文（背景、目标、要求、验收）和「执行说明」artifact。
 卡住时按 `issue-impl`「卡住时怎么办」处理。最终回复按 `issue-impl` 第 8 步写。
 ```
 
