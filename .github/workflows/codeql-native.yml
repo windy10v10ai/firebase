@@ -1,0 +1,36 @@
+name: CodeQL Mac native
+
+# 不能设为必过检查：路径过滤未触发时，必过检查会一直挂起
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'launcher/**'
+      - '.github/workflows/codeql-native.yml'
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'launcher/**'
+      - '.github/workflows/codeql-native.yml'
+  schedule:
+    - cron: '23 18 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  native:
+    name: Analyze Mac native code
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp,swift
+          build-mode: manual
+      - name: Build Mac native code
+        run: bash launcher/macos/build-native.sh "$RUNNER_TEMP/windy-native"
+      - uses: github/codeql-action/analyze@v4
