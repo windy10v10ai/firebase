@@ -33,7 +33,7 @@ gh pr diff <编号> | grep -A3 'node_modules/<包>"'
 - **有 PR 能修**：该 PR 提前到合并顺序最前
 - **没有 PR 能修**（多为间接依赖，Dependabot 不单独发 PR）：列入「需要手动升级」。先看告警的受影响范围，修复版本落在依赖方允许的范围内才能升（例：依赖方要求 `^10`，修复版本是 11.x，就不能靠升级解决，只能等上游或在告警页容忍风险）。能升的只改锁文件里目标包的版本、`resolved`、`integrity` 三项，用 `npm view <包>@<版本> dist.tarball dist.integrity` 取值；`npm update --package-lock-only` 会顺带改写无关条目（如删掉 `libc` 字段），改完用 `git diff` 确认只剩目标包。跑该目录的校验，另开 chore 分支，按「小改动搭车」的判据决定是否并入进行中的 PR
 
-校验前确认 `node -v` 与仓库根目录 `.nvmrc` 一致（24.x）。版本不对时 api 的 Jest 会让几乎每个套件都报 `Must use import to load ES Module`，不是依赖的问题。
+校验前先读仓库根目录的 `.nvmrc`，用 `nvm use` 切到它写的版本，再用 `node -v` 确认一致；每条校验命令（含派给子代理的）都在这个版本下跑，子代理的提示里写明先 `nvm use`。版本不对时 api 的 Jest 会让几乎每个套件都报 `Must use import to load ES Module`，不是依赖的问题。
 
 完成条件：每条告警都标明「由哪个 PR 修」「需手动升级」或「无兼容修复，容忍风险」。
 
