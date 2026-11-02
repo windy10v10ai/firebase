@@ -587,7 +587,7 @@
     },
     "recent": {
       "title": "Recent Matches",
-      "note": "The latest {count} matches show first; keep scrolling to load older ones. Before this, only 50 matches were kept, and anything older can't be recovered.",
+      "note": "The latest {count} matches show first; keep scrolling to load older ones.",
       "loadingMore": "Loading…",
       "loadMoreFailed": "Couldn't load older matches",
       "retry": "Retry",

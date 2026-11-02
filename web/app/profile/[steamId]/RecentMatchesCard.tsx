@@ -490,7 +490,6 @@ export default function RecentMatchesCard({ steamId }: { steamId: string }) {
     <section className="card-container @container pt-4 pb-2" aria-busy={!loaded}>
       <div className="flex items-center gap-1.5 px-3 md:px-4">
         <h2 className="title-secondary">{t('title')}</h2>
-        {/* 「只留 50 场」是一次性知识，常驻一行字占地方，收进说明弹层 */}
         <InfoPopover label={t('noteLabel')}>
           <p className="text-content">{t('note', { count: RECENT_MATCH_LIMIT })}</p>
         </InfoPopover>

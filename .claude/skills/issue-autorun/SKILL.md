@@ -6,14 +6,14 @@ disable-model-invocation: true
 
 # issue-autorun
 
-用户不在场时，把 firebase 仓库里所有带 `agent-todo` 的 issue 做完。能做的都做完，做不了的跳过并记下来，最后统一留给用户。标签与执行说明约定见 `.claude/references/agent-issue.md`，开始前先读。
+用户不在场时，把 firebase 仓库里所有带 `agent-todo` 的 issue 做完。能做的都做完，做不了的跳过并记下来，最后统一留给用户。标签与正文结构约定见 `.claude/references/agent-issue.md`，开始前先读。
 
 一次只做一个 issue，全部在主 checkout 里做，顺序跑，省掉 worktree 和 emulator 端口冲突。每批在新对话里跑。
 
 ## 硬规则
 
 - **只在开工前问一次**：第 2 步请用户选 issue，之后不提问，拿不准的按 `issue-impl`「卡住时怎么办」处理
-- **只做有执行说明的 issue**
+- **只做有执行说明的 issue**（正文末尾有执行说明链接且 artifact 读得到）
 - **主 checkout 只在干净时用**：开工前和每个 issue 之间 `git status --porcelain` 为空；不干净就停掉剩下的全部 issue，写进汇报，不动用户的文件
 - **不合并、不推 `develop` / `main`**，不审批 Release PR
 - 调度员不改代码、不重跑执行者已跑过的验收，以 CI 和日志里看得到的结果为准
@@ -23,13 +23,16 @@ disable-model-invocation: true
 
 ```bash
 gh issue list -R windy10v10ai/firebase -l agent-todo --state open --limit 100 --json number,title,body
+gh project item-list 3 --owner windy10v10ai --limit 200 --format json -q '.items[]|select(.content.repository=="windy10v10ai/firebase" and (.status=="In progress" or .status=="Todo"))|"\(.status)	\(.content.number)"'
 ```
 
-对每个 issue 查「开发计划」项目里的 Status 与 Priority（查询见 game 仓库 `issue-triage` 第 1 步），按下面的顺序排，前一项相同再比后一项：
+第二条列出的顺序就是用户在项目里排的上下顺序（查询说明见 game 仓库的 [issue-fields.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/issue-fields.md)），调度员**只按它排，不按 Priority 重排**：
 
-1. Status：In progress → Todo → Plan → Backlog → 未入项目
-2. Priority：Urgent → High → Medium → Low → 未填
-3. 编号从小到大
+1. 只看项目里 **In progress** 和 **Todo** 两栏里带 `agent-todo` 的 issue。其他栏（Plan、Backlog）和没入项目的 `agent-todo` issue 不做，在计划里单独列出并写明原因
+2. 先 In progress 栏，做完再 Todo 栏
+3. 每一栏内按项目里从上到下的顺序，用户想调先后就在项目里拖动
+
+完成条件：每个要做的 `agent-todo` issue 都有序号，执行说明缺项或「执行说明」artifact 读不到的，直接按「卡住时怎么办」第三行处理。
 
 ## 2. 出计划
 
@@ -44,7 +47,7 @@ gh issue list -R windy10v10ai/firebase -l agent-todo --state open --limit 100 --
 
 ```markdown
 你在仓库主 checkout（当前目录）里做 issue windy10v10ai/firebase#<id>，用户不在场，从实现一直做到运行验证，中途不交回、不提问。
-先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做，分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 末尾的「执行说明」。
+先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做（这条 issue 已有未合并的 PR 就接着做），新切分支时分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 正文（背景、目标、要求、验收）和「执行说明」artifact。
 卡住时按 `issue-impl`「卡住时怎么办」处理。最终回复按 `issue-impl` 第 8 步写。
 ```
 

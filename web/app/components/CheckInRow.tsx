@@ -104,7 +104,7 @@ export default function CheckInRow({
               amount={claimed.catchUpPoint}
             />
           ) : null}
-          <p className="text-xs text-muted">{t('detailNote')}</p>
+          {claimed.catchUpDays > 0 ? <p className="text-xs text-muted">{t('detailNote')}</p> : null}
         </div>
       ) : null}
 
