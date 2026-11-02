@@ -29,7 +29,7 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 
 ## issue 正文结构
 
-issue 正文只放用户要看的几块，写得最短；写给执行 AI 的细节放进挂在 issue 上的 Markdown artifact「执行说明」，正文最后一块只留指向它的链接：
+issue 正文只放用户要看的几块，写得最短；写给执行 AI 的细节放进挂在 issue 上的 Markdown artifact「执行说明」，正文最后留一行压缩的链接，既方便人点开，也是 AI 找执行说明的依据：
 
 ```markdown
 ## 背景
@@ -44,11 +44,10 @@ issue 正文只放用户要看的几块，写得最短；写给执行 AI 的细�
 ## 验收
 用白话写怎么判对错：页面或接口会是什么样、哪个字段是什么值；命令、用例、脚本步骤放进执行说明
 
-## 执行说明
-执行说明（https://github.com/windy10v10ai/firebase/issues/<n>/artifacts/<编号>）
+[执行说明](https://github.com/windy10v10ai/firebase/issues/<n>/artifacts/<编号>)
 ```
 
-firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库有，见其 `agent-issue.md`）。`issue-impl` 与 `issue-autorun` 先读正文，再用 `gh issue artifact view <n> <编号> -R windy10v10ai/firebase` 读「执行说明」artifact，读不到当作没有执行说明。几块之间有冲突时，「要求」最大，其次「验收」，再其次执行说明。执行 AI 不读对话，所以「要求」里别写只有对话里才懂的话。
+firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库有，见其 `agent-issue.md`）。`issue-impl` 与 `issue-autorun` 先读正文，从最后那行链接取 artifact 编号，用 `gh issue artifact view <n> <编号> -R windy10v10ai/firebase` 读内容；正文没有链接时才退回 `gh issue artifact list <n> -R windy10v10ai/firebase` 按名字找「执行说明」，仍找不到或读不到当作没有执行说明。几块之间有冲突时，「要求」最大，其次「验收」，再其次执行说明。执行 AI 不读对话，所以「要求」里别写只有对话里才懂的话。
 
 ### 执行说明
 

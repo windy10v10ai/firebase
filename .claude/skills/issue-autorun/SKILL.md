@@ -13,7 +13,7 @@ disable-model-invocation: true
 ## 硬规则
 
 - **只在开工前问一次**：第 2 步请用户选 issue，之后不提问，拿不准的按 `issue-impl`「卡住时怎么办」处理
-- **只做有执行说明的 issue**（正文有链接且 artifact 读得到）
+- **只做有执行说明的 issue**（正文末尾有执行说明链接且 artifact 读得到）
 - **主 checkout 只在干净时用**：开工前和每个 issue 之间 `git status --porcelain` 为空；不干净就停掉剩下的全部 issue，写进汇报，不动用户的文件
 - **不合并、不推 `develop` / `main`**，不审批 Release PR
 - 调度员不改代码、不重跑执行者已跑过的验收，以 CI 和日志里看得到的结果为准
