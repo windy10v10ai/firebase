@@ -46,6 +46,8 @@ gh issue edit <n> -R windy10v10ai/firebase --body-file <文件>
 gh issue edit <n> -R windy10v10ai/firebase --add-label agent-todo --add-label <L1-code|L2-script|L3-visual>
 ```
 
+打完标签后把项目 Status 改成 Todo 并挪到该栏最上面（状态含义与命令见 game 仓库 [issue-fields.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/issue-fields.md)），用户没指定 issue 时从 Plan 栏最上面那条开始谈。
+
 完成条件：issue 正文是用户确认过的新结构，「执行说明」artifact 已挂上，带 `agent-todo` 与一个级别标签。
 
 ## 处理 agent 留下的问题
