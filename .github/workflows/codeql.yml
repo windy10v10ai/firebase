@@ -36,16 +36,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 只有拉取请求按改动范围跳过；推送、定时和手动触发始终分析
+      # 定时、手动触发和取不到上一个提交的推送没有比对基准，始终分析
       - name: Detect changed native code
         id: filter
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           native=true
-          if [ "$EVENT_NAME" = "pull_request" ]; then
+          if git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
             native=false
             while IFS= read -r file; do
               case "$file" in
