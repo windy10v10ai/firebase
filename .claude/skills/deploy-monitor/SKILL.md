@@ -11,6 +11,8 @@ description: API 部署后盯线上是否引入新问题时加载——「盯一
 
 ## 1. 等部署完成，定部署时刻 T0
 
+**Release PR 还没合并（等 CI 或自动合并中）时就开始，不等用户说「已发布」。**先用 `gh pr list --base main --state open` 找到 Release PR，用 `run_in_background` 跑一个脚本：循环 `gh pr view <编号> --json state` 到 `MERGED`，再取 `createdAt` 不早于 `mergedAt` 的 Deploy 工作流运行，`gh run watch` 到结束，最后打印新旧版本。脚本结束时会通知，不要轮询。
+
 ```bash
 gh run list --workflow "Deploy Firebase" --branch main --limit 3 --json databaseId,status,conclusion,createdAt
 ```
