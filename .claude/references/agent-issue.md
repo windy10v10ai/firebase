@@ -1,8 +1,8 @@
 # 交给 agent 自动做的 issue
 
-`issue-spec`（用户在场时拍板）、`issue-impl`（做一条）与 `issue-autorun`（用户不在时批量做）之间的约定。`issue-impl` 与 `issue-autorun` 只认这里定义的标签和执行说明，不读对话。
+`issue-spec`（用户在场时拍板）、`issue-impl`（做一条）与 `issue-autorun`（用户不在时批量做）之间的约定。`issue-impl` 与 `issue-autorun` 只认这里定义的标签和 issue 正文结构，不读对话。
 
-game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/agent-issue.md) 有一份完整版。标签含义、执行说明格式、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
+game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/agent-issue.md) 有一份完整版。标签含义、正文结构、排序规则两边保持一致，改这几处要两边同步；实机验证与验收命令各仓库自己定。
 
 ## 标签
 
@@ -12,7 +12,7 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 | `agent-done` | `issue-autorun` | 已开 PR（审查通过为正式，没做完的保持草稿），等用户审；PR 里的「等你处理」只列用户本人要看或拍板的事 |
 | `agent-block` | `issue-autorun` | 整条 issue 一点都做不了，原因写在 issue 留言里 |
 
-一个 issue 同时只带其中一个。用户处理完 `agent-block` 的留言、补好执行说明后换回 `agent-todo`。
+一个 issue 同时只带其中一个。用户处理完 `agent-block` 的留言、补好正文后换回 `agent-todo`。
 
 ### 级别标签
 
@@ -27,21 +27,56 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 
 「用户判定」项不影响级别，统一进「等你处理」。
 
-## 执行说明
+## issue 标题
 
-写在 issue 正文末尾，标题固定为 `## 执行说明`，agent 只按这一段干活。每一项都要写到不用再问的程度：
+标题从用户视角写想要实现的结果，不写具体改哪个东西的指令。判断方法：标题读起来像「想要什么」，不像「做什么操作」。
+
+| 不好（指令） | 好（结果） |
+|---|---|
+| 生命之心改成 DataDriven 物品，生命回复借原版龙心 | 优化生命之心的回复 buff 性能 |
+| 泉水光环合并为独立光环，避免传送后继承过高数值 | 传送离开泉水后不再继承过高的护甲与魔抗 |
+| 削蓝减弱：基地去掉，泉水数值降低 | 减弱防御塔对英雄的削蓝 |
+
+做法、字段名、文件名不进标题，写进正文或执行说明。新建 issue 和整理旧 issue 都按这个写，标题可以随用户习惯用中文或英文。
+
+## issue 正文结构
+
+issue 正文只放用户要看的几块，写得最短；写给执行 AI 的细节放进挂在 issue 上的 Markdown artifact「执行说明」，正文最后留一行压缩的链接，既方便人点开，也是 AI 找执行说明的依据：
 
 ```markdown
-## 执行说明
+## 背景
+一两句：现状是什么、为什么要做
 
-- **目标**：做完后玩家或开发者能观察到的结果，可拆成几条，各条尽量互不依赖
-- **做法**：先写用哪个 skill（没有对得上的写「无」），再写已拍板的实现方案，含选型
+## 目标
+做完后玩家或开发者能观察到的结果，可拆成几条，各条尽量互不依赖
+
+## 要求
+用户亲口拍板的指示，一条一行；用户没说过的不写在这里
+
+## 验收
+用白话写怎么判对错：页面或接口会是什么样、哪个字段是什么值；命令、用例、脚本步骤放进执行说明
+
+[执行说明](https://github.com/windy10v10ai/firebase/issues/<n>/artifacts/<编号>)
+```
+
+firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库有，见其 `agent-issue.md`）。`issue-impl` 与 `issue-autorun` 先读正文，从最后那行链接取 artifact 编号，用 `gh issue artifact view <n> <编号> -R windy10v10ai/firebase` 读内容；正文没有链接时才退回 `gh issue artifact list <n> -R windy10v10ai/firebase` 按名字找「执行说明」，仍找不到或读不到当作没有执行说明。几块之间有冲突时，「要求」最大，其次「验收」，再其次执行说明。执行 AI 不读对话，所以「要求」里别写只有对话里才懂的话。
+
+### 执行说明
+
+名为「执行说明」的 Markdown artifact（`gh issue artifact create <n> -R windy10v10ai/firebase '<文件>.md#执行说明'`，改动用 `edit` 覆盖），面向执行者而不是用户。文件以 `# 执行说明` 开头，每一项都要写到不用再问的程度：
+
+```markdown
+# 执行说明
+
+- **做法**：先写用哪个 skill（没有对得上的写「无」），再写已拍板的实现方案，含选型。AI 自己推断、用户没拍板的取舍标「建议」
 - **改动范围**：允许改的文件或目录，逐条列出
 - **不做**：明确排除的相关改动
-- **验收**：必须通过的命令（见下文「默认验收命令」），以及要补的测试用例，每个用例写明输入与预期
+- **验收命令**：必须通过的命令（见下文「默认验收命令」），以及要补的测试用例，每个用例写明输入与预期
 - **运行验证**：需要 / 不需要；需要时逐项标层级（见下文「运行验证分三层」）并写操作步骤和预期值
 - **上线顺序**：只改一个仓库写「无」；跨仓库（与 game 仓库）写清各开什么 PR、谁先部署
 ```
+
+artifact 是 GitHub 的预览功能，命令失败时把执行说明临时写回正文末尾的 `## 执行说明` 兜底，并在留言里说明，功能恢复后再迁回。
 
 - 目标拆成几条互不依赖的小项，agent 卡在其中一条时才能跳过它继续做别的
 - **做法**给出要照抄的已有实现（提交号或同类文件名）；数值、阈值、文案这类取舍在执行说明里定死，定不下来的写明「agent 暂定，记为待你决定」

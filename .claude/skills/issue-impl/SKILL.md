@@ -1,11 +1,11 @@
 ---
 name: issue-impl
-description: 按 issue 末尾的「执行说明」实现一条 issue：实现、验收、运行验证、开 PR。用户说「做 #123」「实现这个 issue」时用，issue-autorun 派执行者时也让执行者照它做。
+description: 按 issue 正文（背景、目标、要求、验收）和「执行说明」artifact 实现一条 issue：实现、验收、运行验证、开 PR。用户说「做 #123」「实现这个 issue」时用，issue-autorun 派执行者时也让执行者照它做。
 ---
 
 # issue-impl
 
-把一条已有「执行说明」的 issue 做到 PR。标签与执行说明格式见 `.claude/references/agent-issue.md`，开始前先读。没有 `## 执行说明` 的 issue 不做：用户在场先用 `issue-spec` 补，批量模式记为 `agent-block`。
+把一条正文已按结构写好的 issue 做到 PR。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。正文末尾没有执行说明链接（也找不到名为「执行说明」的 artifact）、或读不到的 issue 不做：用户在场先用 `issue-spec` 补，批量模式记为 `agent-block`。
 
 ## 硬规则
 
@@ -28,10 +28,10 @@ description: 按 issue 末尾的「执行说明」实现一条 issue：实现、
 
 ## 步骤
 
-1. **开工前**：`git status --porcelain` 必须为空，`git switch develop && git pull --ff-only`，再切 `feature/<issue-id>-<3–6 个英文小写单词>`（Bug 用 `fix/`）。开工把 issue 在「开发计划」项目里的 Status 置为 In progress
+1. **开工前**：`git status --porcelain` 必须为空，`git switch develop && git pull --ff-only`，再看这条 issue 有没有关联的未合并 PR（`gh issue view <issue-id> -R windy10v10ai/firebase --json closedByPullRequestsReferences`，草稿也算）：有就接着做，`git fetch origin && git switch -C <该 PR 的分支> origin/<该 PR 的分支>`，不另切分支、不另开 PR；没有才切 `feature/<issue-id>-<3–6 个英文小写单词>`（Bug 用 `fix/`）。开工把 issue 在「开发计划」项目里的 Status 置为 In progress
 2. **先读**：根 `.claude/CLAUDE.md`、改动目录的 `CLAUDE.md`、执行说明「做法」指定的 skill
 3. **实现**：按「做法」做，范围外的不碰
-4. **验收**：跑执行说明「验收」里的命令并补测试；`git diff --name-only origin/develop...HEAD` 只含改动范围内的文件；改了注释的，按根 `CLAUDE.md`「注释规约」自查
+4. **验收**：跑执行说明「验收命令」里的命令并补测试，并逐条核对「验收」一节；`git diff --name-only origin/develop...HEAD` 只含改动范围内的文件；改了注释的，按根 `CLAUDE.md`「注释规约」自查
 5. **运行验证**（按层级做）：按执行说明起 emulator 或 API，临时脚本每项打印 `[check] PASS|FAIL <名字> actual=<值> expected=<值>`，预期值照执行说明抄，脚本放 scratchpad 不提交，`FAIL` 为 0 才算过。执行说明标了「截图判定」的，按 `web-browser-verify` 与 `web/CLAUDE.md`「PR 截图」拍图放进 PR，只交图和状态，不写「通过 / 失效」；「用户判定」的不做，列进「等你处理」
 6. **提交与 PR**：commit 英文单行标题；`git push -u origin HEAD`；按根 `CLAUDE.md`「PR 正文」写，`gh pr create --base develop`（有没做完的部分才加 `--draft`）。目标全部完成写 `Fixes #<id>`，有跳过写 `Part of #<id>`。正文加「等你处理」三组（请确认 / 待你决定 / 发现），都空写「无」
 7. **审一次**：对照执行说明逐条核对 PR，没问题就保持正式（原先是草稿的 `gh pr ready <编号>`，CI 过了才算完成）；审出要大改的 `gh pr ready <编号> --undo` 退回草稿，改完再转正式；有「待你决定」跳过的部分，或要用户拍板才能继续的，保持草稿并说明原因
