@@ -202,6 +202,7 @@ export function WikiHoverTip({
         />
       }
       tone={kind === 'items' ? 'game' : 'site'}
+      pinnable
     >
       {children}
     </AbilityHoverTip>
