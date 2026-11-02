@@ -1,11 +1,11 @@
 ---
 name: issue-impl
-description: 按 issue 正文（背景、目标、要求、验收、执行说明）实现一条 issue：实现、验收、运行验证、开 PR。用户说「做 #123」「实现这个 issue」时用，issue-autorun 派执行者时也让执行者照它做。
+description: 按 issue 正文（背景、目标、要求、验收）和「执行说明」artifact 实现一条 issue：实现、验收、运行验证、开 PR。用户说「做 #123」「实现这个 issue」时用，issue-autorun 派执行者时也让执行者照它做。
 ---
 
 # issue-impl
 
-把一条正文已按结构写好的 issue 做到 PR。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。没有 `## 执行说明` 的 issue 不做：用户在场先用 `issue-spec` 补，批量模式记为 `agent-block`。
+把一条正文已按结构写好的 issue 做到 PR。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。正文没有 `## 执行说明` 链接、或「执行说明」artifact 读不到的 issue 不做：用户在场先用 `issue-spec` 补，批量模式记为 `agent-block`。
 
 ## 硬规则
 

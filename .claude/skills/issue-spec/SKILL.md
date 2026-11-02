@@ -5,7 +5,7 @@ description: 和用户一起给某个 issue 定 spec，写成 issue 正文（背
 
 # issue-spec
 
-用户在场时，和用户把一个 issue 的做法谈定，整理成 `agent-issue.md`「issue 正文结构」那几块并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。
+用户在场时，和用户把一个 issue 的做法谈定，整理成 `agent-issue.md`「issue 正文结构」那几块，执行说明写成 Markdown artifact 挂到 issue，并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。
 
 ## 1. 补齐 issue 字段
 
@@ -32,18 +32,19 @@ description: 和用户一起给某个 issue 定 spec，写成 issue 正文（背
 
 ## 4. 写入 issue
 
-按 `agent-issue.md` 的正文结构写：背景、目标、要求、验收放前面，写得最短，执行说明放最后面向 AI。「要求」只写用户亲口拍板的，AI 自己推断的取舍写进执行说明并标「建议」；「验收」用白话写怎么判对错。给用户确认时不贴全文，只列三组重点：用户拍板的（即「要求」）、按默认做的（附「不同意就说」）、运行验证要读什么；全文写进 issue 后给链接。
+按 `agent-issue.md` 的正文结构写：背景、目标、要求、验收放前面，写得最短，执行说明不进正文，写成 Markdown artifact「执行说明」，正文最后一块只放它的链接。「要求」只写用户亲口拍板的，AI 自己推断的取舍写进执行说明并标「建议」；「验收」用白话写怎么判对错。给用户确认时不贴全文，只列三组重点：用户拍板的（即「要求」）、按默认做的（附「不同意就说」）、运行验证要读什么；全文写进 issue 后给链接。
 
-执行说明写不进一屏时，把讨论页定稿成设计文档，挂到 issue（HTML「设计」给人看、Markdown「设计文档」给 agent 读，命令见 game 仓库 `.claude/references/doc-writing.md`「issue artifact」），issue 里的执行说明只留指向 Markdown 设计文档的一行。
+用过讨论页的，定稿后把 HTML「设计」也挂到 issue 给人看（命令见 game 仓库 `.claude/references/doc-writing.md`「issue artifact」），设计里和实现有关的结论要写进「执行说明」，agent 不读 HTML。
 
-用户确认后写进 issue 正文（已有同名块时整块替换，旧 issue 的 `## 执行说明` 也按新结构重排，原有内容保留），再打标签：
+用户确认后写进 issue：正文用 `gh issue edit --body-file`，执行说明先建 artifact 再把链接写进正文（旧 issue 正文里的执行说明迁进 artifact，内容保留），再打标签：
 
 ```bash
+gh issue artifact create <n> -R windy10v10ai/firebase '<文件>.md#执行说明'   # 已有时用 edit <n> <编号> --body-file
 gh issue edit <n> -R windy10v10ai/firebase --body-file <文件>
 gh issue edit <n> -R windy10v10ai/firebase --add-label agent-todo --add-label <L1-code|L2-script|L3-visual>
 ```
 
-完成条件：issue 正文是用户确认过的新结构，带 `agent-todo` 与一个级别标签。
+完成条件：issue 正文是用户确认过的新结构，「执行说明」artifact 已挂上，带 `agent-todo` 与一个级别标签。
 
 ## 处理 agent 留下的问题
 

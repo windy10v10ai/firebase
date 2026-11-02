@@ -13,7 +13,7 @@ disable-model-invocation: true
 ## 硬规则
 
 - **只在开工前问一次**：第 2 步请用户选 issue，之后不提问，拿不准的按 `issue-impl`「卡住时怎么办」处理
-- **只做有执行说明的 issue**
+- **只做有执行说明的 issue**（正文有链接且 artifact 读得到）
 - **主 checkout 只在干净时用**：开工前和每个 issue 之间 `git status --porcelain` 为空；不干净就停掉剩下的全部 issue，写进汇报，不动用户的文件
 - **不合并、不推 `develop` / `main`**，不审批 Release PR
 - 调度员不改代码、不重跑执行者已跑过的验收，以 CI 和日志里看得到的结果为准
@@ -44,7 +44,7 @@ gh issue list -R windy10v10ai/firebase -l agent-todo --state open --limit 100 --
 
 ```markdown
 你在仓库主 checkout（当前目录）里做 issue windy10v10ai/firebase#<id>，用户不在场，从实现一直做到运行验证，中途不交回、不提问。
-先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做，分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 正文（背景、目标、要求、验收、执行说明）。
+先读 `.claude/skills/issue-impl/SKILL.md` 并照它的步骤做，分支名 `<fix|feature>/<id>-<3–6 个英文小写单词>`。需求只看 issue 正文（背景、目标、要求、验收）和「执行说明」artifact。
 卡住时按 `issue-impl`「卡住时怎么办」处理。最终回复按 `issue-impl` 第 8 步写。
 ```
 

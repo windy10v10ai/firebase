@@ -29,7 +29,7 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 
 ## issue 正文结构
 
-用户先看的几块放前面、写得最短，写给执行 AI 的细节放最后，用户不用细看：
+issue 正文只放用户要看的几块，写得最短；写给执行 AI 的细节放进挂在 issue 上的 Markdown artifact「执行说明」，正文最后一块只留指向它的链接：
 
 ```markdown
 ## 背景
@@ -45,17 +45,17 @@ game 仓库的 [agent-issue.md](https://github.com/windy10v10ai/game/blob/develo
 用白话写怎么判对错：页面或接口会是什么样、哪个字段是什么值；命令、用例、脚本步骤放进执行说明
 
 ## 执行说明
-（写给执行的 AI）
+执行说明（https://github.com/windy10v10ai/firebase/issues/<n>/artifacts/<编号>）
 ```
 
-firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库有，见其 `agent-issue.md`）。`issue-impl` 与 `issue-autorun` 按整份正文干活。几块之间有冲突时，「要求」最大，其次「验收」，再其次执行说明。执行 AI 不读对话，所以「要求」里别写只有对话里才懂的话。
+firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库有，见其 `agent-issue.md`）。`issue-impl` 与 `issue-autorun` 先读正文，再用 `gh issue artifact view <n> <编号> -R windy10v10ai/firebase` 读「执行说明」artifact，读不到当作没有执行说明。几块之间有冲突时，「要求」最大，其次「验收」，再其次执行说明。执行 AI 不读对话，所以「要求」里别写只有对话里才懂的话。
 
 ### 执行说明
 
-标题固定为 `## 执行说明`，写在正文最后，面向执行者而不是用户。每一项都要写到不用再问的程度：
+名为「执行说明」的 Markdown artifact（`gh issue artifact create <n> -R windy10v10ai/firebase '<文件>.md#执行说明'`，改动用 `edit` 覆盖），面向执行者而不是用户。文件以 `# 执行说明` 开头，每一项都要写到不用再问的程度：
 
 ```markdown
-## 执行说明
+# 执行说明
 
 - **做法**：先写用哪个 skill（没有对得上的写「无」），再写已拍板的实现方案，含选型。AI 自己推断、用户没拍板的取舍标「建议」
 - **改动范围**：允许改的文件或目录，逐条列出
@@ -64,6 +64,8 @@ firebase 的功能 PR 不写 Release Note，所以没有这一块（game 仓库�
 - **运行验证**：需要 / 不需要；需要时逐项标层级（见下文「运行验证分三层」）并写操作步骤和预期值
 - **上线顺序**：只改一个仓库写「无」；跨仓库（与 game 仓库）写清各开什么 PR、谁先部署
 ```
+
+artifact 是 GitHub 的预览功能，命令失败时把执行说明临时写回正文末尾的 `## 执行说明` 兜底，并在留言里说明，功能恢复后再迁回。
 
 - 目标拆成几条互不依赖的小项，agent 卡在其中一条时才能跳过它继续做别的
 - **做法**给出要照抄的已有实现（提交号或同类文件名）；数值、阈值、文案这类取舍在执行说明里定死，定不下来的写明「agent 暂定，记为待你决定」
