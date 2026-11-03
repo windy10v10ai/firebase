@@ -114,7 +114,7 @@ Steam 这边必须守住的规矩：
 | `point_history` | 一种积分的一次变动：获得记在 `added`，花掉记在 `used` | `created_at` 按天 / `steam_id` |
 | `member_history` | 一次开通或续费会员，写入前后的等级与到期日都留下 | `created_at` 按天 / `steam_id` |
 | `launcher_room_events` | 启动器联机的一次开房或一次加入的连接结果，用来看打洞失败率 | `event_time` 按天 / `event` |
-| `hero_item_usage` | 一个英雄的一条装备使用统计，同一英雄一局可分条 | `recorded_at` 按天 / `hero_name`、`difficulty` |
+| `hero_item_usage` | 一个英雄的一条装备使用统计，同一英雄一局可分条；玩家的数据全量，电脑只抽 20% 的对局，所以玩家和电脑的条数不能直接比较 | `recorded_at` 按天 / `hero_name`、`difficulty` |
 | `game_perf` | 一局的卡顿比值与单位规模 | `ended_at` 按天 / `host`、`route` |
 
 - **战绩与卡顿只在结算被接受后写入**：重复发送的请求由共用的结算冷却挡掉，表里不做去重。刷分局照样写入，查询时按 `game_options` 筛掉
