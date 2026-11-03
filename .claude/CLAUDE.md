@@ -328,7 +328,7 @@ feature/<issue-id>-<short-kebab-summary>
 
 ### 合并方式
 
-**用户给出合并指令时直接执行，不用再确认一次**；没有指令则不要主动合并。按 PR 的去向选方式，不要用 `gh pr merge` 的交互式选择：
+**用户给出合并指令时直接执行，不用再确认一次**；没有指令则不要主动合并。例外：按 `issue-impl` 做的 issue 合并条件全过时直接合入 `develop`，见 [agent-issue.md](references/agent-issue.md)「合入 develop」。按 PR 的去向选方式，不要用 `gh pr merge` 的交互式选择：
 
 | PR | 方式 | 命令 |
 |---|---|---|

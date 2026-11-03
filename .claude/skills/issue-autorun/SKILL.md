@@ -1,6 +1,6 @@
 ---
 name: issue-autorun
-description: 用户不在时，按优先级依次派执行者把带 agent-todo 标签的 issue 从实现做到运行验证，各开 PR（审查通过转正式，没做完的保持草稿）。
+description: 用户不在时，按优先级依次派执行者把带 agent-todo 标签的 issue 从实现做到运行验证，合并条件全过的合入 develop，其余 PR 保持开着。
 disable-model-invocation: true
 ---
 
@@ -15,9 +15,9 @@ disable-model-invocation: true
 - **只在开工前问一次**：第 2 步请用户选 issue，之后不提问，拿不准的按 `issue-impl`「卡住时怎么办」处理
 - **只做有执行说明的 issue**（正文末尾有执行说明链接且 artifact 读得到）
 - **主 checkout 只在干净时用**：开工前和每个 issue 之间 `git status --porcelain` 为空；不干净就停掉剩下的全部 issue，写进汇报，不动用户的文件
-- **不合并、不推 `develop` / `main`**，不审批 Release PR
+- **合并条件全过才合入 `develop`**，见 `agent-issue.md`「合入 develop」，下一条 issue 从合并后的 `develop` 切出。不直接推 `develop` / `main`，不审批、不合并 Release PR
 - 调度员不改代码、不重跑执行者已跑过的验收，以 CI 和日志里看得到的结果为准
-- 执行说明写了跨仓库上线顺序的，只做本仓库部分，另一仓库的部分记进「等你处理」
+- 执行说明写了跨仓库上线顺序的，只做本仓库部分，另一仓库的部分和上线顺序写进 Release PR 的 Checklist
 
 ## 1. 排顺序
 
@@ -53,8 +53,9 @@ gh project item-list 3 --owner windy10v10ai --limit 200 --format json -q '.items
 
 3. 读回报：PR 链接、验收结果、运行验证结论、「等你处理」
 4. 对照执行说明核对 PR：目标是否全做、验收是否都过、`[check]` 是否 `FAIL` 为 0、改动是否超出范围；「截图判定」项由调度员逐张看图，按 `web-browser-verify` 的审截图要求（布局对齐、文字、图片比例）判定，执行者的描述不算结论。没过的退回原会话，同一 PR 最多退回两轮，仍不过记为「待你决定」
-5. 精简 PR 的「等你处理」成只含用户本人要做的事，每条一句话写清看什么、选什么
-6. 主 checkout 切回 `develop`，确认干净
+5. 精简 PR 的「等你处理」成只含用户本人要做的事，每条一句话写清看什么、选什么：不满足合并条件的留在「待你决定」，其余见 `agent-issue.md`「写进 Release PR」
+6. 按 `issue-impl` 第 9 步合入 `develop`，不合并的写明原因
+7. 主 checkout 切回 `develop`，确认干净
 
 执行者 30 分钟没有新输出或总时长超过 2 小时就停掉，读日志判断卡在哪：能接着做的退回继续一次，再卡记为「待你决定」，主 checkout 被留在半途时停掉后续 issue。
 
@@ -64,9 +65,9 @@ gh project item-list 3 --owner windy10v10ai --limit 200 --format json -q '.items
 
 ```bash
 gh issue edit <id> -R windy10v10ai/firebase --remove-label agent-todo --add-label agent-done
-gh issue comment <id> -R windy10v10ai/firebase --body "已开 PR：<链接>（保持草稿的写明原因）。等你处理 N 项，见 PR 正文。"
+gh issue comment <id> -R windy10v10ai/firebase --body "已合入 develop：<PR 链接>，要看的 N 项已写进 Release PR 的 Checklist。"   # 没合并时写：已开 PR：<链接>，没合并的原因：<一句话>
 ```
 
-整条做不了的改打 `agent-block`，留言写明卡在哪、缺什么。已合并的本地分支按根 `CLAUDE.md`「合并后清理」删掉。
+整条做不了的改打 `agent-block`，留言写明卡在哪、缺什么。
 
-汇报按计划表顺序列出：PR 链接、「等你处理」条数、验收与运行验证结果、CI 状态、`agent-block` 的原因。issue 和 PR 编号都写成链接。用户回来按这份汇报用 `issue-spec` 逐个收拾。
+汇报按计划表顺序列出：PR 链接、合并了没有（没合并的写原因）、写进 Checklist 的条数、验收与运行验证结果、CI 状态、`agent-block` 的原因，末尾附 Release PR 链接。issue 和 PR 编号都写成链接。用户回来按这份汇报和 Checklist 用 `issue-spec` 收拾。
