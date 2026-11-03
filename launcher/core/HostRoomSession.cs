@@ -154,7 +154,7 @@ namespace Windy10v10AI.Launcher
                 if (pause) { paused = true; body = Body(); body["public"] = false; }
                 else
                 {
-                    nextPollAt = time.AddSeconds(started ? 60 : (time - openedAt).TotalMinutes < 5 ? 2 : 5);
+                    nextPollAt = time.AddSeconds(started ? 120 : 5);
                     checks.AddRange(Tunnel.TakeRouteChecks()); Trim(checks);
                     if (!started) { Tunnel.TakeQuality(); qualityAt = time; }
                     else if ((time - qualityAt).TotalSeconds >= 300) { quality.AddRange(Tunnel.TakeQuality()); qualityAt = time; Trim(quality); }

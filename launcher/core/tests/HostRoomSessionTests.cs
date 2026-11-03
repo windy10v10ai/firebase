@@ -35,15 +35,15 @@ namespace Windy10v10AI.Launcher.Tests
                 room.UpdateReadiness(true, false, false, false, time);
                 Check(room.Tunnel.GameReady, "server-only host releases guests when ready");
                 Reject(() => room.NextGame("easy", "second"), "next game waits for results");
-                room.Poll(); Check(room.NextPollAt == time.AddSeconds(2), "new room polls quickly");
+                room.Poll(); Check(room.NextPollAt == time.AddSeconds(5), "waiting room polls every five seconds");
                 Check(!room.Poll(), "platform ticks do not multiply heartbeat requests");
-                time = time.AddMinutes(6); room.Poll(); Check(room.NextPollAt == time.AddSeconds(5), "older waiting room polls slowly");
+                time = time.AddMinutes(6); room.Poll(); Check(room.NextPollAt == time.AddSeconds(5), "waiting room keeps the same interval after five minutes");
                 room.Roster.Add(new RosterEntry { Key = "guest", SteamId = 456, Status = PlayerStatus.InRoom });
                 room.Kick("host"); Check(room.Roster.Find("host") != null, "host cannot kick themselves");
                 room.Kick("guest");
                 Check(room.Roster.Find("guest") == null && ((long[])room.Snapshot()["kickedSteamIds"])[0] == 456, "kick removes the guest and persists exclusion");
                 room.TrackServerLog("DOTA_GAMERULES_STATE_HERO_SELECTION");
-                time = time.AddSeconds(5); room.Poll(); Check(room.NextPollAt == time.AddSeconds(60), "active game uses game heartbeat interval");
+                time = time.AddSeconds(5); room.Poll(); Check(room.NextPollAt == time.AddSeconds(120), "active game uses game heartbeat interval");
                 Check(room.TrackServerLog("/api/game/end") && room.Ended && !room.Saved && room.Tunnel.GameEnded, "game end reaches guests before result completion");
                 room.TrackServerLog("[Game] end game callback");
                 room.NextGame("easy", "second");
@@ -74,9 +74,9 @@ namespace Windy10v10AI.Launcher.Tests
                 var finished = (Action<string, string, string, int>)typeof(HostTunnel).GetField("JoinFinished", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(tunnel);
                 finished("guest", "direct", null, 20);
                 room.Poll(); Check(room.Failures == 1, "poll failure is recorded");
-                time = time.AddSeconds(2); room.Poll();
+                time = time.AddSeconds(5); room.Poll();
                 Check(((Dictionary<string, object>[])calls[1]["results"]).Length == 1 && ((Dictionary<string, object>[])calls[2]["results"]).Length == 1, "failed join results are retried");
-                time = time.AddSeconds(2); room.Poll();
+                time = time.AddSeconds(5); room.Poll();
                 Check(((Dictionary<string, object>[])calls[3]["results"]).Length == 0 && room.Failures == 0, "acknowledged results are removed");
             }
         }
