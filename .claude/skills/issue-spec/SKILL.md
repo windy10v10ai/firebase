@@ -5,7 +5,7 @@ description: 和用户一起给某个 issue 定 spec，写成 issue 正文（背
 
 # issue-spec
 
-用户在场时，和用户把一个 issue 的做法谈定，整理成 `agent-issue.md`「issue 正文结构」那几块，执行说明写成 Markdown artifact 挂到 issue，并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。
+用户在场时，和用户把一个 issue 的做法谈定，整理成 `agent-issue.md`「issue 正文结构」那几块，执行说明写成 Markdown artifact 挂到 issue，并打 `agent-todo`，留给 `issue-autorun` 在用户不在时自动做。只定到 spec 为止，不写实现计划、不改代码（验证前提用临时脚本，验完删）。标签与正文结构见 `.claude/references/agent-issue.md`，开始前先读。
 
 用户给的不是 issue 而是一句想法时，先查重再新建：先 `gh issue list -R windy10v10ai/firebase --state all --search "<关键词>"` 搜已有 issue（含已关闭的），有相近的就接着谈那一条；没有才 `gh issue create` 新建，标题写想要的结果，Status 放 Plan（命令见 game 仓库 [issue-fields.md](https://github.com/windy10v10ai/game/blob/develop/.claude/references/issue-fields.md)），再从下一步补字段。用户没指定 issue 也没给想法时，从项目 Plan 栏最上面那条开始。
 
@@ -29,8 +29,10 @@ description: 和用户一起给某个 issue 定 spec，写成 issue 正文（背
 - 要补哪些测试，输入与预期值
 - 要不要跨仓库改（game 仓库），各开什么 PR、谁先部署
 - 目标能否拆成几条互不依赖的小项
+- 方案依赖的第三方或线上行为：还没实测过的，打 `agent-todo` 前先验证；验证不了的，定好不成立时走哪条后备
+- 运行验证环境跑不通时怎么判，以及哪些项要用户试用（审批前写进 Release PR 的 Checklist）
 
-能从代码或项目规则直接得出的不问，直接写进草稿。
+能从代码或项目规则直接得出的不问，直接写进草稿。谈完按 `agent-issue.md`「合入 develop」逐条预演：每条验收都说得出 AI 怎么判对错，判不了的已定死或归用户判定，前提不成立、环境跑不通时都有去处，agent 做完不用问用户就能决定合不合并。
 
 ## 4. 写入 issue
 
@@ -54,7 +56,8 @@ gh issue edit <n> -R windy10v10ai/firebase --add-label agent-todo --add-label <L
 
 ## 处理 agent 留下的问题
 
-- **`agent-done`**：读 PR 正文的「等你处理」，逐条和用户过。「请确认」的确认或改掉；「待你决定」的谈定后直接在该 PR 分支上补改，或写进「要求」另起一轮
+- **`agent-done`，PR 还开着**：读 PR 正文的「等你处理」，逐条和用户过。「待你决定」的谈定后直接在该 PR 分支上补改，或写进「要求」另起一轮
+- **Release PR 的 Checklist**：逐条和用户过。不满意的在新分支上改，或写进新 issue
 - **`agent-block`**：读 issue 下 agent 的留言，按第 3 步补齐缺的信息，更新正文后把标签换回 `agent-todo`
 
 ```bash
