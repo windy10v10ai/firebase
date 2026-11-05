@@ -389,8 +389,8 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
         // 游戏的物品提示把换进去的数值加粗，觉醒与抽选技能的说明保持原样
         return kind === 'items' ? `<b>${value}</b>` : value;
       });
-    // game 把神杖、魔晶的升级说明从描述里拆成了独立 key，网站没有独立区块，
-    // 接在描述末尾，段标题用游戏里这两个物品的名字
+    // 神杖、魔晶的升级说明在 game 是独立的本地化 key（_scepter_description、_shard_description），
+    // 网站没有这样的区块，接在描述末尾，段标题用游戏里这两个物品的名字
     const upgrades =
       kind === 'items'
         ? []
