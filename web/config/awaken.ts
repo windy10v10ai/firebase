@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: '80497b3211fb2bf0a9d89dcb1e2c2eea2bba5bd5',
+  gameCommit: '57aa639d246f3ab3ab1b6a69bc82758d4ffb4e37',
   dotaVersion: '7.41f',
 } as const;
 
@@ -262,7 +262,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_beastmaster',
     abilityName: 'beastmaster_wild_axes_awaken',
-    freeTrial: true,
+    freeTrial: false,
     art: 'beastmaster.32266deb.webp',
     icon: 'beastmaster_wild_axes.b094b423.webp',
     name: { zh: '兽王', en: 'Beastmaster', ru: 'Beastmaster' },
@@ -757,9 +757,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Рок: пробуждение</font>",
     },
     desc: {
-      zh: "对敌人施加末日诅咒，对其进行驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>驱散类型：弱驱散<br><br>持有<font color='#92acf5'>阿哈利姆神杖</font>时，末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
-      en: "Inflicts a curse that dispels an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>DISPEL TYPE: Basic Dispel<br><br>With <font color='#92acf5'>Aghanim's Scepter</font>, Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.",
-      ru: "Накладывает на врага проклятие Рок, развеивает его и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>ТИП РАЗВЕИВАНИЯ: Простое развеивание<br><br>С <font color='#92acf5'>Скипетр Аганима</font> Рок также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Рок на врагов в радиусе 350, сам не получая Рок.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня.",
+      zh: "对敌人施加末日诅咒，对其进行弱驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
+      en: "Inflicts a curse that applies a Basic Dispel to an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.",
+      ru: "Накладывает на врага проклятие Рок, применяет к нему простое развеивание и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня.",
     },
     ability: {
       behavior: 'target',
@@ -785,7 +785,11 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ],
       cooldown: ['60'],
       manaCost: ['150', '200', '250', '300'],
-      lore: null,
+      lore: {
+        zh: '每当佤什昂都的丧钟传出一个名字，这个名字的主人就必将迎来末日。',
+        en: 'When a name is tolled from the bell of Vashundol, doom is sure to follow.',
+        ru: 'По ком прозвонил колокол Вашундола, за тем последует неминуемый рок.',
+      },
     },
   },
   {
@@ -1025,9 +1029,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_rattletrap',
     abilityName: 'special_bonus_unique_rattletrap_upgrade',
-    freeTrial: false,
+    freeTrial: true,
     art: 'rattletrap.d675296a.webp',
-    icon: 'rattletrap_power_cogs.98dbaed7.webp',
+    icon: 'rattletrap_overclocking.6017c7b3.webp',
     name: { zh: '发条技师', en: 'Clockwerk', ru: 'Clockwerk' },
     title: {
       zh: "<font color='#d000ff'>发条 觉醒</font>",
@@ -1035,9 +1039,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Часовщик: пробуждение</font>",
     },
     desc: {
-      zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%</b></font>。",
-      en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time.",
-      ru: "После применения Силовых шестерён даётся эффект <font color='#FFCC66'>Чёрного короля</font> на <font color='#FFFFFF'><b>3</b></font> сек., а получаемый урон снижается на <font color='#FFFFFF'><b>60%</b></font>.",
+      zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%</b></font>。<br>自动吃掉自己买的锁子甲，每件永久增加<font color='#FFFFFF'><b>4</b></font>点护甲。锁子甲放在备用格时，装备栏前 6 格需要留出空格。",
+      en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time.<br>Automatically consumes Chainmails you bought, permanently gaining <font color='#FFFFFF'><b>4</b></font> armor each. Chainmails in the backpack need an empty slot among your first six item slots.",
+      ru: "После применения Силовых шестерён даётся эффект <font color='#FFCC66'>Чёрного короля</font> на <font color='#FFFFFF'><b>3</b></font> сек., а получаемый урон снижается на <font color='#FFFFFF'><b>60%</b></font>.<br>Купленные вами кольчуги съедаются автоматически, каждая навсегда даёт <font color='#FFFFFF'><b>4</b></font> брони. Для кольчуг в рюкзаке нужна свободная ячейка среди первых шести ячеек инвентаря.",
     },
     ability: {
       behavior: 'passive',
@@ -1608,9 +1612,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Убийственный выстрел (пробужд.)</font>",
     },
     desc: {
-      zh: "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><font color='#FFFFFF'>神杖升级：命中的敌方英雄附加眩晕效果。</font>",
-      en: "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>",
-      ru: "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.<br><br><font color='#FFFFFF'>Аганимовский скипетр: поражённые герои также оглушаются.</font>",
+      zh: '狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。',
+      en: 'Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.',
+      ru: 'Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.',
     },
     ability: {
       behavior: 'point',

@@ -2717,6 +2717,75 @@
       }
     }
   },
+  "item_force_staff_3": {
+    "desc": {
+      "zh": "<h1>主动：黄金之力</h1>将任何目标单位向其面对方向推进<b>1200</b>距离。<br><br>施法距离：<b>1200</b>",
+      "en": "<h1>Active: Golden Force</h1>Pushes any target unit <b>1200</b> units in the direction it is facing.<br><br>Cast Range: <b>1200</b>",
+      "ru": "<h1>Активное: Золотая сила</h1>Толкает любое выбранное существо на <b>1200</b> в направлении его взгляда.<br><br>Дальность применения: <b>1200</b>"
+    },
+    "ability": {
+      "behavior": "target",
+      "targeting": "units",
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "智力",
+            "en": "Intelligence",
+            "ru": "к интеллекту"
+          },
+          "sign": "+",
+          "levels": [
+            "40"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法恢复",
+            "en": "Mana Regeneration",
+            "ru": "к восстановлению маны"
+          },
+          "sign": "+",
+          "levels": [
+            "6"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "技能伤害",
+            "en": "Spell Damage",
+            "ru": "к урону от заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "20"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "17.0"
+      ],
+      "manaCost": [
+        "250"
+      ],
+      "lore": {
+        "zh": "让你可以操纵他人，不论出于善或恶。",
+        "en": "Allows you to manipulate others, for good or evil.",
+        "ru": "Позволяет вам манипулировать другими во благо или во зло."
+      }
+    }
+  },
   "item_echo_sabre_2": {
     "desc": {
       "zh": "<h1>被动：音速连击</h1>近战攻击可以快速攻击两次。两次攻击都将减缓<b>100%</b>移动速度，每次持续<b>0.8</b>秒。",
@@ -3071,75 +3140,6 @@
         "zh": "我的阿迪王，时尚时尚最时尚",
         "en": "Gotta Go Fast!",
         "ru": "Мой Адидас Кинг — это самый-самый модный шик."
-      }
-    }
-  },
-  "item_force_staff_3": {
-    "desc": {
-      "zh": "<h1>主动：黄金之力</h1>将任何目标单位向其面对方向推进<b>1200</b>距离。<br><br>施法距离：<b>1200</b>",
-      "en": "<h1>Active: Golden Force</h1>Pushes any target unit <b>1200</b> units in the direction it is facing.<br><br>Cast Range: <b>1200</b>",
-      "ru": "<h1>Активное: Золотая сила</h1>Толкает любое выбранное существо на <b>1200</b> в направлении его взгляда.<br><br>Дальность применения: <b>1200</b>"
-    },
-    "ability": {
-      "behavior": "target",
-      "targeting": "units",
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "智力",
-            "en": "Intelligence",
-            "ru": "к интеллекту"
-          },
-          "sign": "+",
-          "levels": [
-            "40"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复",
-            "en": "Mana Regeneration",
-            "ru": "к восстановлению маны"
-          },
-          "sign": "+",
-          "levels": [
-            "6"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能伤害",
-            "en": "Spell Damage",
-            "ru": "к урону от заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "20"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "17.0"
-      ],
-      "manaCost": [
-        "250"
-      ],
-      "lore": {
-        "zh": "让你可以操纵他人，不论出于善或恶。",
-        "en": "Allows you to manipulate others, for good or evil.",
-        "ru": "Позволяет вам манипулировать другими во благо или во зло."
       }
     }
   },
@@ -6975,9 +6975,9 @@
   },
   "item_undying_heart": {
     "desc": {
-      "zh": "<h1><font color='#FFFF00'>主动：巨龙复苏</font></h1>立刻回复 <b>1000</b>+<b>4%</b>最大生命值 的血量，对自身施加弱驱散效果。<br>获得持续 <b>5</b> 秒的额外回血buff，每秒恢复 <b>200</b>+<b>2%</b>最大生命值 的血量。",
-      "en": "<h1><font color='#FFFF00'>Active: Draconic Recovery</font></h1>Heal <b>1000</b> + <b>4%</b> of max health and applies a dispel, then receive <b>200</b> + <b>2%</b> max health as health regeneration for <b>5</b> seconds afterward.<br><br>Dispel Type: Basic Dispel",
-      "ru": "<h1><font color='#FFFF00'>Активное: Драконье возрождение</font></h1>Мгновенно восстанавливает <b>1000</b> + <b>4%</b> от максимального здоровья и накладывает на владельца нормальное развеивание.<br>Даёт дополнительный эффект восстановления здоровья на <b>5</b> сек., восстанавливая <b>200</b> + <b>2%</b> от максимального здоровья в секунду."
+      "zh": "<h1><font color='#FFFF00'>主动：巨龙复苏</font></h1>立刻回复 <b>1000</b>+<b>4%</b>最大生命值 的血量，对自身施加弱驱散效果。<br>获得持续 <b>5</b> 秒的额外回血buff，每秒恢复 <b>200</b>+<b>2%</b>最大生命值 的血量。<br><br><h1>被动：巨兽之血</h1>生命恢复提升缺失生命值的<b>2%</b>。",
+      "en": "<h1><font color='#FFFF00'>Active: Draconic Recovery</font></h1>Heal <b>1000</b> + <b>4%</b> of max health and applies a dispel, then receive <b>200</b> + <b>2%</b> max health as health regeneration for <b>5</b> seconds afterward.<br><br>Dispel Type: Basic Dispel<br><br><h1>Passive: Behemoth's Blood</h1>Your health regeneration is increased by <b>2%</b> of your missing health.",
+      "ru": "<h1><font color='#FFFF00'>Активное: Драконье возрождение</font></h1>Мгновенно восстанавливает <b>1000</b> + <b>4%</b> от максимального здоровья и накладывает на владельца нормальное развеивание.<br>Даёт дополнительный эффект восстановления здоровья на <b>5</b> сек., восстанавливая <b>200</b> + <b>2%</b> от максимального здоровья в секунду.<br><br><h1>Пассивное: Behemoth's Blood</h1>Восстановление здоровья увеличивается на <b>2%</b> от недостающего здоровья."
     },
     "ability": {
       "behavior": "noTarget",
@@ -7002,6 +7002,20 @@
         },
         {
           "label": {
+            "zh": "最大生命值恢复",
+            "en": "Max Health Regen",
+            "ru": "макс. здоровья в секунду"
+          },
+          "sign": "+",
+          "levels": [
+            "1"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
             "zh": "生命值",
             "en": "Health",
             "ru": "к здоровью"
@@ -7016,20 +7030,6 @@
         },
         {
           "label": {
-            "zh": "最大生命恢复",
-            "en": "Max Health Regen",
-            "ru": "Макс. восстановление здоровья"
-          },
-          "sign": "+",
-          "levels": [
-            "2"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
             "zh": "闪避",
             "en": "Evasion",
             "ru": "к уклонению"
@@ -7037,20 +7037,6 @@
           "sign": "+",
           "levels": [
             "20"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "状态抗性",
-            "en": "Status Resistance",
-            "ru": "Сопротивление эффектам"
-          },
-          "sign": "+",
-          "levels": [
-            "8"
           ],
           "percent": true,
           "aoe": false,
@@ -7634,7 +7620,7 @@
         }
       ],
       "cooldown": [
-        "25"
+        "30"
       ],
       "manaCost": [
         "250"
@@ -8533,6 +8519,75 @@
       }
     }
   },
+  "item_magic_crit_blade": {
+    "desc": {
+      "zh": "<h1><font color='#A74ABD'>主动：龙息爆发</font></h1><b>4</b>秒内，智力提供<font color='#C450E5'><b>2</b>倍技能增强</font>，并使<b>1200</b>范围内的敌人魔法抗性降低<b>25%</b>。<br><h1>被动：技能增强</h1>每点智力获得<b>0.3%</b>技能增强。<br><h1><font color='#0096FF'>被动：法术暴击</font></h1>对敌方单位造成魔法或纯粹伤害时，有<b>30%</b>几率触发暴击，造成<b>180%</b>伤害。",
+      "en": "<h1><font color='#A74ABD'>Active: Dragon Breath</font></h1>For <b>4</b> seconds, Intelligence grants <font color='#C450E5'><b>2</b>x Spell Amplification</font>, and enemies within <b>1200</b> radius have their Magic Resistance reduced by <b>25%</b>.<br><h1>Passive: Arcane Refinement</h1>Grants <b>0.3%</b> Spell Amplification for each point of Intelligence.<br><h1><font color='#0096FF'>Passive: Spell Critical</font></h1>Dealing magical or pure damage to enemy units has a <b>30%</b> chance to critically strike, dealing <b>180%</b> damage.",
+      "ru": "<h1><font color='#A74ABD'>Активное: Дыхание дракона</font></h1>На <b>4</b> сек. интеллект даёт <font color='#C450E5'><b>2</b>-кратное усиление заклинаний</font>, а сопротивление магии врагов в радиусе <b>1200</b> снижается на <b>25%</b>.<br><h1>Пассивное: Усиление заклинаний</h1>Даёт <b>0.3%</b> усиления заклинаний за каждую единицу интеллекта.<br><h1><font color='#0096FF'>Пассивное: Критический удар заклинанием</font></h1>Магический или чистый урон по врагам с вероятностью <b>30%</b> становится критическим и наносит <b>180%</b> урона."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "智力",
+            "en": "Intelligence",
+            "ru": "к интеллекту"
+          },
+          "sign": "+",
+          "levels": [
+            "180"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "技能增强",
+            "en": "Spell Amplification",
+            "ru": "Усиление заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "40"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法恢复增强",
+            "en": "Mana Regen Amplification",
+            "ru": "Усиление регенерации маны"
+          },
+          "sign": "+",
+          "levels": [
+            "40"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "60"
+      ],
+      "manaCost": [
+        "1200"
+      ],
+      "lore": {
+        "zh": "魔龙狂舞，焚天灭地。魔焰龙息席卷万物，法术爆发摧枯拉朽。",
+        "en": "Dragon Dance incinerates all in its path. The magic dragon breath sweeps away everything, spell explosions devastate all.",
+        "ru": "Танец дракона испепеляет всё на своём пути. Магическое драконье дыхание сметает всё, взрывы заклинаний сокрушают всё."
+      }
+    }
+  },
   "item_dracula_mask": {
     "desc": {
       "zh": "<h1><font color='#90EE90'>主动：吸血盛宴</font></h1>驱散所有负面效果,并在<b>5</b>秒内获得:<br><b>300%</b>物理吸血<br><b>100%</b>法术吸血<br>+<b>150</b>攻击速度<br>+<b>30%</b>移动速度<br><b>-30%</b>减伤<br>免疫减速<br><br>生命值低于<b>40%</b>时自动触发。<br><br>驱散类型：弱驱散",
@@ -8625,75 +8680,6 @@
         "zh": "饱含生命之力的头盔,赋予佩戴者永恒的生命力。",
         "en": "The mask of the immortal vampire lord.",
         "ru": "Шлем, полный жизненной силы, дарует владельцу вечную жизнь."
-      }
-    }
-  },
-  "item_magic_crit_blade": {
-    "desc": {
-      "zh": "<h1><font color='#A74ABD'>主动：龙息爆发</font></h1><b>4</b>秒内，智力提供<font color='#C450E5'><b>2</b>倍技能增强</font>，并使<b>1200</b>范围内的敌人魔法抗性降低<b>25%</b>。<br><h1>被动：技能增强</h1>每点智力获得<b>0.3%</b>技能增强。<br><h1><font color='#0096FF'>被动：法术暴击</font></h1>对敌方单位造成魔法或纯粹伤害时，有<b>30%</b>几率触发暴击，造成<b>180%</b>伤害。",
-      "en": "<h1><font color='#A74ABD'>Active: Dragon Breath</font></h1>For <b>4</b> seconds, Intelligence grants <font color='#C450E5'><b>2</b>x Spell Amplification</font>, and enemies within <b>1200</b> radius have their Magic Resistance reduced by <b>25%</b>.<br><h1>Passive: Arcane Refinement</h1>Grants <b>0.3%</b> Spell Amplification for each point of Intelligence.<br><h1><font color='#0096FF'>Passive: Spell Critical</font></h1>Dealing magical or pure damage to enemy units has a <b>30%</b> chance to critically strike, dealing <b>180%</b> damage.",
-      "ru": "<h1><font color='#A74ABD'>Активное: Дыхание дракона</font></h1>На <b>4</b> сек. интеллект даёт <font color='#C450E5'><b>2</b>-кратное усиление заклинаний</font>, а сопротивление магии врагов в радиусе <b>1200</b> снижается на <b>25%</b>.<br><h1>Пассивное: Усиление заклинаний</h1>Даёт <b>0.3%</b> усиления заклинаний за каждую единицу интеллекта.<br><h1><font color='#0096FF'>Пассивное: Критический удар заклинанием</font></h1>Магический или чистый урон по врагам с вероятностью <b>30%</b> становится критическим и наносит <b>180%</b> урона."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "智力",
-            "en": "Intelligence",
-            "ru": "к интеллекту"
-          },
-          "sign": "+",
-          "levels": [
-            "180"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能增强",
-            "en": "Spell Amplification",
-            "ru": "Усиление заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "40"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复增强",
-            "en": "Mana Regen Amplification",
-            "ru": "Усиление регенерации маны"
-          },
-          "sign": "+",
-          "levels": [
-            "40"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "60"
-      ],
-      "manaCost": [
-        "1200"
-      ],
-      "lore": {
-        "zh": "魔龙狂舞，焚天灭地。魔焰龙息席卷万物，法术爆发摧枯拉朽。",
-        "en": "Dragon Dance incinerates all in its path. The magic dragon breath sweeps away everything, spell explosions devastate all.",
-        "ru": "Танец дракона испепеляет всё на своём пути. Магическое драконье дыхание сметает всё, взрывы заклинаний сокрушают всё."
       }
     }
   },
@@ -9418,9 +9404,9 @@
   },
   "item_withered_spring": {
     "desc": {
-      "zh": "<h1><font color='#90EE90'>主动：枯木逢春</font></h1>使自身和周围友军回复<b>2500</b>点生命 +<b>6%</b>最大生命值和<b>1500</b>点魔法，并移除施法者身上全部的负面效果。施法者在<b>3</b>秒内获得<b>20</b>点护甲和<b>300</b>点生命回复。<br><br>作用范围：<b>1200</b><br>驱散类型：强驱散<br><br><h1>被动：绝处逢生</h1>受到来自英雄的伤害并且生命值低于<b>40%</b>时自动触发以上效果，并在<b>3</b>秒内获得<b>80%</b><font color='#B99012'>状态抗性</font>，所受到和造成的伤害全部归零。",
-      "en": "<h1><font color='#90EE90'>Active: Withering Bloom</font></h1>Restores <b>2500</b> health +<b>6%</b> max health and <b>1500</b> mana to yourself and nearby allies, and removes all negative effects from the caster. Over the next <b>3</b> seconds, the caster gains <b>20</b> armor and <b>300</b> health regeneration.<br><br>Radius: <b>1200</b><br>Dispel Type: Strong Dispel<br><br><h1>Passive: Rebirth</h1>When you take damage from a hero and your health falls below <b>40%</b>, automatically triggers the effects above, and for <b>3</b> seconds you gain +<b>80%</b> <font color='#B99012'>Status Resistance</font> and all damage you deal and are dealt is reduced to zero.",
-      "ru": "<h1><font color='#90EE90'>Активное: Цветение сухого древа</font></h1>Восстанавливает владельцу и окружающим союзникам <b>2500</b> здоровья +<b>6%</b> максимального здоровья и <b>1500</b> маны, а также снимает с владельца все отрицательные эффекты. На <b>3</b> сек. владелец получает <b>20</b> брони и <b>300</b> восстановления здоровья.<br><br>Радиус действия: <b>1200</b><br>Тип развеивания: сильное<br><br><h1>Пассивное: Спасение на краю гибели</h1>При получении урона от героя и падении здоровья ниже <b>40%</b> автоматически срабатывает эффект выше, а на <b>3</b> сек. владелец получает +<b>80%</b> <font color='#B99012'>сопротивления эффектам</font>, при этом весь получаемый и наносимый им урон становится равным нулю."
+      "zh": "<h1><font color='#90EE90'>主动：枯木逢春</font></h1>使自身和周围友军回复<b>2500</b>点生命 +<b>6%</b>最大生命值和<b>1500</b>点魔法，并移除施法者身上全部的负面效果。施法者在<b>3</b>秒内获得<b>20</b>点护甲和<b>300</b>点生命回复。<br><br>作用范围：<b>1200</b><br>驱散类型：强驱散<br><br><h1>被动：巨兽之血</h1>生命恢复提升缺失生命值的<b>2.5%</b>。<br><br><h1>被动：绝处逢生</h1>受到来自英雄的伤害并且生命值低于<b>40%</b>时自动触发以上效果，并在<b>3</b>秒内获得<b>80%</b><font color='#B99012'>状态抗性</font>，所受到和造成的伤害全部归零。",
+      "en": "<h1><font color='#90EE90'>Active: Withering Bloom</font></h1>Restores <b>2500</b> health +<b>6%</b> max health and <b>1500</b> mana to yourself and nearby allies, and removes all negative effects from the caster. Over the next <b>3</b> seconds, the caster gains <b>20</b> armor and <b>300</b> health regeneration.<br><br>Radius: <b>1200</b><br>Dispel Type: Strong Dispel<br><br><h1>Passive: Behemoth's Blood</h1>Your health regeneration is increased by <b>2.5%</b> of your missing health.<br><br><h1>Passive: Rebirth</h1>When you take damage from a hero and your health falls below <b>40%</b>, automatically triggers the effects above, and for <b>3</b> seconds you gain +<b>80%</b> <font color='#B99012'>Status Resistance</font> and all damage you deal and are dealt is reduced to zero.",
+      "ru": "<h1><font color='#90EE90'>Активное: Цветение сухого древа</font></h1>Восстанавливает владельцу и окружающим союзникам <b>2500</b> здоровья +<b>6%</b> максимального здоровья и <b>1500</b> маны, а также снимает с владельца все отрицательные эффекты. На <b>3</b> сек. владелец получает <b>20</b> брони и <b>300</b> восстановления здоровья.<br><br>Радиус действия: <b>1200</b><br>Тип развеивания: сильное<br><br><h1>Пассивное: Behemoth's Blood</h1>Восстановление здоровья увеличивается на <b>2.5%</b> от недостающего здоровья.<br><br><h1>Пассивное: Спасение на краю гибели</h1>При получении урона от героя и падении здоровья ниже <b>40%</b> автоматически срабатывает эффект выше, а на <b>3</b> сек. владелец получает +<b>80%</b> <font color='#B99012'>сопротивления эффектам</font>, при этом весь получаемый и наносимый им урон становится равным нулю."
     },
     "ability": {
       "behavior": "noTarget",
@@ -9429,20 +9415,6 @@
       "piercesImmunity": null,
       "dispellable": null,
       "values": [
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "2500"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
         {
           "label": {
             "zh": "魔法值",
@@ -9459,20 +9431,6 @@
         },
         {
           "label": {
-            "zh": "最大生命值回复",
-            "en": "Max Health Regen",
-            "ru": "Восстановление максимального здоровья"
-          },
-          "sign": "+",
-          "levels": [
-            "3"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
             "zh": "力量",
             "en": "Strength",
             "ru": "к силе"
@@ -9480,6 +9438,34 @@
           "sign": "+",
           "levels": [
             "100"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "最大生命值恢复",
+            "en": "Max Health Regen",
+            "ru": "макс. здоровья в секунду"
+          },
+          "sign": "+",
+          "levels": [
+            "1"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命值",
+            "en": "Health",
+            "ru": "к здоровью"
+          },
+          "sign": "+",
+          "levels": [
+            "2500"
           ],
           "percent": false,
           "aoe": false,
@@ -9527,9 +9513,9 @@
   },
   "item_swift_glove": {
     "desc": {
-      "zh": "<h1><font color='#FFFF00'>主动：灭世响指</font></h1>立刻湮灭目标单位，获得 <b>600</b> 金钱和 <b>2</b> 倍经验值。<br>周围 <b>1800</b> 范围内的友军获得 <b>120</b> 金钱和 <b>0.5</b> 倍经验值。<br><br>可以对远古单位使用，但无法对肉山使用。<br><br><font color='#FFFF00'>对敌方英雄释放时有<b>50%</b>概率直接将其湮灭。</font><br><br><h1>被动：极速</h1>减少<b>25%</b>基础攻击间隔。<br><br><h1>被动：强化连环闪电</h1>攻击有<b>35%</b>几率释放一道强化连环闪电，在<b>900</b>范围内<b>12</b>个目标之间跳跃，每次造成<b>500</b>点魔法伤害。触发闪电时无视闪避，并且吃技能增强。<br>强化闪电有<b>20%</b>几率造成<b>1.5</b>倍伤害，<b>3%</b>几率造成<b>2</b>倍伤害，<b>1%</b>几率造成<b>3</b>倍伤害。内置冷却为<b>0.2</b>秒，倍率触发对应冷却时间为<b>0.3</b>秒，<b>0.5</b>秒，<b>1</b>秒。",
-      "en": "<h1><font color='#FFFF00'>Active: The Snap</font></h1>Kills the target unit for <b>600</b> gold and <b>2</b>x experience.<br>Allies within <b>1800</b> gain <b>120</b> gold and <b>0.5</b>x experience.<br><br>Can be used on Ancient Creeps, but cannot be used on Roshan.<br><br><font color='#FFFF00'>When cast on an enemy hero, has a <b>50%</b> chance to instantly kill it.</font><br><br><h1>Passive: Rapid Strikes</h1>Reduces Base Attack Time by <b>25%</b>.<br><br><h1>Passive: Empowered Chain Lightning</h1>Grants a <b>35%</b> chance on attack to release an empowered bolt of electricity that leaps between <b>12</b> targets within a <b>900</b> radius, dealing <b>500</b> magical damage to each. Lightning proc pierces evasion and benefits from spell amplification.<br>Empowered lightning has a <b>20%</b> chance to deal <b>1.5</b>x damage, <b>3%</b> chance to deal <b>2</b>x damage, and <b>1%</b> chance to deal <b>3</b>x damage. Internal cooldown is <b>0.2</b>s, and the matching cooldowns for empowered strikes are <b>0.3</b>s, <b>0.5</b>s, and <b>1</b>s.",
-      "ru": "<h1><font color='#FFFF00'>Активное: Щелчок уничтожения</font></h1>Мгновенно уничтожает указанное существо, давая <b>600</b> золота и <b>2</b>x опыта.<br>Союзники в радиусе <b>1800</b> получают <b>120</b> золота и <b>0.5</b>x опыта.<br><br>Можно применять на древних существ, но нельзя на Рошана.<br><br><font color='#FFFF00'>При применении на вражеского героя с вероятностью <b>50%</b> уничтожает его мгновенно.</font><br><br><h1>Пассивное: Скорость</h1>Снижает базовый интервал атаки на <b>25%</b>.<br><br><h1>Пассивное: Усиленная цепная молния</h1>Атаки с вероятностью <b>35%</b> выпускают усиленную цепную молнию, которая перескакивает между <b>12</b> целями в радиусе <b>900</b>, нанося каждой <b>500</b> магического урона. Срабатывание молнии игнорирует уклонение и получает бонус от усиления заклинаний.<br>Усиленная молния с вероятностью <b>20%</b> наносит <b>1.5</b>x урона, с вероятностью <b>3%</b> — <b>2</b>x урона, с вероятностью <b>1%</b> — <b>3</b>x урона. Внутренняя перезарядка составляет <b>0.2</b> сек., а соответствующие перезарядки усиленных ударов — <b>0.3</b> сек., <b>0.5</b> сек. и <b>1</b> сек."
+      "zh": "<h1><font color='#FFFF00'>主动：灭世响指</font></h1>立刻湮灭目标单位，获得 <b>600</b> 金钱和 <b>2</b> 倍经验值。<br>周围 <b>1800</b> 范围内的友军获得 <b>120</b> 金钱和 <b>0.5</b> 倍经验值。<br><br>可以对远古单位使用，但无法对肉山使用。<br><br><font color='#FFFF00'>对敌方英雄释放时有<b>50%</b>概率直接将其湮灭。</font><br><br><h1>被动：极速</h1>减少<b>20%</b>基础攻击间隔。<br><br><h1>被动：强化连环闪电</h1>攻击有<b>35%</b>几率释放一道强化连环闪电，在<b>900</b>范围内<b>12</b>个目标之间跳跃，每次造成<b>500</b>点魔法伤害。触发闪电时无视闪避，并且吃技能增强。<br>强化闪电有<b>20%</b>几率造成<b>1.5</b>倍伤害，<b>3%</b>几率造成<b>2</b>倍伤害，<b>1%</b>几率造成<b>3</b>倍伤害。内置冷却为<b>0.2</b>秒，倍率触发对应冷却时间为<b>0.3</b>秒，<b>0.5</b>秒，<b>1</b>秒。",
+      "en": "<h1><font color='#FFFF00'>Active: The Snap</font></h1>Kills the target unit for <b>600</b> gold and <b>2</b>x experience.<br>Allies within <b>1800</b> gain <b>120</b> gold and <b>0.5</b>x experience.<br><br>Can be used on Ancient Creeps, but cannot be used on Roshan.<br><br><font color='#FFFF00'>When cast on an enemy hero, has a <b>50%</b> chance to instantly kill it.</font><br><br><h1>Passive: Rapid Strikes</h1>Reduces Base Attack Time by <b>20%</b>.<br><br><h1>Passive: Empowered Chain Lightning</h1>Grants a <b>35%</b> chance on attack to release an empowered bolt of electricity that leaps between <b>12</b> targets within a <b>900</b> radius, dealing <b>500</b> magical damage to each. Lightning proc pierces evasion and benefits from spell amplification.<br>Empowered lightning has a <b>20%</b> chance to deal <b>1.5</b>x damage, <b>3%</b> chance to deal <b>2</b>x damage, and <b>1%</b> chance to deal <b>3</b>x damage. Internal cooldown is <b>0.2</b>s, and the matching cooldowns for empowered strikes are <b>0.3</b>s, <b>0.5</b>s, and <b>1</b>s.",
+      "ru": "<h1><font color='#FFFF00'>Активное: Щелчок уничтожения</font></h1>Мгновенно уничтожает указанное существо, давая <b>600</b> золота и <b>2</b>x опыта.<br>Союзники в радиусе <b>1800</b> получают <b>120</b> золота и <b>0.5</b>x опыта.<br><br>Можно применять на древних существ, но нельзя на Рошана.<br><br><font color='#FFFF00'>При применении на вражеского героя с вероятностью <b>50%</b> уничтожает его мгновенно.</font><br><br><h1>Пассивное: Скорость</h1>Снижает базовый интервал атаки на <b>20%</b>.<br><br><h1>Пассивное: Усиленная цепная молния</h1>Атаки с вероятностью <b>35%</b> выпускают усиленную цепную молнию, которая перескакивает между <b>12</b> целями в радиусе <b>900</b>, нанося каждой <b>500</b> магического урона. Срабатывание молнии игнорирует уклонение и получает бонус от усиления заклинаний.<br>Усиленная молния с вероятностью <b>20%</b> наносит <b>1.5</b>x урона, с вероятностью <b>3%</b> — <b>2</b>x урона, с вероятностью <b>1%</b> — <b>3</b>x урона. Внутренняя перезарядка составляет <b>0.2</b> сек., а соответствующие перезарядки усиленных ударов — <b>0.3</b> сек., <b>0.5</b> сек. и <b>1</b> сек."
     },
     "ability": {
       "behavior": "target",

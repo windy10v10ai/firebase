@@ -60,7 +60,9 @@ function blockBodies(text) {
 
 /** KeyValues 转义：\n \t 还原成对应字符，\\ 还原成单个反斜杠，其余 \x 按引擎行为丢弃反斜杠 */
 function unescapeKv(raw) {
-  return raw.replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c === 't' ? '\t' : c));
+  return raw
+    .replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c === 't' ? '\t' : c))
+    .replace(/\r\n?/g, '\n');
 }
 
 /** `"key" "value"` 扁平表，本地化文件用；整行注释掉的条目不算，原版文件里留着不少废弃的旧译法 */
