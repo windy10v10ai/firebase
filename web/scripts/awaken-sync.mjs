@@ -24,7 +24,7 @@ const MANIFEST = path.join(WEB, 'config/awaken-assets.json');
 
 const MIN_HEROES = 30;
 
-/** 七项自检，任一项不过就停下，不生成半成品 */
+/** 八项自检，任一项不过就停下，不生成半成品 */
 function check(source, assets) {
   const errors = [];
   const { heroes, replacementHeroes, unresolved } = source;
@@ -83,18 +83,18 @@ function check(source, assets) {
     }
   }
 
-  // 8. 标题、描述、背景故事里不允许残留反斜杠转义：出现说明本地化解析没有把 \n \" \\ 等还原干净
+  // 8. 标题、描述、背景故事里不允许残留反斜杠转义或回车：前者说明本地化解析没有把 \n \" \\ 等还原干净，
+  // 后者说明 CRLF 检出带回的换行没归一化
+  const stray = (value) => value.includes('\\') || value.includes('\r');
   for (const hero of heroes) {
     for (const [lang, text] of Object.entries(hero.text)) {
-      if (text.title.includes('\\'))
-        errors.push(`${hero.abilityName} 的 ${lang} 标题残留反斜杠转义`);
-      if (text.desc.includes('\\'))
-        errors.push(`${hero.abilityName} 的 ${lang} 描述残留反斜杠转义`);
+      if (stray(text.title)) errors.push(`${hero.abilityName} 的 ${lang} 标题残留回车或反斜杠转义`);
+      if (stray(text.desc)) errors.push(`${hero.abilityName} 的 ${lang} 描述残留回车或反斜杠转义`);
     }
     if (hero.ability.lore) {
       for (const [lang, value] of Object.entries(hero.ability.lore)) {
-        if (value.includes('\\'))
-          errors.push(`${hero.abilityName} 的 ${lang} 背景故事残留反斜杠转义`);
+        if (stray(value))
+          errors.push(`${hero.abilityName} 的 ${lang} 背景故事残留回车或反斜杠转义`);
       }
     }
   }

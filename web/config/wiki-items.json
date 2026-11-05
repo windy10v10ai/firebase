@@ -1,6 +1,6 @@
 {
   "source": {
-    "gameCommit": "f5e80fea1f51cf682b6faff4e3e9418ee4373e18",
+    "gameCommit": "57aa639d246f3ab3ab1b6a69bc82758d4ffb4e37",
     "dotaVersion": "7.41f"
   },
   "priceTiers": [
@@ -247,7 +247,13 @@
     {
       "name": "item_force_staff_2",
       "section": "equipment",
-      "price": 3700,
+      "price": 3500,
+      "tier": 2
+    },
+    {
+      "name": "item_force_staff_3",
+      "section": "equipment",
+      "price": 5000,
       "tier": 2
     },
     {
@@ -291,12 +297,6 @@
       "section": "equipment",
       "price": 4950,
       "tier": 2
-    },
-    {
-      "name": "item_force_staff_3",
-      "section": "equipment",
-      "price": 5200,
-      "tier": 3
     },
     {
       "name": "item_blade_mail_2",
@@ -743,15 +743,15 @@
       "tier": 5
     },
     {
-      "name": "item_dracula_mask",
+      "name": "item_magic_crit_blade",
       "section": "equipment",
-      "price": 36900,
+      "price": 36800,
       "tier": 5
     },
     {
-      "name": "item_magic_crit_blade",
+      "name": "item_dracula_mask",
       "section": "equipment",
-      "price": 37000,
+      "price": 36900,
       "tier": 5
     },
     {

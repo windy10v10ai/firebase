@@ -21,12 +21,16 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 `AbilityValues` 数值、一个字的本地化都不碰，玩家看到的描述照样会变。全量重生成只要几十毫秒，
 直接跑，产物没变化脚本会告诉你。
 
+## 日常一条命令
+
+`cd web && npm run game:sync` 一次跑完物品、百科、觉醒图、觉醒数据与英雄头像，同一份 game 提交的产物放同一个 PR。全量跑不需要判断要不要同步，下面只写觉醒这一支：只想看觉醒、或某一步自检失败要定位时，才单跑 `npm run awaken:sync`。
+
 ## 步骤
 
 1. **把 game 仓库切到 develop 并拉到最新**。脚本默认找与本仓库并列的
    `../windy10v10ai` 或 `../game`，其他位置用 `AWAKEN_GAME_REPO` 指绝对路径。
    **`HEAD` 不用自己记**，脚本会写进产物的 `AWAKEN_SOURCE.gameCommit`。
-2. **取数**：`cd web && npm run awaken:sync`。纯离线，含七项自检。
+2. **取数**：`cd web && npm run awaken:sync`。纯离线，含八项自检。
 3. **自检不过就停下**，把失败项原样报给用户，**不要猜着改产物**——自检拦住的多半是
    game 侧漏同步（比如加了觉醒英雄但忘了同步 `AwakenTab.tsx`），要回 game 仓库修。
 4. **产物没变化就到此为止**，不开 PR。
@@ -35,8 +39,8 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 6. **写变更说明**：拿产物里**改动前**那一版的 `AWAKEN_SOURCE.gameCommit`（`git show HEAD:web/config/awaken.ts | head -10`），
    `git -C <game> log --oneline <旧SHA>..HEAD -- <相关路径>`。
    git 历史用来解释「为什么变了」，产物 diff 回答「变了什么」。
-7. **校验**：`npm run lint && npx tsc --noEmit && npm run build`。
-8. **开 PR**：分支 `chore/awaken-sync-<日期>`，正文贴变更说明与产物 diff 摘要。
+7. **校验**：`npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`。
+8. **开 PR**：分支 `chore/sync-<内容>`（如 `chore/sync-game-data-2026-11-05`），正文贴变更说明与产物 diff 摘要。物品百科的产物有变化时并进同一个 PR，不要为两支各开一个。
 
 ## 产物里的技能提示框数据
 
@@ -50,7 +54,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 脚本判断 `HEAD` 是不是 `origin/develop` 的祖先，不满足就停下不生成——feature 分支上的觉醒改动
 还可能被推翻或改写，据此生成的产物没法追溯。报这个错就去 game 仓库切到 develop 并拉最新。
 
-## 七项自检拦的是什么
+## 八项自检拦的是什么
 
 失败时按这张表判断该回哪儿改：
 
@@ -63,6 +67,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 | 有占位符取不到值 | 数值 key 改了名，或技能挪进了脚本没覆盖的 KV 文件 |
 | 缺 zh/en 英雄名 | Dota 版本目录升级后 key 变了 |
 | 没有立绘 | 先跑 `npm run awaken:images` |
+| 标题、描述或背景故事残留回车、反斜杠转义 | 本地化解析没还原干净，或换行归一化失效，查 `dota-ability.mjs` 的 `unescapeKv` |
 
 图标取不到只告警不拦：页面按缺图占位渲染。
 

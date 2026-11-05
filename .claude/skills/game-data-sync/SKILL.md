@@ -14,13 +14,19 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 | `npm run wiki:sync` | `config/match-items.json`、`match-item-details.json` | 战绩专用物品名单、价格及说明；不进入百科 |
 | `npm run heroes` | `config/heroes.json`，图在 `public/heroes/` | 英雄小头像与中英文名 |
 
+## 日常一条命令
+
+`cd web && npm run game:sync` 按 物品 → 百科 → 觉醒图 → 觉醒数据 → 英雄头像 的顺序全量重生成，同一份 game 提交的产物放同一个 PR。全量跑不需要判断要不要同步，下面的命令表用于只跑单步或排查某一步自检失败。觉醒那一支的细节见 [awaken-sync](../awaken-sync/SKILL.md)。
+
+这条链不接参数：预同步固定提交（`--game-commit`）与 `items` 带 GA 导出表都要单跑，跟在 `game:sync` 后面的参数只会追加到最后一步 `heroes`。整段输出也要看完——缺图、缺头像的告警不会让命令失败。
+
 ## 先判断跑哪个
 
 - **新增物品或技能、换了图标、改了名字**：跑 `items`
 - **抽选池（`lottery-items.ts`、`lottery-abilities.ts`）、商店（`shops.txt`）或自定义物品的配方有改动，或百科收录条目的数值、描述变了**：跑 `wiki:sync`
 - **两者都沾**：先 `items` 再 `wiki:sync`。`wiki:sync` 查到池里条目不在 `items.json` 会直接失败
 - **新增或改动物品**：先 `items` 再 `wiki:sync`，原版与中立物品说明也由后者生成；商店分类按商店与配方自动收录
-- **英雄**：Dota 出了新英雄，或 game 换皮英雄改了名字、头像时跑 `heroes`。名单取自每日任务池 `api/src/daily-task/config/tasks.ts`，新英雄要先加进任务池；换皮的名字和头像手写在 `config/hero-overrides.json` 与 `config/hero-overrides/`，改完再跑
+- **英雄**：Dota 出了新英雄，或 game 换皮英雄改了名字、头像时跑 `heroes`。名字取自 game 的 `docs/reference/<版本>/abilities_*.txt`，名单取自每日任务池 `api/src/daily-task/config/tasks.ts`，换皮的名字和头像手写在 `config/hero-overrides.json` 与 `config/hero-overrides/`。新英雄要先加进任务池；**只改任务池或换皮表时也要单跑 `npm run heroes`**，这时 game 仓库没有改动
 
 不要靠「描述文件有没有改」判断百科要不要重跑：描述里带 `%占位符%`，只改一个 `AbilityValues` 数值也会变。拿不准就跑，产物没变化脚本会告诉你。
 
@@ -34,7 +40,7 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
    完成条件：来源为默认 develop 或用户指定的固定提交，数据副本干净。
 2. **跑 `cd web && npm run items`**。取图要 `sharp`：缺时先 `npm i sharp --no-save`，**不要写进 `package.json`**。
    要补玩家买过、配置推不出来的物品时，带上 GA 导出的物品表：`npm run items -- <导出.csv>`（第一列是物品名）。
-3. **需要时跑 `npm run wiki:sync`**。自检不过就停下，把失败项原样报给用户，不要改产物或放宽自检。常见报错：
+3. **需要时跑 `npm run wiki:sync`**。`game:sync` 已把这两步按顺序排好。自检不过就停下，把失败项原样报给用户，不要改产物或放宽自检。常见报错：
 
    | 报错 | 多半是 |
    |---|---|
@@ -48,8 +54,8 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 
 4. **核对 diff**。新增条目的 `zh`、`en`、`ru` 都对，图标打开看一眼与游戏内一致。diff 里出现与本次无关的大量改动（成批改名、成批换图）先停下查原因再继续；零星一两条来自 Dota 官方数据的改名属于正常跟进，保留并在 PR 里写明。
    完成条件：每一行 diff 都能说出来源。
-5. **校验**：`npm run lint && npx tsc --noEmit && npm run build`。
-6. **开 PR**：分支 `chore/sync-<内容>`，正文写同步了哪些条目、game 的提交号、diff 里的额外变化及来源。
+5. **校验**：`npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`。
+6. **开 PR**：分支 `chore/sync-<内容>`（如 `chore/sync-game-data-2026-11-05`），正文写同步了哪些条目、game 的提交号、diff 里的额外变化及来源。同时有觉醒产物变化时并进同一个 PR。
 
 ## 图标取不到
 
