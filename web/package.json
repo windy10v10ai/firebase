@@ -14,6 +14,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,mts,css}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,mts,css}\" --ignore-path .gitignore",
     "test": "vitest run",
+    "game:sync": "npm run items && npm run wiki:sync && npm run awaken:images && npm run awaken:sync && npm run heroes",
     "awaken:sync": "node scripts/awaken-sync.mjs",
     "awaken:images": "node scripts/awaken-images.mjs",
     "heroes": "node scripts/heroes.mjs",
