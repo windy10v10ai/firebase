@@ -24,7 +24,7 @@ const MANIFEST = path.join(WEB, 'config/awaken-assets.json');
 
 const MIN_HEROES = 30;
 
-/** 七项自检，任一项不过就停下，不生成半成品 */
+/** 八项自检，任一项不过就停下，不生成半成品 */
 function check(source, assets) {
   const errors = [];
   const { heroes, replacementHeroes, unresolved } = source;
@@ -73,7 +73,7 @@ function check(source, assets) {
   }
 
   // 7. 立绘必须有；图标缺了只告警，页面按缺图占位渲染
-  const warnings = [];
+  const warnings = [...(source.warnings ?? [])];
   for (const hero of heroes) {
     if (!assets.art[hero.heroName]) {
       errors.push(`${hero.heroName} 没有立绘，先跑 npm run awaken:images`);

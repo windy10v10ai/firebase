@@ -179,7 +179,7 @@ Next.js 前端，部署在 Firebase App Hosting（windy10v10ai.com）。全仓�
 
 游戏里的名字、图标、技能说明都由 `scripts/` 下的脚本从 game 仓库生成，产物不手改：
 
-- **game 仓库有改动**：`cd web && npm run game:sync` 一条命令全量重生成，产物没变化脚本会告诉你。取图要 `sharp`，缺时先 `npm i sharp --no-save`
+- **game 仓库有改动**：`cd web && npm run game:sync` 一条命令全量重生成，产物没变化脚本会告诉你。整条命令要 `sharp`（第一步取物品图就要），缺时先 `npm i sharp --no-save`
 - **只跑单步、排查自检失败**：物品与百科按 [game-data-sync](../.claude/skills/game-data-sync/SKILL.md) 技能走，觉醒按 [awaken-sync](../.claude/skills/awaken-sync/SKILL.md) 技能走
 
 ## 升级依赖

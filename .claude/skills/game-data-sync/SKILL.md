@@ -55,7 +55,7 @@ description: game 仓库新增或改动物品、抽选技能、换皮英雄，�
 4. **核对 diff**。新增条目的 `zh`、`en`、`ru` 都对，图标打开看一眼与游戏内一致。diff 里出现与本次无关的大量改动（成批改名、成批换图）先停下查原因再继续；零星一两条来自 Dota 官方数据的改名属于正常跟进，保留并在 PR 里写明。
    完成条件：每一行 diff 都能说出来源。
 5. **校验**：`npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`。
-6. **开 PR**：分支 `chore/sync-<内容>`，正文写同步了哪些条目、game 的提交号、diff 里的额外变化及来源。同时有觉醒产物变化时并进同一个 PR。
+6. **开 PR**：分支 `chore/sync-<内容>`（如 `chore/sync-game-data-2026-11-05`），正文写同步了哪些条目、game 的提交号、diff 里的额外变化及来源。同时有觉醒产物变化时并进同一个 PR。
 
 ## 图标取不到
 

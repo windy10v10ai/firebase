@@ -90,5 +90,6 @@ export function loadAwakenSource(repoRoot) {
     replacementHeroes,
     freeTrialHeroes,
     unresolved: reader.unresolved,
+    warnings: reader.warnings,
   };
 }

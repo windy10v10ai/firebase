@@ -314,6 +314,7 @@ function readDetails(reader, names, kind, needsDesc, errors) {
   if (reader.unresolved.length) {
     errors.push(`有占位符取不到值：${[...new Set(reader.unresolved)].join('、')}`);
   }
+  for (const warning of reader.warnings) console.warn(`告警：${warning}`);
   return details;
 }
 

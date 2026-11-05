@@ -167,13 +167,15 @@ function abilityKv(bodies) {
         top.set(key, value);
       } else if (key === 'AbilityValues') {
         for (const [name, entry] of value) {
+          const previous = values.get(name);
           if (typeof entry === 'string') {
-            values.set(name, { value: entry, flags: new Map() });
+            values.set(name, { value: entry, flags: previous?.flags ?? new Map() });
           } else {
             const flags = new Map(entry.filter(([, v]) => typeof v === 'string'));
-            // 天赋、神杖只改写加成键不重写 value 时，沿用低优先级来源里的基础值
-            const value = flags.get('value') ?? values.get(name)?.value;
-            if (value !== undefined) values.set(name, { value, flags });
+            // 天赋、神杖只改写加成键不重写 value 时，沿用低优先级来源里的基础值；
+            // 没有 value 的条目也留着，神杖、魔晶段要知道这一项在升级形态下取什么值
+            const merged = new Map([...(previous?.flags ?? new Map()), ...flags]);
+            values.set(name, { value: flags.get('value') ?? previous?.value, flags: merged });
           }
         }
       }
@@ -247,7 +249,9 @@ function withFallback(text) {
  */
 function valueRows(abilityName, kv, labelOf, damageType) {
   const candidates = [
-    ...[...kv.values].filter(([name]) => !NON_VALUE_KEYS.has(name)),
+    ...[...kv.values].filter(
+      ([name, entry]) => entry.value !== undefined && !NON_VALUE_KEYS.has(name),
+    ),
     ...TOP_LEVEL_VALUE_KEYS.filter((name) => kv.top.has(name) && !kv.values.has(name)).map(
       (name) => [name, { value: kv.top.get(name), flags: new Map() }],
     ),
@@ -334,16 +338,21 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
   };
 
   const unresolved = [];
+  const warnings = [];
 
   function read(abilityName) {
     const bodies = bodiesByAbility.get(abilityName) ?? [];
     const kv = abilityKv(bodies);
     // 描述里的占位符不分大小写，也能引用顶层字段：%abilityduration% 指的是 AbilityDuration
     const values = new Map(
-      [...kv.top, ...[...kv.values].map(([name, { value }]) => [name, value])].map(
-        ([name, value]) => [name.toLowerCase(), value],
-      ),
+      [
+        ...kv.top,
+        ...[...kv.values]
+          .filter(([, entry]) => entry.value !== undefined)
+          .map(([name, { value }]) => [name, value]),
+      ].map(([name, value]) => [name.toLowerCase(), value]),
     );
+    const flagsOf = new Map([...kv.values].map(([name, { flags }]) => [name.toLowerCase(), flags]));
     const textureMatch = bodies
       .map((b) => b.match(/"AbilityTextureName"\s*"([^"]+)"/))
       .find(Boolean);
@@ -353,7 +362,59 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
     const key = `DOTA_Tooltip_ability_${abilityName}`;
     const titles = labelOf(key);
     const descs = labelOf(`${key}_Description`);
+    const baseValue = (name) => {
+      const lower = name.toLowerCase();
+      return values.get(lower) ?? values.get(lower.replace(/_tooltip$/, ''));
+    };
+    // 神杖、魔晶段用对应形态的数值：special_bonus_scepter / _shard 覆盖基础值，带 + - 的是增量
+    const upgradeValue = (name, upgrade) => {
+      const lower = name.toLowerCase();
+      const flags = flagsOf.get(lower) ?? flagsOf.get(lower.replace(/_tooltip$/, ''));
+      const override = flags?.get(`special_bonus_${upgrade}`);
+      if (override === undefined) return baseValue(name);
+      if (!/^[+-]/.test(override)) return override;
+      const base = baseValue(name);
+      if (base === undefined || !/^-?\d+(?:\.\d+)?$/.test(base.trim())) return undefined;
+      return String(Number(base) + Number(override));
+    };
+    // 一次从左到右扫完：%% 是百分号的转义，先替换占位符再还原转义会把「%value%%%」拆错
+    const resolve = (raw, onMissing, upgrade) =>
+      raw.replace(/%([A-Za-z0-9_]*)%/g, (whole, name) => {
+        if (name === '') return '%';
+        const value = upgrade ? upgradeValue(name, upgrade) : baseValue(name);
+        if (value === undefined) {
+          onMissing(name);
+          return whole;
+        }
+        // 游戏的物品提示把换进去的数值加粗，觉醒与抽选技能的说明保持原样
+        return kind === 'items' ? `<b>${value}</b>` : value;
+      });
+    // game 把神杖、魔晶的升级说明从描述里拆成了独立 key，网站没有独立区块，
+    // 接在描述末尾，段标题用游戏里这两个物品的名字
+    const upgrades =
+      kind === 'items'
+        ? []
+        : [
+            [
+              'scepter',
+              '神杖',
+              'DOTA_Tooltip_ability_item_ultimate_scepter',
+              `${key}_scepter_description`,
+            ],
+            [
+              'shard',
+              '魔晶',
+              'DOTA_Tooltip_ability_item_aghanims_shard',
+              `${key}_shard_description`,
+            ],
+          ].map(([name, label, titleKey, bodyKey]) => ({
+            name,
+            label,
+            title: labelOf(titleKey),
+            body: labelOf(bodyKey),
+          }));
     const text = {};
+    const skippedUpgrades = new Map();
     for (const lang of langs) {
       // customval 是游戏里实时变化的计数（如己方已用几本书），网站给不出值，所在的那一行整行不展示
       const live = descs[lang]
@@ -361,27 +422,39 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
         .filter((line) => !/%customval_\w+%/.test(line))
         .join('<br>')
         .replace(/(<br>)+$/i, '');
-      // 一次从左到右扫完：%% 是百分号的转义，先替换占位符再还原转义会把「%value%%%」拆错
-      const desc = live.replace(/%([A-Za-z0-9_]*)%/g, (whole, name) => {
-        if (name === '') return '%';
-        const lower = name.toLowerCase();
-        const value = values.get(lower) ?? values.get(lower.replace(/_tooltip$/, ''));
-        if (value === undefined) {
-          unresolved.push(`${abilityName} 的 %${name}%`);
-          return whole;
+      const parts = [resolve(live, (name) => unresolved.push(`${abilityName} 的 %${name}%`))];
+      for (const upgrade of upgrades) {
+        const title = upgrade.title[lang];
+        const raw = upgrade.body[lang];
+        if (!title || !raw) continue;
+        const missing = [];
+        const body = resolve(raw, (name) => missing.push(name), upgrade.name);
+        // 神杖、魔晶段是补充内容：数值取不到时整段不接，免得页面上出现 %xxx%，主描述照旧拦
+        if (missing.length) {
+          const names = skippedUpgrades.get(upgrade.label) ?? new Set();
+          for (const name of missing) names.add(name);
+          skippedUpgrades.set(upgrade.label, names);
+          continue;
         }
-        // 游戏的物品提示把换进去的数值加粗，觉醒与抽选技能的说明保持原样
-        return kind === 'items' ? `<b>${value}</b>` : value;
-      });
+        parts.push(`<h1>${title}</h1>${body}`);
+      }
       // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换。
       // 游戏用 GameplayValues 的 span 包驱散类型这类取值，显示上与正文无异，去掉标记只留文字
       text[lang] = {
         title: titles[lang].replace(/\n/g, '<br>'),
-        desc: desc
+        desc: parts
+          .filter(Boolean)
+          .join('<br><br>')
           .replace(/<\/b>%/g, '%</b>')
           .replace(/<\/?span\b[^>]*>/gi, '')
           .replace(/\n/g, '<br>'),
       };
+    }
+    if (skippedUpgrades.size) {
+      const sections = [...skippedUpgrades].map(
+        ([label, names]) => `${label}(${[...names].join('、')})`,
+      );
+      warnings.push(`${abilityName} 的${sections.join('、')}说明取不到数值，没有接进描述`);
     }
     for (const lang of langs) {
       if (!text[lang].title) text[lang].title = text.en.title;
@@ -412,7 +485,7 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
     return { found: bodies.length > 0, texture, text, ability };
   }
 
-  return { read, locales, unresolved };
+  return { read, locales, unresolved, warnings };
 }
 
 /**

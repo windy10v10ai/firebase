@@ -23,7 +23,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
 
 ## 日常一条命令
 
-`cd web && npm run game:sync` 一次跑完物品、百科、觉醒图、觉醒数据与英雄头像，同一份 game 提交的产物放同一个 PR。全量跑不需要判断要不要同步，下面只写觉醒这一支：只想看觉醒、或某一步自检失败要定位时，才单跑 `npm run awaken:sync`、`npm run awaken:images`。
+`cd web && npm run game:sync` 一次跑完物品、百科、觉醒图、觉醒数据与英雄头像，同一份 game 提交的产物放同一个 PR。全量跑不需要判断要不要同步，下面只写觉醒这一支：只想看觉醒、或某一步自检失败要定位时，才单跑 `npm run awaken:sync`。
 
 ## 步骤
 
@@ -40,7 +40,7 @@ game 仓库动过下面任意一处就该跑一次，**包括看起来与文案�
    `git -C <game> log --oneline <旧SHA>..HEAD -- <相关路径>`。
    git 历史用来解释「为什么变了」，产物 diff 回答「变了什么」。
 7. **校验**：`npm run lint && npm run format:check && npx tsc --noEmit && npm run test && npm run build`。
-8. **开 PR**：分支 `chore/sync-<日期>`，正文贴变更说明与产物 diff 摘要。物品百科的产物有变化时并进同一个 PR，不要为两支各开一个。
+8. **开 PR**：分支 `chore/sync-<内容>`（如 `chore/sync-game-data-2026-11-05`），正文贴变更说明与产物 diff 摘要。物品百科的产物有变化时并进同一个 PR，不要为两支各开一个。
 
 ## 产物里的技能提示框数据
 

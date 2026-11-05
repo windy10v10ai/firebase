@@ -1,9 +1,9 @@
 {
   "abaddon_borrowed_time": {
     "desc": {
-      "zh": "启动后驱散自身，所有受到的伤害转而产生<font color='#07d738'>治疗</font>效果。只要技能不在冷却中，在生命值低于1000 2000 3000 4000点时技能会自动启动。<br><br>驱散类型：强驱散",
-      "en": "When activated, dispels you and all damage dealt to you will heal instead of harm. If the ability is not on cooldown, it will automatically activate if your health falls below 1000 2000 3000 4000.<br><br>DISPEL TYPE: Strong Dispel",
-      "ru": "Применяет на владельца развеивание и следующие несколько секунд обращает весь получаемый им урон в лечение. Если способность готова, то она сработает автоматически, как только здоровье владельца упадёт ниже 1000 2000 3000 4000.<br><br>ТИП РАЗВЕИВАНИЯ: сильное"
+      "zh": "启动后驱散自身，所有受到的伤害转而产生<font color='#07d738'>治疗</font>效果。只要技能不在冷却中，在生命值低于1000 2000 3000 4000点时技能会自动启动。<br><br>驱散类型：强驱散<br><br><h1>阿哈利姆神杖</h1>提升持续时间。启动回光返照后，亚巴顿附近迷雾缠绕的施法距离内友方英雄受到的伤害超过750点时亚巴顿就会自动对其施放迷雾缠绕。",
+      "en": "When activated, dispels you and all damage dealt to you will heal instead of harm. If the ability is not on cooldown, it will automatically activate if your health falls below 1000 2000 3000 4000.<br><br>DISPEL TYPE: Strong Dispel<br><br><h1>Aghanim's Scepter</h1>Increases duration. While Borrowed Time is active, anytime an ally takes more than 750 damage while within Mist Coil's cast range of Abaddon, an individual Mist Coil will automatically fire towards that ally.",
+      "ru": "Применяет на владельца развеивание и следующие несколько секунд обращает весь получаемый им урон в лечение. Если способность готова, то она сработает автоматически, как только здоровье владельца упадёт ниже 1000 2000 3000 4000.<br><br>ТИП РАЗВЕИВАНИЯ: сильное<br><br><h1>Aghanim's Scepter</h1>Увеличивает длительность. Во время действия способность Mist Coil автоматически срабатывает на союзников в радиусе её применения, когда они получают более 750 урона."
     },
     "ability": {
       "behavior": "noTarget",
@@ -399,9 +399,9 @@
   },
   "dark_willow_shadow_realm": {
     "desc": {
-      "zh": "邪影芳灵遁入暗影之境，无法成为攻击或技能的目标。她的下次攻击具有600额外攻击距离，并且造成额外魔法伤害，暗影之境技能也会随之结束。在暗影中时间越长，伤害越高。在暗影之境内的时间超过3.0秒将达到最高伤害。",
-      "en": "Dark Willow recedes into the shadows, becoming untargetable.  Her next attack has 600 bonus attack range and deals bonus magic damage, and will end Shadow Realm. Damage scales based on how long she remains under the effects of Shadow Realm, the maximum being reached after 3.0 seconds.",
-      "ru": "Герой прячется в мир теней, отчего его нельзя выбрать целью. Действие способности прервётся, если совершить атаку. Она имеет увеличенную на 600 дальность, а также нанесёт дополнительный магический урон, зависящий от того, как долго герой пробыл в мире теней. Максимальный эффект достигается после 3.0 сек."
+      "zh": "邪影芳灵遁入暗影之境，无法成为攻击或技能的目标。她的下次攻击具有600额外攻击距离，并且造成额外魔法伤害，暗影之境技能也会随之结束。在暗影中时间越长，伤害越高。在暗影之境内的时间超过3.0秒将达到最高伤害。<br><br><h1>阿哈利姆神杖</h1>发动普通攻击不再使邪影芳灵脱离暗影之境。持续时间内每次攻击都带有额外伤害。",
+      "en": "Dark Willow recedes into the shadows, becoming untargetable.  Her next attack has 600 bonus attack range and deals bonus magic damage, and will end Shadow Realm. Damage scales based on how long she remains under the effects of Shadow Realm, the maximum being reached after 3.0 seconds.<br><br><h1>Aghanim's Scepter</h1>Attacking no longer takes Dark Willow out of Shadow Realm. Each attack still has bonus damage based on the duration of the buff.",
+      "ru": "Герой прячется в мир теней, отчего его нельзя выбрать целью. Действие способности прервётся, если совершить атаку. Она имеет увеличенную на 600 дальность, а также нанесёт дополнительный магический урон, зависящий от того, как долго герой пробыл в мире теней. Максимальный эффект достигается после 3.0 сек.<br><br><h1>Aghanim's Scepter</h1>Атака не прерывает действие способности, и до её окончания каждая атака будет наносить дополнительный урон, зависящий от времени пребывания в мире теней."
     },
     "ability": {
       "behavior": "noTarget",
@@ -627,9 +627,9 @@
   },
   "legion_commander_duel": {
     "desc": {
-      "zh": "军团指挥官强制与目标敌方英雄进行决斗，持续短暂的数秒。决斗开始后双方英雄不能使用任何物品，而目标敌方英雄不能使用技能。如果有英雄在决斗期间死亡，赢得决斗的英雄将永久获得攻击力加成。",
-      "en": "Legion Commander and the target enemy hero are forced to attack each other for a short duration. Neither hero can use items, and the target enemy hero cannot use abilities. If either hero dies during the duration, the hero winning the Duel gains permanent bonus damage.",
-      "ru": "Владелец способности вызывает выбранного вражеского героя на короткую дуэль, в которой они вынуждены атаковать друг друга и не могут активировать предметы. Также запрещает цели применять способности. Если один из героев погибнет во время дуэли, другой станет победителем и получит постоянный бонус к урону."
+      "zh": "军团指挥官强制与目标敌方英雄进行决斗，持续短暂的数秒。决斗开始后双方英雄不能使用任何物品，而目标敌方英雄不能使用技能。如果有英雄在决斗期间死亡，赢得决斗的英雄将永久获得攻击力加成。<br><br><h1>阿哈利姆神杖</h1>如果军团指挥官在决斗中获胜，会在她周围自动触发强攻。",
+      "en": "Legion Commander and the target enemy hero are forced to attack each other for a short duration. Neither hero can use items, and the target enemy hero cannot use abilities. If either hero dies during the duration, the hero winning the Duel gains permanent bonus damage.<br><br><h1>Aghanim's Scepter</h1>When Legion Commander wins a duel, Press the Attack is automatically triggered around her.",
+      "ru": "Владелец способности вызывает выбранного вражеского героя на короткую дуэль, в которой они вынуждены атаковать друг друга и не могут активировать предметы. Также запрещает цели применять способности. Если один из героев погибнет во время дуэли, другой станет победителем и получит постоянный бонус к урону.<br><br><h1>Aghanim's Scepter</h1>Победив в дуэли, владелец способности автоматически накладывает эффект Press the Attack в области вокруг себя."
     },
     "ability": {
       "behavior": "target",
@@ -795,7 +795,7 @@
             "1200"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -923,9 +923,9 @@
   },
   "doom_bringer_doom_awakened": {
     "desc": {
-      "zh": "对敌人施加末日诅咒，对其进行弱驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
-      "en": "Inflicts a curse that applies a Basic Dispel to an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.",
-      "ru": "Накладывает на врага проклятие Рок, применяет к нему простое развеивание и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня."
+      "zh": "对敌人施加末日诅咒，对其进行弱驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。<br><br><h1>阿哈利姆神杖</h1>末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。",
+      "en": "Inflicts a curse that applies a Basic Dispel to an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.<br><br><h1>Aghanim's Scepter</h1>Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.",
+      "ru": "Накладывает на врага проклятие Рок, применяет к нему простое развеивание и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня.<br><br><h1>Aghanim's Scepter</h1>Рок также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Рок на врагов в радиусе 350, сам не получая Рок."
     },
     "ability": {
       "behavior": "target",
@@ -985,9 +985,9 @@
   },
   "puck_dream_coil": {
     "desc": {
-      "zh": "创造一个变化无常的的魔法梦境来困住敌方英雄，对他们造成伤害和<font color='#e3d59e'>束缚</font>。如果被困住的敌方英雄试图挣脱缠绕走出梦境，将因为梦境破碎而受到<font color='#2dd5e4'>眩晕</font>和额外伤害。",
-      "en": "Creates a coil of volatile magic that latches onto enemy Heroes, damaging and leashing them.  If the enemy hero stretches the coil by moving too far away, it snaps, stunning and dealing additional damage.",
-      "ru": "Цепляет вражеских героев нестабильной магической спиралью, накладывая на них эффект привязки и нанося им урон. Если враг отойдёт слишком далеко от центра спирали, то она разорвётся, оглушив его и нанеся дополнительный урон."
+      "zh": "创造一个变化无常的的魔法梦境来困住敌方英雄，对他们造成伤害和<font color='#e3d59e'>束缚</font>。如果被困住的敌方英雄试图挣脱缠绕走出梦境，将因为梦境破碎而受到<font color='#2dd5e4'>眩晕</font>和额外伤害。<br><br><h1>阿哈利姆神杖</h1>梦境缠绕作用下的所有敌人都会被帕克攻击，攻击频率基于帕克攻击频率的90%。即使目标挣脱梦境，被<font color='#2dd5e4'>眩晕</font>时攻击也会继续。",
+      "en": "Creates a coil of volatile magic that latches onto enemy Heroes, damaging and leashing them.  If the enemy hero stretches the coil by moving too far away, it snaps, stunning and dealing additional damage.<br><br><h1>Aghanim's Scepter</h1>All enemies affected by Dream Coil are attacked at a rate equal to 90% of Puck's attack rate. The attacks continue while the target is stunned if they break the Dream Coil.",
+      "ru": "Цепляет вражеских героев нестабильной магической спиралью, накладывая на них эффект привязки и нанося им урон. Если враг отойдёт слишком далеко от центра спирали, то она разорвётся, оглушив его и нанеся дополнительный урон.<br><br><h1>Aghanim's Scepter</h1>Владелец способности атакует всех врагов под её действием со скоростью в 90% от обычной. Если враг разорвёт спираль, то атаки прекратятся лишь после того, как закончится оглушение."
     },
     "ability": {
       "behavior": "point",
@@ -1170,9 +1170,9 @@
   },
   "antimage_counterspell": {
     "desc": {
-      "zh": "被动提升魔法抗性。可以主动开启法术反制，创造一个环绕敌法师的反魔法外壳，抵挡和反弹所有指向性技能。",
-      "en": "Passively grants magic resistance. Counterspell may be activated to create an anti-magic shell around Anti-Mage that blocks and reflects any targeted spells.",
-      "ru": "Пассивно увеличивает сопротивление магическому урону. Можно применить, чтобы создать вокруг себя противомагический щит, который блокирует и отражает все направленные заклинания."
+      "zh": "被动提升魔法抗性。可以主动开启法术反制，创造一个环绕敌法师的反魔法外壳，抵挡和反弹所有指向性技能。<br><br><h1>阿哈利姆魔晶</h1>开启后反弹指向性技能时会在敌方施法者身边制造一个敌法师的闪烁碎片。",
+      "en": "Passively grants magic resistance. Counterspell may be activated to create an anti-magic shell around Anti-Mage that blocks and reflects any targeted spells.<br><br><h1>Aghanim's Shard</h1>Creates a blinked fragment of Anti-Mage next to the enemy caster upon reflecting their unit-targeted spell while active.",
+      "ru": "Пассивно увеличивает сопротивление магическому урону. Можно применить, чтобы создать вокруг себя противомагический щит, который блокирует и отражает все направленные заклинания.<br><br><h1>Aghanim's Shard</h1>Создаёт фрагмент владельца рядом с врагом, применившим отражённую способность."
     },
     "ability": {
       "behavior": "noTarget",
@@ -1408,9 +1408,9 @@
   },
   "imba_chaos_knight_phantasm": {
     "desc": {
-      "zh": "召集其他维度的混沌骑士来到这个世界，与此处的混沌骑士一同作战。每当混沌骑士攻击时，其他的混沌骑士也会对目标开展额外攻击，其他的混沌骑士的攻击有短暂的冷却。",
-      "en": "Summons other Chaos Knights from other dimensions to Chaos Knight's side and fight with alongside him as a part of his being. Whenever Chaos Knight attacks, the other Chaos Knights will also deliver their own attacks on the target. The additional Chaos Knights' attacks have a short cooldown before they can strike again.",
-      "ru": "Призывает к Хаос-рыцарю других Хаос-рыцарей из иных измерений, которые сражаются вместе с ним. Когда Хаос-рыцарь атакует, остальные Хаос-рыцари наносят по цели собственную атаку, у которой есть короткий откат."
+      "zh": "召集其他维度的混沌骑士来到这个世界，与此处的混沌骑士一同作战。每当混沌骑士攻击时，其他的混沌骑士也会对目标开展额外攻击，其他的混沌骑士的攻击有短暂的冷却。<br><br><h1>阿哈利姆神杖</h1>增加大招攻击次数，降低攻击冷却时间。",
+      "en": "Summons other Chaos Knights from other dimensions to Chaos Knight's side and fight with alongside him as a part of his being. Whenever Chaos Knight attacks, the other Chaos Knights will also deliver their own attacks on the target. The additional Chaos Knights' attacks have a short cooldown before they can strike again.<br><br><h1>Aghanim's Scepter</h1>Increases the number of extra attacks and reduces the cooldown between the extra attacks.",
+      "ru": "Призывает к Хаос-рыцарю других Хаос-рыцарей из иных измерений, которые сражаются вместе с ним. Когда Хаос-рыцарь атакует, остальные Хаос-рыцари наносят по цели собственную атаку, у которой есть короткий откат.<br><br><h1>Aghanim's Scepter</h1>Увеличивает число дополнительных атак и снижает откат между ними."
     },
     "ability": {
       "behavior": "noTarget",
@@ -1881,9 +1881,9 @@
   },
   "shadow_shaman_mass_serpent_ward": {
     "desc": {
-      "zh": "召唤4个群蛇守卫攻击敌方单位和建筑。守卫免疫魔法。非英雄单位对毒蛇守卫造成半额伤害。",
-      "en": "Summons 4 Serpent Wards to attack enemy units and structures. The Wards are immune to magic. Creeps deal half damage to the Serpent Ward.",
-      "ru": "Призывает 4 невосприимчивых к магии змеиных тотемов, атакующих врагов и постройки. Крипы наносят тотемам в два раза меньше урона."
+      "zh": "召唤4个群蛇守卫攻击敌方单位和建筑。守卫免疫魔法。非英雄单位对毒蛇守卫造成半额伤害。<br><br><h1>阿哈利姆魔晶</h1>可以使用巨蟒之瓮技能制造一个巨蛇守卫。",
+      "en": "Summons 4 Serpent Wards to attack enemy units and structures. The Wards are immune to magic. Creeps deal half damage to the Serpent Ward.<br><br><h1>Aghanim's Shard</h1>Allows to create a Mega Ward using the Urnaconda ability.",
+      "ru": "Призывает 4 невосприимчивых к магии змеиных тотемов, атакующих врагов и постройки. Крипы наносят тотемам в два раза меньше урона.<br><br><h1>Aghanim's Shard</h1>Позволяет создать гигантский змеиный тотем способностью Urnaconda."
     },
     "ability": {
       "behavior": "point",
@@ -2215,9 +2215,9 @@
   },
   "brewmaster_primal_split_lua": {
     "desc": {
-      "zh": "酒仙这下NB了，获得四种拳法的效果。",
-      "en": "Gain the bonunses of four different fighting styles.",
-      "ru": "Теперь Пивовар крут: получает эффекты всех четырёх стилей боя."
+      "zh": "酒仙这下NB了，获得四种拳法的效果。<br><br><h1>阿哈利姆魔晶</h1>提升元素分离的持续时间。",
+      "en": "Gain the bonunses of four different fighting styles.<br><br><h1>Aghanim's Shard</h1>Increases duration.",
+      "ru": "Теперь Пивовар крут: получает эффекты всех четырёх стилей боя.<br><br><h1>Aghanim's Shard</h1>Увеличивает длительность разделения стихий."
     },
     "ability": {
       "behavior": "noTarget",
@@ -2653,7 +2653,7 @@
             "800"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -2756,9 +2756,9 @@
   },
   "jakiro_macropyre": {
     "desc": {
-      "zh": "杰奇洛释放出烈焰风暴，烈焰风暴作用范围很宽，并持续数秒。烈焰风暴每秒都会对作用范围内的敌人造成伤害。",
-      "en": "Jakiro exhales a wide line of lasting flames, which deals damage per second to any enemy units caught in the fire.",
-      "ru": "Герой извергает широкий поток жидкого пламени, который держится некоторое время и ежесекундно наносит урон вражеским существам."
+      "zh": "杰奇洛释放出烈焰风暴，烈焰风暴作用范围很宽，并持续数秒。烈焰风暴每秒都会对作用范围内的敌人造成伤害。<br><br><h1>阿哈利姆神杖</h1>提升烈焰焚身的持续时间，并且变为纯粹伤害。杰奇洛会在烈焰焚身边缘放出两道冰墙，对试图穿过的所有敌人减速60%。",
+      "en": "Jakiro exhales a wide line of lasting flames, which deals damage per second to any enemy units caught in the fire.<br><br><h1>Aghanim's Scepter</h1>Increases Macropyre duration and causes it to deal Pure damage. Jakiro emits two walls of ice along the edges of the Macropyre that slow any enemies trying to cross them by 60%.",
+      "ru": "Герой извергает широкий поток жидкого пламени, который держится некоторое время и ежесекундно наносит урон вражеским существам.<br><br><h1>Aghanim's Scepter</h1>Увеличивает длительность и меняет тип урона на чистый. По бокам от линии огня появляются ледяные стены, которые замедляют зашедших на них врагов на 60%."
     },
     "ability": {
       "behavior": "point",
@@ -2954,9 +2954,9 @@
   },
   "treant_overgrowth": {
     "desc": {
-      "zh": "在树精卫士周围召唤出疯狂生长的伤害性藤条和枝干，造成伤害并且阻止被缠绕的敌人移动、闪烁、进入隐身或攻击。",
-      "en": "Summons an overgrowth of vines and branches around Treant that deal damage to afflicted enemies and prevent them from moving, blinking, going invisible, or attacking.",
-      "ru": "Вокруг героя разрастаются опутывающие врагов корни и лозы. Жертвы получают периодический урон и не могут перемещаться, телепортироваться, уходить в невидимость или атаковать."
+      "zh": "在树精卫士周围召唤出疯狂生长的伤害性藤条和枝干，造成伤害并且阻止被缠绕的敌人移动、闪烁、进入隐身或攻击。<br><br><h1>阿哈利姆魔晶</h1>增加疯狂生长作用范围",
+      "en": "Summons an overgrowth of vines and branches around Treant that deal damage to afflicted enemies and prevent them from moving, blinking, going invisible, or attacking.<br><br><h1>Aghanim's Shard</h1>Increases Overgrowth Range.",
+      "ru": "Вокруг героя разрастаются опутывающие врагов корни и лозы. Жертвы получают периодический урон и не могут перемещаться, телепортироваться, уходить в невидимость или атаковать.<br><br><h1>Aghanim's Shard</h1>Увеличивает радиус буйного роста"
     },
     "ability": {
       "behavior": "noTarget",
@@ -3192,9 +3192,9 @@
   },
   "enigma_black_hole": {
     "desc": {
-      "zh": "持续施法 - 召唤一个强引力漩涡吸住敌方单位。被黑洞影响的单位不能移动、攻击或施法。",
-      "en": "CHANNELED - Summons a vortex that sucks in nearby enemy units.  Enemies affected by Black Hole cannot move, attack, or cast spells.",
-      "ru": "ПРЕРЫВАЕМАЯ — образует воронку, всасывающую всех врагов в зоне действия. При этом они не могут двигаться, атаковать и применять способности."
+      "zh": "持续施法 - 召唤一个强引力漩涡吸住敌方单位。被黑洞影响的单位不能移动、攻击或施法。<br><br><h1>阿哈利姆神杖</h1>黑洞额外造成等同于单位4%最大生命值的每秒伤害，并且产生一个1000范围，没有打断效果的牵引效果。牵引速度为150。",
+      "en": "CHANNELED - Summons a vortex that sucks in nearby enemy units.  Enemies affected by Black Hole cannot move, attack, or cast spells.<br><br><h1>Aghanim's Scepter</h1>Black Hole deals additional damage equivalent to 4% of the unit's Max Health per second and does a non-interrupting pull towards it in a 1000 AoE. Pulls at a rate of 150.",
+      "ru": "ПРЕРЫВАЕМАЯ — образует воронку, всасывающую всех врагов в зоне действия. При этом они не могут двигаться, атаковать и применять способности.<br><br><h1>Aghanim's Scepter</h1>Способность каждую секунду наносит дополнительный урон, равный 4% от максимального здоровья жертв. Притягивает к центру чёрной дыры врагов в радиусе 1000, не прерывая их действия."
     },
     "ability": {
       "behavior": "channeled",
@@ -3572,7 +3572,7 @@
             "650"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -3833,9 +3833,9 @@
   },
   "earthshaker_enchant_totem": {
     "desc": {
-      "zh": "强化撼地者的图腾，使下次攻击拥有额外攻击力和200攻击距离加成。",
-      "en": "Empowers Earthshaker's totem, causing it to deal extra damage and have 200 bonus attack range on the next attack.",
-      "ru": "Заряжает тотем, увеличивая урон от следующей атаки и увеличивая её дальность на 200."
+      "zh": "强化撼地者的图腾，使下次攻击拥有额外攻击力和200攻击距离加成。<br><br><h1>阿哈利姆神杖</h1>强化图腾可以对地施放，施放后会跳至半空中再降落至目标地点，在目标地点施放强化图腾。双击技能会按原技能施放，不会跳跃。强化图腾拥有分裂效果。",
+      "en": "Empowers Earthshaker's totem, causing it to deal extra damage and have 200 bonus attack range on the next attack.<br><br><h1>Aghanim's Scepter</h1>Enchant Totem becomes a ground target ability, causing Earthshaker to jump in the air and land at the target spot, casting Enchant Totem there.  Self-casting the ability will behave in the original form, without jumping. Grants Enchant Totem a cleaving attack.",
+      "ru": "Заряжает тотем, увеличивая урон от следующей атаки и увеличивая её дальность на 200.<br><br><h1>Aghanim's Scepter</h1>Позволяет прыгнуть в указанную точку и применить Enchant Totem в ней. Применение на себя работает как прежде, без прыжка. Атака с эффектом этой способности наносит прорубающий урон."
     },
     "ability": {
       "behavior": "noTarget",
@@ -3906,7 +3906,7 @@
             "625"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -4124,9 +4124,9 @@
   },
   "special_bonus_unique_sniper_assassinate_upgrade": {
     "desc": {
-      "zh": "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。",
-      "en": "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.",
-      "ru": "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном."
+      "zh": "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><h1>阿哈利姆神杖</h1>命中的敌方英雄附加眩晕效果。",
+      "en": "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><h1>Aghanim's Scepter</h1>Affected enemy heroes are also stunned.",
+      "ru": "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.<br><br><h1>Aghanim's Scepter</h1>Поражённые герои также оглушаются."
     },
     "ability": {
       "behavior": "point",
@@ -4220,7 +4220,7 @@
             "1875"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -4352,9 +4352,9 @@
   },
   "lion_finger_of_death": {
     "desc": {
-      "zh": "撕裂一个敌方单位，将其折磨得死去活来，并造成巨大伤害。<br><br>使用死亡之指后，莱恩的手臂增强了力量，使他可以发动带有分裂效果的近战攻击，攻击距离为250，并拥有移动速度加成。<br><br>每次技能或重拳击杀英雄后都会分别使技能和重拳永久获得额外伤害和攻击力。<br><br>技能设为（右键点击技能栏图标）后可以禁用近战攻击。",
-      "en": "Rips at an enemy unit, trying to turn it inside-out, dealing massive damage to the target.<br><br>After using Finger of Death, Lion's hand becomes empowered, allowing him to use a cleaving melee attack with 250 range with bonus movement speed.<br><br>Finger of Death gains permanent bonus damage for it and the fist for each enemy Hero it or the fist kills. <br><br>The melee attack may be disabled by setting the ability to Alt Cast.",
-      "ru": "Обрушивает свою ярость на вражеское существо, пытаясь вывернуть его наизнанку и нанося ему большой урон.<br><br>После применения этой способности рука героя усиливается: он может перейти в ближний бой с дальностью атаки в 250 и прорубанием, а также получает бонус к скорости передвижения.<br><br>За каждого вражеского героя, убитого этой способностью или рукой, урон обеих навсегда увеличивается.<br><br>Ближний бой можно выключить, сменив применение способности на альтернативное."
+      "zh": "撕裂一个敌方单位，将其折磨得死去活来，并造成巨大伤害。<br><br>使用死亡之指后，莱恩的手臂增强了力量，使他可以发动带有分裂效果的近战攻击，攻击距离为250，并拥有移动速度加成。<br><br>每次技能或重拳击杀英雄后都会分别使技能和重拳永久获得额外伤害和攻击力。<br><br>技能设为（右键点击技能栏图标）后可以禁用近战攻击。<br><br><h1>阿哈利姆神杖</h1>死亡之指的初始施法获得范围型伤害，并且后续的近战攻击提升持续时间和分裂伤害。",
+      "en": "Rips at an enemy unit, trying to turn it inside-out, dealing massive damage to the target.<br><br>After using Finger of Death, Lion's hand becomes empowered, allowing him to use a cleaving melee attack with 250 range with bonus movement speed.<br><br>Finger of Death gains permanent bonus damage for it and the fist for each enemy Hero it or the fist kills. <br><br>The melee attack may be disabled by setting the ability to Alt Cast.<br><br><h1>Aghanim's Scepter</h1>Finger of Death gains area of effect damage on the initial cast, and increases duration and cleave damage on its subsequent melee attacks.",
+      "ru": "Обрушивает свою ярость на вражеское существо, пытаясь вывернуть его наизнанку и нанося ему большой урон.<br><br>После применения этой способности рука героя усиливается: он может перейти в ближний бой с дальностью атаки в 250 и прорубанием, а также получает бонус к скорости передвижения.<br><br>За каждого вражеского героя, убитого этой способностью или рукой, урон обеих навсегда увеличивается.<br><br>Ближний бой можно выключить, сменив применение способности на альтернативное.<br><br><h1>Aghanim's Scepter</h1>Способность наносит урон по области. Увеличивает длительность ближнего боя и прорубающий урон."
     },
     "ability": {
       "behavior": "target",
@@ -4432,7 +4432,7 @@
           ],
           "percent": false,
           "aoe": false,
-          "spellAmp": true
+          "spellAmp": false
         },
         {
           "label": {
@@ -4508,9 +4508,9 @@
   },
   "silencer_global_silence": {
     "desc": {
-      "zh": "沉默术士停止一切声音，<font color='#6db6e9'>阻止</font>地图上所有敌方英雄和单位施法。",
-      "en": "Silencer stops all sound, preventing enemy heroes and units on the map from casting spells.",
-      "ru": "Герой заглушает все звуки на поле боя, не давая врагам применять способности."
+      "zh": "沉默术士停止一切声音，<font color='#6db6e9'>阻止</font>地图上所有敌方英雄和单位施法。<br><br><h1>阿哈利姆神杖</h1>全领域静默在全领域静默的持续时间内对英雄施加奥术诅咒。",
+      "en": "Silencer stops all sound, preventing enemy heroes and units on the map from casting spells.<br><br><h1>Aghanim's Scepter</h1>Global Silence applies Arcane Curse to heroes for the duration of Global Silence.",
+      "ru": "Герой заглушает все звуки на поле боя, не давая врагам применять способности.<br><br><h1>Aghanim's Scepter</h1>На время действия этой способности на вражеских героев также накладывается эффект Arcane Curse."
     },
     "ability": {
       "behavior": "noTarget",
@@ -4678,9 +4678,9 @@
   },
   "kunkka_ghostship": {
     "desc": {
-      "zh": "召唤一艘幽灵船驶过战场，直到撞成粉碎，残骸周围的敌人将会因撞击受到伤害并<font color='#2dd5e4'>眩晕</font>。<br><br>被幽灵船碰到的友军会获得2倍效果的统帅朗姆酒。",
-      "en": "Summons a ghostly ship that sails through the battle before smashing apart, damaging and stunning all enemies caught near the wreckage.<br><br>Allied heroes touched by the Ghostship are given a 2x strong swig of The Admiral's Rum.",
-      "ru": "Призывает призрачный корабль, который проплывает сквозь битву и разбивается, оглушая врагов в области крушения и нанося им урон.<br><br>На задетых кораблём союзников накладывается ром от способности Admiral's Rum, действующий в 2 раза сильнее."
+      "zh": "召唤一艘幽灵船驶过战场，直到撞成粉碎，残骸周围的敌人将会因撞击受到伤害并<font color='#2dd5e4'>眩晕</font>。<br><br>被幽灵船碰到的友军会获得2倍效果的统帅朗姆酒。<br><br><h1>阿哈利姆神杖</h1>幽灵船在目标地点以2.5秒的间隔产生2艘船组成的舰队。每艘船现在还会从左舷和右舷发射3波炮弹，穿过敌人时造成40%幽灵船伤害。",
+      "en": "Summons a ghostly ship that sails through the battle before smashing apart, damaging and stunning all enemies caught near the wreckage.<br><br>Allied heroes touched by the Ghostship are given a 2x strong swig of The Admiral's Rum.<br><br><h1>Aghanim's Scepter</h1>Ghostship creates a fleet of 2 ships at the target point on a 2.5 second interval. Each ship now also fires 3 waves of cannonballs from the port and starboard side that deal 40% of Ghostship's damage as they pass through enemies.",
+      "ru": "Призывает призрачный корабль, который проплывает сквозь битву и разбивается, оглушая врагов в области крушения и нанося им урон.<br><br>На задетых кораблём союзников накладывается ром от способности Admiral's Rum, действующий в 2 раза сильнее.<br><br><h1>Aghanim's Scepter</h1>Призывает флот из 2 призрачных кораблей, которые разбиваются в указанной точке с интервалом в 2.5 сек. Каждый корабль даёт 3 залпа из пушек с каждого борта, нанося 40% урона от способности врагам, сквозь которых пролетели ядра."
     },
     "ability": {
       "behavior": "point",
@@ -4823,7 +4823,7 @@
             "300"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -4968,7 +4968,7 @@
             "700"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -5107,9 +5107,9 @@
   },
   "dazzle_bad_juju": {
     "desc": {
-      "zh": "减少其他所有技能的剩余冷却时间。施放邪能会暂时增加生命消耗。",
-      "en": "Decreases the remaining cooldown of all other abilities. Casting Bad Juju temporarily increases its health cost.",
-      "ru": "Сокращает оставшееся время восстановления всех других способностей. Применение дурных чар временно повышает расход здоровья."
+      "zh": "减少其他所有技能的剩余冷却时间。施放邪能会暂时增加生命消耗。<br><br><h1>阿哈利姆神杖</h1>编织也会减少物品的冷却时间。",
+      "en": "Decreases the remaining cooldown of all other abilities. Casting Bad Juju temporarily increases its health cost.<br><br><h1>Aghanim's Scepter</h1>Weave also reduces item cooldowns.",
+      "ru": "Сокращает оставшееся время восстановления всех других способностей. Применение дурных чар временно повышает расход здоровья.<br><br><h1>Aghanim's Scepter</h1>Плетение также сокращает перезарядку предметов."
     },
     "ability": {
       "behavior": "noTarget",
@@ -5174,9 +5174,9 @@
   },
   "omniknight_guardian_angel": {
     "desc": {
-      "zh": "全能骑士召唤出守护天使，使全能骑士附近的所有友方单位对物理伤害免疫。",
-      "en": "Omniknight calls upon a Guardian Angel that grants immunity from physical damage to all allied units near Omniknight.",
-      "ru": "Призывает ангела-хранителя, который полностью защищает союзников поблизости от физического урона."
+      "zh": "全能骑士召唤出守护天使，使全能骑士附近的所有友方单位对物理伤害免疫。<br><br><h1>阿哈利姆神杖</h1>守护天使的作用范围为全地图，影响建筑并增强生命回复。",
+      "en": "Omniknight calls upon a Guardian Angel that grants immunity from physical damage to all allied units near Omniknight.<br><br><h1>Aghanim's Scepter</h1>Guardian Angel has global radius, affects buildings, and amplifies health restoration.",
+      "ru": "Призывает ангела-хранителя, который полностью защищает союзников поблизости от физического урона.<br><br><h1>Aghanim's Scepter</h1>Делает радиус способности неограниченным. Она действует на постройки и увеличивает пополнение здоровья."
     },
     "ability": {
       "behavior": "noTarget",
@@ -5302,9 +5302,9 @@
   },
   "sven_storm_bolt": {
     "desc": {
-      "zh": "斯温用他充满魔力的手套对目标周围内所有敌人造成伤害和<font color='#2dd5e4'>眩晕</font>。",
-      "en": "Sven unleashes his magical gauntlet that deals damage and stuns enemy units in a small area around the target.",
-      "ru": "Герой высвобождает всю мощь своей магической рукавицы, нанося жертве и её союзникам в небольшой области урон и оглушая их."
+      "zh": "斯温用他充满魔力的手套对目标周围内所有敌人造成伤害和<font color='#2dd5e4'>眩晕</font>。<br><br><h1>阿哈利姆神杖</h1>提升施法距离，并且对目标施加弱驱散效果。可以影响无敌目标。设为<font color=\"#FF0000\">多样施法</font>（右键点击技能栏图标）后，额外造成180点伤害并且斯温会跟随风暴之拳行进。",
+      "en": "Sven unleashes his magical gauntlet that deals damage and stuns enemy units in a small area around the target.<br><br><h1>Aghanim's Scepter</h1>Increases cast range and applies a basic dispel on the target. Affects invulnerable units. If alt-cast, it deals an additional 180 damage and Sven travels with the Storm Hammer.",
+      "ru": "Герой высвобождает всю мощь своей магической рукавицы, нанося жертве и её союзникам в небольшой области урон и оглушая их.<br><br><h1>Aghanim's Scepter</h1>Увеличивает дальность применения и применяет на цель нормальное развеивание. Действует на неуязвимых существ. Если включено альтернативное применение, герой полетит за снарядом, а способность нанесёт на 180 урона больше."
     },
     "ability": {
       "behavior": "target",
@@ -5344,7 +5344,7 @@
             "330"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         }
       ],
@@ -5462,9 +5462,9 @@
   },
   "templar_assassin_refraction": {
     "desc": {
-      "zh": "圣堂刺客变得高度难以捉摸，获得一个小型<font color='#b97812'>护盾</font>，同时获得攻击力加成。攻击力加成和<font color='#b97812'>护盾</font>效果相互独立，并且都是有限次数的效果。如果<font color='#b97812'>护盾</font>被摧毁，只要还有能量点数就会再产生一个新的。如果单次伤害超过了剩余的<font color='#b97812'>护盾</font>，该次的全部伤害都会被吸收。",
-      "en": "Templar Assassin becomes highly elusive, gaining a small barrier and bonus to her damage.  The damage and avoidance effects are separate, and have a limited number of instances. If a barrier is consumed, a new one is created as long as there are charges left. If an instance of damage would deal more damage than the remaining barrier, all of the damage is absorbed.",
-      "ru": "Делает владельца неуловимым, увеличивая урон его следующих атак и создавая на нём небольшой барьер. Эти эффекты действуют ограниченное число раз и считаются раздельно. Разбитый барьер заменяется новым до тех пор, пока не израсходуются защитные эффекты способности. Урон, превышающий здоровье барьера, поглощается полностью."
+      "zh": "圣堂刺客变得高度难以捉摸，获得一个小型<font color='#b97812'>护盾</font>，同时获得攻击力加成。攻击力加成和<font color='#b97812'>护盾</font>效果相互独立，并且都是有限次数的效果。如果<font color='#b97812'>护盾</font>被摧毁，只要还有能量点数就会再产生一个新的。如果单次伤害超过了剩余的<font color='#b97812'>护盾</font>，该次的全部伤害都会被吸收。<br><br><h1>阿哈利姆魔晶</h1>攻击力加成提升。被控制时可以施放折光。",
+      "en": "Templar Assassin becomes highly elusive, gaining a small barrier and bonus to her damage.  The damage and avoidance effects are separate, and have a limited number of instances. If a barrier is consumed, a new one is created as long as there are charges left. If an instance of damage would deal more damage than the remaining barrier, all of the damage is absorbed.<br><br><h1>Aghanim's Shard</h1>Increases bonus damage. Refraction can be cast while disabled.",
+      "ru": "Делает владельца неуловимым, увеличивая урон его следующих атак и создавая на нём небольшой барьер. Эти эффекты действуют ограниченное число раз и считаются раздельно. Разбитый барьер заменяется новым до тех пор, пока не израсходуются защитные эффекты способности. Урон, превышающий здоровье барьера, поглощается полностью.<br><br><h1>Aghanim's Shard</h1>Увеличивает дополнительный урон и позволяет применять эту способность во время оглушения."
     },
     "ability": {
       "behavior": "noTarget",
@@ -5608,9 +5608,9 @@
   },
   "axe_berserkers_call": {
     "desc": {
-      "zh": "斧王嘲讽附近的敌方单位，强迫他们攻击自己，同时获得额外护甲。",
-      "en": "Axe taunts nearby enemy units, forcing them to attack him while he gains bonus armor during the duration.",
-      "ru": "Герой провоцирует врагов поблизости, заставляя их атаковать его, и на это время получает бонус к броне."
+      "zh": "斧王嘲讽附近的敌方单位，强迫他们攻击自己，同时获得额外护甲。<br><br><h1>阿哈利姆魔晶</h1>狂战士之吼会对作用下单位施加战斗饥渴。",
+      "en": "Axe taunts nearby enemy units, forcing them to attack him while he gains bonus armor during the duration.<br><br><h1>Aghanim's Shard</h1>Berserker's Call applies Battle Hunger to affected units.",
+      "ru": "Герой провоцирует врагов поблизости, заставляя их атаковать его, и на это время получает бонус к броне.<br><br><h1>Aghanim's Shard</h1>Накладывает на жертв эффект способности Battle Hunger."
     },
     "ability": {
       "behavior": "noTarget",
@@ -5629,7 +5629,7 @@
             "350"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -5724,7 +5724,7 @@
             "500"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -6035,9 +6035,9 @@
   },
   "antimage_blink": {
     "desc": {
-      "zh": "短距离传送，能让敌法师自由出入战场。",
-      "en": "Short distance teleportation that allows Anti-Mage to move in and out of combat.",
-      "ru": "Перемещение на короткую дистанцию, позволяющее ворваться в схватку или быстро из неё сбежать."
+      "zh": "短距离传送，能让敌法师自由出入战场。<br><br><h1>阿哈利姆神杖</h1>施放闪烁后，5秒内的法力损毁将额外燃烧20%最大魔法值，并且阻止目标在短时间内恢复或获得魔法。这个负面状态无法驱散。",
+      "en": "Short distance teleportation that allows Anti-Mage to move in and out of combat.<br><br><h1>Aghanim's Scepter</h1>After casting Blink, your next Mana Break within 5s burns an additional 20% max mana and prevents the target from regenerating or gaining mana for a short duration. This debuff is undispellable.",
+      "ru": "Перемещение на короткую дистанцию, позволяющее ворваться в схватку или быстро из неё сбежать.<br><br><h1>Aghanim's Scepter</h1>В течение 5s сек. после применения этой способности следующая атака с эффектом Mana Break дополнительно сожжёт 20% максимальной маны и ненадолго запретит жертве восстанавливать ману. Отрицательный эффект развеять нельзя."
     },
     "ability": {
       "behavior": "point",
@@ -6198,9 +6198,9 @@
   },
   "abyssal_underlord_firestorm": {
     "desc": {
-      "zh": "召唤数波火焰风暴攻击目标区域内的所有单位，并额外持续造成烧灼伤害。",
-      "en": "Calls down waves of fire that damage enemy units in the target area, burning for additional damage over time.",
-      "ru": "Обрушивает на указанную область волны пламени, наносящие урон врагам. Жертвы также получают периодический урон, зависящий от их максимального запаса здоровья."
+      "zh": "召唤数波火焰风暴攻击目标区域内的所有单位，并额外持续造成烧灼伤害。<br><br><h1>阿哈利姆魔晶</h1>火焰风暴可以对友军施放。施放后火焰风暴会跟随该英雄。火焰风暴的波数增加，伤害触发间隔/持续时间更短。",
+      "en": "Calls down waves of fire that damage enemy units in the target area, burning for additional damage over time.<br><br><h1>Aghanim's Shard</h1>Firestorm can be allied targeted. When used that way, the Firestorm follows the hero around.  The wave count is increased, and tick rate / duration time occur more quickly.",
+      "ru": "Обрушивает на указанную область волны пламени, наносящие урон врагам. Жертвы также получают периодический урон, зависящий от их максимального запаса здоровья.<br><br><h1>Aghanim's Shard</h1>Позволяет владельцу применить эту способность на союзника, чтобы область её действия следовала за ним. Увеличивает число волн. Уменьшает интервал между ними, а также длительность и интервал горения, отчего урон наносится быстрее."
     },
     "ability": {
       "behavior": "point",
@@ -6319,9 +6319,9 @@
   },
   "obsidian_destroyer_objurgation": {
     "desc": {
-      "zh": "提升殁境神蚀者的最大魔法值。施放后，殁境神蚀者获得<font color='#b97812'>全伤害护盾</font>，数值为固定值 + 最大魔法值的一定百分比。",
-      "en": "Increases Outworld Destroyer's maximum mana. When cast, protects Outworld Destroyer with an all damage barrier equal to a flat amount and a percentage of his maximum mana.",
-      "ru": "Увеличивает максимальный запас маны героя. Применив эту способность, он получает барьер от всех типов урона, здоровье которого складывается из базового значения и доли от максимальной маны."
+      "zh": "提升殁境神蚀者的最大魔法值。施放后，殁境神蚀者获得<font color='#b97812'>全伤害护盾</font>，数值为固定值 + 最大魔法值的一定百分比。<br><br><h1>阿哈利姆神杖</h1>提升最大魔法值转为<font color='#b97812'>护盾</font>的比例。阻止让殁境神蚀者的血量低于20%的伤害。阻止生效时，殁境神蚀者获得一次强驱散，和不可驱散的责难效果。这个效果每40秒只能触发一次。",
+      "en": "Increases Outworld Destroyer's maximum mana. When cast, protects Outworld Destroyer with an all damage barrier equal to a flat amount and a percentage of his maximum mana.<br><br><h1>Aghanim's Scepter</h1>Increases max mana to barrier. Damage that would bring Outworld Destroyer below 20% health is prevented. When that happens, Outworld Destroyer receives a strong dispel and gains an undispellable instance of Objurgation. This effect cannot occur more than once every 40 seconds.",
+      "ru": "Увеличивает максимальный запас маны героя. Применив эту способность, он получает барьер от всех типов урона, здоровье которого складывается из базового значения и доли от максимальной маны.<br><br><h1>Aghanim's Scepter</h1>Увеличивает здоровье барьера от максимальной маны. Раз в 40 сек. может предотвратить урон, от которого здоровье владельца опустилось бы ниже 20%. Когда это происходит, на него применяется сильное развеивание и накладывается барьер от этой способности, который нельзя развеять."
     },
     "ability": {
       "behavior": "noTarget",
@@ -6481,9 +6481,9 @@
   },
   "bloodseeker_bloodrage": {
     "desc": {
-      "zh": "使血魔陷入渴望鲜血的狂怒中，以每秒流失一定百分比生命的代价获得攻击速度和技能增强加成。",
-      "en": "Drives Bloodseeker into a bloodthirsty rage which causes him to attack faster and deal more spell damage at the cost of a percentage of his health per second.",
-      "ru": "Пробуждает во владельце жажду крови, из-за которой он атакует быстрее и наносит больше урона заклинаниями, но каждую секунду теряет долю от своего здоровья."
+      "zh": "使血魔陷入渴望鲜血的狂怒中，以每秒流失一定百分比生命的代价获得攻击速度和技能增强加成。<br><br><h1>阿哈利姆魔晶</h1>血怒下血魔的攻击现在造成1.5%目标最大生命值的<font color=\"#d8ae53\">纯粹</font>伤害。",
+      "en": "Drives Bloodseeker into a bloodthirsty rage which causes him to attack faster and deal more spell damage at the cost of a percentage of his health per second.<br><br><h1>Aghanim's Shard</h1>Bloodseeker's Bloodrage attacks now deal 1.5% of the target's max health as <font color=\"#d8ae53\">Pure</font> damage.",
+      "ru": "Пробуждает во владельце жажду крови, из-за которой он атакует быстрее и наносит больше урона заклинаниями, но каждую секунду теряет долю от своего здоровья.<br><br><h1>Aghanim's Shard</h1>При применении на себя добавляет к атакам <font color=\"#d8ae53\">чистый</font> урон в размере 1.5% от максимального здоровья жертвы."
     },
     "ability": {
       "behavior": "noTarget",
@@ -6731,9 +6731,9 @@
   },
   "undying_decay": {
     "desc": {
-      "zh": "不朽尸王偷取区域内所有敌方英雄的力量，造成基础伤害并将敌人的力量据为己有。对非英雄单位造成2.0倍伤害。",
-      "en": "Undying steals strength from all enemy heroes in an area, dealing base damage as he claims the enemy's strength for himself. Deals 2.0x damage to creeps.",
-      "ru": "Наносит урон вражеским героям в указанной области и передаёт часть их силы владельцу способности. Урон крипам умножается на 2.0."
+      "zh": "不朽尸王偷取区域内所有敌方英雄的力量，造成基础伤害并将敌人的力量据为己有。对非英雄单位造成2.0倍伤害。<br><br><h1>阿哈利姆神杖</h1>提升力量窃取。",
+      "en": "Undying steals strength from all enemy heroes in an area, dealing base damage as he claims the enemy's strength for himself. Deals 2.0x damage to creeps.<br><br><h1>Aghanim's Scepter</h1>Increases strength steal.",
+      "ru": "Наносит урон вражеским героям в указанной области и передаёт часть их силы владельцу способности. Урон крипам умножается на 2.0.<br><br><h1>Aghanim's Scepter</h1>Увеличивает число отнимаемой силы."
     },
     "ability": {
       "behavior": "point",
@@ -6795,7 +6795,7 @@
             "350"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         }
       ],
@@ -6869,7 +6869,7 @@
             "1225"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         }
       ],
@@ -7111,9 +7111,9 @@
   },
   "monkey_king_boundless_strike": {
     "desc": {
-      "zh": "齐天大圣让金箍棒变大，并将其挥起猛击地面，<font color='#2dd5e4'>眩晕</font>一条直线上的敌人并造成额外伤害和基于他普通攻击的致命一击伤害。具有克敌机先效果。",
-      "en": "Monkey King enlarges his staff and slams it against the ground, stunning enemies in a line and damaging them with bonus damage and a critical hit based on his attack. Has True Strike.",
-      "ru": "Герой увеличивает свой посох и бьёт им по земле, оглушая всех задетых врагов. Этим ударом нельзя промахнуться, и он наносит как базовый урон, так и критический урон от атаки."
+      "zh": "齐天大圣让金箍棒变大，并将其挥起猛击地面，<font color='#2dd5e4'>眩晕</font>一条直线上的敌人并造成额外伤害和基于他普通攻击的致命一击伤害。具有克敌机先效果。<br><br><h1>阿哈利姆魔晶</h1>棒击大地对沿途和末端的敌人施加乾坤之跃，威力为最长持续施法时间的35%。棒击大地设为<font color=\"#FF0000\">多样施法</font>（右键点击技能栏图标）后，齐天大圣还会跳跃至金箍棒的另一端。",
+      "en": "Monkey King enlarges his staff and slams it against the ground, stunning enemies in a line and damaging them with bonus damage and a critical hit based on his attack. Has True Strike.<br><br><h1>Aghanim's Shard</h1>Boundless Strike applies Primal Spring with 35% of the max channeling duration power to enemies along the staff and at the end of the staff. When Boundless Strike is set to alt-cast, Monkey King leaps to the end of his staff.",
+      "ru": "Герой увеличивает свой посох и бьёт им по земле, оглушая всех задетых врагов. Этим ударом нельзя промахнуться, и он наносит как базовый урон, так и критический урон от атаки.<br><br><h1>Aghanim's Shard</h1>Накладывает на врагов, задетых посохом или находящихся вокруг его конца, эффект способности Primal Spring, подготовленной на 35%. Также добавляет альтернативное применение, при котором герой прыгает к концу своего посоха, как только тот ударит землю."
     },
     "ability": {
       "behavior": "point",
@@ -7210,9 +7210,9 @@
   },
   "earthshaker_fissure": {
     "desc": {
-      "zh": "用威武的图腾猛击地面，沿直线裂开地面，制造一条无法通过的岩脊，对沿途的敌方单位造成<font color='#2dd5e4'>眩晕</font>和伤害。",
-      "en": "Slams the ground with a mighty totem, creating an impassable ridge of stone while stunning and damaging enemy units along its line.",
-      "ru": "Герой разбивает землю могучим тотемом, оставляя перед собой непроходимую каменную борозду, при этом оглушая стоящих на её пути врагов и нанося им урон."
+      "zh": "用威武的图腾猛击地面，沿直线裂开地面，制造一条无法通过的岩脊，对沿途的敌方单位造成<font color='#2dd5e4'>眩晕</font>和伤害。<br><br><h1>阿哈利姆魔晶</h1>降低沟壑的冷却时间，并且撼地者每次施放其他技能时都会沿着沟壑释放余震，造成<font color='#2dd5e4'>眩晕</font>的时间有所降低。",
+      "en": "Slams the ground with a mighty totem, creating an impassable ridge of stone while stunning and damaging enemy units along its line.<br><br><h1>Aghanim's Shard</h1>Reduces Fissure cooldown and releases an Aftershock along its path that stuns for a shortened duration when Earthshaker casts another ability.",
+      "ru": "Герой разбивает землю могучим тотемом, оставляя перед собой непроходимую каменную борозду, при этом оглушая стоящих на её пути врагов и нанося им урон.<br><br><h1>Aghanim's Shard</h1>Уменьшает перезарядку. При применении любой способности вдоль борозды срабатывает эффект Aftershock с уменьшенной длительностью оглушения."
     },
     "ability": {
       "behavior": "point",
@@ -7292,9 +7292,9 @@
   },
   "mirana_arrow": {
     "desc": {
-      "zh": "射出一支绝对精准的箭矢，对第一个击中的敌人造成伤害并<font color='#2dd5e4'>眩晕</font>目标。目标距离越远，<font color='#2dd5e4'>眩晕</font>时间越长，最短1.0秒，最长可达2.3 3.2 4.1 5.0 5.9秒。根据箭矢飞行的距离还将对目标额外造成最多360点伤害。若击中的是非远古的普通单位，将直接秒杀。",
-      "en": "Fires a long-range arrow with deadly precision, which stuns and damages the first enemy unit it strikes. The stun duration ranges from 1.0 to 2.3 3.2 4.1 5.0 5.9 seconds, with bonus damage up to 360 added, based on the distance the arrow travels to its target. Instantly kills the first non-ancient creep it hits.",
-      "ru": "Выпускает невероятно точную стрелу, оглушающую первое существо на своём пути на 1.0 сек. и наносящую ему урон. Преодолённое стрелой расстояние увеличивает и урон, который может достичь 360, и длительность оглушения, которое составит до 2.3 3.2 4.1 5.0 5.9 сек. Мгновенно убивает любого крипа, если он не древний."
+      "zh": "射出一支绝对精准的箭矢，对第一个击中的敌人造成伤害并<font color='#2dd5e4'>眩晕</font>目标。目标距离越远，<font color='#2dd5e4'>眩晕</font>时间越长，最短1.0秒，最长可达2.3 3.2 4.1 5.0 5.9秒。根据箭矢飞行的距离还将对目标额外造成最多360点伤害。若击中的是非远古的普通单位，将直接秒杀。<br><br><h1>阿哈利姆神杖</h1>月神之箭在主神箭行进途中对敌人释放群星风暴。对击中的单位施放第二个群星风暴，造成的伤害有所降低。",
+      "en": "Fires a long-range arrow with deadly precision, which stuns and damages the first enemy unit it strikes. The stun duration ranges from 1.0 to 2.3 3.2 4.1 5.0 5.9 seconds, with bonus damage up to 360 added, based on the distance the arrow travels to its target. Instantly kills the first non-ancient creep it hits.<br><br><h1>Aghanim's Scepter</h1>Causes Sacred Arrow to release a Starstorm on enemies along the travel path of the primary arrow, releasing a second Starstorm that deals less damage to the impacted unit.",
+      "ru": "Выпускает невероятно точную стрелу, оглушающую первое существо на своём пути на 1.0 сек. и наносящую ему урон. Преодолённое стрелой расстояние увеличивает и урон, который может достичь 360, и длительность оглушения, которое составит до 2.3 3.2 4.1 5.0 5.9 сек. Мгновенно убивает любого крипа, если он не древний.<br><br><h1>Aghanim's Scepter</h1>Во время полёта основной стрелы на врагов неподалёку от неё срабатывает способность Starstorm. При попадании стрела ещё раз применяет на жертву способность Starstorm, наносящую меньше урона."
     },
     "ability": {
       "behavior": "point",
@@ -7640,9 +7640,9 @@
   },
   "pudge_meat_hook_lua": {
     "desc": {
-      "zh": "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。",
-      "en": "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.",
-      "ru": "Запускает мясной крюк, который притягивает к себе первую задетую цель.<br><br><font color='#00CED1'>Автоприменение:</font> при включении крюк притягивает только врагов, при выключении может притягивать и союзников.<br><br>Значительно увеличены дальность применения и скорость крюка."
+      "zh": "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。<br><br><h1>阿哈利姆魔晶</h1>肉钩击中敌人时，根据钩中时的距离造成额外纯粹伤害。",
+      "en": "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.<br><br><h1>Aghanim's Shard</h1>When Meat Hook hits an enemy, it deals bonus pure damage based on the hook distance.",
+      "ru": "Запускает мясной крюк, который притягивает к себе первую задетую цель.<br><br><font color='#00CED1'>Автоприменение:</font> при включении крюк притягивает только врагов, при выключении может притягивать и союзников.<br><br>Значительно увеличены дальность применения и скорость крюка.<br><br><h1>Aghanim's Shard</h1>Когда мясной крюк попадает по врагу, он наносит дополнительный чистый урон в зависимости от пройденного расстояния."
     },
     "ability": {
       "behavior": "autocast",
@@ -7813,9 +7813,9 @@
   },
   "bloodseeker_rupture": {
     "desc": {
-      "zh": "让一个敌方单位皮开肉绽，根据其当前生命值造成初始伤害。单位移动后会根据移动的距离受到伤害。",
-      "en": "Causes an enemy unit's skin to rupture, dealing initial damage based on its current health. If the unit moves, it takes damage based on the distance moved.",
-      "ru": "Разрывает кожу врага, нанося жертве начальный урон, зависящий от её текущего здоровья. Если цель передвигается, то она получает урон, зависящий от преодолённого расстояния."
+      "zh": "让一个敌方单位皮开肉绽，根据其当前生命值造成初始伤害。单位移动后会根据移动的距离受到伤害。<br><br><h1>阿哈利姆神杖</h1>提升初始伤害，并且提供2点割裂能量点数。",
+      "en": "Causes an enemy unit's skin to rupture, dealing initial damage based on its current health. If the unit moves, it takes damage based on the distance moved.<br><br><h1>Aghanim's Scepter</h1>Increases initial damage and grants 2 Rupture Charges.",
+      "ru": "Разрывает кожу врага, нанося жертве начальный урон, зависящий от её текущего здоровья. Если цель передвигается, то она получает урон, зависящий от преодолённого расстояния.<br><br><h1>Aghanim's Scepter</h1>Увеличивает начальный урон и заменяет перезарядку 2 зарядами."
     },
     "ability": {
       "behavior": "target",
@@ -8041,9 +8041,9 @@
   },
   "witch_doctor_death_ward": {
     "desc": {
-      "zh": "持续施法 - 召唤一个死亡守卫，会优先攻击其攻击距离内的敌方英雄。最多持续8.0秒。死亡守卫拥有50%额外必中率。",
-      "en": "CHANNELED - Summons a deadly ward to attack enemy heroes within its attack range. Lasts a maximum of 8.0 seconds. Death Ward has 50% bonus accuracy.",
-      "ru": "ПРЕРЫВАЕМАЯ — призывает смертоносный тотем, атакующий вражеских героев. Действует до 8.0 сек. Тотем имеет бонус к точности в 50%."
+      "zh": "持续施法 - 召唤一个死亡守卫，会优先攻击其攻击距离内的敌方英雄。最多持续8.0秒。死亡守卫拥有50%额外必中率。<br><br><h1>阿哈利姆神杖</h1>死亡守卫的攻击会向附近英雄弹射。",
+      "en": "CHANNELED - Summons a deadly ward to attack enemy heroes within its attack range. Lasts a maximum of 8.0 seconds. Death Ward has 50% bonus accuracy.<br><br><h1>Aghanim's Scepter</h1>Death Ward attacks bounce between nearby enemies.",
+      "ru": "ПРЕРЫВАЕМАЯ — призывает смертоносный тотем, атакующий вражеских героев. Действует до 8.0 сек. Тотем имеет бонус к точности в 50%.<br><br><h1>Aghanim's Scepter</h1>Атаки тотема перескакивают между вражескими героями."
     },
     "ability": {
       "behavior": "channeled",
@@ -8066,7 +8066,7 @@
           ],
           "percent": false,
           "aoe": false,
-          "spellAmp": true
+          "spellAmp": false
         },
         {
           "label": {
@@ -8152,7 +8152,7 @@
             "200"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -8319,7 +8319,7 @@
             "300"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -8393,9 +8393,9 @@
   },
   "dazzle_shadow_wave": {
     "desc": {
-      "zh": "放出一道能量弧，可以瞬间跳跃至目标附近的队友，<font color='#07d738'>治疗</font>的同时还将对附近的敌方单位造成伤害。施放暗影波时戴泽必定会享受到<font color='#07d738'>治疗</font>效果。",
-      "en": "Sends out a bolt of power that arcs between allies, healing them while damaging any enemy units standing nearby.  Dazzle is always healed by Shadow Wave.",
-      "ru": "Выпускает мощный заряд, который передаётся от союзника к союзнику, излечивая их и нанося урон противникам неподалёку. Способность всегда лечит своего владельца."
+      "zh": "放出一道能量弧，可以瞬间跳跃至目标附近的队友，<font color='#07d738'>治疗</font>的同时还将对附近的敌方单位造成伤害。施放暗影波时戴泽必定会享受到<font color='#07d738'>治疗</font>效果。<br><br><h1>阿哈利姆神杖</h1>暗影波现在也可对敌人施放，在友军和敌人之间都可以弹跳。弹跳至敌人时，他们会受到伤害，并且<font color='#07d738'>治疗</font>附近友军，数值为100%平常治疗和伤害量。戴泽还会对暗影波弹跳到的每个敌人发动一次攻击。",
+      "en": "Sends out a bolt of power that arcs between allies, healing them while damaging any enemy units standing nearby.  Dazzle is always healed by Shadow Wave.<br><br><h1>Aghanim's Scepter</h1>Shadow Wave can now target and bounce between enemies in addition to allies. When bouncing to an enemy, they will take damage and heal nearby allies equal to 100% of the normal healing and damage values. Dazzle will also perform an attack against any enemy that Shadow Wave bounces to.",
+      "ru": "Выпускает мощный заряд, который передаётся от союзника к союзнику, излечивая их и нанося урон противникам неподалёку. Способность всегда лечит своего владельца.<br><br><h1>Aghanim's Scepter</h1>Даёт возможность применять эту способность на любых существ. Позволяет её заряду отскакивать во врагов, нанося им урон и излечивая союзников неподалёку в размере 100% от обычных значений. Владелец способности атакует всех врагов, в которых она отскакивает."
     },
     "ability": {
       "behavior": "target",
@@ -8484,9 +8484,9 @@
   },
   "skywrath_mage_arcane_bolt": {
     "desc": {
-      "zh": "天怒法师施放出缓慢移动的奥术鹰群，对敌方单位造成基于天怒法师智力值的伤害。",
-      "en": "Skywrath Mage launches a slow-moving bolt of arcane magic, dealing damage to an enemy unit based on Skywrath Mage's intelligence.",
-      "ru": "Герой выпускает во врага медленный заряд магической энергии, который наносит урон, зависящий от интеллекта владельца способности."
+      "zh": "天怒法师施放出缓慢移动的奥术鹰群，对敌方单位造成基于天怒法师智力值的伤害。<br><br><h1>阿哈利姆魔晶</h1>天怒法师施放奥法鹰隼时，会产生3个鹰隼，其中一个飞往原目标，而另外的两个飞往原目标附近500范围内随机敌人。以英雄为首要目标。",
+      "en": "Skywrath Mage launches a slow-moving bolt of arcane magic, dealing damage to an enemy unit based on Skywrath Mage's intelligence.<br><br><h1>Aghanim's Shard</h1>When Skywrath Mage casts Arcane Bolt, 3 bolts are created, one aimed at the original target, and two others aimed at random enemies within 500 range of the original target. Heroes will take priority.",
+      "ru": "Герой выпускает во врага медленный заряд магической энергии, который наносит урон, зависящий от интеллекта владельца способности.<br><br><h1>Aghanim's Shard</h1>Каждое применение создаёт 3 снаряда, один из которых летит в изначальную цель, а другие — в случайных врагов в радиусе 500 от неё (в первую очередь в героев)."
     },
     "ability": {
       "behavior": "target",
@@ -8523,7 +8523,7 @@
           ],
           "percent": false,
           "aoe": false,
-          "spellAmp": false
+          "spellAmp": true
         }
       ],
       "cooldown": [
@@ -8662,9 +8662,9 @@
   },
   "leshrac_split_earth": {
     "desc": {
-      "zh": "撕裂敌人脚下的大地。造成伤害和短暂的<font color='#2dd5e4'>眩晕</font>。",
-      "en": "Splits the earth under enemies. Deals damage and stuns for a short duration.",
-      "ru": "Раскалывает землю под врагами. Наносит урон и ненадолго оглушает."
+      "zh": "撕裂敌人脚下的大地。造成伤害和短暂的<font color='#2dd5e4'>眩晕</font>。<br><br><h1>阿哈利姆魔晶</h1>撕裂大地在相同地点再重复2次，重复间隔为5秒。每次作用范围增加45。撕裂大地的重复地点对双方队伍可见。",
+      "en": "Splits the earth under enemies. Deals damage and stuns for a short duration.<br><br><h1>Aghanim's Shard</h1>Causes Split Earth to repeat in the same location 2 additional times, with a 5 second delay between each one. Each time the radius increases by 45. Split Earth echo location is visible to both teams.",
+      "ru": "Раскалывает землю под врагами. Наносит урон и ненадолго оглушает.<br><br><h1>Aghanim's Shard</h1>Способность срабатывает в том же месте ещё 2 раза с промежутком в 5 сек. При каждом срабатывании радиус увеличивается на 45. Область повторного срабатывания видят обе команды."
     },
     "ability": {
       "behavior": "point",
@@ -8700,7 +8700,7 @@
             "210"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -9037,7 +9037,7 @@
             "600"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -9068,7 +9068,7 @@
           ],
           "percent": false,
           "aoe": false,
-          "spellAmp": false
+          "spellAmp": true
         },
         {
           "label": {
@@ -9107,8 +9107,8 @@
   },
   "treant_living_armor": {
     "desc": {
-      "zh": "将目标英雄或建筑笼罩在保护性外壳中，<font color='#07d738'>治疗</font>目标并格挡来自玩家控制来源的伤害。每次本技能格挡伤害后，下次的伤害格挡量都会减少。如果伤害格挡量降至0，加成效果会提前移除。",
-      "en": "Infuses the target hero or structure with a protective coating which heals the target and blocks damage from player-controlled sources. Each time this spell blocks damage, the block amount is decreased. If the damage block is decreased to 0, the buff is removed early.",
+      "zh": "将目标英雄或建筑笼罩在保护性外壳中，<font color='#07d738'>治疗</font>目标并格挡来自玩家控制来源的伤害。每次本技能格挡伤害后，下次的伤害格挡量都会减少。如果伤害格挡量降至0，加成效果会提前移除。<br><br><h1>阿哈利姆魔晶</h1>提升活体护甲的伤害格挡量。树精卫士现在还会被动获得活体护甲的加成效果，0秒内未受到伤害后伤害格挡量会重置。",
+      "en": "Infuses the target hero or structure with a protective coating which heals the target and blocks damage from player-controlled sources. Each time this spell blocks damage, the block amount is decreased. If the damage block is decreased to 0, the buff is removed early.<br><br><h1>Aghanim's Shard</h1>Increases the Damage Blocked by Living Armor. Treant now also passively benefits from Living Armor, with the damage block resetting after not taking damage for 0 seconds.",
       "ru": "Накладывает на выбранного героя или постройку защитный покров, который восстанавливает здоровье и блокирует урон от существ, подконтрольных игрокам противника. С каждым срабатыванием блок урона снижается. Если он достигнет нуля, покров пропадёт полностью."
     },
     "ability": {
@@ -9219,7 +9219,7 @@
             "250"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -10222,9 +10222,9 @@
   },
   "winter_wyvern_arctic_burn": {
     "desc": {
-      "zh": "寒冬飞龙乘着一股极地寒风扶摇而上，移动将无视地形，每次攻击都将呼出逼人的寒气。高飞时，她的攻击距离更远，攻击弹道速度也更快，被攻击的敌人在寒意作用下，移动速度会被减缓，同时每秒损失4 6 8 10 12%当前生命值。",
-      "en": "Winter Wyvern soars upon an arctic wind, granting her unobstructed movement and allowing her to exhale a blistering chill into each attack. While soaring, her attacks travel further and faster, and slow enemies with a magical freeze that strips them of 4 6 8 10 12% of their current health each second.",
-      "ru": "Герой взмывает в небо на арктическом ветре, получая беспрепятственное передвижение и вдыхая жгучий мороз в каждую свою атаку. В полёте можно атаковать дальше и быстрее. Цель морозных атак замедляется и каждую секунду получает урон в размере 4 6 8 10 12% от текущего запаса здоровья."
+      "zh": "寒冬飞龙乘着一股极地寒风扶摇而上，移动将无视地形，每次攻击都将呼出逼人的寒气。高飞时，她的攻击距离更远，攻击弹道速度也更快，被攻击的敌人在寒意作用下，移动速度会被减缓，同时每秒损失4 6 8 10 12%当前生命值。<br><br><h1>阿哈利姆神杖</h1>严寒烧灼变成开关型技能，开启后每秒消耗一定量魔法。提升寒冬飞龙的移动速度。",
+      "en": "Winter Wyvern soars upon an arctic wind, granting her unobstructed movement and allowing her to exhale a blistering chill into each attack. While soaring, her attacks travel further and faster, and slow enemies with a magical freeze that strips them of 4 6 8 10 12% of their current health each second.<br><br><h1>Aghanim's Scepter</h1>Causes Arctic Burn to be a toggle ability, draining mana every second when active. Increases Winter Wyvern's movement speed.",
+      "ru": "Герой взмывает в небо на арктическом ветре, получая беспрепятственное передвижение и вдыхая жгучий мороз в каждую свою атаку. В полёте можно атаковать дальше и быстрее. Цель морозных атак замедляется и каждую секунду получает урон в размере 4 6 8 10 12% от текущего запаса здоровья.<br><br><h1>Aghanim's Scepter</h1>Делает способность переключаемой. В активном состоянии она ежесекундно расходует ману и увеличивает скорость передвижения владельца."
     },
     "ability": {
       "behavior": "noTarget",
@@ -10454,9 +10454,9 @@
   },
   "dazzle_good_juju": {
     "desc": {
-      "zh": "戴泽每次施放技能后，其他所有冷却中的技能都会减少冷却时间。",
-      "en": "Whenever Dazzle Casts a Spell, all other abilities currently on cooldown have their cooldowns reduced.",
-      "ru": "После каждого применения способности Даззла время восстановления всех других перезаряжающихся способностей сокращается."
+      "zh": "戴泽每次施放技能后，其他所有冷却中的技能都会减少冷却时间。<br><br><h1>阿哈利姆神杖</h1>善咒使所有物品的冷却时间减少50%，并且具有主动效果，可以对一名友军施放，刷新其物品冷却时间。",
+      "en": "Whenever Dazzle Casts a Spell, all other abilities currently on cooldown have their cooldowns reduced.<br><br><h1>Aghanim's Scepter</h1>Good Juju reduces all item Cooldowns by 50% and becomes an active ability that can be cast on allied units to refresh all item cooldowns.",
+      "ru": "После каждого применения способности Даззла время восстановления всех других перезаряжающихся способностей сокращается.<br><br><h1>Aghanim's Scepter</h1>Добрые чары снижают время восстановления всех предметов на 50% и получают активный эффект: можно применить на союзника, чтобы обновить перезарядку его предметов."
     },
     "ability": {
       "behavior": "passive",
@@ -10821,9 +10821,9 @@
   },
   "medusa_split_shot": {
     "desc": {
-      "zh": "美杜莎施展魔法将她的箭分裂成若干支箭矢。分裂箭造成的伤害为正常攻击力的一定百分比。<br/><br/>额外目标不会受到其他攻击特效（比如致命一击）的作用。",
-      "en": "Medusa magically splits her shot into several arrows. These arrows deal a lower percent of her normal damage.<br/><br/>The extra targets will not receive other attack effects (such as critical strike).",
-      "ru": "Герой магически расщепляет свои стрелы, атакуя несколько целей, но при этом нанося меньше урона.<br/><br/>На дополнительные цели не срабатывают эффекты атаки, такие как критический урон."
+      "zh": "美杜莎施展魔法将她的箭分裂成若干支箭矢。分裂箭造成的伤害为正常攻击力的一定百分比。<br/><br/>额外目标不会受到其他攻击特效（比如致命一击）的作用。<br><br><h1>阿哈利姆神杖</h1>使分裂箭的次级攻击也能继承攻击特效，并且目标数量提升。",
+      "en": "Medusa magically splits her shot into several arrows. These arrows deal a lower percent of her normal damage.<br/><br/>The extra targets will not receive other attack effects (such as critical strike).<br><br><h1>Aghanim's Scepter</h1>Allows on-hit effects to apply to the secondary attacks from Split Shot. Increases arrow count.",
+      "ru": "Герой магически расщепляет свои стрелы, атакуя несколько целей, но при этом нанося меньше урона.<br/><br/>На дополнительные цели не срабатывают эффекты атаки, такие как критический урон.<br><br><h1>Aghanim's Scepter</h1>Увеличивает число дополнительных целей. На них также накладываются эффекты атаки."
     },
     "ability": {
       "behavior": "toggle",
@@ -11355,7 +11355,7 @@
             "375"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -11462,8 +11462,8 @@
   },
   "dawnbreaker_luminosity": {
     "desc": {
-      "zh": "破晓辰星在数次攻击后提升了力量，她的下一次攻击会造成致命一击，并<font color='#07d738'>治疗</font>她附近650范围内所有友方英雄，治疗量为攻击伤害的一定百分比。攻击小兵和野怪产生的治疗量有所减少。对友军的治疗量为50%。",
-      "en": "After a number of attacks, Dawnbreaker powers up, charging her next attack with a critical hit that heals all allied heroes within 650 units around her for a portion of attack damage dealt. Creeps and neutral enemies provide less healing. Allies are healed for 50% of the amount.",
+      "zh": "破晓辰星在数次攻击后提升了力量，她的下一次攻击会造成致命一击，并<font color='#07d738'>治疗</font>她附近650范围内所有友方英雄，治疗量为攻击伤害的一定百分比。攻击小兵和野怪产生的治疗量有所减少。对友军的治疗量为50%。<br><br><h1>阿哈利姆神杖</h1>Dawnbreaker gets 2 Luminosity attacks every time she powers up.",
+      "en": "After a number of attacks, Dawnbreaker powers up, charging her next attack with a critical hit that heals all allied heroes within 650 units around her for a portion of attack damage dealt. Creeps and neutral enemies provide less healing. Allies are healed for 50% of the amount.<br><br><h1>Aghanim's Scepter</h1>Dawnbreaker gets 2 Luminosity attacks every time she powers up.",
       "ru": "Совершив несколько атак, герой преисполняется мощью: следующая его атака станет критической и излечит его и союзных героев в радиусе 650 на долю от нанесённого урона. Лечение от атаки по крипу или нейтральному существу будет слабее. Союзникам даётся только 50% лечения."
     },
     "ability": {
@@ -11749,9 +11749,9 @@
   },
   "weaver_geminate_attack": {
     "desc": {
-      "zh": "允许编织者立刻发动两次攻击。",
-      "en": "Allows Weaver to dispatch two attacks at once.",
-      "ru": "Позволяет герою совершить несколько атак одновременно."
+      "zh": "允许编织者立刻发动两次攻击。<br><br><h1>阿哈利姆魔晶</h1>连击还会击中虫群附着目标1200范围内的单位。",
+      "en": "Allows Weaver to dispatch two attacks at once.<br><br><h1>Aghanim's Shard</h1>Geminate Attack will also hit units within 1200 range of the original target that have The Swarm beetles attached to them.",
+      "ru": "Позволяет герою совершить несколько атак одновременно.<br><br><h1>Aghanim's Shard</h1>Дополнительные атаки летят во всех врагов, к которым прицепились жуки от способности The Swarm, находящихся на расстоянии 1200 от изначальной цели атаки."
     },
     "ability": {
       "behavior": "autocast",
@@ -11916,9 +11916,9 @@
   },
   "tiny_grow": {
     "desc": {
-      "zh": "小小崎岖的身体不断成长，提升了攻击力、移动速度、护甲和投掷的威力，但攻击速度降低。",
-      "en": "Tiny gains craggy mass, increasing his attack damage, movement speed and armor, and toss power while slowing his attack speed.",
-      "ru": "Герой обрастает камнями, увеличивая свои урон от атак, броню и скорость передвижения, а также усиливая способность Toss, но теряя скорость атаки."
+      "zh": "小小崎岖的身体不断成长，提升了攻击力、移动速度、护甲和投掷的威力，但攻击速度降低。<br><br><h1>阿哈利姆魔晶</h1>现在投掷扔出的单位，扔树和树木连掷扔出的树木都会在落地点的更大范围内造成额外伤害和减速效果。",
+      "en": "Tiny gains craggy mass, increasing his attack damage, movement speed and armor, and toss power while slowing his attack speed.<br><br><h1>Aghanim's Shard</h1>Units tossed by Toss or trees tossed by Tree Throw or Tree Volley now deal additional damage and slow in a larger area of effect at their landing location.",
+      "ru": "Герой обрастает камнями, увеличивая свои урон от атак, броню и скорость передвижения, а также усиливая способность Toss, но теряя скорость атаки.<br><br><h1>Aghanim's Shard</h1>Увеличивает урон от приземления существ, брошенных способностью Toss, и деревьев, брошенных способностями Tree Throw и Tree Volley. Также увеличивает область приземления и замедляет врагов в ней."
     },
     "ability": {
       "behavior": "passive",
@@ -12041,7 +12041,7 @@
             "800"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -12073,9 +12073,9 @@
   },
   "silencer_glaives_of_wisdom": {
     "desc": {
-      "zh": "沉默术士用他的智慧强化刀刃，每次攻击窃取目标的智力，并造成基于他智力值的额外伤害。",
-      "en": "Silencer enchants his glaives with his wisdom, stealing his target's Intelligence with each hit and dealing additional damage based on his Intelligence.",
-      "ru": "Герой наполняет глефы своей мудростью, отчего они наносят дополнительный урон, зависящий от интеллекта владельца, и крадут интеллект цели с каждой атакой."
+      "zh": "沉默术士用他的智慧强化刀刃，每次攻击窃取目标的智力，并造成基于他智力值的额外伤害。<br><br><h1>阿哈利姆魔晶</h1>使智慧之刃向450 范围内的随机敌人弹射1次，并提升智力窃取。",
+      "en": "Silencer enchants his glaives with his wisdom, stealing his target's Intelligence with each hit and dealing additional damage based on his Intelligence.<br><br><h1>Aghanim's Shard</h1>Causes Glaives of Wisdom to bounce 1 time to a random enemy within 450 range and increases intelligence steal.",
+      "ru": "Герой наполняет глефы своей мудростью, отчего они наносят дополнительный урон, зависящий от интеллекта владельца, и крадут интеллект цели с каждой атакой.<br><br><h1>Aghanim's Shard</h1>Глефы 1 раз отскакивают в случайного врага в радиусе 450. Увеличивает кражу интеллекта."
     },
     "ability": {
       "behavior": "autocast",
@@ -13003,9 +13003,9 @@
   },
   "shredder_reactive_armor": {
     "desc": {
-      "zh": "伐木机每受到一次物理攻击，他的生命恢复和护甲值都会提升。英雄攻击提供4倍提升。",
-      "en": "Each time Timbersaw is attacked, he gains increased health regen and armor. Hero attacks are counted as 4x the amount.",
-      "ru": "Каждый раз, когда кто-то атакует этого героя, он получает эффект, увеличивающий его броню и восстановление здоровья. Атаки героев дают по 4 эффекта."
+      "zh": "伐木机每受到一次物理攻击，他的生命恢复和护甲值都会提升。英雄攻击提供4倍提升。<br><br><h1>阿哈利姆神杖</h1>活性护甲可以主动施放，获得最大叠加次数和600点生命的<font color='#b97812'>护盾</font>。<font color='#b97812'>护盾</font>的恢复速度为每秒200 + 伐木机450范围内每名敌方英雄都会增加150，最高为1600。8秒后伐木机会对450范围内每个英雄造成伤害，数值为200 + <font color='#b97812'>护盾</font>剩余生命，而且失去全部<font color='#b97812'>护盾</font>。",
+      "en": "Each time Timbersaw is attacked, he gains increased health regen and armor. Hero attacks are counted as 4x the amount.<br><br><h1>Aghanim's Scepter</h1>Reactive Armor can now be activated to get max stacks and 600 damage barrier. Grants Timbersaw 200 + 150 barrier amount per second for each enemy hero within 450 radius of Timbersaw up to a maximum of 1600. After 8 seconds, Timbersaw deals damage to every hero within 450 radius equal to 200 + his remaining barrier amount and loses all of his barrier.",
+      "ru": "Каждый раз, когда кто-то атакует этого героя, он получает эффект, увеличивающий его броню и восстановление здоровья. Атаки героев дают по 4 эффекта.<br><br><h1>Aghanim's Scepter</h1>Позволяет применить эту способность, чтобы получить максимум её эффектов и барьер на 600 урона. Каждую секунду здоровье барьера увеличивается на 200 + 150 за каждого вражеского героя в радиусе 450 вокруг владельца, но не может превысить 1600. Спустя 8 сек. барьер взрывается, нанося всем вражеским героям в радиусе 450 урон в размере текущего здоровья барьера + 200."
     },
     "ability": {
       "behavior": "passive",
@@ -13165,9 +13165,9 @@
   },
   "nevermore_necromastery": {
     "desc": {
-      "zh": "影魔每杀死一个单位都会窃取其灵魂，每个灵魂获得1点额外攻击力。击杀英雄会获得4个灵魂。影魔死亡时30.0%的灵魂将逃离他的束缚。",
-      "en": "Shadow Fiend steals the soul from units he kills, gaining 1 bonus damage per soul. Hero kills grant 4 souls. On death, he releases 30.0% of them from bondage.",
-      "ru": "Герой крадёт души убитых им существ, и каждая из них увеличивает урон от его атак на 1. За обычное существо даётся одна душа, а за героя — 4. При смерти герой выпускает 30.0% из украденных душ."
+      "zh": "影魔每杀死一个单位都会窃取其灵魂，每个灵魂获得1点额外攻击力。击杀英雄会获得4个灵魂。影魔死亡时30.0%的灵魂将逃离他的束缚。<br><br><h1>阿哈利姆神杖</h1>提高灵魂数量上限。",
+      "en": "Shadow Fiend steals the soul from units he kills, gaining 1 bonus damage per soul. Hero kills grant 4 souls. On death, he releases 30.0% of them from bondage.<br><br><h1>Aghanim's Scepter</h1>Increases max souls.",
+      "ru": "Герой крадёт души убитых им существ, и каждая из них увеличивает урон от его атак на 1. За обычное существо даётся одна душа, а за героя — 4. При смерти герой выпускает 30.0% из украденных душ.<br><br><h1>Aghanim's Scepter</h1>Увеличивает максимальное число душ."
     },
     "ability": {
       "behavior": "passive",
@@ -13316,9 +13316,9 @@
   },
   "vengefulspirit_command_aura": {
     "desc": {
-      "zh": "复仇之魂的存在提升了附近友方英雄的攻击力。复仇之魂自身获得25%额外加成。",
-      "en": "Vengeful Spirit's presence increases the damage of nearby friendly heroes. Vengeful Spirit herself receives 25% extra bonus.",
-      "ru": "Увеличивает урон союзных героев неподалёку. Для владельца этот бонус больше на 25%."
+      "zh": "复仇之魂的存在提升了附近友方英雄的攻击力。复仇之魂自身获得25%额外加成。<br><br><h1>阿哈利姆神杖</h1>提升自身加成系数。死亡时产生一个复仇之魂的强幻象，继承全额攻击力，可以施放自己的所有技能。<br><br>复仇之魂复活时若幻象依然存在，则自身会直接将其取代。幻象获得的经验将给予英雄。强幻象不会被相关技能秒杀。",
+      "en": "Vengeful Spirit's presence increases the damage of nearby friendly heroes. Vengeful Spirit herself receives 25% extra bonus.<br><br><h1>Aghanim's Scepter</h1>Increases self multiplier. Upon death, creates a strong illusion of Vengeful Spirit that deals full damage, and can cast all of her spells.<br><br>If the illusion is alive when Vengeful Spirit respawn, she will take its place. XP earned by her illusion is given to her. Strong Illusions are not instantly killed by spells.",
+      "ru": "Увеличивает урон союзных героев неподалёку. Для владельца этот бонус больше на 25%.<br><br><h1>Aghanim's Scepter</h1>Увеличивает множитель для владельца. После смерти на месте героя появляется сильная иллюзия, которая может применять все способности и наносит полный урон.<br><br>Владелец иллюзии займёт её место, если та жива в момент его возрождения, и получает зарабатываемый ей опыт. Сильная иллюзия не умирает от заклинаний, мгновенно убивающих иллюзии."
     },
     "ability": {
       "behavior": "aura",
@@ -13605,9 +13605,9 @@
   },
   "skeleton_king_mortal_strike": {
     "desc": {
-      "zh": "冥魂大帝被动地在攻击时造成额外伤害，本技能具有冷却时间。",
-      "en": "Wraith King passively deals bonus damage on an attack with a cooldown.",
-      "ru": "Герой пассивно наносит атакой дополнительный урон. Способность имеет перезарядку."
+      "zh": "冥魂大帝被动地在攻击时造成额外伤害，本技能具有冷却时间。<br><br><h1>阿哈利姆魔晶</h1>本命一击会诅咒目标，使其在3秒延迟后再次受到75%原攻击伤害的<font color=\"#d8ae53\">纯粹</font>伤害。吸血灵魂的吸血效果对诅咒伤害有效。",
+      "en": "Wraith King passively deals bonus damage on an attack with a cooldown.<br><br><h1>Aghanim's Shard</h1>Mortal Strike hits curse their target, causing them to take 75% of the initial attack damage again as <font color=\"#d8ae53\">Pure</font> damage after a 3 second delay. Vampiric Spirit's lifesteal applies to the curse damage.",
+      "ru": "Герой пассивно наносит атакой дополнительный урон. Способность имеет перезарядку.<br><br><h1>Aghanim's Shard</h1>Срабатывание этой способности накладывает на жертву сглаз, отчего спустя 3 сек. она получает <font color=\"#d8ae53\">чистый урон</font>, равный 75% от критического урона. На урон от сглаза действует вампиризм способности Vampiric Spirit."
     },
     "ability": {
       "behavior": "passive",
@@ -13899,9 +13899,9 @@
   },
   "axe_counter_helix": {
     "desc": {
-      "zh": "受到一定次数攻击后，斧王就会做出螺旋反击，对附近所有敌方单位造成纯粹伤害。",
-      "en": "After a set number of attacks, Axe will perform a helix counter attack, dealing pure damage to all nearby enemies.",
-      "ru": "Когда по этому герою совершают определённое число атак, он прокручивает вокруг себя топор, нанося чистый урон всем врагам неподалёку."
+      "zh": "受到一定次数攻击后，斧王就会做出螺旋反击，对附近所有敌方单位造成纯粹伤害。<br><br><h1>阿哈利姆神杖</h1>反击螺旋现在对击中的敌人施加一个可叠加的负面效果，使其对斧王造成的攻击伤害减少。反击螺旋不再具有冷却时间，并且斧王的攻击也会计入触发记数。",
+      "en": "After a set number of attacks, Axe will perform a helix counter attack, dealing pure damage to all nearby enemies.<br><br><h1>Aghanim's Scepter</h1>Counter Helix now applies a stacking debuff to enemies hit by it that causes them to deal less total attack damage to Axe. Counter Helix no longer has a cooldown and its counter advances when Axe attacks.",
+      "ru": "Когда по этому герою совершают определённое число атак, он прокручивает вокруг себя топор, нанося чистый урон всем врагам неподалёку.<br><br><h1>Aghanim's Scepter</h1>Убирает перезарядку способности. При подсчёте атак для её срабатывания учитываются и атаки владельца. Она применяет на жертв складывающийся эффект, уменьшающий урон их атак по владельцу способности."
     },
     "ability": {
       "behavior": "passive",
@@ -13997,7 +13997,7 @@
           ],
           "percent": false,
           "aoe": false,
-          "spellAmp": false
+          "spellAmp": true
         },
         {
           "label": {
@@ -14028,9 +14028,9 @@
   },
   "necrolyte_heartstopper_aura": {
     "desc": {
-      "zh": "瘟疫法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。",
-      "en": "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.",
-      "ru": "Герой останавливает сердца врагов вокруг, отчего они постепенно теряют часть максимального здоровья."
+      "zh": "瘟疫法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><h1>阿哈利姆神杖</h1>竭心光环的生命流失伤害提升，数值为瘟疫法师当前生命恢复的50%。",
+      "en": "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><h1>Aghanim's Scepter</h1>Heartstopper Aura's Health Decay is increased by 50% of Necrophos's current health regeneration.",
+      "ru": "Герой останавливает сердца врагов вокруг, отчего они постепенно теряют часть максимального здоровья.<br><br><h1>Aghanim's Scepter</h1>К уменьшению здоровья добавляется 50% от текущего восстановления здоровья владельца."
     },
     "ability": {
       "behavior": "aura",
@@ -14249,7 +14249,7 @@
             "600"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -14485,9 +14485,9 @@
   },
   "antimage_mana_break": {
     "desc": {
-      "zh": "每次攻击损毁目标魔法值，并造成相当于损毁魔法值一定百分比的伤害。",
-      "en": "Burns an opponent's mana on each attack and deals damage equal to a percentage of the mana burnt.",
-      "ru": "Каждая атака сжигает ману цели и наносит ей урон, равный доле от сожжённой маны."
+      "zh": "每次攻击损毁目标魔法值，并造成相当于损毁魔法值一定百分比的伤害。<br><br><h1>阿哈利姆神杖</h1>提升每次攻击燃烧的最大魔法值。",
+      "en": "Burns an opponent's mana on each attack and deals damage equal to a percentage of the mana burnt.<br><br><h1>Aghanim's Scepter</h1>Increases Max Mana Burned per Hit.",
+      "ru": "Каждая атака сжигает ману цели и наносит ей урон, равный доле от сожжённой маны.<br><br><h1>Aghanim's Scepter</h1>Увеличивает сжигание максимальной маны за атаку."
     },
     "ability": {
       "behavior": "passive",
@@ -14895,9 +14895,9 @@
   },
   "viper_poison_attack": {
     "desc": {
-      "zh": "蝮蛇的毒液得到强化，使他的普通攻击附带效果，可以降低目标的移动速度和魔法抗性，并持续造成伤害。效果可以叠加，最多叠加6次。",
-      "en": "Intensifies Viper's venom, adding an effect to his normal attack that applies a stacking movement speed slow and magic resistance deduction while dealing damage over time. Stacks up to 6 times.",
-      "ru": "Добавляет к обычной атаке героя яд, уменьшающий скорость передвижения и сопротивление магии, а также наносящий периодический урон. Эффект яда складывается до 6 раз."
+      "zh": "蝮蛇的毒液得到强化，使他的普通攻击附带效果，可以降低目标的移动速度和魔法抗性，并持续造成伤害。效果可以叠加，最多叠加6次。<br><br><h1>阿哈利姆魔晶</h1>提升最大叠加次数，毒性攻击可以降低护甲，并且可以作用于建筑，造成的伤害有所降低。",
+      "en": "Intensifies Viper's venom, adding an effect to his normal attack that applies a stacking movement speed slow and magic resistance deduction while dealing damage over time. Stacks up to 6 times.<br><br><h1>Aghanim's Shard</h1>Increases max stacks, and causes Poison Attack to lower armor per stack and to affect buildings for reduced damage.",
+      "ru": "Добавляет к обычной атаке героя яд, уменьшающий скорость передвижения и сопротивление магии, а также наносящий периодический урон. Эффект яда складывается до 6 раз.<br><br><h1>Aghanim's Shard</h1>Увеличивает максимум эффектов. Каждый эффект уменьшает броню жертвы. Способность действует на постройки, но наносит им меньше урона."
     },
     "ability": {
       "behavior": "autocast",
@@ -15097,7 +15097,7 @@
             "1250"
           ],
           "percent": false,
-          "aoe": false,
+          "aoe": true,
           "spellAmp": false
         },
         {
@@ -15148,9 +15148,9 @@
   },
   "mirana_celestial_quiver": {
     "desc": {
-      "zh": "有可用能量时，米拉娜的下次攻击会造成额外魔法伤害。",
-      "en": "When a charge is available, Mirana's next attack will deal bonus magic damage.",
-      "ru": "Если у этой способности есть заряды, следующая атака владельца нанесёт дополнительный магический урон."
+      "zh": "有可用能量时，米拉娜的下次攻击会造成额外魔法伤害。<br><br><h1>阿哈利姆魔晶</h1>跳跃的加成状态生效时获得6点临时能量。",
+      "en": "When a charge is available, Mirana's next attack will deal bonus magic damage.<br><br><h1>Aghanim's Shard</h1>Grants 6 temporary Charges while Leap's buff is active.",
+      "ru": "Если у этой способности есть заряды, следующая атака владельца нанесёт дополнительный магический урон.<br><br><h1>Aghanim's Shard</h1>Способность временно получает ещё 6 заряда, пока на владельца действует Leap."
     },
     "ability": {
       "behavior": "autocast",
@@ -15456,9 +15456,9 @@
   },
   "huskar_berserkers_blood": {
     "desc": {
-      "zh": "哈斯卡的伤痛赐予他力量，根据他损失的生命值将获得攻击速度、魔法抗性和生命恢复加成。生命恢复为力量的一定百分比。",
-      "en": "Huskar's injuries feed his power, giving increased attack speed, magic resistance and health regen based on missing health. Health regen is a percentage of your strength.",
-      "ru": "Раны делают героя сильнее, увеличивая его скорость атаки, сопротивление магии и восстановление здоровья в зависимости от доли недостающего здоровья. Восстановление равно доле от силы героя."
+      "zh": "哈斯卡的伤痛赐予他力量，根据他损失的生命值将获得攻击速度、魔法抗性和生命恢复加成。生命恢复为力量的一定百分比。<br><br><h1>阿哈利姆魔晶</h1>哈斯卡可以消耗一定生命来主动开启狂战士之血，炙疗哈斯卡。进行驱散，然后在一定延迟后回复消耗的生命，并且每驱散一个负面状态，他就会额外回复生命。<br><br>驱散类型：弱驱散",
+      "en": "Huskar's injuries feed his power, giving increased attack speed, magic resistance and health regen based on missing health. Health regen is a percentage of your strength.<br><br><h1>Aghanim's Shard</h1>Huskar can activate Berserker's Blood for a health cost to cauterize himself. Dispels Huskar, then after a delay, heals for the amount of health consumed plus an additional bonus per debuff dispelled.<br/><br/>DISPEL TYPE: Basic Dispel",
+      "ru": "Раны делают героя сильнее, увеличивая его скорость атаки, сопротивление магии и восстановление здоровья в зависимости от доли недостающего здоровья. Восстановление равно доле от силы героя.<br><br><h1>Aghanim's Shard</h1>Позволяет активировать эту способность, чтобы пожертвовать частью здоровья и прижечь свои раны. Применяет на владельца развеивание, а после задержки излечивает его, вернув потраченное здоровье плюс бонус за каждый развеянный отрицательный эффект.<br/><br/>ТИП РАЗВЕИВАНИЯ: нормальное"
     },
     "ability": {
       "behavior": "passive",
@@ -15543,9 +15543,9 @@
   },
   "night_stalker_hunter_in_the_night": {
     "desc": {
-      "zh": "暗夜魔王在夜晚如鱼得水，攻击和移动都变得迅速。",
-      "en": "Night Stalker is in his element at night, attacking and moving with great swiftness.",
-      "ru": "Ночью герой оказывается в своей стихии: он атакует и передвигается увеличенной скоростью."
+      "zh": "暗夜魔王在夜晚如鱼得水，攻击和移动都变得迅速。<br><br><h1>阿哈利姆魔晶</h1>可以主动对一个普通单位施放暗夜猎影，将其秒杀并恢复暗夜魔王最大生命和魔法的一定百分比。在白天无法对远古生物施放。",
+      "en": "Night Stalker is in his element at night, attacking and moving with great swiftness.<br><br><h1>Aghanim's Shard</h1>Hunter in the Night may be cast on a creep, instantly killing it and restoring some of Night Stalker's maximum health and mana. Cannot target ancients during the daytime.",
+      "ru": "Ночью герой оказывается в своей стихии: он атакует и передвигается увеличенной скоростью.<br><br><h1>Aghanim's Shard</h1>Позволяет применить эту способность, чтобы мгновенно сожрать выбранного крипа и восстановить себе долю от максимального здоровья и маны. Днём нельзя применять на древних крипов."
     },
     "ability": {
       "behavior": "passive",
@@ -15753,9 +15753,9 @@
   },
   "spirit_breaker_greater_bash": {
     "desc": {
-      "zh": "攻击时有一定概率<font color='#2dd5e4'>眩晕</font>并击退敌方单位。重击的伤害值为移动速度的一定百分比。",
-      "en": "Gives a chance to stun and knockback an enemy unit on an attack. Deals a percentage of movement speed as damage.",
-      "ru": "Каждая атака может оглушить и оттолкнуть цель. Наносит дополнительный урон, зависящий от скорости передвижения владельца способности."
+      "zh": "攻击时有一定概率<font color='#2dd5e4'>眩晕</font>并击退敌方单位。重击的伤害值为移动速度的一定百分比。<br><br><h1>阿哈利姆神杖</h1>击退效果提升。如果击退的敌人又撞到了一个敌人，这个敌人也会被重击（非英雄单位只受到20%伤害），并且原目标再次受到25%的巨力重击伤害。",
+      "en": "Gives a chance to stun and knockback an enemy unit on an attack. Deals a percentage of movement speed as damage.<br><br><h1>Aghanim's Scepter</h1>Increases knockback. If a knocked-back enemy collides with another enemy, the second enemy is bashed (creeps only receive 20% damage), and the original target takes 25% of Greater Bash's damage again.",
+      "ru": "Каждая атака может оглушить и оттолкнуть цель. Наносит дополнительный урон, зависящий от скорости передвижения владельца способности.<br><br><h1>Aghanim's Scepter</h1>Увеличивает дальность отталкивания. Если жертва столкнётся с другим врагом, то на него эта способность также сработает в полную силу, а сама цель получит ещё 25% урона. Такое столкновение наносит крипам только 20% урона."
     },
     "ability": {
       "behavior": "passive",
@@ -15938,9 +15938,9 @@
   },
   "razor_storm_surge": {
     "desc": {
-      "zh": "被攻击时拥有几率、每次受到指向性技能时都会释放一道叉状闪电，击中目标和附近其他敌人，优先打击与目标类型相同的单位，造成伤害并减缓移动速度。",
-      "en": "There's a chance when attacked, and always when targeted with a spell, to release a forked lightning that strikes the target and other nearby enemies, prioritizing the unit type of the attacker, dealing damage and slowing movement speed.",
-      "ru": "Когда владельца способности атакуют, есть шанс, что обидчика и ещё нескольких врагов неподалёку ударит молния, которая наносит урон и замедляет жертв. Этот эффект всегда срабатывает, когда героя выбирают целью заклинания. Из дополнительных жертв в первую очередь выбираются существа того же типа, что и обидчик."
+      "zh": "被攻击时拥有几率、每次受到指向性技能时都会释放一道叉状闪电，击中目标和附近其他敌人，优先打击与目标类型相同的单位，造成伤害并减缓移动速度。<br><br><h1>阿哈利姆魔晶</h1>风暴之眼开启时，打击几率为=2倍，打击冷却时间减少=1.4秒，而且闪电会打击风暴之眼范围内所有敌人。单次伤害不会对同个敌人施加两次。",
+      "en": "There's a chance when attacked, and always when targeted with a spell, to release a forked lightning that strikes the target and other nearby enemies, prioritizing the unit type of the attacker, dealing damage and slowing movement speed.<br><br><h1>Aghanim's Shard</h1>While Eye of the Storm is active, strike chance is =2x as high, strike cooldown is reduced by =1.4s, and Lightning strikes all enemies within Eye of the Storm's radius. Does not apply to the same enemy twice from a single instance.",
+      "ru": "Когда владельца способности атакуют, есть шанс, что обидчика и ещё нескольких врагов неподалёку ударит молния, которая наносит урон и замедляет жертв. Этот эффект всегда срабатывает, когда героя выбирают целью заклинания. Из дополнительных жертв в первую очередь выбираются существа того же типа, что и обидчик.<br><br><h1>Aghanim's Shard</h1>Пока действует способность Eye of the Storm, молния бьёт с увеличенным в =2 раза шансом и уменьшенной на =1.4 сек. перезарядкой по всем врагам в радиусе ульта. Не может ударить одно и то же существо дважды за одно срабатывание."
     },
     "ability": {
       "behavior": "passive",
@@ -16060,9 +16060,9 @@
   },
   "troll_warlord_fervor": {
     "desc": {
-      "zh": "当巨魔战将持续攻击同一个目标时，他会攻击得越来越快。如果改变目标，则额外的攻速加成清零。",
-      "en": "With each continuous blow on the same target, Troll gains increased attack speed.  If Troll changes targets, the stacks drop to zero.",
-      "ru": "Каждая последующая атака по одной и той же цели увеличивает скорость атаки героя. Если сменить цель, скорость станет обычной."
+      "zh": "当巨魔战将持续攻击同一个目标时，他会攻击得越来越快。如果改变目标，则额外的攻速加成清零。<br><br><h1>阿哈利姆魔晶</h1>巨魔战将在攻击敌方单位时拥有16% + 热血战魂叠加次数*3%的几率对远程攻击距离 + =175范围内任意单位发动一次额外的远程攻击。",
+      "en": "With each continuous blow on the same target, Troll gains increased attack speed.  If Troll changes targets, the stacks drop to zero.<br><br><h1>Aghanim's Shard</h1>Grants Troll 16% + 3% chance per Fervor stack of firing an additional ranged attack to any unit within its ranged attack range plus =175 when attacking an enemy unit.",
+      "ru": "Каждая последующая атака по одной и той же цели увеличивает скорость атаки героя. Если сменить цель, скорость станет обычной.<br><br><h1>Aghanim's Shard</h1>Даёт владельцу шанс совершить дополнительную атаку дальнего боя по случайному врагу в радиусе атаки + =175. Шанс дополнительной атаки: 16% + 3% за эффект. Срабатывает только при атаках по вражеским существам."
     },
     "ability": {
       "behavior": "passive",
@@ -16113,9 +16113,9 @@
   },
   "visage_gravekeepers_cloak": {
     "desc": {
-      "zh": "维萨吉产生数层屏障来保护他，降低受到的伤害。每当他受到来自玩家的伤害，就会失去一层屏障，失去的屏障需要一定时间才能恢复。<br><br>维萨吉的佣兽在900范围内也会受到斗篷的保护，承伤降低的数值取决于维萨吉拥有的层数。",
-      "en": "Visage generates a layered barrier that protects him from damage.  If he receives damage from a player, one layer is removed, and takes time to recover.<br><br>Visage's Familiars are protected by his cloak when within 900 range of him, based on the number of layers Visage has.",
-      "ru": "Герой создаёт на себе слоистый защитный покров. Если получить урон от игрока, один слой исчезает и восстанавливается спустя определённое время.<br><br>Слои покрова, которые есть у героя, защищают и гаргулий в радиусе 900."
+      "zh": "维萨吉产生数层屏障来保护他，降低受到的伤害。每当他受到来自玩家的伤害，就会失去一层屏障，失去的屏障需要一定时间才能恢复。<br><br>维萨吉的佣兽在900范围内也会受到斗篷的保护，承伤降低的数值取决于维萨吉拥有的层数。<br><br><h1>阿哈利姆魔晶</h1>获得主动效果，维萨吉可以化作石像形态，对身边375范围内的敌人造成0.8/1.0/1.2秒<font color='#2dd5e4'>眩晕</font>，同时造成60/100/140点伤害，获得6秒无敌状态。最多恢复25%生命值。",
+      "en": "Visage generates a layered barrier that protects him from damage.  If he receives damage from a player, one layer is removed, and takes time to recover.<br><br>Visage's Familiars are protected by his cloak when within 900 range of him, based on the number of layers Visage has.<br><br><h1>Aghanim's Shard</h1>Gains an active component, allowing Visage to use Stone Form, stunning enemies for 0.8 / 1.0 / 1.2 seconds in an 375 area around it, dealing 60 / 100 / 140 damage and becoming invulnerable for 6 seconds.  Restores up to 25% of your health.",
+      "ru": "Герой создаёт на себе слоистый защитный покров. Если получить урон от игрока, один слой исчезает и восстанавливается спустя определённое время.<br><br>Слои покрова, которые есть у героя, защищают и гаргулий в радиусе 900.<br><br><h1>Aghanim's Shard</h1>Способность можно активировать, чтобы герой принял каменный облик и приземлился, оглушив врагов в радиусе 375 на 0,8/1,0/1,2 секунды, нанеся им 60/100/140 урона и став неуязвимым на 6 секунд. Восстанавливает герою 25% здоровья."
     },
     "ability": {
       "behavior": "passive",
@@ -16209,9 +16209,9 @@
   },
   "viper_corrosive_skin": {
     "desc": {
-      "zh": "蝮蛇分泌出感染性的毒素，1200范围内任何伤害它的敌人都将受到伤害，同时攻击速度也被降低。这种酸性分泌物还能提高蝮蛇的魔法抗性。",
-      "en": "Viper exudes an infectious toxin that damages and slows the attack speed of any enemy that damages it in a 1200 radius. The acid exudate also increases Viper's resistance to magic.",
-      "ru": "Если враг на расстоянии до 1200 нанесёт герою урон, то отравится заразным ядом, который наносит урон и замедляет атаки. Также способность увеличивает сопротивление магическому урону."
+      "zh": "蝮蛇分泌出感染性的毒素，1200范围内任何伤害它的敌人都将受到伤害，同时攻击速度也被降低。这种酸性分泌物还能提高蝮蛇的魔法抗性。<br><br><h1>阿哈利姆神杖</h1>腐蚀皮肤会对距离冥界亚龙500范围内的敌人施加4倍攻击速度降低效果。当冥界亚龙处于幽冥剧毒中，腐蚀皮肤的魔法抗性和每秒伤害会逐渐提升，在=4.0秒后，达到最高的=50%提升。",
+      "en": "Viper exudes an infectious toxin that damages and slows the attack speed of any enemy that damages it in a 1200 radius. The acid exudate also increases Viper's resistance to magic.<br><br><h1>Aghanim's Scepter</h1>Corrosive Skin applies 4x the attack speed slow to enemies that are within 500 distance of Viper.  Viper's Corrosive Skin Magic Resistance and Damage per Second are gradually increased while he is in Nethertoxin, up to =50% increased effect after =4.0s.",
+      "ru": "Если враг на расстоянии до 1200 нанесёт герою урон, то отравится заразным ядом, который наносит урон и замедляет атаки. Также способность увеличивает сопротивление магическому урону.<br><br><h1>Aghanim's Scepter</h1>Способность накладывает своё замедление атаки, умноженное на 4, на врагов в радиусе 500 от владельца. Урон и сопротивление магии от этой способности постепенно увеличиваются, пока владелец находится в области действия Nethertoxin. Максимальный бонус в =50% достигается спустя =4.0 сек."
     },
     "ability": {
       "behavior": "passive",
@@ -16682,9 +16682,9 @@
   },
   "drow_ranger_frost_arrows": {
     "desc": {
-      "zh": "卓尔游侠在箭矢中附上冰冻效果，减缓敌人的移动速度并造成额外伤害。持续1.5秒。",
-      "en": "Adds a freezing effect to Drow's attacks, slowing enemy movement and dealing bonus damage.  Slow lasts 1.5 seconds.",
-      "ru": "Добавляет к атакам героя замораживающий эффект, замедляющий передвижение цели на 1.5 сек. и наносящий дополнительный урон."
+      "zh": "卓尔游侠在箭矢中附上冰冻效果，减缓敌人的移动速度并造成额外伤害。持续1.5秒。<br><br><h1>阿哈利姆神杖</h1>霜冻之箭现在对敌人施加低温的叠加效果，提升霜冻之箭的伤害，并且每层叠加效果都会降低生命回复。若敌人在低温效果下阵亡，他们将会爆炸，对范围内的敌人造成伤害和减速。",
+      "en": "Adds a freezing effect to Drow's attacks, slowing enemy movement and dealing bonus damage.  Slow lasts 1.5 seconds.<br><br><h1>Aghanim's Scepter</h1>Frost Arrows now apply a Hypothermia stack to enemies, increasing damage from Frost Arrows and reducing their Health Restoration per stack. If an enemy dies with Hypothermia stacks, they burst and deal damage per stack and slow in an area around it.",
+      "ru": "Добавляет к атакам героя замораживающий эффект, замедляющий передвижение цели на 1.5 сек. и наносящий дополнительный урон.<br><br><h1>Aghanim's Scepter</h1>Способность накладывает на врага переохлаждение. Каждый такой эффект увеличивает урон от этой способности и уменьшает пополнение здоровья. Если цель умрёт под действием переохлаждения, из неё во всех врагов вокруг разлетятся осколки, которые наносят магический урон за каждый эффект и замедляют жертв."
     },
     "ability": {
       "behavior": "autocast",
@@ -16797,9 +16797,9 @@
   },
   "ancient_apparition_chilling_touch": {
     "desc": {
-      "zh": "使自己的普通攻击附带距离提升，高额魔法伤害和减速效果。",
-      "en": "Enhances Ancient Apparition's attack with increased range and a burst of magical damage and slow.",
-      "ru": "Увеличивает дальность следующей атаки. Она наносит дополнительный магический урон и замедляет жертву."
+      "zh": "使自己的普通攻击附带距离提升，高额魔法伤害和减速效果。<br><br><h1>阿哈利姆神杖</h1>移除了冷却时间。",
+      "en": "Enhances Ancient Apparition's attack with increased range and a burst of magical damage and slow.<br><br><h1>Aghanim's Scepter</h1>Removes cooldown.",
+      "ru": "Увеличивает дальность следующей атаки. Она наносит дополнительный магический урон и замедляет жертву.<br><br><h1>Aghanim's Scepter</h1>Убирает перезарядку способности."
     },
     "ability": {
       "behavior": "autocast",
