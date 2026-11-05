@@ -73,7 +73,7 @@ function check(source, assets) {
   }
 
   // 7. 立绘必须有；图标缺了只告警，页面按缺图占位渲染
-  const warnings = [...(source.warnings ?? [])];
+  const warnings = [];
   for (const hero of heroes) {
     if (!assets.art[hero.heroName]) {
       errors.push(`${hero.heroName} 没有立绘，先跑 npm run awaken:images`);

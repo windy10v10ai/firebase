@@ -2954,9 +2954,9 @@
   },
   "treant_overgrowth": {
     "desc": {
-      "zh": "在树精卫士周围召唤出疯狂生长的伤害性藤条和枝干，造成伤害并且阻止被缠绕的敌人移动、闪烁、进入隐身或攻击。<br><br><h1>阿哈利姆魔晶</h1>增加疯狂生长作用范围",
-      "en": "Summons an overgrowth of vines and branches around Treant that deal damage to afflicted enemies and prevent them from moving, blinking, going invisible, or attacking.<br><br><h1>Aghanim's Shard</h1>Increases Overgrowth Range.",
-      "ru": "Вокруг героя разрастаются опутывающие врагов корни и лозы. Жертвы получают периодический урон и не могут перемещаться, телепортироваться, уходить в невидимость или атаковать.<br><br><h1>Aghanim's Shard</h1>Увеличивает радиус буйного роста"
+      "zh": "在树精卫士周围召唤出疯狂生长的伤害性藤条和枝干，造成伤害并且阻止被缠绕的敌人移动、闪烁、进入隐身或攻击。<br><br><h1>阿哈利姆神杖</h1>冷却时间降低至65 55 45 35秒。施放疯狂生长时，树精卫士从土壤中汲取力量，他的身体急剧增大，持续16秒。变大后他会获得<font color='#9019e3'>相位移动</font>状态，移动速度为固定500，100%力量加成，并且拥有在450范围内造成60 70 80 90%攻击伤害的溅射攻击。<br><br><h1>阿哈利姆魔晶</h1>增加疯狂生长作用范围",
+      "en": "Summons an overgrowth of vines and branches around Treant that deal damage to afflicted enemies and prevent them from moving, blinking, going invisible, or attacking.<br><br><h1>Aghanim's Scepter</h1>Decreases Cooldown to 65 55 45 35 seconds. When casting Overgrowth, Treant Protector draws power from the soil, greatly increasing his size for 16 seconds. While enlarged, he gains phased movement with a fixed speed of 500, 100% bonus Strength, and a splashing attack that deals 60 70 80 90% of his attack damage in a 450 unit radius.<br><br><h1>Aghanim's Shard</h1>Increases Overgrowth Range.",
+      "ru": "Вокруг героя разрастаются опутывающие врагов корни и лозы. Жертвы получают периодический урон и не могут перемещаться, телепортироваться, уходить в невидимость или атаковать.<br><br><h1>Aghanim's Scepter</h1>Уменьшает перезарядку до 65 55 45 35 сек. Применение наполняет владельца силой земли на 16 сек., отчего он значительно увеличивается в размерах, а также получает +100% к силе, фиксированную скорость в 500 и возможность проходить сквозь существ. Атаки героя становятся массовыми и наносят 60 70 80 90% урона врагам в радиусе 450 от цели.<br><br><h1>Aghanim's Shard</h1>Увеличивает радиус буйного роста"
     },
     "ability": {
       "behavior": "noTarget",
@@ -3264,9 +3264,9 @@
   },
   "phantom_assassin_blur": {
     "desc": {
-      "zh": "幻影刺客模糊自己的身形，躲避多种飞行过程中的攻击和技能弹道，提升她的移动速度，使她无法被看到，直到她靠近敌方英雄或防御塔。",
-      "en": "Phantom Assassin blurs her body, disjointing incoming projectiles, increasing her movement speed, causing her to be impossible to see until she comes near enemy heroes or towers.",
-      "ru": "Герой размывает свои очертания, сбивая с цели направленные в него снаряды, становясь невидимым и ускоряя своё передвижение. Невидимость и ускорение пропадут, если приблизиться к вражескому герою или башне."
+      "zh": "幻影刺客模糊自己的身形，躲避多种飞行过程中的攻击和技能弹道，提升她的移动速度，使她无法被看到，直到她靠近敌方英雄或防御塔。<br><br><h1>阿哈利姆魔晶</h1>冷却时间减少10秒。只要幻影刺客击杀英雄，她的技能冷却时间都会加快60%最高冷却时间。",
+      "en": "Phantom Assassin blurs her body, disjointing incoming projectiles, increasing her movement speed, causing her to be impossible to see until she comes near enemy heroes or towers.<br><br><h1>Aghanim's Shard</h1>Decreases Cooldown by 10s. Any time Phantom Assassin gets a hero kill, her ability cooldowns advance 60% of their max cooldown values.",
+      "ru": "Герой размывает свои очертания, сбивая с цели направленные в него снаряды, становясь невидимым и ускоряя своё передвижение. Невидимость и ускорение пропадут, если приблизиться к вражескому герою или башне.<br><br><h1>Aghanim's Shard</h1>Уменьшает перезарядку на 10 сек. Когда владелец совершает убийство, текущие перезарядки всех его способностей уменьшаются на 60% от максимальных значений."
     },
     "ability": {
       "behavior": "noTarget",
@@ -10874,9 +10874,9 @@
   },
   "spectre_dispersion2": {
     "desc": {
-      "zh": "减免一定比例的伤害。基于减免前的伤害，累积1秒后反射给范围内的所有敌人，反射伤害类型与接收伤害类型一致。",
-      "en": "Reduces a percentage of incoming damage. Based on pre-mitigation damage, accumulates for 1 second then reflects to all enemies in range. Reflection damage type matches the received damage type.",
-      "ru": "Снижает часть получаемого урона. Урон до снижения накапливается за 1 сек. и отражается всем врагам в радиусе, а тип отражённого урона совпадает с полученным."
+      "zh": "减免一定比例的伤害。基于减免前的伤害，累积1秒后反射给范围内的所有敌人，反射伤害类型与接收伤害类型一致。<br><br><h1>阿哈利姆魔晶</h1>提供14 17 20 23 26%伤害减免。",
+      "en": "Reduces a percentage of incoming damage. Based on pre-mitigation damage, accumulates for 1 second then reflects to all enemies in range. Reflection damage type matches the received damage type.<br><br><h1>Aghanim's Shard</h1>Dispersion grants 14 17 20 23 26% damage reduction if the damage is not reflected.",
+      "ru": "Снижает часть получаемого урона. Урон до снижения накапливается за 1 сек. и отражается всем врагам в радиусе, а тип отражённого урона совпадает с полученным.<br><br><h1>Aghanim's Shard</h1>Даёт 14 17 20 23 26% снижения урона, если урон не отражён."
     },
     "ability": {
       "behavior": "passive",
@@ -15543,9 +15543,9 @@
   },
   "night_stalker_hunter_in_the_night": {
     "desc": {
-      "zh": "暗夜魔王在夜晚如鱼得水，攻击和移动都变得迅速。<br><br><h1>阿哈利姆魔晶</h1>可以主动对一个普通单位施放暗夜猎影，将其秒杀并恢复暗夜魔王最大生命和魔法的一定百分比。在白天无法对远古生物施放。",
-      "en": "Night Stalker is in his element at night, attacking and moving with great swiftness.<br><br><h1>Aghanim's Shard</h1>Hunter in the Night may be cast on a creep, instantly killing it and restoring some of Night Stalker's maximum health and mana. Cannot target ancients during the daytime.",
-      "ru": "Ночью герой оказывается в своей стихии: он атакует и передвигается увеличенной скоростью.<br><br><h1>Aghanim's Shard</h1>Позволяет применить эту способность, чтобы мгновенно сожрать выбранного крипа и восстановить себе долю от максимального здоровья и маны. Днём нельзя применять на древних крипов."
+      "zh": "暗夜魔王在夜晚如鱼得水，攻击和移动都变得迅速。<br><br><h1>阿哈利姆神杖</h1>移动速度加成提升15%，攻击速度加成提升50。击杀敌方英雄会重置所有基础技能的冷却时间。<br><br><h1>阿哈利姆魔晶</h1>可以主动对一个普通单位施放暗夜猎影，将其秒杀并恢复暗夜魔王最大生命和魔法的一定百分比。在白天无法对远古生物施放。",
+      "en": "Night Stalker is in his element at night, attacking and moving with great swiftness.<br><br><h1>Aghanim's Scepter</h1>Increases bonus movement speed by 15% and attack speed by 50. Killing an enemy hero resets all basic ability cooldowns.<br><br><h1>Aghanim's Shard</h1>Hunter in the Night may be cast on a creep, instantly killing it and restoring some of Night Stalker's maximum health and mana. Cannot target ancients during the daytime.",
+      "ru": "Ночью герой оказывается в своей стихии: он атакует и передвигается увеличенной скоростью.<br><br><h1>Aghanim's Scepter</h1>Увеличивает доп. скорость передвижения на 15%, а доп. скорость атаки — на 50. Сбрасывает перезарядки всех базовых способностей владельца, когда тот убивает вражеского героя.<br><br><h1>Aghanim's Shard</h1>Позволяет применить эту способность, чтобы мгновенно сожрать выбранного крипа и восстановить себе долю от максимального здоровья и маны. Днём нельзя применять на древних крипов."
     },
     "ability": {
       "behavior": "passive",

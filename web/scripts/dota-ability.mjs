@@ -338,7 +338,6 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
   };
 
   const unresolved = [];
-  const warnings = [];
 
   function read(abilityName) {
     const bodies = bodiesByAbility.get(abilityName) ?? [];
@@ -362,20 +361,33 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
     const key = `DOTA_Tooltip_ability_${abilityName}`;
     const titles = labelOf(key);
     const descs = labelOf(`${key}_Description`);
-    const baseValue = (name) => {
-      const lower = name.toLowerCase();
-      return values.get(lower) ?? values.get(lower.replace(/_tooltip$/, ''));
+    // 占位符键名可能比 KV 键多一层 bonus_ 前缀（Valve 文案里出现「bonus_bonus_x」这类写法），
+    // 查不到就逐层去掉再查；这类文案写的是增量本身（「减少 %x% 秒」「提升 %x%%」），不是最终值
+    const lookup = (map, name) => {
+      let key = name.toLowerCase();
+      let stripped = false;
+      for (;;) {
+        const hit = map.get(key) ?? map.get(key.replace(/_tooltip$/, ''));
+        if (hit !== undefined) return { value: hit, stripped };
+        if (!key.startsWith('bonus_')) return { value: undefined, stripped: false };
+        key = key.slice('bonus_'.length);
+        stripped = true;
+      }
     };
-    // 神杖、魔晶段用对应形态的数值：special_bonus_scepter / _shard 覆盖基础值，带 + - 的是增量
+    const baseValue = (name) => lookup(values, name).value;
+    // 神杖、魔晶段用对应形态的数值：special_bonus_scepter / _shard 覆盖基础值，带 + - 的是增量。
+    // 基础值可能是多级（「110 100 90」），增量按级应用
     const upgradeValue = (name, upgrade) => {
-      const lower = name.toLowerCase();
-      const flags = flagsOf.get(lower) ?? flagsOf.get(lower.replace(/_tooltip$/, ''));
+      const { value: flags } = lookup(flagsOf, name);
       const override = flags?.get(`special_bonus_${upgrade}`);
-      if (override === undefined) return baseValue(name);
+      const base = lookup(values, name);
+      if (override === undefined) return base.value;
       if (!/^[+-]/.test(override)) return override;
-      const base = baseValue(name);
-      if (base === undefined || !/^-?\d+(?:\.\d+)?$/.test(base.trim())) return undefined;
-      return String(Number(base) + Number(override));
+      if (base.stripped) return override.replace(/^[+-]/, '');
+      if (base.value === undefined) return undefined;
+      const levels = base.value.trim().split(/\s+/);
+      if (!levels.every((level) => /^-?\d+(?:\.\d+)?$/.test(level))) return undefined;
+      return levels.map((level) => String(Number(level) + Number(override))).join(' ');
     };
     // 一次从左到右扫完：%% 是百分号的转义，先替换占位符再还原转义会把「%value%%%」拆错
     const resolve = (raw, onMissing, upgrade) =>
@@ -414,7 +426,6 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
             body: labelOf(bodyKey),
           }));
     const text = {};
-    const skippedUpgrades = new Map();
     for (const lang of langs) {
       // customval 是游戏里实时变化的计数（如己方已用几本书），网站给不出值，所在的那一行整行不展示
       const live = descs[lang]
@@ -430,12 +441,7 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
         const missing = [];
         const body = resolve(raw, (name) => missing.push(name), upgrade.name);
         // 神杖、魔晶段是补充内容：数值取不到时整段不接，免得页面上出现 %xxx%，主描述照旧拦
-        if (missing.length) {
-          const names = skippedUpgrades.get(upgrade.label) ?? new Set();
-          for (const name of missing) names.add(name);
-          skippedUpgrades.set(upgrade.label, names);
-          continue;
-        }
+        if (missing.length) continue;
         parts.push(`<h1>${title}</h1>${body}`);
       }
       // 标题、描述都走 GameText 渲染，只认 <br>，本地化里的换行在这里统一转换。
@@ -449,12 +455,6 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
           .replace(/<\/?span\b[^>]*>/gi, '')
           .replace(/\n/g, '<br>'),
       };
-    }
-    if (skippedUpgrades.size) {
-      const sections = [...skippedUpgrades].map(
-        ([label, names]) => `${label}(${[...names].join('、')})`,
-      );
-      warnings.push(`${abilityName} 的${sections.join('、')}说明取不到数值，没有接进描述`);
     }
     for (const lang of langs) {
       if (!text[lang].title) text[lang].title = text.en.title;
@@ -485,7 +485,7 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
     return { found: bodies.length > 0, texture, text, ability };
   }
 
-  return { read, locales, unresolved, warnings };
+  return { read, locales, unresolved };
 }
 
 /**

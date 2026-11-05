@@ -135,7 +135,8 @@
 - **本地化文本本身带 KeyValues 转义**（`\n` 换行、`\"` 引号、`\\` 反斜杠），取数时统一反还原；标题、描述最终只走 `GameText` 渲染，只认 `<br>`，所以还原出的换行要接着转成 `<br>`。产物里不允许残留任何反斜杠转义，同步自检拦这条
 - **换行先统一成 `\n` 再转 `<br>`**：值跨行书写时，Windows 检出带的是 CRLF，不先归一化就会把 `\r` 一起留在产物里，同一份 game 数据在不同系统上生成的结果不一致。标题、描述、背景故事与数值标签都走这条
 - **神杖、魔晶的升级说明接在描述末尾**：游戏把它们从 `_Description` 拆成了 `_scepter_description`、`_shard_description`，网站没有独立区块，按「神杖在前、魔晶在后」接上去，段标题取游戏里这两个物品的名字（`DOTA_Tooltip_ability_item_ultimate_scepter`、`_aghanims_shard`）。物品提示框不接这两段
-- **这两段的数值取不到时整段不接**，只告警不拦：它们是补充内容，页面上出现 `%xxx%` 比缺一段更糟；主描述里的占位符取不到仍然拦。技能升级用的数值常写成只有 `special_bonus_scepter` 的块，没有 `value` 可取，这类技能的神杖段因此不展示
+- **这两段的数值取不到时整段不接，不告警**：它们是补充内容，页面上出现 `%xxx%` 比缺一段更糟；主描述里的占位符取不到仍然拦。game 侧有些升级数值只写了 `special_bonus_scepter` / `special_bonus_shard` 的增量、没有基础值，这类技能的神杖段因此不展示
+- **神杖、魔晶段的取值细节**：增量按级应用（基础值是「110 100 90」时逐级加 25）；占位符键名比 KV 多一层重复的 `bonus_` 前缀时（如 `bonus_bonus_movement_speed_pct_night`），查不到就逐层去掉再查
 
 物品的本地化 key 同样是 `DOTA_Tooltip_ability_item_<名>` 这一套，KV 读 game 的各份 `npc_items_*.txt`，原版 `items.txt` 兜底。物品另有几条：
 
