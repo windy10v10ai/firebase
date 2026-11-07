@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: '80497b3211fb2bf0a9d89dcb1e2c2eea2bba5bd5',
+  gameCommit: '57aa639d246f3ab3ab1b6a69bc82758d4ffb4e37',
   dotaVersion: '7.41f',
 } as const;
 
@@ -262,7 +262,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_beastmaster',
     abilityName: 'beastmaster_wild_axes_awaken',
-    freeTrial: true,
+    freeTrial: false,
     art: 'beastmaster.32266deb.webp',
     icon: 'beastmaster_wild_axes.b094b423.webp',
     name: { zh: '兽王', en: 'Beastmaster', ru: 'Beastmaster' },
@@ -568,9 +568,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Астральный дух: пробуждение</font>",
     },
     desc: {
-      zh: "上古巨神放出他的灵体游魂，灵魂对任何经过的单位都会造成伤害。当它与巨神合体时，它每伤害过一个单位都会给予若干攻击力和移动速度加成。<br><br>灵体游魂拥有回音重踏，回归和自然秩序三个技能。<br><br><font color='#d000ff'>觉醒强化：</font>冷却时间缩短。<br><font color='#00CED1'>自动施法：</font>技能冷却完毕且附近存在敌方英雄时，自动朝距离最远的敌方英雄放出游魂，游魂可召回时立即自动收回，无需手动操作；开启期间手动放出的游魂同样会被自动收回。",
-      en: "Elder Titan sends forth his Astral Spirit, damaging any units it passes through.  When the spirit rejoins the Titan, it grants bonus damage and movement speed for each unit it passed through.<br><br>The Astral Spirit possesses the Echo Stomp, Return Spirit, and Natural Order abilities.<br><br><font color='#d000ff'>Awakening Bonus:</font> Reduced cooldown.<br><font color='#00CED1'>Autocast:</font> Whenever the ability is off cooldown and an enemy hero is nearby, automatically sends the spirit toward the farthest enemy hero, then recalls it automatically as soon as the recall is available, with no manual input required. While active, manually cast spirits are also recalled automatically.",
-      ru: "Древний титан призывает своего астрального духа, который наносит урон любым юнитам на своём пути. Когда дух воссоединяется с титаном, он даёт бонус к урону и скорости передвижения за каждый задетый юнит.<br><br>Астральный дух обладает способностями Эхо-топот, Возврат духа и Естественный порядок.<br><br><font color='#d000ff'>Бонус пробуждения:</font> Сокращённое время восстановления.<br><font color='#00CED1'>Автоприменение:</font> Как только способность готова к использованию и поблизости есть вражеский герой, автоматически посылает духа к самому дальнему вражескому герою, а затем автоматически возвращает его, как только возврат становится доступен, без ручного управления. Пока способность активна, вручную призванный дух также возвращается автоматически.",
+      zh: "上古巨神放出他的灵体游魂，灵魂对任何经过的单位都会造成伤害。当它与巨神合体时，它每伤害过一个单位都会给予若干攻击力和移动速度加成。<br><br>灵体游魂拥有回音重踏，回归和自然秩序三个技能。<br><br><font color='#d000ff'>觉醒强化：</font>冷却时间缩短。<br><font color='#00CED1'>自动施法：</font>技能冷却完毕且附近存在敌方英雄时，自动朝距离最远的敌方英雄放出游魂，游魂可召回时立即自动收回，无需手动操作；开启期间手动放出的游魂同样会被自动收回。<br><br><h1>阿哈利姆神杖</h1>游魂每碰到一名英雄就能使上古巨神在游魂回归后获得1.5秒<font color='#d76907'>减益免疫</font>状态和50%魔法抗性提升。",
+      en: "Elder Titan sends forth his Astral Spirit, damaging any units it passes through.  When the spirit rejoins the Titan, it grants bonus damage and movement speed for each unit it passed through.<br><br>The Astral Spirit possesses the Echo Stomp, Return Spirit, and Natural Order abilities.<br><br><font color='#d000ff'>Awakening Bonus:</font> Reduced cooldown.<br><font color='#00CED1'>Autocast:</font> Whenever the ability is off cooldown and an enemy hero is nearby, automatically sends the spirit toward the farthest enemy hero, then recalls it automatically as soon as the recall is available, with no manual input required. While active, manually cast spirits are also recalled automatically.<br><br><h1>Aghanim's Scepter</h1>Causes Elder Titan to become debuff immune and gain 50% magic resistance for 1.5 seconds per affected enemy Hero when the spirit returns.",
+      ru: "Древний титан призывает своего астрального духа, который наносит урон любым юнитам на своём пути. Когда дух воссоединяется с титаном, он даёт бонус к урону и скорости передвижения за каждый задетый юнит.<br><br>Астральный дух обладает способностями Эхо-топот, Возврат духа и Естественный порядок.<br><br><font color='#d000ff'>Бонус пробуждения:</font> Сокращённое время восстановления.<br><font color='#00CED1'>Автоприменение:</font> Как только способность готова к использованию и поблизости есть вражеский герой, автоматически посылает духа к самому дальнему вражескому герою, а затем автоматически возвращает его, как только возврат становится доступен, без ручного управления. Пока способность активна, вручную призванный дух также возвращается автоматически.<br><br><h1>Aghanim's Scepter</h1>За каждого задетого вражеского героя Древний титан после возвращения духа получает <font color='#d76907'>невосприимчивость к дебаффам</font> на 1.5 сек. и 50% сопротивления магии.",
     },
     ability: {
       behavior: 'autocast',
@@ -757,9 +757,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Рок: пробуждение</font>",
     },
     desc: {
-      zh: "对敌人施加末日诅咒，对其进行驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>驱散类型：弱驱散<br><br>持有<font color='#92acf5'>阿哈利姆神杖</font>时，末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。",
-      en: "Inflicts a curse that dispels an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>DISPEL TYPE: Basic Dispel<br><br>With <font color='#92acf5'>Aghanim's Scepter</font>, Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.",
-      ru: "Накладывает на врага проклятие Рок, развеивает его и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>ТИП РАЗВЕИВАНИЯ: Простое развеивание<br><br>С <font color='#92acf5'>Скипетр Аганима</font> Рок также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Рок на врагов в радиусе 350, сам не получая Рок.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня.",
+      zh: "对敌人施加末日诅咒，对其进行弱驱散，并且使其<font color='#6db6e9'>无法施放技能</font>或获得任何<font color='#07d738'>治疗</font>效果，同时造成持续伤害。<br><br>觉醒后，<font color='#FFFFFF'>吞噬</font>获得的野怪技能会自动提升至最高等级。<br><br><h1>阿哈利姆神杖</h1>末日额外施加<font color='#DD621E'>破坏</font>效果，并可对自己或<font color='#FFFFFF'>友方英雄</font>释放，持续对周围350范围内的敌人造成末日效果，自身不受影响。",
+      en: "Inflicts a curse that applies a Basic Dispel to an enemy and prevents them from casting spells or healing in any way, while taking damage over time.<br><br>After awakening, neutral abilities gained through <font color='#FFFFFF'>Devour</font> are automatically raised to their maximum level.<br><br><h1>Aghanim's Scepter</h1>Doom also applies <font color='#DD621E'>Break</font> and may target the caster or an <font color='#FFFFFF'>allied hero</font> instead, continuously Dooming enemies within a 350 radius without affecting the target itself.",
+      ru: "Накладывает на врага проклятие Рок, применяет к нему простое развеивание и не позволяет ему <font color='#6db6e9'>использовать способности</font> или получать какое-либо <font color='#07d738'>лечение</font>, одновременно нанося периодический урон.<br><br>После пробуждения способности нейтральных крипов, полученные с помощью <font color='#FFFFFF'>Пожирание</font>, автоматически повышаются до максимального уровня.<br><br><h1>Aghanim's Scepter</h1>Рок также накладывает <font color='#DD621E'>Разрушение</font> и может применяться к владельцу или <font color='#FFFFFF'>союзному герою</font>, который будет непрерывно накладывать Рок на врагов в радиусе 350, сам не получая Рок.",
     },
     ability: {
       behavior: 'target',
@@ -785,7 +785,11 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ],
       cooldown: ['60'],
       manaCost: ['150', '200', '250', '300'],
-      lore: null,
+      lore: {
+        zh: '每当佤什昂都的丧钟传出一个名字，这个名字的主人就必将迎来末日。',
+        en: 'When a name is tolled from the bell of Vashundol, doom is sure to follow.',
+        ru: 'По ком прозвонил колокол Вашундола, за тем последует неминуемый рок.',
+      },
     },
   },
   {
@@ -1025,9 +1029,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_rattletrap',
     abilityName: 'special_bonus_unique_rattletrap_upgrade',
-    freeTrial: false,
+    freeTrial: true,
     art: 'rattletrap.d675296a.webp',
-    icon: 'rattletrap_power_cogs.98dbaed7.webp',
+    icon: 'rattletrap_overclocking.6017c7b3.webp',
     name: { zh: '发条技师', en: 'Clockwerk', ru: 'Clockwerk' },
     title: {
       zh: "<font color='#d000ff'>发条 觉醒</font>",
@@ -1035,9 +1039,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Часовщик: пробуждение</font>",
     },
     desc: {
-      zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%</b></font>。",
-      en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time.",
-      ru: "После применения Силовых шестерён даётся эффект <font color='#FFCC66'>Чёрного короля</font> на <font color='#FFFFFF'><b>3</b></font> сек., а получаемый урон снижается на <font color='#FFFFFF'><b>60%</b></font>.",
+      zh: "施放能量齿轮后获得<font color='#FFCC66'>黑皇杖</font>效果，持续<font color='#FFFFFF'><b>3</b></font>秒，期间受到的伤害降低<font color='#FFFFFF'><b>60%</b></font>。<br>自动吃掉自己买的锁子甲，每件永久增加<font color='#FFFFFF'><b>4</b></font>点护甲。锁子甲放在备用格时，装备栏前 6 格需要留出空格。",
+      en: "Casting Power Cogs grants the <font color='#FFCC66'>Black King Bar</font> effect for <font color='#FFFFFF'><b>3</b></font> seconds, reducing damage taken by <font color='#FFFFFF'><b>60%</b></font> during that time.<br>Automatically consumes Chainmails you bought, permanently gaining <font color='#FFFFFF'><b>4</b></font> armor each. Chainmails in the backpack need an empty slot among your first six item slots.",
+      ru: "После применения Силовых шестерён даётся эффект <font color='#FFCC66'>Чёрного короля</font> на <font color='#FFFFFF'><b>3</b></font> сек., а получаемый урон снижается на <font color='#FFFFFF'><b>60%</b></font>.<br>Купленные вами кольчуги съедаются автоматически, каждая навсегда даёт <font color='#FFFFFF'><b>4</b></font> брони. Для кольчуг в рюкзаке нужна свободная ячейка среди первых шести ячеек инвентаря.",
     },
     ability: {
       behavior: 'passive',
@@ -1523,9 +1527,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Останавливающая сердца аура: пробуждение</font>",
     },
     desc: {
-      zh: "死灵法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><font color='#d000ff'>造成的伤害可以被技能增强。</font>",
-      en: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font>",
-      ru: "Некрофос заставляет сердца врагов остановиться: окружающие вражеские юниты непрерывно теряют здоровье в размере процента от максимального запаса.<br><br><font color='#d000ff'>Наносимый урон усиливается усилением способностей.</font>",
+      zh: "死灵法师让敌人的心脏停跳，使附近敌方单位按最大生命值一定百分比持续流失生命。<br><br><font color='#d000ff'>造成的伤害可以被技能增强。</font><br><br><h1>阿哈利姆神杖</h1>将死灵法师的生命恢复值的40%转化为额外伤害",
+      en: "Necrophos stills the hearts of his opponents, causing nearby enemy units to lose a percentage of their max health over time.<br><br><font color='#d000ff'>The damage can be amplified by abilities.</font><br><br><h1>Aghanim's Scepter</h1>Converts 40% of Necrophos's health regeneration into additional damage",
+      ru: "Некрофос заставляет сердца врагов остановиться: окружающие вражеские юниты непрерывно теряют здоровье в размере процента от максимального запаса.<br><br><font color='#d000ff'>Наносимый урон усиливается усилением способностей.</font><br><br><h1>Aghanim's Scepter</h1>40% восстановления здоровья Некрофоса превращается в дополнительный урон",
     },
     ability: {
       behavior: 'aura',
@@ -1608,9 +1612,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Убийственный выстрел (пробужд.)</font>",
     },
     desc: {
-      zh: "狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><font color='#FFFFFF'>神杖升级：命中的敌方英雄附加眩晕效果。</font>",
-      en: "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><font color='#FFFFFF'>Aghanim's Scepter: affected enemy heroes are also stunned.</font>",
-      ru: "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.<br><br><font color='#FFFFFF'>Аганимовский скипетр: поражённые герои также оглушаются.</font>",
+      zh: '狙击手锁定区域内的敌方英雄，发射毁灭性的子弹，在远距离造成一次必定暴击的攻击，并附带额外物理伤害。<br><br><h1>阿哈利姆神杖</h1>命中的敌方英雄附加眩晕效果。',
+      en: "Sniper locks onto enemy heroes in an area, firing devastating bullets that deal an attack with a guaranteed critical hit at long range, plus bonus physical damage.<br><br><h1>Aghanim's Scepter</h1>Affected enemy heroes are also stunned.",
+      ru: "Снайпер захватывает вражеских героев в области и выпускает сокрушительные пули, наносящие на большой дистанции атаку с гарантированным критическим ударом и дополнительным физическим уроном.<br><br><h1>Aghanim's Scepter</h1>Поражённые герои также оглушаются.",
     },
     ability: {
       behavior: 'point',
@@ -1729,9 +1733,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Мясной крюк: пробуждение</font>",
     },
     desc: {
-      zh: "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。",
-      en: "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.",
-      ru: "Запускает мясной крюк, который притягивает к себе первую задетую цель.<br><br><font color='#00CED1'>Автоприменение:</font> при включении крюк притягивает только врагов, при выключении может притягивать и союзников.<br><br>Значительно увеличены дальность применения и скорость крюка.",
+      zh: "发射一个肉钩，将接触到的第一个单位拖回。<br><br><font color='#00CED1'>自动施法：</font>开启时肉钩只会拖拽敌方单位，关闭时肉钩可以拖拽友方单位。<br><br>大幅提升施法距离与钩子速度。<br><br><h1>阿哈利姆魔晶</h1>肉钩击中敌人时，根据钩中时的距离造成额外纯粹伤害。",
+      en: "Launches a hook that pulls the first unit it contacts.<br><br><font color='#00CED1'>Autocast:</font> when enabled, the hook only hits enemies; when disabled, the hook can pull allies.<br><br>Greatly increased cast range and hook speed.<br><br><h1>Aghanim's Shard</h1>When Meat Hook hits an enemy, it deals bonus pure damage based on the hook distance.",
+      ru: "Запускает мясной крюк, который притягивает к себе первую задетую цель.<br><br><font color='#00CED1'>Автоприменение:</font> при включении крюк притягивает только врагов, при выключении может притягивать и союзников.<br><br>Значительно увеличены дальность применения и скорость крюка.<br><br><h1>Aghanim's Shard</h1>Когда мясной крюк попадает по врагу, он наносит дополнительный чистый урон в зависимости от пройденного расстояния.",
     },
     ability: {
       behavior: 'autocast',

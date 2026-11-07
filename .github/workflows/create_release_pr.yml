@@ -37,6 +37,12 @@ jobs:
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           title: Release
+          body: |
+            ## Checklist
+
+            <!-- agent 合并功能 PR 后，把要你验证或确认的事追加到这里。审批后会自动合并并部署，审批前逐条过完 -->
+
+            - [ ] 跨仓库改动的上线顺序没问题（没有跨仓库改动就直接勾掉）
           branch: develop
           base: main
           labels: release
