@@ -239,12 +239,6 @@
       "tier": 1
     },
     {
-      "name": "item_skill_reset",
-      "section": "equipment",
-      "price": 2000,
-      "tier": 1
-    },
-    {
       "name": "item_aether_lens_2",
       "section": "equipment",
       "price": 3200,
@@ -833,12 +827,6 @@
       "tier": 5
     },
     {
-      "name": "item_passive_skill_tome",
-      "section": "equipment",
-      "price": 80000,
-      "tier": 5
-    },
-    {
       "name": "item_candy_candy",
       "section": "consumable",
       "price": 6000,
@@ -879,6 +867,18 @@
       "section": "consumable",
       "price": 0,
       "tier": 5
+    },
+    {
+      "name": "item_passive_skill_tome",
+      "section": "consumable",
+      "price": 80000,
+      "tier": 5
+    },
+    {
+      "name": "item_skill_reset",
+      "section": "consumable",
+      "price": 2000,
+      "tier": 2
     },
     {
       "name": "item_light_part",
