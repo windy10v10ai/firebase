@@ -218,14 +218,13 @@ describe('daily task numeric parameters', () => {
       expect(starTargets[1]).toBeGreaterThan(starTargets[0]);
       expect(starTargets[2]).toBeGreaterThan(starTargets[1]);
     }
-
-    const roshanTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.ROSHAN_KILLS);
-    expect(roshanTask).toBeDefined();
-    expect(STARS.map((star) => (roshanTask?.target ?? 0) + (star - 1))).toEqual([1, 2, 3]);
   });
 
   it('keeps fixed star targets increasing and starting from the base target', () => {
-    const fixedTasks = DAILY_TASKS.filter((task) => task.starTargets);
+    // 肉山每次重生等待过长，1★ 与 2★ 共用同一目标，3★ 只加一次
+    const fixedTasks = DAILY_TASKS.filter(
+      (task) => task.starTargets && task.metric !== TaskMetric.ROSHAN_KILLS,
+    );
 
     expect(fixedTasks.length).toBeGreaterThan(0);
     for (const task of fixedTasks) {
@@ -237,5 +236,8 @@ describe('daily task numeric parameters', () => {
 
     const towerTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.TOWER_KILLS);
     expect(towerTask?.starTargets).toEqual([3, 4, 6]);
+
+    const roshanTask = GENERAL_TASKS.find((task) => task.metric === TaskMetric.ROSHAN_KILLS);
+    expect(roshanTask?.starTargets).toEqual([1, 1, 2]);
   });
 });

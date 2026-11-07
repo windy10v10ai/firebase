@@ -73,6 +73,7 @@ export const DAILY_TASKS: TaskDefinition[] = [
     scope: TaskScope.PERSONAL_GENERAL,
     metric: TaskMetric.ROSHAN_KILLS,
     target: 1,
+    starTargets: [1, 1, 2],
   },
   {
     id: 'hero_crystal_maiden_1',
