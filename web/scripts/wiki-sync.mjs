@@ -39,7 +39,6 @@ const CUSTOM_ITEM_KV = new Set([
 const SHOP_EXCLUDED = [
   'item_arcane_blink_2',
   'item_collector',
-  'item_skill_reset',
   'item_rune_transmuter_random',
   'item_rune_transmuter_advanced',
   'item_exchange',

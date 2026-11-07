@@ -2179,9 +2179,9 @@
   },
   "item_skill_reset": {
     "icon": "skill_reset.e8a94791.webp",
-    "zh": "技能洗点书",
-    "en": "Respec Tome",
-    "ru": "Том сброса навыков"
+    "zh": "遗忘技能书",
+    "en": "Skill Forget Tome",
+    "ru": "Том забвения навыков"
   },
   "item_slippers": {
     "icon": "slippers.a05d8c2e.webp",

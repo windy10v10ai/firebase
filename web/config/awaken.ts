@@ -1,10 +1,10 @@
 // 本文件由 web/scripts/awaken-sync.mjs 生成，不要手改。
 // 改觉醒数据要改 game 仓库，再跑 npm run awaken:sync 重新生成。
-// 数据来源与同步流程见 .claude/skills/awaken-sync/SKILL.md。
+// 数据来源与同步流程见 .claude/skills/game-sync/SKILL.md。
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: '57aa639d246f3ab3ab1b6a69bc82758d4ffb4e37',
+  gameCommit: '98c14a3efd3d0e6234fbc9eead6a04e2f4689e7a',
   dotaVersion: '7.41f',
 } as const;
 
