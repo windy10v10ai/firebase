@@ -2717,6 +2717,28 @@
       }
     }
   },
+  "item_skill_reset": {
+    "desc": {
+      "zh": "<h1>使用：遗忘</h1>选择一个被动技能书得到的额外被动技能遗忘，返还已花费的技能点，并退回一次被动技能书使用次数。<br>英雄自带技能和开局抽奖得到的技能不能遗忘。",
+      "en": "<h1>Use: Forget</h1>Choose one extra passive ability gained from the Passive Skill Tome to forget. Refunds its spent skill points and one Passive Skill Tome use.<br>Hero innate abilities and abilities from the starting lottery cannot be forgotten.",
+      "ru": "<h1>Применение: Забыть навык</h1>Выберите один дополнительный пассивный навык, полученный из Тома пассивного навыка, и забудьте его. Возвращает потраченные очки навыков и одно использование Тома пассивного навыка.<br>Врождённые способности героя и способности из стартовой лотереи нельзя забыть."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [],
+      "cooldown": null,
+      "manaCost": null,
+      "lore": {
+        "zh": "后悔药。",
+        "en": "A pill for regrets.",
+        "ru": "Таблетка от сожалений."
+      }
+    }
+  },
   "item_force_staff_3": {
     "desc": {
       "zh": "<h1>主动：黄金之力</h1>将任何目标单位向其面对方向推进<b>1200</b>距离。<br><br>施法距离：<b>1200</b>",

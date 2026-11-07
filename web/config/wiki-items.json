@@ -239,6 +239,12 @@
       "tier": 1
     },
     {
+      "name": "item_skill_reset",
+      "section": "equipment",
+      "price": 2000,
+      "tier": 1
+    },
+    {
       "name": "item_aether_lens_2",
       "section": "equipment",
       "price": 3200,
