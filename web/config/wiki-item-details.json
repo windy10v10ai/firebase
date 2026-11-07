@@ -19,9 +19,9 @@
   },
   "item_passive_skill_tome": {
     "desc": {
-      "zh": "<h1>使用: 学习被动技能</h1> 有更高概率获得强力技能，从 4 个随机被动技能中任选其一学习。<br>每名玩家整局最多使用 2 次<br>可以分享给队友<br>不可购买出售，藏宝箱有概率出现",
-      "en": "<h1>Active: Learn Passive Skill</h1> Higher chance of strong abilities. Choose one passive ability to learn from 4 random options.<br>Each player can use this up to 2 times per game.<br>Shareable with teammates.<br>Cannot be purchased or sell. Has a chance to appear in treasure chests.",
-      "ru": "<h1>Применение: Изучить пассивный навык</h1> Повышенный шанс получить сильную способность: выберите один из 4 случайных пассивных навыков.<br>Каждый игрок может использовать предмет не более 2 раз за игру.<br>Можно передавать союзникам.<br>Нельзя купить или продать. Может выпасть из сундуков с сокровищами."
+      "zh": "<h1>使用: 学习被动技能</h1> 有更高概率获得强力技能，从 4 个随机被动技能中任选其一学习。<br>每名玩家整局最多使用 2 次，可刷新候选，可分享给队友<br>可在商店购买，不可出售，藏宝箱有概率出现",
+      "en": "<h1>Active: Learn Passive Skill</h1> Higher chance of strong abilities. Choose one passive ability to learn from 4 random options.<br>Each player can use this up to 2 times per game, choices can be rerolled, shareable with teammates.<br>Can be bought in the shop but cannot be sold. Has a chance to appear in treasure chests.",
+      "ru": "<h1>Применение: Изучить пассивный навык</h1> Повышенный шанс получить сильную способность: выберите один из 4 случайных пассивных навыков.<br>Каждый игрок может использовать предмет не более 2 раз за игру, варианты можно обновить, предмет можно передавать союзникам.<br>Можно купить в магазине, нельзя продать. Может выпасть из сундуков с сокровищами."
     },
     "ability": {
       "behavior": "noTarget",
