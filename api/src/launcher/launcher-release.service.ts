@@ -7,12 +7,12 @@ import { LauncherReleaseDto } from './dto/launcher-release.dto';
 
 // 发布新版启动器时与 web 的 LAUNCHER_VERSION、LAUNCHER_MAC_VERSION 一起改，哈希取自 web/public/downloads 下的 exe 与 ZIP
 export const LAUNCHER_RELEASE: LauncherReleaseDto = {
-  version: '0.7.1',
-  sha256: 'f41bacab3052f0867fb6e98203b3bba12e839fc5cbb806308feb343ee1571c46',
+  version: '0.7.2',
+  sha256: '552592b745f7eb9ca8efb34f07ffbf5889bb58675209a9ee9c0b2d5c94afd8cc',
 };
 export const LAUNCHER_MAC_RELEASE: LauncherReleaseDto | undefined = {
-  version: '0.7.1',
-  sha256: '258baf4dc5f2cb13457d120fc69a81da97026ec1d3c973cb55b0d176e18645cd',
+  version: '0.7.2',
+  sha256: 'dd07bd5c4ce42b0687d96636f36769f2a46d3b0f215859bcd76b2416aceb11c2',
 };
 export const LAUNCHER_VERSION_CACHE_SECONDS = 3600;
 
