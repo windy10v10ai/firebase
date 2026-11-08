@@ -16,8 +16,21 @@ function getUtcMidnightForTest(): Date {
 
 function createFakeRateLimitRepository() {
   const store = new Map<string, LocalRateLimit>();
+  // 真实事务会让冲突的事务重试，这里用串行队列模拟同一时刻只有一个事务生效
+  let queue: Promise<unknown> = Promise.resolve();
   return {
     repository: {
+      runTransaction: jest.fn(<T>(work: (transaction: unknown) => Promise<T>): Promise<T> => {
+        const run = queue.then(() =>
+          work({
+            findById: (id: string) => Promise.resolve(store.get(id) ?? null),
+            update: (doc: LocalRateLimit) => Promise.resolve(store.set(doc.id, doc)),
+            create: (doc: LocalRateLimit) => Promise.resolve(store.set(doc.id, doc)),
+          }),
+        );
+        queue = run.catch(() => undefined);
+        return run;
+      }),
       findById: jest.fn((id: string) => Promise.resolve(store.get(id) ?? null)),
       update: jest.fn((doc: LocalRateLimit) => {
         store.set(doc.id, doc);
@@ -149,6 +162,35 @@ describe('LocalHostService', () => {
     await service.recordGameEnd(createGameEndDto({ matchId: 'match-2' }), GAME_ID);
 
     expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('同一玩家并发到达的多个请求：只有一个加分，其余按冷却拒绝', async () => {
+    const { service, playerService, store } = createService();
+    store.set('1', { id: '1', lastRequestAt: new Date(Date.now() - COOLDOWN_MS - 1) });
+
+    const results = await Promise.all(
+      [1, 2, 3, 4].map(() => service.recordGameEnd(createGameEndDto(), GAME_ID)),
+    );
+
+    expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(1);
+    expect(results.filter((result) => result.recorded)).toHaveLength(1);
+    expect(store.get('1')?.dailyGameEndSeasonPoint).toBe(200);
+  });
+
+  it('不同玩家并发结算互不影响，各自都能通过', async () => {
+    const { service, playerService } = createService();
+
+    const results = await Promise.all(
+      [1, 2, 3].map((steamId) =>
+        service.recordGameEnd(
+          createGameEndDto({ players: [createPlayerDto({ steamId })] }),
+          GAME_ID,
+        ),
+      ),
+    );
+
+    expect(results.every((result) => result.recorded)).toBe(true);
+    expect(playerService.upsertGameEnd).toHaveBeenCalledTimes(3);
   });
 
   it('控制台启动的对局 matchId 均为 "0"，过了冷却窗口后不应被当成重复而拒绝', async () => {
