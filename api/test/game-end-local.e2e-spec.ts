@@ -308,6 +308,31 @@ describe('POST /api/game/end/local (e2e)', () => {
     expect(player.seasonPointTotal).toBe(400);
   });
 
+  it('同一玩家同时到达的多个结算请求：只有一个到账，其余按冷却拒绝', async () => {
+    const steamId = 105620040;
+    mockDate('2026-08-16T01:00:00.000Z');
+    await createPlayer(app, { steamId, matchCount: 20 });
+    const payload = createGameEndLocalPayload({
+      matchId: '9100000040',
+      players: [{ steamId, battlePoints: 200 }],
+    });
+
+    await Promise.all([
+      postAsLocalHost(app, payload),
+      postAsLocalHost(app, payload),
+      postAsLocalHost(app, payload),
+      postAsLocalHost(app, payload),
+    ]);
+
+    const player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(200);
+    expect(player.matchCount).toBe(21);
+
+    mockDate('2026-08-16T01:05:00.000Z');
+    await postAsLocalHost(app, { ...payload, matchId: '9100000041' }).expect(201);
+    expect((await getPlayer(app, steamId)).seasonPointTotal).toBe(400);
+  }, 60000);
+
   it('同一 matchId 重试：直接判定失败，不重复加分', async () => {
     const steamId = 105620006;
     mockDate('2026-08-16T01:00:00.000Z');
