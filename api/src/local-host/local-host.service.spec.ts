@@ -166,6 +166,7 @@ describe('LocalHostService', () => {
 
   it('同一玩家并发到达的多个请求：只有一个加分，其余按冷却拒绝', async () => {
     const { service, playerService, store } = createService();
+    store.set('1', { id: '1', lastRequestAt: new Date(Date.now() - COOLDOWN_MS - 1) });
 
     const results = await Promise.all(
       [1, 2, 3, 4].map(() => service.recordGameEnd(createGameEndDto(), GAME_ID)),

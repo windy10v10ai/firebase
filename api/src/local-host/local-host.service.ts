@@ -164,7 +164,7 @@ export class LocalHostService {
     // 多人报文里有人不通过就整份拒绝，是为了省掉部分成功的处理，不是安全上的要求
     let rejected = checks.find((check) => !check.ok);
     if (!rejected) {
-      const claimed = await Promise.all(checks.map((check) => this.claimCooldown(check)));
+      const claimed = await Promise.all(checks.map((check) => this.claimCooldown(check.steamId)));
       checks.forEach((check, index) => {
         if (!claimed[index]) {
           check.ok = false;
@@ -205,29 +205,20 @@ export class LocalHostService {
   }
 
   // 前面的冷却检查与后面的落盘是两次分开的读写，客户端并发重发的请求会同时通过检查；
-  // 这里在事务里再检查一次并立刻占位，同一时刻只有一个请求能占到
-  private async claimCooldown(check: PlayerCheck): Promise<boolean> {
-    const id = check.steamId.toString();
-    const claimed = await this.rateLimitRepository.runTransaction(async (transaction) => {
-      const latest = await transaction.findById(id);
-      if (latest?.lastRequestAt && Date.now() - latest.lastRequestAt.getTime() < COOLDOWN_MS) {
-        return null;
+  // 这里在事务里再检查一次并立刻占位，同一时刻只有一个请求能占到。
+  // 新玩家还没有冷却文档，跳过占位交给落盘去创建，首局撞上并发重发的概率极低
+  private async claimCooldown(steamId: number): Promise<boolean> {
+    return this.rateLimitRepository.runTransaction(async (transaction) => {
+      const latest = await transaction.findById(steamId.toString());
+      if (!latest) {
+        return true;
       }
-      const next = { ...(latest ?? { id }), lastRequestAt: new Date() } as LocalRateLimit;
-      if (latest) {
-        await transaction.update(next);
-      } else {
-        await transaction.create(next);
+      if (latest.lastRequestAt && Date.now() - latest.lastRequestAt.getTime() < COOLDOWN_MS) {
+        return false;
       }
-      return next;
+      await transaction.update({ ...latest, lastRequestAt: new Date() });
+      return true;
     });
-    if (!claimed) {
-      return false;
-    }
-    // 占位可能新建了文档，后面的落盘要按已存在处理
-    check.current = claimed;
-    check.counters = getDailyCounters(claimed, check.today);
-    return true;
   }
 
   private async recordSettlementAudit(
