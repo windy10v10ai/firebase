@@ -46,6 +46,7 @@ namespace Windy10v10AI.Launcher
         public readonly bool ShowLog;
         public string Button;
         public Action OnClick;
+        public string Detail;
 
         public LaunchError(string message, bool showLog) : base(message)
         {
@@ -1232,8 +1233,27 @@ namespace Windy10v10AI.Launcher
         LaunchError ServerExitError()
         {
             var corrupt = CorruptFilesText(ReadShared(logFile));
-            if (corrupt == null) return new LaunchError(Strings.ServerExited, true);
-            return new LaunchError(corrupt, false) { Button = Strings.VerifyFiles, OnClick = VerifyFiles };
+            if (corrupt == null) return ServerExited();
+            return new LaunchError(corrupt, false) { Button = Strings.VerifyFiles, OnClick = VerifyFiles, Detail = ServerExitDetail() };
+        }
+
+        LaunchError ServerExited()
+        {
+            return new LaunchError(Strings.ServerExited, true) { Detail = ServerExitDetail() };
+        }
+
+        // The exit code tells an engine crash from a voluntary exit or an external kill, which is how feedback reports get sorted
+        string ServerExitDetail()
+        {
+            try
+            {
+                var minutes = (int)(server.ExitTime - server.StartTime).TotalMinutes;
+                return "serverExit code=0x" + server.ExitCode.ToString("X8") + " exitedAt=" + server.ExitTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss") + "Z ranMinutes=" + minutes;
+            }
+            catch (Exception error)
+            {
+                return "serverExit code=unavailable " + error.GetType().Name;
+            }
         }
 
         static void VerifyFiles()
@@ -1575,7 +1595,7 @@ namespace Windy10v10AI.Launcher
                 if (server.HasExited)
                 {
                     if (end.Ended) break;
-                    throw new LaunchError(Strings.ServerExited, true);
+                    throw ServerExited();
                 }
                 NativeMethods.HideWindowsOf(serverId);
                 var presence = Judge(client, serverId);
@@ -1785,7 +1805,7 @@ namespace Windy10v10AI.Launcher
                 if (server.HasExited)
                 {
                     if (room.Ended) continue;
-                    throw new LaunchError(Strings.ServerExited, true);
+                    throw ServerExited();
                 }
                 NativeMethods.HideWindowsOf(serverId);
                 if (room.Ended) continue;
@@ -1941,6 +1961,14 @@ namespace Windy10v10AI.Launcher
         }
 
         // Runs on the worker thread when a launch ends for any reason, and returns the window to its idle state
+        string FailureDetail()
+        {
+            if (failureCause == null) return null;
+            var launchError = failureCause as LaunchError;
+            if (launchError != null && launchError.Detail != null) return launchError.Detail;
+            return failureCause.ToString();
+        }
+
         void Finish(string error, bool showLog)
         {
             Finish(error, showLog, null, null);
@@ -1951,7 +1979,7 @@ namespace Windy10v10AI.Launcher
             var cancelled = stopping;
             if (error != null && !cancelled)
             {
-                failure = new FeedbackError { Message = error, Stage = stage, Detail = failureCause == null ? null : failureCause.ToString() };
+                failure = new FeedbackError { Message = error, Stage = stage, Detail = FailureDetail() };
             }
             failureCause = null;
             // Stops the poll thread first so a late poll cannot list the room again
