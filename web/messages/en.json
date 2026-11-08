@@ -190,6 +190,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_7_2": [
+          "Fixed some issues"
+        ],
         "v0_7_1": [
           "Improved multiplayer connections with less lag and fewer disconnects"
         ],

@@ -39,7 +39,6 @@ const CUSTOM_ITEM_KV = new Set([
 const SHOP_EXCLUDED = [
   'item_arcane_blink_2',
   'item_collector',
-  'item_skill_reset',
   'item_rune_transmuter_random',
   'item_rune_transmuter_advanced',
   'item_exchange',
@@ -92,9 +91,12 @@ const SHOP_CONSUMABLES = [
   'item_tome_of_luoshu',
   'item_tome_of_ability_reset',
   'item_awaken_stone',
+  // 两本书成对使用：先学被动技能，再拿遗忘书退掉，排在被动技能书后面
+  'item_passive_skill_tome',
+  'item_skill_reset',
 ];
-// 不按价格上色的消耗道具：觉醒石不花钱，在游戏里却是最稀有的一档
-const CONSUMABLE_TIERS = { item_awaken_stone: 5 };
+// 不按价格上色的消耗道具：觉醒石不花钱，在游戏里却是最稀有的一档；遗忘技能书按 2 档蓝色
+const CONSUMABLE_TIERS = { item_awaken_stone: 5, item_skill_reset: 2 };
 // 打怪掉落，商店里买不到，要单独列出来才收得进商店分类；没有价格，边框颜色按游戏里的稀有程度定，顺序即页面上的顺序
 const SHOP_DROP_TIERS = {
   item_light_part: 4,
