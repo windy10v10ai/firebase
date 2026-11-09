@@ -15,7 +15,7 @@ VirusTotal 的 Microsoft 一栏报 `!ml`，dev 站下载被拦，或玩家反馈
 
 ## Additional information 模板
 
-要点：先说是什么、源码和编译方式可查，再给签名与 SHA-256、扫描结果，最后明确请求放行。不要写 HTML 实体（页面会把 `'` 转成 `&amp;#39;`），文中不用撇号。0.7.3 是首个签名版，用这个结构提交。
+要点：先说是什么、源码和编译方式可查，再给签名与 SHA-256、扫描结果，最后明确请求放行。不要写 HTML 实体（页面会把 `'` 转成 `&amp;#39;`），文中不用撇号。下面分行只是便于阅读，填进去时连成一整段，不留换行：换行会在申报记录里显示成 `&#10;`。0.7.3 是首个签名版，用这个结构提交。
 
 ```
 This is Windy10v10AI Launcher <版本>, an open-source launcher for the Windy10v10AI Dota 2 custom game.
