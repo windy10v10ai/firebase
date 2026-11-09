@@ -5,6 +5,8 @@ import type { NextConfig } from 'next';
 
 const withNextIntl = createNextIntlPlugin();
 
+const LAUNCHER_BUCKET = 'windy10v10ai-launcher';
+
 const HASHED_ASSET_DIRS = ['dota', 'heroes', 'abilities', 'items', 'item-slots'];
 
 const apiOrigin = process.env.API_ORIGIN;
@@ -54,6 +56,11 @@ const config: NextConfig = {
         source: '/api/:path*',
         destination: `${apiOrigin}/api/:path*`,
       },
+      // Mac 安装包放在 Storage 的 mac/ 目录，不进 git；下载地址仍是本站域名
+      ...['zip', 'dmg'].map((ext) => ({
+        source: `/downloads/:file(.*-macos-arm64\\.${ext})`,
+        destination: `https://storage.googleapis.com/${LAUNCHER_BUCKET}/mac/:file`,
+      })),
       // Firebase Auth 的登录与续期请求由 config/firebase.ts 指到本站域名，在这里转发出去。
       // 路径前缀是 SDK 拼出来的，不能改名
       {
