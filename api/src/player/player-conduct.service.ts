@@ -99,7 +99,7 @@ export class PlayerConductService {
     return Math.min(CONDUCT_POINT_MAX, Math.max(CONDUCT_POINT_MIN, value));
   }
 
-  // 游戏结束时按是否逃跑调整行为分，正常结束只在分数未达上限时回升。
+  // 游戏结束时逃跑扣分，正常结束只在低于默认分 100 时回升。
   calculateGameEndConductPoint(current: number, isDisconnect: boolean): number {
     let next = current;
     if (isDisconnect) {
