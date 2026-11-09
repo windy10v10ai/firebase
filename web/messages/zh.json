@@ -547,7 +547,7 @@
         "intro": "反映游戏内行为，默认 100 分，上限 120 分。",
         "changesTitle": "分数变化（仅限组队）",
         "changesFinish": "完成一局 <pos>+1</pos>（未满 100 时）",
-        "changesEarlyLeave": "秒退一局 <neg>-10</neg>（单人或全员提前退出不计）",
+        "changesEarlyLeave": "中途退出游戏 <neg>-5</neg>（单人 / 全员退出不计）",
         "changesCommend": "被点赞 <pos>+2</pos> / 被举报 <neg>-2</neg>（同一玩家每周最多生效一次）",
         "multiplierTitle": "组队局结算积分倍率",
         "tierExcellent": "110 分及以上",
