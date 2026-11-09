@@ -97,7 +97,7 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
 4. 每次发版都用本机 Defender 扫描签名后的 exe，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可继续；报具体病毒家族、或大量引擎一起报时先停下排查。**大版本（升第二位及以上）不论扫描结果都提交一次误报申报**：云端判定与本机扫描不是一回事，扫描干净的版本也有玩家反馈被 Windows 报毒，提前申报比等玩家撞上再处理省事。
 5. 发版 PR：
    - 把签名后的 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
-   - Mac 的 `Windy10v10AI-<version>-macos-arm64.zip` 与 `.dmg` 不进 git：先用 `gcloud storage cp --cache-control="public, max-age=31536000, immutable" <两个文件> gs://windy10v10ai-launcher/mac/` 上传，再给 DMG 设保存名：`gcloud storage objects update gs://windy10v10ai-launcher/mac/<dmg 文件名> --content-disposition='attachment; filename="Windy10v10AI.dmg"'`。上传要先于发版 PR 合并，网站从该目录转发。
+   - Mac 的 `Windy10v10AI-<version>-macos-arm64.zip` 与 `.dmg` 不进 git：先用 `gcloud storage cp --cache-control="public, max-age=31536000, immutable" <两个文件> gs://windy10v10ai-launcher/mac/` 上传，再给 DMG 设保存名：`gcloud storage objects update gs://windy10v10ai-launcher/mac/<dmg 文件名> --content-disposition='attachment; filename="Windy10v10AI.dmg"'`。上传后把桶里的 ZIP 取回算 sha256，与 API 里填的比对（单测只查格式）。上传要先于发版 PR 合并，网站从该目录转发。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION` 与 `LAUNCHER_MAC_VERSION`（首次发 Mac 版时从 `null` 改成版本号，页面才显示 Mac tab）。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有），Mac 取 ZIP 的 sha256（`LAUNCHER_MAC_RELEASE`）。抄错时 api 单测会失败。
    - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只列对玩家影响大的变化，小修小改合成一句；未发布的版本并进本版。
