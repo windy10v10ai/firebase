@@ -110,6 +110,9 @@
   /* 折扣标签专用，不借用 danger：折扣不是危险，还要和绿色的限免标签一眼分开 */
   --color-discount: #ff6b6b;
 
+  /* 「已签名」这类可信标记专用的图标蓝，不借用功能色，免得被读成某个功能 */
+  --color-trust: #7ca2f6;
+
   /* 英雄等级圈，只用在近期战绩那一列：取值照搬游戏结算界面的 #HeroLevelLabel。
      它是金色但与会员金无关，破例的理由见 docs/web/design-system.md「游戏语义色」 */
   --color-hero-level: #e7d291;

@@ -29,9 +29,9 @@ VirusTotal 用 Claude in Chrome 上传，不用 API（要填密钥）。应用�
 - 上传框在 `vt-ui-main-upload-form` 的 shadow DOM 里，`find` 拿不到：先用 `javascript_tool` 往 `document.body` 插一个带 `aria-label` 的 `<input type="file">`，`file_upload` 传给它，再用 `DataTransfer` 赋给 shadow DOM 里的第二个 file input 并派发 `change`，最后在 shadow DOM 里找到「Confirm upload」调 `click()`
 - 完成后跳到 `/gui/file/<sha256>`。单次 `javascript_tool` 超过 45 秒会超时，分几次轮询；结果用 `javascript_tool` 递归拼 `shadowRoot` 文本来读
 
-Microsoft 一栏报 `!ml` 时，按 `references/false-positive.md` 申报误报。大版本（升第二位及以上）不论扫描结果干净与否都申报一次，理由见 README 第 4 步。第一个签名版本也申报一次：新证书还没有信誉，签名不保证 Defender 不再报。
+Microsoft 一栏报 `!ml` 时，按 `references/false-positive.md` 申报误报。只在被拦、本机报毒或出现 `!ml` 时申报。首个签名版和换证书后的第一个版本也申报一次：新证书还没有信誉，签名不保证 Defender 不再报。理由见 README 第 4 步。
 
-完成条件：Defender 输出 `found no threats`，VirusTotal 的检出数与 Microsoft 一栏已写进发版 PR 的测试清单；大版本另已提交误报申报。
+完成条件：Defender 输出 `found no threats`，VirusTotal 的检出数与 Microsoft 一栏已写进发版 PR 的测试清单，需要申报的已提交申报。
 
 ## 第 5 步：更新日志
 
@@ -48,6 +48,6 @@ Microsoft 一栏报 `!ml` 时，按 `references/false-positive.md` 申报误报�
 
 ## 第 6 步：下载验证
 
-用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 查这个下载地址有没有新记录。被拦时按 `references/false-positive.md` 申报。
+用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 查这个下载地址有没有新记录。被拦时按 `references/false-positive.md` 申报。再对下载到的文件跑 `Get-AuthenticodeSignature`，状态必须是 Valid、签名人是开源证书，并核对 sha256 与发版一致。Mac 的 DMG 用 `curl` 取一次，sha256 与 API 里一致（ZIP）或与桶里一致（DMG）。
 
-完成条件：没有新记录，或申报已提交。
+完成条件：没有新记录或申报已提交，且签名与 sha256 核对通过。
