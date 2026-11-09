@@ -1,6 +1,6 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { Download, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState, useSyncExternalStore } from 'react';
@@ -127,6 +127,12 @@ export default function LauncherDownload() {
             v{isMac ? LAUNCHER_MAC_VERSION : LAUNCHER_VERSION}
           </span>
           {isMac && <span className="text-center text-xs text-muted">{t('appleSilicon')}</span>}
+          {!isMac && (
+            <span className="flex items-center justify-center gap-1 text-center text-xs text-muted">
+              <ShieldCheck className="size-3.5 shrink-0" aria-hidden="true" />
+              {t('signed')}
+            </span>
+          )}
         </div>
       </div>
 
