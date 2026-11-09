@@ -120,16 +120,14 @@ export default function LauncherDownload() {
             <Download className="size-[18px]" aria-hidden="true" />
             {t('download')}
           </a>
-          <span className="text-center text-xs text-muted">
-            {isMac ? LAUNCHER_MAC_FILE_NAME : LAUNCHER_FILE_NAME}
-          </span>
-          <span className="text-center text-xs text-muted">
-            v{isMac ? LAUNCHER_MAC_VERSION : LAUNCHER_VERSION}
+          <span className="flex items-center justify-center gap-2 text-xs whitespace-nowrap text-muted">
+            <span>{isMac ? LAUNCHER_MAC_FILE_NAME : LAUNCHER_FILE_NAME}</span>
+            <span>v{isMac ? LAUNCHER_MAC_VERSION : LAUNCHER_VERSION}</span>
           </span>
           {isMac && <span className="text-center text-xs text-muted">{t('appleSilicon')}</span>}
           {!isMac && (
             <span className="flex items-center justify-center gap-1 text-center text-xs text-muted">
-              <ShieldCheck className="size-3.5 shrink-0" aria-hidden="true" />
+              <ShieldCheck className="size-3.5 shrink-0 text-trust" aria-hidden="true" />
               {t('signed')}
             </span>
           )}
