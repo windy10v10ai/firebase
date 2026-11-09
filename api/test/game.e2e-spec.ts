@@ -862,7 +862,7 @@ describe('PlayerController (e2e)', () => {
       expect(player.conductPoint).toEqual(100);
     });
 
-    it('组队局秒退扣10分', async () => {
+    it('组队局逃跑扣5分', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId1 = 100002011;
       const steamId2 = 100002012;
@@ -874,7 +874,7 @@ describe('PlayerController (e2e)', () => {
         }),
       );
       const player = await getPlayer(app, steamId1);
-      expect(player.conductPoint).toEqual(90);
+      expect(player.conductPoint).toEqual(95);
     });
 
     it('组队局正常结束加1分', async () => {
@@ -910,7 +910,7 @@ describe('PlayerController (e2e)', () => {
       expect(player.conductPoint).toEqual(100);
     });
 
-    it('组队局秒退 conductPoint=120 -> 110（验证上限不被卡）', async () => {
+    it('组队局逃跑 conductPoint=120 -> 115（验证上限不被卡）', async () => {
       mockDate('2023-12-01T00:00:00.000Z');
       const steamId1 = 100002025;
       const steamId2 = 100002026;
@@ -923,7 +923,7 @@ describe('PlayerController (e2e)', () => {
         }),
       );
       const player = await getPlayer(app, steamId1);
-      expect(player.conductPoint).toEqual(110);
+      expect(player.conductPoint).toEqual(115);
     });
   });
 

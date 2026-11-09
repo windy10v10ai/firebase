@@ -8,6 +8,7 @@ import { Player } from './entities/player.entity';
 
 const CONDUCT_COOLDOWN_DAYS = 7;
 const CONDUCT_POINT_DELTA = 2;
+const CONDUCT_ESCAPE_PENALTY = 5;
 const CONDUCT_POINT_MAX = 120;
 const CONDUCT_POINT_MIN = 0;
 
@@ -98,12 +99,11 @@ export class PlayerConductService {
     return Math.min(CONDUCT_POINT_MAX, Math.max(CONDUCT_POINT_MIN, value));
   }
 
-  // 根据当前行为分和是否秒退，计算游戏结束后的行为分。
-  // 秒退 -10；正常结束在 < 100 时 +1，>= 100 时不变。范围 [0, 120]。
+  // 游戏结束时逃跑扣分，正常结束只在低于默认分 100 时回升。
   calculateGameEndConductPoint(current: number, isDisconnect: boolean): number {
     let next = current;
     if (isDisconnect) {
-      next -= 10;
+      next -= CONDUCT_ESCAPE_PENALTY;
     } else if (current < 100) {
       next += 1;
     }

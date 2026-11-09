@@ -7,9 +7,10 @@ describe('PlayerConductService.calculateGameEndConductPoint', () => {
     [100, false, 100], // >= 100 不加
     [99, false, 100],
     [0, false, 1],
-    [50, true, 40],
+    [100, true, 95],
+    [50, true, 45],
     [5, true, 0], // 下限
-    [120, true, 110],
+    [120, true, 115],
     [110, false, 110], // >= 100 不加
     [120, false, 120], // 上限不变
     [3, true, 0], // 负数 clamp 到 0
