@@ -64,8 +64,6 @@ export default function SmartScreenFigure({ kind }: SmartScreenFigureProps) {
           </span>
           <p className="text-xs text-muted md:text-[13px]">
             {t('app')} {LAUNCHER_FILE_NAME}
-            <br />
-            {t('publisher')}
           </p>
           <div className="mt-auto flex flex-wrap justify-end gap-2 md:gap-3">
             <span

@@ -65,7 +65,7 @@ Windows 与 Mac 采用三层职责划分，使同一条房间规则只维护一�
 ## 自我更新
 
 - **版本信息与下载都走 API**：和地图检测同一套国内外线路。
-- **只校验 sha256，不做代码签名**：哈希用来挡下载不完整或被代理损坏。
+- **只校验 sha256，不校验签名**：哈希用来挡下载不完整或被代理损坏。
 - **只升不降**：线上版本比自己新才提示，本地开发不会被换回旧版。
 
 ## 编译
@@ -93,13 +93,14 @@ exe 放在官网 `/launch` 下载页，只从 `develop` 编译，每次发版分
 1. 代码 PR：按 [CLAUDE.md](CLAUDE.md) 的「版本号」升版本，合进 `develop`。可以攒几个 PR 共用一个未发布的版本号。
 2. 在 `develop` 上运行「Launcher release build」工作流（`gh workflow run launcher-release.yml --ref develop`），下载产物（`gh run download <run-id>`）。发布的 exe 必须来自这里，不用本机编译的。
    工作流同时产出 Windows 的 exe 与 Mac 的 `Windy10v10AI-<version>-macos-arm64.zip`，同一个版本号；Mac 另有拖拽安装的 DMG，ZIP 留给应用内更新。Mac 包在工作流里已验证结构、版本、架构与 ad hoc 签名（`macos/verify-package.sh`），运行摘要里有两个包的 sha256 与对应提交。
-3. 没有代码签名，每次发版都用本机 Defender 扫描，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可继续；报具体病毒家族、或大量引擎一起报时先停下排查。**大版本（升第二位及以上）不论扫描结果都提交一次误报申报**：云端判定与本机扫描不是一回事，扫描干净的版本也有玩家反馈被 Windows 报毒，提前申报比等玩家撞上再处理省事。
-4. 发版 PR：
-   - 把 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
-   - 把 Mac 的 `Windy10v10AI-<version>-macos-arm64.zip` 与 `.dmg` 也复制进 `web/public/downloads/`，删掉旧版。
+3. 给 Windows exe 做代码签名：用 Certum 云证书（SimplySign）在本机对工作流产出的 exe 签名并带时间戳，签名后 `signtool verify` 通过。签名会改变文件，所以 sha256 以签名后的为准；Mac 包不受影响。证书一年一续，到期前续费，过期后新版本无法再签。
+4. 每次发版都用本机 Defender 扫描签名后的 exe，必须没有报毒，否则玩家一下载就被隔离；再上传 [VirusTotal](https://www.virustotal.com/)，两项结果写进发版 PR 的测试清单。Microsoft 一栏的 `!ml` 是云端机器学习判定，与本机不一致时以本机为准，到[误报申报页](https://www.microsoft.com/en-us/wdsi/filesubmission)提交后即可继续；报具体病毒家族、或大量引擎一起报时先停下排查。签名让信誉能挂在证书上，所以不再每个大版本都申报：只在被拦、本机报毒或 VirusTotal 的 Microsoft 一栏出 `!ml` 时申报，另外首个签名版和换证书后的第一个版本各申报一次。
+5. 发版 PR：
+   - 把签名后的 exe 复制为 `web/public/downloads/Windy10v10AI-<version>.exe`，删掉旧版。
+   - Mac 的 `Windy10v10AI-<version>-macos-arm64.zip` 与 `.dmg` 不进 git：先用 `gcloud storage cp --cache-control="public, max-age=31536000, immutable" <两个文件> gs://windy10v10ai-launcher/mac/` 上传，再给 DMG 设保存名：`gcloud storage objects update gs://windy10v10ai-launcher/mac/<dmg 文件名> --content-disposition='attachment; filename="Windy10v10AI.dmg"'`。上传后把桶里的 ZIP 取回算 sha256，与 API 里填的比对（单测只查格式）。上传要先于发版 PR 合并，网站从该目录转发。
    - 改 `web/app/launch/launcher.ts` 的 `LAUNCHER_VERSION` 与 `LAUNCHER_MAC_VERSION`（首次发 Mac 版时从 `null` 改成版本号，页面才显示 Mac tab）。
    - 改 `api/src/launcher/launcher-release.service.ts` 的版本号与 sha256（运行摘要里有），Mac 取 ZIP 的 sha256（`LAUNCHER_MAC_RELEASE`）。抄错时 api 单测会失败。
    - 在官网 `/launch` 的更新日志加本版条目（`web/app/launch/changelog.ts` 与三语 `launch.changelog.entries`）。只列对玩家影响大的变化，小修小改合成一句；未发布的版本并进本版。
-5. 发版 PR 合进 `develop` 后，从 dev 站（`https://dev--windy10v10ai.asia-east1.hosted.app/launch`）实际下载一次，Defender 不拦截才请用户审批 Release PR。下载时的云端判定与 VirusTotal 上的 Microsoft 一栏不是同一条，前面两项都干净也可能被拦；被拦就到误报申报页提交，等微软放行、重新下载不报再上线。
+6. 发版 PR 合进 `develop` 后，从 dev 站（`https://dev--windy10v10ai.asia-east1.hosted.app/launch`）实际下载一次，Defender 不拦截才请用户审批 Release PR。下载时的云端判定与 VirusTotal 上的 Microsoft 一栏不是同一条，前面两项都干净也可能被拦；被拦就到误报申报页提交，等微软放行、重新下载不报再上线。
 
-同一版本号每次编译的 sha256 都不同，填的必须是放进官网的那一个。发版 PR 合进 `develop` 后由用户审批 Release PR 上线（见根目录 [CLAUDE.md](../.claude/CLAUDE.md) 的「合并方式」）；请用户审批前，确认 `web/public/downloads/` 里只有这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。
+同一版本号每次编译、每次签名的 sha256 都不同，填的必须是放进官网的那一个。发版 PR 合进 `develop` 后由用户审批 Release PR 上线（见根目录 [CLAUDE.md](../.claude/CLAUDE.md) 的「合并方式」）；请用户审批前，确认 `web/public/downloads/` 里只有这次的改动：exe 在 diff 里只显示为二进制变更，线上玩家会自动更新到它。
