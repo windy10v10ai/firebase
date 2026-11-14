@@ -5407,8 +5407,8 @@
   },
   "item_arcane_blink": {
     "desc": {
-      "zh": "<h1>主动：爱因斯坦闪光</h1>传送到最远<b>1800</b>距离的位置。<br><br>传送后回复<b>500</b>点生命和<b>200</b>点魔法。<br><br>受到来自敌方英雄或肉山的攻击时，秘奥闪光将在<b>0.2</b>秒内无法使用。",
-      "en": "<h1>Active: Blink of Einstein</h1> Teleport to a target point up to <b>1800</b> units away. <br><br>After teleportation, you restore <b>500</b> health and <b>200</b> mana.<br><br>Arcane Blink cannot be used for <b>0.2</b> seconds after taking damage from an enemy hero or Roshan.",
+      "zh": "<h1>主动：爱因斯坦闪光</h1>传送到最远<b>1800</b>距离的位置。<br><br>传送后回复<b>500</b>点生命和<b>200</b>点魔法。<br><br>受到来自敌方英雄或肉山的攻击时，爱因斯坦闪光将在<b>0.2</b>秒内无法使用。",
+      "en": "<h1>Active: Blink of Einstein</h1> Teleport to a target point up to <b>1800</b> units away. <br><br>After teleportation, you restore <b>500</b> health and <b>200</b> mana.<br><br>Blink of Einstein cannot be used for <b>0.2</b> seconds after taking damage from an enemy hero or Roshan.",
       "ru": "<h1>Активное: Вспышка Эйнштейна</h1>Мгновенно перемещает к указанной точке на расстоянии до <b>1800</b>.<br><br>Перемещение восстанавливает владельцу <b>500</b> здоровья и <b>200</b> маны.<br><br>Предмет нельзя использовать в течение <b>0.2</b> сек. после получения урона от вражеских героев или Рошана."
     },
     "ability": {
