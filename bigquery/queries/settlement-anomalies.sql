@@ -24,7 +24,7 @@ ordered AS (
 ),
 repeats AS (
   SELECT steam_id, MAX(copies) AS max_identical_stats
-  FROM (SELECT steam_id, COUNT(*) AS copies FROM history
+  FROM (SELECT steam_id, COUNT(DISTINCT COALESCE(match_id, game_id)) AS copies FROM history
         WHERE hero_name IS NOT NULL AND dota_time_msec > 0
           AND (hero_damage > 0 OR kills > 0 OR total_gold_earned > 0)
         GROUP BY steam_id, fingerprint)
@@ -37,7 +37,7 @@ daily AS (
 ),
 normal AS (
   SELECT steam_id, COUNT(*) AS accepted_count,
-    COUNTIF(battle_points > 500 OR battle_points < 0) AS invalid_raw_points_count,
+    COUNTIF(battle_points - COALESCE(daily_task_point, 0) > 500 OR battle_points < 0) AS invalid_raw_points_count,
     COUNTIF(dota_time_msec BETWEEN 0 AND 180000 AND hero_damage = 0 AND kills = 0
       AND battle_points >= 400) AS short_zero_contribution_count,
     SUM(battle_points) AS requested_points,
