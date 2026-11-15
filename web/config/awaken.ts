@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: '98c14a3efd3d0e6234fbc9eead6a04e2f4689e7a',
+  gameCommit: '8659c7d82e2bb8b3d192f9edde5f7881aa5c9a2a',
   dotaVersion: '7.41f',
 } as const;
 
@@ -85,6 +85,35 @@ export interface AwakenHero {
 
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
 export const AWAKEN_HEROES: AwakenHero[] = [
+  {
+    heroName: 'npc_dota_hero_centaur',
+    abilityName: 'special_bonus_unique_centaur_upgrade',
+    freeTrial: true,
+    art: 'centaur.e5d6c053.webp',
+    icon: 'centaur_double_edge.26a131eb.webp',
+    name: { zh: '半人马战行者', en: 'Centaur Warrunner', ru: 'Centaur Warrunner' },
+    title: {
+      zh: "<font color='#d000ff'>双刃剑 觉醒</font>",
+      en: "<font color='#d000ff'>Double Edge Awakened</font>",
+      ru: "<font color='#d000ff'>Двойной клинок: пробуждение</font>",
+    },
+    desc: {
+      zh: '半人马战行者最近6秒内受到的敌方伤害会积蓄为反击之力，最多为双刃剑伤害的300%。<br>双刃剑命中敌人时消耗全部反击之力，提高这次双刃剑的伤害，并将消耗量的100%转化为全伤害护盾，持续4秒。<br>双刃剑对自身的伤害也会随之提高。',
+      en: "Enemy damage Centaur Warrunner takes within the last 6 seconds is stored as Counter Force, up to 300% of normal Double Edge damage.<br>When Double Edge hits an enemy, all Counter Force is consumed to increase that cast's damage, and 100% of the amount consumed becomes an all-damage shield lasting 4 seconds.<br>The damage Double Edge deals to Centaur himself rises accordingly.",
+      ru: 'Урон от врагов, полученный Centaur Warrunner за последние 6 сек., накапливается как Сила отпора, не более 300% обычного урона Двойного клинка.<br>Когда Двойной клинок попадает по врагу, вся Сила отпора расходуется и увеличивает урон этого применения, а 100% израсходованного значения превращается в щит от любого урона на 4 сек.<br>Урон Двойного клинка по самому кентавру тоже растёт.',
+    },
+    ability: {
+      behavior: 'passive',
+      targeting: null,
+      damageType: null,
+      piercesImmunity: null,
+      dispellable: null,
+      values: [],
+      cooldown: null,
+      manaCost: null,
+      lore: null,
+    },
+  },
   {
     heroName: 'npc_dota_hero_storm_spirit',
     abilityName: 'special_bonus_unique_storm_spirit_upgrade',
@@ -233,7 +262,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_nyx_assassin',
     abilityName: 'special_bonus_unique_nyx_assassin_mobile_burrow_awaken',
-    freeTrial: true,
+    freeTrial: false,
     art: 'nyx_assassin.29612b0f.webp',
     icon: 'nyx_assassin_burrow.a289b3f2.webp',
     name: { zh: '司夜刺客', en: 'Nyx Assassin', ru: 'Nyx Assassin' },
