@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import Button from '@/app/components/ui/button';
 import Skeleton from '@/app/components/ui/skeleton';
 import { ApiError } from '@/app/lib/api';
 import { claimCompensation, isCompensationOpen, type PlayerInfo } from '@/app/lib/player-info';
+import { invalidatePlayerState } from '@/app/lib/queries';
 
 interface CompensationRowProps {
   info: PlayerInfo | null;
@@ -25,7 +27,9 @@ export default function CompensationRow({
 }: CompensationRowProps) {
   const t = useTranslations('compensation');
   const [pending, setPending] = useState(false);
+  const queryClient = useQueryClient();
   const [claimedNow, setClaimedNow] = useState(false);
+  const [claimedElsewhere, setClaimedElsewhere] = useState(false);
   const [failed, setFailed] = useState(false);
 
   // 数据到了却没有补偿状态，说明接口已经判定领取期结束，以接口为准
@@ -34,7 +38,7 @@ export default function CompensationRow({
   }
 
   const status = info?.compensation;
-  const claimed = claimedNow || Boolean(status?.claimed);
+  const claimed = claimedNow || claimedElsewhere || Boolean(status?.claimed);
 
   const onClick = async () => {
     setPending(true);
@@ -44,9 +48,10 @@ export default function CompensationRow({
       setClaimedNow(true);
       onClaimed(player);
     } catch (error) {
-      // 另一个标签页先领了：接口回已领取，这里照已领取显示，不当成失败
+      // 别处先领过时接口回 409：照已领取显示，并重新取一次积分，不当成失败
       if (error instanceof ApiError && error.status === 409) {
-        onClaimed({ ...info!, compensation: { ...status!, claimed: true } });
+        setClaimedElsewhere(true);
+        void invalidatePlayerState(queryClient, steamId);
       } else {
         setFailed(true);
       }
