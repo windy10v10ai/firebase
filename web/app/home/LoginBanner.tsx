@@ -1,10 +1,11 @@
 'use client';
 
-import { UserRound } from 'lucide-react';
+import { Gift, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import AcceleratorHint from '@/app/components/AcceleratorHint';
 import SteamLoginButton from '@/app/components/SteamLoginButton';
+import { isCompensationOpen } from '@/app/lib/player-info';
 
 import LevelTile from './LevelTile';
 
@@ -15,6 +16,8 @@ const SAMPLE_SEASON = {
   nextLevelPoint: 1790,
   usablePoint: 4820,
 };
+// 未登录拿不到接口里的积分数，与 api 的发放数额保持一致
+const COMPENSATION_SEASON_POINT = 5000;
 const SAMPLE_MEMBER = { level: 5, currentLevelPoint: 760, nextLevelPoint: 2000, usablePoint: 1260 };
 
 /** 首屏右侧面板（未登录）：示意一份玩家数据，再给登录入口 */
@@ -22,6 +25,7 @@ export default function LoginBanner() {
   const t = useTranslations('home.intro');
   const tSample = useTranslations('home.sample');
   const tSummary = useTranslations('home.summary');
+  const tCompensation = useTranslations('compensation');
 
   return (
     <section className="hero-panel card-pad">
@@ -46,6 +50,18 @@ export default function LoginBanner() {
         </div>
         <p className="text-xs text-muted">{tSample('note')}</p>
       </div>
+
+      {isCompensationOpen() ? (
+        <p className="flex items-center gap-2.5 rounded-xl border border-season-border bg-season-soft px-3.5 py-3 text-sm text-content">
+          <Gift className="size-[18px] shrink-0 text-season-light" aria-hidden="true" />
+          <span>
+            {tCompensation.rich('loginHint', {
+              amount: COMPENSATION_SEASON_POINT,
+              points: (chunks) => <span className="font-bold text-season-light">{chunks}</span>,
+            })}
+          </span>
+        </p>
+      ) : null}
 
       <SteamLoginButton variant="glass" />
       <div className="flex flex-col items-start gap-2">

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { EventRewardsService } from '../../event-rewards/event-rewards.service';
 import { MemberDto } from '../../members/dto/member.dto';
 import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
@@ -11,7 +12,7 @@ import { PlayerPropertyService } from '../../player-property/player-property.ser
 import { PlayerInfoDto } from '../dto/player-info.dto';
 
 export type PlayerInfoInclude =
-  'member' | 'property' | 'setting' | 'statsLifetime' | 'heroAwakening';
+  'member' | 'property' | 'setting' | 'statsLifetime' | 'heroAwakening' | 'compensation';
 
 @Injectable()
 export class PlayerDtoAssembler {
@@ -21,6 +22,7 @@ export class PlayerDtoAssembler {
     private readonly membersService: MembersService,
     private readonly playerStatsLifetimeService: PlayerStatsLifetimeService,
     private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
+    private readonly eventRewardsService: EventRewardsService,
   ) {}
 
   async assemblePlayerInfoDto(
@@ -36,19 +38,23 @@ export class PlayerDtoAssembler {
     dto.useableLevel = this.calculateUseableLevel(dto);
     this.calculateUseablePoints(dto);
 
-    const [properties, playerSetting, member, statsLifetime, heroAwakenings] = await Promise.all([
-      include.includes('property') ? this.playerPropertyService.findBySteamId(+player.id) : null,
-      include.includes('setting')
-        ? this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id)
-        : null,
-      include.includes('member') ? this.membersService.findOne(+player.id) : null,
-      include.includes('statsLifetime')
-        ? this.playerStatsLifetimeService.findBySteamId(+player.id)
-        : null,
-      include.includes('heroAwakening')
-        ? this.playerHeroAwakeningService.findBySteamId(+player.id)
-        : null,
-    ]);
+    const [properties, playerSetting, member, statsLifetime, heroAwakenings, compensation] =
+      await Promise.all([
+        include.includes('property') ? this.playerPropertyService.findBySteamId(+player.id) : null,
+        include.includes('setting')
+          ? this.playerSettingService.getPlayerSettingOrGenerateDefault(player.id)
+          : null,
+        include.includes('member') ? this.membersService.findOne(+player.id) : null,
+        include.includes('statsLifetime')
+          ? this.playerStatsLifetimeService.findBySteamId(+player.id)
+          : null,
+        include.includes('heroAwakening')
+          ? this.playerHeroAwakeningService.findBySteamId(+player.id)
+          : null,
+        include.includes('compensation')
+          ? this.eventRewardsService.getWebCompensation(+player.id)
+          : undefined,
+      ]);
 
     if (include.includes('property')) {
       dto.properties = properties ?? [];
@@ -62,6 +68,9 @@ export class PlayerDtoAssembler {
     }
     if (include.includes('statsLifetime')) {
       dto.statsLifetime = statsLifetime ?? undefined;
+    }
+    if (compensation) {
+      dto.compensation = compensation;
     }
     if (include.includes('heroAwakening')) {
       dto.awakenedHeroes = (heroAwakenings ?? []).map(({ heroName }) => heroName);

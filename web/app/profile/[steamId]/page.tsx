@@ -97,8 +97,12 @@ export default function ProfilePage() {
         profile={profile}
         isSelf={isSelf}
         rankBadge={rankBadge}
-        onCheckInClaimed={(player) => {
-          void applyPlayerWrite(queryClient, steamId, playerInfoQuery(steamId).queryKey, player);
+        onPlayerWrite={(player) => {
+          // 写接口只带回部分字段，合进现有数据，免得战绩、补偿状态被清掉
+          void applyPlayerWrite(queryClient, steamId, playerInfoQuery(steamId).queryKey, {
+            ...info,
+            ...player,
+          });
         }}
       />
       <div className="grid min-w-0 content-start gap-6 lg:col-span-2">

@@ -33,4 +33,5 @@ export class EventReward {
   // FIXME 活动每次需要更新（共 5 处，搜索「FIXME 活动」逐一改全，漏一处会重复发放或发不出）：新增领取字段
   midAutumn2026?: boolean; // 中秋国庆活动（9/24-10/9，登录发放）：5000勇士积分
   compensation20261024?: boolean; // 服务器波动补偿（10/24-10/25，登录发放）：1000勇士积分
+  compensation20261119?: boolean; // 联网受限补偿（11/19-11/30，网站领取）：5000勇士积分
 }
