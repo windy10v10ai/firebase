@@ -18,6 +18,7 @@ const PRIVATE_FIELDS = [
   'disconnectCount',
   'lastMatchTime',
   'checkIn',
+  'compensation',
 ] as const;
 
 @Injectable()

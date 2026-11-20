@@ -1087,6 +1087,18 @@
     "detailNote": "Up to 7 makeup days; forfeited once membership expires",
     "failed": "Check-in failed, please try again"
   },
+  "compensation": {
+    "title": "Battle Points compensation",
+    "available": "Claim <points>{amount}</points> Battle Points by Nov 30",
+    "action": "Claim",
+    "pending": "Claiming…",
+    "done": "Claimed",
+    "arrived": "Received, takes effect next game",
+    "oncePerAccount": "One claim per account",
+    "detail": "Battle Points",
+    "failed": "Claim failed, please try again",
+    "loginHint": "Log in to claim <points>{amount}</points> Battle Points as compensation, by Nov 30"
+  },
   "shareCard": {
     "siteDescription": "Official site of the DOTA2 10v10 AI custom map: stats, attributes and hero awakening",
     "playerFallback": "Player {steamId}",

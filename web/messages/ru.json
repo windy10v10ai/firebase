@@ -1087,6 +1087,18 @@
     "detailNote": "Восстановить можно до 7 дней; после окончания подписки пропущенные отметки сгорают",
     "failed": "Не удалось отметиться, попробуйте снова"
   },
+  "compensation": {
+    "title": "Компенсация Battle Points",
+    "available": "Можно получить <points>{amount}</points> Battle Points до 30 ноября",
+    "action": "Получить",
+    "pending": "Получение…",
+    "done": "Получено",
+    "arrived": "Начислено, действует со следующей игры",
+    "oncePerAccount": "Один раз на аккаунт",
+    "detail": "Battle Points",
+    "failed": "Не удалось получить, попробуйте ещё раз",
+    "loginHint": "Войдите, чтобы получить <points>{amount}</points> Battle Points в качестве компенсации, до 30 ноября"
+  },
   "shareCard": {
     "siteDescription": "Официальный сайт пользовательской карты DOTA2 10v10 AI: статистика, атрибуты и пробуждение героев",
     "playerFallback": "игрока {steamId}",

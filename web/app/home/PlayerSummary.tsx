@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import CheckInRow, { hasCheckIn } from '@/app/components/CheckInRow';
+import CompensationRow from '@/app/components/CompensationRow';
 import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
-import { memberStatusKey } from '@/app/lib/player-info';
+import { memberStatusKey, type PlayerInfo } from '@/app/lib/player-info';
 import { playerPagePath } from '@/app/lib/player-path';
 import { applyPlayerWrite, playerInfoQuery } from '@/app/lib/queries';
 import { useSteamProfile } from '@/app/lib/use-steam-profile';
@@ -30,6 +31,10 @@ export default function PlayerSummary({ uid }: { uid: string }) {
   const idText = t('heading', { id: uid });
   const personaName = profile?.personaName ?? null;
   const profilePath = playerPagePath(uid);
+  // 写接口只带回部分字段，合进现有数据，免得别的行的状态被清掉
+  const applyWrite = (player: PlayerInfo) => {
+    void applyPlayerWrite(queryClient, uid, playerInfoQuery(uid).queryKey, { ...info, ...player });
+  };
 
   const seasonValues = info
     ? {
@@ -113,14 +118,9 @@ export default function PlayerSummary({ uid }: { uid: string }) {
           <LevelTile tone="member" label={t('memberLevel')} values={memberValues} failed={failed} />
         </div>
 
-        <CheckInRow
-          info={info}
-          steamId={uid}
-          buttonVariant="cta"
-          onClaimed={(player) => {
-            void applyPlayerWrite(queryClient, uid, playerInfoQuery(uid).queryKey, player);
-          }}
-        />
+        <CheckInRow info={info} steamId={uid} buttonVariant="cta" onClaimed={applyWrite} />
+
+        <CompensationRow info={info} steamId={uid} buttonVariant="cta" onClaimed={applyWrite} />
 
         <Link href={profilePath} className="btn-glass h-11 gap-1 text-sm md:hidden">
           {t('profileLink')}
