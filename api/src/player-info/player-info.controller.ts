@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
+import { EventRewardsService } from '../event-rewards/event-rewards.service';
 import { MembersService } from '../members/members.service';
 import { UsePlayerMemberPointsDto } from '../player/dto/use-player-member-points.dto';
 import { PlayerService } from '../player/player.service';
@@ -42,6 +43,7 @@ export class PlayerInfoController {
     private readonly playerService: PlayerService,
     private readonly playerHeroAwakeningService: PlayerHeroAwakeningService,
     private readonly membersService: MembersService,
+    private readonly eventRewardsService: EventRewardsService,
   ) {}
 
   @AllowLocal()
@@ -85,6 +87,14 @@ export class PlayerInfoController {
     const memberPoint = await this.membersService.checkIn(steamId);
     const player = await this.playerInfoService.findPlayerInfoBySteamId(steamId, ['member']);
     return { memberPoint, player };
+  }
+
+  @AllowWeb()
+  @Post(':steamId/compensation')
+  @ApiOperation({ summary: 'Claim the one-time web compensation' })
+  async claimCompensation(@Param('steamId', ParseIntPipe) steamId: number): Promise<PlayerInfoDto> {
+    await this.eventRewardsService.claimWebCompensation(steamId);
+    return this.playerInfoService.findPlayerInfoBySteamId(steamId, ['member', 'compensation']);
   }
 
   @AllowWeb()

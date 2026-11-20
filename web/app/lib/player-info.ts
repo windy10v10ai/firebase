@@ -38,6 +38,11 @@ export interface CheckInResult extends CheckInStatus {
   player: PlayerInfo;
 }
 
+export interface CompensationStatus {
+  seasonPoint: number;
+  claimed: boolean;
+}
+
 export interface PropertyItem {
   name: string;
   level: number;
@@ -69,6 +74,7 @@ export interface PlayerInfo {
   properties?: PropertyItem[];
   awakenedHeroes?: string[];
   checkIn?: CheckInStatus;
+  compensation?: CompensationStatus;
 }
 
 /** 重置属性的价码，与 api 的 player-property.service.ts 保持一致 */
@@ -89,7 +95,7 @@ export function memberStatusKey(member?: MemberInfo): string {
 /** 取个人主页要的全部数据，按 URL 里的 id 请求，不从登录态取 uid */
 export function fetchPlayerInfo(steamId: string) {
   return apiFetch<PlayerInfo>(
-    `/api/player/${steamId}/info?include=member,statsLifetime,heroAwakening`,
+    `/api/player/${steamId}/info?include=member,statsLifetime,heroAwakening,compensation`,
   );
 }
 
@@ -114,6 +120,20 @@ export function updateProfileVisibility(steamId: string, profileHidden: boolean)
 /** 领取今日签到与补签的积分，响应里带回刷新后的玩家信息 */
 export function claimCheckIn(steamId: string) {
   return apiFetch<CheckInResult>(`/api/player/${steamId}/check-in`, { method: 'POST' });
+}
+
+// 与 api 的 event-rewards.service.ts 同一段时间：页面据此在首帧就决定补偿行出不出现，能不能领以接口为准
+const COMPENSATION_START = Date.parse('2026-11-19T00:00:00.000Z');
+const COMPENSATION_END = Date.parse('2026-11-30T23:59:59.999Z');
+
+/** 网站补偿是否在领取期内 */
+export function isCompensationOpen(now = Date.now()): boolean {
+  return now >= COMPENSATION_START && now <= COMPENSATION_END;
+}
+
+/** 领取网站补偿，响应是刷新后的玩家信息 */
+export function claimCompensation(steamId: string) {
+  return apiFetch<PlayerInfo>(`/api/player/${steamId}/compensation`, { method: 'POST' });
 }
 
 /** level 是升到的目标等级，不是增量 */

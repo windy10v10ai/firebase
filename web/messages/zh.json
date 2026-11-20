@@ -1081,6 +1081,18 @@
     "detailNote": "补签最多 7 天，会员过期后作废",
     "failed": "签到失败，请重试"
   },
+  "compensation": {
+    "title": "勇士积分补偿",
+    "available": "可领 <points>{amount}</points> 勇士积分，11 月 30 日前有效",
+    "action": "领取",
+    "pending": "领取中…",
+    "done": "已领取",
+    "arrived": "已到账，下一局生效",
+    "oncePerAccount": "每个账号限领一次",
+    "detail": "勇士积分",
+    "failed": "领取失败，请重试",
+    "loginHint": "登录后可领 <points>{amount}</points> 勇士积分补偿，11 月 30 日前有效"
+  },
   "shareCard": {
     "siteDescription": "DOTA2 10v10 AI 自定义地图官网：查看战绩、属性加点、英雄觉醒",
     "playerFallback": "玩家 {steamId}",

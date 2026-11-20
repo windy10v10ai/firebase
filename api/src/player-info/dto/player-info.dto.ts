@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+import { WebCompensationDto } from '../../event-rewards/dto/web-compensation.dto';
 import { MemberDto } from '../../members/dto/member.dto';
 import { PlayerSetting } from '../../player/entities/player-setting.entity';
 import { PlayerStatsLifetime } from '../../player/entities/player-stats-lifetime.entity';
@@ -41,4 +42,6 @@ export class PlayerInfoDto extends Player {
   awakenedHeroes?: string[];
   @ApiPropertyOptional()
   checkIn?: PlayerCheckInDto;
+  @ApiPropertyOptional()
+  compensation?: WebCompensationDto;
 }

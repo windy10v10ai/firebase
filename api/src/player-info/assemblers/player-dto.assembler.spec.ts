@@ -1,3 +1,4 @@
+import { EventRewardsService } from '../../event-rewards/event-rewards.service';
 import { MembersService } from '../../members/members.service';
 import { Player } from '../../player/entities/player.entity';
 import { PlayerSettingService } from '../../player/player-setting.service';
@@ -16,6 +17,9 @@ function makeAssembler(): PlayerDtoAssembler {
     { findOne: jest.fn().mockResolvedValue(null) } as unknown as MembersService,
     { findBySteamId: jest.fn().mockResolvedValue(null) } as unknown as PlayerStatsLifetimeService,
     { findBySteamId: jest.fn().mockResolvedValue([]) } as unknown as PlayerHeroAwakeningService,
+    {
+      getWebCompensation: jest.fn().mockResolvedValue(undefined),
+    } as unknown as EventRewardsService,
   );
 }
 

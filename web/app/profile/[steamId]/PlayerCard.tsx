@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import CheckInRow from '@/app/components/CheckInRow';
+import CompensationRow from '@/app/components/CompensationRow';
 import IdWithCopy from '@/app/components/IdWithCopy';
 import PlayerAvatar from '@/app/components/PlayerAvatar';
 import Skeleton from '@/app/components/ui/skeleton';
@@ -22,7 +23,7 @@ interface PlayerCardProps {
   isSelf: boolean;
   /** 别人看时名次显示在身份卡里；本人的名次在入口卡上 */
   rankBadge: React.ReactNode;
-  onCheckInClaimed: (player: PlayerInfo) => void;
+  onPlayerWrite: (player: PlayerInfo) => void;
 }
 
 /** 身份卡：ID 取自地址，数据没到也能先显示；会员状态只做陈述，订阅入口是底部的文字链接 */
@@ -32,7 +33,7 @@ export default function PlayerCard({
   profile,
   isSelf,
   rankBadge,
-  onCheckInClaimed,
+  onPlayerWrite,
 }: PlayerCardProps) {
   const t = useTranslations('profile.identity');
   const tMember = useTranslations('profile.member');
@@ -128,7 +129,8 @@ export default function PlayerCard({
           ) : null}
         </div>
       </div>
-      {isSelf ? <CheckInRow info={info} steamId={steamId} onClaimed={onCheckInClaimed} /> : null}
+      {isSelf ? <CheckInRow info={info} steamId={steamId} onClaimed={onPlayerWrite} /> : null}
+      {isSelf ? <CompensationRow info={info} steamId={steamId} onClaimed={onPlayerWrite} /> : null}
       <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
         <div className="flex items-center gap-1.5 text-content" title={t('conductNet')}>
           <ThumbsUp className="size-4 text-success" aria-hidden="true" />
