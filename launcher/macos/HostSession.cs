@@ -32,6 +32,9 @@ namespace Windy10v10AI.Launcher
         int maxPlayers;
         int game => room?.Game ?? 1;
         readonly GameEnd gameEnd = new();
+        readonly SettlementUploader settlement;
+        volatile int settlementRound;
+        const int SettlementFlushMs = 30000;
         bool ended => room?.Ended ?? gameEnd.Ended;
         bool saved => room?.Saved ?? gameEnd.Saved;
         DateTime readyAt;
@@ -48,8 +51,34 @@ namespace Windy10v10AI.Launcher
         ClientSignon signon = new();
         public bool LocalTestSkipLatestCheck { get; init; }
         readonly ConcurrentQueue<string> next = new();
-        public HostSession(Action<object> emit) { this.emit = emit; }
-        void Event(string state, string message) { State = state; lastMessage = message; emit(new { type = "state", role = Solo ? "solo" : "host", state, message, code = Code ?? "", log = ServerLog ?? "", game, saving = Saving, publicRoom = PublicRoom, maxPlayers, paused = Paused }); }
+        public HostSession(Action<object> emit)
+        {
+            this.emit = emit;
+            settlement = new SettlementUploader(
+                () => BuildKey.LauncherApiKey,
+                SettlementApi.Transport,
+                Path.Combine(Logs, "settlement-sent.txt"),
+                (state, round, roomGame) =>
+                {
+                    if (round != settlementRound) return;
+                    // The game number comes from the upload, not from whatever the room is on when the answer lands.
+                    room?.SetSettlement(roomGame, state);
+                    Event(State, lastMessage);
+                },
+                SettlementDiagnostic);
+        }
+        static void SettlementDiagnostic(string message)
+        {
+            try
+            {
+                Directory.CreateDirectory(Logs);
+                File.AppendAllText(Path.Combine(Logs, "launcher.log"), DateTime.UtcNow.ToString("s") + " " + message + Environment.NewLine);
+            }
+            catch (Exception)
+            {
+            }
+        }
+        void Event(string state, string message) { State = state; lastMessage = message; emit(new { type = "state", role = Solo ? "solo" : "host", state, message, code = Code ?? "", log = ServerLog ?? "", game, saving = Saving, publicRoom = PublicRoom, maxPlayers, paused = Paused, settlement = (int)settlement.State }); }
         void Info(string message) => emit(new { type = "message", message });
         public void Start(string difficulty, int count, bool enter) => Start(difficulty, count, enter, false, false);
         public void Start(string difficulty, int count, bool enter, bool solo, bool publicRoom)
@@ -60,6 +89,8 @@ namespace Windy10v10AI.Launcher
             {
                 if (worker != null && !worker.IsCompleted) throw new Exception(Strings.SessionActive);
                 cancel?.Dispose(); cancel = new CancellationTokenSource(); mode = difficulty; maxPlayers = count; autoEnter = solo || enter; Solo = solo; PublicRoom = publicRoom;
+                settlementRound++;
+                settlement.Reset(settlementRound);
                 worker = Task.Run(() => Run(cancel.Token));
             }
         }
@@ -221,7 +252,11 @@ namespace Windy10v10AI.Launcher
         }
         void StartNextGame(string nextMode, RoomPoll poll)
         {
+            // The old round must finish reading its log and report its result before the next game starts.
             StopServer();
+            settlement.WaitIdle(SettlementFlushMs);
+            settlementRound++;
+            settlement.Reset(settlementRound);
             install = MacInstall.Find();
             room.NextGame(nextMode, install.Manifest);
             mode = nextMode; Ready = false;
@@ -234,8 +269,11 @@ namespace Windy10v10AI.Launcher
         {
             Ready = false;
             cancel?.Cancel(); await entering;
+            // StopServer reads the round's last lines after the server exits; the upload finishes before the room goes.
+            StopServer();
+            settlement.WaitIdle(SettlementFlushMs);
             room?.Dispose(); gate?.Dispose(); gate = null;
-            StopServer(); try { mount?.Dispose(); } catch (Exception e) { Info(Strings.MapCleanupFailed + e.Message); }
+            try { mount?.Dispose(); } catch (Exception e) { Info(Strings.MapCleanupFailed + e.Message); }
             mount = null;
             lock (logLock) { log?.Dispose(); log = null; }
             if (failed) Event("error", failure); else Event("idle", Solo ? Strings.Idle : Strings.HostIdle);
@@ -260,7 +298,16 @@ namespace Windy10v10AI.Launcher
             if (consolePath == null) return;
             if (consoleReader == null) { if (!File.Exists(consolePath)) return; consoleReader = new StreamReader(new FileStream(consolePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
             consolePending += consoleReader.ReadToEnd(); int at;
-            while ((at = consolePending.IndexOf('\n')) >= 0) { var line = consolePending.Substring(0, at); consolePending = consolePending.Substring(at + 1); ServerLine(line); }
+            if (consolePending.Length > 512 * 1024) consolePending = "";
+            var batch = new System.Text.StringBuilder();
+            while ((at = consolePending.IndexOf('\n')) >= 0)
+            {
+                var line = consolePending.Substring(0, at); consolePending = consolePending.Substring(at + 1);
+                ServerLine(line);
+                batch.Append(line).Append('\n');
+            }
+            // The whole read is one settlement batch, so a marker followed by more players in the same read keeps them.
+            if (batch.Length > 0) settlement.Observe(batch.ToString(), settlementRound, game);
         }
         void ServerLine(string line)
         {
@@ -290,7 +337,14 @@ namespace Windy10v10AI.Launcher
                     using var kill = Process.Start(new ProcessStartInfo("/bin/kill") { ArgumentList = { "-TERM", p.Id.ToString() }, UseShellExecute = false }); kill.WaitForExit();
                     if (!p.WaitForExit(5000)) p.Kill();
                 }
-                p.WaitForExit();
+                // Bounded too, so quitting never hangs on a server that ignores the kill.
+                p.WaitForExit(5000);
+                // The server has closed its console log, so this read still belongs to the round that just ended.
+                if (p.HasExited)
+                {
+                    try { ReadConsole(); } catch { }
+                    settlement.ObserveFinal("", settlementRound, game);
+                }
             }
             catch { }
             finally { p.Dispose(); consoleReader?.Dispose(); consoleReader = null; if (consolePath != null) try { File.Delete(consolePath); } catch { } consolePath = null; dedicated?.Dispose(); dedicated = null; }

@@ -22,8 +22,10 @@ if not executable.is_file():
 output.mkdir(parents=True, exist_ok=True)
 groups = {
     "host": [("host-idle", "on"), ("host-idle", "off"),
-             ("host-starting", "on"), ("host", "on"), ("ended", "on")],
+             ("host-starting", "on"), ("host", "on"), ("ended", "on"),
+             ("ended-sending", "on"), ("ended-sent", "on"), ("ended-partial", "on"), ("ended-failed", "on")],
     "join": [*[(state, checked) for state in ("join-checking", "join-waiting", "join-ready", "join-playing", "join-ended") for checked in ("on", "off")],
+             ("join-ended-sending", "on"), ("join-ended-sent", "on"), ("join-ended-partial", "on"), ("join-ended-failed", "on"),
              ("join-error", "on"), ("join-left", "on")],
     "feedback": [("feedback", "on")],
 }

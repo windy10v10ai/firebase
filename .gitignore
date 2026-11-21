@@ -142,3 +142,6 @@ docs/superpowers/
 
 # Agent skill link created by `npm run skills:link`
 /.agents/
+# 启动器结算上传 key 只由构建环境注入，不提交
+launcher/launcher-api-key.txt
+launcher/.launcher-api-key
