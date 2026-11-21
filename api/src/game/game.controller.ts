@@ -5,6 +5,7 @@ import { GameEndDto } from '../analytics/dto/game-end-dto';
 import { GameEndRoute, createGameEndRecordContext } from '../bigquery/game-end-rows';
 import { LocalHostService } from '../local-host/local-host.service';
 import { PlayerInfoInclude } from '../player-info/assemblers/player-dto.assembler';
+import { AllowLauncher } from '../util/auth/allow-launcher.decorator';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
@@ -70,6 +71,7 @@ export class GameController {
   }
 
   @AllowLocal()
+  @AllowLauncher()
   @ApiBody({ type: GameEndDto })
   @Post('end/local')
   async endLocal(

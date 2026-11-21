@@ -4,6 +4,7 @@ import { logger } from 'firebase-functions';
 export enum SERVER_TYPE {
   WINDY = 'WINDY',
   LOCAL = 'LOCAL',
+  LAUNCHER = 'LAUNCHER',
   WEB = 'WEB',
   UNKNOWN = 'UNKNOWN',
 }
@@ -14,6 +15,7 @@ export enum SECRET {
   SERVER_APIKEY = 'SERVER_APIKEY',
   LOCAL_APIKEY_A = 'LOCAL_APIKEY_A',
   LOCAL_APIKEY_B = 'LOCAL_APIKEY_B',
+  LAUNCHER_APIKEY = 'LAUNCHER_APIKEY',
   GA4_API_SECRET = 'GA4_API_SECRET',
   KOFI_VERIFICATION_TOKEN = 'KOFI_VERIFICATION_TOKEN',
   ALIPAY_APP_ID = 'ALIPAY_APP_ID',
@@ -48,6 +50,10 @@ export class SecretService {
     ];
     if (localKeys.includes(apiKey)) {
       return SERVER_TYPE.LOCAL;
+    }
+    // 启动器是公开分发的 exe，key 等同公开，所以只用一个、不设轮替槽位，防线是路由白名单与限额
+    if (apiKey === this.getSecretValue(SECRET.LAUNCHER_APIKEY)) {
+      return SERVER_TYPE.LAUNCHER;
     }
 
     return SERVER_TYPE.UNKNOWN;

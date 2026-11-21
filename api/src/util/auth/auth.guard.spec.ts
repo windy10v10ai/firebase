@@ -4,6 +4,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 import { SERVER_TYPE } from '../secret/secret.service';
 
+import { ALLOW_LAUNCHER_KEY } from './allow-launcher.decorator';
 import { ALLOW_LOCAL_KEY } from './allow-local.decorator';
 import { ALLOW_QUERY_KEY_KEY } from './allow-query-key.decorator';
 import { ALLOW_VIEW_OTHERS_KEY } from './allow-view-others.decorator';
@@ -46,6 +47,7 @@ function createGuard(metadata: Record<string, boolean> = {}, hiddenSteamIds: str
     getServerTypeByApiKey: jest.fn((apiKey: string) => {
       if (apiKey === 'windy-key') return SERVER_TYPE.WINDY;
       if (apiKey === 'local-key') return SERVER_TYPE.LOCAL;
+      if (apiKey === 'launcher-key') return SERVER_TYPE.LAUNCHER;
       return SERVER_TYPE.UNKNOWN;
     }),
   };
@@ -87,6 +89,28 @@ describe('AuthGuard', () => {
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(request.serverType).toBe(SERVER_TYPE.LOCAL);
+  });
+
+  it('启动器 key 未挂 AllowLauncher 抛 401，即使挂了 AllowLocal', async () => {
+    const guard = createGuard({ [ALLOW_LOCAL_KEY]: true });
+    const { context } = createContext({ apiKey: 'launcher-key' });
+
+    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('启动器 key 挂了 AllowLauncher 放行，并把来源写进 request', async () => {
+    const guard = createGuard({ [ALLOW_LAUNCHER_KEY]: true });
+    const { context, request } = createContext({ apiKey: 'launcher-key' });
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(request.serverType).toBe(SERVER_TYPE.LAUNCHER);
+  });
+
+  it('本地 key 挂了 AllowLauncher 但没挂 AllowLocal 仍抛 401', async () => {
+    const guard = createGuard({ [ALLOW_LAUNCHER_KEY]: true });
+    const { context } = createContext({ apiKey: 'local-key' });
+
+    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
   });
 
   it('挂了 AllowQueryKey 且没有请求头时，从 query 的 apiKey 读取', async () => {

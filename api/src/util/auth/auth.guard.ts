@@ -11,6 +11,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { PlayerService } from '../../player/player.service';
 import { SERVER_TYPE, SecretService } from '../secret/secret.service';
 
+import { ALLOW_LAUNCHER_KEY } from './allow-launcher.decorator';
 import { ALLOW_LOCAL_KEY } from './allow-local.decorator';
 import { ALLOW_QUERY_KEY_KEY } from './allow-query-key.decorator';
 import { ALLOW_VIEW_OTHERS_KEY } from './allow-view-others.decorator';
@@ -87,6 +88,17 @@ export class AuthGuard implements CanActivate {
         context.getClass(),
       ]);
       if (!allowLocal) {
+        throw new UnauthorizedException();
+      }
+    }
+
+    // 启动器 key 随 exe 公开分发，只用于显式声明接受启动器来源的路由
+    if (serverType === SERVER_TYPE.LAUNCHER) {
+      const allowLauncher = this.reflector.getAllAndOverride<boolean>(ALLOW_LAUNCHER_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+      if (!allowLauncher) {
         throw new UnauthorizedException();
       }
     }
