@@ -1,6 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
@@ -17,6 +22,11 @@ namespace Windy10v10AI.Launcher.Tests
             MergeKeepsPlayersAndPerf();
             UnknownVersionDuplicatesOutOfOrderAndHalfLines();
             ChunkedPayloadIsJoinedBeforeDecoding();
+            SummaryBeforeTheFirstPlayerLine();
+            AKeySwitchKeepsTheFinishedMatch();
+            TrailingHalfLineWaitsForTheNextRead();
+            FinalReadAfterTheServerStops();
+            FinalReadUploadsCompletePlayersWithoutTheSummary();
             BadBodyAndMismatchedPlayerAreIgnored();
             TailAdvancesByBytesActuallyRead();
             NoSummaryIsNotAGreenSuccess();
@@ -25,10 +35,15 @@ namespace Windy10v10AI.Launcher.Tests
             ServerErrorsRetryTheSameRoute();
             ExplicitBadRequestStopsAtOnce();
             DeadlineStopsTheUpload();
+            LateSuccessCannotTurnGreen();
+            ABlockedRequestEndsAtTheDeadline();
             SuccessIsDeduplicatedLocally();
+            DedupReadsPastTheOldLimit();
             MissingKeySkipsQuietly();
             LateReplyCannotChangeTheNextRound();
-            StartsWithOneSettlementState();
+            CallbacksCarryTheCapturedRoomGame();
+            SettlementStateCrossesTheRealTunnel();
+            BuildKeyIsMasked();
             Console.WriteLine("PASS settlement parser, upload and tunnel state tests");
         }
 
@@ -72,7 +87,7 @@ namespace Windy10v10AI.Launcher.Tests
             var transport = new FakeTransport();
             transport.Replies.Add(() => Reply(200));
             var uploader = NewUploader(transport, "key");
-            uploader.Observe(text, 1);
+            uploader.Observe(text, 1, 0);
             WaitFor(uploader, SettlementState.Partial);
             Check(transport.Urls.Count == 1, "the remaining players go out in one request");
             var body = Deserialize(transport.Bodies[0]);
@@ -129,6 +144,76 @@ namespace Windy10v10AI.Launcher.Tests
             Check(((object[])merged["players"]).Length == 1 && merged.ContainsKey("perf"), "the joined payload decodes to the original request");
         }
 
+        static void SummaryBeforeTheFirstPlayerLine()
+        {
+            var log = new SettlementLog();
+            Check(log.Feed("[WSettle] done v1 room-17 2\n") == null, "the summary waits when no valid player line came first");
+            var batch = log.Feed(Line("room-17", 11, 1, 1, Body(11, false)) + Line("room-17", 22, 1, 1, Body(22, false)));
+            Check(batch != null && batch.MatchKey == "room-17" && batch.HasSummary && batch.Expected == 2, "a later player line binds to the summary's match");
+            Check(batch.Parts.Count == 2, "both players join the batch the summary described");
+            var transport = new FakeTransport();
+            transport.Replies.Add(() => Reply(200));
+            var uploader = NewUploader(transport, "key");
+            uploader.Observe("[WSettle] done v1 room-18 1\n", 1, 0);
+            uploader.Observe(Line("room-18", 33, 1, 1, Body(33, false)), 1, 0);
+            WaitFor(uploader, SettlementState.SentAll);
+            Check(transport.Urls.Count == 1, "the summary still decides the all-sent state when it arrived first");
+        }
+
+        static void AKeySwitchKeepsTheFinishedMatch()
+        {
+            var log = new SettlementLog();
+            var text = Line("room-a", 11, 1, 1, Body(11, false)) +
+                Line("room-b", 22, 1, 1, Body(22, false)) +
+                "[WSettle] done v1 room-b 1\n";
+            var first = log.Feed(text);
+            var second = log.Feed("");
+            Check(first != null && first.MatchKey == "room-a" && first.Parts.Count == 1 && !first.HasSummary, "a key switch hands out the previous match instead of dropping it");
+            Check(second != null && second.MatchKey == "room-b" && second.HasSummary && second.Parts[0].SteamId == 22, "the next match is handed out after it");
+        }
+
+        static void TrailingHalfLineWaitsForTheNextRead()
+        {
+            var log = new SettlementLog();
+            var text = Line("room-19", 11, 1, 1, Body(11, false)) + "[WSettle] done v1 room-19 1\n";
+            var cut = text.Length - 7;
+            Check(log.Feed(text.Substring(0, cut)) == null, "a cut-off last line is not treated as lost");
+            var batch = log.Feed(text.Substring(cut));
+            Check(batch != null && batch.Parts.Count == 1 && batch.HasSummary, "the rest of the last line completes the same batch");
+        }
+
+        static void FinalReadAfterTheServerStops()
+        {
+            var path = Path.Combine(Path.GetTempPath(), "settlement-final-" + Guid.NewGuid().ToString("N") + ".log");
+            try
+            {
+                File.WriteAllText(path, Line("room-21", 11, 1, 1, Body(11, false)));
+                var tail = new SettlementTail();
+                var log = new SettlementLog();
+                Check(log.Feed(tail.Read(path)) == null, "the player line alone is not a finished batch");
+                // The server closes its log and only then prints the summary; the last read must still collect it.
+                File.AppendAllText(path, "[WSettle] done v1 room-21 1\n");
+                var batch = log.Feed(tail.Read(path));
+                Check(batch != null && batch.Parts.Count == 1 && batch.HasSummary, "the final read completes the round");
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        static void FinalReadUploadsCompletePlayersWithoutTheSummary()
+        {
+            var transport = new FakeTransport();
+            transport.Replies.Add(() => Reply(200));
+            var uploader = NewUploader(transport, "key");
+            var text = Line("room-23", 11, 1, 1, Body(11, false)) + "[WSettle] done v1 room-23 1";
+            uploader.ObserveFinal(text, 1, 0);
+            WaitFor(uploader, SettlementState.Partial);
+            Check(transport.Urls.Count == 1, "a cut-off summary does not hold back the complete player");
+            Check(((object[])Deserialize(transport.Bodies[0])["players"]).Length == 1, "the upload carries the complete player");
+        }
+
         static void BadBodyAndMismatchedPlayerAreIgnored()
         {
             var log = new SettlementLog();
@@ -174,7 +259,7 @@ namespace Windy10v10AI.Launcher.Tests
             var transport = new FakeTransport();
             transport.Replies.Add(() => Reply(200));
             var uploader = NewUploader(transport, "key");
-            uploader.Observe(Line("room-5", 11, 1, 1, Body(11, false)) + Line("room-5", 22, 1, 1, Body(22, false)) + "[Game] end game callback\n", 1);
+            uploader.Observe(Line("room-5", 11, 1, 1, Body(11, false)) + Line("room-5", 22, 1, 1, Body(22, false)) + "[Game] end game callback\n", 1, 0);
             WaitFor(uploader, SettlementState.Partial);
             Check(transport.Urls.Count == 1, "one merged request is enough");
             Check(((object[])((Dictionary<string, object>)Deserialize(transport.Bodies[0]))["players"]).Length == 2, "the request body carries both players");
@@ -188,7 +273,7 @@ namespace Windy10v10AI.Launcher.Tests
             transport.Replies.Add(() => Reply(200));
             var delays = new List<int>();
             var uploader = NewUploader(transport, "key", delays);
-            uploader.Observe(Complete("room-6", 2), 1);
+            uploader.Observe(Complete("room-6", 2), 1, 0);
             WaitFor(uploader, SettlementState.SentAll);
             Check(transport.Urls.Count == 2, "a direct request with no answer is retried once on the relay");
             Check(transport.Urls[0] == SettlementApi.Direct && transport.Urls[1] == SettlementApi.Relay, "the retry switches to the Guangzhou relay");
@@ -202,7 +287,7 @@ namespace Windy10v10AI.Launcher.Tests
             transport.Replies.Add(() => Reply(200));
             var delays = new List<int>();
             var uploader = NewUploader(transport, "key", delays);
-            uploader.Observe(Complete("room-7", 2), 1);
+            uploader.Observe(Complete("room-7", 2), 1, 0);
             WaitFor(uploader, SettlementState.SentAll);
             Check(transport.Urls.Count == 2 && transport.Urls[0] == SettlementApi.Direct && transport.Urls[1] == SettlementApi.Direct, "a 429 retries on the current route");
             Check(delays.Count == 1 && delays[0] == 2000, "Retry-After is obeyed inside the budget");
@@ -216,7 +301,7 @@ namespace Windy10v10AI.Launcher.Tests
             transport.Replies.Add(() => Reply(200));
             var delays = new List<int>();
             var uploader = NewUploader(transport, "key", delays);
-            uploader.Observe(Complete("room-13", 2), 1);
+            uploader.Observe(Complete("room-13", 2), 1, 0);
             WaitFor(uploader, SettlementState.SentAll);
             Check(transport.Urls.Count == 3 && transport.Urls.TrueForAll(url => url == SettlementApi.Direct), "5xx answers stay on the direct route");
             Check(delays.Count == 2 && delays[0] == 1000 && delays[1] == 3000, "the three attempts are spaced one and three seconds apart");
@@ -227,24 +312,62 @@ namespace Windy10v10AI.Launcher.Tests
             var transport = new FakeTransport();
             transport.Replies.Add(() => Reply(400));
             var uploader = NewUploader(transport, "key");
-            uploader.Observe(Complete("room-8", 2), 1);
+            uploader.Observe(Complete("room-8", 2), 1, 0);
             WaitFor(uploader, SettlementState.Failed);
             Check(transport.Urls.Count == 1, "an explicit 4xx is not retried");
         }
 
         static void DeadlineStopsTheUpload()
         {
-            var clock = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            long clock = 0;
             var transport = new FakeTransport();
-            transport.BeforeReply = () => clock = clock.AddSeconds(20);
+            transport.BeforeReply = () => clock += 20000;
             transport.Replies.Add(() => Reply(0, false));
             transport.Replies.Add(() => Reply(0, false));
             transport.Replies.Add(() => Reply(0, false));
             var delays = new List<int>();
-            var uploader = NewUploader(transport, "key", delays, () => clock, ms => clock = clock.AddMilliseconds(ms));
-            uploader.Observe(Complete("room-9", 2), 1);
+            var uploader = NewUploader(transport, "key", delays, () => clock, ms => clock += ms);
+            uploader.Observe(Complete("room-9", 2), 1, 0);
             WaitFor(uploader, SettlementState.None);
             Check(transport.Urls.Count == 2, "the 30-second budget stops a third request");
+        }
+
+        static void LateSuccessCannotTurnGreen()
+        {
+            long clock = 0;
+            var transport = new FakeTransport();
+            transport.BeforeReply = () => clock += 31000;
+            transport.Replies.Add(() => Reply(200));
+            var uploader = NewUploader(transport, "key", null, () => clock, ms => clock += ms);
+            uploader.Observe(Complete("room-20", 2), 1, 0);
+            Check(transport.Entered.WaitOne(3000), "the late answer reaches the transport");
+            WaitFor(uploader, SettlementState.None);
+            Check(uploader.State != SettlementState.SentAll, "an answer past the whole budget cannot turn the result green");
+        }
+
+        static void ABlockedRequestEndsAtTheDeadline()
+        {
+            var transport = new FakeTransport { Block = true };
+            transport.Replies.Add(() => Reply(200));
+            var path = Path.Combine(Path.GetTempPath(), "settlement-sent-" + Guid.NewGuid().ToString("N") + ".txt");
+            try
+            {
+                var uploader = new SettlementUploader(() => "key", transport, path, (state, round, game) => { }, null, () => Stopwatch.GetTimestamp() * 1000 / Stopwatch.Frequency, ms => Thread.Sleep(ms), 1000);
+                uploader.Observe(Complete("room-22", 2), 1, 0);
+                Check(transport.Entered.WaitOne(3000), "the blocked request reaches the transport");
+                WaitFor(uploader, SettlementState.None);
+                Thread.Sleep(100);
+                Check(transport.Urls.Count == 1, "a hung request is not retried past the deadline");
+                transport.Release.Set();
+                Check(transport.Finished.WaitOne(3000), "the transport call is released afterwards");
+                Thread.Sleep(50);
+                Check(transport.Cancelled, "the deadline cancels the pending request");
+                Check(uploader.State == SettlementState.None, "its late success cannot turn the result green");
+            }
+            finally
+            {
+                File.Delete(path);
+            }
         }
 
         static void SuccessIsDeduplicatedLocally()
@@ -255,13 +378,35 @@ namespace Windy10v10AI.Launcher.Tests
             try
             {
                 var first = NewUploader(transport, "key", null, null, null, path);
-                first.Observe(Complete("room-10", 2), 1);
+                first.Observe(Complete("room-10", 2), 1, 0);
                 WaitFor(first, SettlementState.SentAll);
                 Check(transport.Urls.Count == 1, "a successful upload records its players");
                 var second = NewUploader(transport, "key", null, null, null, path);
-                second.Observe(Complete("room-10", 2), 1);
+                second.Observe(Complete("room-10", 2), 1, 0);
                 WaitFor(second, SettlementState.SentAll);
                 Check(transport.Urls.Count == 1, "the same match and players are not sent again after a restart");
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        static void DedupReadsPastTheOldLimit()
+        {
+            var path = Path.Combine(Path.GetTempPath(), "settlement-sent-" + Guid.NewGuid().ToString("N") + ".txt");
+            try
+            {
+                var lines = new List<string>();
+                for (var i = 0; i < 5000; i++) lines.Add("old-" + i + "\t1");
+                lines.Add("room-late\t1");
+                File.WriteAllLines(path, lines.ToArray());
+                var transport = new FakeTransport();
+                transport.Replies.Add(() => Reply(200));
+                var uploader = NewUploader(transport, "key", null, null, null, path);
+                uploader.Observe(Complete("room-late", 1), 1, 0);
+                WaitFor(uploader, SettlementState.SentAll);
+                Check(transport.Urls.Count == 0, "a record after the first 5000 lines still suppresses the upload");
             }
             finally
             {
@@ -273,11 +418,11 @@ namespace Windy10v10AI.Launcher.Tests
         {
             var transport = new FakeTransport();
             var notes = new List<string>();
-            var uploader = new SettlementUploader(() => "", transport, null, (state, game) => { }, notes.Add);
-            uploader.Observe(Complete("room-11", 2), 1);
+            var uploader = new SettlementUploader(() => "", transport, null, (state, round, game) => { }, notes.Add);
+            uploader.Observe(Complete("room-11", 2), 1, 0);
             Check(uploader.State == SettlementState.None && transport.Urls.Count == 0, "an empty key skips the upload without an error");
             Check(notes.Count == 1 && notes[0].IndexOf("LAUNCHER_APIKEY", StringComparison.Ordinal) >= 0, "one non-sensitive diagnostic explains the skip");
-            uploader.Observe(Complete("room-11", 2), 1);
+            uploader.Observe(Complete("room-11", 2), 1, 0);
             Check(notes.Count == 1, "the missing-key note is written once");
         }
 
@@ -286,7 +431,7 @@ namespace Windy10v10AI.Launcher.Tests
             var transport = new FakeTransport { Block = true };
             transport.Replies.Add(() => Reply(200));
             var uploader = NewUploader(transport, "key");
-            uploader.Observe(Complete("room-12", 2), 1);
+            uploader.Observe(Complete("room-12", 2), 1, 0);
             Check(transport.Entered.WaitOne(3000), "the first round reaches the transport");
             uploader.Reset(2);
             transport.Release.Set();
@@ -295,28 +440,88 @@ namespace Windy10v10AI.Launcher.Tests
             Check(uploader.State == SettlementState.None, "a late answer from the previous round does not change the current one");
         }
 
-        static void StartsWithOneSettlementState()
+        static void CallbacksCarryTheCapturedRoomGame()
         {
-            var tunnel = new JoinTunnel();
+            var transport = new FakeTransport { Block = true };
+            transport.Replies.Add(() => Reply(200));
+            var path = Path.Combine(Path.GetTempPath(), "settlement-sent-" + Guid.NewGuid().ToString("N") + ".txt");
+            var seen = new List<string>();
             try
             {
-                tunnel.Game = 2;
-                Check(!tunnel.ApplySettlement(HostTunnel.EncodeSettlement(1, 2)), "a packet for the finished game is stale");
-                Check(tunnel.ApplySettlement(HostTunnel.EncodeSettlement(2, 2)) && tunnel.Settlement == 2, "the host's current settlement state reaches a joiner");
-                Check(!tunnel.ApplySettlement(HostTunnel.EncodeSettlement(3, 3)), "a packet for a game the joiner has not entered yet is ignored");
+                var uploader = new SettlementUploader(() => "key", transport, path, (state, round, game) =>
+                {
+                    lock (seen) seen.Add(round + "/" + game + "/" + (int)state);
+                }, null, () => 0, ms => { }, 30000);
+                uploader.Observe(Complete("room-24", 1), 1, 4);
+                Check(transport.Entered.WaitOne(3000), "the first upload reaches the transport");
+                uploader.Reset(2);
+                uploader.Observe(Complete("room-25", 1), 2, 5);
+                transport.Release.Set();
+                WaitFor(() =>
+                {
+                    lock (seen) return seen.Contains("1/4/1") && seen.Contains("2/5/1");
+                }, "both uploads report the game number captured when they started");
+                Thread.Sleep(100);
+                lock (seen)
+                {
+                    Check(!seen.Contains("1/4/3"), "the old upload's late success is not reported for its round");
+                }
             }
             finally
             {
-                tunnel.Dispose();
+                File.Delete(path);
             }
         }
 
-        static SettlementUploader NewUploader(FakeTransport transport, string key, List<int> delays = null, Func<DateTime> now = null, Action<int> sleep = null, string dedupPath = null)
+        // The whole packet path is exercised: the host's Send wraps the payload once and the joiner's Receive reads it.
+        static void SettlementStateCrossesTheRealTunnel()
+        {
+            using (var server = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)))
+            using (var host = new HostTunnel(((IPEndPoint)server.Client.LocalEndPoint).Port))
+            using (var join = new JoinTunnel())
+            {
+                Platform.KeepPrivate(server.Client);
+                host.RosterSource = () => new List<RosterEntry> { new RosterEntry { Name = "host", IsHost = true } };
+                host.Start();
+                join.Start();
+                var token = Guid.NewGuid().ToString("N");
+                host.AddJoin("settle", token, new List<Candidate>(), false, null);
+                var path = join.Connect(token, new List<Candidate> { new Candidate(PathType.Stun, Address(host)) }, null);
+                Check(path == PathType.Stun, "the settlement test joins over the direct route");
+                join.Forward(0);
+                host.Game = 1;
+                host.Settlement = (int)SettlementState.Sending;
+                WaitFor(() => join.Game == 1 && join.Settlement == (int)SettlementState.Sending, "the joiner receives the host's state");
+                host.Game = 2;
+                WaitFor(() => join.Game == 2 && join.Settlement == (int)SettlementState.Sending, "the next game carries the current state");
+                var older = new byte[5];
+                Buffer.BlockCopy(BitConverter.GetBytes(1), 0, older, 0, 4);
+                older[4] = 1;
+                SendFromHost(host, token, Packet.NextGame, older);
+                Thread.Sleep(300);
+                Check(join.Game == 2, "an older NextGame cannot move the joiner back");
+                SendFromHost(host, token, Packet.Settlement, HostTunnel.EncodeSettlement(1, (int)SettlementState.Failed));
+                Thread.Sleep(300);
+                Check(join.Settlement == (int)SettlementState.Sending, "an older game's result cannot overwrite the current game");
+                host.Settlement = 0;
+                WaitFor(() => join.Settlement == 0, "the host returning to neutral reaches the joiner");
+                SendFromHost(host, token, Packet.Settlement, HostTunnel.EncodeSettlement(1, (int)SettlementState.Failed));
+                Thread.Sleep(300);
+                Check(join.Settlement == 0, "a late older result cannot wake the finished game");
+            }
+        }
+
+        static void BuildKeyIsMasked()
+        {
+            Check(BuildKey.Unpack("Lz4oL3YwPiI=") == "test-key", "the embedded key decodes through the build mask");
+        }
+
+        static SettlementUploader NewUploader(FakeTransport transport, string key, List<int> delays = null, Func<long> elapsed = null, Action<int> sleep = null, string dedupPath = null)
         {
             if (dedupPath == null) dedupPath = Path.Combine(Path.GetTempPath(), "settlement-sent-" + Guid.NewGuid().ToString("N") + ".txt");
             if (delays == null) delays = new List<int>();
             if (sleep == null) sleep = ms => { delays.Add(ms); Thread.Sleep(0); };
-            return new SettlementUploader(() => key, transport, dedupPath, (state, game) => { }, null, now ?? (() => DateTime.UtcNow), sleep);
+            return new SettlementUploader(() => key, transport, dedupPath, (state, round, game) => { }, null, elapsed ?? (() => 0), sleep);
         }
 
         static string Complete(string matchKey, int players)
@@ -405,6 +610,34 @@ namespace Windy10v10AI.Launcher.Tests
             throw new Exception("settlement state stayed " + uploader.State + " instead of " + state);
         }
 
+        static void WaitFor(Func<bool> condition, string message)
+        {
+            for (var i = 0; i < 600; i++)
+            {
+                if (condition()) return;
+                Thread.Sleep(25);
+            }
+            throw new Exception(message);
+        }
+
+        static void SendFromHost(HostTunnel host, string token, byte type, byte[] payload)
+        {
+            var peers = (IDictionary)typeof(HostTunnel).GetField("peers", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(host);
+            var peer = peers[token];
+            var remote = (IPEndPoint)peer.GetType().GetField("Remote", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(peer);
+            var socket = (UdpClient)typeof(Tunnel).GetField("Socket", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(host);
+            var packet = new byte[payload.Length + 1];
+            packet[0] = type;
+            Buffer.BlockCopy(payload, 0, packet, 1, payload.Length);
+            socket.Send(packet, packet.Length, remote);
+        }
+
+        static IPEndPoint Address(Tunnel tunnel)
+        {
+            var socket = (UdpClient)typeof(Tunnel).GetField("Socket", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(tunnel);
+            return new IPEndPoint(IPAddress.Loopback, ((IPEndPoint)socket.Client.LocalEndPoint).Port);
+        }
+
         static void Check(bool condition, string message)
         {
             if (!condition) throw new Exception(message);
@@ -420,10 +653,11 @@ namespace Windy10v10AI.Launcher.Tests
             public readonly ManualResetEvent Release = new ManualResetEvent(false);
             public readonly ManualResetEvent Finished = new ManualResetEvent(false);
             public bool Block;
+            public volatile bool Cancelled;
             public Action BeforeReply;
             int index;
 
-            public SettlementReply Post(string url, string json, string apiKey, int timeoutMs)
+            public SettlementReply Post(string url, string json, string apiKey, int timeoutMs, CancellationToken cancel)
             {
                 lock (sync)
                 {
@@ -432,6 +666,7 @@ namespace Windy10v10AI.Launcher.Tests
                 }
                 Entered.Set();
                 if (Block) Release.WaitOne(5000);
+                if (cancel.IsCancellationRequested) Cancelled = true;
                 if (BeforeReply != null) BeforeReply();
                 Func<SettlementReply> reply;
                 lock (sync)

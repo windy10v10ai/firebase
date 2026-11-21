@@ -1,4 +1,4 @@
-﻿// Windy10v10AI local dedicated server launcher.
+// Windy10v10AI local dedicated server launcher.
 // Built with the .NET Framework 4 compiler that ships with Windows, so the language level is C# 5.
 using System;
 using System.Collections.Generic;
@@ -170,7 +170,14 @@ namespace Windy10v10AI.Launcher
         bool endNoticeShown;
         SettlementState settlementState;
         SettlementUploader settlement;
-        int settlementRound;
+        volatile int settlementRound;
+        SettlementTail settlementTail;
+        // The log may only be read for the round whose server started it, and only until its log is replaced.
+        bool settlementLogActive;
+        readonly object settlementFinalSync = new object();
+        int settlementFinalRound = -1;
+        Thread launchThread;
+        const int SettlementFlushMs = 30000;
 
         readonly System.Windows.Forms.Timer mapPoll = new System.Windows.Forms.Timer { Interval = 5000 };
         Process server;
@@ -294,7 +301,7 @@ namespace Windy10v10AI.Launcher
                 () => BuildKey.LauncherApiKey,
                 SettlementApi.Transport,
                 Path.Combine(Settings.Folder, "settlement-sent.txt"),
-                (state, game) => UI(() => ApplySettlement(state, game)),
+                (state, round, game) => UI(() => ApplySettlement(state, round, game)),
                 SettlementDiagnostic);
             autoStartBox.Text = Strings.AutoStartDota;
             autoStartBox.Checked = Settings.AutoStartDota;
@@ -1079,6 +1086,8 @@ namespace Windy10v10AI.Launcher
             endNoticeShown = false;
             settlementState = SettlementState.None;
             settlementRound++;
+            settlementTail = new SettlementTail();
+            settlementLogActive = false;
             settlement.Reset(settlementRound);
             for (var i = 0; i < modes.Length; i++)
             {
@@ -1090,7 +1099,8 @@ namespace Windy10v10AI.Launcher
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Starting, room ? Strings.RoomStartingHint : Strings.StartingHint, Strings.Cancel, true);
             stage = room ? "host" : "solo";
-            new Thread(() => Run(install, id, map, room)) { IsBackground = true }.Start();
+            launchThread = new Thread(() => Run(install, id, map, room)) { IsBackground = true };
+            launchThread.Start();
         }
 
         void Run(DotaInstall install, string id, string map, bool room)
@@ -1191,6 +1201,8 @@ namespace Windy10v10AI.Launcher
         {
             logFile = Path.Combine(install.Game, @"dota\dedicated.log");
             if (File.Exists(logFile)) File.Delete(logFile);
+            settlementTail = new SettlementTail();
+            settlementLogActive = true;
             var process = StartDota(new ProcessStartInfo
             {
                 FileName = install.Exe,
@@ -1613,14 +1625,14 @@ namespace Windy10v10AI.Launcher
         void WatchSolo(DotaInstall install, ClientWatch client)
         {
             var serverId = server.Id;
-            var tail = new SettlementTail();
+            var round = settlementRound;
             var end = new GameEnd();
             Presence? shown = null;
             while (!stopping)
             {
                 Thread.Sleep(1000);
-                var text = tail.Read(logFile);
-                settlement.Observe(text, settlementRound);
+                var text = settlementTail.Read(logFile);
+                settlement.Observe(text, round, 0);
                 end.Track(text);
                 if (server.HasExited)
                 {
@@ -1638,6 +1650,7 @@ namespace Windy10v10AI.Launcher
                     if (busy) ShowPresence(presence, null, Strings.StopServer, install, serverId);
                 });
             }
+            FinishSettlement(round, 0);
             endNotice = Strings.SettlementStatus(settlement.State, true);
             endNoticeKind = SettlementNotice(settlement.State);
             Finish(null, false);
@@ -1802,7 +1815,6 @@ namespace Windy10v10AI.Launcher
         void WatchRoom(DotaInstall install, string workshopId, ClientWatch client)
         {
             var serverId = server.Id;
-            var tail = new SettlementTail();
             Presence? shown = null;
             var readyAt = DateTime.UtcNow;
             while (!stopping)
@@ -1815,16 +1827,17 @@ namespace Windy10v10AI.Launcher
                 if (mode >= 0)
                 {
                     nextMode = -1;
+                    // The old round's last lines must be read after its server exits and before the new log replaces it.
+                    FinishSettlement(settlementRound, room.Game);
                     settlementRound++;
                     settlement.Reset(settlementRound);
                     StartNextGame(install, workshopId, mode, client, room);
                     readyAt = DateTime.UtcNow;
                     serverId = server.Id;
-                    tail.Reset();
                     shown = null;
                     continue;
                 }
-                var text = tail.Read(logFile);
+                var text = settlementTail.Read(logFile);
                 foreach (Match match in Regex.Matches(text, @"Adding player SteamID (\d+)"))
                 {
                     roster.SetInGame(long.Parse(match.Groups[1].Value));
@@ -1832,7 +1845,7 @@ namespace Windy10v10AI.Launcher
                 var wasEnded = room.Ended;
                 var wasSaved = room.Saved;
                 room.TrackServerLog(text);
-                settlement.Observe(text, settlementRound);
+                settlement.Observe(text, settlementRound, room.Game);
                 if (!wasEnded && room.Ended) UI(() => ShowRoomEnd(false));
                 if (!wasSaved && room.Saved) UI(() => ShowRoomEnd(true));
                 room.UpdateReadiness(true, roster.InGame("host"), Settings.AutoStartDota, DotaClientRunning(serverId), readyAt);
@@ -1850,6 +1863,7 @@ namespace Windy10v10AI.Launcher
                 shown = presence;
                 UI(() => ShowHostPresence(presence, false, install, serverId));
             }
+            FinishSettlement(settlementRound, hostRoom == null ? 0 : hostRoom.Game);
             Finish(null, false);
         }
 
@@ -1979,12 +1993,46 @@ namespace Windy10v10AI.Launcher
             hint.Visible = true;
         }
 
+        // Reads the rest of the round's server log after its server has exited and before the log is replaced.
+        void FinishSettlement(int round, int game)
+        {
+            lock (settlementFinalSync)
+            {
+                if (settlementFinalRound != round)
+                {
+                    settlementFinalRound = round;
+                    if (settlementLogActive)
+                    {
+                        settlementLogActive = false;
+                        var process = server;
+                        var exited = true;
+                        if (process != null)
+                        {
+                            KillQuietly(process);
+                            exited = WaitQuietly(process);
+                        }
+                        if (exited && settlementTail != null && logFile != null)
+                        {
+                            try
+                            {
+                                settlement.ObserveFinal(settlementTail.Read(logFile), round, game);
+                            }
+                            catch (IOException)
+                            {
+                            }
+                        }
+                    }
+                }
+            }
+            settlement.WaitIdle(SettlementFlushMs);
+        }
+
         // A late answer from the previous game must not change the room or the end page of the current one.
-        void ApplySettlement(SettlementState state, int round)
+        void ApplySettlement(SettlementState state, int round, int game)
         {
             if (round != settlementRound) return;
             var room = hostRoom;
-            if (room != null) room.SetSettlement(room.Game, state);
+            if (room != null) room.SetSettlement(game, state);
             settlementState = state;
             if (room != null)
             {
@@ -2073,6 +2121,8 @@ namespace Windy10v10AI.Launcher
             failureCause = null;
             // Stops the poll thread first so a late poll cannot list the room again
             stopping = true;
+            var room = hostRoom;
+            FinishSettlement(settlementRound, room == null ? 0 : room.Game);
             var s = server;
             if (s != null) KillQuietly(s);
             server = null;
@@ -2271,6 +2321,14 @@ namespace Windy10v10AI.Launcher
                 KillQuietly(s);
             }
             stopping = true;
+            // The watch thread does the last log read and waits for the upload; the process must stay alive for it.
+            if (s != null)
+            {
+                KillQuietly(s);
+                WaitQuietly(s);
+            }
+            var worker = launchThread;
+            if (worker != null) worker.Join(SettlementFlushMs + 5000);
             // 网络请求不能阻止窗口退出，连接与游戏进程仍由关闭流程释放。
             var close = new Thread(CloseTunnels) { IsBackground = true };
             close.Start();
@@ -2296,15 +2354,16 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        static void WaitQuietly(Process process)
+        static bool WaitQuietly(Process process)
         {
             try
             {
-                process.WaitForExit(15000);
+                return process.WaitForExit(15000);
             }
             catch (Exception)
             {
                 // Not ours to wait on; nothing else to do
+                return false;
             }
         }
 

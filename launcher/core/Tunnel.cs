@@ -427,13 +427,13 @@ namespace Windy10v10AI.Launcher
         {
         }
 
+        // The payload only; SendTo adds the packet type that ApplySettlement reads first.
         internal static byte[] EncodeSettlement(int game, int state)
         {
-            var data = new byte[6];
-            data[0] = Packet.Settlement;
+            var data = new byte[5];
             var number = BitConverter.GetBytes(game);
-            Buffer.BlockCopy(number, 0, data, 1, number.Length);
-            data[5] = (byte)state;
+            Buffer.BlockCopy(number, 0, data, 0, number.Length);
+            data[4] = (byte)state;
             return data;
         }
 
@@ -459,7 +459,8 @@ namespace Windy10v10AI.Launcher
                             // Roster packets go out every two seconds, so they also keep the route open
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (GameEnded) SendTo(peer, Packet.GameEnded, BitConverter.GetBytes(Game));
-                            if (Settlement != 0) SendTo(peer, Packet.Settlement, EncodeSettlement(Game, Settlement));
+                            // A return to neutral is sent too, otherwise a joiner keeps showing the host's last state.
+                            SendTo(peer, Packet.Settlement, EncodeSettlement(Game, Settlement));
                             if (peer.Seq) SendTo(peer, Packet.LossReport, peer.Up.EncodeReport(LossReportSeconds, NowMs()));
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                             // A joiner that left or dropped stops being measured once Dota itself would give up on it

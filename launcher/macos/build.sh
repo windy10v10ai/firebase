@@ -12,7 +12,13 @@ PY
 mkdir -p "$APP_OUT/Contents/MacOS" "$APP_OUT/Contents/Resources/engine"
 KEY_FILE=$(mktemp "${TMPDIR:-/tmp}/windy-launcher-key.XXXXXX")
 trap 'rm -f "$KEY_FILE"' EXIT
-printf '%s' "${LAUNCHER_APIKEY:-}" > "$KEY_FILE"
+# Masked to match BuildKey.Unpack, so the embedded resource is not the plain key
+python3 - "$KEY_FILE" <<'PY'
+import base64, os, sys
+key = os.environ.get("LAUNCHER_APIKEY", "").encode("utf-8")
+masked = bytes(b ^ 0x5B for b in key)
+open(sys.argv[1], "w").write(base64.b64encode(masked).decode("ascii"))
+PY
 "$DOTNET_BIN" publish WindyMac.csproj -c Release -r osx-arm64 --self-contained true -p:Version="$VERSION" -p:LauncherApiKeyFile="$KEY_FILE" -o "$APP_OUT/Contents/Resources/engine"
 for language in zh-CN en-US ru-RU; do
     "$APP_OUT/Contents/Resources/engine/WindyMacEngine" --strings "$language" > "$APP_OUT/Contents/Resources/strings-$language.json"

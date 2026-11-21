@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -35,7 +36,8 @@ namespace Windy10v10AI.Launcher
     }
 
     // Reads the per-player settlement lines the game writes after a match. A batch is only handed out once the
-    // game's own end marker or summary has been seen, so a data line alone never counts as the end of the game.
+    // game's own end marker or summary has been seen, so a data line alone never counts as the end of the game;
+    // a key switch hands out whatever the previous match already completed.
     sealed class SettlementLog
     {
         const int MaxLineChars = 512 * 1024;
@@ -54,6 +56,8 @@ namespace Windy10v10AI.Launcher
 
         readonly JavaScriptSerializer serializer = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
         readonly Dictionary<long, PlayerParts> players = new Dictionary<long, PlayerParts>();
+        // Batches finished by a key change, handed out after the one being assembled
+        readonly List<SettlementBatch> ready = new List<SettlementBatch>();
         string pending = "";
         string matchKey;
         string finishedKey;
@@ -99,10 +103,29 @@ namespace Windy10v10AI.Launcher
             }
             // A line this long cannot be one of ours, so drop it rather than letting the buffer grow without bound.
             if (pending.Length > MaxLineChars) pending = "";
-            if (!endSeen && !doneSeen) return null;
+            if (endSeen || doneSeen)
+            {
+                var batch = Build();
+                if (batch != null)
+                {
+                    finishedKey = batch.MatchKey;
+                    ResetActive();
+                    ready.Add(batch);
+                }
+            }
+            if (ready.Count == 0) return null;
+            var next = ready[0];
+            ready.RemoveAt(0);
+            return next;
+        }
 
+        // Ends a round whose last line was cut off, so the complete players already read are not held back.
+        public SettlementBatch Finish()
+        {
             var batch = Build();
-            if (matchKey != null) finishedKey = matchKey;
+            if (batch == null) return null;
+            finishedKey = batch.MatchKey;
+            ready.Clear();
             ResetActive();
             return batch;
         }
@@ -111,7 +134,27 @@ namespace Windy10v10AI.Launcher
         {
             pending = "";
             finishedKey = null;
+            ready.Clear();
             ResetActive();
+        }
+
+        // A key change finishes what the previous match already has instead of dropping it.
+        void SwitchTo(string key)
+        {
+            if (matchKey == null)
+            {
+                matchKey = key;
+                return;
+            }
+            if (matchKey == key) return;
+            var batch = Build();
+            ResetActive();
+            if (batch != null)
+            {
+                finishedKey = batch.MatchKey;
+                ready.Add(batch);
+            }
+            matchKey = key;
         }
 
         void ResetActive()
@@ -154,17 +197,7 @@ namespace Windy10v10AI.Launcher
             if (!int.TryParse(data.Groups[4].Value, NumberStyles.None, CultureInfo.InvariantCulture, out total)) return;
             if (total < 1 || total > MaxSegments || seq < 1 || seq > total) return;
             if (key == finishedKey) return;
-            if (matchKey == null)
-            {
-                matchKey = key;
-            }
-            else if (matchKey != key)
-            {
-                // Only one match is assembled at a time; a line from another match starts a new assembly.
-                ResetActive();
-                matchKey = key;
-                finishedKey = null;
-            }
+            SwitchTo(key);
 
             var payload = data.Groups[5].Value;
             PlayerParts state;
@@ -183,10 +216,13 @@ namespace Windy10v10AI.Launcher
         void AddDone(Match done)
         {
             var key = done.Groups[1].Value;
+            if (key == finishedKey) return;
             int count;
-            if (matchKey == null || key != matchKey) return;
             if (!int.TryParse(done.Groups[2].Value, NumberStyles.None, CultureInfo.InvariantCulture, out count)) return;
             if (count < 0 || count > MaxPlayers) return;
+            // The summary can be the first valid line when the player lines before it are damaged.
+            if (matchKey == null) matchKey = key;
+            else if (key != matchKey) SwitchTo(key);
             expected = count;
             summary = true;
             doneSeen = true;
@@ -354,7 +390,7 @@ namespace Windy10v10AI.Launcher
 
     interface ISettlementTransport
     {
-        SettlementReply Post(string url, string json, string apiKey, int timeoutMs);
+        SettlementReply Post(string url, string json, string apiKey, int timeoutMs, CancellationToken cancel);
     }
 
     static class SettlementApi
@@ -371,17 +407,20 @@ namespace Windy10v10AI.Launcher
                 ServicePointManager.SecurityProtocol |= (SecurityProtocolType)3072;
             }
 
-            public SettlementReply Post(string url, string json, string apiKey, int timeoutMs)
+            public SettlementReply Post(string url, string json, string apiKey, int timeoutMs, CancellationToken cancel)
             {
                 var reply = new SettlementReply();
+                CancellationTokenRegistration registration = default(CancellationTokenRegistration);
                 try
                 {
                     var request = (HttpWebRequest)WebRequest.Create(url);
                     request.Method = "POST";
                     request.ContentType = "application/json";
-                    request.Timeout = timeoutMs;
-                    request.ReadWriteTimeout = timeoutMs;
+                    request.Timeout = Math.Max(1, timeoutMs);
+                    request.ReadWriteTimeout = Math.Max(1, timeoutMs);
                     request.Headers["x-api-key"] = apiKey;
+                    // A connect or read that outlives the upload's whole budget is aborted from the upload thread.
+                    registration = cancel.Register(request.Abort);
                     var bytes = Encoding.UTF8.GetBytes(json);
                     using (var stream = request.GetRequestStream()) stream.Write(bytes, 0, bytes.Length);
                     using (var response = (HttpWebResponse)request.GetResponse())
@@ -418,67 +457,74 @@ namespace Windy10v10AI.Launcher
                 catch (Exception)
                 {
                 }
+                finally
+                {
+                    registration.Dispose();
+                }
                 return reply;
             }
         }
     }
 
-    // Uploads the complete players of one finished match in a single request. Retries never take longer than the
-    // match's 30-second budget, and only an explicit 4xx answer is reported as a failed upload.
+    // Uploads the complete players of one finished match in a single request. The whole upload ends at its deadline
+    // even when a request is still waiting, and only an explicit 4xx answer is reported as a failed upload.
     sealed class SettlementUploader
     {
         const int MaxRequests = 3;
-        const int DeadlineMs = 30000;
+        const int DefaultDeadlineMs = 30000;
         const int RequestTimeoutMs = 8000;
         static readonly int[] RetryMs = { 1000, 3000 };
 
         readonly Func<string> apiKey;
         readonly ISettlementTransport transport;
         readonly string dedupPath;
-        readonly Action<SettlementState, int> changed;
+        readonly Action<SettlementState, int, int> changed;
         readonly Action<string> diagnostics;
-        readonly Func<DateTime> now;
+        readonly Func<long> elapsed;
         readonly Action<int> sleep;
+        readonly int deadlineMs;
         readonly SettlementLog log = new SettlementLog();
         readonly object sync = new object();
         readonly HashSet<string> sent = new HashSet<string>();
-        int game = -1;
+        int round = -1;
         SettlementState state;
         string uploading;
         bool dedupLoaded;
         bool keyWarned;
 
-        public SettlementUploader(Func<string> apiKey, ISettlementTransport transport, string dedupPath, Action<SettlementState, int> changed, Action<string> diagnostics)
-            : this(apiKey, transport, dedupPath, changed, diagnostics, () => DateTime.UtcNow, Thread.Sleep) { }
+        public SettlementUploader(Func<string> apiKey, ISettlementTransport transport, string dedupPath, Action<SettlementState, int, int> changed, Action<string> diagnostics)
+            : this(apiKey, transport, dedupPath, changed, diagnostics, NowMs, Thread.Sleep, DefaultDeadlineMs) { }
 
-        internal SettlementUploader(Func<string> apiKey, ISettlementTransport transport, string dedupPath, Action<SettlementState, int> changed, Action<string> diagnostics, Func<DateTime> now, Action<int> sleep)
+        internal SettlementUploader(Func<string> apiKey, ISettlementTransport transport, string dedupPath, Action<SettlementState, int, int> changed, Action<string> diagnostics, Func<long> elapsed, Action<int> sleep, int deadlineMs = DefaultDeadlineMs)
         {
             this.apiKey = apiKey;
             this.transport = transport;
             this.dedupPath = dedupPath;
             this.changed = changed;
             this.diagnostics = diagnostics;
-            this.now = now;
+            this.elapsed = elapsed;
             this.sleep = sleep;
+            this.deadlineMs = deadlineMs;
         }
 
         public SettlementState State { get { lock (sync) return state; } }
-        public int Game { get { lock (sync) return game; } }
+        public int Game { get { lock (sync) return round; } }
 
-        public void Reset(int game)
+        public void Reset(int round)
         {
-            lock (sync) this.game = game;
+            lock (sync) this.round = round;
             log.Reset();
-            SetState(SettlementState.None, game);
+            SetState(SettlementState.None, round, 0);
         }
 
-        public void Observe(string text, int game)
+        // The room's game number is captured with the batch, so an answer that arrives after the next game cannot label itself.
+        public void Observe(string text, int round, int roomGame)
         {
-            if (this.game != game)
+            if (this.round != round)
             {
-                lock (sync) this.game = game;
+                lock (sync) this.round = round;
                 log.Reset();
-                SetState(SettlementState.None, game);
+                SetState(SettlementState.None, round, roomGame);
             }
             if (string.IsNullOrEmpty(text)) return;
             SettlementBatch batch;
@@ -490,16 +536,58 @@ namespace Windy10v10AI.Launcher
             {
                 return;
             }
-            if (batch != null) Start(batch, game);
+            while (batch != null)
+            {
+                Start(batch, round, roomGame);
+                try
+                {
+                    batch = log.Feed("");
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+            }
         }
 
-        void Start(SettlementBatch batch, int forGame)
+        // The last read of a round: sends complete players even when the summary line itself was cut off.
+        public void ObserveFinal(string text, int round, int roomGame)
+        {
+            Observe(text, round, roomGame);
+            SettlementBatch batch;
+            try
+            {
+                batch = log.Finish();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            if (batch != null) Start(batch, round, roomGame);
+        }
+
+        // Waits for the current request to finish or time out, never longer than the given budget.
+        public void WaitIdle(int timeoutMs)
+        {
+            var until = NowMs() + (timeoutMs < 0 ? 0 : timeoutMs);
+            while (true)
+            {
+                lock (sync)
+                {
+                    if (uploading == null && state != SettlementState.Sending) return;
+                }
+                if (NowMs() >= until) return;
+                Thread.Sleep(50);
+            }
+        }
+
+        void Start(SettlementBatch batch, int forRound, int roomGame)
         {
             if (batch.Parts.Count == 0) return;
             var key = (apiKey() ?? "").Trim();
             if (key.Length == 0)
             {
-                WarnMissingKey(forGame);
+                WarnMissingKey(forRound, roomGame);
                 return;
             }
             var remaining = new List<long>();
@@ -517,7 +605,7 @@ namespace Windy10v10AI.Launcher
             }
             if (remaining.Count == 0)
             {
-                SetState(batch.HasSummary && batch.Expected > 0 && already >= batch.Expected ? SettlementState.SentAll : SettlementState.Partial, forGame);
+                SetState(batch.HasSummary && batch.Expected > 0 && already >= batch.Expected ? SettlementState.SentAll : SettlementState.Partial, forRound, roomGame);
                 return;
             }
             var body = SettlementLog.Merge(batch, remaining);
@@ -536,98 +624,121 @@ namespace Windy10v10AI.Launcher
                 ClearUploading(batch.MatchKey);
                 return;
             }
-            SetState(SettlementState.Sending, forGame);
-            var deadline = now().AddMilliseconds(DeadlineMs);
-            var thread = new Thread(() => Run(batch, remaining, already, json, key, forGame, deadline));
+            SetState(SettlementState.Sending, forRound, roomGame);
+            var deadline = elapsed() + deadlineMs;
+            var thread = new Thread(() => Run(batch, remaining, already, json, key, forRound, roomGame, deadline));
             thread.IsBackground = true;
             thread.Start();
         }
 
-        void Run(SettlementBatch batch, List<long> ids, int already, string json, string key, int forGame, DateTime deadline)
+        void Run(SettlementBatch batch, List<long> ids, int already, string json, string key, int forRound, int roomGame, long deadline)
         {
+            // The request runs on its own thread so the caller can end the whole upload at the deadline even if
+            // connect or read is still blocked. Only this thread reports the result, so a late answer stays ignored.
+            var cancel = new CancellationTokenSource();
+            var finished = new ManualResetEvent(false);
             var result = SettlementState.None;
-            try
+            var work = new Thread(() =>
             {
-                var confirmed = already;
-                var route = SettlementApi.Direct;
-                var attempts = 0;
-                var delay = 0;
-                while (attempts < MaxRequests)
+                try
                 {
-                    if (attempts > 0)
-                    {
-                        var wait = delay > 0 ? delay : RetryMs[Math.Min(attempts - 1, RetryMs.Length - 1)];
-                        delay = 0;
-                        if (!WaitUntil(deadline, wait)) break;
-                    }
-                    var left = (int)(deadline - now()).TotalMilliseconds;
-                    if (left <= 0) break;
-                    attempts++;
-                    var reply = transport.Post(route, json, key, Math.Min(RequestTimeoutMs, left));
-                    if (reply != null && reply.Answered && reply.Status >= 200 && reply.Status < 300)
-                    {
-                        foreach (var id in ids) MarkSent(batch.MatchKey, id);
-                        confirmed += ids.Count;
-                        result = batch.HasSummary && batch.Expected > 0 && confirmed >= batch.Expected
-                            ? SettlementState.SentAll
-                            : SettlementState.Partial;
-                        break;
-                    }
-                    if (reply != null && reply.Answered)
-                    {
-                        if (reply.Status == 429 || reply.Status >= 500)
-                        {
-                            delay = reply.RetryAfterMs;
-                            continue;
-                        }
-                        if (reply.Status >= 400 && reply.Status < 500)
-                        {
-                            result = SettlementState.Failed;
-                            break;
-                        }
-                        result = SettlementState.None;
-                        break;
-                    }
-                    // A direct request with no HTTP answer at all is the only case that switches to the relay.
-                    if (route == SettlementApi.Direct) route = SettlementApi.Relay;
+                    result = Attempt(batch, ids, already, json, key, deadline, cancel.Token);
                 }
-            }
-            catch (Exception)
+                catch (Exception)
+                {
+                    result = SettlementState.None;
+                }
+                finally
+                {
+                    finished.Set();
+                }
+            })
+            { IsBackground = true };
+            work.Start();
+            var left = deadline - elapsed();
+            var answered = left > 0 && finished.WaitOne((int)Math.Min(left, int.MaxValue));
+            if (!answered || elapsed() > deadline)
             {
+                cancel.Cancel();
                 result = SettlementState.None;
             }
-            finally
-            {
-                ClearUploading(batch.MatchKey);
-                SetState(result, forGame);
-            }
+            if (answered) finished.Close();
+            // Report before releasing the match, so a following batch cannot have its Sending overwritten by this result.
+            SetState(result, forRound, roomGame);
+            ClearUploading(batch.MatchKey);
         }
 
-        bool WaitUntil(DateTime deadline, int milliseconds)
+        SettlementState Attempt(SettlementBatch batch, List<long> ids, int already, string json, string key, long deadline, CancellationToken cancel)
         {
-            if (milliseconds <= 0) return now() < deadline;
-            var left = (int)(deadline - now()).TotalMilliseconds;
+            var confirmed = already;
+            var route = SettlementApi.Direct;
+            var attempts = 0;
+            var delay = 0;
+            while (attempts < MaxRequests)
+            {
+                if (cancel.IsCancellationRequested) return SettlementState.None;
+                if (attempts > 0)
+                {
+                    var wait = delay > 0 ? delay : RetryMs[Math.Min(attempts - 1, RetryMs.Length - 1)];
+                    delay = 0;
+                    if (!WaitUntil(deadline, wait)) return SettlementState.None;
+                }
+                var left = deadline - elapsed();
+                if (left <= 0) return SettlementState.None;
+                attempts++;
+                var reply = transport.Post(route, json, key, (int)Math.Min(RequestTimeoutMs, left), cancel);
+                if (cancel.IsCancellationRequested) return SettlementState.None;
+                if (reply != null && reply.Answered && reply.Status >= 200 && reply.Status < 300)
+                {
+                    // An answer that arrives after the budget has run out cannot turn the result green.
+                    if (elapsed() > deadline) return SettlementState.None;
+                    foreach (var id in ids) MarkSent(batch.MatchKey, id);
+                    confirmed += ids.Count;
+                    return batch.HasSummary && batch.Expected > 0 && confirmed >= batch.Expected
+                        ? SettlementState.SentAll
+                        : SettlementState.Partial;
+                }
+                if (reply != null && reply.Answered)
+                {
+                    if (reply.Status == 429 || reply.Status >= 500)
+                    {
+                        delay = reply.RetryAfterMs;
+                        continue;
+                    }
+                    if (reply.Status >= 400 && reply.Status < 500) return SettlementState.Failed;
+                    return SettlementState.None;
+                }
+                // A direct request with no HTTP answer at all is the only case that switches to the relay.
+                if (route == SettlementApi.Direct) route = SettlementApi.Relay;
+            }
+            return SettlementState.None;
+        }
+
+        bool WaitUntil(long deadline, int milliseconds)
+        {
+            if (milliseconds <= 0) return elapsed() < deadline;
+            var left = deadline - elapsed();
             if (left <= 0) return false;
             if (milliseconds >= left)
             {
-                sleep(left);
+                sleep((int)Math.Min(left, int.MaxValue));
                 return false;
             }
             sleep(milliseconds);
-            return true;
+            return elapsed() < deadline;
         }
 
-        void SetState(SettlementState next, int forGame)
+        void SetState(SettlementState next, int forRound, int roomGame)
         {
-            Action<SettlementState, int> handler;
+            Action<SettlementState, int, int> handler;
             lock (sync)
             {
-                if (forGame != game) return;
+                if (forRound != round) return;
                 if (state == next) return;
                 state = next;
                 handler = changed;
             }
-            if (handler != null) handler(next, forGame);
+            if (handler != null) handler(next, forRound, roomGame);
         }
 
         void ClearUploading(string matchKey)
@@ -638,7 +749,7 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        void WarnMissingKey(int forGame)
+        void WarnMissingKey(int forRound, int roomGame)
         {
             var first = false;
             lock (sync)
@@ -650,7 +761,7 @@ namespace Windy10v10AI.Launcher
                 }
             }
             if (first && diagnostics != null) diagnostics("settlement upload skipped: LAUNCHER_APIKEY is not set");
-            SetState(SettlementState.None, forGame);
+            SetState(SettlementState.None, forRound, roomGame);
         }
 
         void LoadDedup()
@@ -664,12 +775,16 @@ namespace Windy10v10AI.Launcher
                 foreach (var line in File.ReadAllLines(dedupPath))
                 {
                     if (line.Length > 0) sent.Add(line);
-                    if (sent.Count >= 5000) break;
                 }
             }
             catch (Exception)
             {
             }
+        }
+
+        static long NowMs()
+        {
+            return Stopwatch.GetTimestamp() * 1000 / Stopwatch.Frequency;
         }
 
         void MarkSent(string matchKey, long steamId)

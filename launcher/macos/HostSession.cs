@@ -33,7 +33,8 @@ namespace Windy10v10AI.Launcher
         int game => room?.Game ?? 1;
         readonly GameEnd gameEnd = new();
         readonly SettlementUploader settlement;
-        int settlementRound;
+        volatile int settlementRound;
+        const int SettlementFlushMs = 30000;
         bool ended => room?.Ended ?? gameEnd.Ended;
         bool saved => room?.Saved ?? gameEnd.Saved;
         DateTime readyAt;
@@ -57,10 +58,11 @@ namespace Windy10v10AI.Launcher
                 () => BuildKey.LauncherApiKey,
                 SettlementApi.Transport,
                 Path.Combine(Logs, "settlement-sent.txt"),
-                (state, round) =>
+                (state, round, roomGame) =>
                 {
                     if (round != settlementRound) return;
-                    room?.SetSettlement(room.Game, state);
+                    // The game number comes from the upload, not from whatever the room is on when the answer lands.
+                    room?.SetSettlement(roomGame, state);
                     Event(State, lastMessage);
                 },
                 SettlementDiagnostic);
@@ -250,9 +252,11 @@ namespace Windy10v10AI.Launcher
         }
         void StartNextGame(string nextMode, RoomPoll poll)
         {
+            // The old round must finish reading its log and report its result before the next game starts.
+            StopServer();
+            settlement.WaitIdle(SettlementFlushMs);
             settlementRound++;
             settlement.Reset(settlementRound);
-            StopServer();
             install = MacInstall.Find();
             room.NextGame(nextMode, install.Manifest);
             mode = nextMode; Ready = false;
@@ -265,8 +269,11 @@ namespace Windy10v10AI.Launcher
         {
             Ready = false;
             cancel?.Cancel(); await entering;
+            // StopServer reads the round's last lines after the server exits; the upload finishes before the room goes.
+            StopServer();
+            settlement.WaitIdle(SettlementFlushMs);
             room?.Dispose(); gate?.Dispose(); gate = null;
-            StopServer(); try { mount?.Dispose(); } catch (Exception e) { Info(Strings.MapCleanupFailed + e.Message); }
+            try { mount?.Dispose(); } catch (Exception e) { Info(Strings.MapCleanupFailed + e.Message); }
             mount = null;
             lock (logLock) { log?.Dispose(); log = null; }
             if (failed) Event("error", failure); else Event("idle", Solo ? Strings.Idle : Strings.HostIdle);
@@ -300,7 +307,7 @@ namespace Windy10v10AI.Launcher
                 batch.Append(line).Append('\n');
             }
             // The whole read is one settlement batch, so a marker followed by more players in the same read keeps them.
-            if (batch.Length > 0) settlement.Observe(batch.ToString(), settlementRound);
+            if (batch.Length > 0) settlement.Observe(batch.ToString(), settlementRound, game);
         }
         void ServerLine(string line)
         {
@@ -330,7 +337,14 @@ namespace Windy10v10AI.Launcher
                     using var kill = Process.Start(new ProcessStartInfo("/bin/kill") { ArgumentList = { "-TERM", p.Id.ToString() }, UseShellExecute = false }); kill.WaitForExit();
                     if (!p.WaitForExit(5000)) p.Kill();
                 }
-                p.WaitForExit();
+                // Bounded too, so quitting never hangs on a server that ignores the kill.
+                p.WaitForExit(5000);
+                // The server has closed its console log, so this read still belongs to the round that just ended.
+                if (p.HasExited)
+                {
+                    try { ReadConsole(); } catch { }
+                    settlement.ObserveFinal("", settlementRound, game);
+                }
             }
             catch { }
             finally { p.Dispose(); consoleReader?.Dispose(); consoleReader = null; if (consolePath != null) try { File.Delete(consolePath); } catch { } consolePath = null; dedicated?.Dispose(); dedicated = null; }
