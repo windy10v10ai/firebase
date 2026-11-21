@@ -14,6 +14,7 @@ namespace Windy10v10AI.Launcher.Tests
                 TunnelPortTests.RunAll();
                 SessionLifecycleTests.RunAll();
                 HostRoomSessionTests.RunAll();
+                SettlementTests.RunAll();
                 FeedbackLogTests.RunAll();
                 return 0;
             }

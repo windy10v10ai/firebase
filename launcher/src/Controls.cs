@@ -155,7 +155,7 @@ namespace Windy10v10AI.Launcher
         }
     }
 
-    enum NoticeKind { Warning, Error, Success }
+    enum NoticeKind { Warning, Error, Success, Info }
 
     class NoticeBar : PaintedControl
     {
@@ -181,10 +181,11 @@ namespace Windy10v10AI.Launcher
             if (Visible && Kind == kind && Message.Text == text && hasAction == (action != null)) return;
             Kind = kind;
             Message.Text = text;
+            Message.ForeColor = kind == NoticeKind.Info ? Theme.Muted : Theme.Text;
             Action.Text = action ?? "";
             hasAction = action != null;
             Action.Visible = hasAction;
-            Action.BorderColor = kind == NoticeKind.Error ? Theme.ErrorBorder : (kind == NoticeKind.Success ? Theme.OkBorder : Theme.WarningBorder);
+            Action.BorderColor = kind == NoticeKind.Error ? Theme.ErrorBorder : (kind == NoticeKind.Success ? Theme.OkBorder : (kind == NoticeKind.Info ? Theme.Border : Theme.WarningBorder));
             Visible = true;
             LayoutChildren();
             Invalidate();
@@ -215,9 +216,10 @@ namespace Windy10v10AI.Launcher
             var g = Prepare(e);
             var s = DpiScale;
             var success = Kind == NoticeKind.Success;
-            var fill = Kind == NoticeKind.Error ? Theme.ErrorPanel : (success ? Theme.OkPanel : Theme.WarningPanel);
-            var edge = Kind == NoticeKind.Error ? Theme.ErrorBorder : (success ? Theme.OkBorder : Theme.WarningBorder);
-            var icon = Kind == NoticeKind.Error ? Theme.Error : (success ? Theme.Ok : Theme.Warning);
+            var info = Kind == NoticeKind.Info;
+            var fill = Kind == NoticeKind.Error ? Theme.ErrorPanel : (success ? Theme.OkPanel : (info ? Theme.Panel : Theme.WarningPanel));
+            var edge = Kind == NoticeKind.Error ? Theme.ErrorBorder : (success ? Theme.OkBorder : (info ? Theme.Border : Theme.WarningBorder));
+            var icon = Kind == NoticeKind.Error ? Theme.Error : (success ? Theme.Ok : (info ? Theme.Muted : Theme.Warning));
             using (var path = Theme.Rounded(new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f), 8 * s))
             using (var brush = new SolidBrush(fill))
             using (var pen = new Pen(edge, Math.Max(1f, s)))

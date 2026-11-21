@@ -24,6 +24,7 @@ namespace Windy10v10AI.Launcher
         DateTime openedAt, qualityAt, nextPollAt;
         DateTime? startedAt;
         int failures;
+        SettlementState settlement;
         public readonly HostTunnel Tunnel;
         public readonly HostRoster Roster;
         public event Action ConnectionFailed;
@@ -33,6 +34,7 @@ namespace Windy10v10AI.Launcher
         public bool Started { get { lock (sync) return started; } }
         public bool Ended { get { lock (sync) return end.Ended; } }
         public bool Saved { get { lock (sync) return end.Saved; } }
+        public SettlementState Settlement { get { lock (sync) return settlement; } }
         public bool Paused { get { lock (sync) return paused; } }
         public bool PublicRoom { get { lock (sync) return publicRoom; } }
         public int MaxPlayers { get { lock (sync) return maxPlayers; } }
@@ -116,6 +118,15 @@ namespace Windy10v10AI.Launcher
                 return true;
             }
         }
+        public void SetSettlement(int forGame, SettlementState next)
+        {
+            lock (sync)
+            {
+                if (closed || forGame != game) return;
+                settlement = next;
+                Tunnel.Settlement = (int)next;
+            }
+        }
         public void UpdateReadiness(bool ready, bool hostInGame, bool autoEnter, bool clientRunning, DateTime readyAt)
         {
             lock (sync)
@@ -132,7 +143,8 @@ namespace Windy10v10AI.Launcher
                 if (closed) throw new OperationCanceledException();
                 generation++; map = nextMap; peer["mapVersion"] = mapVersion; game++;
                 started = paused = false; startedAt = null; end.Reset();
-                Tunnel.GameReady = false; Tunnel.GameEnded = false; Tunnel.Game = game; Roster.SetAll(PlayerStatus.Waiting);
+                settlement = SettlementState.None;
+                Tunnel.GameReady = false; Tunnel.GameEnded = false; Tunnel.Settlement = 0; Tunnel.Game = game; Roster.SetAll(PlayerStatus.Waiting);
                 openedAt = qualityAt = now(); nextPollAt = DateTime.MinValue;
             }
         }

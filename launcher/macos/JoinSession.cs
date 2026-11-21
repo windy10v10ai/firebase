@@ -26,6 +26,7 @@ namespace Windy10v10AI.Launcher
         MacInstall install;
         volatile bool autoEnter;
         RoomBrowser browser;
+        int settlement;
         public string State { get; private set; } = "idle";
         public string Code { get; private set; }
         public bool Ready { get; private set; }
@@ -35,7 +36,7 @@ namespace Windy10v10AI.Launcher
         void Event(string state, string message)
         {
             State = state;
-            emit(new { type = "state", role = "join", state, message, code = Code ?? "", log = "", game = tunnel?.Game ?? 0 });
+            emit(new { type = "state", role = "join", state, message, code = Code ?? "", log = "", game = tunnel?.Game ?? 0, settlement });
         }
         void Info(string message) => emit(new { type = "message", message });
         public void Start(string code, bool enter, RoomBrowser source = null)
@@ -44,7 +45,7 @@ namespace Windy10v10AI.Launcher
             lock (runLock)
             {
                 if (worker != null && !worker.IsCompleted) throw new Exception(Strings.SessionActive);
-                cancel?.Dispose(); cancel = new CancellationTokenSource(); Code = code; autoEnter = enter; Ready = false; browser = source;
+                cancel?.Dispose(); cancel = new CancellationTokenSource(); Code = code; autoEnter = enter; Ready = false; browser = source; settlement = 0;
                 var ct = cancel.Token;
                 worker = Task.Run(() => Run(ct));
             }
@@ -161,11 +162,17 @@ namespace Windy10v10AI.Launcher
             Ready = state == JoinState.Ready;
             if (Ready)
             {
+                settlement = 0;
                 if (State != "ready") Event("ready", Strings.EnterGame);
                 return;
             }
             string nextState = state == JoinState.Ended ? "ended" : "waiting";
-            if (State != nextState) Event(nextState, state == JoinState.Ended ? Strings.GameEnded : Strings.StatusWaiting);
+            var nextSettlement = state == JoinState.Ended ? tunnel?.Settlement ?? 0 : 0;
+            if (State != nextState || settlement != nextSettlement)
+            {
+                settlement = nextSettlement;
+                Event(nextState, state == JoinState.Ended ? Strings.SettlementStatus((SettlementState)settlement, false) : Strings.StatusWaiting);
+            }
         }
         void EmitRoute(JoinTunnel current)
         {
