@@ -28,6 +28,11 @@
 - 核心要用到系统能力时，在 `Platform` 加方法，每个平台的实现都补上：Windows 是 `src/Platform.cs`，Mac 是 `macos/Platform.cs`，核心测试是 `core/tests/dotnet/TestPlatform.cs`
 - 与平台无关的测试放 `core/tests/`，并加进 `core/tests/dotnet/Program.cs` 与 `tests/SteamExecutableTests.cs` 两处入口
 
+## 结算上传
+
+- key 只从构建环境 `LAUNCHER_APIKEY` 读取，由 `build.cmd` 与 `macos/build.sh` 在编译时嵌入可执行文件；不写进源码、日志、反馈包或产物目录里的单独文件，空值安静跳过并记一条不含 key 的诊断
+- 读取专用服日志用 `SettlementTail` 按实际读取字节数推进，不把读完后的文件长度当偏移；测试要覆盖跨轮半行、UTF-8 截断、重复与乱序
+
 ## 网络
 
 - 新建的 socket 都要调 `Platform.KeepPrivate`：启动器以继承句柄的方式启动 Steam 与 Dota，被继承的 socket 在启动器退出后仍占着端口

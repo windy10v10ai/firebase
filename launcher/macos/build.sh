@@ -10,14 +10,17 @@ print(re.search(r'Current = "([^"]+)"', source).group(1))
 PY
 )
 mkdir -p "$APP_OUT/Contents/MacOS" "$APP_OUT/Contents/Resources/engine"
-"$DOTNET_BIN" publish WindyMac.csproj -c Release -r osx-arm64 --self-contained true -p:Version="$VERSION" -o "$APP_OUT/Contents/Resources/engine"
+KEY_FILE=$(mktemp "${TMPDIR:-/tmp}/windy-launcher-key.XXXXXX")
+trap 'rm -f "$KEY_FILE"' EXIT
+printf '%s' "${LAUNCHER_APIKEY:-}" > "$KEY_FILE"
+"$DOTNET_BIN" publish WindyMac.csproj -c Release -r osx-arm64 --self-contained true -p:Version="$VERSION" -p:LauncherApiKeyFile="$KEY_FILE" -o "$APP_OUT/Contents/Resources/engine"
 for language in zh-CN en-US ru-RU; do
     "$APP_OUT/Contents/Resources/engine/WindyMacEngine" --strings "$language" > "$APP_OUT/Contents/Resources/strings-$language.json"
 done
 bash build-native.sh "$APP_OUT/Contents/MacOS"
 cp ../assets/banner.jpg "$APP_OUT/Contents/Resources/"
 ICON_TEMP=$(mktemp -d)
-trap 'rm -rf "$ICON_TEMP"' EXIT
+trap 'rm -f "$KEY_FILE"; rm -rf "$ICON_TEMP"' EXIT
 mkdir "$ICON_TEMP/Launcher.iconset"
 for size in 16 32 128 256 512; do
     sips -s format png -z "$size" "$size" ../assets/icon.ico --out "$ICON_TEMP/Launcher.iconset/icon_${size}x${size}.png" >/dev/null

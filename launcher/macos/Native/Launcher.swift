@@ -253,6 +253,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var backendAvailable = true
     var state = "idle"
     var sessionRole = "solo"
+    var settlement = 0
     var code = ""
     var mapState = "checking"
     var mapMessage = ""
@@ -583,12 +584,13 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             pendingStart = false
             state = event["state"] as? String ?? "idle"
             sessionRole = event["role"] as? String ?? sessionRole
+            settlement = event["settlement"] as? Int ?? 0
             status.stringValue = event["message"] as? String ?? ""
             code = event["code"] as? String ?? ""
             paused = event["paused"] as? Bool ?? false
             if let value = event["publicRoom"] as? Bool { roomType.selectedSegment = value ? 0 : 1 }
             if let value = event["maxPlayers"] as? Int, (2...10).contains(value) { count.selectItem(at: value - 2) }
-            status.textColor = state == "error" ? .systemRed : Theme.text
+            status.textColor = state == "error" ? .systemRed : (state == "ended" ? settlementColor() : Theme.text)
             append(status.stringValue); refreshControls()
             if !active && previous != state {
                 route.stringValue = ""; route.isHidden = true; routeDot.isHidden = true
@@ -654,6 +656,18 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         journal.scrollToEndOfDocument(nil)
     }
     func showError(_ value: String) { if pendingStart { state = "error"; pendingStart = false }; status.stringValue = value; status.textColor = .systemRed; append(value); refreshControls() }
+    func settlementMessage() -> String {
+        switch settlement {
+        case 1: return text(sessionRole == "join" ? "SettlementWaitingHost" : "SettlementSending")
+        case 2: return text("SettlementSent")
+        case 3: return text("SettlementPartial")
+        case 4: return text("SettlementFailed")
+        default: return text("GameEnded")
+        }
+    }
+    func settlementColor() -> NSColor {
+        return settlement == 2 ? Theme.ok : (settlement == 4 ? .systemRed : Theme.muted)
+    }
     func showMessage(_ value: String) { let alert = NSAlert(); alert.messageText = value; alert.runModal() }
     func confirm(_ title: String, _ body: String, _ action: String) -> Bool {
         let alert = NSAlert(); alert.messageText = title; alert.informativeText = body
@@ -706,9 +720,16 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         mapDot.textColor = mapState == "ready" ? Theme.color(0x3fb67a) : (["outdated", "unverified"].contains(mapState) ? .systemOrange : Theme.muted)
         hostGuide.isHidden = page != "host" || active || blockedByMap || releaseAvailable
         (hostGuide.arrangedSubviews.first as? NSTextField)?.stringValue = "✓  " + text(autoStart.state == .on ? "HostGuide" : "HostGuideServerOnly")
-        if !active && !browsing { hint.stringValue = "" }
-        else if active && !away && sessionRole == "host" { hint.stringValue = text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint") }
-        hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host")
+        if !active && !browsing {
+            hint.stringValue = settlement == 0 || state == "error" ? "" : settlementMessage()
+            hint.textColor = settlementColor()
+        } else if active && !away && sessionRole == "host" {
+            hint.stringValue = state == "ended" ? settlementMessage() : text(roomType.selectedSegment == 0 ? "PublicHostingHint" : "PrivateHostingHint")
+            hint.textColor = state == "ended" ? settlementColor() : Theme.muted
+        } else if active {
+            hint.stringValue = ""
+        }
+        hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host" && state != "ended")
         statusLine.isHidden = browsing || !hostGuide.isHidden || blockedByMap || releaseAvailable
         route.isHidden = route.stringValue.isEmpty || away
         routeDot.isHidden = route.isHidden
@@ -1077,7 +1098,18 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             handle(["type": "roster", "players": [["key": "host", "name": "Konosuba", "host": true, "status": 1]]])
         case "host", "join", "ended":
             let mode = option("--preview-state")!; let role = mode == "ended" ? "host" : mode; pages.selectedSegment = role == "host" ? 1 : 2
-            handle(["type": "state", "role": role, "state": mode == "ended" ? "ended" : "ready", "code": "Z82QCT", "message": text(mode == "ended" ? "GameEnded" : "HostGuide")])
+            handle(["type": "state", "role": role, "state": mode == "ended" ? "ended" : "ready", "code": "Z82QCT", "message": text(mode == "ended" ? "NextGamePick" : "HostGuide")])
+            handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
+        case "ended-sending", "ended-sent", "ended-partial", "ended-failed":
+            let value = ["ended-sending": 1, "ended-sent": 2, "ended-partial": 3, "ended-failed": 4][option("--preview-state")!] ?? 0
+            pages.selectedSegment = 1
+            handle(["type": "state", "role": "host", "state": "ended", "code": "Z82QCT", "message": text("NextGamePick"), "settlement": value])
+            handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
+        case "join-ended-sending", "join-ended-sent", "join-ended-partial", "join-ended-failed":
+            let value = ["join-ended-sending": 1, "join-ended-sent": 2, "join-ended-partial": 3, "join-ended-failed": 4][option("--preview-state")!] ?? 0
+            let key = ["join-ended-sending": "SettlementWaitingHost", "join-ended-sent": "SettlementSent", "join-ended-partial": "SettlementPartial", "join-ended-failed": "SettlementFailed"][option("--preview-state")!] ?? "GameEnded"
+            pages.selectedSegment = 2
+            handle(["type": "state", "role": "join", "state": "ended", "code": "Z82QCT", "message": text(key), "settlement": value])
             handle(["type": "roster", "players": [["key": "host", "name": "Windy", "host": true, "status": 2], ["key": "guest", "name": "Player", "status": 5]]])
         case "join-checking", "join-waiting", "join-ready", "join-playing", "join-ended", "join-error", "join-left":
             pages.selectedSegment = 2

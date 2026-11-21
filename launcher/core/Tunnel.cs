@@ -37,6 +37,8 @@ namespace Windy10v10AI.Launcher
         public const byte LossReport = 15;
         // A joiner that reads numbered data says so; older hosts ignore it and keep sending plain Data
         public const byte Caps = 16;
+        // The host's one settlement state for this game, so joiners show the same result; older launchers ignore it
+        public const byte Settlement = 17;
     }
 
     // Recent round trip and loss on one route; Rtt is -1 when every reply was lost, Samples is 0 before anything was measured.
@@ -419,9 +421,20 @@ namespace Windy10v10AI.Launcher
         public volatile bool GameEnded;
         public volatile int Game = 1;
         public volatile bool GameReady = true;
+        public volatile int Settlement;
 
         public HostTunnel() : this(GamePort)
         {
+        }
+
+        internal static byte[] EncodeSettlement(int game, int state)
+        {
+            var data = new byte[6];
+            data[0] = Packet.Settlement;
+            var number = BitConverter.GetBytes(game);
+            Buffer.BlockCopy(number, 0, data, 1, number.Length);
+            data[5] = (byte)state;
+            return data;
         }
 
         internal HostTunnel(int gamePort)
@@ -446,6 +459,7 @@ namespace Windy10v10AI.Launcher
                             // Roster packets go out every two seconds, so they also keep the route open
                             for (var i = 0; i < roster.Count; i++) SendTo(peer, Packet.Roster, roster[i].Encode(i, roster.Count));
                             if (GameEnded) SendTo(peer, Packet.GameEnded, BitConverter.GetBytes(Game));
+                            if (Settlement != 0) SendTo(peer, Packet.Settlement, EncodeSettlement(Game, Settlement));
                             if (peer.Seq) SendTo(peer, Packet.LossReport, peer.Up.EncodeReport(LossReportSeconds, NowMs()));
                             if (peer.Remote != null && (DateTime.UtcNow - peer.LastSent).TotalMilliseconds > KeepaliveMs) SendTo(peer, Packet.Keepalive, new byte[0]);
                             // A joiner that left or dropped stops being measured once Dota itself would give up on it
@@ -904,6 +918,7 @@ namespace Windy10v10AI.Launcher
         public volatile bool GameEnded;
         public volatile int Game = 1;
         public volatile bool GameReady = true;
+        public volatile int Settlement;
         readonly Dictionary<int, RosterEntry> roster = new Dictionary<int, RosterEntry>();
         int rosterCount = -1;
         // Shown until the host's own list arrives
@@ -1533,6 +1548,11 @@ namespace Windy10v10AI.Launcher
                     GameEnded = true;
                     return;
                 }
+                if (data[0] == Packet.Settlement)
+                {
+                    ApplySettlement(data);
+                    return;
+                }
                 if (data[0] == Packet.NextGame)
                 {
                     int game;
@@ -1542,6 +1562,7 @@ namespace Windy10v10AI.Launcher
                     {
                         Game = game;
                         GameEnded = false;
+                        Settlement = 0;
                     }
                     GameReady = ready;
                     return;
@@ -1576,6 +1597,17 @@ namespace Windy10v10AI.Launcher
                 }
                 if (data[0] == Packet.Data || data[0] == Packet.SeqData) Deliver(data);
             }
+        }
+
+        internal bool ApplySettlement(byte[] data)
+        {
+            if (data == null || data.Length < 6 || data[0] != Packet.Settlement) return false;
+            var game = BitConverter.ToInt32(data, 1);
+            // Wait for the NextGame packet to move the room forward; a packet for a finished game is stale.
+            if (game != Game) return false;
+            if (data[5] > (byte)SettlementState.Failed) return false;
+            Settlement = data[5];
+            return true;
         }
 
         void Deliver(byte[] data)

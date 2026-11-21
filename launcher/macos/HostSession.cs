@@ -32,6 +32,8 @@ namespace Windy10v10AI.Launcher
         int maxPlayers;
         int game => room?.Game ?? 1;
         readonly GameEnd gameEnd = new();
+        readonly SettlementUploader settlement;
+        int settlementRound;
         bool ended => room?.Ended ?? gameEnd.Ended;
         bool saved => room?.Saved ?? gameEnd.Saved;
         DateTime readyAt;
@@ -48,8 +50,33 @@ namespace Windy10v10AI.Launcher
         ClientSignon signon = new();
         public bool LocalTestSkipLatestCheck { get; init; }
         readonly ConcurrentQueue<string> next = new();
-        public HostSession(Action<object> emit) { this.emit = emit; }
-        void Event(string state, string message) { State = state; lastMessage = message; emit(new { type = "state", role = Solo ? "solo" : "host", state, message, code = Code ?? "", log = ServerLog ?? "", game, saving = Saving, publicRoom = PublicRoom, maxPlayers, paused = Paused }); }
+        public HostSession(Action<object> emit)
+        {
+            this.emit = emit;
+            settlement = new SettlementUploader(
+                () => BuildKey.LauncherApiKey,
+                SettlementApi.Transport,
+                Path.Combine(Logs, "settlement-sent.txt"),
+                (state, round) =>
+                {
+                    if (round != settlementRound) return;
+                    room?.SetSettlement(room.Game, state);
+                    Event(State, lastMessage);
+                },
+                SettlementDiagnostic);
+        }
+        static void SettlementDiagnostic(string message)
+        {
+            try
+            {
+                Directory.CreateDirectory(Logs);
+                File.AppendAllText(Path.Combine(Logs, "launcher.log"), DateTime.UtcNow.ToString("s") + " " + message + Environment.NewLine);
+            }
+            catch (Exception)
+            {
+            }
+        }
+        void Event(string state, string message) { State = state; lastMessage = message; emit(new { type = "state", role = Solo ? "solo" : "host", state, message, code = Code ?? "", log = ServerLog ?? "", game, saving = Saving, publicRoom = PublicRoom, maxPlayers, paused = Paused, settlement = (int)settlement.State }); }
         void Info(string message) => emit(new { type = "message", message });
         public void Start(string difficulty, int count, bool enter) => Start(difficulty, count, enter, false, false);
         public void Start(string difficulty, int count, bool enter, bool solo, bool publicRoom)
@@ -60,6 +87,8 @@ namespace Windy10v10AI.Launcher
             {
                 if (worker != null && !worker.IsCompleted) throw new Exception(Strings.SessionActive);
                 cancel?.Dispose(); cancel = new CancellationTokenSource(); mode = difficulty; maxPlayers = count; autoEnter = solo || enter; Solo = solo; PublicRoom = publicRoom;
+                settlementRound++;
+                settlement.Reset(settlementRound);
                 worker = Task.Run(() => Run(cancel.Token));
             }
         }
@@ -221,6 +250,8 @@ namespace Windy10v10AI.Launcher
         }
         void StartNextGame(string nextMode, RoomPoll poll)
         {
+            settlementRound++;
+            settlement.Reset(settlementRound);
             StopServer();
             install = MacInstall.Find();
             room.NextGame(nextMode, install.Manifest);
@@ -260,7 +291,16 @@ namespace Windy10v10AI.Launcher
             if (consolePath == null) return;
             if (consoleReader == null) { if (!File.Exists(consolePath)) return; consoleReader = new StreamReader(new FileStream(consolePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
             consolePending += consoleReader.ReadToEnd(); int at;
-            while ((at = consolePending.IndexOf('\n')) >= 0) { var line = consolePending.Substring(0, at); consolePending = consolePending.Substring(at + 1); ServerLine(line); }
+            if (consolePending.Length > 512 * 1024) consolePending = "";
+            var batch = new System.Text.StringBuilder();
+            while ((at = consolePending.IndexOf('\n')) >= 0)
+            {
+                var line = consolePending.Substring(0, at); consolePending = consolePending.Substring(at + 1);
+                ServerLine(line);
+                batch.Append(line).Append('\n');
+            }
+            // The whole read is one settlement batch, so a marker followed by more players in the same read keeps them.
+            if (batch.Length > 0) settlement.Observe(batch.ToString(), settlementRound);
         }
         void ServerLine(string line)
         {

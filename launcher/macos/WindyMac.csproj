@@ -17,4 +17,7 @@
     <Compile Condition="'$(LauncherTests)' == 'true'" Include="../core/tests/*.cs" Link="Tests/Core/%(Filename)%(Extension)" />
     <Compile Include="../core/dotnet/JsonCompatibility.cs" Link="Core/JsonCompatibility.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(LauncherApiKeyFile)' != ''">
+    <EmbeddedResource Include="$(LauncherApiKeyFile)" LogicalName="launcher-api-key.txt" Link="launcher-api-key.txt" />
+  </ItemGroup>
 </Project>

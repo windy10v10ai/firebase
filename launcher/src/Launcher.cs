@@ -166,6 +166,11 @@ namespace Windy10v10AI.Launcher
         bool saving;
         // Shown once the window is back to idle, so a finished game does not end on a blank screen
         string endNotice;
+        NoticeKind endNoticeKind = NoticeKind.Info;
+        bool endNoticeShown;
+        SettlementState settlementState;
+        SettlementUploader settlement;
+        int settlementRound;
 
         readonly System.Windows.Forms.Timer mapPoll = new System.Windows.Forms.Timer { Interval = 5000 };
         Process server;
@@ -285,6 +290,12 @@ namespace Windy10v10AI.Launcher
 
             // Only the screen comes back; a room is never opened without a click
             Settings.Load();
+            settlement = new SettlementUploader(
+                () => BuildKey.LauncherApiKey,
+                SettlementApi.Transport,
+                Path.Combine(Settings.Folder, "settlement-sent.txt"),
+                (state, game) => UI(() => ApplySettlement(state, game)),
+                SettlementDiagnostic);
             autoStartBox.Text = Strings.AutoStartDota;
             autoStartBox.Checked = Settings.AutoStartDota;
             autoStartBox.CheckedChanged += delegate
@@ -1065,6 +1076,10 @@ namespace Windy10v10AI.Launcher
             selfId = Platform.SteamAccountId();
             busy = true;
             stopping = false;
+            endNoticeShown = false;
+            settlementState = SettlementState.None;
+            settlementRound++;
+            settlement.Reset(settlementRound);
             for (var i = 0; i < modes.Length; i++)
             {
                 modes[i].Active = i == index;
@@ -1376,6 +1391,8 @@ namespace Windy10v10AI.Launcher
             var title = string.Format(Strings.Joined, code);
             Presence? shown = null;
             var waitingShown = false;
+            var settlementShown = false;
+            var shownSettlement = SettlementState.None;
             while (!stopping)
             {
                 Thread.Sleep(1000);
@@ -1384,22 +1401,32 @@ namespace Windy10v10AI.Launcher
                 if (lifecycle.State == JoinState.Kicked) throw new LaunchError(Strings.KickedByHost, false);
                 if (lifecycle.State == JoinState.Closed) break;
                 if (lifecycle.State == JoinState.HostLost) throw new LaunchError(Strings.HostLost, false);
-                if (lifecycle.GameChanged) waitingShown = false;
+                if (lifecycle.GameChanged)
+                {
+                    waitingShown = false;
+                    settlementShown = false;
+                }
                 if (lifecycle.State != JoinState.Ready)
                 {
-                    endNotice = Strings.GameEnded;
-                    if (waitingShown) continue;
+                    var tunnel = room.Tunnel;
+                    var settlement = lifecycle.State == JoinState.Ended && tunnel != null ? (SettlementState)tunnel.Settlement : SettlementState.None;
+                    endNotice = Strings.SettlementStatus(settlement, false);
+                    endNoticeKind = SettlementNotice(settlement);
+                    if (waitingShown && settlementShown && settlement == shownSettlement) continue;
                     waitingShown = true;
+                    settlementShown = true;
+                    shownSettlement = settlement;
                     shown = null;
                     UI(() =>
                     {
-                        if (busy) ShowJoinEnded(title);
+                        if (busy) ShowJoinEnded(title, settlement);
                     });
                     continue;
                 }
                 if (lifecycle.NewGameReady)
                 {
                     endNotice = null;
+                    settlementShown = false;
                     if (lifecycle.FirstGame || (DotaClientRunning(-1) && Settings.AutoEnter)) EnterGame(install, client, -1);
                     else
                     {
@@ -1423,9 +1450,10 @@ namespace Windy10v10AI.Launcher
             Finish(null, false);
         }
 
-        void ShowJoinEnded(string title)
+        void ShowJoinEnded(string title, SettlementState settlement)
         {
-            ShowProgress(title, Strings.GameEnded, Strings.LeaveRoom, false);
+            ShowProgress(title, Strings.SettlementStatus(settlement, false), Strings.LeaveRoom, false);
+            hint.ForeColor = SettlementColor(settlement);
             secondary.Visible = false;
             Relayout();
         }
@@ -1585,13 +1613,15 @@ namespace Windy10v10AI.Launcher
         void WatchSolo(DotaInstall install, ClientWatch client)
         {
             var serverId = server.Id;
-            long logOffset = 0;
+            var tail = new SettlementTail();
             var end = new GameEnd();
             Presence? shown = null;
             while (!stopping)
             {
                 Thread.Sleep(1000);
-                end.Track(ReadFrom(logFile, ref logOffset));
+                var text = tail.Read(logFile);
+                settlement.Observe(text, settlementRound);
+                end.Track(text);
                 if (server.HasExited)
                 {
                     if (end.Ended) break;
@@ -1608,6 +1638,8 @@ namespace Windy10v10AI.Launcher
                     if (busy) ShowPresence(presence, null, Strings.StopServer, install, serverId);
                 });
             }
+            endNotice = Strings.SettlementStatus(settlement.State, true);
+            endNoticeKind = SettlementNotice(settlement.State);
             Finish(null, false);
         }
 
@@ -1770,7 +1802,7 @@ namespace Windy10v10AI.Launcher
         void WatchRoom(DotaInstall install, string workshopId, ClientWatch client)
         {
             var serverId = server.Id;
-            long logOffset = 0;
+            var tail = new SettlementTail();
             Presence? shown = null;
             var readyAt = DateTime.UtcNow;
             while (!stopping)
@@ -1783,14 +1815,16 @@ namespace Windy10v10AI.Launcher
                 if (mode >= 0)
                 {
                     nextMode = -1;
+                    settlementRound++;
+                    settlement.Reset(settlementRound);
                     StartNextGame(install, workshopId, mode, client, room);
                     readyAt = DateTime.UtcNow;
                     serverId = server.Id;
-                    logOffset = 0;
+                    tail.Reset();
                     shown = null;
                     continue;
                 }
-                var text = ReadFrom(logFile, ref logOffset);
+                var text = tail.Read(logFile);
                 foreach (Match match in Regex.Matches(text, @"Adding player SteamID (\d+)"))
                 {
                     roster.SetInGame(long.Parse(match.Groups[1].Value));
@@ -1798,6 +1832,7 @@ namespace Windy10v10AI.Launcher
                 var wasEnded = room.Ended;
                 var wasSaved = room.Saved;
                 room.TrackServerLog(text);
+                settlement.Observe(text, settlementRound);
                 if (!wasEnded && room.Ended) UI(() => ShowRoomEnd(false));
                 if (!wasSaved && room.Saved) UI(() => ShowRoomEnd(true));
                 room.UpdateReadiness(true, roster.InGame("host"), Settings.AutoStartDota, DotaClientRunning(serverId), readyAt);
@@ -1912,7 +1947,8 @@ namespace Windy10v10AI.Launcher
         {
             if (!busy || !hostCode.Visible) return;
             saving = !saved;
-            endNotice = Strings.GameEnded;
+            endNotice = Strings.SettlementStatus(settlementState, true);
+            endNoticeKind = SettlementNotice(settlementState);
             clientClosed = false;
             secondary.Visible = false;
             pauseBar.Visible = false;
@@ -1926,8 +1962,7 @@ namespace Windy10v10AI.Launcher
             HideNotice();
             pickingNext = true;
             status.Text = Strings.NextGamePick;
-            hint.Text = Strings.NextGameHint;
-            hint.Visible = true;
+            ShowSettlementHint();
             for (var i = 0; i < modes.Length; i++)
             {
                 modes[i].Active = false;
@@ -1935,6 +1970,60 @@ namespace Windy10v10AI.Launcher
                 modes[i].Invalidate();
             }
             Relayout();
+        }
+
+        void ShowSettlementHint()
+        {
+            hint.Text = settlementState == SettlementState.None ? Strings.NextGameHint : Strings.SettlementStatus(settlementState, true);
+            hint.ForeColor = SettlementColor(settlementState);
+            hint.Visible = true;
+        }
+
+        // A late answer from the previous game must not change the room or the end page of the current one.
+        void ApplySettlement(SettlementState state, int round)
+        {
+            if (round != settlementRound) return;
+            var room = hostRoom;
+            if (room != null) room.SetSettlement(room.Game, state);
+            settlementState = state;
+            if (room != null)
+            {
+                if (!busy || !hostCode.Visible) return;
+                endNotice = Strings.SettlementStatus(state, true);
+                endNoticeKind = SettlementNotice(state);
+                if (saving)
+                {
+                    if (state == SettlementState.Failed) ShowNotice(NoticeKind.Error, Strings.SettlementFailed, null, null);
+                    return;
+                }
+                if (pickingNext) ShowSettlementHint();
+                return;
+            }
+            if (busy || !endNoticeShown) return;
+            ShowNotice(SettlementNotice(state), Strings.SettlementStatus(state, true), null, null);
+            stickyNotice = true;
+        }
+
+        static NoticeKind SettlementNotice(SettlementState state)
+        {
+            return state == SettlementState.SentAll ? NoticeKind.Success : state == SettlementState.Failed ? NoticeKind.Error : NoticeKind.Info;
+        }
+
+        static Color SettlementColor(SettlementState state)
+        {
+            return state == SettlementState.SentAll ? Theme.Ok : state == SettlementState.Failed ? Theme.Error : Theme.Muted;
+        }
+
+        static void SettlementDiagnostic(string message)
+        {
+            try
+            {
+                Directory.CreateDirectory(Settings.Folder);
+                File.AppendAllText(Path.Combine(Settings.Folder, "launcher.log"), DateTime.UtcNow.ToString("s") + " " + message + Environment.NewLine);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         // A public room is found in the list, so it does not ask the host to share the code
@@ -2009,7 +2098,9 @@ namespace Windy10v10AI.Launcher
                 nextMode = -1;
                 action.MakePlain();
                 var ended = endNotice;
+                var endedKind = endNoticeKind;
                 endNotice = null;
+                endNoticeShown = ended != null;
                 players.CanKick = false;
                 paused = false;
                 pauseBar.Visible = false;
@@ -2024,7 +2115,7 @@ namespace Windy10v10AI.Launcher
                 else if (error != null && !cancelled) ShowNotice(NoticeKind.Error, error, showLog && logFile != null && File.Exists(logFile));
                 else if (ended != null)
                 {
-                    ShowNotice(NoticeKind.Success, ended, null, null);
+                    ShowNotice(endedKind, ended, null, null);
                     // Kept until the next launch rather than cleared by the next map check
                     stickyNotice = true;
                 }
@@ -2230,23 +2321,6 @@ namespace Windy10v10AI.Launcher
                 if (error.NativeErrorCode == ErrorAccessDenied) throw new LaunchError(Strings.DotaBlocked, false);
                 if (error.NativeErrorCode == ErrorElevationRequired) throw new LaunchError(Strings.DotaNeedsAdmin, false);
                 throw;
-            }
-        }
-
-        // Reads only what the server appended since the last call; the log grows for the whole game
-        static string ReadFrom(string path, ref long offset)
-        {
-            if (!File.Exists(path)) return "";
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-            {
-                if (stream.Length < offset) offset = 0;
-                stream.Seek(offset, SeekOrigin.Begin);
-                using (var reader = new StreamReader(stream))
-                {
-                    var text = reader.ReadToEnd();
-                    offset = stream.Length;
-                    return text;
-                }
             }
         }
 

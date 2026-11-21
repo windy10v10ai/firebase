@@ -204,6 +204,22 @@ namespace Windy10v10AI.Launcher
         public static string SavingCloseBody { get { return Pick("现在关闭服务器，这局的积分可能不会记录。", "Stopping the server now may lose this game's points.", "Если остановить сервер сейчас, очки за эту игру могут не засчитаться."); } }
         public static string StopAnyway { get { return Pick("仍然关闭", "Stop anyway", "Всё равно остановить"); } }
         public static string GameEnded { get { return Pick("游戏已结束", "Game over", "Игра окончена"); } }
+        public static string SettlementSending { get { return Pick("正在发送结算…", "Sending results…", "Отправляем результаты…"); } }
+        public static string SettlementWaitingHost { get { return Pick("等待房主发送结算…", "Waiting for the host to send results…", "Ждём, пока хост отправит результаты…"); } }
+        public static string SettlementSent { get { return Pick("结算发送成功", "Results sent", "Результаты отправлены"); } }
+        public static string SettlementPartial { get { return Pick("部分结算已发送", "Some results were sent", "Часть результатов отправлена"); } }
+        public static string SettlementFailed { get { return Pick("结算发送失败", "Could not send results", "Не удалось отправить результаты"); } }
+        public static string SettlementStatus(SettlementState state, bool host)
+        {
+            switch (state)
+            {
+                case SettlementState.Sending: return host ? SettlementSending : SettlementWaitingHost;
+                case SettlementState.SentAll: return SettlementSent;
+                case SettlementState.Partial: return SettlementPartial;
+                case SettlementState.Failed: return SettlementFailed;
+                default: return GameEnded;
+            }
+        }
         public static string HostLost { get { return Pick("房主已关闭游戏，或连接已断开。", "The host closed the game or the connection was lost.", "Хост закрыл игру, или соединение потеряно."); } }
 
         public static string PlayersInRoom { get { return Pick("房间里的玩家", "Players in the room", "Игроки в комнате"); } }
