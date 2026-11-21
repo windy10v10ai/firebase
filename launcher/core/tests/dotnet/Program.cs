@@ -15,6 +15,7 @@ namespace Windy10v10AI.Launcher.Tests
                 SessionLifecycleTests.RunAll();
                 HostRoomSessionTests.RunAll();
                 SettlementTests.RunAll();
+                GameRelayTests.RunAll();
                 FeedbackLogTests.RunAll();
                 return 0;
             }

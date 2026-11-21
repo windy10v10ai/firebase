@@ -170,6 +170,7 @@ namespace Windy10v10AI.Launcher
         bool endNoticeShown;
         SettlementState settlementState;
         SettlementUploader settlement;
+        GameRelay relay;
         volatile int settlementRound;
         SettlementTail settlementTail;
         // The log may only be read for the round whose server started it, and only until its log is replaced.
@@ -303,6 +304,7 @@ namespace Windy10v10AI.Launcher
                 Path.Combine(Settings.Folder, "settlement-sent.txt"),
                 (state, round, game) => UI(() => ApplySettlement(state, round, game)),
                 SettlementDiagnostic);
+            relay = new GameRelay(() => BuildKey.LauncherApiKey, new HttpRelayTransport(), SettlementDiagnostic);
             autoStartBox.Text = Strings.AutoStartDota;
             autoStartBox.Checked = Settings.AutoStartDota;
             autoStartBox.CheckedChanged += delegate
@@ -1203,6 +1205,7 @@ namespace Windy10v10AI.Launcher
             if (File.Exists(logFile)) File.Delete(logFile);
             settlementTail = new SettlementTail();
             settlementLogActive = true;
+            relay.Start(Path.Combine(install.Game, @"dota_addons\" + addon, @"scripts\kv\launcher_relay.kv"));
             var process = StartDota(new ProcessStartInfo
             {
                 FileName = install.Exe,
@@ -1633,6 +1636,7 @@ namespace Windy10v10AI.Launcher
                 Thread.Sleep(1000);
                 var text = settlementTail.Read(logFile);
                 settlement.Observe(text, round, 0);
+                relay.Observe(text);
                 end.Track(text);
                 if (server.HasExited)
                 {
@@ -1846,6 +1850,7 @@ namespace Windy10v10AI.Launcher
                 var wasSaved = room.Saved;
                 room.TrackServerLog(text);
                 settlement.Observe(text, settlementRound, room.Game);
+                relay.Observe(text);
                 if (!wasEnded && room.Ended) UI(() => ShowRoomEnd(false));
                 if (!wasSaved && room.Saved) UI(() => ShowRoomEnd(true));
                 room.UpdateReadiness(true, roster.InGame("host"), Settings.AutoStartDota, DotaClientRunning(serverId), readyAt);
@@ -2123,6 +2128,7 @@ namespace Windy10v10AI.Launcher
             stopping = true;
             var room = hostRoom;
             FinishSettlement(settlementRound, room == null ? 0 : room.Game);
+            relay.Stop();
             var s = server;
             if (s != null) KillQuietly(s);
             server = null;

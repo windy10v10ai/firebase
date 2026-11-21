@@ -232,8 +232,8 @@ export class GameService {
    * @returns GA4配置信息，如果不符合条件则返回undefined
    */
   getGA4Config(serverType: SERVER_TYPE): GA4ConfigDto | undefined {
-    // 来源不明的服务器不参与GA4统计
-    if (serverType === SERVER_TYPE.UNKNOWN) {
+    // 来源不明的服务器不参与GA4统计；启动器 key 随 exe 公开，不下发 GA4 密钥
+    if (serverType === SERVER_TYPE.UNKNOWN || serverType === SERVER_TYPE.LAUNCHER) {
       return undefined;
     }
 

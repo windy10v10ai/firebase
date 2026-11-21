@@ -22,6 +22,7 @@ import { EnsureRandomCandidatesDto } from '../player-hero-awakening/dto/ensure-r
 import { PlayerHeroAwakeningService } from '../player-hero-awakening/player-hero-awakening.service';
 import { UpgradePlayerPropertyDto } from '../player-property/dto/upgrade-player-property.dto';
 import { PlayerPropertyService } from '../player-property/player-property.service';
+import { AllowLauncher } from '../util/auth/allow-launcher.decorator';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { AllowViewOthers } from '../util/auth/allow-view-others.decorator';
 import { AllowWeb } from '../util/auth/allow-web.decorator';
@@ -47,6 +48,7 @@ export class PlayerInfoController {
   ) {}
 
   @AllowLocal()
+  @AllowLauncher()
   @AllowWeb()
   @AllowViewOthers()
   @Get(':steamId/info')

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
+import { AllowLauncher } from '../util/auth/allow-launcher.decorator';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { AllowWeb } from '../util/auth/allow-web.decorator';
 
@@ -14,6 +15,7 @@ export class DailyTaskController {
   constructor(private readonly dailyTaskService: DailyTaskService) {}
 
   @AllowLocal()
+  @AllowLauncher()
   @AllowWeb()
   @Get(':steamId')
   async getSnapshot(

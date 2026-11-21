@@ -42,6 +42,7 @@ export class GameController {
   }
 
   @AllowLocal()
+  @AllowLauncher()
   @Get('start')
   async start(
     @Query('steamIds', new ParseArrayPipe({ items: Number, separator: ',' }))

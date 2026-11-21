@@ -33,6 +33,7 @@ namespace Windy10v10AI.Launcher
         int game => room?.Game ?? 1;
         readonly GameEnd gameEnd = new();
         readonly SettlementUploader settlement;
+        readonly GameRelay relay = new GameRelay(() => BuildKey.LauncherApiKey, new HttpRelayTransport(), delegate { });
         volatile int settlementRound;
         const int SettlementFlushMs = 30000;
         bool ended => room?.Ended ?? gameEnd.Ended;
@@ -285,6 +286,7 @@ namespace Windy10v10AI.Launcher
             Directory.CreateDirectory(Logs); ServerLog = Path.Combine(Logs, "server-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-" + game + ".log");
             lock (logLock) { log?.Dispose(); log = new StreamWriter(ServerLog) { AutoFlush = true }; }
             consolePath = Path.Combine(install.Game, "dota", "windymac-" + Guid.NewGuid().ToString("N") + ".log"); consolePending = ""; signon = new ClientSignon();
+            relay.Start(Path.Combine(install.Addon, "scripts", "kv", "launcher_relay.kv"));
             dedicated = new DedicatedBundle(install);
             var pi = new ProcessStartInfo(dedicated.Exe) { WorkingDirectory = install.Game, UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
             pi.Environment["SteamAppId"] = "570"; pi.Environment["DYLD_LIBRARY_PATH"] = Path.Combine(install.Game, "bin/osx64");
@@ -307,7 +309,7 @@ namespace Windy10v10AI.Launcher
                 batch.Append(line).Append('\n');
             }
             // The whole read is one settlement batch, so a marker followed by more players in the same read keeps them.
-            if (batch.Length > 0) settlement.Observe(batch.ToString(), settlementRound, game);
+            if (batch.Length > 0) { settlement.Observe(batch.ToString(), settlementRound, game); relay.Observe(batch.ToString()); }
         }
         void ServerLine(string line)
         {
@@ -328,6 +330,7 @@ namespace Windy10v10AI.Launcher
         void MarkSaved() { if (room == null) Roster.SetAll(PlayerStatus.InRoom); Event("ended", Solo ? Strings.GameEnded : Strings.NextGamePick); }
         void StopServer()
         {
+            relay.Stop();
             var p = server; server = null; if (p == null) { dedicated?.Dispose(); dedicated = null; return; }
             try
             {

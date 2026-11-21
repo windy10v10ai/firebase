@@ -174,6 +174,13 @@ describe('GameService', () => {
       expect(secretService.getSecretValue).not.toHaveBeenCalled();
     });
 
+    it('should not hand the GA4 secret to the public launcher key', () => {
+      const result = service.getGA4Config(SERVER_TYPE.LAUNCHER);
+
+      expect(result).toBeUndefined();
+      expect(secretService.getSecretValue).not.toHaveBeenCalled();
+    });
+
     it('should return undefined when measurementId is not set', () => {
       delete process.env.GA_MEASUREMENT_ID;
 
