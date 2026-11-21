@@ -23,6 +23,10 @@ export function getLocalApiKey(): string {
   return process.env.LOCAL_APIKEY_A ?? 'local-apikey-a';
 }
 
+export function getLauncherApiKey(): string {
+  return process.env.LAUNCHER_APIKEY ?? 'launcher-apikey';
+}
+
 export function get(app: INestApplication, url: string, query: object = {}): request.Test {
   const headers = {
     'x-api-key': getServerApiKey(),

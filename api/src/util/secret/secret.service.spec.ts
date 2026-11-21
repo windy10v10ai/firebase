@@ -9,6 +9,7 @@ describe('SecretService', () => {
       [SECRET.SERVER_APIKEY]: 'windy-key',
       [SECRET.LOCAL_APIKEY_A]: 'local-key-a',
       [SECRET.LOCAL_APIKEY_B]: 'local-key-b',
+      [SECRET.LAUNCHER_APIKEY]: 'launcher-key',
     };
   });
 
@@ -27,6 +28,12 @@ describe('SecretService', () => {
       const service = new SecretService();
 
       expect(service.getServerTypeByApiKey(key)).toBe(SERVER_TYPE.LOCAL);
+    });
+
+    it('should return LAUNCHER for the launcher key', () => {
+      const service = new SecretService();
+
+      expect(service.getServerTypeByApiKey('launcher-key')).toBe(SERVER_TYPE.LAUNCHER);
     });
 
     it('should return UNKNOWN for the legacy dedicated server sentinel value', () => {
