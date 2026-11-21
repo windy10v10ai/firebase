@@ -7,6 +7,7 @@ import { LocalRateLimit } from '../src/local-host/entities/local-rate-limit.enti
 
 import {
   get,
+  getLauncherApiKey,
   getLocalApiKey,
   getServerApiKey,
   initTest,
@@ -508,5 +509,71 @@ describe('POST /api/game/end/local (e2e)', () => {
         usedMemberPoint: 0,
       }),
     ]);
+  });
+});
+
+describe('POST /api/game/end/local 启动器来源 (e2e)', () => {
+  let app: INestApplication;
+  const launcherApiKey = getLauncherApiKey();
+
+  beforeAll(async () => {
+    app = await initTest();
+  });
+
+  afterEach(() => {
+    restoreDate();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('启动器 key 可以结算，积分照常记上，同一玩家冷却内重发不重复加分', async () => {
+    const steamId = 105620061;
+    mockDate('2026-08-17T01:00:00.000Z');
+    await createPlayer(app, { steamId, matchCount: 20 });
+    const payload = createGameEndLocalPayload({
+      matchId: '9100000061',
+      players: [{ steamId, battlePoints: 150 }],
+    });
+
+    await request(app.getHttpServer())
+      .post(gameEndLocalUrl)
+      .set('x-api-key', launcherApiKey)
+      .send(payload)
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(gameEndLocalUrl)
+      .set('x-api-key', launcherApiKey)
+      .send({ ...payload, matchId: '9100000062' })
+      .expect(201);
+
+    const player = await getPlayer(app, steamId);
+    expect(player.seasonPointTotal).toBe(150);
+    expect(player.matchCount).toBe(21);
+  });
+
+  it('启动器 key 不能调官方结算与其他接口', async () => {
+    const steamId = 105620062;
+    await createPlayer(app, { steamId });
+    const payload = createGameEndLocalPayload({
+      matchId: '9100000063',
+      players: [{ steamId }],
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/game/end')
+      .set('x-api-key', launcherApiKey)
+      .send(payload)
+      .expect(401);
+    await request(app.getHttpServer())
+      .get(`/api/player/${steamId}/info`)
+      .set('x-api-key', launcherApiKey)
+      .expect(401);
+    await request(app.getHttpServer())
+      .get('/api/game/start')
+      .query({ steamIds: `${steamId}`, matchId: 1, version: 'v4.05' })
+      .set('x-api-key', launcherApiKey)
+      .expect(401);
   });
 });

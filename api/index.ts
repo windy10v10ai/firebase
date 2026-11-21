@@ -42,6 +42,7 @@ const commonSecrets = isLocal
       defineSecret(SECRET.SERVER_APIKEY),
       defineSecret(SECRET.LOCAL_APIKEY_A),
       defineSecret(SECRET.LOCAL_APIKEY_B),
+      defineSecret(SECRET.LAUNCHER_APIKEY),
       defineSecret(SECRET.AFDIAN_WEBHOOK_TOKEN),
       defineSecret(SECRET.AFDIAN_API_TOKEN),
       defineSecret(SECRET.GA4_API_SECRET),
