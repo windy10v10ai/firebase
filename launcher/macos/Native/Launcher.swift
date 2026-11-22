@@ -662,7 +662,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         case 2: return text("SettlementSent")
         case 3: return text("SettlementPartial")
         case 4: return text("SettlementFailed")
-        default: return text("GameEnded")
+        default: return ""
         }
     }
     func settlementColor() -> NSColor {
