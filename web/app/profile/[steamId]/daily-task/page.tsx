@@ -12,7 +12,6 @@ import { refreshDailyTask, type DailyTaskSnapshot } from '@/app/lib/daily-task';
 import { dailyTaskQuery } from '@/app/lib/queries';
 
 import HistoryCard from './HistoryCard';
-import SummaryCard from './SummaryCard';
 import TodayCard from './TodayCard';
 
 type LoadResult =
@@ -97,10 +96,9 @@ export default function DailyTaskPage() {
             refreshFailed={refreshFailed}
             onRefresh={handleRefresh}
           />
-          <SummaryCard snapshot={snapshot} />
         </div>
         <div className="lg:col-span-2">
-          <HistoryCard entries={snapshot?.history ?? null} />
+          <HistoryCard snapshot={snapshot} />
         </div>
       </div>
     </div>
