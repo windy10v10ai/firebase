@@ -9,6 +9,7 @@ import { requestTimingMiddleware } from './request-timing';
 // 站点和能承载登录页的站点是同一批。游戏客户端的请求不带 Origin，cors 中间件原样放过
 export const SITE_ORIGIN_WHITELIST = [
   'https://windy10v10ai.com',
+  'https://cn.windy10v10ai.com',
   'https://prod--windy10v10ai.asia-east1.hosted.app',
   'https://dev--windy10v10ai.asia-east1.hosted.app',
   'http://localhost:3000',
