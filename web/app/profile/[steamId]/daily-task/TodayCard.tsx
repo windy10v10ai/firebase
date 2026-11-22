@@ -1,4 +1,4 @@
-import { Check, RefreshCw } from 'lucide-react';
+import { ArrowRight, Check, Lock, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import Button from '@/app/components/ui/button';
@@ -6,39 +6,41 @@ import Skeleton from '@/app/components/ui/skeleton';
 import { ROUNDS_PER_DAY } from '@/config/daily-task';
 
 import CandidateCard from './CandidateCard';
-import Stars from './Stars';
 import TaskIcon from './TaskIcon';
 
 import type { DailyTaskSnapshot, TaskCandidate } from '@/app/lib/daily-task';
 
 type RoundStatus = 'done' | 'current' | 'todo';
 
+// 不画圆圈：空心圆配实心点像单选框，会让人以为要在这里选
+const MARK = {
+  done: { Icon: Check, className: 'text-success', strokeWidth: 2.6 },
+  current: { Icon: ArrowRight, className: 'text-heading', strokeWidth: 2.6 },
+  todo: { Icon: Lock, className: 'text-faint', strokeWidth: 2 },
+} as const;
+
 function RoundMark({ status }: { status: RoundStatus }) {
-  if (status === 'done') {
-    return (
-      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-feature-daily">
-        <Check className="size-3.5 text-surface" strokeWidth={3} aria-hidden="true" />
-      </span>
-    );
-  }
+  const { Icon, className, strokeWidth } = MARK[status];
   return (
-    <span
-      className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${
-        status === 'current' ? 'border-feature-daily' : 'border-line-strong'
-      }`}
-    >
-      {status === 'current' ? (
-        <span className="size-2 rounded-full bg-feature-daily" aria-hidden="true" />
-      ) : null}
-    </span>
+    <Icon
+      className={`size-3.5 shrink-0 lg:size-[18px] ${className}`}
+      strokeWidth={strokeWidth}
+      aria-hidden="true"
+    />
   );
 }
 
 /** 手机与平板是三格并排，电脑宽度改成竖排的一行一轮，所以同一个 `li` 带两套样式 */
 const ITEM_CLASS = {
   done: 'border-line bg-control',
-  current: 'border-feature-daily bg-feature-daily-soft',
+  current: 'border-line-strong bg-panel-raised',
   todo: 'border-line',
+} as const;
+
+const LABEL_CLASS = {
+  done: 'text-muted',
+  current: 'font-bold text-heading',
+  todo: 'text-faint',
 } as const;
 
 function RoundItem({
@@ -60,7 +62,7 @@ function RoundItem({
     >
       <div className="flex items-center gap-2 lg:gap-3">
         <RoundMark status={status} />
-        <span className="text-sm whitespace-nowrap text-muted lg:min-w-11">
+        <span className={`text-sm whitespace-nowrap lg:min-w-11 ${LABEL_CLASS[status]}`}>
           {t('roundLabel', { round })}
         </span>
       </div>
@@ -73,17 +75,17 @@ function RoundItem({
             <span className="min-w-0 text-xs leading-tight break-words hyphens-auto text-content lg:truncate lg:text-sm">
               {t(`metric.${task.metric}`)}
             </span>
-            <span className="hidden lg:block">
-              <Stars star={task.star} />
-            </span>
             <span className="ml-auto hidden font-bold whitespace-nowrap text-season lg:block">
               {t('reward', { n: task.rewardSeasonPoint })}
             </span>
           </>
         ) : status === 'current' ? (
-          <span className="text-feature-daily">{t('inProgress')}</span>
+          <span className="text-heading">{t('inProgress')}</span>
         ) : (
-          <span className="text-faint">{t('notStarted')}</span>
+          <span className="min-w-0 truncate text-faint">
+            <span className="lg:hidden">{t('notStarted')}</span>
+            <span className="hidden lg:inline">{t('unlockAfter', { round: round - 1 })}</span>
+          </span>
         )}
       </div>
     </li>
@@ -158,9 +160,10 @@ export default function TodayCard({
               {round === null ? <Skeleton>第 0 轮任务</Skeleton> : t('round', { round })}
             </h3>
             {/* 每轮只能刷一次，所以不显示剩余次数，用按钮自己的状态表达 */}
+            {/* 次要操作，不和本轮标题抢视线；窄屏只去掉边框，触控点击区不缩 */}
             <Button
-              variant="secondary"
-              className="px-4"
+              variant="ghost"
+              className="-mr-2 gap-1.5 px-2 text-[13px] font-semibold lg:mr-0 lg:min-h-8 lg:border-line lg:px-3"
               loading={refreshing}
               disabled={!canRefresh}
               onClick={onRefresh}

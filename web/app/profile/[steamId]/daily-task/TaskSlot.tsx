@@ -35,7 +35,7 @@ export default function TaskSlot({
       );
     }
     return fallback === 'pending' ? (
-      <div className={`${SLOT_CLASS} text-sm text-feature-daily`}>{t('inProgress')}</div>
+      <div className={`${SLOT_CLASS} text-sm text-muted`}>{t('inProgress')}</div>
     ) : (
       <div className={`${SLOT_CLASS} text-faint`} aria-hidden="true">
         —

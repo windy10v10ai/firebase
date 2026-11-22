@@ -837,6 +837,7 @@
     "roundLabel": "Round {round}",
     "inProgress": "In progress",
     "notStarted": "Not started",
+    "unlockAfter": "Unlocks after Round {round}",
     "refresh": "Refresh Tasks",
     "refreshing": "Refreshing",
     "refreshed": "Refreshed",

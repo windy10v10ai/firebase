@@ -837,6 +837,7 @@
     "roundLabel": "Раунд {round}",
     "inProgress": "В процессе",
     "notStarted": "Не начат",
+    "unlockAfter": "После раунда {round}",
     "refresh": "Обновить задания",
     "refreshing": "Обновление",
     "refreshed": "Обновлено",

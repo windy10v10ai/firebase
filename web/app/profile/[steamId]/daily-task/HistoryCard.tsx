@@ -103,8 +103,8 @@ export default function HistoryCard({ snapshot }: { snapshot: DailyTaskSnapshot 
               </li>
             ))
           : [
-              <li key={snapshot.dayId} className={`${ROW_CLASS} bg-feature-daily/5`}>
-                <span className="text-sm font-bold text-feature-daily">{t('today')}</span>
+              <li key={snapshot.dayId} className={`${ROW_CLASS} bg-panel-soft`}>
+                <span className="text-sm font-bold text-heading">{t('today')}</span>
                 <span
                   className={`text-right text-sm font-bold md:order-3 ${
                     snapshot.todaySeasonPoint > 0 ? 'text-season' : 'text-muted'
