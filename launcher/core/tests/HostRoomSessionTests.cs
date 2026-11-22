@@ -13,6 +13,7 @@ namespace Windy10v10AI.Launcher.Tests
             FailedPollRetainsJoinResults();
             StaleRepliesCannotChangeTheNextGame();
             CloseFollowsTheLastHeartbeat();
+            SettlementStateFollowsTheCurrentGame();
             ProbesAndExcludedPlayersStayOutOfTheRoster();
             Console.WriteLine("PASS shared host room lifecycle, polling and retry");
         }
@@ -130,6 +131,24 @@ namespace Windy10v10AI.Launcher.Tests
                 Check(!room.Poll(), "late ticks cannot reopen a closed room");
             }
             entered.Dispose(); release.Dispose(); hidden.Dispose();
+        }
+        static void SettlementStateFollowsTheCurrentGame()
+        {
+            using (var room = new HostRoomSession(new HostTunnel(), new HostRoster(), body => Opened(), () => DateTime.UtcNow))
+            {
+                room.Open(new Dictionary<string, object>(), 123, true);
+                room.TrackServerLog("/api/game/end\n[Game] end game callback");
+                room.SetSettlement(1, SettlementState.Sending);
+                Check(room.Settlement == SettlementState.Sending && room.Tunnel.Settlement == (int)SettlementState.Sending, "the host shares its current settlement state");
+                room.SetSettlement(2, SettlementState.SentAll);
+                Check(room.Settlement == SettlementState.Sending, "a packet for another game cannot change this one");
+                room.NextGame("easy", "second");
+                Check(room.Settlement == SettlementState.None && room.Tunnel.Settlement == 0, "the next game clears the settlement state");
+                room.SetSettlement(1, SettlementState.Failed);
+                Check(room.Settlement == SettlementState.None, "a late state for the finished game is rejected");
+                room.SetSettlement(2, SettlementState.SentAll);
+                Check(room.Settlement == SettlementState.SentAll, "the current game accepts its own state");
+            }
         }
         static void ProbesAndExcludedPlayersStayOutOfTheRoster()
         {

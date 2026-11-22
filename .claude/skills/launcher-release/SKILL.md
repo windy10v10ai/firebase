@@ -9,7 +9,7 @@ description: 发布启动器新版本，或更新官网 /launch 的启动器更�
 
 ## 第 3 步：签名
 
-用户要先在电脑上开着 SimplySign Desktop 并登录（手机 App 取一次性码），没登录时 `signtool` 找不到证书，请用户登录后再签。对工作流产出的 exe 的副本签名，不改下载目录里的原文件：
+用户要先在电脑上开着 SimplySign Desktop 并登录（手机 App 取一次性码）。没登录时证书仍会出现在 `Cert:\CurrentUser\My` 里，但私钥不可用，`signtool` 报「No certificates were found that met all the given criteria」，不能靠查证书列表判断是否已登录，直接试签，失败就请用户登录后再签。对工作流产出的 exe 的副本签名，不改下载目录里的原文件：
 
 ```powershell
 & "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign /sha1 83FF36706EB8AC0CF56743BE06031A028085A8B4 /fd sha256 /tr http://time.certum.pl /td sha256 <exe>
@@ -32,6 +32,10 @@ VirusTotal 用 Claude in Chrome 上传，不用 API（要填密钥）。应用�
 Microsoft 一栏报 `!ml` 时，按 `references/false-positive.md` 申报误报。只在被拦、本机报毒或出现 `!ml` 时申报。首个签名版和换证书后的第一个版本也申报一次：新证书还没有信誉，签名不保证 Defender 不再报。理由见 README 第 4 步。
 
 完成条件：Defender 输出 `found no threats`，VirusTotal 的检出数与 Microsoft 一栏已写进发版 PR 的测试清单，需要申报的已提交申报。
+
+## 第 5 步前：Mac 包上传
+
+Mac 的 ZIP 与 DMG 不进 git，在发版 PR 之前先传存储桶，命令见 README 第 5 步。上传后用 `gcloud storage ls -l gs://windy10v10ai-launcher/mac/` 确认两个文件都在，DMG 的下载文件名已设。官网与 API 里 Mac 的版本号、ZIP 的 sha256 取自工作流运行摘要，`sha256sum` 本机算一遍核对。
 
 ## 第 5 步：更新日志
 
