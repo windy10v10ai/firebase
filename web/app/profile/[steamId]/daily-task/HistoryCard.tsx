@@ -57,7 +57,6 @@ export default function HistoryCard({ snapshot }: { snapshot: DailyTaskSnapshot 
       : null;
 
   const days = counted?.length ?? null;
-  const tasks = counted?.reduce((sum, entry) => sum + entry.tasks.length, 0) ?? null;
   const points = counted?.reduce((sum, entry) => sum + entry.seasonPoint, 0) ?? null;
 
   const todayDone = snapshot ? Math.min(snapshot.completedTasks.length, ROUNDS_PER_DAY) : 0;
@@ -70,12 +69,9 @@ export default function HistoryCard({ snapshot }: { snapshot: DailyTaskSnapshot 
           <p className="text-xs font-bold text-heading md:pb-0.5">
             {t('summary.title', { days: HISTORY_DAY_LIMIT })}
           </p>
-          <dl className="grid grid-cols-3 gap-2 md:flex md:gap-8">
+          <dl className="grid grid-cols-2 gap-2 md:flex md:gap-8">
             <Stat label={t('summary.days')}>
               {days === null ? <Skeleton>00</Skeleton> : t('summary.dayCount', { n: days })}
-            </Stat>
-            <Stat label={t('summary.tasks')}>
-              {tasks === null ? <Skeleton>00</Skeleton> : t('summary.taskCount', { n: tasks })}
             </Stat>
             <Stat label={t('summary.points')}>
               <span className="text-season">

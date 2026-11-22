@@ -855,10 +855,8 @@
     "summary": {
       "title": "Last {days} days",
       "days": "Days active",
-      "tasks": "Tasks completed",
       "points": "Battle Points earned",
-      "dayCount": "{n} days",
-      "taskCount": "{n} tasks"
+      "dayCount": "{n} days"
     },
     "metric": {
       "kills": "Kills",
