@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Download, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState, useSyncExternalStore } from 'react';
@@ -134,12 +134,11 @@ export default function LauncherDownload() {
         </div>
       </div>
 
-      <p className="border-t border-line pt-5 text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
-        {isMac ? t('suspiciousMac') : t('suspicious')}
-      </p>
-
       {isMac ? (
         <>
+          <p className="border-t border-line pt-5 text-[15px] leading-[22px] text-content text-pretty md:text-base md:leading-6">
+            {t('suspiciousMac')}
+          </p>
           <div className="space-y-3">
             <p className={headingClass}>{t.rich('macInstallPrompt', { mark })}</p>
             <div className="grid gap-3 md:grid-cols-2 md:gap-5">
@@ -153,13 +152,22 @@ export default function LauncherDownload() {
           </div>
         </>
       ) : (
-        // 宽屏按列排，两条标题同在第一行，示意图顶边才对齐
-        <div className="grid gap-x-5 gap-y-3 md:grid-flow-col md:grid-cols-2 md:grid-rows-[auto_auto]">
-          <p className={headingClass}>{t.rich('browserPrompt', { mark })}</p>
-          <SmartScreenFigure kind="browser" />
-          <p className={`mt-3 md:mt-0 ${headingClass}`}>{t.rich('windowsPrompt', { mark })}</p>
-          <SmartScreenFigure kind="windows" />
-        </div>
+        <details className="group border-t border-line pt-4">
+          <summary className="flex cursor-pointer list-none items-center gap-2 text-[15px] text-content md:text-base [&::-webkit-details-marker]:hidden">
+            <ChevronRight
+              className="size-4 shrink-0 text-muted transition-transform group-open:rotate-90"
+              aria-hidden="true"
+            />
+            {t('blockedSummary')}
+          </summary>
+          {/* 宽屏按列排，两条标题同在第一行，示意图顶边才对齐 */}
+          <div className="mt-4 grid gap-x-5 gap-y-3 md:grid-flow-col md:grid-cols-2 md:grid-rows-[auto_auto]">
+            <p className={headingClass}>{t.rich('browserPrompt', { mark })}</p>
+            <SmartScreenFigure kind="browser" />
+            <p className={`mt-3 md:mt-0 ${headingClass}`}>{t.rich('windowsPrompt', { mark })}</p>
+            <SmartScreenFigure kind="windows" />
+          </div>
+        </details>
       )}
 
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line pt-4 text-[13px] text-muted">
