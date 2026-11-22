@@ -339,6 +339,8 @@ feature 分支的中间提交对 `develop` 的历史没有价值，压成一条�
 
 「Create Release PR」工作流在每次推送 `develop` 时自动创建 Release PR。**Release PR 由用户审批上线，Claude 不审批、不合并。**
 
+**上线只有这一条路**：Release PR 合入 `main` 后由 `deploy_firebase.yml` 自动部署。不在本机或 feature 分支上跑 `firebase deploy`，用户授权了部署也一样：从别的分支部署会让线上缺掉 `develop` 已合入的改动，游戏依赖的接口可能消失，线上版本也对不上任何一次 Release。
+
 仓库设置里 rebase 已关闭，不是可选项。
 
 **CI 还没跑完时加 `--auto`**，让 GitHub 在检查通过后自己合，别用 `--admin` 绕过分支保护。分支保护要求检查通过，此时直接 `gh pr merge` 会被拒绝并提示 `the base branch policy prohibits the merge`——那是还有检查在跑，不是权限不够。

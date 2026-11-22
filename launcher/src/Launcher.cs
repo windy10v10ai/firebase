@@ -2147,7 +2147,8 @@ namespace Windy10v10AI.Launcher
                 pickingNext = false;
                 nextMode = -1;
                 action.MakePlain();
-                var ended = endNotice;
+                // The game itself shows the result of an online settlement, so a plain "game over" adds nothing
+                var ended = endNotice == Strings.GameEnded ? null : endNotice;
                 var endedKind = endNoticeKind;
                 endNotice = null;
                 endNoticeShown = ended != null;

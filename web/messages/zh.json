@@ -827,32 +827,30 @@
     "today": "今天",
     "todayPoint": "今日勇士积分",
     "roundProgress": "已完成 {done} / {total} 轮",
-    "roundTotal": "/ {total}",
     "round": "第 {round} 轮任务",
+    "roundLabel": "第 {round} 轮",
+    "inProgress": "进行中",
+    "notStarted": "未开始",
+    "unlockAfter": "完成第 {round} 轮后出现",
     "refresh": "刷新任务",
     "refreshing": "刷新中",
     "refreshed": "已刷新",
     "refreshFailed": "刷新失败，稍后再试。",
     "noCandidate": "暂时没有可做的任务，下一局再来看看。",
     "allDone": "今日 {total} 轮任务已全部完成",
-    "completed": "今天已完成",
     "history": "历史",
-    "historyEmpty": "还没有记录。完成任务后，这里会按天列出来。",
     "reward": "+{n}",
-    "rewardFull": "+{n} 勇士积分",
     "star": "{n} 星",
     "columns": {
       "date": "日期",
       "tasks": "完成任务",
-      "points": "总积分"
+      "points": "勇士积分"
     },
     "summary": {
       "title": "最近 {days} 天",
-      "days": "完成过任务的天数",
-      "tasks": "完成任务",
+      "days": "完成过任务",
       "points": "获得勇士积分",
-      "dayCount": "{n} 天",
-      "taskCount": "{n} 条"
+      "dayCount": "{n} 天"
     },
     "metric": {
       "kills": "击杀",
