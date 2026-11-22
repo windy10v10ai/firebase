@@ -844,6 +844,7 @@
     "refreshFailed": "Refresh failed. Try again in a moment.",
     "noCandidate": "No tasks available right now. Check back next match.",
     "allDone": "All {total} rounds completed today",
+    "history": "History",
     "reward": "+{n}",
     "star": "{n} stars",
     "columns": {
