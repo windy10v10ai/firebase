@@ -838,6 +838,7 @@
     "refreshFailed": "刷新失败，稍后再试。",
     "noCandidate": "暂时没有可做的任务，下一局再来看看。",
     "allDone": "今日 {total} 轮任务已全部完成",
+    "history": "历史",
     "reward": "+{n}",
     "star": "{n} 星",
     "columns": {

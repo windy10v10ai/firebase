@@ -34,22 +34,26 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
 }
 
 /**
- * 最近 30 天：顶部是总量，下面一行一天，今天固定排第一行。
+ * 历史：顶部是最近 30 天的总量，下面一行一天，今天固定排第一行。
  * 日期不连续：没完成任务的日子根本不进历史，不补空日，日历格子会把「没打游戏」和「打了但没完成」画成同一个空格。
- * 后端按条数保留历史，所以汇总前要先按日历窗口筛一遍；今天的进度也算在窗口里。
+ * 后端按条数保留历史，列表照单全列；只有汇总按日历窗口筛，今天的进度也算在窗口里。
  */
 export default function HistoryCard({ snapshot }: { snapshot: DailyTaskSnapshot | null }) {
   const t = useTranslations('dailyTask');
 
-  const past: DailyTaskHistoryEntry[] | null = snapshot
-    ? (snapshot.history ?? []).filter((entry) => entry.dayId >= windowStartDayId(snapshot.dayId))
-    : null;
+  const past: DailyTaskHistoryEntry[] | null = snapshot ? (snapshot.history ?? []) : null;
   const counted =
     snapshot && past
       ? [
-          { tasks: snapshot.completedTasks, seasonPoint: snapshot.todaySeasonPoint },
+          {
+            dayId: snapshot.dayId,
+            tasks: snapshot.completedTasks,
+            seasonPoint: snapshot.todaySeasonPoint,
+          },
           ...past,
-        ].filter((entry) => entry.tasks.length > 0)
+        ].filter(
+          (entry) => entry.tasks.length > 0 && entry.dayId >= windowStartDayId(snapshot.dayId),
+        )
       : null;
 
   const days = counted?.length ?? null;
@@ -61,22 +65,25 @@ export default function HistoryCard({ snapshot }: { snapshot: DailyTaskSnapshot 
   return (
     <section className="card-container pt-4 pb-2">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 px-3 md:px-4">
-        <h2 className="text-lg font-bold text-heading">
-          {t('summary.title', { days: HISTORY_DAY_LIMIT })}
-        </h2>
-        <dl className="grid w-full grid-cols-3 gap-2 md:flex md:w-auto md:gap-8">
-          <Stat label={t('summary.days')}>
-            {days === null ? <Skeleton>00</Skeleton> : t('summary.dayCount', { n: days })}
-          </Stat>
-          <Stat label={t('summary.tasks')}>
-            {tasks === null ? <Skeleton>00</Skeleton> : t('summary.taskCount', { n: tasks })}
-          </Stat>
-          <Stat label={t('summary.points')}>
-            <span className="text-season">
-              {points === null ? <Skeleton>0,000</Skeleton> : points.toLocaleString()}
-            </span>
-          </Stat>
-        </dl>
+        <h2 className="text-lg font-bold text-heading">{t('history')}</h2>
+        <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-end md:gap-8">
+          <p className="text-xs font-bold text-heading md:pb-0.5">
+            {t('summary.title', { days: HISTORY_DAY_LIMIT })}
+          </p>
+          <dl className="grid grid-cols-3 gap-2 md:flex md:gap-8">
+            <Stat label={t('summary.days')}>
+              {days === null ? <Skeleton>00</Skeleton> : t('summary.dayCount', { n: days })}
+            </Stat>
+            <Stat label={t('summary.tasks')}>
+              {tasks === null ? <Skeleton>00</Skeleton> : t('summary.taskCount', { n: tasks })}
+            </Stat>
+            <Stat label={t('summary.points')}>
+              <span className="text-season">
+                {points === null ? <Skeleton>0,000</Skeleton> : points.toLocaleString()}
+              </span>
+            </Stat>
+          </dl>
+        </div>
       </div>
 
       <div
