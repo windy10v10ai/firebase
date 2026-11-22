@@ -116,3 +116,12 @@ describe('ProxyController.playerStatsRadar', () => {
     expect(payload).toEqual(result);
   });
 });
+
+describe('ProxyController.bridge', () => {
+  it('返回含就绪标题的中转页，且只放行同源 /api/proxy/ 路径', () => {
+    const html = createController({}).bridge();
+
+    expect(html).toContain('bridge|ready');
+    expect(html).toContain("path.indexOf('/api/proxy/') !== 0");
+  });
+});

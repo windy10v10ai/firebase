@@ -128,7 +128,7 @@
       "lead": "Play solo or online, team up in public rooms, and enjoy a smoother game.",
       "download": "Download launcher",
       "desktopOnly": "The launcher runs on a computer. Open this page on your computer to download it.",
-      "suspicious": "Your browser and Windows may flag the launcher as suspicious by mistake. Allow it in two steps:",
+      "blockedSummary": "Warning when downloading or opening? See how to allow it",
       "suspiciousMac": "macOS may block the launcher the first time you open it. Install and allow it with the steps below:",
       "appleSilicon": "For Apple silicon (M1 and later)",
       "openSource": "Its code is <github>open source on GitHub</github>",

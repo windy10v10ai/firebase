@@ -730,7 +730,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             hint.stringValue = ""
         }
         hint.isHidden = hint.stringValue.isEmpty || (active && !away && sessionRole == "host" && state != "ended")
-        statusLine.isHidden = browsing || !hostGuide.isHidden || blockedByMap || releaseAvailable
+        statusLine.isHidden = browsing || !hostGuide.isHidden || blockedByMap || (releaseAvailable && state != "error")
         route.isHidden = route.stringValue.isEmpty || away
         routeDot.isHidden = route.isHidden
         let showUpdate = releaseAvailable && !active && !blockedByMap

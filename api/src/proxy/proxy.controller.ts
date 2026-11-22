@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Header,
   NotFoundException,
   ParseArrayPipe,
   ParseIntPipe,
@@ -37,10 +38,12 @@ import { PlayerInfoService } from '../player-info/player-info.service';
 import { AllowLocal } from '../util/auth/allow-local.decorator';
 import { AllowQueryKey } from '../util/auth/allow-query-key.decorator';
 import { ClientOrigin, CurrentClientOrigin } from '../util/auth/client-origin.decorator';
+import { Public } from '../util/auth/public.decorator';
 import { CurrentServerType } from '../util/auth/server-type.decorator';
 import { timeStep } from '../util/request-timing';
 import { SERVER_TYPE } from '../util/secret/secret.service';
 
+import { PROXY_BRIDGE_PAGE_HTML } from './proxy-bridge-page';
 import { ProxyExceptionFilter } from './proxy-exception.filter';
 import { decodeProxyBody } from './proxy-request.util';
 import { buildProxySuccessHtml, validateRequestId } from './proxy-response.util';
@@ -71,6 +74,16 @@ export class ProxyController {
     private readonly feedbackService: FeedbackService,
     private readonly playerStatsRadarService: PlayerStatsRadarService,
   ) {}
+
+  // 游戏客户端网页控件的中转页，只是固定页面、不含数据，所以不要 key；
+  // no-cache 让改了页面的部署立刻生效，不被 Hosting 或游戏内置浏览器缓存
+  @Public()
+  @Get('bridge')
+  @Header('Cache-Control', 'no-cache')
+  @Header('Content-Type', 'text/html; charset=utf-8')
+  bridge(): string {
+    return PROXY_BRIDGE_PAGE_HTML;
+  }
 
   // 对应 GET /game/probe
   @Get('game-probe')
