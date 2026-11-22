@@ -9,6 +9,7 @@ API 是一个 NestJS 应用，部署在第二代 Cloud Functions，运行时由�
 | 来源 | 入口域名 | 经过 |
 |---|---|---|
 | 网站浏览器 | `windy10v10ai.com` | Cloudflare → App Hosting（`web/next.config.ts` 的 `/api` 转发）→ 函数 |
+| 大陆玩家的浏览器 | `cn.windy10v10ai.com` | 备用入口 → 现有网站，之后同上 |
 | 游戏服务器 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
 | 支付宝 / 爱发电 / Ko-fi / Stripe 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
 | 启动器（直连失败时） | 备用入口，地址写在启动器里 | 备用入口 → 函数 |
