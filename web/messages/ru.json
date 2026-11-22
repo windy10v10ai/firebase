@@ -855,10 +855,8 @@
     "summary": {
       "title": "{days, plural, one {Последний # день} few {Последние # дня} many {Последние # дней} other {Последние # дня}}",
       "days": "Дней с заданиями",
-      "tasks": "Выполнено заданий",
       "points": "Получено Battle Points",
-      "dayCount": "{n, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
-      "taskCount": "{n, plural, one {# задание} few {# задания} many {# заданий} other {# задания}}"
+      "dayCount": "{n, plural, one {# день} few {# дня} many {# дней} other {# дня}}"
     },
     "metric": {
       "kills": "Киллы",

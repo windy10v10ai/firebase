@@ -849,10 +849,8 @@
     "summary": {
       "title": "最近 {days} 天",
       "days": "完成过任务",
-      "tasks": "完成任务",
       "points": "获得勇士积分",
-      "dayCount": "{n} 天",
-      "taskCount": "{n} 条"
+      "dayCount": "{n} 天"
     },
     "metric": {
       "kills": "击杀",
