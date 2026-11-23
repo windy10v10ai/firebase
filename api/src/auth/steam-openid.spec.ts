@@ -1,3 +1,5 @@
+import { SITE_ORIGIN_WHITELIST } from '../util/settings';
+
 import {
   buildCheckAuthenticationBody,
   isAllowedReturnTo,
@@ -18,6 +20,15 @@ describe('isAllowedReturnTo', () => {
     expect(isAllowedReturnTo('https://windy10v10ai.com.evil.net/login/callback', ALLOWED)).toBe(
       false,
     );
+  });
+
+  it('备用域名的回调地址在正式白名单内', () => {
+    expect(
+      isAllowedReturnTo(
+        'https://cn.windy10v10ai.com/login/callback?next=%2F',
+        SITE_ORIGIN_WHITELIST,
+      ),
+    ).toBe(true);
   });
 
   it('协议不同不通过', () => {

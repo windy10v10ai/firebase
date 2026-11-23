@@ -118,10 +118,31 @@ describe('ProxyController.playerStatsRadar', () => {
 });
 
 describe('ProxyController.bridge', () => {
-  it('返回含就绪标题的中转页，且只放行同源 /api/proxy/ 路径', () => {
-    const html = createController({}).bridge();
+  const readyTitle = (html: string) => /document\.title = '(bridge\|ready[^']*)'/.exec(html)?.[1];
 
-    expect(html).toContain('bridge|ready');
+  it('不带参数时就绪标题不变，且只放行同源 /api/proxy/ 路径', () => {
+    const html = createController({}).bridge(undefined, { country: 'CN' });
+
+    expect(readyTitle(html)).toBe('bridge|ready');
     expect(html).toContain("path.indexOf('/api/proxy/') !== 0");
+  });
+
+  it('带 country 参数时标题带国家码', () => {
+    const html = createController({}).bridge('1', { country: 'CN' });
+
+    expect(readyTitle(html)).toBe('bridge|ready|CN');
+  });
+
+  it('带 country 参数但拿不到国家码时标题以空串结尾', () => {
+    const html = createController({}).bridge('1', {});
+
+    expect(readyTitle(html)).toBe('bridge|ready|');
+  });
+
+  it('国家码不是两位大写字母时当空处理', () => {
+    const html = createController({}).bridge('1', { country: "C';alert(1);//" });
+
+    expect(readyTitle(html)).toBe('bridge|ready|');
+    expect(html).not.toContain('alert');
   });
 });

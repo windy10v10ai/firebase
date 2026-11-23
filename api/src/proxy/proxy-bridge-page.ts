@@ -1,7 +1,14 @@
 // Dota 2 游戏客户端的网页控件中转页：控件创建时加载本页一次，之后只改网址 # 片段。
 // 片段格式 <requestId>|<同源路径与查询>，请求结果经 document.title 以 <requestId>|<数据> 回传。
-// 页面在哪个域名下打开就向哪个域名发请求
-export const PROXY_BRIDGE_PAGE_HTML = `<!DOCTYPE html>
+// 页面在哪个域名下打开就向哪个域名发请求。
+// 就绪标题默认必须是 bridge|ready（线上客户端按全等判断），要国家码时才追加 |<国家码>。
+const COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/;
+
+// 国家码来自请求头，按两位大写字母白名单校验，非法按空处理，避免把头原样写进页面
+export function buildProxyBridgePageHtml(withCountry: boolean, country?: string): string {
+  const safeCountry = country && COUNTRY_CODE_PATTERN.test(country) ? country : '';
+  const countrySuffix = withCountry ? '|' + safeCountry : '';
+  return `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -44,10 +51,11 @@ export const PROXY_BRIDGE_PAGE_HTML = `<!DOCTYPE html>
         }
 
         window.addEventListener('hashchange', run);
-        document.title = 'bridge|ready';
+        document.title = 'bridge|ready${countrySuffix}';
         run();
       })();
     </script>
   </body>
 </html>
 `;
+}
