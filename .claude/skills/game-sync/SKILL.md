@@ -28,6 +28,8 @@ game 仓库动过下面任意一处就跑一次，**包括看起来与文案无�
 - 本地化：`game/resource/addon_schinese.txt`、`addon_english.txt`、`addon_russian.txt`
 - `docs/reference/` 升了 Dota 版本
 
+**Dota 升大版本（如 7.42）时，原版物品与技能的机制和描述可能整体变了**，game 里基于原版的改造物品、技能要对照新版本重新梳理，再同步网站；同步时自检报「取不到值」多半就是这类。
+
 **不要靠「哪些文件改了」判断要不要同步。** 描述里带 `%占位符%`，改一个 `AbilityValues` 数值、一个字的本地化都不碰，玩家看到的描述照样会变。
 
 只改网站侧这几处时，跑单步：每日任务池 `api/src/daily-task/config/tasks.ts` 或换皮表 `web/config/hero-overrides.json` 改了 → `npm run heroes`（这时 game 仓库没有改动）。
@@ -75,6 +77,8 @@ game 仓库动过下面任意一处就跑一次，**包括看起来与文案无�
 | 不在 `config/<kind>.json` | 没先跑 `items` |
 | 在 KV 里找不到 | 池里写错了名字，或物品挪进了脚本没覆盖的 KV 文件（`items.mjs` 的 `ITEM_KV_FILES`） |
 | 缺 zh/en 描述、占位符取不到值 | game 本地化漏写或数值 key 改了名，回 game 修 |
+| 占位符取不到值，且是基于原版的改造物品或技能 | **Dota 升大版本后原版改了机制**：数值 key 被改名或删除，game 里的自定义描述还在引用旧 key。回 game 对照 `docs/reference/<新版本>/` 重新梳理该物品的机制与描述，不要在网站侧放宽 |
+| 系列名单里的 X 不在商店装备里 | 靠材料链合得出来才收，材料（多为原版物品）被商店下架或换掉会断链；先确认是不是 game 有意下架 |
 | 商店名单里的 X 在 KV 里找不到、消耗道具 X 不在商店里 | game 删了或改名了 `wiki-sync.mjs` 里排除、消耗道具、掉落三份名单中的物品，名单跟着改 |
 | X 算不出价格 | 新物品没写 `ItemCost`，配方材料也算不出价格，回 game 补 |
 | 描述有网站不认的标记 | game 本地化用了 `<br>`、`<b>`、`<h1>`、`<font>` 以外的标记；显示上不需要它就在 `dota-ability.mjs` 里去掉，需要就让 `GameText` 支持 |

@@ -311,12 +311,6 @@
     "en": "Chaos Strike",
     "ru": "Chaos Strike"
   },
-  "chaos_knight_fundamental_forging": {
-    "icon": "chaos_knight_fundamental_forging.61c20d27.webp",
-    "zh": "基本法则锻造",
-    "en": "Fundamental Forging",
-    "ru": "Fundamental Forging"
-  },
   "clinkz_burning_barrage2": {
     "icon": "clinkz_burning_barrage2.5861f7e0.webp",
     "zh": "炽烈火雨",
@@ -424,12 +418,6 @@
     "zh": "暗影波",
     "en": "Shadow Wave",
     "ru": "Shadow Wave"
-  },
-  "death_prophet_witchcraft": {
-    "icon": "death_prophet_witchcraft.c23eab9d.webp",
-    "zh": "巫术精研",
-    "en": "Witchcraft",
-    "ru": "Witchcraft"
   },
   "doom_bringer_doom_awakened": {
     "icon": "doom_bringer_doom_awakened.74515bca.webp",
@@ -1048,18 +1036,6 @@
     "zh": "背刺",
     "en": "Backstab",
     "ru": "Backstab"
-  },
-  "ringmaster_tame_the_beasts": {
-    "icon": "ringmaster_tame_the_beasts.24434190.webp",
-    "zh": "驯兽术",
-    "en": "Tame the Beasts",
-    "ru": "Tame the Beasts"
-  },
-  "ringmaster_wheel": {
-    "icon": "ringmaster_wheel.655e7d02.webp",
-    "zh": "奇观轮",
-    "en": "Wheel of Wonder",
-    "ru": "Wheel of Wonder"
   },
   "rubick_arcane_supremacy": {
     "icon": "rubick_arcane_supremacy.5656499a.webp",
