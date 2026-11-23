@@ -91,6 +91,7 @@ const SHOP_CONSUMABLES = [
   'item_tome_of_luoshu',
   'item_tome_of_ability_reset',
   'item_awaken_stone',
+  'item_horn_of_battle_greater',
   // 两本书成对使用：先学被动技能，再拿遗忘书退掉，排在被动技能书后面
   'item_passive_skill_tome',
   'item_skill_reset',
@@ -218,7 +219,11 @@ function readShop(game, version, lotteryNames, errors) {
   const drops = new Set(SHOP_DROPS);
   const consumables = new Set(SHOP_CONSUMABLES);
   const names = [
-    ...new Set([...inShop, ...crafted].filter((name) => isCustom(name) && !kv.get(name)?.recipe)),
+    ...new Set(
+      [...inShop, ...crafted].filter(
+        (name) => (isCustom(name) || consumables.has(name)) && !kv.get(name)?.recipe,
+      ),
+    ),
   ].filter((name) => !excluded.has(name) && !drops.has(name));
   for (const name of SHOP_CONSUMABLES) {
     if (!names.includes(name)) errors.push(`消耗道具 ${name} 不在商店里`);

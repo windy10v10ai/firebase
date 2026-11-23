@@ -453,7 +453,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅远程）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
           },
@@ -473,9 +473,9 @@
   },
   "item_roshans_banner": {
     "desc": {
-      "zh": "<h1>使用：放置战旗</h1>在目标地点创造一面旗帜。战旗立起后作用范围内的小兵将免疫伤害。战旗持续<b>90</b>秒。<br><br>可以被摧毁。近战英雄对战旗造成2倍伤害。",
-      "en": "<h1>Use: Place Banner</h1> Creates a banner at the target location. Lane creeps in the area of effect become damage immune while the Banner is up. Lasts <b>90</b> seconds.<br><br> Can be destroyed. Melee hero attacks deal 2x damage to the banner.",
-      "ru": "<h1>Использование: Place Banner</h1> Устанавливает в указанной точке знамя, которое делает неуязвимыми союзных крипов на линии в области действия. Знамя существует <b>90</b> сек. или пока его не уничтожат. Герои ближнего боя наносят ему двойной урон."
+      "zh": "<h1>使用：放置战旗</h1>在目标地点创造一面旗帜。战旗立起后作用范围内的小兵将免疫伤害。战旗持续<b>90</b>秒。<br><br>可以被摧毁。非英雄单位和幻象对战旗造成25%伤害。",
+      "en": "<h1>Use: Place Banner</h1> Creates a banner at the target location. Lane creeps in the area of effect become damage immune while the Banner is up. Lasts <b>90</b> seconds.<br><br> Can be destroyed. Creeps and illusions deal 25% damage to the banner.",
+      "ru": "<h1>Использование: Place Banner</h1> Устанавливает в указанной точке знамя, которое делает неуязвимыми союзных крипов на линии в области действия. Знамя существует <b>90</b> сек. или пока его не уничтожат. Крипы и иллюзии наносят знамени 25% урона."
     },
     "ability": {
       "behavior": "point",
@@ -501,9 +501,9 @@
         },
         {
           "label": {
-            "zh": "可攻击次数：",
-            "en": "HITS TO KILL:",
-            "ru": "ЧИСЛО АТАК ДЛЯ УНИЧТОЖЕНИЯ:"
+            "zh": "生命格数：",
+            "en": "PIP HEALTH:",
+            "ru": "СЕГМЕНТЫ ЗДОРОВЬЯ:"
           },
           "levels": [
             "10",
@@ -853,7 +853,7 @@
           },
           "sign": "+",
           "levels": [
-            "12"
+            "10"
           ],
           "percent": true,
           "aoe": false,
@@ -867,7 +867,7 @@
           },
           "sign": "+",
           "levels": [
-            "16"
+            "20"
           ],
           "percent": true,
           "aoe": false,
@@ -960,7 +960,7 @@
           },
           "sign": "+",
           "levels": [
-            "30"
+            "25"
           ],
           "percent": true,
           "aoe": false,
@@ -974,7 +974,7 @@
           },
           "sign": "+",
           "levels": [
-            "12"
+            "10"
           ],
           "percent": true,
           "aoe": false,
@@ -988,7 +988,7 @@
           },
           "sign": "+",
           "levels": [
-            "16"
+            "20"
           ],
           "percent": true,
           "aoe": false,
@@ -1081,7 +1081,7 @@
           },
           "sign": "+",
           "levels": [
-            "30"
+            "25"
           ],
           "percent": true,
           "aoe": false,
@@ -1095,7 +1095,7 @@
           },
           "sign": "+",
           "levels": [
-            "12"
+            "10"
           ],
           "percent": true,
           "aoe": false,
@@ -1109,7 +1109,7 @@
           },
           "sign": "+",
           "levels": [
-            "12"
+            "10"
           ],
           "percent": true,
           "aoe": false,
@@ -1208,9 +1208,9 @@
   },
   "item_solar_crest": {
     "desc": {
-      "zh": "<h1>主动：日耀</h1>对友军施放可以提供<b>5</b>点护甲，<b>60</b>攻击速度，<b>15%</b>移动速度和<b>1400</b>点生命的<font color='#b94512'>物理伤害护盾</font>。<br><br>对自身施放时不会提供护甲、移动速度和攻击速度加成。<br><br>持续时间：<b>10</b>",
-      "en": "<h1>Active: Shine</h1>When cast on an ally, grants them <b>5</b> armor, <b>60</b> attack speed, <b>15%</b> movement speed and a <b>1400</b> physical damage barrier. <br><br>Does not grant bonus armor, movement or attack speed if used on self. <br><br>Duration: <b>10</b>",
-      "ru": "<h1>Активное: Shine</h1> Даёт выбранному союзнику физический барьер на <b>1400</b> здоровья, +<b>5</b> к броне, +<b>60</b> к скорости атаки и +<b>15%</b> к скорости передвижения.<br><br>При применении на себя владелец получит только барьер.<br><br>Длительность: <b>10</b> сек."
+      "zh": "<h1>主动：日耀</h1>对友军施放可以提供<b>5</b>点护甲，<b>60</b>攻击速度，<b>15%</b>移动速度和<b>1400</b>点生命的<font color='#b94512'>物理伤害护盾</font>。<br><br>对自身施放时护甲、移动速度和攻击速度加成为<b>50%</b>效果。<br><br>持续时间：<b>10</b>",
+      "en": "<h1>Active: Shine</h1>When cast on an ally, grants them <b>5</b> armor, <b>60</b> attack speed, <b>15%</b> movement speed and a <b>1400</b> physical damage barrier. <br><br>Bonus armor, movement and attack speed have <b>50%</b> effectiveness when cast on self. <br><br>Duration: <b>10</b>",
+      "ru": "<h1>Активное: Shine</h1> Даёт выбранному союзнику физический барьер на <b>1400</b> здоровья, +<b>5</b> к броне, +<b>60</b> к скорости атаки и +<b>15%</b> к скорости передвижения.<br><br>При применении на себя даёт полный барьер и <b>50%</b> от остальных бонусов.<br><br>Длительность: <b>10</b> сек."
     },
     "ability": {
       "behavior": "target",
@@ -1334,7 +1334,7 @@
           "label": {
             "zh": "施法距离",
             "en": "Cast Range",
-            "ru": "к дальности применения заклинаний"
+            "ru": "к дальности заклинаний"
           },
           "sign": "+",
           "levels": [
@@ -1592,6 +1592,26 @@
         "en": "A wise choice and scientific investment.",
         "ru": "Мудрый выбор. Научная инвестиция."
       }
+    }
+  },
+  "item_horn_of_battle_greater": {
+    "desc": {
+      "zh": "<h1>使用：征召群兵</h1>己方每条兵线召唤一波超级士兵，包括一个攻城单位和一个士兵旗手。可以在背包中使用。",
+      "en": "<h1>Use: Grand Call to Arms</h1>Summons a wave of mega creeps, including a catapult and a flagbearer, in every lane for your team. Can be used from the backpack.",
+      "ru": "<h1>Использование: Grand Call to Arms</h1>Владелец гудит в великий рог битвы, чтобы призвать волну мегакрипов с катапультой и знаменосцем на каждую свою линию. Можно применить из ранца."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [],
+      "cooldown": [
+        "30"
+      ],
+      "manaCost": null,
+      "lore": null
     }
   },
   "item_tome_of_knowledge": {
@@ -2018,9 +2038,9 @@
   },
   "item_veil_of_discord": {
     "desc": {
-      "zh": "<h1>主动：法术虚弱</h1>发出一波弱化冲击，使<b>900</b>范围内敌方英雄受到的技能伤害增加<b>10%</b>。<br><br>可以在持续施法期间施放。<br><br>持续时间：<b>16.0</b>秒。",
-      "en": "<h1>Active: Spell Weakness</h1> Cast a <b>900</b> radius blast that causes enemy heroes to take <b>10%</b> increased damage from spells.<br><br>Can be cast while channeling.<br><br>Duration: <b>16.0</b> seconds.",
-      "ru": "<h1>Активное: Spell Weakness</h1> Ослабляет вражеских героев в радиусе <b>900</b> вокруг владельца, отчего они получают на <b>10%</b> больше урона от заклинаний.<br><br>Можно использовать во время применения прерываемых заклинаний.<br><br>Длительность: <b>16.0</b> сек."
+      "zh": "<h1>主动：法术虚弱</h1>发出一波弱化冲击，使<b>900</b>范围内敌方英雄受到的技能伤害增加<b>8%</b>。<br><br>可以在持续施法期间施放。<br><br>持续时间：<b>16.0</b>秒。",
+      "en": "<h1>Active: Spell Weakness</h1> Cast a <b>900</b> radius blast that causes enemy heroes to take <b>8%</b> increased damage from spells.<br><br>Can be cast while channeling.<br><br>Duration: <b>16.0</b> seconds.",
+      "ru": "<h1>Активное: Spell Weakness</h1> Ослабляет вражеских героев в радиусе <b>900</b> вокруг владельца, отчего они получают на <b>8%</b> больше урона от заклинаний.<br><br>Можно использовать во время применения прерываемых заклинаний.<br><br>Длительность: <b>16.0</b> сек."
     },
     "ability": {
       "behavior": "noTarget",
@@ -2328,15 +2348,15 @@
         },
         {
           "label": {
-            "zh": "最大魔法值",
-            "en": "Max Mana",
-            "ru": "максимальной маны"
+            "zh": "魔法值",
+            "en": "Mana",
+            "ru": "к мане"
           },
           "sign": "+",
           "levels": [
-            "6"
+            "60"
           ],
-          "percent": true,
+          "percent": false,
           "aoe": false,
           "spellAmp": false
         },
@@ -2487,7 +2507,7 @@
           },
           "sign": "+",
           "levels": [
-            "45"
+            "50"
           ],
           "percent": false,
           "aoe": false,
@@ -2515,7 +2535,7 @@
           },
           "sign": "+",
           "levels": [
-            "125"
+            "150"
           ],
           "percent": false,
           "aoe": false,
@@ -2523,7 +2543,7 @@
         }
       ],
       "cooldown": [
-        "55.0"
+        "50.0"
       ],
       "manaCost": null,
       "lore": {
@@ -2548,13 +2568,13 @@
       "values": [
         {
           "label": {
-            "zh": "移动速度",
-            "en": "Movement Speed",
-            "ru": "к скорости передвижения"
+            "zh": "移动速度（远程英雄）",
+            "en": "Move Speed (Ranged Heroes)",
+            "ru": "к скорости передвижения (ДАЛЬНИЙ БОЙ)"
           },
           "sign": "+",
           "levels": [
-            "50"
+            "45"
           ],
           "percent": false,
           "aoe": false,
@@ -2562,13 +2582,13 @@
         },
         {
           "label": {
-            "zh": "攻击力（近战）",
-            "en": "Damage (MELEE)",
-            "ru": "к урону (БЛИЖНИЙ БОЙ)"
+            "zh": "移动速度（近战英雄）",
+            "en": "Move Speed (Melee Heroes)",
+            "ru": "к скорости передвижения (БЛИЖНИЙ БОЙ)"
           },
           "sign": "+",
           "levels": [
-            "18"
+            "55"
           ],
           "percent": false,
           "aoe": false,
@@ -2576,13 +2596,13 @@
         },
         {
           "label": {
-            "zh": "攻击力（远程）",
-            "en": "Damage (RANGED)",
-            "ru": "к урону (ДАЛЬНИЙ БОЙ)"
+            "zh": "攻击力",
+            "en": "Damage",
+            "ru": "к урону"
           },
           "sign": "+",
           "levels": [
-            "12"
+            "15"
           ],
           "percent": false,
           "aoe": false,
@@ -2971,9 +2991,9 @@
   },
   "item_armlet_plus": {
     "desc": {
-      "zh": "<h1>开关：邪恶之力</h1>开启后邪恶之力将提供+<b>45</b>点攻击力，+<b>50</b>点力量，+<b>35%</b>减速抗性和+<b>8</b>点护甲，但每秒失去<b>25</b>点生命值。<br><br>开启邪恶之力后生命流失并不会导致死亡，关闭邪恶之力后力量降低也不会导致死亡。",
-      "en": "<h1>Toggle: Unholy Strength</h1>When active, Unholy Strength grants +<b>45</b> damage, +<b>50</b> strength, +<b>35%</b> slow resistance and +<b>8</b> armor, but drains <b>25</b> health per second.<br><br> You cannot die from the health drain when Unholy Strength is activated, nor from the strength loss when Unholy Strength is deactivated.",
-      "ru": "<h1>Переключение: Unholy Strength</h1>Во включённом состоянии даёт +<b>45</b> урона от атак, +<b>50</b> силы, +<b>35%</b> к сопротивлению замедлениям и +<b>8</b> брони, но отнимает <b>25</b> здоровья в секунду.<br><br>Вы не можете умереть ни от потери здоровья при включении Unholy Strength, ни от спада силы при его выключении."
+      "zh": "<h1>开关：邪恶之力</h1>开启后邪恶之力将提供+<b>45</b>点攻击力，+<b>50</b>点力量，+<b>40%</b>减速抗性和+<b>8</b>点护甲，但每秒失去<b>25</b>点生命值。<br><br>开启邪恶之力后生命流失并不会导致死亡，关闭邪恶之力后力量降低也不会导致死亡。",
+      "en": "<h1>Toggle: Unholy Strength</h1>When active, Unholy Strength grants +<b>45</b> damage, +<b>50</b> strength, +<b>40%</b> slow resistance and +<b>8</b> armor, but drains <b>25</b> health per second.<br><br> You cannot die from the health drain when Unholy Strength is activated, nor from the strength loss when Unholy Strength is deactivated.",
+      "ru": "<h1>Переключение: Unholy Strength</h1>Во включённом состоянии даёт +<b>45</b> урона от атак, +<b>50</b> силы, +<b>40%</b> к сопротивлению замедлениям и +<b>8</b> брони, но отнимает <b>25</b> здоровья в секунду.<br><br>Вы не можете умереть ни от потери здоровья при включении Unholy Strength, ни от спада силы при его выключении."
     },
     "ability": {
       "behavior": "toggle",
@@ -3195,103 +3215,6 @@
         "zh": "覆盖着尖锐剃刀的盔甲，战斗中可以用来做出不顾自身安危的烈士行为。",
         "en": "A razor-sharp coat of mail, it is the choice of selfless martyrs in combat.",
         "ru": "Острый, как лезвие бритвы, панцирь — выбор самоотверженных мучеников в бою."
-      }
-    }
-  },
-  "item_meteor_hammer_2": {
-    "desc": {
-      "zh": "<h1>主动：星落</h1> 持续施法 - 成功施法后召唤一颗小行星，打击<b>400</b>范围内敌人，造成<b>1.0</b>秒眩晕和冲击伤害。对敌方单位和建筑造成持续伤害，持续<b>6</b>秒。非建筑单位在烧灼期间还会被减速<b>40%</b>。<br><br>对建筑冲击伤害：<b>120</b><br>对建筑持续伤害：<b>60</b><br><br>对非建筑冲击伤害：<b>300</b><br>对非建筑持续伤害：<b>100</b><br><br>持续施法时间：<b>1.5</b>秒<br>落地时间：<b>.5</b>秒",
-      "en": "<h1>Active: Meteor</h1> CHANNELED - After a successful channel, summons a meteor that strikes a <b>400</b> AoE, stunning enemies for <b>1.0</b> seconds and dealing impact damage. <font color='#e03e77'>Stuns enemies regardless of debuff immunity.</font> Continues to deal damage over time to enemy units and buildings for <b>6</b> seconds. Non-building units are also slowed for <b>40%</b> for the duration of the burn. <br><br>Building Impact Damage: <b>120</b> <br>Building Damage Over Time: <b>60</b> <br><br>Non-Building Impact Damage: <b>300</b> <br>Non-Building Damage Over Time: <b>100</b> <br><br>Channel Duration: <b>1.5</b> seconds.<br>Landing Time: <b>.5</b> seconds.",
-      "ru": "<h1>Активное: Падение звезды</h1> ПРЕРЫВАЕМАЯ — после успешного применения призывает астероид, который бьёт по врагам в радиусе <b>400</b>, оглушая их на <b>1.0</b> сек. и нанося урон при ударе. Наносит периодический урон вражеским существам и постройкам в течение <b>6</b> сек. Существа, кроме построек, также замедляются на <b>40%</b> на время горения.<br><br>Урон постройкам при ударе: <b>120</b><br>Периодический урон постройкам: <b>60</b><br><br>Урон существам при ударе: <b>300</b><br>Периодический урон существам: <b>100</b><br><br>Время применения: <b>1.5</b> сек.<br>Задержка приземления: <b>.5</b> сек."
-    },
-    "ability": {
-      "behavior": "channeled",
-      "targeting": null,
-      "damageType": "magical",
-      "piercesImmunity": "yes",
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "力量",
-            "en": "Strength",
-            "ru": "к силе"
-          },
-          "sign": "+",
-          "levels": [
-            "30"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "敏捷",
-            "en": "Agility",
-            "ru": "к ловкости"
-          },
-          "sign": "+",
-          "levels": [
-            "30"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "智力",
-            "en": "Intelligence",
-            "ru": "к интеллекту"
-          },
-          "sign": "+",
-          "levels": [
-            "50"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能增强",
-            "en": "Spell Damage",
-            "ru": "Усиление заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "24"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复增强",
-            "en": "Mana Regen Amplification",
-            "ru": "Усиление регенерации маны"
-          },
-          "sign": "+",
-          "levels": [
-            "50"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "20"
-      ],
-      "manaCost": [
-        "300"
-      ],
-      "lore": {
-        "zh": "所谓神器，就是要无视魔免晕",
-        "en": "You want the moon so bad? HERE, TAKE IT!",
-        "ru": "Артефакт — это когда оглушает, игнорируя невосприимчивость к магии"
       }
     }
   },
@@ -4326,9 +4249,9 @@
   },
   "item_disperser_chaos": {
     "desc": {
-      "zh": "<h1>主动：抑制</h1>同时驱散佩戴者和目标。敌方目标会被减速<b>8.0</b>秒，友方目标则会提升移动速度和<b>40%</b>减速抗性，持续<b>5.0</b>秒。施法者总是会获得友军的加成效果。<br><br>移动速度减缓和提升效果在状态持续时间内初始均为<b>100%</b>，并且逐渐减少至0。<br>驱散类型：弱驱散<br><br><h1>被动：破法</h1>每次攻击将燃烧目标<b>150</b>点魔法，而且每燃烧一点魔法都会造成<b>1.0</b>点物理伤害。<br><br>近战英雄的幻象每次攻击将燃烧<b>50</b>点魔法，远程英雄的幻象每次攻击将燃烧<b>50</b>点魔法。",
-      "en": "<h1>Active: Suppress</h1> Dispels both the wearer and the target. Enemy targets are slowed for <b>8.0</b> seconds. Allied targets gain bonus movespeed and <b>40%</b> slow resistance for <b>5.0</b> seconds. Caster is always granted the ally benefit on cast.<br><br>Both movement speed reduction and increase start at <b>100%</b> and gradually decrease to 0 over the course of the buff duration.<br>Dispel Type: Basic Dispel<br><br><h1>Passive: Manabreak</h1>Each attack burns <b>150</b> mana from the target, and deals <b>1.0</b> physical damage per burned mana.<br><br>Burns <b>50</b> mana per attack from melee illusions and <b>50</b> mana per attack from ranged illusions.",
-      "ru": "<h1>Активное: Подавление</h1> Развеивает и владельца, и цель. Если целью был враг, также замедляет его передвижение на <b>8.0</b> сек., а если союзник — ускоряет на <b>5.0</b> сек. и даёт +<b>40%</b> к сопротивлению замедлениям. Бонусы для союзника накладываются и на самого владельца.<br><br>И замедление, и ускорение составляют <b>100%</b> в момент применения, а по мере действия постепенно снижаются до нуля.<br>Тип развеивания: нормальное<br><br><h1>Пассивное: Сжигание маны</h1> Каждая атака сжигает <b>150</b> маны врага и наносит ему <b>1.0</b> физического урона за единицу сожжённой маны.<br><br>Иллюзии ближнего боя сжигают <b>50</b> маны за атаку, иллюзии дальнего боя — <b>50</b>."
+      "zh": "<h1>主动：抑制</h1>同时驱散佩戴者和目标。敌方目标会被减速<b>8.0</b>秒，友方目标则会提升移动速度和<b>40%</b>减速抗性，持续<b>5.0</b>秒。施法者总是会获得友军的加成效果。<br><br>移动速度减缓和提升效果在状态持续时间内初始均为<b>100%</b>，并且逐渐减少至0。<br>驱散类型：弱驱散<br><br><h1>被动：破法</h1>每次攻击将燃烧目标<b>150</b>点魔法，而且每燃烧一点魔法都会造成<b>1.0</b>点物理伤害。",
+      "en": "<h1>Active: Suppress</h1> Dispels both the wearer and the target. Enemy targets are slowed for <b>8.0</b> seconds. Allied targets gain bonus movespeed and <b>40%</b> slow resistance for <b>5.0</b> seconds. Caster is always granted the ally benefit on cast.<br><br>Both movement speed reduction and increase start at <b>100%</b> and gradually decrease to 0 over the course of the buff duration.<br>Dispel Type: Basic Dispel<br><br><h1>Passive: Manabreak</h1>Each attack burns <b>150</b> mana from the target, and deals <b>1.0</b> physical damage per burned mana.",
+      "ru": "<h1>Активное: Подавление</h1> Развеивает и владельца, и цель. Если целью был враг, также замедляет его передвижение на <b>8.0</b> сек., а если союзник — ускоряет на <b>5.0</b> сек. и даёт +<b>40%</b> к сопротивлению замедлениям. Бонусы для союзника накладываются и на самого владельца.<br><br>И замедление, и ускорение составляют <b>100%</b> в момент применения, а по мере действия постепенно снижаются до нуля.<br>Тип развеивания: нормальное<br><br><h1>Пассивное: Сжигание маны</h1> Каждая атака сжигает <b>150</b> маны врага и наносит ему <b>1.0</b> физического урона за единицу сожжённой маны."
     },
     "ability": {
       "behavior": "target",
@@ -4375,11 +4298,33 @@
       "lore": null
     }
   },
+  "item_revenants_brooch_ultra": {
+    "desc": {
+      "zh": "<h1>被动：</h1>每次攻击都有<b>30%</b>几率造成额外的魔法伤害，数值为攻击伤害的<b>220%</b>。",
+      "en": "<h1>Passive: Phantom Critical</h1>Grants each attack a <b>30%</b> chance to deal an additional <b>220%</b> of the attack's damage as bonus magic damage.",
+      "ru": "<h1>Пассивное:</h1>Каждая атака с вероятностью <b>30%</b> наносит дополнительный магический урон в размере <b>220%</b> от урона атаки."
+    },
+    "ability": {
+      "behavior": "passive",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": "yes",
+      "dispellable": null,
+      "values": [],
+      "cooldown": null,
+      "manaCost": null,
+      "lore": {
+        "zh": "你说得对，但这就是数值怪的力量",
+        "en": "The cursed brooch of a fallen guardian who stalks forever between the veil of life and death.",
+        "ru": "Вы правы, но такова сила монстра чисел."
+      }
+    }
+  },
   "item_bloodstone": {
     "desc": {
-      "zh": "<h1>主动：血之契约</h1>血精石的技能吸血效果提升至<b>60%</b>。持续<b>5</b>秒。<br><br><h1>被动：法术虚弱光环</h1>敌方单位承受的技能伤害增加<b>10%</b>。<br><br>作用范围：<b>1200</b>",
-      "en": "<h1>Active: Bloodpact</h1> Increases Bloodstone's Spell Lifesteal to <b>60%</b>. Lasts <b>5</b> seconds. <br><br><h1>Passive: Spell Weakness Aura</h1> Enemy units take <b>10%</b> increased damage from spells. <br><br>Radius: <b>1200</b>",
-      "ru": "<h1>Активное: Bloodpact</h1> Увеличивает вампиризм заклинаниями от этого предмета до <b>60%</b>. Длительность: <b>5</b> сек. <br><br><h1>Пассивное: Spell Weakness Aura</h1> Враги в радиусе <b>1200</b> получают на <b>10%</b> больше урона от заклинаний."
+      "zh": "<h1>主动：血之契约</h1>血精石的技能吸血效果提升至<b>70%</b>。持续<b>5</b>秒。<br><br><h1>被动：法术虚弱光环</h1>敌方单位承受的技能伤害增加<b>8%</b>。<br><br>作用范围：<b>1200</b>",
+      "en": "<h1>Active: Bloodpact</h1> Increases Bloodstone's Spell Lifesteal to <b>70%</b>. Lasts <b>5</b> seconds. <br><br><h1>Passive: Spell Weakness Aura</h1> Enemy units take <b>8%</b> increased damage from spells. <br><br>Radius: <b>1200</b>",
+      "ru": "<h1>Активное: Bloodpact</h1> Увеличивает вампиризм заклинаниями от этого предмета до <b>70%</b>. Длительность: <b>5</b> сек. <br><br><h1>Пассивное: Spell Weakness Aura</h1> Враги в радиусе <b>1200</b> получают на <b>8%</b> больше урона от заклинаний."
     },
     "ability": {
       "behavior": "noTarget",
@@ -4446,7 +4391,7 @@
         }
       ],
       "cooldown": [
-        "35.0"
+        "30.0"
       ],
       "manaCost": null,
       "lore": {
@@ -4553,9 +4498,9 @@
   },
   "item_bloodthorn_ultra": {
     "desc": {
-      "zh": "<h1>主动：灵魂撕裂</h1>使目标沉默<b>5</b>秒，沉默结束后其间所受伤害的<b>120%</b>将以额外魔法伤害的形式结算。<br><br>英雄/非英雄对目标发动攻击会分别额外造成<b>100</b> / <b>50</b>点伤害。另外，自身和控制单位对目标发动的所有攻击都拥有克敌机先效果。<br><br><h1>被动：穿刺</h1>每次攻击有<b>80%</b>几率无视闪避并造成额外<b>120</b>点魔法伤害。",
-      "en": "<h1>Active: Soul Tear</h1> Silences a target for <b>5</b> seconds. At the end of the silence, an additional <b>120%</b> of all damage taken during the silence will be dealt to the target as magical damage.<br><br>All attacks on the silenced target will deal additional damage equal to <b>100</b> if the attacker is a hero, and <b>50</b>, if the attacker is a creep. Provides True Strike for your attacks and attacks from your controlled units against the silenced target.<br><br><h1>Passive: Pierce</h1>Grants each attack a <b>80%</b> chance to pierce through evasion and deal <b>120</b> bonus magical damage.",
-      "ru": "<h1>Активное: Разрыв души</h1>Заставляет цель замолчать на <b>5</b> сек. По окончании немоты наносит цели магический урон в размере <b>120%</b> от урона, полученного за время действия.<br><br>Атаки героев дополнительно наносят цели <b>100</b> урона, а атаки существ, не являющихся героями, — <b>50</b>. Кроме того, владелец и подконтрольные ему существа не могут промахнуться по цели.<br><br><h1>Пассивное: Пронзание</h1>Каждая атака с вероятностью <b>80%</b> проходит сквозь уклонение и наносит дополнительно <b>120</b> магического урона."
+      "zh": "<h1>主动：灵魂撕裂</h1>使目标沉默<b>5</b>秒，沉默结束后其间所受伤害的<b>120%</b>将以额外魔法伤害的形式结算。<br><br>英雄/非英雄对目标发动攻击会分别额外造成<b>100</b> / <b>50</b>点伤害。另外，自身和控制单位对目标发动的所有攻击都拥有克敌机先效果。",
+      "en": "<h1>Active: Soul Tear</h1> Silences a target for <b>5</b> seconds. At the end of the silence, an additional <b>120%</b> of all damage taken during the silence will be dealt to the target as magical damage.<br><br>All attacks on the silenced target will deal additional damage equal to <b>100</b> if the attacker is a hero, and <b>50</b>, if the attacker is a creep. Provides True Strike for your attacks and attacks from your controlled units against the silenced target.",
+      "ru": "<h1>Активное: Разрыв души</h1>Заставляет цель замолчать на <b>5</b> сек. По окончании немоты наносит цели магический урон в размере <b>120%</b> от урона, полученного за время действия.<br><br>Атаки героев дополнительно наносят цели <b>100</b> урона, а атаки существ, не являющихся героями, — <b>50</b>. Кроме того, владелец и подконтрольные ему существа не могут промахнуться по цели."
     },
     "ability": {
       "behavior": "target",
@@ -4601,20 +4546,6 @@
           "sign": "+",
           "levels": [
             "10"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命恢复",
-            "en": "Health Regeneration",
-            "ru": "к восстановлению здоровья"
-          },
-          "sign": "+",
-          "levels": [
-            "15"
           ],
           "percent": false,
           "aoe": false,
@@ -4719,7 +4650,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅远程）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
           },
@@ -4928,57 +4859,6 @@
       }
     }
   },
-  "item_revenants_brooch_ultra": {
-    "desc": {
-      "zh": "<h1>被动：</h1>每次攻击都有<b>30%</b>几率造成额外的魔法伤害，数值为攻击伤害的<b>220%</b>。",
-      "en": "<h1>Passive: Phantom Critical</h1>Grants each attack a <b>30%</b> chance to deal an additional <b>220%</b> of the attack's damage as bonus magic damage.",
-      "ru": "<h1>Пассивное:</h1>Каждая атака с вероятностью <b>30%</b> наносит дополнительный магический урон в размере <b>220%</b> от урона атаки."
-    },
-    "ability": {
-      "behavior": "passive",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": "yes",
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "攻击力",
-            "en": "Damage",
-            "ru": "к урону"
-          },
-          "sign": "+",
-          "levels": [
-            "200"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "技能吸血",
-            "en": "Spell Lifesteal",
-            "ru": "к вампиризму заклинаниями"
-          },
-          "sign": "+",
-          "levels": [
-            "30"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": null,
-      "manaCost": null,
-      "lore": {
-        "zh": "你说得对，但这就是数值怪的力量",
-        "en": "The cursed brooch of a fallen guardian who stalks forever between the veil of life and death.",
-        "ru": "Вы правы, но такова сила монстра чисел."
-      }
-    }
-  },
   "item_shotgun_v2": {
     "desc": {
       "zh": "<h1>被动: 霰弹</h1>仅限远程：对攻击目标周围<b>400</b>范围内的敌人造成<b>60%</b>溅射伤害。<br/>霰弹特效无法叠加，拥有<b>0.05</b>s内置冷却。",
@@ -5027,113 +4907,6 @@
         "zh": "嗵！嗵！嗵！",
         "en": "Aim? What's that?",
         "ru": "Бах! Бах! Бах!"
-      }
-    }
-  },
-  "item_arcane_octarine_core": {
-    "desc": {
-      "zh": "<h1>被动：冷却时间减少</h1>降低所有技能和物品<b>25%</b>的冷却时间。",
-      "en": "<h1>Passive: Cooldown Reduction</h1>Reduces the cooldown time of all spells and items by <b>25%</b>.",
-      "ru": "<h1>Пассивное: Снижение перезарядки</h1>Уменьшает перезарядку всех способностей и предметов на <b>25%</b>."
-    },
-    "ability": {
-      "behavior": "passive",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "冷却时间减少",
-            "en": "Cooldown Reduction",
-            "ru": "к уменьшению перезарядок заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "25"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "施法距离",
-            "en": "Cast Range",
-            "ru": "к дальности применения заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "275"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "900"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法值",
-            "en": "Mana",
-            "ru": "к мане"
-          },
-          "sign": "+",
-          "levels": [
-            "900"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命恢复",
-            "en": "Health Regeneration",
-            "ru": "к восстановлению здоровья"
-          },
-          "sign": "+",
-          "levels": [
-            "8.0"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复",
-            "en": "Mana Regeneration",
-            "ru": "к восстановлению маны"
-          },
-          "sign": "+",
-          "levels": [
-            "8.0"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": null,
-      "manaCost": null,
-      "lore": {
-        "zh": "位于法术技艺核心的，是只有身负异能之人才能感知的光带。",
-        "en": "At the core of spellcraft are spectrums only the very gifted can sense.",
-        "ru": "Самая основа колдовства скрыта в цветах, узреть которые способны лишь самые одарённые."
       }
     }
   },
@@ -5327,11 +5100,229 @@
       }
     }
   },
+  "item_arcane_octarine_core": {
+    "desc": {
+      "zh": "<h1>被动：冷却时间减少</h1>降低所有技能和物品<b>25%</b>的冷却时间。",
+      "en": "<h1>Passive: Cooldown Reduction</h1>Reduces the cooldown time of all spells and items by <b>25%</b>.",
+      "ru": "<h1>Пассивное: Снижение перезарядки</h1>Уменьшает перезарядку всех способностей и предметов на <b>25%</b>."
+    },
+    "ability": {
+      "behavior": "passive",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "冷却时间减少",
+            "en": "Cooldown Reduction",
+            "ru": "к уменьшению перезарядок заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "25"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "施法距离",
+            "en": "Cast Range",
+            "ru": "к дальности заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "275"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命值",
+            "en": "Health",
+            "ru": "к здоровью"
+          },
+          "sign": "+",
+          "levels": [
+            "900"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法值",
+            "en": "Mana",
+            "ru": "к мане"
+          },
+          "sign": "+",
+          "levels": [
+            "900"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命恢复",
+            "en": "Health Regeneration",
+            "ru": "к восстановлению здоровья"
+          },
+          "sign": "+",
+          "levels": [
+            "8.0"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法恢复",
+            "en": "Mana Regeneration",
+            "ru": "к восстановлению маны"
+          },
+          "sign": "+",
+          "levels": [
+            "8.0"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": null,
+      "manaCost": null,
+      "lore": {
+        "zh": "位于法术技艺核心的，是只有身负异能之人才能感知的光带。",
+        "en": "At the core of spellcraft are spectrums only the very gifted can sense.",
+        "ru": "Самая основа колдовства скрыта в цветах, узреть которые способны лишь самые одарённые."
+      }
+    }
+  },
+  "item_refresh_core": {
+    "desc": {
+      "zh": "<h1>主动：完全重置</h1>重置所有物品和技能的冷却时间。<br><h1>被动：冷却时间减少</h1>降低所有技能和物品<b>34%</b>的冷却时间。",
+      "en": "<h1>Active: Reset Cooldowns</h1>Resets the cooldowns of all your items and abilities.<br><h1>Passive: Cooldown Reduction</h1>Reduces the cooldown time of all spells and items by <b>34%</b>.",
+      "ru": "<h1>Активное: Полный сброс</h1>Сбрасывает перезарядку всех предметов и способностей.<br><h1>Пассивное: Снижение перезарядки</h1>Снижает перезарядку всех способностей и предметов на <b>34%</b>."
+    },
+    "ability": {
+      "behavior": "noTarget",
+      "targeting": null,
+      "damageType": null,
+      "piercesImmunity": null,
+      "dispellable": null,
+      "values": [
+        {
+          "label": {
+            "zh": "冷却时间减少",
+            "en": "Cooldown Reduction",
+            "ru": "к уменьшению перезарядок заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "34"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "施法距离",
+            "en": "Cast Range",
+            "ru": "к дальности заклинаний"
+          },
+          "sign": "+",
+          "levels": [
+            "300"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命值",
+            "en": "Health",
+            "ru": "к здоровью"
+          },
+          "sign": "+",
+          "levels": [
+            "1500"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法值",
+            "en": "Mana",
+            "ru": "к мане"
+          },
+          "sign": "+",
+          "levels": [
+            "1500"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "生命恢复",
+            "en": "Health Regeneration",
+            "ru": "к восстановлению здоровья"
+          },
+          "sign": "+",
+          "levels": [
+            "20.0"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "魔法恢复",
+            "en": "Mana Regeneration",
+            "ru": "к восстановлению маны"
+          },
+          "sign": "+",
+          "levels": [
+            "15.0"
+          ],
+          "percent": false,
+          "aoe": false,
+          "spellAmp": false
+        }
+      ],
+      "cooldown": [
+        "120.0"
+      ],
+      "manaCost": [
+        "900"
+      ],
+      "lore": {
+        "zh": "位于法术技艺核心的，是只有身负异能之人才能感知的光带。",
+        "en": "At the core of spellcraft are spectrums only the very gifted can sense.",
+        "ru": "В сердце мастерства заклинаний лежат спектры, которые дано ощущать лишь избранным."
+      }
+    }
+  },
   "item_overwhelming_blink_2": {
     "desc": {
-      "zh": "<h1>主动：泰森闪光</h1>传送到最远<b>1600</b>距离的位置。<br><br>传送后，<b>1200</b>范围内所有敌人受到<b>200</b> + <b>100%</b>力量值的瞬时伤害，并且额外持续受到总计为<b>200%</b>力量值的伤害，被减缓<b>80%</b>移动速度，降低<b>100</b>攻击速度，持续<b>6</b>秒。<br><br>受到来自敌方英雄或肉山的攻击时，盛势闪光将在<b>2.0</b>秒内无法使用。",
-      "en": "<h1>Active: Tyson's Flash</h1>Teleport to a target point up to <b>1600</b> units away.<br><br>After teleportation, all enemies in a <b>1200</b> AoE take damage equal to <b>200</b> + <b>100%</b> of your strength and an additional <b>200%</b> over time, and have <b>80%</b> movement speed slow and <b>100</b> attack speed slow for <b>6</b> seconds. <br><br>Overwhelming Blink cannot be used for <b>2.0</b> seconds after taking damage from an enemy hero or Roshan.",
-      "ru": "<h1>Активное: Вспышка Тайсона</h1>Мгновенно перемещает к указанной точке на расстоянии до <b>1600</b>.<br><br>После перемещения все враги в радиусе <b>1200</b> мгновенно получают урон, равный <b>200</b> + <b>100%</b> от силы владельца, и дополнительно получают суммарный урон, равный <b>200%</b> от силы владельца. Также их передвижение замедляется на <b>80%</b>, а атака — на <b>100</b>, на <b>6</b> сек.<br><br>Предмет нельзя использовать в течение <b>2.0</b> сек. после получения урона от вражеских героев или Рошана."
+      "zh": "<h1>主动：泰森闪光</h1>传送到最远<b>1600</b>距离的位置。<br><br>传送后，<b>1200</b>范围内所有敌人受到<b>200</b> + <b>100%</b>力量值的瞬时伤害，并且额外持续受到总计为<b>200%</b>力量值的伤害，被减缓<b>70%</b>移动速度，降低<b>140</b>攻击速度，持续<b>4.5</b>秒。<br><br>受到来自敌方英雄或肉山的攻击时，盛势闪光将在<b>2.0</b>秒内无法使用。",
+      "en": "<h1>Active: Tyson's Flash</h1>Teleport to a target point up to <b>1600</b> units away.<br><br>After teleportation, all enemies in a <b>1200</b> AoE take damage equal to <b>200</b> + <b>100%</b> of your strength and an additional <b>200%</b> over time, and have <b>70%</b> movement speed slow and <b>140</b> attack speed slow for <b>4.5</b> seconds. <br><br>Overwhelming Blink cannot be used for <b>2.0</b> seconds after taking damage from an enemy hero or Roshan.",
+      "ru": "<h1>Активное: Вспышка Тайсона</h1>Мгновенно перемещает к указанной точке на расстоянии до <b>1600</b>.<br><br>После перемещения все враги в радиусе <b>1200</b> мгновенно получают урон, равный <b>200</b> + <b>100%</b> от силы владельца, и дополнительно получают суммарный урон, равный <b>200%</b> от силы владельца. Также их передвижение замедляется на <b>70%</b>, а атака — на <b>140</b>, на <b>4.5</b> сек.<br><br>Предмет нельзя использовать в течение <b>2.0</b> сек. после получения урона от вражеских героев или Рошана."
     },
     "ability": {
       "behavior": "point",
@@ -6346,9 +6337,9 @@
   },
   "item_devastator_2": {
     "desc": {
-      "zh": "<h1>被动：巫师之刃</h1>使下次攻击具有克敌机先效果，并且会施加毒素，持续<b>4</b>秒，减缓<b>50%</b>移动速度，并且每秒造成<b>1.2</b>倍智力值的伤害。<br><br><h1>被动：法力腐蚀</h1>攻击会降低敌人<b>35%</b>魔法抗性，持续<b>4</b>秒。",
-      "en": "<h1>Passive: Witch Blade</h1> Causes your next attack to have true strike, apply a poison for <b>4</b> seconds, slowing by <b>50%</b> and dealing <b>1.2</b>x your intelligence as damage every second.<br><br><h1>Passive: Magic Corruption</h1> Your attacks reduce the enemy's Magic resistance by <b>35%</b> for <b>4</b> seconds.",
-      "ru": "<h1>Пассивное: Ведьмин клинок</h1>Следующая атака не может промахнуться, отравляет жертву на <b>4</b> сек., замедляя её на <b>50%</b> и каждую секунду нанося урон, равный интеллекту владельца, помноженному на <b>1.2</b>.<br><br><h1>Пассивное: Порча магии</h1>Атаки снижают сопротивление магии врага на <b>35%</b> на <b>4</b> сек."
+      "zh": "<h1>被动：巫师之刃</h1>使下次攻击具有克敌机先效果，并且会施加毒素，持续<b>4</b>秒，减缓<b>50%</b>移动速度，并且每秒造成<b>1.2</b>倍智力值的伤害。该攻击可作用于建筑，对建筑造成<b>40%</b>伤害。<br><br><h1>被动：法力腐蚀</h1>攻击会降低敌人<b>35%</b>魔法抗性，持续<b>4</b>秒。",
+      "en": "<h1>Passive: Witch Blade</h1> Causes your next attack to have true strike, apply a poison for <b>4</b> seconds, slowing by <b>50%</b> and dealing <b>1.2</b>x your intelligence as damage every second. This attack can affect buildings and deals <b>40%</b> damage to buildings.<br><br><h1>Passive: Magic Corruption</h1> Your attacks reduce the enemy's Magic resistance by <b>35%</b> for <b>4</b> seconds.",
+      "ru": "<h1>Пассивное: Ведьмин клинок</h1>Следующая атака не может промахнуться, отравляет жертву на <b>4</b> сек., замедляя её на <b>50%</b> и каждую секунду нанося урон, равный интеллекту владельца, помноженному на <b>1.2</b>. Эта атака может поражать постройки и наносит им только <b>40%</b> урона.<br><br><h1>Пассивное: Порча магии</h1>Атаки снижают сопротивление магии врага на <b>35%</b> на <b>4</b> сек."
     },
     "ability": {
       "behavior": "passive",
@@ -6715,9 +6706,9 @@
   },
   "item_guardian_greaves_artifact": {
     "desc": {
-      "zh": "<h1>主动：修复</h1>使周围友军回复<b>1500</b>点生命 <font color='#00FF00'>+ <b>6%</b> 最大生命值</font> 和<b>1000</b>点魔法，并移除施法者身上大部分的负面效果。<br><br>作用范围：<b>1200</b><br>驱散类型：弱驱散<br><br><h1>被动：卫士光环</h1> 为周围友军提供<b>50</b>点/秒生命恢复和<b>30</b>点/秒魔法恢复。如果友方英雄的生命值低于<b>75%</b>，生命恢复将提升至<b>100</b>点/秒。<br><br>作用范围：<b>1200</b><br>多个鞋类物品提供的移动速度加成不叠加。",
-      "en": "<h1>Active: Mend</h1>Restores <b>1500</b> health <font color='#00FF00'>+ <b>6%</b> of max health</font> and <b>1000</b> mana to nearby allies, and removes most negative effects from the caster.<br><br>Radius: <b>1200</b><br>Dispel Type: Basic Dispel<br><br><h1>Passive: Guardian Aura</h1> Grants <b>50</b> health regeneration and <b>30</b> mana regeneration to allied units. If an allied hero's health falls below <b>75%</b>, their health regeneration is increased to <b>100</b>. <br><br>Radius: <b>1200</b> <br>Movement speed bonuses from multiple pairs of boots do not stack.",
-      "ru": "<h1>Активное: Mend</h1>Восстанавливает союзникам вокруг <b>1500</b> здоровья <font color='#00FF00'>+ <b>6%</b> от максимального здоровья</font> и <b>1000</b> маны, а также снимает с владельца большинство отрицательных эффектов.<br><br>Радиус: <b>1200</b><br>Тип развеивания: обычное<br><br><h1>Пассивное: Guardian Aura</h1> Даёт союзникам вокруг <b>50</b> восстановления здоровья и <b>30</b> восстановления маны в секунду. Если здоровье союзного героя падает ниже <b>75%</b>, восстановление его здоровья повышается до <b>100</b> в секунду.<br><br>Радиус: <b>1200</b><br>Бонусы к скорости передвижения от нескольких пар ботинок не складываются."
+      "zh": "<h1>主动：修复</h1>使周围友军回复<b>1500</b>点生命 <font color='#00FF00'>+ <b>6%</b> 最大生命值</font> 和<b>1000</b>点魔法，并移除施法者身上大部分的负面效果。<br><br>作用范围：<b>1200</b><br>驱散类型：弱驱散<br><br><h1>被动：卫士光环</h1> 为周围友军提供<b>50</b>点/秒生命恢复和<b>30</b>点/秒魔法恢复。<br><br>作用范围：<b>1200</b><br>多个鞋类物品提供的移动速度加成不叠加。",
+      "en": "<h1>Active: Mend</h1>Restores <b>1500</b> health <font color='#00FF00'>+ <b>6%</b> of max health</font> and <b>1000</b> mana to nearby allies, and removes most negative effects from the caster.<br><br>Radius: <b>1200</b><br>Dispel Type: Basic Dispel<br><br><h1>Passive: Guardian Aura</h1> Grants <b>50</b> health regeneration and <b>30</b> mana regeneration to allied units.<br><br>Radius: <b>1200</b> <br>Movement speed bonuses from multiple pairs of boots do not stack.",
+      "ru": "<h1>Активное: Mend</h1>Восстанавливает союзникам вокруг <b>1500</b> здоровья <font color='#00FF00'>+ <b>6%</b> от максимального здоровья</font> и <b>1000</b> маны, а также снимает с владельца большинство отрицательных эффектов.<br><br>Радиус: <b>1200</b><br>Тип развеивания: обычное<br><br><h1>Пассивное: Guardian Aura</h1> Даёт союзникам вокруг <b>50</b> восстановления здоровья и <b>30</b> восстановления маны в секунду.<br><br>Радиус: <b>1200</b><br>Бонусы к скорости передвижения от нескольких пар ботинок не складываются."
     },
     "ability": {
       "behavior": "noTarget",
@@ -6734,7 +6725,7 @@
           },
           "sign": "+",
           "levels": [
-            "150"
+            "165"
           ],
           "percent": false,
           "aoe": false,
@@ -7115,7 +7106,7 @@
           "label": {
             "zh": "施法距离",
             "en": "Cast Range",
-            "ru": "к дальности применения заклинаний"
+            "ru": "к дальности заклинаний"
           },
           "sign": "+",
           "levels": [
@@ -7826,117 +7817,6 @@
       }
     }
   },
-  "item_refresh_core": {
-    "desc": {
-      "zh": "<h1>主动：完全重置</h1>重置所有物品和技能的冷却时间。<br><h1>被动：冷却时间减少</h1>降低所有技能和物品<b>34%</b>的冷却时间。",
-      "en": "<h1>Active: Reset Cooldowns</h1>Resets the cooldowns of all your items and abilities.<br><h1>Passive: Cooldown Reduction</h1>Reduces the cooldown time of all spells and items by <b>34%</b>.",
-      "ru": "<h1>Активное: Полный сброс</h1>Сбрасывает перезарядку всех предметов и способностей.<br><h1>Пассивное: Снижение перезарядки</h1>Снижает перезарядку всех способностей и предметов на <b>34%</b>."
-    },
-    "ability": {
-      "behavior": "noTarget",
-      "targeting": null,
-      "damageType": null,
-      "piercesImmunity": null,
-      "dispellable": null,
-      "values": [
-        {
-          "label": {
-            "zh": "冷却时间减少",
-            "en": "Cooldown Reduction",
-            "ru": "к уменьшению перезарядок заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "34"
-          ],
-          "percent": true,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "施法距离",
-            "en": "Cast Range",
-            "ru": "к дальности применения заклинаний"
-          },
-          "sign": "+",
-          "levels": [
-            "300"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命值",
-            "en": "Health",
-            "ru": "к здоровью"
-          },
-          "sign": "+",
-          "levels": [
-            "1500"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法值",
-            "en": "Mana",
-            "ru": "к мане"
-          },
-          "sign": "+",
-          "levels": [
-            "1500"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "生命恢复",
-            "en": "Health Regeneration",
-            "ru": "к восстановлению здоровья"
-          },
-          "sign": "+",
-          "levels": [
-            "20.0"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        },
-        {
-          "label": {
-            "zh": "魔法恢复",
-            "en": "Mana Regeneration",
-            "ru": "к восстановлению маны"
-          },
-          "sign": "+",
-          "levels": [
-            "15.0"
-          ],
-          "percent": false,
-          "aoe": false,
-          "spellAmp": false
-        }
-      ],
-      "cooldown": [
-        "120.0"
-      ],
-      "manaCost": [
-        "900"
-      ],
-      "lore": {
-        "zh": "位于法术技艺核心的，是只有身负异能之人才能感知的光带。",
-        "en": "At the core of spellcraft are spectrums only the very gifted can sense.",
-        "ru": "В сердце мастерства заклинаний лежат спектры, которые дано ощущать лишь избранным."
-      }
-    }
-  },
   "item_wasp_golden": {
     "desc": {
       "zh": "<h1>主动：大核荣耀</h1><b>4</b>秒内致命一击概率为<b>75%</b>，致命一击伤害为<b>300%</b>，闪避概率为<b>75%</b>，移动速度提升<b>30%</b>。<br><h1>被动：致命一击</h1>每次攻击有<b>30%</b>概率造成<b>300%</b>伤害。",
@@ -8103,7 +7983,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅远程）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
           },
@@ -8812,7 +8692,7 @@
           "label": {
             "zh": "施法距离",
             "en": "Cast Range",
-            "ru": "к дальности применения заклинаний"
+            "ru": "к дальности заклинаний"
           },
           "sign": "+",
           "levels": [
@@ -9802,7 +9682,7 @@
           "label": {
             "zh": "施法距离",
             "en": "Cast Range",
-            "ru": "к дальности применения заклинаний"
+            "ru": "к дальности заклинаний"
           },
           "sign": "+",
           "levels": [

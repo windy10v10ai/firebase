@@ -1,7 +1,7 @@
 {
   "source": {
-    "gameCommit": "8659c7d82e2bb8b3d192f9edde5f7881aa5c9a2a",
-    "dotaVersion": "7.41f"
+    "gameCommit": "ac46175db21eef61395fbb4727996d604893263f",
+    "dotaVersion": "7.42"
   },
   "abilities": [
     {
@@ -285,11 +285,6 @@
       "tier": 2
     },
     {
-      "name": "ringmaster_wheel",
-      "group": "active",
-      "tier": 2
-    },
-    {
       "name": "batrider_flaming_lasso",
       "group": "active",
       "tier": 2
@@ -356,11 +351,6 @@
     },
     {
       "name": "antimage_blink",
-      "group": "active",
-      "tier": 2
-    },
-    {
-      "name": "ringmaster_tame_the_beasts",
       "group": "active",
       "tier": 2
     },
@@ -790,11 +780,6 @@
       "tier": 3
     },
     {
-      "name": "death_prophet_witchcraft",
-      "group": "passive",
-      "tier": 3
-    },
-    {
       "name": "omniknight_hammer_of_purity",
       "group": "passive",
       "tier": 3
@@ -856,11 +841,6 @@
     },
     {
       "name": "shredder_reactive_armor",
-      "group": "passive",
-      "tier": 2
-    },
-    {
-      "name": "chaos_knight_fundamental_forging",
       "group": "passive",
       "tier": 2
     },

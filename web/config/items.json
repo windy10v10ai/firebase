@@ -167,6 +167,12 @@
     "en": "Ballista",
     "ru": "Ballista"
   },
+  "item_balmhook": {
+    "icon": "balmhook.644a7bf6.webp",
+    "zh": "镇痛之钩",
+    "en": "Balmhook",
+    "ru": "Balmhook"
+  },
   "item_basher": {
     "icon": "basher.a717a796.webp",
     "zh": "碎颅锤",
@@ -364,6 +370,12 @@
     "zh": "铁树枝干",
     "en": "Iron Branch",
     "ru": "Iron Branch"
+  },
+  "item_brick": {
+    "icon": "brick.b9639705.webp",
+    "zh": "板砖",
+    "en": "Brick",
+    "ru": "Brick"
   },
   "item_broadsword": {
     "icon": "broadsword.847c3049.webp",
@@ -598,12 +610,6 @@
     "zh": "黯灭",
     "en": "Desolator",
     "ru": "Desolator"
-  },
-  "item_desolator_2": {
-    "icon": "desolator_2.225c8312.webp",
-    "zh": "寂灭",
-    "en": "Stygian Desolator",
-    "ru": "Stygian Desolator"
   },
   "item_devastator": {
     "icon": "devastator.0abb3d1d.webp",
@@ -1019,6 +1025,12 @@
     "en": "Flayer's Bota",
     "ru": "Flayer's Bota"
   },
+  "item_flicker": {
+    "icon": "flicker.934f59bf.webp",
+    "zh": "闪灵",
+    "en": "Flicker",
+    "ru": "Flicker"
+  },
   "item_fluffy_hat": {
     "icon": "fluffy_hat.b7028b75.webp",
     "zh": "毛毛帽",
@@ -1313,11 +1325,23 @@
     "en": "Helm of Iron Will",
     "ru": "Helm of Iron Will"
   },
+  "item_helm_of_the_hivemind": {
+    "icon": "helm_of_the_hivemind.c04a9bb4.webp",
+    "zh": "虫巢思维头盔",
+    "en": "Helm of the Hivemind",
+    "ru": "Helm of the Hivemind"
+  },
   "item_holy_locket": {
     "icon": "holy_locket.c9699fee.webp",
     "zh": "圣洁吊坠",
     "en": "Holy Locket",
     "ru": "Holy Locket"
+  },
+  "item_horn_of_battle_greater": {
+    "icon": "horn_of_battle_greater.881cda33.webp",
+    "zh": "大战斗号角",
+    "en": "Greater Horn of Battle",
+    "ru": "Greater Horn of Battle"
   },
   "item_hurricane_pike": {
     "icon": "hurricane_pike.4fe3b981.webp",
@@ -1565,11 +1589,11 @@
     "en": "Meteor Hammer",
     "ru": "Meteor Hammer"
   },
-  "item_meteor_hammer_2": {
-    "icon": "meteor_hammer_2.df52f725.webp",
-    "zh": "星落",
-    "en": "Asteroid Hammer",
-    "ru": "Падение звезды"
+  "item_mind_breaker": {
+    "icon": "mind_breaker.5969fb93.webp",
+    "zh": "智灭",
+    "en": "Mind Breaker",
+    "ru": "Mind Breaker"
   },
   "item_minotaur_horn": {
     "icon": "minotaur_horn.3c3c8d38.webp",
@@ -1841,6 +1865,12 @@
     "en": "Prophet's Pendulum",
     "ru": "Prophet's Pendulum"
   },
+  "item_quarterstaff": {
+    "icon": "quarterstaff.6bb726f2.webp",
+    "zh": "短棍",
+    "en": "Quarterstaff",
+    "ru": "Quarterstaff"
+  },
   "item_quelling_blade": {
     "icon": "quelling_blade.442bf8f4.webp",
     "zh": "压制之刃",
@@ -1895,6 +1925,12 @@
     "en": "Reaver",
     "ru": "Reaver"
   },
+  "item_red_ledger": {
+    "icon": "red_ledger.a070e464.webp",
+    "zh": "悬红",
+    "en": "Red Ledger",
+    "ru": "Red Ledger"
+  },
   "item_refresh_core": {
     "icon": "refresh_core.ee2c4899.webp",
     "zh": "熔火核心",
@@ -1929,7 +1965,7 @@
     "icon": "revenants_brooch.41a7efa9.webp",
     "zh": "英灵胸针",
     "en": "Revenant's Brooch",
-    "ru": "Revenant's Brooch"
+    "ru": "Кулон призрака"
   },
   "item_revenants_brooch_ultra": {
     "icon": "revenants_brooch_ultra.a704e5c3.webp",
@@ -2273,6 +2309,12 @@
     "en": "Staff of Wizardry",
     "ru": "Staff of Wizardry"
   },
+  "item_starforge": {
+    "icon": "starforge.12ba1e99.webp",
+    "zh": "锻星炉",
+    "en": "Starforge",
+    "ru": "Starforge"
+  },
   "item_stonefeather_satchel": {
     "icon": "stonefeather_satchel.fd67f79e.webp",
     "zh": "石羽小包",
@@ -2284,6 +2326,12 @@
     "zh": "风暴宝器",
     "en": "Stormcrafter",
     "ru": "Stormcrafter"
+  },
+  "item_stygian_desolator": {
+    "icon": "stygian_desolator.225c8312.webp",
+    "zh": "寂灭",
+    "en": "Stygian Desolator",
+    "ru": "Stygian Desolator"
   },
   "item_swift_blink": {
     "icon": "swift_blink.e57f4f15.webp",
@@ -2446,6 +2494,12 @@
     "zh": "赫拉的神秘面纱",
     "en": "Upgraded Veil of Discord",
     "ru": "Мистическая вуаль Геры"
+  },
+  "item_vile_phial": {
+    "icon": "vile_phial.1919ca5f.webp",
+    "zh": "邪恶药瓶",
+    "en": "Vile Phial",
+    "ru": "Vile Phial"
   },
   "item_vitality_booster": {
     "icon": "vitality_booster.2f12b739.webp",

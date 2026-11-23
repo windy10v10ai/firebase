@@ -52,6 +52,6 @@ Mac 的 ZIP 与 DMG 不进 git，在发版 PR 之前先传存储桶，命令见 
 
 ## 第 6 步：下载验证
 
-用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 查这个下载地址有没有新记录。被拦时按 `references/false-positive.md` 申报。再对下载到的文件跑 `Get-AuthenticodeSignature`，状态必须是 Valid、签名人是开源证书，并核对 sha256 与发版一致。Mac 的 DMG 用 `curl` 取一次，sha256 与 API 里一致（ZIP）或与桶里一致（DMG）。
+用 Claude in Chrome 打开 dev 站 `/launch` 点下载，再用 `Get-MpThreatDetection` 查这个下载地址有没有新记录。被拦时按 `references/false-positive.md` 申报。再对下载到的文件跑 `Get-AuthenticodeSignature`，状态必须是 Valid、签名人是开源证书，并核对 sha256 与发版一致。Mac 的 DMG 用 `curl` 取一次，sha256 与 API 里一致（ZIP）或与桶里一致（DMG）。dev 站的大文件下载偶尔中途断开，加 `--http1.1` 重试，仍不完整再排查。
 
 完成条件：没有新记录或申报已提交，且签名与 sha256 核对通过。
