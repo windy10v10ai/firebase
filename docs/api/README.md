@@ -9,15 +9,17 @@ API 是一个 NestJS 应用，部署在第二代 Cloud Functions，运行时由�
 | 来源 | 入口域名 | 经过 |
 |---|---|---|
 | 网站浏览器 | `windy10v10ai.com` | Cloudflare → App Hosting（`web/next.config.ts` 的 `/api` 转发）→ 函数 |
-| 大陆玩家的浏览器 | `cn.windy10v10ai.com` | 备用入口 → 现有网站，之后同上 |
+| 大陆玩家的浏览器 | 备用域名 | 备用入口 → 现有网站，之后同上 |
 | 游戏服务器 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
 | 支付宝 / 爱发电 / Ko-fi / Stripe 回调 | `api.windy10v10ai.com` | Cloudflare → Firebase Hosting → 函数 |
-| 启动器（直连失败时） | 备用入口，地址写在启动器里 | 备用入口 → 函数 |
+| 游戏（经玩家客户端代发，见「代理路由」） | 主入口或备用入口，见下 | 备用入口 → 函数，或同主入口 |
+| 启动器 | 先主入口，失败改走备用入口，地址写在启动器里 | 备用入口 → 函数 |
 
 - 浏览器不直连 API 子域，是因为部分网络连不到它而主站域名通，取舍见 [docs/design/api-entry/README.md](../design/api-entry/README.md)
 - 网站的转发直接打函数自己的地址，配在 `web/.env` 的 `API_ORIGIN`。不指 `api.windy10v10ai.com`，那样每个请求要多穿一次 Cloudflare 和 Firebase Hosting
 - **转发服务器放宽了响应头上限**（`web/apphosting.yaml` 的 `NODE_OPTIONS`）：上游响应偶尔带着超过 Node 默认上限的头，超限时转发直接回 500。换掉转发实现时同样要放宽
 - 支付宝的回调地址以下单请求带的 `notify_url` 为准，取自 `api/.env.windy10v10ai` 的 `ALIPAY_NOTIFY_URL`，开放平台后台配的只是兜底；爱发电、Ko-fi 与 Stripe 的配在各自平台的控制台，仓库里搜不到
+- **备用入口与主入口路径一一对应**，供主入口连不上的玩家使用；后端放行备用域名的 CORS 与 Steam 登录回跳。机器与限速配置不在本仓库维护
 - **只有直连 API 域名的请求带着玩家自己的来源信息。**经网站域名转发进来的，边缘看到的是转发服务器的地址，`cf-connecting-ip` 与 `cf-ipcountry` 不代表玩家。依赖真实来源的功能只能挂在直连的那条路上
 
 ## 对外依赖
@@ -58,7 +60,7 @@ Steam 这边必须守住的规矩：
 - **`POST /api/launcher/rooms/host` 与 `POST /api/launcher/rooms/:code/join` 是启动器联机开房用的公开端点**：只负责交换双方地址，游戏数据不经过这里。exe 里放不了秘密，权限靠开房、加入时发下去的随机令牌：只有房主能取到加入请求。配了中转时，加入与房主轮询的响应附带用私钥签的中转通行证与这次加入要依次尝试的中转，中转只用公钥验签、不回调 API；加入的响应还带加入后实测选线与游戏中换路的参数，加入者的测量结果由房主随轮询转报。房间与加入请求存 Firestore，带 IP，按 TTL 字段 `expireAt` 清理，删除规则写在 `firestore.indexes.json`，随部署生效。设计见 [docs/design/launcher-multiplayer/phase-1-friend-room.md](../design/launcher-multiplayer/phase-1-friend-room.md)
 - **`POST /api/launcher/rooms/list` 是启动器列公开房间的公开端点**：只返回房间码、房里玩家的昵称头像、地图与人数，不含地址与令牌。列出心跳未过期的可加入房间，以及已开局未结束的游戏；好友房只给人数与已进行时间。玩家资料由 API 获取，不用房主上报的资料。等待房间与游戏分别缓存，游戏状态允许更长的展示延迟，以减少重复读取；跨局重叠时优先展示等待状态，避免列表与人数重复统计。握手仅处理有效窗口内的加入与测速请求，历史记录不参与轮询。新增查询索引须在 API 上线前就绪。设计见 [docs/design/launcher-multiplayer/phase-2-public-room.md](../design/launcher-multiplayer/phase-2-public-room.md)
 - **`POST /api/feedback` 是玩家反馈的公开端点**，启动器、游戏与网站共用，`source` 区分来源；网站已登录时改走 `POST /api/feedback/web`（`@AllowWeb()`），Steam ID 取登录态，报告的 `steamIdVerified` 只有这条路是 true，其余来源请求体里的 ID 都能伪造。游戏来源不带日志，改带游戏现场 `gameState`，字段名与结算一致。报告存 Firestore `FeedbackReports`，日志压缩后存 GCS 桶 `windy10v10ai-feedback`（标成 gzip 编码，下载即解压），两边都定期删除，桶的删除规则是桶上的生命周期设置，不随部署。exe 里放不了秘密，滥用靠次数上限挡：个人按 Steam ID 限频，没有 ID 时按 IP（国内代理转发的请求共用代理 IP）；另有全站每日上限，Steam ID 能伪造，这是存储费用的封顶。分类与仓库标签的对应见 [feedback-review](../../.claude/skills/feedback-review/SKILL.md) 技能，取舍见 [docs/design/launcher-feedback/phase-1-launcher.md](../design/launcher-feedback/phase-1-launcher.md)
-- 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码。它只在玩家直连 API 域名时代表玩家本人，理由见「对外入口」；设计见 [docs/design/api-entry/cn-gateway.md](../design/api-entry/cn-gateway.md)
+- 游戏客户端开局选路用 `GET /api/game/probe`，返回来源国家码，国家码为 CN 走备用入口，否则走主入口；某次请求失败重试时换另一条线路。它只在玩家直连主入口时代表玩家本人，理由见「对外入口」
 
 ### 游戏结算与本地主机来源的限额
 
@@ -88,6 +90,8 @@ Steam 这边必须守住的规矩：
 - **结算按玩家拆成自包含请求**：网址装不下整场数据，一局 N 个真人就是 N 条请求，每条 `players` 恰好一人，服务端无状态、不按 `matchId` 去重。限额与冷却照常逐人生效，是本地主机结算唯一的防线，所以不绕开 `LocalHostService.recordGameEnd`
 - **代发结算只发按玩家的 GA4 事件**（`gameEndPlayerBot`），不发整场的 `gameEndMatch`：单玩家请求凑不齐全场数据。全场人数由客户端在报文里另带 `playerCount`，`player_count` 与行为分的组队判定都读它。这条路径没有机器人条目，是已知偏差；限额记录里的 `ipActivity` 记的是代发玩家的 IP，同一局所有玩家相同
 - **只接原路由已经 `@AllowLocal()` 的写入**：代理 controller 整体放行本地 key、直接调 service，绕得过原路由的认证。花积分的属性加点与重置、觉醒解锁与随机只认网页登录态，不进代理。原路由在 controller 里做的本地来源限制要先下沉到 service，两条路径调同一个方法
+- **每名玩家的客户端按线路各建一组网页控件**，选线规则见「对外入口」
+- **中转页 `/api/proxy/bridge` 带 `?country=1` 时，就绪标题带国家码**，供游戏决定跳转网站用主域名还是备用域名；不带参数时行为不变
 - **代理路由不是原路由的转发**：字段集与错误语义都可以不同，如 `/proxy/player-info` 查无此人返回空对象而不是 404。改原路由不会自动改到它
 - **429 限频按 message 映射成专用错误码**：反馈的个人限频与全站日上限在代发路由上变成 `ERR:too_many_reports`、`ERR:daily_limit_reached`，游戏据此给玩家不同提示；其他 429 仍归 `internal`
 - **title 有长度上限，随天数增长的字段不进开局包**：开局与刷新返回的每日任务快照不带历史，历史由 `GET /daily-task/:steamId` 单独取；代发版 `/proxy/daily-task` 只回最近几天的历史、不含开局已下发的今日字段。超限时记 warn 日志（`[Proxy] title too long`）
