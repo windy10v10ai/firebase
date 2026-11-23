@@ -302,6 +302,9 @@ function valueRows(abilityName, kv, labelOf, damageType) {
   return rows;
 }
 
+// Valve 改了数值键名却漏改个别语言的描述文案，占位符仍写旧名
+const PLACEHOLDER_ALIASES = { tower_dps_pct: 'tower_dps_penalty_pct' };
+
 const levelsOrNull = (raw) =>
   raw && splitLevels(raw).some((v) => Number(v) !== 0) ? splitLevels(raw) : null;
 
@@ -367,7 +370,10 @@ export function createAbilityReader(game, version, langs, kind = 'abilities') {
       let key = name.toLowerCase();
       let stripped = false;
       for (;;) {
-        const hit = map.get(key) ?? map.get(key.replace(/_tooltip$/, ''));
+        const hit =
+          map.get(key) ??
+          map.get(key.replace(/_tooltip$/, '')) ??
+          map.get(PLACEHOLDER_ALIASES[key]);
         if (hit !== undefined) return { value: hit, stripped };
         if (!key.startsWith('bonus_')) return { value: undefined, stripped: false };
         key = key.slice('bonus_'.length);

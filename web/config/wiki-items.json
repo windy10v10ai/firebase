@@ -1,7 +1,7 @@
 {
   "source": {
-    "gameCommit": "8659c7d82e2bb8b3d192f9edde5f7881aa5c9a2a",
-    "dotaVersion": "7.41f"
+    "gameCommit": "ac46175db21eef61395fbb4727996d604893263f",
+    "dotaVersion": "7.42"
   },
   "priceTiers": [
     2000,
@@ -151,6 +151,10 @@
       "tier": 3
     },
     {
+      "name": "item_horn_of_battle_greater",
+      "tier": 3
+    },
+    {
       "name": "item_tome_of_knowledge",
       "tier": 2
     },
@@ -241,7 +245,7 @@
     {
       "name": "item_aether_lens_2",
       "section": "equipment",
-      "price": 3200,
+      "price": 3450,
       "tier": 2
     },
     {
@@ -312,12 +316,6 @@
     },
     {
       "name": "item_veil_of_discord_2",
-      "section": "equipment",
-      "price": 6000,
-      "tier": 3
-    },
-    {
-      "name": "item_meteor_hammer_2",
       "section": "equipment",
       "price": 6000,
       "tier": 3
@@ -419,6 +417,12 @@
       "tier": 3
     },
     {
+      "name": "item_revenants_brooch_ultra",
+      "section": "equipment",
+      "price": 8700,
+      "tier": 3
+    },
+    {
       "name": "item_bloodstone",
       "section": "equipment",
       "price": 8900,
@@ -461,19 +465,7 @@
       "tier": 3
     },
     {
-      "name": "item_revenants_brooch_ultra",
-      "section": "equipment",
-      "price": 10000,
-      "tier": 3
-    },
-    {
       "name": "item_shotgun_v2",
-      "section": "equipment",
-      "price": 10000,
-      "tier": 3
-    },
-    {
-      "name": "item_arcane_octarine_core",
       "section": "equipment",
       "price": 10000,
       "tier": 3
@@ -489,6 +481,18 @@
       "section": "equipment",
       "price": 10000,
       "tier": 3
+    },
+    {
+      "name": "item_arcane_octarine_core",
+      "section": "equipment",
+      "price": 10250,
+      "tier": 4
+    },
+    {
+      "name": "item_refresh_core",
+      "section": "equipment",
+      "price": 19450,
+      "tier": 4
     },
     {
       "name": "item_overwhelming_blink_2",
@@ -689,12 +693,6 @@
       "tier": 4
     },
     {
-      "name": "item_refresh_core",
-      "section": "equipment",
-      "price": 19200,
-      "tier": 4
-    },
-    {
       "name": "item_wasp_golden",
       "section": "equipment",
       "price": 20000,
@@ -805,7 +803,7 @@
     {
       "name": "item_time_gem",
       "section": "equipment",
-      "price": 51600,
+      "price": 51850,
       "tier": 5
     },
     {

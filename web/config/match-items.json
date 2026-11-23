@@ -1,12 +1,12 @@
 {
   "source": {
-    "gameCommit": "8659c7d82e2bb8b3d192f9edde5f7881aa5c9a2a",
-    "dotaVersion": "7.41f"
+    "gameCommit": "ac46175db21eef61395fbb4727996d604893263f",
+    "dotaVersion": "7.42"
   },
   "items": [
     {
       "name": "item_abyssal_blade",
-      "price": 6250
+      "price": 6150
     },
     {
       "name": "item_aegis",
@@ -18,7 +18,7 @@
     },
     {
       "name": "item_aether_lens",
-      "price": 2275
+      "price": 2100
     },
     {
       "name": "item_angels_demise",
@@ -45,6 +45,10 @@
       "price": null
     },
     {
+      "name": "item_balmhook",
+      "price": null
+    },
+    {
       "name": "item_basher",
       "price": 2875
     },
@@ -54,7 +58,7 @@
     },
     {
       "name": "item_blade_mail",
-      "price": 2400
+      "price": 2350
     },
     {
       "name": "item_blink",
@@ -62,11 +66,15 @@
     },
     {
       "name": "item_bloodthorn",
-      "price": 6400
+      "price": 6250
     },
     {
       "name": "item_boots_of_bearing",
       "price": 4225
+    },
+    {
+      "name": "item_brick",
+      "price": null
     },
     {
       "name": "item_broom_handle",
@@ -74,7 +82,7 @@
     },
     {
       "name": "item_butterfly",
-      "price": 5450
+      "price": 5000
     },
     {
       "name": "item_ceremonial_robe",
@@ -147,10 +155,6 @@
     {
       "name": "item_desolator",
       "price": 3500
-    },
-    {
-      "name": "item_desolator_2",
-      "price": null
     },
     {
       "name": "item_devastator",
@@ -329,6 +333,10 @@
       "price": null
     },
     {
+      "name": "item_flicker",
+      "price": null
+    },
+    {
       "name": "item_foragers_health",
       "price": null
     },
@@ -370,7 +378,7 @@
     },
     {
       "name": "item_guardian_greaves",
-      "price": 4450
+      "price": 4350
     },
     {
       "name": "item_gungir",
@@ -398,10 +406,14 @@
     },
     {
       "name": "item_heavens_halberd",
-      "price": 3300
+      "price": 2400
     },
     {
       "name": "item_heavy_blade",
+      "price": null
+    },
+    {
+      "name": "item_helm_of_the_hivemind",
       "price": null
     },
     {
@@ -426,7 +438,7 @@
     },
     {
       "name": "item_kaya",
-      "price": 2100
+      "price": 2000
     },
     {
       "name": "item_kobold_cup",
@@ -462,11 +474,11 @@
     },
     {
       "name": "item_manta",
-      "price": 4650
+      "price": 4550
     },
     {
       "name": "item_mask_of_madness",
-      "price": 1900
+      "price": 1800
     },
     {
       "name": "item_medallion_of_courage",
@@ -482,7 +494,11 @@
     },
     {
       "name": "item_meteor_hammer",
-      "price": 2850
+      "price": 2750
+    },
+    {
+      "name": "item_mind_breaker",
+      "price": null
     },
     {
       "name": "item_minotaur_horn",
@@ -526,7 +542,7 @@
     },
     {
       "name": "item_orb_of_corrosion",
-      "price": 1050
+      "price": 880
     },
     {
       "name": "item_orb_of_destruction",
@@ -554,7 +570,7 @@
     },
     {
       "name": "item_pavise",
-      "price": 1350
+      "price": 1250
     },
     {
       "name": "item_penta_edged_sword",
@@ -605,6 +621,10 @@
       "price": null
     },
     {
+      "name": "item_red_ledger",
+      "price": null
+    },
+    {
       "name": "item_refresher",
       "price": 5000
     },
@@ -618,7 +638,7 @@
     },
     {
       "name": "item_revenants_brooch",
-      "price": 3300
+      "price": 2000
     },
     {
       "name": "item_riftshadow_prism",
@@ -646,7 +666,7 @@
     },
     {
       "name": "item_sange",
-      "price": 2100
+      "price": 2000
     },
     {
       "name": "item_satanic",
@@ -721,6 +741,10 @@
       "price": null
     },
     {
+      "name": "item_stygian_desolator",
+      "price": null
+    },
+    {
       "name": "item_swift_blink",
       "price": 6800
     },
@@ -746,11 +770,15 @@
     },
     {
       "name": "item_urn_of_shadows",
-      "price": 825
+      "price": 875
     },
     {
       "name": "item_vanguard",
       "price": 1700
+    },
+    {
+      "name": "item_vile_phial",
+      "price": null
     },
     {
       "name": "item_vladmir",
@@ -770,7 +798,7 @@
     },
     {
       "name": "item_yasha",
-      "price": 2100
+      "price": 2000
     }
   ]
 }

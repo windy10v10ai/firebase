@@ -4,8 +4,8 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: '8659c7d82e2bb8b3d192f9edde5f7881aa5c9a2a',
-  dotaVersion: '7.41f',
+  gameCommit: 'ac46175db21eef61395fbb4727996d604893263f',
+  dotaVersion: '7.42',
 } as const;
 
 /** 俄文缺译的条目在生成时已经落成英文 */
@@ -301,9 +301,9 @@ export const AWAKEN_HEROES: AwakenHero[] = [
       ru: "<font color='#d000ff'>Дикие топоры: пробуждение</font>",
     },
     desc: {
-      zh: "兽王投出他的斧头然后召回它们，切开飞过的敌人和树木。每把飞斧对同一个敌人只能击中一次，并且使受到来自兽王和其单位的伤害增加。减益持续时间受状态抗性影响。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方单位时自动朝最远的敌方英雄投斧。<br><font color='#d000ff'>觉醒强化：</font>伤害加深持续时间延长，飞斧以极快速度飞出并返回，斯洛姆战鼓的伤害，治疗和原始咆哮提供的敲鼓层数一并提高。",
-      en: "Beastmaster sends his axes flying and calls them home again, slicing through enemy units and trees along their path. Each axe can hit an enemy once, and amplifies subsequent damage from Beastmaster and his units. Debuff duration is affected by Status Resistance.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, throws the axes toward the farthest enemy hero whenever an enemy unit is within cast range.<br><font color='#d000ff'>AWAKENED:</font> Damage amplification lasts longer, the axes travel out and back at extreme speed, and Drums of Slom gains increased damage, healing, and drum stacks from Primal Roar.",
-      ru: "Герой швыряет топоры, которые прорубают деревья и противников на своём пути и возвращаются обратно. Каждый топор задевает одного врага лишь единожды и увеличивает урон, получаемый от героя и его существ. Длительность эффекта зависит от сопротивления эффектам.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении топоры автоматически летят в самого дальнего вражеского героя, если в радиусе применения есть вражеские единицы.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> Длительность усиления получаемого урона повышена, топоры почти мгновенно вылетают и возвращаются, а Барабаны Слома получают увеличенные урон, лечение и число ударов барабана от Первобытного рёва.",
+      zh: "兽王投出他的斧头然后召回它们，切开飞过的敌人和树木。每把飞斧对同一个敌人只能击中一次，并且使受到来自兽王和其单位的伤害增加。减益持续时间受状态抗性影响。<br><br><font color='#00CED1'>自动施法：</font>开启后，施法距离内出现敌方单位时自动朝最远的敌方英雄投斧。<br><font color='#d000ff'>觉醒强化：</font>伤害加深持续时间延长，飞斧以极快速度飞出并返回。",
+      en: "Beastmaster sends his axes flying and calls them home again, slicing through enemy units and trees along their path. Each axe can hit an enemy once, and amplifies subsequent damage from Beastmaster and his units. Debuff duration is affected by Status Resistance.<br><br><font color='#00CED1'>AUTOCAST:</font> When enabled, throws the axes toward the farthest enemy hero whenever an enemy unit is within cast range.<br><font color='#d000ff'>AWAKENED:</font> Damage amplification lasts longer, the axes travel out and back at extreme speed.",
+      ru: "Герой швыряет топоры, которые прорубают деревья и противников на своём пути и возвращаются обратно. Каждый топор задевает одного врага лишь единожды и увеличивает урон, получаемый от героя и его существ. Длительность эффекта зависит от сопротивления эффектам.<br><br><font color='#00CED1'>АВТОПРИМЕНЕНИЕ:</font> При включении топоры автоматически летят в самого дальнего вражеского героя, если в радиусе применения есть вражеские единицы.<br><font color='#d000ff'>ПРОБУЖДЕНИЕ:</font> Длительность усиления получаемого урона повышена, топоры почти мгновенно вылетают и возвращаются.",
     },
     ability: {
       behavior: 'autocast',
