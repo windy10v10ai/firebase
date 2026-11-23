@@ -5895,7 +5895,7 @@
           "label": {
             "zh": "距离：",
             "en": "DISTANCE:",
-            "ru": "РАССТОЯНИЕ:"
+            "ru": "ДАЛЬНОСТЬ:"
           },
           "levels": [
             "500",
@@ -6918,7 +6918,7 @@
   },
   "monkey_king_boundless_strike": {
     "desc": {
-      "zh": "齐天大圣让金箍棒变大，并将其挥起猛击地面，<font color='#2dd5e4'>眩晕</font>一条直线上的敌人并造成额外伤害和基于他普通攻击的致命一击伤害。具有克敌机先效果。",
+      "zh": "齐天大圣让金箍棒变大，并将其挥起猛击地面，<font color='#2dd5e4'>眩晕</font>一条直线上的敌人并造成额外伤害和基于他普通攻击的致命一击伤害。具有克敌机先效果。<br><br><h1>阿哈利姆魔晶</h1>擎天一击对沿途和末端的敌人施加乾坤之跃，威力为最长持续施法时间的35%。擎天一击设为<font color=\"#FF0000\">多样施法</font>（右键点击技能栏图标）后，齐天大圣还会跳跃至目标地点，对落点附近造成乾坤之跃的伤害。",
       "en": "Monkey King enlarges his staff and slams it against the ground, stunning enemies in a line and damaging them with bonus damage and a critical hit based on his attack. Has True Strike.<br><br><h1>Aghanim's Shard</h1>Boundless Strike applies Primal Spring with 35% of the max channeling duration power to enemies along the staff and at the end of the staff. When Boundless Strike is set to alt-cast, Monkey King leaps to the target position and Primal Spring damage is dealt around the jump area instead.",
       "ru": "Герой увеличивает свой посох и бьёт им по земле, оглушая всех задетых врагов. Этим ударом нельзя промахнуться, и он наносит как базовый урон, так и критический урон от атаки.<br><br><h1>Aghanim's Shard</h1>Накладывает на врагов, задетых посохом или находящихся вокруг его конца, эффект способности Primal Spring, подготовленной на 35%. Также добавляет альтернативное применение, при котором после удара посохом герой прыгнет в указанную точку и наложит эффект Primal Spring там."
     },
@@ -11969,7 +11969,7 @@
           "label": {
             "zh": "智力窃取：",
             "en": "INT STEAL:",
-            "ru": "ПОХИЩЕНИЕ ИНТЕЛЛЕКТА:"
+            "ru": "ВРЕМЕННАЯ КРАЖА ИНТЕЛЛЕКТА:"
           },
           "levels": [
             "2",
@@ -13293,7 +13293,7 @@
           "label": {
             "zh": "施法距离：",
             "en": "CAST RANGE:",
-            "ru": "ДАЛЬНОСТЬ ПРИМЕНЕНИЯ:"
+            "ru": "ДОП. ДАЛЬНОСТЬ ПРИМЕНЕНИЯ:"
           },
           "levels": [
             "50",
@@ -13335,9 +13335,9 @@
   },
   "monkey_king_jingu_mastery": {
     "desc": {
-      "zh": "Monkey King's attacks awaken the Jingu Bang's power. Upon the number of required hits on the same enemy hero, Monkey King earns 4 charged attacks that have bonus damage and lifesteal.",
+      "zh": "齐天大圣的攻击唤醒了金箍棒的力量。对同个敌方英雄达到所需的攻击次数后，齐天大圣的下4次攻击得到加强，拥有攻击力加成和吸血效果。",
       "en": "Monkey King's attacks awaken the Jingu Bang's power. Upon the number of required hits on the same enemy hero, Monkey King earns 4 charged attacks that have bonus damage and lifesteal.",
-      "ru": "Monkey King's attacks awaken the Jingu Bang's power. Upon the number of required hits on the same enemy hero, Monkey King earns 4 charged attacks that have bonus damage and lifesteal."
+      "ru": "Удары героя пробуждают мощь Цзиньгубана. Совершив несколько атак по одному и тому же вражескому герою, владелец способности получает 4 усиленные атаки с дополнительным уроном и вампиризмом."
     },
     "ability": {
       "behavior": "passive",
@@ -15624,7 +15624,7 @@
           "label": {
             "zh": "移动速度转为伤害：",
             "en": "MOVEMENT SPEED AS DAMAGE:",
-            "ru": "МНОЖИТЕЛЬ УРОНА ЗА СКОРОСТЬ:"
+            "ru": "УРОН ЗА СКОРОСТЬ ПЕРЕДВИЖЕНИЯ:"
           },
           "levels": [
             "24",

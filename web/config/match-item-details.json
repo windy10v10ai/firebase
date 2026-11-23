@@ -56,7 +56,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对近战有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅近战）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Melee Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем бою)</font>"
           },
@@ -534,7 +534,7 @@
   },
   "item_balmhook": {
     "desc": {
-      "zh": "<h1>Passive: Shepherd's Protection</h1>Targeting a friendly unit with a spell increases their Health Regeneration by <b>240</b> for <b>60</b> seconds.",
+      "zh": "<h1>被动：牧羊人保护</h1>以友方单位为目标的技能会使其生命恢复提升<b>240</b>，持续<b>60</b>秒。",
       "en": "<h1>Passive: Shepherd's Protection</h1>Targeting a friendly unit with a spell increases their Health Regeneration by <b>240</b> for <b>60</b> seconds.",
       "ru": "<h1>Пассивное: Shepherd's Protection</h1>Следующая направленная способность, применённая на союзника, даст ему +<b>240</b> к восстановлению здоровья на <b>60</b> сек."
     },
@@ -889,7 +889,7 @@
   },
   "item_brick": {
     "desc": {
-      "zh": "<h1>Active: Brick</h1>Tosses a brick at the target enemy, removing <b>2000</b> from any active barrier and dealing <b>450</b> physical damage.",
+      "zh": "<h1>主动：板砖</h1>向目标敌人投掷一块砖头，移除<b>2000</b>点目标身上任意生效的护盾。并造成<b>450</b>点物理伤害。",
       "en": "<h1>Active: Brick</h1>Tosses a brick at the target enemy, removing <b>2000</b> from any active barrier and dealing <b>450</b> physical damage.",
       "ru": "<h1>Активное: Brick</h1>Владелец бросает кирпич в выбранного врага, снижая здоровье его барьеров на <b>2000</b> и нанося ему <b>450</b> физического урона."
     },
@@ -904,7 +904,11 @@
         "10"
       ],
       "manaCost": null,
-      "lore": null
+      "lore": {
+        "zh": "疯狂的简单答案。",
+        "en": "A simple answer for madness",
+        "ru": "Простой ответ на безумие."
+      }
     }
   },
   "item_broom_handle": {
@@ -922,7 +926,7 @@
       "values": [
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对近战有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅近战）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Melee Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем бою)</font>"
           },
@@ -1053,7 +1057,7 @@
   },
   "item_ceremonial_robe": {
     "desc": {
-      "zh": "<h1>被动：祭礼光环</h1>降低敌人<b>50%</b>状态抗性和<b>50%</b>魔法抗性。<br><br>作用范围：<b>850</b>",
+      "zh": "<h1>被动：祭礼光环</h1>降低敌人<b>50%</b><font color='#b99012'>状态抗性</font>和<b>50%</b>魔法抗性。<br><br>作用范围：<b>850</b>",
       "en": "<h1>Passive: Ceremonial Aura</h1>Lowers enemy Status Resistance by <b>50%</b> and Magic Resistance by <b>50%</b>.<br><br>Radius: <b>850</b>",
       "ru": "<h1>Пассивное: Ceremonial Aura</h1> Снижает сопротивление эффектам на <b>50%</b> и сопротивление магии на <b>50%</b> у врагов в радиусе <b>850</b>."
     },
@@ -1985,7 +1989,7 @@
   },
   "item_devastator": {
     "desc": {
-      "zh": "<h1>Passive: Witch Blade</h1> Causes your next attack to apply a poison for <b>4</b> seconds, slowing by <b>30%</b> and dealing <b>1.00</b>x your intelligence as damage every second. This attack has True Strike and can affect buildings. Deals <b>40%</b> damage to buildings. <br><br><h1>Passive: Magic Corruption</h1> Your attacks reduce the enemy's Magic resistance by <b>25%</b> for <b>4</b> seconds.",
+      "zh": "<h1>被动：巫师之刃</h1>使下次攻击施加毒素，减缓<b>30%</b>移动速度，并且每秒造成<b>1.00</b>倍智力值的伤害，持续<b>4</b>秒。攻击具有克敌机先效果，并且可以作用于建筑。对建筑造成<b>40%</b>伤害。<br><br><h1>被动：法力腐蚀</h1>攻击会降低敌人<b>25%</b>魔法抗性，持续<b>4</b>秒。",
       "en": "<h1>Passive: Witch Blade</h1> Causes your next attack to apply a poison for <b>4</b> seconds, slowing by <b>30%</b> and dealing <b>1.00</b>x your intelligence as damage every second. This attack has True Strike and can affect buildings. Deals <b>40%</b> damage to buildings. <br><br><h1>Passive: Magic Corruption</h1> Your attacks reduce the enemy's Magic resistance by <b>25%</b> for <b>4</b> seconds.",
       "ru": "<h1>Пассивное: Witch Blade</h1> Следующая атака отравит жертву на <b>4</b> сек. Яд замедляет её на <b>30%</b> и каждую секунду наносит урон, равный интеллекту владельца, помноженному на <b>1.00</b>. Этой атакой невозможно промахнуться, и она наносит постройкам только <b>40%</b> урона.<br><br><h1>Пассивное: Magic Corruption</h1> Атаки на <b>4</b> сек. снижают сопротивление магии жертвы на <b>25%</b>."
     },
@@ -2102,7 +2106,7 @@
   },
   "item_diffusal_blade": {
     "desc": {
-      "zh": "<h1>Active: Inhibit</h1> Targets an enemy, slowing it for <b>4.0</b> seconds.<br><br><h1>Passive: Manabreak</h1>Each attack burns <b>40</b> mana from the target, and deals <b>1</b> physical damage per burned mana.",
+      "zh": "<h1>主动：阻止</h1> 以敌方单位为目标，减缓其移动速度，持续<b>4.0</b>秒。<br><br><h1>被动：破法</h1>每次攻击将燃烧目标<b>40</b>点魔法，而且每燃烧一点魔法都会造成<b>1</b>点物理伤害。",
       "en": "<h1>Active: Inhibit</h1> Targets an enemy, slowing it for <b>4.0</b> seconds.<br><br><h1>Passive: Manabreak</h1>Each attack burns <b>40</b> mana from the target, and deals <b>1</b> physical damage per burned mana.",
       "ru": "<h1>Активное: Inhibit</h1> Замедляет противника на <b>4.0</b> сек.<br><br><h1>Пассивное: Manabreak</h1> Каждая атака сжигает <b>40</b> маны врага и наносит ему <b>1</b> физического урона за единицу сожжённой маны."
     },
@@ -2157,7 +2161,7 @@
   },
   "item_disperser": {
     "desc": {
-      "zh": "<h1>Active: Suppress</h1> Dispels both the wearer and the target. Enemy targets are slowed for <b>4.0</b> seconds. Allied targets gain bonus movespeed and <b>40%</b> slow resistance for <b>4.0</b> seconds. Caster is always granted the ally benefit on cast.<br><br>Both movement speed reduction and increase start at <b>100%</b> and gradually decrease to 0% over the course of the buff duration.<br>Dispel Type: Basic Dispel<br><br><h1>Passive: Manabreak</h1>Each attack burns <b>40</b> mana from the target, and deals <b>1.0</b> physical damage per burned mana.",
+      "zh": "<h1>主动：抑制</h1>同时驱散佩戴者和目标。敌方目标会被减速<b>4.0</b>秒，友方目标则会提升移动速度和<b>40%</b><font color='#9ec8e3'>减速抗性</font>，持续<b>4.0</b>秒。施法者总是会获得友军的加成效果。<br><br>移动速度减缓和提升效果在状态持续时间内初始均为<b>100%</b>，并且逐渐减少至0。<br>驱散类型：弱驱散<br><br><h1>被动：破法</h1>每次攻击将燃烧目标<b>40</b>点魔法，而且每燃烧一点魔法都会造成<b>1.0</b>点物理伤害。",
       "en": "<h1>Active: Suppress</h1> Dispels both the wearer and the target. Enemy targets are slowed for <b>4.0</b> seconds. Allied targets gain bonus movespeed and <b>40%</b> slow resistance for <b>4.0</b> seconds. Caster is always granted the ally benefit on cast.<br><br>Both movement speed reduction and increase start at <b>100%</b> and gradually decrease to 0% over the course of the buff duration.<br>Dispel Type: Basic Dispel<br><br><h1>Passive: Manabreak</h1>Each attack burns <b>40</b> mana from the target, and deals <b>1.0</b> physical damage per burned mana.",
       "ru": "<h1>Активное: Suppress</h1> Применяет на цель и на владельца развеивание. Если целью был враг, также замедляет его передвижение на <b>4.0</b> сек., а если союзник — ускоряет на <b>4.0</b> сек. и даёт +<b>40%</b> к сопротивлению замедлениям. Бонусы для союзника накладываются и на самого владельца.<br><br>И замедление, и ускорение составляют <b>100%</b> в момент применения, а по мере действия постепенно снижаются до нуля.<br>Тип развеивания: нормальное<br><br><h1>Пассивное: Manabreak</h1> Каждая атака сжигает <b>40</b> маны врага и наносит ему <b>1.0</b> физического урона за единицу сожжённой маны."
     },
@@ -2319,7 +2323,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅远程）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
           },
@@ -2333,7 +2337,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对近战有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅近战）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Melee Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем бою)</font>"
           },
@@ -2525,7 +2529,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅远程）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
           },
@@ -2541,7 +2545,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对近战有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅近战）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Melee Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем бою)</font>"
           },
@@ -4391,7 +4395,7 @@
   },
   "item_gale_guard": {
     "desc": {
-      "zh": "<h1>主动：飓风护盾</h1>把施法者包裹在<b>2500</b>点全伤害护盾中，抵挡<b>75%</b>的所受伤害。最多持续<b>10</b>秒，生效时护盾还会提供<b>50%</b>减速抗性。",
+      "zh": "<h1>主动：飓风护盾</h1>把施法者包裹在<b>2500</b>点<font color='#b97812'>全伤害护盾</font>中，抵挡<b>75%</b>的所受伤害。最多持续<b>10</b>秒，生效时护盾还会提供<b>50%</b>减速抗性。",
       "en": "<h1>Active: Cyclonic Shield</h1> Envelops the caster in an all damage barrier that absorbs <b>75%</b> of incoming damage up to a max of <b>2500</b>. Lasts for up to <b>10</b> seconds and while the barrier is active you have <b>50%</b> Slow Resistance.",
       "ru": "<h1>Активное: Cyclonic Shield</h1>Владельца укрывает ветровой барьер, поглощающий <b>75%</b> от урона всех типов и увеличивающий сопротивление замедлениям на <b>50%</b>. Барьер держится <b>10</b> сек. или пока не заблокирует <b>2500</b> урона."
     },
@@ -4764,7 +4768,7 @@
   },
   "item_harmonizer": {
     "desc": {
-      "zh": "<h1>Passive: Balance</h1> Gain <b>7%</b> spell mana cost reduction for every ability off cooldown and <b>9%</b> Spell Lifesteal for every ability on cooldown.",
+      "zh": "<h1>被动：均衡</h1>每个不在冷却的英雄技能提供<b>7%</b>魔法消耗降低，每个在冷却的技能提供<b>9%</b>技能吸血。",
       "en": "<h1>Passive: Balance</h1> Gain <b>7%</b> spell mana cost reduction for every ability off cooldown and <b>9%</b> Spell Lifesteal for every ability on cooldown.",
       "ru": "<h1>Пассивное: Balance</h1> За каждую способность, не находящуюся на перезарядке, владелец получает +<b>7%</b> к уменьшению расхода маны, а за каждую способность на перезарядке — +<b>9%</b> к вампиризму заклинаниями."
     },
@@ -4837,7 +4841,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对近战有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅近战）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Melee Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в ближнем бою)</font>"
           },
@@ -5045,7 +5049,7 @@
   },
   "item_helm_of_the_hivemind": {
     "desc": {
-      "zh": "<h1>Passive: Brood Awakening</h1>Merge consciousness with an unknown monarch, gaining <b>180</b> cast range. Bonus cast range is increased by <b>120</b> and maximum health is decreased by <b>0%</b> for every assimilated hero on both teams.",
+      "zh": "<h1>被动：巢群觉醒</h1>与一位未知的君主融合意识，获得<b>180</b>施法距离。场上双方每有一名同化的英雄，施法距离加成就会提升<b>120</b>，最大生命值则减少<b>0%</b>。",
       "en": "<h1>Passive: Brood Awakening</h1>Merge consciousness with an unknown monarch, gaining <b>180</b> cast range. Bonus cast range is increased by <b>120</b> and maximum health is decreased by <b>0%</b> for every assimilated hero on both teams.",
       "ru": "<h1>Пассивное: Brood Awakening</h1>Владелец сливается разумом с неизвестным монархом, получая +<b>180</b> к дальности заклинаний. С каждым вступившим в слияние героем, включая владельца и противников, этот бонус увеличивается на <b>120</b>, но их максимальное здоровье уменьшается на <b>0%</b>."
     },
@@ -5132,7 +5136,7 @@
         },
         {
           "label": {
-            "zh": "攻击距离<font color='#7d7d7d'>（仅对远程有效）</font>",
+            "zh": "攻击距离<font color='#7d7d7d'>（仅远程）</font>",
             "en": "Attack Range <font color='#7d7d7d'>(Ranged Only)</font>",
             "ru": "к дальности атаки <font color='#7d7d7d'>(в дальнем бою)</font>"
           },
@@ -5160,7 +5164,7 @@
   },
   "item_idol_of_screeauk": {
     "desc": {
-      "zh": "<h1>主动：飞天之幻</h1>提供<b>60%</b>减速抗性、相位移动和<b>40%</b>闪避，持续<b>6.5</b>秒。",
+      "zh": "<h1>主动：飞天之幻</h1>提供<b>60%</b><font color='#9ec8e3'>减速抗性</font>、相位移动和<b>40%</b>闪避，持续<b>6.5</b>秒。",
       "en": "<h1>Active: False Flight</h1> Gain <b>60%</b> slow resistance, phased movement, and <b>40%</b> evasion for <b>6.5</b> seconds.",
       "ru": "<h1>Активное: False Flight</h1> Увеличивает сопротивление замедлениям на <b>60%</b>, позволяет проходить сквозь существ и даёт +<b>40%</b> к уклонению. Длительность: <b>6.5</b> сек."
     },
@@ -5943,7 +5947,7 @@
   },
   "item_meteor_hammer": {
     "desc": {
-      "zh": "<h1>Active: Meteor Hammer</h1> CHANNELED - After a <b>2</b>s channel, summons a meteor after <b>.5</b>s that strikes a <b>400</b> AoE, stunning enemies for <b>0.75</b>s and dealing <b>150</b> impact damage. Continues to deal <b>60</b> damage per second for <b>6</b>s.<br><br>Non-building units are also slowed by <b>15%</b> for <b>6</b>s.<br><br>Deals <b>75%</b> damage to buildings.",
+      "zh": "<h1>主动：陨星锤</h1>持续施法 - 经过<b>2</b>秒持续施法，<b>.5</b>秒后召唤一颗流星，打击<b>400</b>范围内敌人，造成<b>0.75</b>秒眩晕和<b>150</b>点冲击伤害。持续造成<b>60</b>点每秒伤害，持续<b>6</b>秒。<br><br>非建筑单位还会被减速<b>15%</b>，持续<b>6</b>秒。<br><br>对建筑造成<b>75%</b>伤害。",
       "en": "<h1>Active: Meteor Hammer</h1> CHANNELED - After a <b>2</b>s channel, summons a meteor after <b>.5</b>s that strikes a <b>400</b> AoE, stunning enemies for <b>0.75</b>s and dealing <b>150</b> impact damage. Continues to deal <b>60</b> damage per second for <b>6</b>s.<br><br>Non-building units are also slowed by <b>15%</b> for <b>6</b>s.<br><br>Deals <b>75%</b> damage to buildings.",
       "ru": "<h1>Активное: Meteor Hammer</h1> ПРЕРЫВАЕМАЯ — в течение <b>2</b> сек. призывает метеорит, который через <b>.5</b> сек. бьёт по области радиусом <b>400</b>. Удар наносит врагам <b>150</b> урона и оглушает их на <b>0.75</b> сек., а также на <b>6</b> сек. поджигает их, отчего они получают ещё <b>60</b> урона каждую секунду.<br><br>Действует на постройки, но наносит им <b>75%</b> урона.<br><br>Подожжённые враги, не являющиеся постройками, также замедляются на <b>15%</b>."
     },
@@ -6377,7 +6381,7 @@
   },
   "item_nullifier": {
     "desc": {
-      "zh": "<h1>Active: Nullify</h1> Dispels the target and applies a debuff for <b>4.0</b> seconds. Continuously dispels and slows the target, and the target is less susceptible to forced movement effects applied by their allies.<br><br>Dispel Type: Basic Dispel",
+      "zh": "<h1>主动：否决</h1>驱散目标身上的效果，并且施加负面效果，持续<b>4.0</b>秒。期间持续驱散和减速目标，而且目标受到其友军施加的强制位移效果减少。<br><br>驱散类型：弱驱散",
       "en": "<h1>Active: Nullify</h1> Dispels the target and applies a debuff for <b>4.0</b> seconds. Continuously dispels and slows the target, and the target is less susceptible to forced movement effects applied by their allies.<br><br>Dispel Type: Basic Dispel",
       "ru": "<h1>Активное: Nullify</h1>Подавляет цель: замедляет её, непрерывно развеивает с неё положительные эффекты и снижает дальность отталкиваний, применяемых на неё союзниками. Длительность: <b>4.0</b> сек.<br><br>Тип развеивания: нормальное"
     },
@@ -6424,6 +6428,19 @@
           },
           "levels": [
             "10"
+          ],
+          "percent": true,
+          "aoe": false,
+          "spellAmp": false
+        },
+        {
+          "label": {
+            "zh": "强制位移减少：",
+            "en": "FORCED MOVEMENT REDUCTION:",
+            "ru": "СНИЖЕНИЕ ОТТАЛКИВАНИЙ:"
+          },
+          "levels": [
+            "60"
           ],
           "percent": true,
           "aoe": false,
@@ -7310,7 +7327,7 @@
   },
   "item_red_ledger": {
     "desc": {
-      "zh": "<h1>Active: Most Wanted</h1>Generates a list of hero bounties. Killing a hero on the list grants <b>100</b> gold plus an additional <b>60</b> for every level higher the target is than you. Assists award <b>200%</b> of the bounty.",
+      "zh": "<h1>主动：悬赏</h1>生成一份英雄赏金名单。击杀名单上的英雄可获得<b>100</b>金，目标每比你高一级都将额外获得<b>60</b>金。助攻将获得<b>200%</b>赏金。",
       "en": "<h1>Active: Most Wanted</h1>Generates a list of hero bounties. Killing a hero on the list grants <b>100</b> gold plus an additional <b>60</b> for every level higher the target is than you. Assists award <b>200%</b> of the bounty.",
       "ru": "<h1>Активное: Most Wanted</h1>Создаёт список заказов. Убийство героя из списка даст владельцу дополнительное золото в размере <b>100</b> + <b>60</b> за каждый уровень, на который жертва выше владельца. Помощь в убийстве даст только <b>200%</b> от награды."
     },
@@ -7453,7 +7470,7 @@
   },
   "item_riftshadow_prism": {
     "desc": {
-      "zh": "<h1>Active: Refract</h1> Spend <b>12%</b> of your current life total to create a full health strong illusion that lasts for 20 seconds. The illusion has <b>60%</b> outgoing damage, takes <b>200%</b> of incoming damage, and has <b>100%</b> Item Potency.",
+      "zh": "<h1>主动：折射</h1>消耗自身<b>12%</b>当前生命值，制造一个满血的强幻象，持续20秒。幻象造成<b>60%</b>伤害，承受<b>200%</b>伤害，并拥有<b>100%</b>物品威力。",
       "en": "<h1>Active: Refract</h1> Spend <b>12%</b> of your current life total to create a full health strong illusion that lasts for 20 seconds. The illusion has <b>60%</b> outgoing damage, takes <b>200%</b> of incoming damage, and has <b>100%</b> Item Potency.",
       "ru": "<h1>Активное: Refract</h1> Владелец тратит <b>12%</b> от текущего здоровья, чтобы создать свою сильную иллюзию с полным здоровьем. Она существует 20 сек., наносит <b>60%</b> урона, получает <b>200%</b> урона и имеет <b>100%</b> действенности предметов."
     },
@@ -8494,7 +8511,7 @@
   },
   "item_tranquil_boots": {
     "desc": {
-      "zh": "<h1>Passive: Respite</h1> Whenever you attack a hero or are attacked by any unit, the health regen bonus is reduced to <b>2</b> and the movement speed bonus is reduced to <b>40</b> for <b>13</b> seconds.<br>Movement speed bonuses from multiple pairs of boots do not stack.",
+      "zh": "<h1>被动：暂缓</h1> 只要主动攻击英雄或受到任何单位的攻击，生命恢复加成就会降低至<b>14</b>点/秒，并且移动速度加成降低至<b>40</b>，持续<b>13</b>秒。<br>多个鞋类物品提供的移动速度加成不叠加。",
       "en": "<h1>Passive: Respite</h1> Whenever you attack a hero or are attacked by any unit, the health regen bonus is reduced to <b>2</b> and the movement speed bonus is reduced to <b>40</b> for <b>13</b> seconds.<br>Movement speed bonuses from multiple pairs of boots do not stack.",
       "ru": "<h1>Пассивное: Respite</h1> Если владелец атаковал героя или стал целью атаки любого существа, то предмет <b>13</b> сек. будет восстанавливать только <b>2</b> здоровья в секунду, а бонус к скорости передвижения уменьшится до <b>40</b>.<br>Бонусы к скорости передвижения от нескольких пар ботинок не складываются."
     },
@@ -8826,7 +8843,7 @@
   },
   "item_vile_phial": {
     "desc": {
-      "zh": "<h1>Passive: Toxic Tincture</h1>Attacking the same enemy <b>4</b> times within <b>10</b> seconds poisons them for <b>5</b> seconds, reducing their Health Restoration by <b>70%</b> and dealing <b>120</b> damage per second.",
+      "zh": "<h1>被动：毒性酊剂</h1><b>10</b>秒内攻击同个敌人<b>4</b>次会使其中毒，持续<b>5</b>秒，降低其<b>70%</b>生命回复并造成<b>120</b>点每秒伤害。",
       "en": "<h1>Passive: Toxic Tincture</h1>Attacking the same enemy <b>4</b> times within <b>10</b> seconds poisons them for <b>5</b> seconds, reducing their Health Restoration by <b>70%</b> and dealing <b>120</b> damage per second.",
       "ru": "<h1>Пассивное: Toxic Tincture</h1>Если владелец совершит <b>4</b> атаки по одному и тому же врагу за <b>10</b> сек., то отравит его. Токсины действуют <b>5</b> сек., снижают пополнение здоровья на <b>70%</b> и наносят <b>120</b> урона в секунду."
     },
