@@ -36,7 +36,7 @@ game 仓库动过下面任意一处就跑一次，**包括看起来与文案无�
 
 ## 步骤
 
-1. **准备 game 数据源**。默认用最新 `develop`。脚本找与本仓库并列的 `../windy10v10ai` 或 `../game`，其他位置用 `AWAKEN_GAME_REPO` 指绝对路径。并列的 game checkout 在别的分支或有未提交改动时，**不要切它的分支**，另开 worktree：`git -C ../windy10v10ai fetch origin develop && git -C ../windy10v10ai worktree add --detach ../windy10v10ai-develop-sync origin/develop`，跑脚本时加 `AWAKEN_GAME_REPO=<该 worktree 的绝对路径>`，用完 `git worktree remove`。`docs/reference/` 若未被 git 跟踪（常见），把对应 Dota 版本目录只读复制进副本。
+1. **准备 game 数据源**。默认用最新 `develop`。脚本找与本仓库并列的 `../windy10v10ai` 或 `../game`，其他位置用 `AWAKEN_GAME_REPO` 指绝对路径。并列的 game checkout 在别的分支或有未提交改动时，**不要切它的分支**，另开 worktree：`git -C ../windy10v10ai fetch origin develop && git -C ../windy10v10ai worktree add --detach ../windy10v10ai-develop-sync origin/develop`，跑脚本时加 `AWAKEN_GAME_REPO=<该 worktree 的绝对路径>`，用完 `git worktree remove`。`docs/reference/` 若未被 git 跟踪（常见），把对应 Dota 版本目录只读复制进副本。**同步前先核对 reference 新不新**：比较 `<dota>/game/dota/steam.inf` 与 `pak01_dir.vpk` 的日期和 `docs/reference/<版本>/` 的解包日期，vpk 更新过就先按 game 仓库 `dota-patch-sync` 技能的「参考快照」重新解包（Source2Viewer-CLI），Valve 发版后常再补简中、俄文翻译，快照旧了新物品会回落成英文。
    `items`、`wiki:sync`、`awaken:sync` 都要求 HEAD 在 `origin/develop` 上（觉醒只判断祖先关系）：feature 分支上的改动还可能被推翻或改写，据此生成的产物没法追溯。**用户明确指定未合并分支时**，在独立副本检出该提交，`items` 与 `wiki:sync` 追加 `-- --game-commit=<完整 SHA>`（必须匹配副本 HEAD），在 PR 写明来源与游戏发布依赖，不要动正在测试的原 game checkout。
 2. **跑 `npm run game:sync`**。
 3. **自检不过就停下**，把失败项原样报给用户，**不要猜着改产物**——自检拦住的多半是 game 侧漏同步（比如加了觉醒英雄但忘了同步 `AwakenTab.tsx`），要回 game 仓库修。

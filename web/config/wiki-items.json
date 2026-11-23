@@ -867,6 +867,12 @@
       "tier": 5
     },
     {
+      "name": "item_horn_of_battle_greater",
+      "section": "consumable",
+      "price": 5000,
+      "tier": 2
+    },
+    {
       "name": "item_passive_skill_tome",
       "section": "consumable",
       "price": 80000,
