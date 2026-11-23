@@ -190,6 +190,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_8_1": [
+          "Improved connection routes"
+        ],
         "v0_8_0": [
           "Points are now recorded automatically when a game ends"
         ],
