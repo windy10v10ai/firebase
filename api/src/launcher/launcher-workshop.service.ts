@@ -5,8 +5,8 @@ import { WorkshopVersionDto } from './dto/workshop-version.dto';
 
 const PUBLISHED_FILE_DETAILS_URL =
   'https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/';
-// 启动器只检测正式图与测试图，限定 ID 免得接口被当成通用的 Steam 代理
-export const LAUNCHER_WORKSHOP_IDS = ['2307479570', '2636824668'];
+// 启动器只检测原版正式图、测试图与二次元版，限定 ID 免得接口被当成通用的 Steam 代理
+export const LAUNCHER_WORKSHOP_IDS = ['2307479570', '2636824668', '3788870952'];
 // 启动器自己还有一路直连 Steam，这里宁可快速失败也不拖住它的等待
 const REQUEST_TIMEOUT_MS = 3000;
 // 新版发布后最多晚一分钟被启动器看到，换来同一实例上的玩家共用一次 Steam 请求

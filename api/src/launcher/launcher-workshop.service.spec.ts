@@ -1,6 +1,12 @@
-import { LauncherWorkshopService } from './launcher-workshop.service';
+import { LAUNCHER_WORKSHOP_IDS, LauncherWorkshopService } from './launcher-workshop.service';
 
 describe('LauncherWorkshopService', () => {
+  it('白名单含原版正式、测试与二次元三张图', () => {
+    expect(LAUNCHER_WORKSHOP_IDS).toEqual(
+      expect.arrayContaining(['2307479570', '2636824668', '3788870952']),
+    );
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });

@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
@@ -14,7 +15,12 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { LAUNCHER_ROOM_MAPS, LauncherRoomMap } from '../entities/launcher-room.entity';
+import {
+  LAUNCHER_EDITIONS,
+  LAUNCHER_ROOM_MAPS,
+  LauncherEdition,
+  LauncherRoomMap,
+} from '../entities/launcher-room.entity';
 
 const MAX_CANDIDATES = 8;
 const MAX_KICKED = 50;
@@ -112,6 +118,14 @@ class LauncherPeerDto {
   @IsOptional()
   @IsString()
   mapVersion?: string;
+
+  @ApiPropertyOptional({
+    enum: LAUNCHER_EDITIONS,
+    description: '开房或加入用的地图版本，缺省是原版；旧版启动器不报',
+  })
+  @IsOptional()
+  @IsIn(LAUNCHER_EDITIONS)
+  edition?: LauncherEdition;
 }
 
 export class JoinResultDto {
@@ -342,6 +356,18 @@ export class JoinRoomDto extends LauncherPeerDto {
   probe?: boolean;
 }
 
+export class MapVersionsDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  original?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  anime?: string;
+}
+
 export class ListRoomsDto {
   @ApiProperty()
   @IsInt()
@@ -356,6 +382,17 @@ export class ListRoomsDto {
   @IsOptional()
   @IsString()
   mapVersion?: string;
+
+  @ApiPropertyOptional({
+    description:
+      '各版本地图在本机的 manifest，没装的版本省略；有这个字段才会看到二次元房间，每个房间只和它那一版比较',
+    example: { original: '111', anime: '222' },
+  })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => MapVersionsDto)
+  mapVersions?: MapVersionsDto;
 }
 
 export class LauncherProfileDto {
@@ -449,6 +486,8 @@ export class JoinRoomResponse {
 export class PublicRoomDto extends LauncherProfileDto {
   @ApiProperty()
   code: string;
+  @ApiProperty({ enum: LAUNCHER_EDITIONS, description: '旧数据缺省按原版返回' })
+  edition: LauncherEdition;
   @ApiPropertyOptional({ enum: LAUNCHER_ROOM_MAPS })
   map?: LauncherRoomMap;
   @ApiPropertyOptional()
@@ -469,6 +508,8 @@ export class PublicRoomDto extends LauncherProfileDto {
 export class ActiveGameDto {
   @ApiProperty({ description: '好友房只给人数与时长，不给地图与玩家' })
   public: boolean;
+  @ApiProperty({ enum: LAUNCHER_EDITIONS, description: '旧数据缺省按原版返回' })
+  edition: LauncherEdition;
   @ApiPropertyOptional({ enum: LAUNCHER_ROOM_MAPS })
   map?: LauncherRoomMap;
   @ApiPropertyOptional()
