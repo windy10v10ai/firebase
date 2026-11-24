@@ -1,4 +1,4 @@
-export const LAUNCHER_VERSION = '0.8.1';
+export const LAUNCHER_VERSION = '0.9.0';
 
 // Mac 版的官方安装包放在 Storage 的 mac/ 目录，由网站转发，为 null 时页面不显示 Mac 入口
 export const LAUNCHER_MAC_VERSION: string | null = '0.8.1';

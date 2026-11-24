@@ -116,7 +116,6 @@
       "launcherHint": "Suggested",
       "multiplayer": "Multiplayer",
       "records": "Latest data, match points and daily tasks",
-      "stable": "Stable connection",
       "smooth": "Smooth late game",
       "noteOffline": "When the game can't reach the server it runs in offline mode: membership, attributes and awakenings use the data from the last map update, and points and stats are not recorded.",
       "yes": "Yes",
@@ -190,6 +189,9 @@
       "title": "Changelog",
       "latest": "Latest",
       "entries": {
+        "v0_9_0": [
+          "Added support for the anime edition map"
+        ],
         "v0_8_1": [
           "Improved connection routes"
         ],
