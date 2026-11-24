@@ -91,6 +91,10 @@ export class LauncherRoomService {
     if (room.hostToken !== dto.token) {
       throw new ForbiddenException();
     }
+    // 房间版本以创建时为准，心跳省略 edition 保留原值，显式报了不同的版本不处理
+    if (dto.edition !== undefined && dto.edition !== (room.edition ?? 'original')) {
+      throw new ConflictException({ code: 'edition_mismatch' });
+    }
 
     for (const result of dto.results ?? []) {
       const join = await this.joinRepository.findById(result.joinId);

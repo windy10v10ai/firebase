@@ -12,6 +12,7 @@ import {
   Matches,
   Max,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -123,7 +124,7 @@ class LauncherPeerDto {
     enum: LAUNCHER_EDITIONS,
     description: '开房或加入用的地图版本，缺省是原版；旧版启动器不报',
   })
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsIn(LAUNCHER_EDITIONS)
   edition?: LauncherEdition;
 }
@@ -358,12 +359,12 @@ export class JoinRoomDto extends LauncherPeerDto {
 
 export class MapVersionsDto {
   @ApiPropertyOptional()
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   original?: string;
 
   @ApiPropertyOptional()
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   anime?: string;
 }
@@ -388,7 +389,7 @@ export class ListRoomsDto {
       '各版本地图在本机的 manifest，没装的版本省略；有这个字段才会看到二次元房间，每个房间只和它那一版比较',
     example: { original: '111', anime: '222' },
   })
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsObject()
   @ValidateNested()
   @Type(() => MapVersionsDto)

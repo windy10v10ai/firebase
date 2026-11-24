@@ -582,17 +582,51 @@ describe('LauncherRoomService', () => {
     ).resolves.toBeDefined();
   });
 
-  it('进行中的游戏带版本，旧数据缺省按原版', async () => {
+  it('进行中的游戏带版本，含好友房，旧数据缺省按原版', async () => {
     const anime = await service.host({ ...HOST, steamId: 3201, public: true, edition: 'anime' });
     const old = await service.host({ ...HOST, steamId: 3202, public: true });
-    for (const room of [anime, old]) {
+    const friends = await service.host({ ...HOST, steamId: 3203, edition: 'anime' });
+    for (const room of [anime, old, friends]) {
       await service.host({ ...HOST, code: room.code, token: room.token, started: true });
     }
     delete rooms.docs.get(old.code)!.edition;
 
     const res = await service.list({ steamId: 2002, protocolVersion: 1 });
 
-    expect(res.games.map((g) => g.edition).sort()).toEqual(['anime', 'original']);
+    expect(res.games.map((g) => g.edition).sort()).toEqual(['anime', 'anime', 'original']);
+    expect(res.games.find((g) => !g.public)?.edition).toBe('anime');
+  });
+
+  it('没有 edition 字段的旧文档按原版：新旧列表都能看到，旧客户端凭码可加入', async () => {
+    const old = await service.host({ ...HOST, steamId: 3301, public: true });
+    delete rooms.docs.get(old.code)!.edition;
+
+    for (const dto of [
+      { steamId: 2002, protocolVersion: 1 },
+      { steamId: 2002, protocolVersion: 1, mapVersions: { original: 'x' } },
+    ]) {
+      const res = await service.list(dto);
+      expect(res.rooms.map((r) => [r.code, r.edition])).toEqual([[old.code, 'original']]);
+    }
+    await expect(service.join(old.code, JOINER)).resolves.toBeDefined();
+  });
+
+  it('心跳省略 edition 保留房间版本，报了不同版本返回 edition_mismatch 且不写入', async () => {
+    const room = await service.host({ ...HOST, edition: 'anime', mapVersion: 'a1' });
+    const poll = { ...HOST, code: room.code, token: room.token };
+
+    await service.host({ ...poll, mapVersion: 'a2', game: 2 });
+    expect(rooms.docs.get(room.code)).toMatchObject({ edition: 'anime', mapVersion: 'a2' });
+
+    await expect(
+      service.host({ ...poll, edition: 'original', mapVersion: 'o9', game: 3 }),
+    ).rejects.toMatchObject({ status: 409, response: { code: 'edition_mismatch' } });
+    expect(rooms.docs.get(room.code)).toMatchObject({
+      edition: 'anime',
+      mapVersion: 'a2',
+      game: 2,
+    });
+    await expect(service.host({ ...poll, edition: 'anime' })).resolves.toBeDefined();
   });
 
   it('列表只返回请求者能进的公开房间，不带地址与令牌', async () => {
