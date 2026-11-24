@@ -12,6 +12,7 @@ namespace Windy10v10AI.Launcher
         public HostTunnel Tunnel => room?.Tunnel;
         public string Code => room?.Code;
         public string Manifest { get; private set; }
+        public string Edition { get; private set; } = Editions.Original;
         public string State { get; private set; } = "idle";
         public bool Ready { get; private set; }
         public bool Active { get { lock (runLock) return worker != null && !worker.IsCompleted; } }
@@ -162,7 +163,7 @@ namespace Windy10v10AI.Launcher
                     room.ConnectionFailed += () => Info(Strings.ConnectFailed);
                     var candidates = Tunnel.Gather(out var publicIp);
                     ct.ThrowIfCancellationRequested();
-                    var body = RoomPeer.Body(MacInstall.AccountId(), install.Manifest, candidates, Tunnel.SymmetricNat); body["publicIp"] = publicIp;
+                    var body = RoomPeer.Body(MacInstall.AccountId(), install.Manifest, candidates, Tunnel.SymmetricNat, Edition); body["publicIp"] = publicIp;
                     Event("opening", Strings.OpeningRoom);
                     var opened = room.Open(body, MacInstall.AccountId(), autoEnter);
                     room.StartNetwork(opened);
@@ -185,7 +186,7 @@ namespace Windy10v10AI.Launcher
         }
         void CheckInstall()
         {
-            install = MacInstall.Find(); Manifest = install.Manifest;
+            install = MacInstall.Find(); Manifest = install.Manifest; Edition = MacInstall.Edition;
             if (!Solo && Platform.SteamAccountId() <= 0) throw new Exception(Strings.SteamNotSignedIn);
             foreach (int port in new[] { 27015, 27016 }) { using var probe = new UdpClient(new IPEndPoint(IPAddress.Loopback, port)); }
             if (!Solo) { var tcpProbe = new TcpListener(IPAddress.Loopback, 27080); try { tcpProbe.Start(); } finally { tcpProbe.Stop(); } }

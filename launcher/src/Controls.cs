@@ -1261,6 +1261,12 @@ namespace Windy10v10AI.Launcher
             }
         }
 
+        // The anime marker in front of the map name; original rooms keep the same blank so the names line up
+        int MapIconWidth { get { return (int)(18 * DpiScale); } }
+
+        // Set once by the form, since the picture is an embedded resource of the executable
+        public Image EditionAvatar;
+
         // Column edges from the right, shared by the header and every row
         void Columns(out int mapLeft, out int countLeft, out int pingLeft, out int buttonLeft)
         {
@@ -1268,7 +1274,7 @@ namespace Windy10v10AI.Launcher
             buttonLeft = Width - (int)(12 * s) - ButtonWidth;
             pingLeft = buttonLeft - (int)(10 * s) - (int)(40 * s);
             countLeft = pingLeft - (int)(6 * s) - (int)(44 * s);
-            mapLeft = countLeft - (int)(8 * s) - (int)(56 * s);
+            mapLeft = countLeft - (int)(8 * s) - (int)(72 * s) - MapIconWidth;
         }
 
         Rectangle RowRect(int index)
@@ -1446,7 +1452,7 @@ namespace Windy10v10AI.Launcher
                     TextRenderer.DrawText(g, banner, small, new Rectangle(0, 0, Width, BannerHeight - (int)(4 * s)), Theme.Warning, line | TextFormatFlags.Left);
                 }
                 var header = new Rectangle(0, BannerHeight, 0, (int)(18 * s));
-                TextRenderer.DrawText(g, Strings.ColumnMap, small, new Rectangle(mapLeft, header.Y, countLeft - mapLeft, header.Height), Theme.Muted, line | TextFormatFlags.Left);
+                TextRenderer.DrawText(g, Strings.ColumnMap, small, new Rectangle(mapLeft + MapIconWidth, header.Y, countLeft - mapLeft - MapIconWidth, header.Height), Theme.Muted, line | TextFormatFlags.Left);
                 TextRenderer.DrawText(g, Strings.ColumnPlayers, small, new Rectangle(countLeft, header.Y, pingLeft - countLeft - (int)(6 * s), header.Height), Theme.Muted, line | TextFormatFlags.Right);
                 TextRenderer.DrawText(g, Strings.ColumnPing, small, new Rectangle(pingLeft - (int)(10 * s), header.Y, (int)(60 * s), header.Height), Theme.Muted, line | TextFormatFlags.HorizontalCenter);
             }
@@ -1502,7 +1508,21 @@ namespace Windy10v10AI.Launcher
                 }
 
                 var map = room.Friends ? Strings.FriendGame : MapName(room.Map);
-                TextRenderer.DrawText(g, map, small, new Rectangle(mapLeft, row.Y, countLeft - mapLeft, row.Height), Fade(Theme.Muted, faded), line | TextFormatFlags.Left);
+                if (room.Edition == Editions.Anime && EditionAvatar != null)
+                {
+                    var d = 14 * s;
+                    var circle = new RectangleF(mapLeft, row.Y + (row.Height - d) / 2, d, d);
+                    using (var clip = new GraphicsPath())
+                    {
+                        clip.AddEllipse(circle);
+                        var state = g.Save();
+                        g.SetClip(clip, CombineMode.Intersect);
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(EditionAvatar, circle);
+                        g.Restore(state);
+                    }
+                }
+                TextRenderer.DrawText(g, map, small, new Rectangle(mapLeft + MapIconWidth, row.Y, countLeft - mapLeft - MapIconWidth, row.Height), Fade(Theme.Muted, faded), line | TextFormatFlags.Left);
                 var count = waiting || (own && room.Minutes < 0)
                     ? (room.MaxPlayers > 0 ? room.Players + "/" + room.MaxPlayers : room.Players.ToString())
                     : string.Format(Strings.RoomPlayers, room.Players);
@@ -1746,6 +1766,237 @@ namespace Windy10v10AI.Launcher
             {
                 return dialog.ShowDialog(owner) == DialogResult.OK;
             }
+        }
+    }
+
+    // The banner with the version badge and the edition switch drawn on it, so both sit on the picture without child controls
+    class BannerBar : PaintedControl
+    {
+        public string VersionText = "";
+        public string OriginalText = "";
+        public string AnimeText = "";
+        public Image OriginalPicture;
+        Image animePicture;
+        public Image Avatar;
+        // A running game or room keeps the edition it started with, so the switch only looks dimmed
+        public bool Locked;
+        public event EventHandler VersionClick;
+        public event Action<string> EditionChanged;
+        // A click on the picture itself, away from the switch and the version badge
+        public event Action PictureClick;
+        static readonly Color AnimeFill = ColorTranslator.FromHtml("#3a2a33");
+        static readonly Color AnimeEdge = ColorTranslator.FromHtml("#c9648a");
+        readonly System.Windows.Forms.Timer slide = new System.Windows.Forms.Timer { Interval = 15 };
+        string edition = Editions.Original;
+        // 0 under the original option, 1 under the anime one; eases toward the chosen edition
+        float thumb;
+        string hover;
+        Bitmap scaled;
+        Image scaledPicture;
+        Size scaledSize;
+
+        public BannerBar()
+        {
+            Font = new Font(Theme.FontName, 8.25f);
+            // Quick repeated clicks would otherwise arrive as double clicks and skip MouseClick, so every press counts as a click
+            SetStyle(ControlStyles.StandardDoubleClick, false);
+            slide.Tick += delegate
+            {
+                var target = edition == Editions.Anime ? 1f : 0f;
+                const float Step = 0.2f;
+                thumb = Math.Abs(target - thumb) <= Step ? target : thumb + (target > thumb ? Step : -Step);
+                if (thumb == target) slide.Stop();
+                Invalidate();
+            };
+        }
+
+        public Image AnimePicture
+        {
+            get { return animePicture; }
+            set
+            {
+                animePicture = value;
+                Invalidate();
+            }
+        }
+
+        public string Edition
+        {
+            get { return edition; }
+            set
+            {
+                value = Editions.Normalize(value);
+                if (edition == value) return;
+                edition = value;
+                if (IsHandleCreated && Visible) slide.Start();
+                else thumb = value == Editions.Anime ? 1f : 0f;
+                Invalidate();
+            }
+        }
+
+        float OptionWidth
+        {
+            get { return (System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? 84 : 72) * DpiScale; }
+        }
+
+        RectangleF TrackRect()
+        {
+            var s = DpiScale;
+            var w = 2 * OptionWidth;
+            return new RectangleF(Width - 8 * s - w, Height - 4 * s - 28 * s, w, 28 * s);
+        }
+
+        RectangleF OptionRect(int index)
+        {
+            var s = DpiScale;
+            var track = TrackRect();
+            return new RectangleF(track.X + index * OptionWidth, track.Y, OptionWidth, track.Height);
+        }
+
+        RectangleF BadgeRect()
+        {
+            var s = DpiScale;
+            var size = TextRenderer.MeasureText(VersionText, Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding);
+            var w = size.Width + 14 * s;
+            return new RectangleF(Width - 8 * s - w, 6 * s, w, size.Height + 4 * s);
+        }
+
+        string OptionAt(Point point)
+        {
+            if (OptionRect(0).Contains(point)) return Editions.Original;
+            if (OptionRect(1).Contains(point)) return Editions.Anime;
+            return null;
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            var over = Locked ? null : OptionAt(e.Location);
+            Cursor = (!Locked && TrackRect().Contains(e.Location)) || BadgeRect().Contains(e.Location) ? Cursors.Hand : Cursors.Default;
+            if (over != hover)
+            {
+                hover = over;
+                Invalidate();
+            }
+            base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            hover = null;
+            Cursor = Cursors.Default;
+            Invalidate();
+            base.OnMouseLeave(e);
+        }
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            // The whole track is one switch, so a click anywhere on it flips to the other edition
+            if (TrackRect().Contains(e.Location))
+            {
+                if (!Locked && EditionChanged != null) EditionChanged(edition == Editions.Anime ? Editions.Original : Editions.Anime);
+            }
+            else if (BadgeRect().Contains(e.Location))
+            {
+                if (VersionClick != null) VersionClick(this, EventArgs.Empty);
+            }
+            else if (PictureClick != null) PictureClick();
+            base.OnMouseClick(e);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                slide.Dispose();
+                if (scaled != null) scaled.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        // Fills the whole strip, cropping what overflows instead of leaving bars
+        void DrawPicture(Graphics g)
+        {
+            var picture = edition == Editions.Anime ? AnimePicture : OriginalPicture;
+            if (picture == null) return;
+            if (scaled == null || scaledPicture != picture || scaledSize != Size)
+            {
+                if (scaled != null) scaled.Dispose();
+                scaled = new Bitmap(Math.Max(1, Width), Math.Max(1, Height));
+                scaledPicture = picture;
+                scaledSize = Size;
+                var factor = Math.Max((float)Width / picture.Width, (float)Height / picture.Height);
+                var w = picture.Width * factor;
+                var h = picture.Height * factor;
+                using (var inner = Graphics.FromImage(scaled))
+                {
+                    inner.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    inner.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    inner.DrawImage(picture, (Width - w) / 2, (Height - h) / 2, w, h);
+                }
+            }
+            g.DrawImageUnscaled(scaled, 0, 0);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Prepare(e);
+            var s = DpiScale;
+            DrawPicture(g);
+            const TextFormatFlags Flags = TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter;
+
+            var badge = BadgeRect();
+            using (var path = Theme.Rounded(badge, 9 * s))
+            using (var brush = new SolidBrush(Color.FromArgb(153, 0, 0, 0))) g.FillPath(brush, path);
+            TextRenderer.DrawText(g, VersionText, Font, Rectangle.Round(badge), Theme.Muted, Flags | TextFormatFlags.HorizontalCenter);
+
+            var alpha = Locked ? 120 : 255;
+            var track = TrackRect();
+            using (var path = Theme.Rounded(track, 14 * s))
+            using (var brush = new SolidBrush(Color.FromArgb(204 * alpha / 255, 22, 20, 18))) g.FillPath(brush, path);
+            using (var path = Theme.Rounded(RectangleF.Inflate(track, -0.5f, -0.5f), 14 * s))
+            using (var pen = new Pen(Color.FromArgb(41 * alpha / 255, 255, 255, 255), 1f)) g.DrawPath(pen, path);
+
+            var first = OptionRect(0);
+            var thumbRect = new RectangleF(first.X + thumb * OptionWidth, first.Y, first.Width, first.Height);
+            var animeShown = thumb >= 0.5f;
+            using (var path = Theme.Rounded(thumbRect, 14 * s))
+            using (var brush = new SolidBrush(Color.FromArgb(alpha, animeShown ? AnimeFill : Theme.ActivePanel))) g.FillPath(brush, path);
+            using (var path = Theme.Rounded(RectangleF.Inflate(thumbRect, -0.5f, -0.5f), 14 * s))
+            using (var pen = new Pen(Color.FromArgb(alpha, animeShown ? AnimeEdge : Theme.Accent), 1f)) g.DrawPath(pen, path);
+
+            DrawOption(g, 0, OriginalText, false, Flags, alpha);
+            DrawOption(g, 1, AnimeText, true, Flags, alpha);
+        }
+
+        void DrawOption(Graphics g, int index, string text, bool withAvatar, TextFormatFlags flags, int alpha)
+        {
+            var s = DpiScale;
+            var rect = OptionRect(index);
+            var name = index == 1 ? Editions.Anime : Editions.Original;
+            var color = edition == name || hover == name ? Theme.Text : Theme.Muted;
+            if (alpha < 255) color = Color.FromArgb(alpha, color);
+            // Avatar, gap and text are centered together in the option, and the avatar keeps clear of the selection border
+            var size = TextRenderer.MeasureText(text, Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding);
+            var icon = withAvatar && Avatar != null ? 20 * s : 0;
+            var gap = icon > 0 ? 4 * s : 0;
+            var left = rect.X + (rect.Width - icon - gap - size.Width) / 2;
+            if (icon > 0)
+            {
+                var circle = new RectangleF(left, rect.Y + (rect.Height - icon) / 2, icon, icon);
+                var state = g.Save();
+                using (var path = new GraphicsPath())
+                using (var attributes = new System.Drawing.Imaging.ImageAttributes())
+                {
+                    path.AddEllipse(circle);
+                    g.SetClip(path, CombineMode.Intersect);
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix { Matrix33 = alpha / 255f });
+                    g.DrawImage(Avatar, Rectangle.Round(circle), 0, 0, Avatar.Width, Avatar.Height, GraphicsUnit.Pixel, attributes);
+                }
+                g.Restore(state);
+            }
+            var textRect = new Rectangle((int)Math.Round(left + icon + gap), (int)rect.Y, size.Width + 2, (int)rect.Height);
+            TextRenderer.DrawText(g, text, Font, textRect, color, flags | TextFormatFlags.Left);
         }
     }
 }

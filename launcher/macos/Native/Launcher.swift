@@ -213,14 +213,96 @@ private final class DescriptionView: NSTextView {
 }
 
 private final class Banner: NSView {
-    let image = Bundle.main.url(forResource: "banner", withExtension: "jpg").flatMap { NSImage(contentsOf: $0) }
+    let originalImage = Bundle.main.url(forResource: "banner", withExtension: "jpg").flatMap { NSImage(contentsOf: $0) }
+    // The anime banner is picked from the gallery folder shipped in the app bundle
+    private let animeBanners = (Bundle.main.urls(forResourcesWithExtension: "jpg", subdirectory: "anime-banners") ?? []).sorted { $0.lastPathComponent < $1.lastPathComponent }
+    var animeImage: NSImage?
+    let avatar = Bundle.main.url(forResource: "anime-avatar", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
+    var versionText = ""
+    var edition = "original" { didSet { needsDisplay = true } }
+    // A running game or room keeps the edition it started with, so the switch only looks dimmed
+    var locked = false { didSet { needsDisplay = true; window?.invalidateCursorRects(for: self) } }
+    var onEdition: ((String) -> Void)?
+    var onVersion: (() -> Void)?
+    override var isFlipped: Bool { true }
+    override init(frame frameRect: NSRect) { super.init(frame: frameRect); pickBanner() }
+    required init?(coder: NSCoder) { super.init(coder: coder); pickBanner() }
+    // The first launch shows anime-16, later picks never repeat the last picture
+    private func pickBanner() {
+        guard !animeBanners.isEmpty else { return }
+        func name(_ url: URL) -> String { url.deletingPathExtension().lastPathComponent }
+        let last = UserDefaults.standard.string(forKey: "animeBanner") ?? ""
+        let chosen = last.isEmpty ? (animeBanners.first { name($0) == "anime-16" } ?? animeBanners[0]) : (animeBanners.filter { name($0) != last }.randomElement() ?? animeBanners[0])
+        animeImage = NSImage(contentsOf: chosen)
+        if !preview { UserDefaults.standard.set(name(chosen), forKey: "animeBanner") }
+        needsDisplay = true
+    }
+    private var optionWidth: CGFloat { languageCode == "ru-RU" ? 84 : 72 }
+    private let smallFont = NSFont.systemFont(ofSize: 11)
+    private var trackRect: NSRect {
+        let width = 2 * optionWidth
+        return NSRect(x: bounds.width - 8 - width, y: bounds.height - 4 - 28, width: width, height: 28)
+    }
+    private func optionRect(_ index: Int) -> NSRect {
+        NSRect(x: trackRect.minX + CGFloat(index) * optionWidth, y: trackRect.minY, width: optionWidth, height: trackRect.height)
+    }
+    private var badgeRect: NSRect {
+        let size = (versionText as NSString).size(withAttributes: [.font: smallFont])
+        let width = ceil(size.width) + 14
+        return NSRect(x: bounds.width - 8 - width, y: 6, width: width, height: ceil(size.height) + 4)
+    }
+    override func mouseDown(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        // The whole track is one switch, so a click anywhere on it flips to the other edition
+        if trackRect.contains(point) { if !locked { onEdition?(edition == "anime" ? "original" : "anime") } }
+        else if badgeRect.contains(point) { onVersion?() }
+        else if edition == "anime" { pickBanner() }
+    }
+    override func resetCursorRects() {
+        addCursorRect(badgeRect, cursor: .pointingHand)
+        if !locked { addCursorRect(trackRect, cursor: .pointingHand) }
+    }
     override func draw(_ dirtyRect: NSRect) {
         NSBezierPath(rect: bounds).addClip()
         NSColor.black.setFill(); bounds.fill()
-        guard let image = image else { return }
-        let width = bounds.width * 0.8
-        let height = width * image.size.height / image.size.width
-        image.draw(in: NSRect(x: (bounds.width - width) / 2, y: (bounds.height - height) / 2, width: width, height: height), from: .zero, operation: .sourceOver, fraction: 1)
+        // Fills the whole strip and crops what overflows, instead of leaving bars
+        if let image = edition == "anime" ? animeImage : originalImage {
+            let scale = max(bounds.width / image.size.width, bounds.height / image.size.height)
+            let width = image.size.width * scale, height = image.size.height * scale
+            image.draw(in: NSRect(x: (bounds.width - width) / 2, y: (bounds.height - height) / 2, width: width, height: height), from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
+        }
+        let badge = badgeRect
+        NSColor.black.withAlphaComponent(0.6).setFill(); NSBezierPath(roundedRect: badge, xRadius: 9, yRadius: 9).fill()
+        let centered = NSMutableParagraphStyle(); centered.alignment = .center
+        (versionText as NSString).draw(in: NSRect(x: badge.minX, y: badge.minY + 2, width: badge.width, height: badge.height - 2), withAttributes: [.font: smallFont, .foregroundColor: Theme.muted, .paragraphStyle: centered])
+
+        let opacity: CGFloat = locked ? 0.47 : 1
+        let track = trackRect
+        Theme.background.withAlphaComponent(0.8 * opacity).setFill(); NSBezierPath(roundedRect: track, xRadius: 14, yRadius: 14).fill()
+        NSColor.white.withAlphaComponent(0.16 * opacity).setStroke(); NSBezierPath(roundedRect: track.insetBy(dx: 0.5, dy: 0.5), xRadius: 14, yRadius: 14).stroke()
+        let anime = edition == "anime"
+        let thumb = optionRect(anime ? 1 : 0)
+        (anime ? Theme.color(0x3a2a33) : Theme.color(0x2a1d19)).withAlphaComponent(opacity).setFill(); NSBezierPath(roundedRect: thumb, xRadius: 14, yRadius: 14).fill()
+        (anime ? Theme.color(0xc9648a) : Theme.accent).withAlphaComponent(opacity).setStroke(); NSBezierPath(roundedRect: thumb.insetBy(dx: 0.5, dy: 0.5), xRadius: 14, yRadius: 14).stroke()
+        drawOption(0, text("EditionOriginal"), selected: !anime, opacity: opacity)
+        drawOption(1, text("EditionAnime"), selected: anime, opacity: opacity, withAvatar: true)
+    }
+    private func drawOption(_ index: Int, _ title: String, selected: Bool, opacity: CGFloat, withAvatar: Bool = false) {
+        let rect = optionRect(index)
+        let attributes: [NSAttributedString.Key: Any] = [.font: smallFont, .foregroundColor: (selected ? Theme.text : Theme.muted).withAlphaComponent(opacity)]
+        let size = (title as NSString).size(withAttributes: attributes)
+        let icon: CGFloat = withAvatar && avatar != nil ? 20 : 0
+        let gap: CGFloat = icon > 0 ? 4 : 0
+        var left = rect.minX + (rect.width - icon - gap - size.width) / 2
+        if icon > 0, let avatar = avatar {
+            let circle = NSRect(x: left, y: rect.minY + (rect.height - icon) / 2, width: icon, height: icon)
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(ovalIn: circle).addClip()
+            avatar.draw(in: circle, from: .zero, operation: .sourceOver, fraction: opacity, respectFlipped: true, hints: nil)
+            NSGraphicsContext.restoreGraphicsState()
+            left += icon + gap
+        }
+        (title as NSString).draw(at: NSPoint(x: left, y: rect.minY + (rect.height - size.height) / 2), withAttributes: attributes)
     }
 }
 
@@ -317,6 +399,10 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var badgeTimer: Timer?
     var lastBadge = Date.distantPast
     var mapCard: NSStackView!
+    private let banner = Banner()
+    let editionAvatar = Bundle.main.url(forResource: "anime-avatar", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
+    var joinRetried = false
+    var edition = preview || UserDefaults.standard.string(forKey: "edition") != "anime" ? "original" : "anime"
     let mapWarning = NSTextField(wrappingLabelWithString: "")
 
     var page: String { ["solo", "host", "join"][max(0, pages.selectedSegment)] }
@@ -387,7 +473,10 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         window.isReleasedWhenClosed = false; window.title = text("Title"); window.center(); window.backgroundColor = Theme.background
         let content = window.contentView!
         content.wantsLayer = true; content.layer?.backgroundColor = Theme.background.cgColor
-        let banner = Banner(); banner.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(banner)
+        banner.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(banner)
+        banner.versionText = "v" + launcherVersion + " ↗"; banner.toolTip = text("Changelog"); banner.edition = edition
+        banner.onVersion = { [weak self] in self?.openChangelog() }
+        banner.onEdition = { [weak self] value in self?.editionChanged(value) }
         body = stack([], spacing: 12); body.translatesAutoresizingMaskIntoConstraints = false; content.addSubview(body)
         NSLayoutConstraint.activate([
             banner.leadingAnchor.constraint(equalTo: content.leadingAnchor), banner.trailingAnchor.constraint(equalTo: content.trailingAnchor),
@@ -395,10 +484,6 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             body.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20), body.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
             body.topAnchor.constraint(equalTo: banner.bottomAnchor, constant: 12)
         ])
-        let version = button("v" + launcherVersion + " ↗", #selector(openChangelog)); version.link = true; version.toolTip = text("Changelog")
-        let subtitle = label(text("Subtitle"), size: 11); subtitle.textColor = Theme.muted
-        subtitle.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        body.addArrangedSubview(stack([subtitle, spacer(), version], horizontal: true, spacing: 4))
         pages.heightAnchor.constraint(equalToConstant: 36).isActive = true
         pages.selectedSegment = preview ? 0 : min(2, max(0, defaults.integer(forKey: "mode")))
         pages.target = self; pages.action = #selector(changePage); body.addArrangedSubview(pages)
@@ -419,7 +504,8 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         action(refresh, #selector(refreshRooms))
         rooms.target = self; rooms.doubleAction = #selector(joinRoom)
         let roomTable = table(rooms, columns: [("room", "", 438)], height: 280); rooms.headerView = nil
-        let heading = roomColumns(NSView(), label(text("ColumnMap"), size: 10), label(text("ColumnPlayers"), size: 10), label(text("ColumnPing"), size: 10))
+        let mapTitle = label(text("ColumnMap"), size: 10); mapTitle.widthAnchor.constraint(equalToConstant: 72).isActive = true
+        let heading = roomColumns(NSView(), stack([editionMarker(false), mapTitle], horizontal: true, spacing: 4), label(text("ColumnPlayers"), size: 10), label(text("ColumnPing"), size: 10))
         heading.heightAnchor.constraint(equalToConstant: 18).isActive = true
         browser = stack([stack([label(text("PublicRooms"), weight: .semibold), spacer(), refresh], horizontal: true), heading, roomTable], spacing: 6)
         body.addArrangedSubview(browser)
@@ -596,6 +682,11 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
                 route.stringValue = ""; route.isHidden = true; routeDot.isHidden = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in self?.inspect(); self?.updateBrowsing() }
             }
+            // A private room of the other edition is refused once; switch and try again only once
+            if state == "error", event["reason"] as? String == "edition_mismatch", !joinRetried, !roomCode.stringValue.isEmpty {
+                let other = edition == "anime" ? "original" : "anime"
+                if switchPrompt(other) { editionChanged(other); join(roomCode.stringValue, retrying: true) }
+            }
         case "route":
             route.stringValue = event["message"] as? String ?? ""
             let level = event["level"] as? String ?? "ok"
@@ -685,7 +776,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         let blockedByMap = !active && (["missing", "unknown"].contains(mapState) || (mapState == "outdated" && page != "solo"))
         roomSettings.isHidden = page != "host" || blockedByMap
         mapCard.isHidden = !blockedByMap && !(mapState == "outdated" && !active)
-        mapWarning.stringValue = mapState == "missing" ? text("NoMap") : (mapState == "unknown" ? text("NoDota") : text(page == "join" ? "MapCardJoin" : "MapCardHost"))
+        mapWarning.stringValue = mapState == "missing" ? text("NoMap", text(edition == "anime" ? "MapNameAnime" : "MapNameOriginal")) : (mapState == "unknown" ? text("NoDota") : text(page == "join" ? "MapCardJoin" : "MapCardHost"))
         updateMap.isHidden = mapState != "outdated"; subscribe.isHidden = mapState != "missing"
         difficultyRow.isHidden = blockedByMap || page == "join" || (active && state != "ended")
         for difficulty in difficulties { difficulty.isEnabled = backendAvailable && (!active || state == "ended") }
@@ -706,7 +797,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         pages.isEnabled = backendAvailable && (!active || sessionRole == "host")
         pages.setEnabled(!active, forSegment: 0)
         roomType.isEnabled = backendAvailable && (!active || (sessionRole == "host" && !busy))
-        count.isEnabled = roomType.isEnabled; testMap.isEnabled = !active
+        count.isEnabled = roomType.isEnabled; testMap.isEnabled = !active; banner.locked = active
         reopen.isHidden = !paused || sessionRole != "host" || away
         installUpdate.isEnabled = backendAvailable && !active && releaseAvailable
         autoStart.isEnabled = !active; autoEnter.isEnabled = backendAvailable
@@ -745,7 +836,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     }
     @objc func refreshBadge() {
         guard !preview, window != nil, NSApp.isActive, !window.isMiniaturized, !browsing else { return }
-        lastBadge = Date(); send(["action": "badge", "testMap": testMap.state == .on])
+        lastBadge = Date(); send(["action": "badge", "testMap": testMap.state == .on, "edition": edition])
     }
     func applicationDidBecomeActive(_ notification: Notification) {
         if Date().timeIntervalSince(lastBadge) >= 10 { refreshBadge() }
@@ -756,7 +847,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         defaults.set(pages.selectedSegment, forKey: "mode"); defaults.set(roomType.selectedSegment == 1, forKey: "privateRoom")
         defaults.set(count.indexOfSelectedItem + 2, forKey: "maxPlayers")
         defaults.set(autoStart.state == .on, forKey: "autoStartDota"); defaults.set(autoEnter.state == .on, forKey: "autoEnter")
-        defaults.set(testMap.state == .on, forKey: "testMap")
+        defaults.set(testMap.state == .on, forKey: "testMap"); defaults.set(edition, forKey: "edition")
         if active && sessionRole == "host" { send(["action": "roomSettings", "public": roomType.selectedSegment == 0, "maxPlayers": count.indexOfSelectedItem + 2]) }
         refreshControls()
     }
@@ -766,12 +857,17 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         if !active { status.stringValue = text(page == "host" ? "HostIdle" : "Idle"); status.textColor = Theme.text }
         refreshControls(); updateBrowsing()
     }
-    func updateBrowsing() { send(["action": "browse", "active": browsing, "testMap": testMap.state == .on]) }
+    func updateBrowsing() { send(["action": "browse", "active": browsing, "testMap": testMap.state == .on, "edition": edition]) }
     @objc func autoEnterChanged() { saveSettings(); send(["action": "auto-enter", "enabled": autoEnter.state == .on]) }
     @objc func toggleDeveloper() { testMap.isHidden.toggle(); resizeWindow() }
     @objc func testMapChanged() { saveSettings(); inspect(); updateBrowsing() }
+    func editionChanged(_ value: String) {
+        guard !active, value != edition else { return }
+        edition = value; banner.edition = value
+        saveSettings(); inspect(); updateBrowsing()
+    }
     @objc func toggleLogs() { journal.enclosingScrollView?.isHidden.toggle(); resizeWindow() }
-    @objc func inspect() { send(["action": "inspect", "testMap": testMap.state == .on]) }
+    @objc func inspect() { send(["action": "inspect", "testMap": testMap.state == .on, "edition": edition]) }
     @objc func reopenRoom() { send(["action": "reopen"]) }
     @objc func updateLauncher() { send(["action": "update-launcher"]) }
     @objc func checkVersion() { send(["action": "check-version"]) }
@@ -781,14 +877,23 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         let mode = ["easy", "hard", "custom"][sender.tag]
         if active { send(["action": "next", "mode": mode]); return }
         pendingStart = true; sessionRole = page; state = "checking"; status.stringValue = text("Starting"); refreshControls()
-        send(["action": "open", "sessionMode": page, "public": roomType.selectedSegment == 0, "mode": mode, "maxPlayers": count.indexOfSelectedItem + 2, "autoEnter": page == "solo" || autoStart.state == .on, "testMap": testMap.state == .on])
+        send(["action": "open", "sessionMode": page, "public": roomType.selectedSegment == 0, "mode": mode, "maxPlayers": count.indexOfSelectedItem + 2, "autoEnter": page == "solo" || autoStart.state == .on, "testMap": testMap.state == .on, "edition": edition])
     }
-    func join(_ value: String) {
+    func switchPrompt(_ roomEdition: String) -> Bool {
+        confirm(text("EditionSwitchTitle"), text(roomEdition == "anime" ? "EditionSwitchToAnime" : "EditionSwitchToOriginal"), text("EditionSwitchYes"))
+    }
+    func join(_ value: String, retrying: Bool = false) {
         guard !active else { return }
         let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         guard normalized.range(of: "^[A-Z0-9]{6}$", options: .regularExpression) != nil else { showError(text("InvalidCode")); return }
+        // A listed room tells its edition. A private room is tried with the current edition first, and the backend reports a mismatch
+        if let listed = roomRows.first(where: { $0["code"] as? String == normalized })?["edition"] as? String, listed != edition {
+            guard switchPrompt(listed) else { return }
+            editionChanged(listed)
+        }
+        joinRetried = retrying
         pendingStart = true; roomCode.stringValue = normalized; sessionRole = "join"; state = "joining"; status.stringValue = text("Connecting"); refreshControls()
-        send(["action": "join", "code": normalized, "autoEnter": autoEnter.state == .on, "testMap": testMap.state == .on])
+        send(["action": "join", "code": normalized, "autoEnter": autoEnter.state == .on, "testMap": testMap.state == .on, "edition": edition])
     }
     @objc func joinByCode() { join(roomCode.stringValue) }
     @objc func joinRoom() {
@@ -816,9 +921,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     func copy(_ value: String) { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(value, forType: .string) }
     @objc func copyRoom() { copy(code) }
     @objc func copyConnect() { copy("connect 127.0.0.1:27016"); append(text("ConsoleSteps")) }
-    @objc func updateWorkshop() { send(["action": "update", "testMap": testMap.state == .on]) }
+    @objc func updateWorkshop() { send(["action": "update", "testMap": testMap.state == .on, "edition": edition]) }
     @objc func verifyFiles() { send(["action": "verify"]) }
-    @objc func subscribeMap() { send(["action": "subscribe", "testMap": testMap.state == .on]) }
+    @objc func subscribeMap() { send(["action": "subscribe", "testMap": testMap.state == .on, "edition": edition]) }
     @objc func openDownload() { if !preview { NSWorkspace.shared.open(URL(string: "https://windy10v10ai.com/launch")!) } }
     @objc func openChangelog() { if !preview { NSWorkspace.shared.open(URL(string: "https://windy10v10ai.com/launch#changelog")!) } }
     @objc func openLogs() {
@@ -863,6 +968,16 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         image.wantsLayer = true; image.layer?.cornerRadius = size / 2; image.layer?.masksToBounds = true
         return image
     }
+    // The anime marker in front of the map name; original rooms keep the same blank so the names line up
+    func editionMarker(_ anime: Bool) -> NSView {
+        let view = NSImageView(); view.translatesAutoresizingMaskIntoConstraints = false
+        view.widthAnchor.constraint(equalToConstant: 14).isActive = true; view.heightAnchor.constraint(equalToConstant: 14).isActive = true
+        if anime, let image = editionAvatar {
+            view.image = image; view.imageScaling = .scaleProportionallyUpOrDown
+            view.wantsLayer = true; view.layer?.cornerRadius = 7; view.layer?.masksToBounds = true
+        }
+        return view
+    }
     func roomColumns(_ name: NSView, _ map: NSView, _ count: NSView, _ tail: NSView) -> NSView {
         let row = NSView()
         for child in [name, map, count, tail] {
@@ -872,7 +987,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         NSLayoutConstraint.activate([
             tail.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -10), tail.widthAnchor.constraint(equalToConstant: 110),
             count.trailingAnchor.constraint(equalTo: tail.leadingAnchor, constant: -8), count.widthAnchor.constraint(equalToConstant: 34),
-            map.trailingAnchor.constraint(equalTo: count.leadingAnchor, constant: -8), map.widthAnchor.constraint(equalToConstant: 50),
+            map.trailingAnchor.constraint(equalTo: count.leadingAnchor, constant: -8), map.widthAnchor.constraint(equalToConstant: 90),
             name.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 10), name.trailingAnchor.constraint(equalTo: map.leadingAnchor, constant: -8)
         ])
         return row
@@ -902,8 +1017,9 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             if kind != 1 { let name = label(kind == 2 ? text("YourRoom") : (item["name"] as? String ?? text("Player")), size: 12); name.lineBreakMode = .byTruncatingTail; name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal); nameViews.append(name) }
             nameViews.append(spacer())
             let name = stack(nameViews, horizontal: true, spacing: 4); name.setContentHuggingPriority(.defaultLow, for: .horizontal)
-            let map = label(text(friends ? "FriendGame" : (["easy": "Easy", "hard": "Hard", "custom": "Custom"][item["map"] as? String ?? ""] ?? "Custom")), size: 11)
-            map.widthAnchor.constraint(equalToConstant: 50).isActive = true
+            let mapName = label(text(friends ? "FriendGame" : (["easy": "Easy", "hard": "Hard", "custom": "Custom"][item["map"] as? String ?? ""] ?? "Custom")), size: 11)
+            mapName.widthAnchor.constraint(equalToConstant: 72).isActive = true
+            let map = stack([editionMarker(item["edition"] as? String == "anime"), mapName], horizontal: true, spacing: 4)
             let count = label(kind == 1 ? text("RoomPlayers", String(item["playerCount"] as? Int ?? 0)) : "\(item["playerCount"] as? Int ?? 0)/\(item["maxPlayers"] as? Int ?? 10)", size: 11)
             count.widthAnchor.constraint(equalToConstant: 34).isActive = true
             let tail: NSView
@@ -1125,7 +1241,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
             }
         case "rooms":
             pages.selectedSegment = 2
-            handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32, "probe": 2, "latency": 32, "kind": 0, "avatars": [["name": "Windy"], ["name": "Player"]]], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "kind": 1, "minutes": 24, "avatars": [["name": "Player"], ["name": "Windy"]]]]])
+            handle(["type": "rooms", "rows": [["code": "Z82QCT", "name": "Windy", "map": "easy", "playerCount": 3, "maxPlayers": 10, "rtt": 32, "probe": 2, "latency": 32, "kind": 0, "edition": "anime", "avatars": [["name": "Windy"], ["name": "Player"]]], ["code": "ABC123", "name": "Player", "map": "hard", "playerCount": 2, "maxPlayers": 6, "kind": 1, "minutes": 24, "avatars": [["name": "Player"], ["name": "Windy"]]]]])
         case "missing": mapState = "missing"
         case "outdated": pages.selectedSegment = 1; mapState = "outdated"
         case "error": state = "error"; status.stringValue = text("BackendExited"); status.textColor = .systemRed
