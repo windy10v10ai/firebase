@@ -214,7 +214,9 @@ private final class DescriptionView: NSTextView {
 
 private final class Banner: NSView {
     let originalImage = Bundle.main.url(forResource: "banner", withExtension: "jpg").flatMap { NSImage(contentsOf: $0) }
-    let animeImage = Bundle.main.url(forResource: "banner-anime", withExtension: "jpg").flatMap { NSImage(contentsOf: $0) }
+    // The anime banner is picked from the gallery folder shipped in the app bundle
+    private let animeBanners = (Bundle.main.urls(forResourcesWithExtension: "jpg", subdirectory: "anime-banners") ?? []).sorted { $0.lastPathComponent < $1.lastPathComponent }
+    var animeImage: NSImage?
     let avatar = Bundle.main.url(forResource: "anime-avatar", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
     var versionText = ""
     var edition = "original" { didSet { needsDisplay = true } }
@@ -223,14 +225,26 @@ private final class Banner: NSView {
     var onEdition: ((String) -> Void)?
     var onVersion: (() -> Void)?
     override var isFlipped: Bool { true }
-    private var optionWidth: CGFloat { languageCode == "ru-RU" ? 76 : 62 }
+    override init(frame frameRect: NSRect) { super.init(frame: frameRect); pickBanner() }
+    required init?(coder: NSCoder) { super.init(coder: coder); pickBanner() }
+    // The first launch shows anime-16, later picks never repeat the last picture
+    private func pickBanner() {
+        guard !animeBanners.isEmpty else { return }
+        func name(_ url: URL) -> String { url.deletingPathExtension().lastPathComponent }
+        let last = UserDefaults.standard.string(forKey: "animeBanner") ?? ""
+        let chosen = last.isEmpty ? (animeBanners.first { name($0) == "anime-16" } ?? animeBanners[0]) : (animeBanners.filter { name($0) != last }.randomElement() ?? animeBanners[0])
+        animeImage = NSImage(contentsOf: chosen)
+        if !preview { UserDefaults.standard.set(name(chosen), forKey: "animeBanner") }
+        needsDisplay = true
+    }
+    private var optionWidth: CGFloat { languageCode == "ru-RU" ? 84 : 72 }
     private let smallFont = NSFont.systemFont(ofSize: 11)
     private var trackRect: NSRect {
-        let width = 2 * optionWidth + 4
-        return NSRect(x: bounds.width - 8 - width, y: bounds.height - 8 - 24, width: width, height: 24)
+        let width = 2 * optionWidth
+        return NSRect(x: bounds.width - 8 - width, y: bounds.height - 4 - 28, width: width, height: 28)
     }
     private func optionRect(_ index: Int) -> NSRect {
-        NSRect(x: trackRect.minX + 2 + CGFloat(index) * optionWidth, y: trackRect.minY + 2, width: optionWidth, height: 20)
+        NSRect(x: trackRect.minX + CGFloat(index) * optionWidth, y: trackRect.minY, width: optionWidth, height: trackRect.height)
     }
     private var badgeRect: NSRect {
         let size = (versionText as NSString).size(withAttributes: [.font: smallFont])
@@ -239,12 +253,10 @@ private final class Banner: NSView {
     }
     override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        if optionRect(0).contains(point) { choose("original") }
-        else if optionRect(1).contains(point) { choose("anime") }
+        // The whole track is one switch, so a click anywhere on it flips to the other edition
+        if trackRect.contains(point) { if !locked { onEdition?(edition == "anime" ? "original" : "anime") } }
         else if badgeRect.contains(point) { onVersion?() }
-    }
-    private func choose(_ value: String) {
-        if !locked && value != edition { onEdition?(value) }
+        else if edition == "anime" { pickBanner() }
     }
     override func resetCursorRects() {
         addCursorRect(badgeRect, cursor: .pointingHand)
@@ -266,12 +278,12 @@ private final class Banner: NSView {
 
         let opacity: CGFloat = locked ? 0.47 : 1
         let track = trackRect
-        Theme.background.withAlphaComponent(0.8 * opacity).setFill(); NSBezierPath(roundedRect: track, xRadius: 12, yRadius: 12).fill()
-        NSColor.white.withAlphaComponent(0.16 * opacity).setStroke(); NSBezierPath(roundedRect: track.insetBy(dx: 0.5, dy: 0.5), xRadius: 12, yRadius: 12).stroke()
+        Theme.background.withAlphaComponent(0.8 * opacity).setFill(); NSBezierPath(roundedRect: track, xRadius: 14, yRadius: 14).fill()
+        NSColor.white.withAlphaComponent(0.16 * opacity).setStroke(); NSBezierPath(roundedRect: track.insetBy(dx: 0.5, dy: 0.5), xRadius: 14, yRadius: 14).stroke()
         let anime = edition == "anime"
         let thumb = optionRect(anime ? 1 : 0)
-        (anime ? Theme.color(0x3a2a33) : Theme.color(0x2a1d19)).withAlphaComponent(opacity).setFill(); NSBezierPath(roundedRect: thumb, xRadius: 10, yRadius: 10).fill()
-        (anime ? Theme.color(0xc9648a) : Theme.accent).withAlphaComponent(opacity).setStroke(); NSBezierPath(roundedRect: thumb.insetBy(dx: 0.5, dy: 0.5), xRadius: 10, yRadius: 10).stroke()
+        (anime ? Theme.color(0x3a2a33) : Theme.color(0x2a1d19)).withAlphaComponent(opacity).setFill(); NSBezierPath(roundedRect: thumb, xRadius: 14, yRadius: 14).fill()
+        (anime ? Theme.color(0xc9648a) : Theme.accent).withAlphaComponent(opacity).setStroke(); NSBezierPath(roundedRect: thumb.insetBy(dx: 0.5, dy: 0.5), xRadius: 14, yRadius: 14).stroke()
         drawOption(0, text("EditionOriginal"), selected: !anime, opacity: opacity)
         drawOption(1, text("EditionAnime"), selected: anime, opacity: opacity, withAvatar: true)
     }
@@ -280,14 +292,15 @@ private final class Banner: NSView {
         let attributes: [NSAttributedString.Key: Any] = [.font: smallFont, .foregroundColor: (selected ? Theme.text : Theme.muted).withAlphaComponent(opacity)]
         let size = (title as NSString).size(withAttributes: attributes)
         let icon: CGFloat = withAvatar && avatar != nil ? 20 : 0
-        var left = rect.minX + (rect.width - icon - size.width) / 2
+        let gap: CGFloat = icon > 0 ? 4 : 0
+        var left = rect.minX + (rect.width - icon - gap - size.width) / 2
         if icon > 0, let avatar = avatar {
-            let circle = NSRect(x: left, y: rect.minY + 2, width: 16, height: 16)
+            let circle = NSRect(x: left, y: rect.minY + (rect.height - icon) / 2, width: icon, height: icon)
             NSGraphicsContext.saveGraphicsState()
             NSBezierPath(ovalIn: circle).addClip()
             avatar.draw(in: circle, from: .zero, operation: .sourceOver, fraction: opacity, respectFlipped: true, hints: nil)
             NSGraphicsContext.restoreGraphicsState()
-            left += icon
+            left += icon + gap
         }
         (title as NSString).draw(at: NSPoint(x: left, y: rect.minY + (rect.height - size.height) / 2), withAttributes: attributes)
     }

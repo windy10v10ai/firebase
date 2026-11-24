@@ -1776,12 +1776,14 @@ namespace Windy10v10AI.Launcher
         public string OriginalText = "";
         public string AnimeText = "";
         public Image OriginalPicture;
-        public Image AnimePicture;
+        Image animePicture;
         public Image Avatar;
         // A running game or room keeps the edition it started with, so the switch only looks dimmed
         public bool Locked;
         public event EventHandler VersionClick;
         public event Action<string> EditionChanged;
+        // A click on the picture itself, away from the switch and the version badge
+        public event Action PictureClick;
         static readonly Color AnimeFill = ColorTranslator.FromHtml("#3a2a33");
         static readonly Color AnimeEdge = ColorTranslator.FromHtml("#c9648a");
         readonly System.Windows.Forms.Timer slide = new System.Windows.Forms.Timer { Interval = 15 };
@@ -1790,7 +1792,7 @@ namespace Windy10v10AI.Launcher
         float thumb;
         string hover;
         Bitmap scaled;
-        string scaledEdition;
+        Image scaledPicture;
         Size scaledSize;
 
         public BannerBar()
@@ -1804,6 +1806,16 @@ namespace Windy10v10AI.Launcher
                 if (thumb == target) slide.Stop();
                 Invalidate();
             };
+        }
+
+        public Image AnimePicture
+        {
+            get { return animePicture; }
+            set
+            {
+                animePicture = value;
+                Invalidate();
+            }
         }
 
         public string Edition
@@ -1822,21 +1834,21 @@ namespace Windy10v10AI.Launcher
 
         float OptionWidth
         {
-            get { return (System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? 76 : 62) * DpiScale; }
+            get { return (System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? 84 : 72) * DpiScale; }
         }
 
         RectangleF TrackRect()
         {
             var s = DpiScale;
-            var w = 2 * OptionWidth + 4 * s;
-            return new RectangleF(Width - 8 * s - w, Height - 8 * s - 24 * s, w, 24 * s);
+            var w = 2 * OptionWidth;
+            return new RectangleF(Width - 8 * s - w, Height - 4 * s - 28 * s, w, 28 * s);
         }
 
         RectangleF OptionRect(int index)
         {
             var s = DpiScale;
             var track = TrackRect();
-            return new RectangleF(track.X + 2 * s + index * OptionWidth, track.Y + 2 * s, OptionWidth, 20 * s);
+            return new RectangleF(track.X + index * OptionWidth, track.Y, OptionWidth, track.Height);
         }
 
         RectangleF BadgeRect()
@@ -1857,7 +1869,7 @@ namespace Windy10v10AI.Launcher
         protected override void OnMouseMove(MouseEventArgs e)
         {
             var over = Locked ? null : OptionAt(e.Location);
-            Cursor = over != null || BadgeRect().Contains(e.Location) ? Cursors.Hand : Cursors.Default;
+            Cursor = (!Locked && TrackRect().Contains(e.Location)) || BadgeRect().Contains(e.Location) ? Cursors.Hand : Cursors.Default;
             if (over != hover)
             {
                 hover = over;
@@ -1876,12 +1888,16 @@ namespace Windy10v10AI.Launcher
 
         protected override void OnMouseClick(MouseEventArgs e)
         {
-            var chosen = OptionAt(e.Location);
-            if (chosen != null)
+            // The whole track is one switch, so a click anywhere on it flips to the other edition
+            if (TrackRect().Contains(e.Location))
             {
-                if (!Locked && chosen != edition && EditionChanged != null) EditionChanged(chosen);
+                if (!Locked && EditionChanged != null) EditionChanged(edition == Editions.Anime ? Editions.Original : Editions.Anime);
             }
-            else if (BadgeRect().Contains(e.Location) && VersionClick != null) VersionClick(this, EventArgs.Empty);
+            else if (BadgeRect().Contains(e.Location))
+            {
+                if (VersionClick != null) VersionClick(this, EventArgs.Empty);
+            }
+            else if (PictureClick != null) PictureClick();
             base.OnMouseClick(e);
         }
 
@@ -1900,11 +1916,11 @@ namespace Windy10v10AI.Launcher
         {
             var picture = edition == Editions.Anime ? AnimePicture : OriginalPicture;
             if (picture == null) return;
-            if (scaled == null || scaledEdition != edition || scaledSize != Size)
+            if (scaled == null || scaledPicture != picture || scaledSize != Size)
             {
                 if (scaled != null) scaled.Dispose();
                 scaled = new Bitmap(Math.Max(1, Width), Math.Max(1, Height));
-                scaledEdition = edition;
+                scaledPicture = picture;
                 scaledSize = Size;
                 var factor = Math.Max((float)Width / picture.Width, (float)Height / picture.Height);
                 var w = picture.Width * factor;
@@ -1933,17 +1949,17 @@ namespace Windy10v10AI.Launcher
 
             var alpha = Locked ? 120 : 255;
             var track = TrackRect();
-            using (var path = Theme.Rounded(track, 12 * s))
+            using (var path = Theme.Rounded(track, 14 * s))
             using (var brush = new SolidBrush(Color.FromArgb(204 * alpha / 255, 22, 20, 18))) g.FillPath(brush, path);
-            using (var path = Theme.Rounded(RectangleF.Inflate(track, -0.5f, -0.5f), 12 * s))
+            using (var path = Theme.Rounded(RectangleF.Inflate(track, -0.5f, -0.5f), 14 * s))
             using (var pen = new Pen(Color.FromArgb(41 * alpha / 255, 255, 255, 255), 1f)) g.DrawPath(pen, path);
 
             var first = OptionRect(0);
             var thumbRect = new RectangleF(first.X + thumb * OptionWidth, first.Y, first.Width, first.Height);
             var animeShown = thumb >= 0.5f;
-            using (var path = Theme.Rounded(thumbRect, 10 * s))
+            using (var path = Theme.Rounded(thumbRect, 14 * s))
             using (var brush = new SolidBrush(Color.FromArgb(alpha, animeShown ? AnimeFill : Theme.ActivePanel))) g.FillPath(brush, path);
-            using (var path = Theme.Rounded(RectangleF.Inflate(thumbRect, -0.5f, -0.5f), 10 * s))
+            using (var path = Theme.Rounded(RectangleF.Inflate(thumbRect, -0.5f, -0.5f), 14 * s))
             using (var pen = new Pen(Color.FromArgb(alpha, animeShown ? AnimeEdge : Theme.Accent), 1f)) g.DrawPath(pen, path);
 
             DrawOption(g, 0, OriginalText, false, Flags, alpha);
@@ -1957,12 +1973,14 @@ namespace Windy10v10AI.Launcher
             var name = index == 1 ? Editions.Anime : Editions.Original;
             var color = edition == name || hover == name ? Theme.Text : Theme.Muted;
             if (alpha < 255) color = Color.FromArgb(alpha, color);
+            // Avatar, gap and text are centered together in the option, and the avatar keeps clear of the selection border
             var size = TextRenderer.MeasureText(text, Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding);
             var icon = withAvatar && Avatar != null ? 20 * s : 0;
-            var left = rect.X + (rect.Width - icon - size.Width) / 2;
+            var gap = icon > 0 ? 4 * s : 0;
+            var left = rect.X + (rect.Width - icon - gap - size.Width) / 2;
             if (icon > 0)
             {
-                var circle = new RectangleF(left, rect.Y + (rect.Height - 16 * s) / 2, 16 * s, 16 * s);
+                var circle = new RectangleF(left, rect.Y + (rect.Height - icon) / 2, icon, icon);
                 var state = g.Save();
                 using (var path = new GraphicsPath())
                 using (var attributes = new System.Drawing.Imaging.ImageAttributes())
@@ -1975,7 +1993,7 @@ namespace Windy10v10AI.Launcher
                 }
                 g.Restore(state);
             }
-            var textRect = new Rectangle((int)Math.Round(left + icon), (int)rect.Y, size.Width + 2, (int)rect.Height);
+            var textRect = new Rectangle((int)Math.Round(left + icon + gap), (int)rect.Y, size.Width + 2, (int)rect.Height);
             TextRenderer.DrawText(g, text, Font, textRect, color, flags | TextFormatFlags.Left);
         }
     }

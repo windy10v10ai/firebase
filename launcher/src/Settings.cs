@@ -13,6 +13,8 @@ namespace Windy10v10AI.Launcher
 
         public static int Mode;
         public static string Edition = Editions.Original;
+        // The anime banner shown last, so the next pick differs from it
+        public static string AnimeBanner = "";
         public static bool PublicRoom = true;
         public static int MaxPlayers = PlayerLimit;
         public static bool AutoStartDota = true;
@@ -43,6 +45,7 @@ namespace Windy10v10AI.Launcher
                 int number;
                 if (values.TryGetValue("mode", out value) && int.TryParse(value, out number) && number >= 0 && number <= 2) Mode = number;
                 if (values.TryGetValue("edition", out value)) Edition = Editions.Normalize(value);
+                if (values.TryGetValue("animeBanner", out value)) AnimeBanner = value;
                 if (values.TryGetValue("public", out value)) PublicRoom = value != "0";
                 if (values.TryGetValue("maxPlayers", out value) && int.TryParse(value, out number) && number >= MinPlayers && number <= PlayerLimit) MaxPlayers = number;
                 if (values.TryGetValue("autoStartDota", out value)) AutoStartDota = value != "0";
@@ -62,6 +65,7 @@ namespace Windy10v10AI.Launcher
                 {
                     "mode=" + Mode,
                     "edition=" + Edition,
+                    "animeBanner=" + AnimeBanner,
                     "public=" + (PublicRoom ? "1" : "0"),
                     "maxPlayers=" + MaxPlayers,
                     "autoStartDota=" + (AutoStartDota ? "1" : "0"),

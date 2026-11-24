@@ -209,7 +209,7 @@ namespace Windy10v10AI.Launcher
             Font = new Font(Theme.FontName, 9f);
 
             banner.OriginalPicture = LoadPicture("banner.jpg");
-            banner.AnimePicture = LoadPicture("banner-anime.jpg");
+            banner.PictureClick += ChangeAnimeBanner;
             banner.Avatar = LoadPicture("anime-avatar.png");
             roomList.EditionAvatar = banner.Avatar;
             banner.OriginalText = Strings.EditionOriginal;
@@ -286,6 +286,7 @@ namespace Windy10v10AI.Launcher
 
             // Only the screen comes back; a room is never opened without a click
             Settings.Load();
+            LoadAnimeBanners();
             settlement = new SettlementUploader(
                 () => BuildKey.LauncherApiKey,
                 SettlementApi.Transport,
@@ -625,6 +626,39 @@ namespace Windy10v10AI.Launcher
         string MapIdOf(string edition)
         {
             return Editions.MapId(edition, testBox.Checked);
+        }
+
+        // Every embedded picture named anime-banner-*.jpg is part of the gallery
+        readonly List<string> animeBannerNames = new List<string>();
+
+        void LoadAnimeBanners()
+        {
+            foreach (var resource in typeof(MainForm).Assembly.GetManifestResourceNames())
+                if (resource.StartsWith("anime-banner-") && resource.EndsWith(".jpg")) animeBannerNames.Add(ResourceBannerName(resource));
+            animeBannerNames.Sort(StringComparer.Ordinal);
+            ShowAnimeBanner(BannerGallery.Pick(animeBannerNames, Settings.AnimeBanner, new Random()));
+        }
+
+        static string ResourceBannerName(string resource)
+        {
+            return resource.Substring("anime-banner-".Length, resource.Length - "anime-banner-".Length - ".jpg".Length);
+        }
+
+        void ShowAnimeBanner(string name)
+        {
+            if (name == null) return;
+            var picture = LoadPicture("anime-banner-" + name + ".jpg");
+            if (picture == null) return;
+            banner.AnimePicture = picture;
+            Settings.AnimeBanner = name;
+            Settings.Save();
+        }
+
+        // Only the anime banner changes, and never to the picture already showing
+        void ChangeAnimeBanner()
+        {
+            if (Settings.Edition != Editions.Anime) return;
+            ShowAnimeBanner(BannerGallery.Pick(animeBannerNames, Settings.AnimeBanner, new Random()));
         }
 
         static Image LoadPicture(string name)

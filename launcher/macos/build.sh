@@ -24,7 +24,8 @@ for language in zh-CN en-US ru-RU; do
     "$APP_OUT/Contents/Resources/engine/WindyMacEngine" --strings "$language" > "$APP_OUT/Contents/Resources/strings-$language.json"
 done
 bash build-native.sh "$APP_OUT/Contents/MacOS"
-cp ../assets/banner.jpg ../assets/banner-anime.jpg ../assets/anime-avatar.png "$APP_OUT/Contents/Resources/"
+cp ../assets/banner.jpg ../assets/anime-avatar.png "$APP_OUT/Contents/Resources/"
+cp -R ../assets/anime-banners "$APP_OUT/Contents/Resources/"
 ICON_TEMP=$(mktemp -d)
 trap 'rm -f "$KEY_FILE"; rm -rf "$ICON_TEMP"' EXIT
 mkdir "$ICON_TEMP/Launcher.iconset"
