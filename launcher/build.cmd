@@ -18,7 +18,7 @@ if errorlevel 1 (
   del /q "%KEYFILE%" >nul 2>&1
   exit /b 1
 )
-"%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /optimize+ /target:winexe %DEFINE% /out:%OUT%\Windy10v10AI.exe /win32icon:assets\icon.ico /win32manifest:app.manifest /resource:assets\banner.jpg,banner.jpg /resource:"%KEYFILE%",launcher-api-key.txt /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Web.Extensions.dll core\*.cs src\*.cs
+"%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /optimize+ /target:winexe %DEFINE% /out:%OUT%\Windy10v10AI.exe /win32icon:assets\icon.ico /win32manifest:app.manifest /resource:assets\banner.jpg,banner.jpg /resource:assets\banner-anime.jpg,banner-anime.jpg /resource:assets\anime-avatar.png,anime-avatar.png /resource:"%KEYFILE%",launcher-api-key.txt /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Web.Extensions.dll core\*.cs src\*.cs
 set "STATUS=%ERRORLEVEL%"
 del /q "%KEYFILE%" >nul 2>&1
 exit /b %STATUS%

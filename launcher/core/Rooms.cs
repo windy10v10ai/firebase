@@ -25,6 +25,7 @@ namespace Windy10v10AI.Launcher
         public string Name;
         public string AvatarUrl;
         public string Map;
+        public string Edition = Editions.Original;
         public int Players;
         public int MaxPlayers;
         public ProbeState Probe;
@@ -70,7 +71,7 @@ namespace Windy10v10AI.Launcher
     {
         public readonly bool Probing;
         readonly Func<Dictionary<string, object>> listBody;
-        readonly Func<List<Candidate>, bool?, Dictionary<string, object>> peerBody;
+        readonly Func<string, List<Candidate>, bool?, Dictionary<string, object>> peerBody;
         readonly object sync = new object();
         readonly List<RoomRow> rows = new List<RoomRow>();
         List<RoomRow> games = new List<RoomRow>();
@@ -89,7 +90,7 @@ namespace Windy10v10AI.Launcher
         // Raised on worker threads
         public event Action Changed;
 
-        public RoomBrowser(Func<Dictionary<string, object>> listBody, Func<List<Candidate>, bool?, Dictionary<string, object>> peerBody, bool probing)
+        public RoomBrowser(Func<Dictionary<string, object>> listBody, Func<string, List<Candidate>, bool?, Dictionary<string, object>> peerBody, bool probing)
         {
             this.listBody = listBody;
             this.peerBody = peerBody;
@@ -192,7 +193,7 @@ namespace Windy10v10AI.Launcher
             { IsBackground = true }.Start();
         }
 
-        static RoomRow Parse(Dictionary<string, object> room)
+        internal static RoomRow Parse(Dictionary<string, object> room)
         {
             object value;
             var row = new RoomRow
@@ -201,6 +202,7 @@ namespace Windy10v10AI.Launcher
                 Name = room.TryGetValue("personaName", out value) ? value as string : null,
                 AvatarUrl = room.TryGetValue("avatarUrl", out value) ? value as string : null,
                 Map = room.TryGetValue("map", out value) ? value as string : null,
+                Edition = ReadEdition(room),
                 Players = room.TryGetValue("playerCount", out value) && value != null ? Convert.ToInt32(value) : 0,
                 MaxPlayers = room.TryGetValue("maxPlayers", out value) && value != null ? Convert.ToInt32(value) : 0,
                 HostRelays = RelayLeg.ParseList(room.TryGetValue("hostRelays", out value) ? value : null),
@@ -212,7 +214,7 @@ namespace Windy10v10AI.Launcher
             return row;
         }
 
-        static RoomRow ParseGame(Dictionary<string, object> game)
+        internal static RoomRow ParseGame(Dictionary<string, object> game)
         {
             object value;
             return new RoomRow
@@ -220,10 +222,17 @@ namespace Windy10v10AI.Launcher
                 Kind = RowKind.Playing,
                 Friends = !(game.TryGetValue("public", out value) && true.Equals(value)),
                 Map = game.TryGetValue("map", out value) ? value as string : null,
+                Edition = ReadEdition(game),
                 Players = game.TryGetValue("playerCount", out value) && value != null ? Convert.ToInt32(value) : 0,
                 Minutes = game.TryGetValue("minutes", out value) && value != null ? Convert.ToInt32(value) : -1,
                 Avatars = ParseAvatars(game),
             };
+        }
+
+        static string ReadEdition(Dictionary<string, object> data)
+        {
+            object value;
+            return Editions.Normalize(data.TryGetValue("edition", out value) ? value as string : null);
         }
 
         static List<RoomAvatar> ParseAvatars(Dictionary<string, object> data)
@@ -273,11 +282,17 @@ namespace Windy10v10AI.Launcher
             }
             var rtt = -1;
             var gone = false;
+            var edition = Editions.Original;
+            lock (sync)
+            {
+                var listed = rows.Find(r => r.Code == code);
+                if (listed != null) edition = listed.Edition;
+            }
             if (socket != null && !disposed)
             {
                 try
                 {
-                    var body = peerBody(own, SymmetricNat);
+                    var body = peerBody(edition, own, SymmetricNat);
                     body["probe"] = true;
                     var answer = RoomApi.Join(code, body);
                     var hosts = new List<Candidate>();
@@ -386,6 +401,16 @@ namespace Windy10v10AI.Launcher
         public List<RelayLeg> OwnRelays
         {
             get { lock (sync) return new List<RelayLeg>(ownRelays); }
+        }
+
+        // Which edition a listed room runs, or null when the code is not on the list (a private room)
+        public string EditionOf(string code)
+        {
+            lock (sync)
+            {
+                var row = rows.Find(r => r.Code == code);
+                return row == null ? null : row.Edition;
+            }
         }
 
         public JoinTunnel TakeTunnel(out List<Candidate> gathered)

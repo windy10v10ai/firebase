@@ -80,7 +80,7 @@ namespace Windy10v10AI.Launcher
         {
             JsonElement? result = null;
             using var rooms = new MacRooms(value => result = JsonSerializer.SerializeToElement(value), new HostSession(_ => { }));
-            using var browser = new RoomBrowser(() => new(), (_, _) => new(), false);
+            using var browser = new RoomBrowser(() => new(), (_, _, _) => new(), false);
             var rows = (List<RoomRow>)typeof(RoomBrowser).GetField("rows", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(browser);
             rows.Add(new RoomRow { Kind = RowKind.Waiting, Code = "AB12CD", Map = "hard", Name = "host", Players = 2, MaxPlayers = 4, Probe = ProbeState.Reachable, Rtt = 12 });
             browser.Loaded = true;

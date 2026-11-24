@@ -59,7 +59,9 @@ namespace Windy10v10AI.Launcher
         public static string MapUpdateHelperMissing { get { return Pick("地图更新工具缺失，请重新解压启动器。", "The map update tool is missing. Extract the launcher again.", "Отсутствует средство обновления карты. Распакуйте лаунчер снова."); } }
 
         public static string Title { get { return Pick("Windy10v10AI 启动器", "Windy10v10AI Launcher", "Windy10v10AI Лаунчер"); } }
-        public static string Subtitle { get { return Pick("本地启动服务器，性能优化", "Local server for better performance", "Локальный сервер для лучшей производительности"); } }
+        public static string EditionOriginal { get { return Pick("原版", "Original", "Оригинал"); } }
+        public static string EditionAnime { get { return Pick("二次元", "Anime", "Аниме"); } }
+        public static string EditionMismatch { get { return Pick("房间用的是另一个版本：请在右上角切换版本后再加入。", "This room uses the other edition. Switch the edition on the banner and join again.", "Эта комната использует другую версию. Переключите версию на баннере и войдите снова."); } }
 
         public static string Easy { get { return Pick("简单", "Easy", "Лёгкий"); } }
         public static string Hard { get { return Pick("困难", "Hard", "Сложный"); } }

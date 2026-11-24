@@ -94,12 +94,12 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        public void Open(string code, long accountId, string mapVersion, CancellationToken cancellation)
+        public void Open(string code, long accountId, string mapVersion, CancellationToken cancellation, string edition = Editions.Original)
         {
             code = NormalizeCode(code);
             var current = RequireTunnel();
             cancellation.ThrowIfCancellationRequested();
-            var body = RoomPeer.Body(accountId, mapVersion, candidates, current.SymmetricNat);
+            var body = RoomPeer.Body(accountId, mapVersion, candidates, current.SymmetricNat, edition);
             RoomPeer.AddRelays(body, relays);
             var joined = options.JoinRoom(code, body);
             cancellation.ThrowIfCancellationRequested();
@@ -199,6 +199,7 @@ namespace Windy10v10AI.Launcher
                 case "kicked_by_host": return Strings.KickedByHost;
                 case "connect_failed": return Strings.ConnectFailed;
                 case "port_in_use": return Strings.PortInUse;
+                case "edition_mismatch": return Strings.EditionMismatch;
                 case "map_mismatch": case "map_version_mismatch": return Strings.MapMismatch;
                 case "version_mismatch": case "protocol_mismatch": return Strings.VersionMismatch;
                 case "network": return Strings.RoomNetwork;

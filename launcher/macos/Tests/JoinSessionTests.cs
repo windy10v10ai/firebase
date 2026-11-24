@@ -162,7 +162,7 @@ namespace Windy10v10AI.Launcher.Tests
         static async Task BrowserSocketIsReused()
         {
             await using var fixture = new Fixture();
-            using var browser = new RoomBrowser(() => new(), (_, _) => new(), true);
+            using var browser = new RoomBrowser(() => new(), (_, _, _) => new(), true);
             fixture.Tunnel = new JoinTunnel(); fixture.Tunnel.Start();
             SetBrowser(browser, "tunnel", fixture.Tunnel);
             SetBrowser(browser, "candidates", new List<Candidate> { new("lan", Address(fixture.Tunnel)) });

@@ -19,7 +19,7 @@ namespace Windy10v10AI.Launcher
             bool probing = !host.Active;
             if (browser != null && browser.Probing == probing) { Refresh(); return; }
             Dispose();
-            var created = new RoomBrowser(ListBody, (candidates, symmetric) => RoomPeer.Body(MacInstall.AccountId(), MapVersion(), candidates, symmetric), probing);
+            var created = new RoomBrowser(ListBody, (edition, candidates, symmetric) => RoomPeer.Body(MacInstall.AccountId(), MapVersion(edition), candidates, symmetric, edition), probing);
             browser = created;
             created.Changed += () => { if (browser == created) Publish(created); };
             Publish(created);
@@ -68,16 +68,18 @@ namespace Windy10v10AI.Launcher
             old?.Dispose();
         }
 
-        static string MapVersion()
+        static string MapVersion(string edition)
         {
-            try { return MacInstall.Find().Manifest; } catch { return null; }
+            try { return MacInstall.Find(true, edition).Manifest; } catch { return null; }
         }
 
         static Dictionary<string, object> ListBody() => new()
         {
             ["steamId"] = Platform.SteamAccountId(),
             ["protocolVersion"] = RoomApi.ProtocolVersion,
-            ["mapVersion"] = MapVersion()
+            // Older APIs only read mapVersion, as the original edition's map
+            ["mapVersion"] = MapVersion(Editions.Original),
+            ["mapVersions"] = new Dictionary<string, object> { [Editions.Original] = MapVersion(Editions.Original), [Editions.Anime] = MapVersion(Editions.Anime) }
         };
 
         void Publish(RoomBrowser source)
@@ -88,13 +90,13 @@ namespace Windy10v10AI.Launcher
             if (host.Active && !host.Solo && host.Code != null)
             {
                 var players = host.Roster.Snapshot().Where(e => e.Status != PlayerStatus.Left && e.Status != PlayerStatus.Failed).ToList();
-                rows.Add(new RoomRow { Kind = RowKind.Own, Code = host.Code, Name = Strings.YourRoom, Map = host.Difficulty, Players = players.Count, MaxPlayers = host.MaxPlayers, Friends = !host.PublicRoom, Avatars = players.Select(e => new RoomAvatar { Name = e.Name, Url = e.AvatarUrl }).ToList() });
+                rows.Add(new RoomRow { Kind = RowKind.Own, Code = host.Code, Name = Strings.YourRoom, Map = host.Difficulty, Edition = host.Edition, Players = players.Count, MaxPlayers = host.MaxPlayers, Friends = !host.PublicRoom, Avatars = players.Select(e => new RoomAvatar { Name = e.Name, Url = e.AvatarUrl }).ToList() });
                 waiting.RemoveAll(r => r.Code == host.Code);
                 games.RemoveAll(r => r.Code == host.Code);
             }
             rows.AddRange(waiting);
             rows.AddRange(games);
-            emit(new { type = "rooms", loading = !source.Loaded && !source.LoadFailed, failed = source.LoadFailed, lookOnly = host.Active, count = waiting.Count, rows = rows.Select(r => new { code = r.Code, name = r.Name, map = r.Map, playerCount = r.Players, maxPlayers = r.MaxPlayers, probe = (int)r.Probe, rtt = r.Rtt, relayRtt = r.RelayRtt, latency = r.Latency, started = r.Kind == RowKind.Playing, minutes = r.Minutes, kind = (int)r.Kind, friends = r.Friends, joinable = r.Joinable, avatars = r.Avatars.Select(a => new { name = a.Name, url = a.Url }).ToArray() }).ToArray() });
+            emit(new { type = "rooms", loading = !source.Loaded && !source.LoadFailed, failed = source.LoadFailed, lookOnly = host.Active, count = waiting.Count, rows = rows.Select(r => new { code = r.Code, name = r.Name, map = r.Map, edition = r.Edition, playerCount = r.Players, maxPlayers = r.MaxPlayers, probe = (int)r.Probe, rtt = r.Rtt, relayRtt = r.RelayRtt, latency = r.Latency, started = r.Kind == RowKind.Playing, minutes = r.Minutes, kind = (int)r.Kind, friends = r.Friends, joinable = r.Joinable, avatars = r.Avatars.Select(a => new { name = a.Name, url = a.Url }).ToArray() }).ToArray() });
         }
     }
 }
