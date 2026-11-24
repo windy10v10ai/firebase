@@ -1798,6 +1798,8 @@ namespace Windy10v10AI.Launcher
         public BannerBar()
         {
             Font = new Font(Theme.FontName, 8.25f);
+            // Quick repeated clicks would otherwise arrive as double clicks and skip MouseClick, so every press counts as a click
+            SetStyle(ControlStyles.StandardDoubleClick, false);
             slide.Tick += delegate
             {
                 var target = edition == Editions.Anime ? 1f : 0f;
