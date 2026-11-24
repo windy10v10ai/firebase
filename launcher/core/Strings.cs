@@ -61,7 +61,14 @@ namespace Windy10v10AI.Launcher
         public static string Title { get { return Pick("Windy10v10AI 启动器", "Windy10v10AI Launcher", "Windy10v10AI Лаунчер"); } }
         public static string EditionOriginal { get { return Pick("原版", "Original", "Оригинал"); } }
         public static string EditionAnime { get { return Pick("二次元", "Anime", "Аниме"); } }
-        public static string EditionMismatch { get { return Pick("房间用的是另一个版本，请在横幅右下角切换版本后再加入。", "This room uses the other edition. Switch the edition at the bottom right of the banner and join again.", "Эта комната использует другую версию. Переключите версию в правом нижнем углу баннера и войдите снова."); } }
+        public static string EditionSwitchTitle { get { return Pick("切换版本", "Switch edition", "Сменить версию"); } }
+        public static string EditionSwitchToAnime { get { return Pick("这个房间是二次元版，要切换到二次元版并加入吗？", "This room is the Anime edition. Switch to the Anime edition and join?", "Эта комната — версия «Аниме». Переключиться на неё и войти?"); } }
+        public static string EditionSwitchToOriginal { get { return Pick("这个房间是原版，要切换到原版并加入吗？", "This room is the Original edition. Switch to the Original edition and join?", "Эта комната — версия «Оригинал». Переключиться на неё и войти?"); } }
+        public static string EditionSwitchYes { get { return Pick("切换并加入", "Switch and join", "Сменить и войти"); } }
+        public static string MapNameOriginal { get { return Pick("10v10 AI", "10v10 AI", "10v10 AI"); } }
+        public static string MapNameAnime { get { return Pick("10v10 AI 二次元版", "10v10 AI Anime", "10v10 AI Аниме"); } }
+        public static string MapName(string edition) { return Editions.Normalize(edition) == Editions.Anime ? MapNameAnime : MapNameOriginal; }
+        public static string EditionSwitchPrompt(string roomEdition) { return Editions.Normalize(roomEdition) == Editions.Anime ? EditionSwitchToAnime : EditionSwitchToOriginal; }
 
         public static string Easy { get { return Pick("简单", "Easy", "Лёгкий"); } }
         public static string Hard { get { return Pick("困难", "Hard", "Сложный"); } }
@@ -110,10 +117,10 @@ namespace Windy10v10AI.Launcher
         public static string SteamNotSignedIn { get { return Pick("Steam 还没有登录。请打开 Steam 并登录，再试一次。", "Steam is not signed in. Open Steam, sign in, then try again.", "Вход в Steam не выполнен. Откройте Steam, войдите в аккаунт и попробуйте снова."); } }
         public static string SteamClientMissing { get { return Pick("找不到 Steam 客户端。请打开 Steam 或蒸汽平台并等待更新完成，再重新开局。", "Steam could not be found. Open Steam and wait for it to finish updating, then try again.", "Steam не найден. Откройте Steam, дождитесь завершения обновления и попробуйте снова."); } }
         public static string NoDota { get { return Pick("没有找到 Dota 2，请先在 Steam 安装。", "Dota 2 was not found. Install it in Steam first.", "Dota 2 не найдена. Сначала установите её в Steam."); } }
-        public static string NoMap { get { return Pick("没有找到地图，请先订阅 10v10 AI，等待 Steam 下载完成。", "Map not found. Subscribe to 10v10 AI and wait for Steam to download it.", "Карта не найдена. Подпишитесь на 10v10 AI и дождитесь загрузки в Steam."); } }
+        public static string NoMap { get { return Pick("没有找到地图，请先订阅 {0}，等待 Steam 下载完成。", "Map not found. Subscribe to {0} and wait for Steam to download it.", "Карта не найдена. Подпишитесь на {0} и дождитесь загрузки в Steam."); } }
         public static string Timeout { get { return Pick("启动失败：服务器没有按时启动完成。请再试一次；多次失败请点「反馈问题」告诉我们。", "Launch failed: the server did not start in time. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер не запустился вовремя. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить»."); } }
         public static string ServerExited { get { return Pick("服务器意外退出。请再试一次；多次失败请点「反馈问题」告诉我们。", "The server stopped unexpectedly. Try again; if it keeps failing, press \"Report problem\" to tell us.", "Сервер неожиданно остановился. Попробуйте ещё раз; если ошибка повторяется, нажмите «Сообщить»."); } }
-        public static string MapCorrupt { get { return Pick("地图文件已损坏。请关闭 Dota 2 后点「验证文件」；还不行就在创意工坊重新订阅 10v10 AI。", "The map files are damaged. Close Dota 2 and press Verify files; if that fails, resubscribe to 10v10 AI in the Workshop.", "Файлы карты повреждены. Закройте Dota 2 и нажмите «Проверить»; если не поможет, переподпишитесь на 10v10 AI в Мастерской."); } }
+        public static string MapCorrupt { get { return Pick("地图文件已损坏。请关闭 Dota 2 后点「验证文件」；还不行就在创意工坊重新订阅 {0}。", "The map files are damaged. Close Dota 2 and press Verify files; if that fails, resubscribe to {0} in the Workshop.", "Файлы карты повреждены. Закройте Dota 2 и нажмите «Проверить»; если не поможет, переподпишитесь на {0} в Мастерской."); } }
         public static string GameFilesCorrupt { get { return Pick("Dota 2 游戏文件已损坏。请关闭 Dota 2 后点「验证文件」。", "The Dota 2 game files are damaged. Close Dota 2 and press Verify files.", "Файлы Dota 2 повреждены. Закройте Dota 2 и нажмите «Проверить»."); } }
         public static string DotaBlocked { get { return Pick("启动失败：Dota 2 没能启动，可能被杀毒软件拦截了。请在杀毒软件里把 Windy10v10AI.exe 加入信任，再试一次。", "Launch failed: Dota 2 could not start, possibly blocked by antivirus. Allow Windy10v10AI.exe in your antivirus, then try again.", "Не удалось запустить Dota 2 — возможно, её блокирует антивирус. Разрешите Windy10v10AI.exe в антивирусе и попробуйте снова."); } }
         public static string DotaNeedsAdmin { get { return Pick("启动失败：Steam 或 Dota 2 被设置成「以管理员身份运行」。请右键 Windy10v10AI.exe 选「以管理员身份运行」，或在 Steam、Dota 2 的属性里取消这个选项。", "Launch failed: Steam or Dota 2 is set to run as administrator. Right-click Windy10v10AI.exe and choose Run as administrator, or turn that option off in the properties of Steam and Dota 2.", "Не удалось запустить: Steam или Dota 2 настроены на запуск от имени администратора. Запустите Windy10v10AI.exe от имени администратора или отключите этот параметр в свойствах Steam и Dota 2."); } }
@@ -123,7 +130,10 @@ namespace Windy10v10AI.Launcher
         public static string OpenWorkshop { get { return Pick("打开创意工坊", "Open Workshop", "Открыть Мастерскую"); } }
         public static string UpdateMap { get { return Pick("更新地图", "Update map", "Обновить карту"); } }
         public static string MapUpdating { get { return Pick("正在更新地图…", "Updating the map...", "Обновление карты…"); } }
-        public static string MapUpdateFailed { get { return Pick("没能自动更新地图。请在 Dota 2 中更新地图（删除后重新安装），或打开创意工坊重新订阅 10v10 AI。", "Update failed. Reinstall the map in Dota 2, or resubscribe.", "Не удалось. Переустановите карту в Dota 2 или переподпишитесь."); } }
+        public static string MapUpdateFailed { get { return Pick("没能自动更新地图。请在 Dota 2 中更新地图（删除后重新安装），或打开创意工坊重新订阅 {0}。", "Update failed. Reinstall the map in Dota 2, or resubscribe.", "Не удалось. Переустановите карту в Dota 2 или переподпишитесь."); } }
+        public static string NoMapFor(string edition) { return string.Format(NoMap, MapName(edition)); }
+        public static string MapCorruptFor(string edition) { return string.Format(MapCorrupt, MapName(edition)); }
+        public static string MapUpdateFailedFor(string edition) { return string.Format(MapUpdateFailed, MapName(edition)); }
         public static string Subscribe { get { return Pick("订阅地图", "Subscribe", "Подписаться"); } }
         public static string ReportProblem { get { return Pick("反馈问题", "Report problem", "Сообщить"); } }
 

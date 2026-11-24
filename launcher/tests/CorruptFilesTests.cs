@@ -6,11 +6,11 @@ namespace Windy10v10AI.Launcher.Tests
     {
         public static void RunAll()
         {
-            Equal(Strings.MapCorrupt, MainForm.CorruptFilesText(
+            Equal(Strings.MapCorruptFor(Editions.Original), MainForm.CorruptFilesText(
                 "WARNING: File might be corrupt or missing - 'c:\\games\\steamapps\\common\\dota 2 beta\\game\\dota_addons\\2307479570\\pak01.vpk'\r\n" +
                 "FATAL ERROR: Content file c:\\games\\steamapps\\common\\dota 2 beta\\game\\dota_addons\\2307479570\\pak01.vpk is corrupt. Verify integrity of game files.\r\n"),
                 "detects a corrupt map in the server log");
-            Equal(Strings.MapCorrupt, MainForm.CorruptFilesText(
+            Equal(Strings.MapCorruptFor(Editions.Original), MainForm.CorruptFilesText(
                 "FATAL ERROR: Content file c:\\program files (x86)\\steam\\steamapps\\workshop\\content\\570\\2307479570\\2307479570.vpk is corrupt. Verify integrity of game files.\r\n"),
                 "detects a corrupt map in a joiner's client log");
             Equal(Strings.GameFilesCorrupt, MainForm.CorruptFilesText(

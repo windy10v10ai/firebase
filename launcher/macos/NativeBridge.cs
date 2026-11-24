@@ -93,10 +93,7 @@ namespace Windy10v10AI.Launcher
         {
             CheckAvailable();
             var code = JoinSession.NormalizeCode(Convert.ToString(command.GetValueOrDefault("code", "")));
-            // The room decides which map is joined, and a code typed in for a room not on the list carries none
-            var listed = Convert.ToString(command.GetValueOrDefault("roomEdition"));
-            var roomEdition = string.IsNullOrEmpty(listed) || Editions.Normalize(listed) == MacInstall.Edition ? null : Editions.Normalize(listed);
-            join.Start(code, true.Equals(command.GetValueOrDefault("autoEnter", true)), rooms.TakeForJoin(), roomEdition);
+            join.Start(code, true.Equals(command.GetValueOrDefault("autoEnter", true)), rooms.TakeForJoin());
             role = "join"; lastRole = role;
         }
         void ApplyMap(Dictionary<string, object> command)

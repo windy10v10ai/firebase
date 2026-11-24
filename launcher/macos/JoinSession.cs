@@ -4,8 +4,6 @@ namespace Windy10v10AI.Launcher
     sealed class JoinSessionOptions
     {
         public Func<MacInstall> FindInstall = () => MacInstall.Find();
-        // Joining a room of the edition not picked in the UI looks for that edition's map instead
-        public Func<string, MacInstall> FindEditionInstall = edition => MacInstall.Find(true, edition);
         public Func<string, string> LatestManifest = Workshop.LatestManifest;
         public Func<string, CancellationToken, Task> UpdateMap = Workshop.UpdateMap;
         public Func<long> AccountId = MacInstall.AccountId;
@@ -30,7 +28,7 @@ namespace Windy10v10AI.Launcher
         MacInstall install;
         volatile bool autoEnter;
         RoomBrowser browser;
-        string edition;
+        string failureReason;
         int settlement;
         public string State { get; private set; } = "idle";
         public string Code { get; private set; }
@@ -38,19 +36,19 @@ namespace Windy10v10AI.Launcher
         public bool Active { get { lock (runLock) return worker != null && !worker.IsCompleted; } }
         public JoinSession(Action<object> emit) : this(emit, new JoinSessionOptions()) { }
         internal JoinSession(Action<object> emit, JoinSessionOptions options) { this.emit = emit; this.options = options; }
-        void Event(string state, string message)
+        void Event(string state, string message, string reason = "")
         {
             State = state;
-            emit(new { type = "state", role = "join", state, message, code = Code ?? "", log = "", game = tunnel?.Game ?? 0, settlement });
+            emit(new { type = "state", role = "join", state, message, code = Code ?? "", log = "", game = tunnel?.Game ?? 0, settlement, reason });
         }
         void Info(string message) => emit(new { type = "message", message });
-        public void Start(string code, bool enter, RoomBrowser source = null, string roomEdition = null)
+        public void Start(string code, bool enter, RoomBrowser source = null)
         {
             code = NormalizeCode(code);
             lock (runLock)
             {
                 if (worker != null && !worker.IsCompleted) throw new Exception(Strings.SessionActive);
-                cancel?.Dispose(); cancel = new CancellationTokenSource(); Code = code; autoEnter = enter; Ready = false; browser = source; edition = roomEdition; settlement = 0;
+                cancel?.Dispose(); cancel = new CancellationTokenSource(); Code = code; autoEnter = enter; Ready = false; browser = source; settlement = 0; failureReason = "";
                 var ct = cancel.Token;
                 worker = Task.Run(() => Run(ct));
             }
@@ -90,7 +88,7 @@ namespace Windy10v10AI.Launcher
             try
             {
                 Event("checking", Strings.Starting);
-                if (edition != null) await EnsureMap(ct);
+                await EnsureMap(ct);
                 var accountId = CheckInstall(ct);
                 mount = options.Mount(install);
                 current = new JoinRoomSession(new JoinRoomSessionOptions
@@ -105,7 +103,7 @@ namespace Windy10v10AI.Launcher
                 browser = null;
                 Event("joining", Strings.Connecting);
                 var code = Code;
-                await RunNetwork(() => current.Open(code, accountId, install.Manifest, ct, edition ?? MacInstall.Edition), ct);
+                await RunNetwork(() => current.Open(code, accountId, install.Manifest, ct, MacInstall.Edition), ct);
                 EmitRoster(current.Tunnel);
                 current.Connect(ct);
                 current.Forward(options.ForwardPort);
@@ -114,7 +112,7 @@ namespace Windy10v10AI.Launcher
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { }
             catch (Exception) when (ct.IsCancellationRequested) { }
-            catch (RoomError e) { failure = JoinRoomSession.ErrorText(e.Code); }
+            catch (RoomError e) { failure = JoinRoomSession.ErrorText(e.Code); failureReason = e.Code; }
             catch (Exception e) { failure = e.Message; }
             finally
             {
@@ -125,13 +123,13 @@ namespace Windy10v10AI.Launcher
                 try { mount?.Dispose(); } catch (Exception e) { failure ??= Strings.MapCleanupFailed + e.Message; }
                 Code = null;
                 emit(new { type = "roster", role = "join", players = Array.Empty<object>() });
-                Event(failure == null ? "idle" : "error", failure ?? Strings.JoinGuide);
+                Event(failure == null ? "idle" : "error", failure ?? Strings.JoinGuide, failure == null ? "" : failureReason);
             }
         }
-        // The idle check only covers the edition picked in the UI, so the other edition's map is brought up to date here
+        // An outdated map is updated here instead of sending the player to the Workshop
         async Task EnsureMap(CancellationToken ct)
         {
-            var current = options.FindEditionInstall(edition);
+            var current = options.FindInstall();
             var latest = options.LatestManifest(current.SelectedMapId);
             if (latest == null || latest == current.Manifest) return;
             Event("checking", Strings.MapUpdating);
@@ -139,7 +137,7 @@ namespace Windy10v10AI.Launcher
         }
         long CheckInstall(CancellationToken ct)
         {
-            install = edition == null ? options.FindInstall() : options.FindEditionInstall(edition);
+            install = options.FindInstall();
             long accountId = options.AccountId();
             if (accountId <= 0) throw new Exception(Strings.SteamNotSignedIn);
             ct.ThrowIfCancellationRequested();

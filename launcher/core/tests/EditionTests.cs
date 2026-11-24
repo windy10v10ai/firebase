@@ -12,7 +12,7 @@ namespace Windy10v10AI.Launcher.Tests
             PeerBodyCarriesEdition();
             RoomsWithoutEditionAreOriginal();
             ListedRoomsAndGamesReadEdition();
-            EditionMismatchHasItsOwnMessage();
+            MapNamesFollowTheEdition();
             Console.WriteLine("PASS Edition tests");
         }
 
@@ -53,9 +53,12 @@ namespace Windy10v10AI.Launcher.Tests
             Equal(Editions.Anime, game.Edition, "a game in progress keeps its edition");
         }
 
-        static void EditionMismatchHasItsOwnMessage()
+        static void MapNamesFollowTheEdition()
         {
-            Equal(Strings.EditionMismatch, JoinRoomSession.ErrorText("edition_mismatch"), "edition_mismatch tells the player to switch");
+            Equal(Strings.MapNameOriginal, Strings.MapName(Editions.Original), "original map name");
+            Equal(Strings.MapNameAnime, Strings.MapName(Editions.Anime), "anime map name");
+            if (!Strings.NoMapFor(Editions.Anime).Contains(Strings.MapNameAnime)) throw new Exception("the missing map hint names the anime edition");
+            if (Strings.EditionSwitchPrompt(Editions.Anime) == Strings.EditionSwitchPrompt(Editions.Original)) throw new Exception("the switch prompt names the room's edition");
         }
 
         static void Equal(string expected, string actual, string message)

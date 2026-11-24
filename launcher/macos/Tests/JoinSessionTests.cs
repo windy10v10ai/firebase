@@ -262,6 +262,7 @@ namespace Windy10v10AI.Launcher.Tests
                 Options = new JoinSessionOptions
                 {
                     FindInstall = () => new MacInstall { Manifest = "offline-test" },
+                    LatestManifest = _ => null,
                     AccountId = () => 456,
                     CreateTunnel = () => Tunnel = new JoinTunnel(),
                     Gather = t => new List<Candidate> { new("lan", Address(t)) },

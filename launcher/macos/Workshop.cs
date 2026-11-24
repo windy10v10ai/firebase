@@ -45,7 +45,7 @@ namespace Windy10v10AI.Launcher
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct); timeout.CancelAfter(TimeSpan.FromMinutes(11));
             try { await p.WaitForExitAsync(timeout.Token); } catch { if (!p.HasExited) p.Kill(); throw; }
             await stdout; await stderr;
-            if (p.ExitCode != 0) throw new Exception(Strings.MapUpdateFailed);
+            if (p.ExitCode != 0) throw new Exception(Strings.MapUpdateFailedFor(MacInstall.Edition));
             lock (versions) versions.Remove(id);
             // Steam 异步释放辅助进程的游戏会话，启动客户端前需留出时间。
             await Task.Delay(5000, ct);
@@ -63,7 +63,7 @@ namespace Windy10v10AI.Launcher
             {
                 emit(new { type = "state", state = "idle", message = Strings.MapUpdateStopped, code = "", log = "" });
             }
-            catch (Exception e) { emit(new { type = "state", state = "error", message = e is OperationCanceledException ? Strings.MapUpdateFailed : e.Message, code = "", log = "" }); }
+            catch (Exception e) { emit(new { type = "state", state = "error", message = e is OperationCanceledException ? Strings.MapUpdateFailedFor(MacInstall.Edition) : e.Message, code = "", log = "" }); }
         }
     }
 }

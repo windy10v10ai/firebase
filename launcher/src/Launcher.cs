@@ -638,10 +638,15 @@ namespace Windy10v10AI.Launcher
         void OnEditionChanged(string edition)
         {
             if (banner.Locked || Settings.Edition == edition) return;
+            ApplyEdition(edition);
+            RefreshMapState();
+        }
+
+        void ApplyEdition(string edition)
+        {
             Settings.Edition = edition;
             Settings.Save();
             banner.Edition = edition;
-            RefreshMapState();
         }
 
         MapState RefreshMapState()
@@ -666,12 +671,12 @@ namespace Windy10v10AI.Launcher
                 case MapState.Outdated:
                     SetFooter(Theme.Warning, Strings.MapOutdated);
                     if (modeBar.Selected != 0) ShowIdleNotice();
-                    else if (mapUpdateFailed == id) ShowNotice(NoticeKind.Warning, Strings.MapUpdateFailed, Strings.OpenWorkshop, UpdateOrOpenWorkshop);
+                    else if (mapUpdateFailed == id) ShowNotice(NoticeKind.Warning, Strings.MapUpdateFailedFor(Settings.Edition), Strings.OpenWorkshop, UpdateOrOpenWorkshop);
                     else ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.UpdateMap, UpdateOrOpenWorkshop);
                     break;
                 case MapState.Missing:
                     SetFooter(Theme.Error, Strings.MapMissing);
-                    ShowNotice(NoticeKind.Error, Strings.NoMap, Strings.Subscribe, () => OpenSteamUrl("steam://url/CommunityFilePage/" + id));
+                    ShowNotice(NoticeKind.Error, Strings.NoMapFor(Settings.Edition), Strings.Subscribe, () => OpenSteamUrl("steam://url/CommunityFilePage/" + id));
                     break;
                 case MapState.NoDota:
                     SetFooter(Theme.Error, Strings.MapUnknown);
@@ -1267,7 +1272,7 @@ namespace Windy10v10AI.Launcher
 
         LaunchError ServerExitError()
         {
-            var corrupt = CorruptFilesText(ReadShared(logFile));
+            var corrupt = CorruptFilesText(ReadShared(logFile), Settings.Edition);
             if (corrupt == null) return ServerExited();
             return new LaunchError(corrupt, false) { Button = Strings.VerifyFiles, OnClick = VerifyFiles, Detail = ServerExitDetail() };
         }
@@ -1298,7 +1303,7 @@ namespace Windy10v10AI.Launcher
 
         // Damaged files only show up in the log of a Dota that failed fatally; the corruption warning alone does not
         // stop the game, so it counts only next to a fatal error. Returns null when the log shows no damaged files
-        internal static string CorruptFilesText(string log)
+        internal static string CorruptFilesText(string log, string edition = Editions.Original)
         {
             var fatal = false;
             var gameFiles = false;
@@ -1306,7 +1311,7 @@ namespace Windy10v10AI.Launcher
             {
                 if (line.Contains(CorruptContent))
                 {
-                    if (line.Contains("dota_addons") || line.Contains(@"workshop\content")) return Strings.MapCorrupt;
+                    if (line.Contains("dota_addons") || line.Contains(@"workshop\content")) return Strings.MapCorruptFor(edition);
                     gameFiles = true;
                 }
                 if (line.Contains(LocalContentCorrupt)) gameFiles = true;
@@ -1324,28 +1329,20 @@ namespace Windy10v10AI.Launcher
                 return;
             }
             if (mapUpdating) return;
-            // The room decides which map is needed, not the edition picked on the banner; a private room's code is not on the list
+            // A listed room tells which edition it runs; a private room's code is not on the list, so it is tried with the current one first
             var listed = browser == null ? null : browser.EditionOf(code.Trim().ToUpperInvariant());
-            var edition = listed ?? Settings.Edition;
-            var id = MapIdOf(edition);
+            if (listed != null && listed != Settings.Edition)
+            {
+                if (!ConfirmDialog.Ask(this, Strings.EditionSwitchTitle, Strings.EditionSwitchPrompt(listed), Strings.EditionSwitchYes)) return;
+                ApplyEdition(listed);
+            }
+            var edition = Settings.Edition;
+            var id = MapId;
             DotaInstall install;
-            if (edition == Settings.Edition)
-            {
-                var state = RefreshMapState();
-                // Mismatched map versions between host and joiner can break the game, so an outdated map blocks joining
-                if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing || state == MapState.Outdated) return;
-                DotaInstall.Check(id, out install);
-            }
-            else
-            {
-                // The other edition's map is not what the footer shows, so only a missing one stops here;
-                // an outdated one is updated while joining
-                var state = DotaInstall.Check(id, out install);
-                if (state == MapState.NoSteam) ShowNotice(NoticeKind.Error, Strings.NoSteam, false);
-                else if (state == MapState.NoDota) ShowNotice(NoticeKind.Error, Strings.NoDota, false);
-                else if (state == MapState.Missing) ShowNotice(NoticeKind.Error, Strings.NoMap, Strings.Subscribe, () => OpenSteamUrl("steam://url/CommunityFilePage/" + id));
-                if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing) return;
-            }
+            var state = RefreshMapState();
+            // An outdated map is updated while joining, and a version check still running is waited for there
+            if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing) return;
+            DotaInstall.Check(id, out install);
             selfId = Platform.SteamAccountId();
             busy = true;
             stopping = false;
@@ -1358,16 +1355,18 @@ namespace Windy10v10AI.Launcher
             var source = browser;
             browser = null;
             listTimer.Stop();
+            // The map card of an outdated map gives way to the progress, which updates it
+            UpdateMapCard(state);
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Connecting, Strings.ConnectingHint, Strings.Cancel, true);
             stage = "join";
             var cancellation = new CancellationTokenSource();
             joinCancellation = cancellation;
             var cancellationToken = cancellation.Token;
-            new Thread(() => RunJoin(install, id, edition, code, source, cancellationToken)) { IsBackground = true }.Start();
+            new Thread(() => RunJoin(install, id, edition, listed != null, code, source, cancellationToken)) { IsBackground = true }.Start();
         }
 
-        void RunJoin(DotaInstall install, string id, string edition, string code, RoomBrowser source, CancellationToken cancellation)
+        void RunJoin(DotaInstall install, string id, string edition, bool listed, string code, RoomBrowser source, CancellationToken cancellation)
         {
             try
             {
@@ -1377,11 +1376,52 @@ namespace Windy10v10AI.Launcher
                     UI(() => status.Text = Strings.Connecting);
                 }
                 cancellation.ThrowIfCancellationRequested();
-                UpdateMapIfOutdated(id, cancellation);
-                var room = new JoinRoomSession();
-                joinedRoom = room;
-                room.Prepare(source, cancellation);
-                room.Open(code, selfId, install.InstalledManifest(id), cancellation, edition);
+                JoinRoomSession room = null;
+                var retried = false;
+                while (room == null)
+                {
+                    WaitMapChecked(id, cancellation);
+                    UpdateMapIfOutdated(id, edition, cancellation);
+                    var attempt = new JoinRoomSession();
+                    joinedRoom = attempt;
+                    try
+                    {
+                        attempt.Prepare(source, cancellation);
+                        attempt.Open(code, selfId, install.InstalledManifest(id), cancellation, edition);
+                        room = attempt;
+                    }
+                    catch (RoomError error)
+                    {
+                        // A private room's edition is only known from the API's answer; ask once, then retry with the other edition
+                        if (error.Code != "edition_mismatch" || listed || retried) throw;
+                        Interlocked.Exchange(ref joinedRoom, null);
+                        attempt.Dispose();
+                        var other = edition == Editions.Anime ? Editions.Original : Editions.Anime;
+                        var switched = false;
+                        Invoke((Action)(() =>
+                        {
+                            switched = ConfirmDialog.Ask(this, Strings.EditionSwitchTitle, Strings.EditionSwitchPrompt(other), Strings.EditionSwitchYes);
+                            if (switched) ApplyEdition(other);
+                        }));
+                        if (!switched)
+                        {
+                            Finish(null, false);
+                            return;
+                        }
+                        retried = true;
+                        source = null;
+                        edition = other;
+                        id = MapIdOf(other);
+                        var state = DotaInstall.Check(id, out install);
+                        if (state == MapState.NoSteam) throw new LaunchError(Strings.NoSteam, false);
+                        if (state == MapState.NoDota) throw new LaunchError(Strings.NoDota, false);
+                        if (state == MapState.Missing)
+                        {
+                            var workshop = id;
+                            throw new LaunchError(Strings.NoMapFor(edition), false) { Button = Strings.Subscribe, OnClick = () => OpenSteamUrl("steam://url/CommunityFilePage/" + workshop) };
+                        }
+                    }
+                }
                 UI(() => ShowPlayers(true));
                 room.Connect(cancellation);
                 PrepareAddon(install, id);
@@ -1420,15 +1460,30 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        // Joining a room of the edition not picked on the banner skips the idle map check, so the map is brought up to date here
-        void UpdateMapIfOutdated(string id, CancellationToken cancellation)
+        // The first answer about the latest map version may still be on its way when the player clicks join
+        static void WaitMapChecked(string id, CancellationToken cancellation)
+        {
+            var watch = Stopwatch.StartNew();
+            DotaInstall current;
+            while (DotaInstall.Check(id, out current) == MapState.Checking && watch.ElapsedMilliseconds < 20000)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                Thread.Sleep(200);
+            }
+        }
+
+        // Joining needs the latest map, so an outdated one is updated here instead of sending the player to the Workshop
+        void UpdateMapIfOutdated(string id, string edition, CancellationToken cancellation)
         {
             DotaInstall current;
             if (DotaInstall.Check(id, out current) != MapState.Outdated) return;
             UI(() => status.Text = Strings.MapUpdating);
-            WorkshopDownload.Run(id);
+            WorkshopDownload.Run(id, cancellation);
             cancellation.ThrowIfCancellationRequested();
-            if (DotaInstall.Check(id, out current) == MapState.Outdated) throw new LaunchError(Strings.MapUpdateFailed, false);
+            if (DotaInstall.Check(id, out current) != MapState.Outdated) return;
+            // The map card then offers the Workshop page instead of trying the same update again
+            mapUpdateFailed = id;
+            throw new LaunchError(Strings.MapUpdateFailedFor(edition), false);
         }
 
         // The tunnel outlives Dota and each game, so a joiner who left can go back into the same match, and stays in
@@ -1831,7 +1886,7 @@ namespace Windy10v10AI.Launcher
                 string corrupt = null;
                 try
                 {
-                    corrupt = CorruptFilesText(ReadShared(Path.Combine(install.Game, @"dota\client.log")));
+                    corrupt = CorruptFilesText(ReadShared(Path.Combine(install.Game, @"dota\client.log")), Settings.Edition);
                 }
                 catch (IOException)
                 {

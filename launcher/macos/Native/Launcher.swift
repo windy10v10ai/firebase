@@ -388,6 +388,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     var mapCard: NSStackView!
     private let banner = Banner()
     let editionAvatar = Bundle.main.url(forResource: "anime-avatar", withExtension: "png").flatMap { NSImage(contentsOf: $0) }
+    var joinRetried = false
     var edition = preview || UserDefaults.standard.string(forKey: "edition") != "anime" ? "original" : "anime"
     let mapWarning = NSTextField(wrappingLabelWithString: "")
 
@@ -668,6 +669,11 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
                 route.stringValue = ""; route.isHidden = true; routeDot.isHidden = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in self?.inspect(); self?.updateBrowsing() }
             }
+            // A private room of the other edition is refused once; switch and try again only once
+            if state == "error", event["reason"] as? String == "edition_mismatch", !joinRetried, !roomCode.stringValue.isEmpty {
+                let other = edition == "anime" ? "original" : "anime"
+                if switchPrompt(other) { editionChanged(other); join(roomCode.stringValue, retrying: true) }
+            }
         case "route":
             route.stringValue = event["message"] as? String ?? ""
             let level = event["level"] as? String ?? "ok"
@@ -757,7 +763,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         let blockedByMap = !active && (["missing", "unknown"].contains(mapState) || (mapState == "outdated" && page != "solo"))
         roomSettings.isHidden = page != "host" || blockedByMap
         mapCard.isHidden = !blockedByMap && !(mapState == "outdated" && !active)
-        mapWarning.stringValue = mapState == "missing" ? text("NoMap") : (mapState == "unknown" ? text("NoDota") : text(page == "join" ? "MapCardJoin" : "MapCardHost"))
+        mapWarning.stringValue = mapState == "missing" ? text("NoMap", text(edition == "anime" ? "MapNameAnime" : "MapNameOriginal")) : (mapState == "unknown" ? text("NoDota") : text(page == "join" ? "MapCardJoin" : "MapCardHost"))
         updateMap.isHidden = mapState != "outdated"; subscribe.isHidden = mapState != "missing"
         difficultyRow.isHidden = blockedByMap || page == "join" || (active && state != "ended")
         for difficulty in difficulties { difficulty.isEnabled = backendAvailable && (!active || state == "ended") }
@@ -860,15 +866,21 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
         pendingStart = true; sessionRole = page; state = "checking"; status.stringValue = text("Starting"); refreshControls()
         send(["action": "open", "sessionMode": page, "public": roomType.selectedSegment == 0, "mode": mode, "maxPlayers": count.indexOfSelectedItem + 2, "autoEnter": page == "solo" || autoStart.state == .on, "testMap": testMap.state == .on, "edition": edition])
     }
-    func join(_ value: String, roomEdition: String? = nil) {
+    func switchPrompt(_ roomEdition: String) -> Bool {
+        confirm(text("EditionSwitchTitle"), text(roomEdition == "anime" ? "EditionSwitchToAnime" : "EditionSwitchToOriginal"), text("EditionSwitchYes"))
+    }
+    func join(_ value: String, retrying: Bool = false) {
         guard !active else { return }
         let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         guard normalized.range(of: "^[A-Z0-9]{6}$", options: .regularExpression) != nil else { showError(text("InvalidCode")); return }
+        // A listed room tells its edition. A private room is tried with the current edition first, and the backend reports a mismatch
+        if let listed = roomRows.first(where: { $0["code"] as? String == normalized })?["edition"] as? String, listed != edition {
+            guard switchPrompt(listed) else { return }
+            editionChanged(listed)
+        }
+        joinRetried = retrying
         pendingStart = true; roomCode.stringValue = normalized; sessionRole = "join"; state = "joining"; status.stringValue = text("Connecting"); refreshControls()
-        var command: [String: Any] = ["action": "join", "code": normalized, "autoEnter": autoEnter.state == .on, "testMap": testMap.state == .on, "edition": edition]
-        // The room decides which map is joined, not the edition picked on the banner
-        if let roomEdition = roomEdition { command["roomEdition"] = roomEdition }
-        send(command)
+        send(["action": "join", "code": normalized, "autoEnter": autoEnter.state == .on, "testMap": testMap.state == .on, "edition": edition])
     }
     @objc func joinByCode() { join(roomCode.stringValue) }
     @objc func joinRoom() {
@@ -880,7 +892,7 @@ final class Launcher: NSObject, NSApplicationDelegate, NSTableViewDataSource, NS
     func joinRoomAt(_ row: Int) {
         guard row >= 0, row < roomRows.count, !away, roomRows[row]["joinable"] as? Bool != false,
               (roomRows[row]["kind"] as? Int ?? 0) == 0 else { return }
-        join(roomRows[row]["code"] as? String ?? "", roomEdition: roomRows[row]["edition"] as? String)
+        join(roomRows[row]["code"] as? String ?? "")
     }
     @objc func enterGame() { send(["action": "enter"]) }
     @objc func stopGame() {

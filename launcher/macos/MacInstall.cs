@@ -39,8 +39,8 @@ namespace Windy10v10AI.Launcher
             return recent.Count == 1 ? recent[0] : recent.Count == 0 && automatic.Count == 1 ? automatic[0] : 0;
         }
         public static MacInstall Find() => Find(true);
-        public static MacInstall Find(bool requireMap, string edition = null) => FindIn(SteamRoot, MapIdOf(edition ?? Edition), requireMap);
-        internal static MacInstall FindIn(string steamRoot, string mapId, bool requireMap)
+        public static MacInstall Find(bool requireMap, string edition = null) => FindIn(SteamRoot, MapIdOf(edition ?? Edition), requireMap, edition ?? Edition);
+        internal static MacInstall FindIn(string steamRoot, string mapId, bool requireMap, string edition = Editions.Original)
         {
             var libs = new List<string> { steamRoot };
             var vdf = Path.Combine(steamRoot, "steamapps/libraryfolders.vdf");
@@ -58,7 +58,7 @@ namespace Windy10v10AI.Launcher
                     install.workshopAcf = Path.Combine(workshopLib, "steamapps/workshop/appworkshop_570.acf");
                     install.Manifest = install.AcfBlocks().Select(block => Value(block, "manifest")).FirstOrDefault(value => !string.IsNullOrEmpty(value));
                 }
-                if (requireMap && install.Vpk == null) throw new Exception(Strings.NoMap);
+                if (requireMap && install.Vpk == null) throw new Exception(Strings.NoMapFor(edition));
                 if (requireMap && string.IsNullOrEmpty(install.Manifest)) throw new Exception(Strings.MapVersionMissing);
                 return install;
             }
