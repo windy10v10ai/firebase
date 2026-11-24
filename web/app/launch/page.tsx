@@ -17,7 +17,6 @@ interface Cell {
 const COMPARE_ROWS: { labelKey: string; arcade: Cell; launcher: Cell }[] = [
   { labelKey: 'multiplayer', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
   { labelKey: 'records', arcade: { mark: 'yes' }, launcher: { mark: 'yes' } },
-  { labelKey: 'stable', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
   { labelKey: 'smooth', arcade: { mark: 'partial' }, launcher: { mark: 'yes' } },
 ];
 
