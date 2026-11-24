@@ -91,6 +91,10 @@ export class LauncherRoomService {
     if (room.hostToken !== dto.token) {
       throw new ForbiddenException();
     }
+    // 房间版本以创建时为准，心跳省略 edition 保留原值，显式报了不同的版本不处理
+    if (dto.edition !== undefined && dto.edition !== (room.edition ?? 'original')) {
+      throw new ConflictException({ code: 'edition_mismatch' });
+    }
 
     for (const result of dto.results ?? []) {
       const join = await this.joinRepository.findById(result.joinId);
@@ -218,6 +222,9 @@ export class LauncherRoomService {
       throw new ConflictException({ code: 'version_mismatch' });
     }
     // 只在双方都读到版本时比较：读不到的一方照常放行，版本检查失败不该挡住联机
+    if ((room.edition ?? 'original') !== (dto.edition ?? 'original')) {
+      throw new ConflictException({ code: 'edition_mismatch' });
+    }
     if (room.mapVersion && dto.mapVersion && room.mapVersion !== dto.mapVersion) {
       throw new ConflictException({ code: 'map_mismatch' });
     }
@@ -316,11 +323,12 @@ export class LauncherRoomService {
             !room.started &&
             now - room.lastSeenAt.getTime() <= ROOM_LIST_ALIVE_MS &&
             room.protocolVersion === dto.protocolVersion &&
-            !(room.mapVersion && dto.mapVersion && room.mapVersion !== dto.mapVersion) &&
+            canSeeRoom(room, dto) &&
             !room.kickedSteamIds?.includes(dto.steamId),
         )
         .map((room) => ({
           code: room.id,
+          edition: room.edition ?? 'original',
           personaName: room.hostPersonaName,
           avatarUrl: room.hostAvatarUrl,
           map: room.map,
@@ -338,12 +346,18 @@ export class LauncherRoomService {
         return room.public === true
           ? {
               public: true,
+              edition: room.edition ?? 'original',
               map: room.map,
               playerCount: room.playerCount,
               minutes,
               players: hostAndPlayers(room),
             }
-          : { public: false, playerCount: room.playerCount, minutes };
+          : {
+              public: false,
+              edition: room.edition ?? 'original',
+              playerCount: room.playerCount,
+              minutes,
+            };
       }),
       activeGames: activeRooms.length,
       activePlayers: activeRooms.reduce((total, room) => total + (room.playerCount ?? 0), 0),
@@ -397,6 +411,7 @@ export class LauncherRoomService {
       hostSymmetricNat: dto.symmetricNat,
       protocolVersion: dto.protocolVersion,
       mapVersion: dto.mapVersion,
+      edition: dto.edition ?? 'original',
       started: false,
       ...roomSettings(dto),
       lastSeenAt: now,
@@ -450,6 +465,17 @@ export class LauncherRoomService {
       .whereGreaterOrEqualThan('createdAt', new Date(now.getTime() - PENDING_JOIN_MS))
       .find();
   }
+}
+
+// 旧版启动器不报 mapVersions，只看得到原版房间；新版按房间的版本取对应的地图版本比较，
+// 与加入时一致：任一方读不到地图版本就放行（启动器加入前会先更新那一版地图）
+function canSeeRoom(room: LauncherRoom, dto: ListRoomsDto): boolean {
+  const edition = room.edition ?? 'original';
+  const mapVersion = dto.mapVersions ? dto.mapVersions[edition] : dto.mapVersion;
+  if (!dto.mapVersions && edition !== 'original') {
+    return false;
+  }
+  return !(room.mapVersion && mapVersion && room.mapVersion !== mapVersion);
 }
 
 function hostAndPlayers(room: LauncherRoom): LauncherProfileDto[] {

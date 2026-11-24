@@ -15,6 +15,9 @@ export interface LauncherRelayProbe {
   loss: number;
 }
 
+export const LAUNCHER_EDITIONS = ['original', 'anime'] as const;
+export type LauncherEdition = (typeof LAUNCHER_EDITIONS)[number];
+
 /** 启动器联机开房，文档 ID 就是房间码。 */
 @Collection()
 export class LauncherRoom {
@@ -31,6 +34,8 @@ export class LauncherRoom {
   hostSymmetricNat?: boolean;
   protocolVersion: number;
   mapVersion?: string;
+  /** 房间用的是哪一版地图，缺省是原版（二次元版上线前的旧数据与旧版启动器） */
+  edition?: LauncherEdition;
   /** 房主报的第几局，开始、结束状态只记这一局；缺省是第一局或旧版启动器 */
   game?: number;
   /** 进入选英雄后不再接受加入 */
