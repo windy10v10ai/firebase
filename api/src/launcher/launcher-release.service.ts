@@ -11,8 +11,8 @@ export const LAUNCHER_RELEASE: LauncherReleaseDto = {
   sha256: '20478d307076513ae1719f92db6cbd09df8ca7144cc2c57425a58f319db04d4d',
 };
 export const LAUNCHER_MAC_RELEASE: LauncherReleaseDto | undefined = {
-  version: '0.8.1',
-  sha256: 'a32980cca2ea9d3cb1dcb091f17a07157716977de1c15ec2744ae79a8f36584b',
+  version: '0.9.0',
+  sha256: '8d0dfa22500a8982ea0368457c59067bbdbd2311832f43e6121c9fa0277663c4',
 };
 export const LAUNCHER_VERSION_CACHE_SECONDS = 3600;
 
