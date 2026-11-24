@@ -907,14 +907,20 @@ namespace Windy10v10AI.Launcher
                 { "protocolVersion", RoomApi.ProtocolVersion },
                 // Older APIs only read mapVersion, as the original edition's map
                 { "mapVersion", InstalledMapVersion(Editions.Original) },
-                {
-                    "mapVersions", new Dictionary<string, object>
-                    {
-                        { Editions.Original, InstalledMapVersion(Editions.Original) },
-                        { Editions.Anime, InstalledMapVersion(Editions.Anime) },
-                    }
-                },
+                { "mapVersions", InstalledMapVersions() },
             };
+        }
+
+        // An edition whose map is not installed is left out, since the API rejects null versions
+        Dictionary<string, object> InstalledMapVersions()
+        {
+            var versions = new Dictionary<string, object>();
+            foreach (var edition in new[] { Editions.Original, Editions.Anime })
+            {
+                var version = InstalledMapVersion(edition);
+                if (version != null) versions[edition] = version;
+            }
+            return versions;
         }
 
         string InstalledMapVersion(string edition)

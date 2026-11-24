@@ -79,8 +79,20 @@ namespace Windy10v10AI.Launcher
             ["protocolVersion"] = RoomApi.ProtocolVersion,
             // Older APIs only read mapVersion, as the original edition's map
             ["mapVersion"] = MapVersion(Editions.Original),
-            ["mapVersions"] = new Dictionary<string, object> { [Editions.Original] = MapVersion(Editions.Original), [Editions.Anime] = MapVersion(Editions.Anime) }
+            ["mapVersions"] = MapVersions()
         };
+
+        // An edition whose map is not installed is left out, since the API rejects null versions
+        static Dictionary<string, object> MapVersions()
+        {
+            var versions = new Dictionary<string, object>();
+            foreach (var edition in new[] { Editions.Original, Editions.Anime })
+            {
+                var version = MapVersion(edition);
+                if (version != null) versions[edition] = version;
+            }
+            return versions;
+        }
 
         void Publish(RoomBrowser source)
         {
