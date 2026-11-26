@@ -611,12 +611,6 @@
     "en": "Blade Dance",
     "ru": "Blade Dance"
   },
-  "juggernaut_blade_fury_custom": {
-    "icon": "juggernaut_blade_fury_custom.8502de55.webp",
-    "zh": "剑刃风暴 觉醒",
-    "en": "Blade Fury Awakened",
-    "ru": "Танец клинков: пробуждение"
-  },
   "juggernaut_omni_slash": {
     "icon": "juggernaut_omni_slash.76725f28.webp",
     "zh": "无敌斩",
@@ -736,12 +730,6 @@
     "zh": "月之祝福",
     "en": "Lunar Blessing",
     "ru": "Lunar Blessing"
-  },
-  "luna_moon_glaive": {
-    "icon": "luna_moon_glaive.8403b857.webp",
-    "zh": "月刃",
-    "en": "Moon Glaives",
-    "ru": "Moon Glaives"
   },
   "lycan_feral_impulse": {
     "icon": "lycan_feral_impulse.cf289c5a.webp",

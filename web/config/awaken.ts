@@ -4,7 +4,7 @@
 
 /** 生成时 game 仓库的位置，下次同步时用它算出变更说明。必定是 develop 上的提交 */
 export const AWAKEN_SOURCE = {
-  gameCommit: 'ac46175db21eef61395fbb4727996d604893263f',
+  gameCommit: '54afb598a9aab74324d3b5775ed0e388918ddaea',
   dotaVersion: '7.42',
 } as const;
 
@@ -85,6 +85,87 @@ export interface AwakenHero {
 
 /** 顺序照 game 的 AWAKEN_ABILITIES，新上线的觉醒排最前 */
 export const AWAKEN_HEROES: AwakenHero[] = [
+  {
+    heroName: 'npc_dota_hero_morphling',
+    abilityName: 'special_bonus_unique_morphling_upgrade',
+    freeTrial: true,
+    art: 'morphling.8de7549f.webp',
+    icon: 'morphling_replicate.7442be5a.webp',
+    name: { zh: '变体精灵', en: 'Morphling', ru: 'Morphling' },
+    title: {
+      zh: "<font color='#d000ff'>变体精灵 觉醒</font>",
+      en: "<font color='#d000ff'>Morphling Awakened</font>",
+      ru: "<font color='#d000ff'>Морфлинг: пробуждение</font>",
+    },
+    desc: {
+      zh: '<h1>变形觉醒</h1>对一名敌方英雄施放变形后，临时获得该英雄力量，敏捷和智力合计的一定比例，全部加在敏捷上。<br>再次施放刷新并替换加成，死亡时移除。<br><h1>波浪形态觉醒</h1>沿途攻击经过的敌人，并触发攻击特效。<br><h1>强化</h1>每点敏捷提升技能增强。',
+      en: "<h1>Morph Awakened</h1>After casting Morph on an enemy hero, temporarily gain a percentage of that hero's combined Strength, Agility and Intelligence as Agility.<br>Recasting replaces and refreshes the bonus, which is removed on death.<br><h1>Waveform Awakened</h1>Attacks enemies along the path, applying attack effects.<br><h1>Enhancement</h1>Each point of Agility grants spell amplification.",
+      ru: '<h1>Morph: пробуждение</h1>После применения Morph на вражеского героя временно получает в виде ловкости часть суммы силы, ловкости и интеллекта этого героя.<br>Повторное применение заменяет прибавку и обновляет её длительность. Эффект исчезает после смерти.<br><h1>Waveform: пробуждение</h1>Атакует врагов на пути, применяя эффекты атаки.<br><h1>Усиление</h1>Каждая единица ловкости даёт усиление заклинаний.',
+    },
+    ability: {
+      behavior: 'passive',
+      targeting: null,
+      damageType: null,
+      piercesImmunity: null,
+      dispellable: null,
+      values: [
+        {
+          label: {
+            zh: '目标三项属性合计折算敏捷：',
+            en: 'TARGET TOTAL ATTRIBUTES AS AGILITY:',
+            ru: 'ЛОВКОСТЬ ИЗ СУММЫ АТРИБУТОВ ЦЕЛИ:',
+          },
+          levels: ['9', '12', '15', '18'],
+          percent: true,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: {
+            zh: '每点敏捷提供技能增强：',
+            en: 'SPELL AMPLIFICATION PER AGILITY:',
+            ru: 'УСИЛЕНИЕ ЗАКЛИНАНИЙ ЗА ЛОВКОСТЬ:',
+          },
+          levels: ['0.10', '0.12', '0.14', '0.16'],
+          percent: true,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: {
+            zh: '波浪形态攻击目标数：',
+            en: 'WAVEFORM ATTACK TARGETS:',
+            ru: 'ЦЕЛИ АТАК WAVEFORM:',
+          },
+          levels: ['5'],
+          percent: false,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: {
+            zh: '波浪形态攻击伤害：',
+            en: 'WAVEFORM ATTACK DAMAGE:',
+            ru: 'УРОН АТАК WAVEFORM:',
+          },
+          levels: ['100'],
+          percent: true,
+          aoe: false,
+          spellAmp: false,
+        },
+        {
+          label: { zh: '持续时间：', en: 'DURATION:', ru: 'ДЛИТЕЛЬНОСТЬ:' },
+          levels: ['45'],
+          percent: false,
+          aoe: false,
+          spellAmp: false,
+        },
+      ],
+      cooldown: null,
+      manaCost: null,
+      lore: null,
+    },
+  },
   {
     heroName: 'npc_dota_hero_centaur',
     abilityName: 'special_bonus_unique_centaur_upgrade',
@@ -175,7 +256,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_terrorblade',
     abilityName: 'terrorblade_sunder_awakened_status',
-    freeTrial: true,
+    freeTrial: false,
     art: 'terrorblade.38c7a323.webp',
     icon: 'terrorblade_sunder.81abec5d.webp',
     name: { zh: '恐怖利刃', en: 'Terrorblade', ru: 'Terrorblade' },
@@ -204,7 +285,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_bounty_hunter',
     abilityName: 'bounty_hunter_track_awaken',
-    freeTrial: true,
+    freeTrial: false,
     art: 'bounty_hunter.a8cac8de.webp',
     icon: 'bounty_hunter_track.ee84d8d3.webp',
     name: { zh: '赏金猎人', en: 'Bounty Hunter', ru: 'Bounty Hunter' },
@@ -412,7 +493,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_abyssal_underlord',
     abilityName: 'special_bonus_unique_underlord_demons_reach_awaken',
-    freeTrial: false,
+    freeTrial: true,
     art: 'abyssal_underlord.bb075df0.webp',
     icon: 'abyssal_underlord_atrophy_aura.e1d68787.webp',
     name: { zh: '孽主', en: 'Underlord', ru: 'Underlord' },
@@ -471,7 +552,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_slark',
     abilityName: 'special_bonus_unique_slark_permanent_essence_awaken',
-    freeTrial: false,
+    freeTrial: true,
     art: 'slark.af0aa43b.webp',
     icon: 'slark_essence_shift.2ac17b05.webp',
     name: { zh: '斯拉克', en: 'Slark', ru: 'Slark' },
@@ -500,7 +581,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_abaddon',
     abilityName: 'special_bonus_unique_abaddon_quickening_awaken',
-    freeTrial: false,
+    freeTrial: true,
     art: 'abaddon.a4dc4053.webp',
     icon: 'abaddon_borrowed_time.3737ee83.webp',
     name: { zh: '亚巴顿', en: 'Abaddon', ru: 'Abaddon' },
@@ -1146,7 +1227,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_kunkka',
     abilityName: 'kunkka_torrent_storm',
-    freeTrial: true,
+    freeTrial: false,
     art: 'kunkka.1b3d19dc.webp',
     icon: 'kunkka_torrent_storm.5ed5eae7.webp',
     name: { zh: '昆卡', en: 'Kunkka', ru: 'Kunkka' },
@@ -1292,7 +1373,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_lina',
     abilityName: 'special_bonus_unique_lina_upgrade',
-    freeTrial: false,
+    freeTrial: true,
     art: 'lina.1feb5196.webp',
     icon: 'lina_laguna_blade.3872b268.webp',
     name: { zh: '莉娜', en: 'Lina', ru: 'Lina' },
@@ -1350,7 +1431,7 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   {
     heroName: 'npc_dota_hero_drow_ranger',
     abilityName: 'special_bonus_unique_drow_ranger_upgrade',
-    freeTrial: true,
+    freeTrial: false,
     art: 'drow_ranger.45dc71cd.webp',
     icon: 'drow_ranger_multishot_arcana.be05e297.webp',
     name: { zh: '卓尔游侠', en: 'Drow Ranger', ru: 'Drow Ranger' },
@@ -1689,63 +1770,30 @@ export const AWAKEN_HEROES: AwakenHero[] = [
   },
   {
     heroName: 'npc_dota_hero_juggernaut',
-    abilityName: 'juggernaut_blade_fury_custom',
-    freeTrial: false,
+    abilityName: 'special_bonus_unique_juggernaut_upgrade',
+    freeTrial: true,
     art: 'juggernaut.3e6f5235.webp',
     icon: 'juggernaut_blade_fury_immortal_crimson.65715ed0.webp',
     name: { zh: '主宰', en: 'Juggernaut', ru: 'Juggernaut' },
     title: {
-      zh: "<font color='#d000ff'>剑刃风暴 觉醒</font>",
-      en: "<font color='#d000ff'>Blade Fury Awakened</font>",
-      ru: "<font color='#d000ff'>Танец клинков: пробуждение</font>",
+      zh: "<font color='#d000ff'>剑圣 觉醒</font>",
+      en: "<font color='#d000ff'>Juggernaut Awakened</font>",
+      ru: "<font color='#d000ff'>Джаггернаут: пробуждение</font>",
     },
     desc: {
-      zh: "剑圣化身旋转风暴，每秒对周围敌人造成基础伤害加目标最大生命百分比的魔法伤害。期间获得<font color='#FFCC66'>减益免疫</font>和80%魔法抗性，可以正常攻击但攻击力降低50%。旋转结束时对自身施加强效驱散。",
-      en: "Juggernaut becomes a spinning storm, each second dealing magic damage to surrounding enemies equal to base damage plus a percentage of each enemy's max health. Grants <font color='#FFCC66'>debuff immunity</font> and 80% magic resistance, and can attack normally but with attack power reduced by 50%. Performs a strong dispel on himself when the spin ends.",
-      ru: "Джаггернаут превращается в вихрь клинков и ежесекундно наносит окружающим врагам магический урон, складывающийся из базового урона и процента от максимального здоровья цели. На время действия он получает <font color='#FFCC66'>невосприимчивость к дебаффам</font> и 80% сопротивления магии, может атаковать, но его урон от атак снижен на 50%. По окончании вихря на себя накладывается сильное развеивание.",
+      zh: "剑刃风暴的范围扩大到<font color='#FFFFFF'><b>550</b></font>，风暴范围内的敌人移动速度减缓<font color='#FFFFFF'><b>30%</b></font>。新增的外圈内的敌人，每次受到伤害都必定按剑舞当前的暴击倍率暴击。<br>旋转时可以边移动边攻击，造成<font color='#FFFFFF'><b>50%</b></font>攻击伤害，有阿哈利姆神杖时造成全额攻击伤害。",
+      en: "Blade Fury's radius is increased to <font color='#FFFFFF'><b>550</b></font>, and enemies within the storm are slowed by <font color='#FFFFFF'><b>30%</b></font>. Enemies in the added outer ring always take a critical hit with the current Blade Dance critical multiplier on every damage tick.<br>Can attack while moving during Blade Fury, dealing <font color='#FFFFFF'><b>50%</b></font> attack damage, or full attack damage with Aghanim's Scepter.",
+      ru: "Радиус Blade Fury увеличен до <font color='#FFFFFF'><b>550</b></font>, враги в зоне бури замедляются на <font color='#FFFFFF'><b>30%</b></font>. Враги в добавленном внешнем кольце при каждом уроне всегда получают критический удар с текущим множителем Blade Dance.<br>Во время Blade Fury можно атаковать на ходу, нанося <font color='#FFFFFF'><b>50%</b></font> урона от атаки, а с Aghanim's Scepter — полный урон от атаки.",
     },
     ability: {
-      behavior: 'channeled',
+      behavior: 'passive',
       targeting: null,
-      damageType: 'magical',
-      piercesImmunity: 'no',
-      dispellable: 'no',
-      values: [
-        {
-          label: { zh: '作用范围：', en: 'RADIUS:', ru: 'РАДИУС:' },
-          levels: ['350'],
-          percent: false,
-          aoe: true,
-          spellAmp: false,
-        },
-        {
-          label: { zh: '持续时间：', en: 'DURATION:', ru: 'ДЛИТЕЛЬНОСТЬ:' },
-          levels: ['5'],
-          percent: false,
-          aoe: false,
-          spellAmp: false,
-        },
-        {
-          label: { zh: '基础伤害：', en: 'BASE DAMAGE:', ru: 'БАЗОВЫЙ УРОН:' },
-          levels: ['80', '160', '240', '320', '400'],
-          percent: false,
-          aoe: false,
-          spellAmp: true,
-        },
-        {
-          label: {
-            zh: '每秒最大生命伤害：',
-            en: 'MAX HEALTH DAMAGE PER SECOND:',
-            ru: 'УРОН ОТ МАКС. ЗДОРОВЬЯ В СЕКУНДУ:',
-          },
-          levels: ['2'],
-          percent: true,
-          aoe: false,
-          spellAmp: true,
-        },
-      ],
-      cooldown: ['20', '19', '18', '17', '16'],
-      manaCost: ['100', '105', '110', '115', '120'],
+      damageType: null,
+      piercesImmunity: null,
+      dispellable: null,
+      values: [],
+      cooldown: null,
+      manaCost: null,
       lore: null,
     },
   },
