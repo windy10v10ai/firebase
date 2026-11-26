@@ -4,12 +4,13 @@ namespace Windy10v10AI.Launcher
 {
     static class RoomPeer
     {
-        public static Dictionary<string, object> Body(long steamId, string mapVersion, List<Candidate> candidates, bool? symmetricNat)
+        public static Dictionary<string, object> Body(long steamId, string mapVersion, List<Candidate> candidates, bool? symmetricNat, string edition = Editions.Original)
         {
             return new Dictionary<string, object>
             {
                 { "steamId", steamId },
                 { "mapVersion", mapVersion },
+                { "edition", Editions.Normalize(edition) },
                 { "candidates", candidates.ConvertAll(c => c.ToString()).ToArray() },
                 { "upnp", false },
                 { "symmetricNat", symmetricNat },

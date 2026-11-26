@@ -99,9 +99,10 @@ namespace Windy10v10AI.Launcher
         void ApplyMap(Dictionary<string, object> command)
         {
             var wanted = true.Equals(command.GetValueOrDefault("testMap", MacInstall.UseTestMap));
-            if (wanted == MacInstall.UseTestMap) return;
+            var edition = Editions.Normalize(Convert.ToString(command.GetValueOrDefault("edition", MacInstall.Edition)));
+            if (wanted == MacInstall.UseTestMap && edition == MacInstall.Edition) return;
             CheckAvailable();
-            rooms.Dispose(); MacInstall.UseTestMap = wanted;
+            rooms.Dispose(); MacInstall.UseTestMap = wanted; MacInstall.Edition = edition;
         }
         void Browse(Dictionary<string, object> command)
         {

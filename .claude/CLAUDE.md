@@ -347,7 +347,13 @@ feature 分支的中间提交对 `develop` 的历史没有价值，压成一条�
 
 ### 合并后清理
 
-PR 合并后立刻清理该分支，不用等提醒。分支在 worktree 里：
+PR 合并后立刻清理该分支，不用等提醒。清理前注意两点：
+
+- worktree 里如果把 `node_modules` 做成指向主检出的目录链接（复用依赖、不重新安装），`git worktree remove --force` 前必须先解除链接（PowerShell `(Get-Item <path>pi
+ode_modules).Delete()`，或 `rmdir` 不带 `/s`），否则会顺着链接清空主检出的 `node_modules`。
+- 仓库没设 `core.autocrlf`，Windows 上新建的 worktree 检出的是 CRLF，eslint 会对每个文件报 `Delete ␍`。只把自己改的文件转成 LF 再跑 lint，不要整仓转换。
+
+分支在 worktree 里：
 
 ```
 git worktree remove <path> --force

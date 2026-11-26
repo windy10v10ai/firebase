@@ -178,7 +178,7 @@ namespace Windy10v10AI.Launcher
 
         // Returns false when Steam could not be asked. Steam counts every process that opens the Steam API as Dota 2
         // running until it exits, which would stop the launcher from starting Dota, so the work runs in a child process.
-        public static bool Run(string id)
+        public static bool Run(string id, CancellationToken cancellation = default(CancellationToken))
         {
             var steamWasRunningDota = DotaRunning();
             int exitCode;
@@ -188,10 +188,15 @@ namespace Windy10v10AI.Launcher
                 start.EnvironmentVariables["SteamAppId"] = "570";
                 using (var child = Process.Start(start))
                 {
-                    if (!child.WaitForExit(ChildTimeoutMs))
+                    var waited = Stopwatch.StartNew();
+                    // Polled so that cancelling stops waiting for the download
+                    while (!child.WaitForExit(300))
                     {
-                        child.Kill();
-                        return false;
+                        if (cancellation.IsCancellationRequested || waited.ElapsedMilliseconds > ChildTimeoutMs)
+                        {
+                            child.Kill();
+                            return false;
+                        }
                     }
                     exitCode = child.ExitCode;
                 }
@@ -200,6 +205,7 @@ namespace Windy10v10AI.Launcher
             {
                 return false;
             }
+            if (cancellation.IsCancellationRequested) return false;
             // Steam notices the exit some seconds later, and a launch before that finds Dota still marked as running
             var watch = Stopwatch.StartNew();
             while (!steamWasRunningDota && DotaRunning() && watch.ElapsedMilliseconds < ReleaseTimeoutMs) Thread.Sleep(500);

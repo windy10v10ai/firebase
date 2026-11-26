@@ -94,12 +94,12 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        public void Open(string code, long accountId, string mapVersion, CancellationToken cancellation)
+        public void Open(string code, long accountId, string mapVersion, CancellationToken cancellation, string edition = Editions.Original)
         {
             code = NormalizeCode(code);
             var current = RequireTunnel();
             cancellation.ThrowIfCancellationRequested();
-            var body = RoomPeer.Body(accountId, mapVersion, candidates, current.SymmetricNat);
+            var body = RoomPeer.Body(accountId, mapVersion, candidates, current.SymmetricNat, edition);
             RoomPeer.AddRelays(body, relays);
             var joined = options.JoinRoom(code, body);
             cancellation.ThrowIfCancellationRequested();

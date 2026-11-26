@@ -57,8 +57,6 @@ namespace Windy10v10AI.Launcher
     class MainForm : Form
     {
         const string Version = LauncherVersion.Current;
-        const string ReleaseId = "2307479570";
-        const string TestId = "2636824668";
         const int Port = 27015;
         // Dota keeps sending while it loads, so a longer silence means it left the game; a slow PC gets room to spare
         const int OutAfterMs = 30000;
@@ -91,9 +89,7 @@ namespace Windy10v10AI.Launcher
         static readonly string[] MapNames = { "easy", "hard", "custom" };
 
         readonly float scale;
-        readonly PictureBox banner = new PictureBox();
-        readonly Label subtitle = new Label();
-        readonly LinkLabel version = new LinkLabel();
+        readonly BannerBar banner = new BannerBar();
         readonly ToolTip tooltip = new ToolTip();
         readonly NoticeBar notice = new NoticeBar();
         readonly ModeButton[] modes = { new ModeButton(), new ModeButton(), new ModeButton() };
@@ -147,6 +143,8 @@ namespace Windy10v10AI.Launcher
         JoinTunnel joinTunnel { get { var room = joinedRoom; return room == null ? null : room.Tunnel; } }
         string roomCode { get { var room = hostRoom; return room == null ? null : room.Code; } }
         string roomMap;
+        // The edition the open room was hosted with, fixed for every game in it
+        string roomEdition = Editions.Original;
         bool paused;
         bool hostingReady;
         readonly Dictionary<Control, bool> hiddenTabStops = new Dictionary<Control, bool>();
@@ -210,25 +208,16 @@ namespace Windy10v10AI.Launcher
             ForeColor = Theme.Text;
             Font = new Font(Theme.FontName, 9f);
 
-            banner.SizeMode = PictureBoxSizeMode.Zoom;
-            banner.BackColor = Color.Black;
-            using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("banner.jpg"))
-            using (var picture = Image.FromStream(stream))
-            {
-                banner.Image = ShortBanner(picture);
-            }
-
-            subtitle.Text = Strings.Subtitle;
-            subtitle.Font = new Font(Theme.FontName, 9.75f);
-            subtitle.AutoEllipsis = true;
-            version.Text = "v" + Version + " ↗";
-            version.Font = new Font(Theme.FontName, 8.25f);
-            version.LinkColor = Theme.Muted;
-            version.ActiveLinkColor = Theme.Text;
-            version.LinkBehavior = LinkBehavior.HoverUnderline;
-            version.TextAlign = ContentAlignment.MiddleRight;
-            version.LinkClicked += delegate { OpenUrl(Updater.DownloadPage + "#changelog"); };
-            tooltip.SetToolTip(version, Strings.Changelog);
+            banner.OriginalPicture = LoadPicture("banner.jpg");
+            banner.PictureClick += ChangeAnimeBanner;
+            banner.Avatar = LoadPicture("anime-avatar.png");
+            roomList.EditionAvatar = banner.Avatar;
+            banner.OriginalText = Strings.EditionOriginal;
+            banner.AnimeText = Strings.EditionAnime;
+            banner.VersionText = "v" + Version + " ↗";
+            banner.VersionClick += delegate { OpenUrl(Updater.DownloadPage + "#changelog"); };
+            tooltip.SetToolTip(banner, Strings.Changelog);
+            banner.EditionChanged += OnEditionChanged;
             notice.Visible = false;
             notice.Action.Click += delegate { if (noticeAction != null) noticeAction(); };
 
@@ -297,6 +286,7 @@ namespace Windy10v10AI.Launcher
 
             // Only the screen comes back; a room is never opened without a click
             Settings.Load();
+            LoadAnimeBanners();
             settlement = new SettlementUploader(
                 () => BuildKey.LauncherApiKey,
                 SettlementApi.Transport,
@@ -323,6 +313,7 @@ namespace Windy10v10AI.Launcher
             modeBar.Items = new[] { Strings.Solo, Strings.HostRoom, Strings.JoinRoom };
             modeBar.Badge = 2;
             badgeTimer.Tick += delegate { RefreshBadge(); };
+            banner.Edition = Settings.Edition;
             modeBar.Selected = Settings.Mode;
             status.Text = IdleText();
             modeBar.SelectedChanged += delegate
@@ -429,7 +420,7 @@ namespace Windy10v10AI.Launcher
             secondary.Visible = false;
             secondary.Click += delegate { if (secondaryAction != null) secondaryAction(); };
 
-            Controls.AddRange(new Control[] { banner, subtitle, version, notice, hostGuide, status, routeDot, routeLabel, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, autoStartBox, autoEnterBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
+            Controls.AddRange(new Control[] { banner, notice, hostGuide, status, routeDot, routeLabel, marquee, hint, action, secondary, hostCode, players, pauseBar, mapCard, divider, mapDot, mapLabel, devLink, feedbackLink, testBox, autoStartBox, autoEnterBox, modeBar, roomTypeLabel, roomTypeBar, maxLabel, maxButton, roomsTitle, refresh, roomList, codeBox, joinButton });
             Controls.AddRange(modes);
 
             RefreshMapState();
@@ -490,9 +481,7 @@ namespace Windy10v10AI.Launcher
         void Relayout()
         {
             banner.SetBounds(0, 0, P(480), P(BannerHeight));
-            subtitle.SetBounds(P(20), P(BannerHeight + 12), P(370), P(22));
-            version.SetBounds(P(390), P(BannerHeight + 12), P(70), P(22));
-            var y = BannerHeight + 42;
+            var y = BannerHeight + 12;
             modeBar.SetBounds(P(20), P(y), P(440), P(36));
             y += 48;
             // Room settings stay above the player list, because the host may change them while the room is open
@@ -631,7 +620,67 @@ namespace Windy10v10AI.Launcher
 
         string MapId
         {
-            get { return testBox.Checked ? TestId : ReleaseId; }
+            get { return MapIdOf(Settings.Edition); }
+        }
+
+        string MapIdOf(string edition)
+        {
+            return Editions.MapId(edition, testBox.Checked);
+        }
+
+        // Every embedded picture named anime-banner-*.jpg is part of the gallery
+        readonly List<string> animeBannerNames = new List<string>();
+
+        void LoadAnimeBanners()
+        {
+            foreach (var resource in typeof(MainForm).Assembly.GetManifestResourceNames())
+                if (resource.StartsWith("anime-banner-") && resource.EndsWith(".jpg")) animeBannerNames.Add(ResourceBannerName(resource));
+            animeBannerNames.Sort(StringComparer.Ordinal);
+            ShowAnimeBanner(BannerGallery.Pick(animeBannerNames, Settings.AnimeBanner, new Random()));
+        }
+
+        static string ResourceBannerName(string resource)
+        {
+            return resource.Substring("anime-banner-".Length, resource.Length - "anime-banner-".Length - ".jpg".Length);
+        }
+
+        void ShowAnimeBanner(string name)
+        {
+            if (name == null) return;
+            var picture = LoadPicture("anime-banner-" + name + ".jpg");
+            if (picture == null) return;
+            banner.AnimePicture = picture;
+            Settings.AnimeBanner = name;
+            Settings.Save();
+        }
+
+        // Only the anime banner changes, and never to the picture already showing
+        void ChangeAnimeBanner()
+        {
+            if (Settings.Edition != Editions.Anime) return;
+            ShowAnimeBanner(BannerGallery.Pick(animeBannerNames, Settings.AnimeBanner, new Random()));
+        }
+
+        static Image LoadPicture(string name)
+        {
+            using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream(name))
+            {
+                return stream == null ? null : Image.FromStream(stream);
+            }
+        }
+
+        void OnEditionChanged(string edition)
+        {
+            if (banner.Locked || Settings.Edition == edition) return;
+            ApplyEdition(edition);
+            RefreshMapState();
+        }
+
+        void ApplyEdition(string edition)
+        {
+            Settings.Edition = edition;
+            Settings.Save();
+            banner.Edition = edition;
         }
 
         MapState RefreshMapState()
@@ -656,12 +705,12 @@ namespace Windy10v10AI.Launcher
                 case MapState.Outdated:
                     SetFooter(Theme.Warning, Strings.MapOutdated);
                     if (modeBar.Selected != 0) ShowIdleNotice();
-                    else if (mapUpdateFailed == id) ShowNotice(NoticeKind.Warning, Strings.MapUpdateFailed, Strings.OpenWorkshop, UpdateOrOpenWorkshop);
+                    else if (mapUpdateFailed == id) ShowNotice(NoticeKind.Warning, Strings.MapUpdateFailedFor(Settings.Edition), Strings.OpenWorkshop, UpdateOrOpenWorkshop);
                     else ShowNotice(NoticeKind.Warning, Strings.OutdatedNotice, Strings.UpdateMap, UpdateOrOpenWorkshop);
                     break;
                 case MapState.Missing:
                     SetFooter(Theme.Error, Strings.MapMissing);
-                    ShowNotice(NoticeKind.Error, Strings.NoMap, Strings.Subscribe, () => OpenSteamUrl("steam://url/CommunityFilePage/" + id));
+                    ShowNotice(NoticeKind.Error, Strings.NoMapFor(Settings.Edition), Strings.Subscribe, () => OpenSteamUrl("steam://url/CommunityFilePage/" + id));
                     break;
                 case MapState.NoDota:
                     SetFooter(Theme.Error, Strings.MapUnknown);
@@ -735,7 +784,7 @@ namespace Windy10v10AI.Launcher
             }
             if (wanted && browser == null)
             {
-                var created = new RoomBrowser(ListBody, (candidates, symmetric) => PeerBody(candidates, symmetric, InstalledMapVersion()), !Hosting);
+                var created = new RoomBrowser(ListBody, (edition, candidates, symmetric) => PeerBody(candidates, symmetric, InstalledMapVersion(edition), edition), !Hosting);
                 browser = created;
                 created.Changed += () => UI(() => { if (browser == created) UpdateRoomList(); });
                 roomList.LookOnly = Hosting;
@@ -784,7 +833,7 @@ namespace Windy10v10AI.Launcher
             var list = new List<RoomRow>();
             var roster = hostRoster;
             if (!Hosting || roster == null) return list;
-            var row = new RoomRow { Kind = RowKind.Own, Code = roomCode, Map = roomMap, MaxPlayers = Settings.MaxPlayers };
+            var row = new RoomRow { Kind = RowKind.Own, Code = roomCode, Map = roomMap, Edition = roomEdition, MaxPlayers = Settings.MaxPlayers };
             foreach (var entry in roster.Snapshot())
             {
                 if (entry.Status == PlayerStatus.Failed || entry.Status == PlayerStatus.Left) continue;
@@ -889,38 +938,35 @@ namespace Windy10v10AI.Launcher
             }
         }
 
-        // The picture shrinks onto a shorter strip on black, so the logo stays whole without stretching
-        static Image ShortBanner(Image picture)
-        {
-            const float Shrink = 0.8f;
-            var strip = new Bitmap(picture.Width, picture.Width * BannerHeight / 480);
-            using (var g = Graphics.FromImage(strip))
-            {
-                g.Clear(Color.Black);
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                var w = picture.Width * Shrink;
-                var h = picture.Height * Shrink;
-                g.DrawImage(picture, (strip.Width - w) / 2, (strip.Height - h) / 2, w, h);
-            }
-            return strip;
-        }
-
         Dictionary<string, object> ListBody()
         {
             return new Dictionary<string, object>
             {
                 { "steamId", Platform.SteamAccountId() },
                 { "protocolVersion", RoomApi.ProtocolVersion },
-                { "mapVersion", InstalledMapVersion() },
+                // Older APIs only read mapVersion, as the original edition's map
+                { "mapVersion", InstalledMapVersion(Editions.Original) },
+                { "mapVersions", InstalledMapVersions() },
             };
         }
 
-        string InstalledMapVersion()
+        // An edition whose map is not installed is left out, since the API rejects null versions
+        Dictionary<string, object> InstalledMapVersions()
         {
-            DotaInstall install;
-            var id = MapId;
-            DotaInstall.Check(id, out install);
-            return install == null ? null : install.InstalledManifest(id);
+            var versions = new Dictionary<string, object>();
+            foreach (var edition in new[] { Editions.Original, Editions.Anime })
+            {
+                var version = InstalledMapVersion(edition);
+                if (version != null) versions[edition] = version;
+            }
+            return versions;
+        }
+
+        string InstalledMapVersion(string edition)
+        {
+            // Only the installed build is read, so listing rooms never asks the API about the edition not in use
+            var install = DotaInstall.Find();
+            return install == null ? null : install.InstalledManifest(MapIdOf(edition));
         }
 
         void UpdateJoinButton()
@@ -1080,6 +1126,7 @@ namespace Windy10v10AI.Launcher
             var map = MapKeys[index];
             var room = modeBar.Selected == 1;
             roomMap = MapNames[index];
+            roomEdition = Settings.Edition;
             selfId = Platform.SteamAccountId();
             busy = true;
             stopping = false;
@@ -1126,7 +1173,7 @@ namespace Windy10v10AI.Launcher
                     bool publicIp;
                     var candidates = session.Tunnel.Gather(out publicIp);
                     if (stopping) throw new OperationCanceledException();
-                    var peer = PeerBody(candidates, session.Tunnel.SymmetricNat, manifest);
+                    var peer = PeerBody(candidates, session.Tunnel.SymmetricNat, manifest, roomEdition);
                     peer["publicIp"] = publicIp;
                     Dictionary<string, object> opened;
                     try { opened = session.Open(peer, selfId, Settings.AutoStartDota); }
@@ -1259,7 +1306,7 @@ namespace Windy10v10AI.Launcher
 
         LaunchError ServerExitError()
         {
-            var corrupt = CorruptFilesText(ReadShared(logFile));
+            var corrupt = CorruptFilesText(ReadShared(logFile), Settings.Edition);
             if (corrupt == null) return ServerExited();
             return new LaunchError(corrupt, false) { Button = Strings.VerifyFiles, OnClick = VerifyFiles, Detail = ServerExitDetail() };
         }
@@ -1290,7 +1337,7 @@ namespace Windy10v10AI.Launcher
 
         // Damaged files only show up in the log of a Dota that failed fatally; the corruption warning alone does not
         // stop the game, so it counts only next to a fatal error. Returns null when the log shows no damaged files
-        internal static string CorruptFilesText(string log)
+        internal static string CorruptFilesText(string log, string edition = Editions.Original)
         {
             var fatal = false;
             var gameFiles = false;
@@ -1298,7 +1345,7 @@ namespace Windy10v10AI.Launcher
             {
                 if (line.Contains(CorruptContent))
                 {
-                    if (line.Contains("dota_addons") || line.Contains(@"workshop\content")) return Strings.MapCorrupt;
+                    if (line.Contains("dota_addons") || line.Contains(@"workshop\content")) return Strings.MapCorruptFor(edition);
                     gameFiles = true;
                 }
                 if (line.Contains(LocalContentCorrupt)) gameFiles = true;
@@ -1316,13 +1363,20 @@ namespace Windy10v10AI.Launcher
                 return;
             }
             if (mapUpdating) return;
-            var state = RefreshMapState();
-            // Mismatched map versions between host and joiner can break the game, so an outdated map blocks joining
-            if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing || state == MapState.Outdated) return;
-
-            DotaInstall install;
-            DotaInstall.Check(MapId, out install);
+            // A listed room tells which edition it runs; a private room's code is not on the list, so it is tried with the current one first
+            var listed = browser == null ? null : browser.EditionOf(code.Trim().ToUpperInvariant());
+            if (listed != null && listed != Settings.Edition)
+            {
+                if (!ConfirmDialog.Ask(this, Strings.EditionSwitchTitle, Strings.EditionSwitchPrompt(listed), Strings.EditionSwitchYes)) return;
+                ApplyEdition(listed);
+            }
+            var edition = Settings.Edition;
             var id = MapId;
+            DotaInstall install;
+            var state = RefreshMapState();
+            // An outdated map is updated while joining, and a version check still running is waited for there
+            if (state == MapState.NoSteam || state == MapState.NoDota || state == MapState.Missing) return;
+            DotaInstall.Check(id, out install);
             selfId = Platform.SteamAccountId();
             busy = true;
             stopping = false;
@@ -1335,16 +1389,18 @@ namespace Windy10v10AI.Launcher
             var source = browser;
             browser = null;
             listTimer.Stop();
+            // The map card of an outdated map gives way to the progress, which updates it
+            UpdateMapCard(state);
             SetIdleControlsEnabled(false);
             ShowProgress(Strings.Connecting, Strings.ConnectingHint, Strings.Cancel, true);
             stage = "join";
             var cancellation = new CancellationTokenSource();
             joinCancellation = cancellation;
             var cancellationToken = cancellation.Token;
-            new Thread(() => RunJoin(install, id, code, source, cancellationToken)) { IsBackground = true }.Start();
+            new Thread(() => RunJoin(install, id, edition, listed != null, code, source, cancellationToken)) { IsBackground = true }.Start();
         }
 
-        void RunJoin(DotaInstall install, string id, string code, RoomBrowser source, CancellationToken cancellation)
+        void RunJoin(DotaInstall install, string id, string edition, bool listed, string code, RoomBrowser source, CancellationToken cancellation)
         {
             try
             {
@@ -1354,10 +1410,52 @@ namespace Windy10v10AI.Launcher
                     UI(() => status.Text = Strings.Connecting);
                 }
                 cancellation.ThrowIfCancellationRequested();
-                var room = new JoinRoomSession();
-                joinedRoom = room;
-                room.Prepare(source, cancellation);
-                room.Open(code, selfId, install.InstalledManifest(id), cancellation);
+                JoinRoomSession room = null;
+                var retried = false;
+                while (room == null)
+                {
+                    WaitMapChecked(id, cancellation);
+                    UpdateMapIfOutdated(id, edition, cancellation);
+                    var attempt = new JoinRoomSession();
+                    joinedRoom = attempt;
+                    try
+                    {
+                        attempt.Prepare(source, cancellation);
+                        attempt.Open(code, selfId, install.InstalledManifest(id), cancellation, edition);
+                        room = attempt;
+                    }
+                    catch (RoomError error)
+                    {
+                        // A private room's edition is only known from the API's answer; ask once, then retry with the other edition
+                        if (error.Code != "edition_mismatch" || listed || retried) throw;
+                        Interlocked.Exchange(ref joinedRoom, null);
+                        attempt.Dispose();
+                        var other = edition == Editions.Anime ? Editions.Original : Editions.Anime;
+                        var switched = false;
+                        Invoke((Action)(() =>
+                        {
+                            switched = ConfirmDialog.Ask(this, Strings.EditionSwitchTitle, Strings.EditionSwitchPrompt(other), Strings.EditionSwitchYes);
+                            if (switched) ApplyEdition(other);
+                        }));
+                        if (!switched)
+                        {
+                            Finish(null, false);
+                            return;
+                        }
+                        retried = true;
+                        source = null;
+                        edition = other;
+                        id = MapIdOf(other);
+                        var state = DotaInstall.Check(id, out install);
+                        if (state == MapState.NoSteam) throw new LaunchError(Strings.NoSteam, false);
+                        if (state == MapState.NoDota) throw new LaunchError(Strings.NoDota, false);
+                        if (state == MapState.Missing)
+                        {
+                            var workshop = id;
+                            throw new LaunchError(Strings.NoMapFor(edition), false) { Button = Strings.Subscribe, OnClick = () => OpenSteamUrl("steam://url/CommunityFilePage/" + workshop) };
+                        }
+                    }
+                }
                 UI(() => ShowPlayers(true));
                 room.Connect(cancellation);
                 PrepareAddon(install, id);
@@ -1394,6 +1492,32 @@ namespace Windy10v10AI.Launcher
             {
                 if (source != null) source.Dispose();
             }
+        }
+
+        // The first answer about the latest map version may still be on its way when the player clicks join
+        static void WaitMapChecked(string id, CancellationToken cancellation)
+        {
+            var watch = Stopwatch.StartNew();
+            DotaInstall current;
+            while (DotaInstall.Check(id, out current) == MapState.Checking && watch.ElapsedMilliseconds < 20000)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                Thread.Sleep(200);
+            }
+        }
+
+        // Joining needs the latest map, so an outdated one is updated here instead of sending the player to the Workshop
+        void UpdateMapIfOutdated(string id, string edition, CancellationToken cancellation)
+        {
+            DotaInstall current;
+            if (DotaInstall.Check(id, out current) != MapState.Outdated) return;
+            UI(() => status.Text = Strings.MapUpdating);
+            WorkshopDownload.Run(id, cancellation);
+            cancellation.ThrowIfCancellationRequested();
+            if (DotaInstall.Check(id, out current) != MapState.Outdated) return;
+            // The map card then offers the Workshop page instead of trying the same update again
+            mapUpdateFailed = id;
+            throw new LaunchError(Strings.MapUpdateFailedFor(edition), false);
         }
 
         // The tunnel outlives Dota and each game, so a joiner who left can go back into the same match, and stays in
@@ -1497,9 +1621,9 @@ namespace Windy10v10AI.Launcher
             if (browser != null) browser.Refresh();
         }
 
-        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool? symmetricNat, string mapVersion)
+        Dictionary<string, object> PeerBody(List<Candidate> candidates, bool? symmetricNat, string mapVersion, string edition)
         {
-            return RoomPeer.Body(Platform.SteamAccountId(), mapVersion, candidates, symmetricNat);
+            return RoomPeer.Body(Platform.SteamAccountId(), mapVersion, candidates, symmetricNat, edition);
         }
 
         static string JoinErrorText(string code, DotaInstall install, string id)
@@ -1602,6 +1726,8 @@ namespace Windy10v10AI.Launcher
                 control.Enabled = enabled;
                 control.Invalidate();
             }
+            // The version badge stays clickable, so the banner locks its own switch instead of being disabled
+            banner.Locked = !enabled;
             UpdateJoinButton();
         }
 
@@ -1794,7 +1920,7 @@ namespace Windy10v10AI.Launcher
                 string corrupt = null;
                 try
                 {
-                    corrupt = CorruptFilesText(ReadShared(Path.Combine(install.Game, @"dota\client.log")));
+                    corrupt = CorruptFilesText(ReadShared(Path.Combine(install.Game, @"dota\client.log")), Settings.Edition);
                 }
                 catch (IOException)
                 {
@@ -2280,7 +2406,7 @@ namespace Windy10v10AI.Launcher
             var context = new FeedbackContext
             {
                 LauncherVersion = Version,
-                MapVersion = InstalledMapVersion(),
+                MapVersion = InstalledMapVersion(Settings.Edition),
                 Mode = modeBar.Selected,
                 GameDir = install == null ? null : install.Game,
                 Error = error,
