@@ -1,5 +1,6 @@
 {
   "art": {
+    "npc_dota_hero_morphling": "morphling.8de7549f.webp",
     "npc_dota_hero_centaur": "centaur.e5d6c053.webp",
     "npc_dota_hero_storm_spirit": "storm_spirit.d1a722c4.webp",
     "npc_dota_hero_antimage": "antimage.4b96c7dc.webp",
@@ -45,6 +46,7 @@
     "npc_dota_hero_pudge": "pudge.f0968078.webp"
   },
   "icons": {
+    "morphling_replicate": "morphling_replicate.7442be5a.webp",
     "centaur_double_edge": "centaur_double_edge.26a131eb.webp",
     "storm_spirit_ball_lightning": "storm_spirit_ball_lightning.e60832b8.webp",
     "antimage_blink": "antimage_blink.1e48365e.webp",
