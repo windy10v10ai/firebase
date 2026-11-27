@@ -1,6 +1,6 @@
 {
   "source": {
-    "gameCommit": "ac46175db21eef61395fbb4727996d604893263f",
+    "gameCommit": "54afb598a9aab74324d3b5775ed0e388918ddaea",
     "dotaVersion": "7.42"
   },
   "abilities": [
@@ -101,11 +101,6 @@
     },
     {
       "name": "brewmaster_drunken_boxing",
-      "group": "active",
-      "tier": 4
-    },
-    {
-      "name": "juggernaut_blade_fury_custom",
       "group": "active",
       "tier": 4
     },
@@ -621,11 +616,6 @@
     },
     {
       "name": "templar_assassin_psi_blades",
-      "group": "passive",
-      "tier": 4
-    },
-    {
-      "name": "luna_moon_glaive",
       "group": "passive",
       "tier": 4
     },
